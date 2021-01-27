@@ -1225,6 +1225,20 @@ void PropHallucinating::clear_all_fake_stairs() const
         }
 }
 
+void PropAstralOpiumAddict::save() const
+{
+        saving::put_int(m_shock_lvl);
+        saving::put_int(m_nr_dlvls_to_penalty);
+        saving::put_int(m_nr_turns_to_penalty);
+}
+
+void PropAstralOpiumAddict::load()
+{
+        m_shock_lvl = saving::get_int();
+        m_nr_dlvls_to_penalty = saving::get_int();
+        m_nr_turns_to_penalty = saving::get_int();
+}
+
 std::string PropAstralOpiumAddict::name_short() const
 {
         std::string str = m_data.name_short;

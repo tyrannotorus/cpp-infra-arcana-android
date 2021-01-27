@@ -738,6 +738,10 @@ public:
         PropAstralOpiumAddict() :
                 Prop(PropId::astral_opium_addiction) {}
 
+        void save() const override;
+
+        void load() override;
+
         std::string name_short() const override;
 
         void on_applied() override;
