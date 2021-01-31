@@ -22,6 +22,7 @@
 #include "msg_log.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "terrain.hpp"
 #include "terrain_mob.hpp"
 #include "terrain_trap.hpp"
@@ -68,7 +69,7 @@ void run(
 
         const auto defender_can_move_into_tgt_pos =
                 !map_parsers::BlocksActor(defender, ParseActors::no)
-                         .cell(new_pos);
+                         .run(new_pos);
 
         const std::vector<terrain::Id> deep_terrains = {
                 terrain::Id::chasm,
@@ -76,16 +77,16 @@ void run(
 
         const bool is_tgt_pos_deep =
                 map_parsers::IsAnyOfTerrains(deep_terrains)
-                        .cell(new_pos);
+                        .run(new_pos);
 
-        auto& tgt_cell = map::g_cells.at(new_pos);
+        auto& tgt_terrain = map::g_terrain.at(new_pos);
 
         if (!defender_can_move_into_tgt_pos && !is_tgt_pos_deep)
         {
                 // Defender nailed to a wall from a spike gun?
                 if (is_spike_gun)
                 {
-                        if (!tgt_cell.terrain->is_projectile_passable())
+                        if (!tgt_terrain->is_projectile_passable())
                         {
                                 auto* prop = new PropNailed();
 
@@ -132,14 +133,14 @@ void run(
                 }
         }
 
-        auto* prop = new PropParalyzed();
+        auto* prop = property_factory::make(PropId::paralyzed);
 
         prop->set_duration(1 + paralyze_extra_turns);
 
         defender.m_properties.apply(prop);
 
         // Leave current cell
-        map::g_cells.at(defender.m_pos).terrain->on_leave(defender);
+        map::g_terrain.at(defender.m_pos)->on_leave(defender);
 
         defender.m_pos = new_pos;
 
@@ -153,7 +154,7 @@ void run(
                 }
                 else if (
                         player_is_aware_of_defender &&
-                        tgt_cell.is_seen_by_player)
+                        map::g_seen.at(new_pos))
                 {
                         msg_log::add(
                                 defender_name + " perishes in the depths.",
@@ -185,7 +186,7 @@ void run(
                 return;
         }
 
-        map::g_cells.at(defender.m_pos).terrain->bump(defender);
+        map::g_terrain.at(defender.m_pos)->bump(defender);
 
         TRACE_FUNC_END;
 }

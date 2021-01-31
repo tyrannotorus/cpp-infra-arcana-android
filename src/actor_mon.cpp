@@ -52,7 +52,7 @@ static void unblock_passable_doors(
 {
         for (size_t i = 0; i < blocked.length(); ++i)
         {
-                const auto* const t = map::g_cells.at(i).terrain;
+                const auto* const t = map::g_terrain.at(i);
 
                 if (t->id() != terrain::Id::door)
                 {

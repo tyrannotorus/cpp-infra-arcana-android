@@ -1742,12 +1742,12 @@ void Dynamite::on_player_paralyzed()
 
         map::g_player->m_active_explosive = nullptr;
 
-        const P& p = map::g_player->m_pos;
+        const auto& p = map::g_player->m_pos;
 
-        const auto f_id = map::g_cells.at(p).terrain->id();
+        const auto t_id = map::g_terrain.at(p)->id();
 
-        if (f_id != terrain::Id::chasm &&
-            f_id != terrain::Id::liquid_deep)
+        if (t_id != terrain::Id::chasm &&
+            t_id != terrain::Id::liquid_deep)
         {
                 game_time::add_mob(new terrain::LitDynamite(p, m_fuse_turns));
         }
@@ -1905,12 +1905,12 @@ void Flare::on_player_paralyzed()
 
         map::g_player->m_active_explosive = nullptr;
 
-        const P& p = map::g_player->m_pos;
+        const auto& p = map::g_player->m_pos;
 
-        const auto f_id = map::g_cells.at(p).terrain->id();
+        const auto t_id = map::g_terrain.at(p)->id();
 
-        if (f_id != terrain::Id::chasm &&
-            f_id != terrain::Id::liquid_deep)
+        if (t_id != terrain::Id::chasm &&
+            t_id != terrain::Id::liquid_deep)
         {
                 game_time::add_mob(new terrain::LitFlare(p, m_fuse_turns));
         }
@@ -1960,10 +1960,10 @@ void SmokeGrenade::on_player_paralyzed()
 
         const P& p = map::g_player->m_pos;
 
-        const auto f_id = map::g_cells.at(p).terrain->id();
+        const auto t_id = map::g_terrain.at(p)->id();
 
-        if (f_id != terrain::Id::chasm &&
-            f_id != terrain::Id::liquid_deep)
+        if (t_id != terrain::Id::chasm &&
+            t_id != terrain::Id::liquid_deep)
         {
                 explosion::run_smoke_explosion_at(map::g_player->m_pos);
         }

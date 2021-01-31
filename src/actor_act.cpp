@@ -186,19 +186,12 @@ static void player_act()
 
                 for (const P& d : dir_utils::g_dir_list_w_center)
                 {
-                        const P p_adj(target + d);
-
-                        const Cell& adj_cell = map::g_cells.at(p_adj);
-
-                        if (!adj_cell.is_seen_by_player)
+                        if (!map::g_seen.at(target + d))
                         {
                                 is_target_adj_to_unseen_cell = true;
-
                                 break;
                         }
                 }
-
-                const Cell& target_cell = map::g_cells.at(target);
 
                 // If this is not the first step of auto moving, stop before
                 // blocking terrains, fire, known traps, etc - otherwise allow
@@ -207,26 +200,32 @@ static void player_act()
                 {
                         bool should_abort = false;
 
-                        if (!target_cell.terrain->can_move(player))
+                        const auto* const target_terrain =
+                                map::g_terrain.at(target);
+
+                        if (!target_terrain->can_move(player))
                         {
                                 should_abort = true;
                         }
                         else
                         {
+                                const auto is_target_seen =
+                                        map::g_seen.at(target);
+
                                 const auto target_terrain_id =
-                                        target_cell.terrain->id();
+                                        target_terrain->id();
 
                                 const bool is_target_known_trap =
-                                        target_cell.is_seen_by_player &&
+                                        is_target_seen &&
                                         (target_terrain_id == terrain::Id::trap) &&
-                                        !static_cast<const terrain::Trap*>(target_cell.terrain)->is_hidden();
+                                        !static_cast<const terrain::Trap*>(target_terrain)->is_hidden();
 
                                 should_abort =
                                         is_target_known_trap ||
                                         (target_terrain_id == terrain::Id::chains) ||
                                         (target_terrain_id == terrain::Id::liquid_shallow) ||
                                         (target_terrain_id == terrain::Id::vines) ||
-                                        (target_cell.terrain->is_burning());
+                                        (target_terrain->is_burning());
                         }
 
                         if (should_abort)
@@ -244,16 +243,18 @@ static void player_act()
                         {
                                 const P p_adj(p + d);
 
-                                const Cell& adj_cell = map::g_cells.at(p_adj);
+                                const auto* const adj_terrain =
+                                        map::g_terrain.at(p_adj);
 
-                                if (adj_cell.is_seen_by_player &&
-                                    (adj_cell.terrain->id() == terrain::Id::door))
+                                const bool is_adj_seen = map::g_seen.at(p_adj);
+
+                                if (is_adj_seen &&
+                                    (adj_terrain->id() == terrain::Id::door))
                                 {
                                         const auto* const door =
-                                                static_cast<const terrain::Door*>(adj_cell.terrain);
+                                                static_cast<const terrain::Door*>(adj_terrain);
 
-                                        if (!door->is_hidden() &&
-                                            !door->is_open())
+                                        if (!door->is_hidden() && !door->is_open())
                                         {
                                                 doors.push_back(door);
                                         }

@@ -1030,10 +1030,11 @@ void handle(const GameCmd cmd)
         {
                 if (init::g_is_cheat_vision_enabled)
                 {
-                        for (auto& cell : map::g_cells)
+                        const size_t nr_positions = map::nr_positions();
+                        for (size_t i = 0; i < nr_positions; ++i)
                         {
-                                cell.is_seen_by_player = false;
-                                cell.is_explored = false;
+                                map::g_seen.at(i) = false;
+                                map::g_explored.at(i) = false;
                         }
 
                         init::g_is_cheat_vision_enabled = false;

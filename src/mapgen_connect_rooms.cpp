@@ -143,12 +143,14 @@ void connect_rooms()
 
                 Array2<bool> blocked(map::dims());
 
-                map_parsers::BlocksWalking(ParseActors::no).run(blocked, blocked.rect());
+                map_parsers::BlocksWalking(ParseActors::no)
+                        .run(blocked, blocked.rect());
 
                 // Do not consider doors blocking
-                for (size_t i = 0; i < map::nr_cells(); ++i)
+                const size_t nr_positions = map::nr_positions();
+                for (size_t i = 0; i < nr_positions; ++i)
                 {
-                        const auto id = map::g_cells.at(i).terrain->id();
+                        const auto id = map::g_terrain.at(i)->id();
 
                         if (id == terrain::Id::door)
                         {

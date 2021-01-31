@@ -510,23 +510,20 @@ namespace look
 {
 void print_location_info_msgs(const P& pos)
 {
-        Cell* cell = nullptr;
-
         bool is_cell_seen = false;
 
         if (map::is_pos_inside_map(pos))
         {
-                cell = &map::g_cells.at(pos);
-
-                is_cell_seen = cell->is_seen_by_player;
+                is_cell_seen = map::g_seen.at(pos);
         }
 
         if (is_cell_seen)
         {
                 // Describe terrain
-                std::string str = cell->terrain->name(Article::a);
+                const auto* const terrain = map::g_terrain.at(pos);
 
-                str = text_format::first_to_upper(str);
+                std::string str = terrain->name(Article::a);
+                str = text_format::first_to_upper(terrain->name(Article::a));
 
                 msg_log::add(
                         str + ".",
@@ -565,7 +562,7 @@ void print_location_info_msgs(const P& pos)
                 }
 
                 // Describe item
-                auto* item = cell->item;
+                const auto* item = map::g_items.at(pos);
 
                 if (item)
                 {

@@ -75,7 +75,7 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
                         PropEndAllowMsg::no,
                         PropEndAllowHistoricMsg::no));
 
-        if (map::g_cells.at(actor.m_pos).terrain->id() == terrain::Id::chasm)
+        if (map::g_terrain.at(actor.m_pos)->id() == terrain::Id::chasm)
         {
                 // Player died due to falling down a chasm - go to next level
                 map_travel::go_to_nxt();
@@ -100,16 +100,16 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
 
 static void move_actor_to_pos_can_have_corpse(actor::Actor& actor)
 {
-        if (map::g_cells.at(actor.m_pos).terrain->can_have_corpse())
+        if (map::g_terrain.at(actor.m_pos)->can_have_corpse())
         {
                 return;
         }
 
-        for (const P& d : dir_utils::g_dir_list_w_center)
+        for (const auto& d : dir_utils::g_dir_list_w_center)
         {
-                const P p = actor.m_pos + d;
+                const auto p = actor.m_pos + d;
 
-                if (map::g_cells.at(p).terrain->can_have_corpse())
+                if (map::g_terrain.at(p)->can_have_corpse())
                 {
                         actor.m_pos = p;
 

@@ -17,7 +17,7 @@ static const int child_room_min_size = 2;
 
 static bool is_floor(const P& pos)
 {
-        return map::g_cells.at(pos).terrain->id() == terrain::Id::floor;
+        return map::g_terrain.at(pos)->id() == terrain::Id::floor;
 }
 
 static bsp::BlockedSplitPositions find_blocked_split_positions(
@@ -71,7 +71,7 @@ static std::vector<Room*> try_bsp_split_room(Room& room)
                 }
 
                 const bool is_floor =
-                        map::g_cells.at(pos).terrain->id() ==
+                        map::g_terrain.at(pos)->id() ==
                         terrain::Id::floor;
 
                 if (!is_floor)
@@ -262,8 +262,7 @@ static bool is_valid_entrance(const P& pos)
                 {
                         const P map_p = pos.with_offsets(x - 1, y - 1);
 
-                        const auto t_id =
-                                map::g_cells.at(map_p).terrain->id();
+                        const auto t_id = map::g_terrain.at(map_p)->id();
 
                         const bool is_wall =
                                 (t_id == terrain::Id::wall) ||

@@ -175,9 +175,9 @@ DidAction handle_closed_blocking_door(actor::Mon& mon, std::vector<P>& path)
                 return DidAction::no;
         }
 
-        const P& p = path.back();
+        const auto& p = path.back();
 
-        auto* const t = map::g_cells.at(p).terrain;
+        auto* const t = map::g_terrain.at(p);
 
         if ((t->id() != terrain::Id::door) || t->can_move(mon))
         {
@@ -492,14 +492,13 @@ DidAction move_to_target_simple(actor::Mon& mon)
                 return DidAction::no;
         }
 
-        const P offset = mon.m_ai_state.target->m_pos - mon.m_pos;
-        const P signs = offset.signs();
-
-        const P new_pos(mon.m_pos + signs);
+        const auto offset = mon.m_ai_state.target->m_pos - mon.m_pos;
+        const auto signs = offset.signs();
+        const auto new_pos = mon.m_pos + signs;
 
         const bool is_blocked =
                 map_parsers::BlocksActor(mon, ParseActors::yes)
-                        .cell(new_pos);
+                        .run(new_pos);
 
         if (!is_blocked)
         {
@@ -550,13 +549,13 @@ DidAction step_to_lair_if_los(actor::Mon& mon, const P& lair_p)
 
                 if (!los.is_blocked_hard)
                 {
-                        const P d = (lair_p - mon.m_pos).signs();
+                        const auto d = (lair_p - mon.m_pos).signs();
 
-                        const P target_p = mon.m_pos + d;
+                        const auto target_p = mon.m_pos + d;
 
                         const bool is_blocked =
                                 map_parsers::BlocksActor(mon, ParseActors::yes)
-                                        .cell(target_p);
+                                        .run(target_p);
 
                         if (is_blocked)
                         {
@@ -814,14 +813,14 @@ std::vector<P> find_path_to_target(actor::Mon& mon)
 
                         blocked.at(p) = false;
 
-                        if (!blocked_parser.cell(p))
+                        if (!blocked_parser.run(p))
                         {
                                 continue;
                         }
 
                         // This cell is blocked
 
-                        const auto* const t = map::g_cells.at(p).terrain;
+                        const auto* const t = map::g_terrain.at(p);
 
                         if (t->id() == terrain::Id::door)
                         {

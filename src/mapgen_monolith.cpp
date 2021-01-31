@@ -77,11 +77,11 @@ void make_monoliths()
                         return;
                 }
 
-                const size_t spawn_p_idx = rnd::weighted_choice(spawn_weights);
+                const auto spawn_p_idx = rnd::weighted_choice(spawn_weights);
 
-                const P p = spawn_weight_positions[spawn_p_idx];
+                const auto p = spawn_weight_positions[spawn_p_idx];
 
-                map::g_cells.at(p).terrain = new terrain::Monolith(p);
+                map::put(new terrain::Monolith(p));
 
                 // Block this position and all adjacent positions
                 for (const P& d : dir_utils::g_cardinal_list_w_center)

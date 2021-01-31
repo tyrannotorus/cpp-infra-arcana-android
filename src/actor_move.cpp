@@ -83,8 +83,7 @@ static void player_bump_known_hostile_mon(actor::Mon& mon)
 
         // If this is also a ranged weapon, ask if player really
         // intended to use it as melee weapon
-        if (wpn.data().ranged.is_ranged_wpn &&
-            config::warn_on_ranged_wpn_melee())
+        if (wpn.data().ranged.is_ranged_wpn && config::warn_on_ranged_wpn_melee())
         {
                 const auto answer =
                         query_player_attack_mon_with_ranged_wpn(wpn, mon);
@@ -158,8 +157,7 @@ static void print_corpses_at_player_msgs()
 {
         for (auto* const actor : game_time::g_actors)
         {
-                if ((actor->m_pos == map::g_player->m_pos) &&
-                    (actor->m_state == ActorState::corpse))
+                if ((actor->m_pos == map::g_player->m_pos) && (actor->m_state == ActorState::corpse))
                 {
                         const std::string name =
                                 text_format::first_to_upper(
@@ -201,7 +199,7 @@ static AllowAction pre_bump_terrains(actor::Actor& actor, const P& tgt)
                 }
         }
 
-        const auto result = map::g_cells.at(tgt).terrain->pre_bump(actor);
+        const auto result = map::g_terrain.at(tgt)->pre_bump(actor);
 
         return result;
 }
@@ -268,7 +266,7 @@ static void bump_terrains(actor::Actor& actor, const P& tgt)
                 mob->bump(actor);
         }
 
-        auto* const terrain = map::g_cells.at(tgt).terrain;
+        auto* const terrain = map::g_terrain.at(tgt);
 
         if (!actor.is_player() &&
             !terrain->is_walkable() &&
@@ -309,7 +307,7 @@ static void move_player_non_center_direction(const P& tgt)
 
         const bool is_terrains_blocking_move =
                 map_parsers::BlocksActor(player, ParseActors::no)
-                        .cell(tgt);
+                        .run(tgt);
 
         auto* const mon =
                 static_cast<actor::Mon*>(
@@ -368,11 +366,11 @@ static void move_player_non_center_direction(const P& tgt)
                         player_bump_allied_mon(*mon);
                 }
 
-                map::g_cells.at(player.m_pos).terrain->on_leave(player);
+                map::g_terrain.at(player.m_pos)->on_leave(player);
 
                 player.m_pos = tgt;
 
-                player_walk_on_item(map::g_cells.at(player.m_pos).item);
+                player_walk_on_item(map::g_items.at(player.m_pos));
 
                 print_corpses_at_player_msgs();
 
@@ -444,21 +442,18 @@ static void move_mon(actor::Mon& mon, Dir dir)
 #ifndef NDEBUG
         if (target_p != mon.m_pos)
         {
-                Array2<bool> blocked(map::dims());
-
                 const bool is_blocked =
                         map_parsers::BlocksActor(mon, ParseActors::yes)
-                                .cell(target_p);
+                                .run(target_p);
 
                 ASSERT(!is_blocked);
         }
 #endif  // NDEBUG
 
-        if ((dir != Dir::center) &&
-            map::is_pos_inside_outer_walls(target_p))
+        if ((dir != Dir::center) && map::is_pos_inside_outer_walls(target_p))
         {
                 // Leave current cell (e.g. stop swimming)
-                map::g_cells.at(mon.m_pos).terrain->on_leave(mon);
+                map::g_terrain.at(mon.m_pos)->on_leave(mon);
 
                 mon.m_pos = target_p;
 

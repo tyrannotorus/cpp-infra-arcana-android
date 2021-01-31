@@ -163,21 +163,21 @@ static void draw(
 
                         for (const P& pos : inner)
                         {
-                                const auto& cell = map::g_cells.at(pos);
-
-                                if (cell.is_seen_by_player &&
-                                    !blocked.at(pos) &&
-                                    viewport::is_in_view(pos))
+                                if (!map::g_seen.at(pos) ||
+                                    blocked.at(pos) ||
+                                    !viewport::is_in_view(pos))
                                 {
-                                        is_any_cell_seen_by_player = true;
-
-                                        io::draw_symbol(
-                                                tile,
-                                                '*',
-                                                Panel::map,
-                                                viewport::to_view_pos(pos),
-                                                color);
+                                        continue;
                                 }
+
+                                is_any_cell_seen_by_player = true;
+
+                                io::draw_symbol(
+                                        tile,
+                                        '*',
+                                        Panel::map,
+                                        viewport::to_view_pos(pos),
+                                        color);
                         }
                 }
 
@@ -185,8 +185,7 @@ static void draw(
                 {
                         io::update_screen();
 
-                        io::sleep(
-                                config::delay_explosion() / nr_anim_steps);
+                        io::sleep(config::delay_explosion() / nr_anim_steps);
                 }
         }
 }
@@ -204,9 +203,7 @@ static void apply_explosion_on_pos(
         const int dmg = dmg_range.roll();
 
         // Damage environment
-        auto& cell = map::g_cells.at(pos);
-
-        cell.terrain->hit(DmgType::explosion, nullptr);
+        map::g_terrain.at(pos)->hit(DmgType::explosion, nullptr);
 
         // Damage living actor
         if (living_actor)
@@ -266,9 +263,7 @@ static void apply_explosion_property_on_pos(
         // If property is burning, also apply it to corpses and the environment
         if (property->id() == PropId::burning)
         {
-                auto& cell = map::g_cells.at(pos);
-
-                cell.terrain->hit(DmgType::fire, nullptr);
+                map::g_terrain.at(pos)->hit(DmgType::fire, nullptr);
 
                 for (auto* corpse : corpses_here)
                 {
@@ -332,9 +327,8 @@ void run(
 
         Array2<std::vector<actor::Actor*>> corpses(map::dims());
 
-        const size_t len = map::nr_cells();
-
-        for (size_t i = 0; i < len; ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 living_actors.at(i) = nullptr;
 

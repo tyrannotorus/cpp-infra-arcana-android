@@ -120,8 +120,7 @@ static bool should_vigilant_make_aware_of_unseeable_mon(
                 return false;
         }
 
-        const bool is_cell_seen =
-                map::g_cells.at(mon.m_pos).is_seen_by_player;
+        const bool is_cell_seen = map::g_seen.at(mon.m_pos);
 
         const bool is_mon_invis =
                 mon.m_properties.has(PropId::invis) ||
@@ -147,7 +146,7 @@ static bool should_vigilant_make_aware_of_unseeable_mon(
 
 static void make_aware_of_unseeable_mon_by_vigilant(actor::Mon& mon)
 {
-        const bool is_cell_seen = map::g_cells.at(mon.m_pos).is_seen_by_player;
+        const bool is_cell_seen = map::g_seen.at(mon.m_pos);
 
         if (!mon.is_player_aware_of_me())
         {
@@ -199,8 +198,7 @@ static bool player_try_spot_sneaking_mon(
         else
         {
                 // Cannot be detected by Vigilant
-                const bool is_cell_seen =
-                        map::g_cells.at(mon.m_pos).is_seen_by_player;
+                const bool is_cell_seen = map::g_seen.at(mon.m_pos);
 
                 if (is_cell_seen)
                 {
@@ -399,7 +397,7 @@ static void player_items_start_turn()
 
 static bool should_print_unload_wpn_hint()
 {
-        const auto* const item = map::g_cells.at(map::g_player->m_pos).item;
+        const auto* const item = map::g_items.at(map::g_player->m_pos);
 
         if (!item)
         {

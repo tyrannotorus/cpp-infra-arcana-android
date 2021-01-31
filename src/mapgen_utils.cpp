@@ -188,8 +188,8 @@ void cut_room_corners(const Room& room)
                                                 map::g_room_map.at(check_p);
 
                                         const terrain::Id id =
-                                                map::g_cells.at(check_p)
-                                                        .terrain->id();
+                                                map::g_terrain.at(check_p)
+                                                        ->id();
 
                                         if ((room_here == &room &&
                                              id != terrain::Id::floor) ||
@@ -233,8 +233,7 @@ void make_pillars_in_room(const Room& room)
                 {
                         const P check_p(p + d);
 
-                        const terrain::Id id =
-                                map::g_cells.at(check_p).terrain->id();
+                        const auto id = map::g_terrain.at(check_p)->id();
 
                         if ((id == terrain::Id::wall) ||
                             (id == terrain::Id::grate))
@@ -281,7 +280,8 @@ void cavify_room(Room& room)
 {
         Array2<bool> is_other_room(map::dims());
 
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 const auto* const room_here = map::g_room_map.at(i);
 
@@ -367,17 +367,19 @@ void cavify_room(Room& room)
                 }
         }
 
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                if (map::g_room_map.at(i) == &room)
+                if (map::g_room_map.at(i) != &room)
                 {
-                        auto* const terrain = map::g_cells.at(i).terrain;
+                        continue;
+                }
 
-                        if (terrain->id() == terrain::Id::floor)
-                        {
-                                static_cast<terrain::Floor*>(terrain)->m_type =
-                                        terrain::FloorType::cave;
-                        }
+                auto* const terrain = map::g_terrain.at(i);
+
+                if (terrain->id() == terrain::Id::floor)
+                {
+                        static_cast<terrain::Floor*>(terrain)->m_type =
+                                terrain::FloorType::cave;
                 }
         }
 }
@@ -398,14 +400,15 @@ void valid_corridor_entries(const Room& room, std::vector<P>& out)
         Array2<bool> room_cells(map::dims());
         Array2<bool> room_floor_cells(map::dims());
 
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 const bool is_room_cell =
                         map::g_room_map.at(i) == &room;
 
                 room_cells.at(i) = is_room_cell;
 
-                const auto* const t = map::g_cells.at(i).terrain;
+                const auto* const t = map::g_terrain.at(i);
 
                 room_floor_cells.at(i) =
                         is_room_cell &&
@@ -422,7 +425,7 @@ void valid_corridor_entries(const Room& room, std::vector<P>& out)
                 for (int x = room.m_r.p0.x - 1; x <= room.m_r.p1.x + 1; ++x)
                 {
                         // Condition (1)
-                        if (map::g_cells.at(x, y).terrain->id() != terrain::Id::wall)
+                        if (map::g_terrain.at(x, y)->id() != terrain::Id::wall)
                         {
                                 continue;
                         }
@@ -605,8 +608,9 @@ bool is_choke_point(
         if (out)
         {
                 // Prepare for at least the worst case of push-backs
-                out->sides[0].reserve(map::nr_cells());
-                out->sides[1].reserve(map::nr_cells());
+                const size_t nr_positions = map::nr_positions();
+                out->sides[0].reserve(nr_positions);
+                out->sides[1].reserve(nr_positions);
 
                 // Add the origin positions for both sides (they have flood
                 // value 0)
@@ -735,10 +739,11 @@ void make_pathfind_corridor(
                 Array2<bool> blocked(map::dims());
 
                 // Mark all cells as blocked, which is not a wall, or is a room
-                for (size_t i = 0; i < map::nr_cells(); ++i)
+                const size_t nr_positions = map::nr_positions();
+                for (size_t i = 0; i < nr_positions; ++i)
                 {
                         const bool is_wall =
-                                map::g_cells.at(i).terrain->id() ==
+                                map::g_terrain.at(i)->id() ==
                                 terrain::Id::wall;
 
                         const auto* const room_ptr = map::g_room_map.at(i);
@@ -1030,7 +1035,8 @@ void make_explore_spawn_weights(
 {
         Array2<int> weight_map(map::dims());
 
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 // Give all cells a base weight of 1
                 weight_map.at(i) = 1;
@@ -1083,7 +1089,7 @@ void make_explore_spawn_weights(
                                 (250 / weight_div));
 
                         auto* const terrain =
-                                map::g_cells.at(choke_point.p).terrain;
+                                map::g_terrain.at(choke_point.p);
 
                         // Increase weight if behind hidden/stuck/metal doors
                         if (terrain->id() == terrain::Id::door)
@@ -1121,9 +1127,8 @@ void make_explore_spawn_weights(
         }
 
         // Prepare for at least the worst case of push-backs
-        positions_out.reserve(map::nr_cells());
-
-        weights_out.reserve(map::nr_cells());
+        positions_out.reserve(nr_positions);
+        weights_out.reserve(nr_positions);
 
         for (int x = 0; x < map::w(); ++x)
         {
@@ -1169,9 +1174,10 @@ Array2<bool> allowed_stair_cells()
                 .run(result, result.rect());
 
         // Block cells with items
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                if (map::g_cells.at(i).item)
+                if (map::g_items.at(i))
                 {
                         result.at(i) = false;
                 }
@@ -1280,7 +1286,7 @@ P make_stairs_at_random_pos()
                 {
                         const P p(x, y);
 
-                        if (map_parsers::IsAnyOfTerrains(free_terrains).cell(p))
+                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p))
                         {
                                 blocks_player.at(p) = false;
                         }
@@ -1358,7 +1364,7 @@ void reveal_doors_on_path_to_stairs(const P& stairs_pos)
                 {
                         const P p(x, y);
 
-                        if (map_parsers::IsAnyOfTerrains(free_terrains).cell(p))
+                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p))
                         {
                                 blocks_player.at(p) = false;
                         }
@@ -1376,7 +1382,7 @@ void reveal_doors_on_path_to_stairs(const P& stairs_pos)
 
         for (const P& pos : path)
         {
-                auto* const terrain = map::g_cells.at(pos).terrain;
+                auto* const terrain = map::g_terrain.at(pos);
 
                 if (terrain->id() == terrain::Id::door)
                 {

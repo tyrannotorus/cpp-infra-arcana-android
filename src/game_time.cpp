@@ -209,18 +209,18 @@ static void run_std_turn_events()
         }  // Actor loop
 
         // Allow already burning terrains to damage stuff, spread fire, etc
-        for (auto& cell : map::g_cells)
+        for (auto* const terrain : map::g_terrain)
         {
-                if (cell.terrain->is_burning())
+                if (terrain->is_burning())
                 {
-                        cell.terrain->m_started_burning_this_turn = false;
+                        terrain->m_started_burning_this_turn = false;
                 }
         }
 
         // New turn for terrains
-        for (auto& cell : map::g_cells)
+        for (auto* const terrain : map::g_terrain)
         {
-                cell.terrain->on_new_turn();
+                terrain->on_new_turn();
         }
 
         // New turn for mobs
@@ -268,7 +268,7 @@ static void run_atomic_turn_events()
         {
                 const P& p = actor->m_pos;
 
-                const auto* const terrain = map::g_cells.at(p).terrain;
+                const auto* const terrain = map::g_terrain.at(p);
 
                 if (terrain->data().matl_type == Matl::fluid)
                 {
@@ -494,8 +494,8 @@ void tick()
         if (map::rect().is_pos_inside(next_actor->m_opening_door_pos))
         {
                 auto* const t =
-                        map::g_cells.at(next_actor->m_opening_door_pos)
-                                .terrain;
+                        map::g_terrain.at(
+                                next_actor->m_opening_door_pos);
 
                 if (t->id() == terrain::Id::door)
                 {
@@ -527,9 +527,9 @@ void update_light_map()
                 m->add_light(light_tmp);
         }
 
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        for (auto* const terrain : map::g_terrain)
         {
-                map::g_cells.at(i).terrain->add_light(light_tmp);
+                terrain->add_light(light_tmp);
         }
 
         // Copy the temporary buffer to the real light map

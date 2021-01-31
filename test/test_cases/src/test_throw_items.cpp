@@ -41,7 +41,7 @@ TEST_CASE("Throw weapon at wall")
 
         throwing::throw_item(*(map::g_player), {5, 8}, *item);
 
-        REQUIRE(map::g_cells.at(5, 9).item == item);
+        REQUIRE(map::g_items.at(5, 9) == item);
 
         test_utils::cleanup_all();
 }

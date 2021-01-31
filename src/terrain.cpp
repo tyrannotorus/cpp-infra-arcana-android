@@ -99,7 +99,7 @@ AllowAction Terrain::pre_bump(actor::Actor& actor_bumping)
             !actor_bumping.m_properties.has(PropId::r_fire) &&
             !actor_bumping.m_properties.has(PropId::flying) &&
             can_move(actor_bumping) &&
-            map::g_cells.at(m_pos).is_seen_by_player)
+            map::g_seen.at(m_pos))
         {
                 const std::string msg =
                         "Step into the flames? " +
@@ -217,13 +217,13 @@ void Terrain::on_new_turn()
 
                         if (map::is_pos_inside_map(p))
                         {
-                                auto& cell = map::g_cells.at(p);
+                                auto* const terrain = map::g_terrain.at(p);
 
-                                cell.terrain->hit(DmgType::fire, nullptr);
+                                terrain->hit(DmgType::fire, nullptr);
 
-                                if (cell.terrain->is_burning())
+                                if (terrain->is_burning())
                                 {
-                                        cell.terrain->m_started_burning_this_turn = true;
+                                        terrain->m_started_burning_this_turn = true;
 
                                         if (map::g_player->m_pos == p)
                                         {
@@ -243,7 +243,7 @@ void Terrain::on_new_turn()
                         const P p(dir_utils::rnd_adj_pos(m_pos, true));
 
                         if (map::is_pos_inside_map(p) &&
-                            !map_parsers::BlocksProjectiles().cell(p))
+                            !map_parsers::BlocksProjectiles().run(p))
                         {
                                 game_time::add_mob(new Smoke(p, 10));
                         }
@@ -307,14 +307,10 @@ void Terrain::hit(
                         {
                                 if (dmg_type == DmgType::kicking)
                                 {
-                                        const bool can_see_terrain =
-                                                !map::g_cells.at(m_pos)
-                                                         .is_seen_by_player;
-
                                         const std::string terrain_name =
-                                                can_see_terrain
-                                                ? "something"
-                                                : name(Article::the);
+                                                map::g_seen.at(m_pos)
+                                                ? name(Article::the)
+                                                : "something";
 
                                         msg_log::add(
                                                 "I kick " +
@@ -1106,7 +1102,7 @@ void Statue::topple(
                 ? AlertsMon::yes
                 : AlertsMon::no;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("The statue topples over.");
         }
@@ -1171,7 +1167,7 @@ void Statue::topple(
                 }
         }
 
-        const auto terrain_id = map::g_cells.at(dst_pos).terrain->id();
+        const auto terrain_id = map::g_terrain.at(dst_pos)->id();
 
         // NOTE: This is kinda hacky, but the rubble is mostly just for
         // decoration anyway, so it doesn't really matter.
@@ -1358,7 +1354,7 @@ void Stairs::on_hit(
 
 void Stairs::on_new_turn_hook()
 {
-        ASSERT(!map::g_cells.at(m_pos).item);
+        ASSERT(!map::g_items.at(m_pos));
 }
 
 void Stairs::bump(actor::Actor& actor_bumping)
@@ -1670,7 +1666,7 @@ Color LiquidShallow::color_default() const
 
 Color LiquidShallow::color_bg_default() const
 {
-        const auto* const item = map::g_cells.at(m_pos).item;
+        const auto* const item = map::g_items.at(m_pos);
 
         const auto* const corpse =
                 map::first_actor_at_pos(
@@ -1988,7 +1984,7 @@ void Lever::bump(actor::Actor& actor_bumping)
         TRACE_FUNC_BEGIN;
 
         // If player is blind, ask it they really want to pull the lever
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 msg_log::clear();
 
@@ -2460,7 +2456,7 @@ Color Chains::color_default() const
 
 Color Chains::color_bg_default() const
 {
-        const auto* const item = map::g_cells.at(m_pos).item;
+        const auto* const item = map::g_items.at(m_pos);
 
         const auto* const corpse =
                 map::first_actor_at_pos(
@@ -2486,7 +2482,7 @@ void Chains::bump(actor::Actor& actor_bumping)
         {
                 std::string msg;
 
-                if (map::g_cells.at(m_pos).is_seen_by_player)
+                if (map::g_seen.at(m_pos))
                 {
                         msg = "The chains rattle.";
                 }
@@ -2729,12 +2725,13 @@ void Brazier::on_hit(
                         ? AlertsMon::yes
                         : AlertsMon::no;
 
-                if (map::g_cells.at(m_pos).is_seen_by_player)
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("It topples over.");
                 }
 
-                Snd snd("I hear a crash.",
+                Snd snd(
+                        "I hear a crash.",
                         audio::SfxId::END,
                         IgnoreMsgIfOriginSeen::yes,
                         m_pos,
@@ -2752,7 +2749,7 @@ void Brazier::on_hit(
 
                 // NOTE: "this" is now deleted!
 
-                const auto* const tgt_f = map::g_cells.at(dst_pos).terrain;
+                const auto* const tgt_f = map::g_terrain.at(dst_pos);
 
                 if (tgt_f->id() != terrain::Id::chasm &&
                     tgt_f->id() != terrain::Id::liquid_deep)
@@ -3277,7 +3274,7 @@ void Tomb::bump(actor::Actor& actor_bumping)
                 {
                         msg_log::add("The tomb is empty.");
                 }
-                else if (!map::g_cells.at(m_pos).is_seen_by_player)
+                else if (!map::g_seen.at(m_pos))
                 {
                         msg_log::add("There is a stone box here.");
                 }
@@ -3397,7 +3394,7 @@ DidOpen Tomb::open(actor::Actor* const actor_opening)
 
                 snd.run();
 
-                if (map::g_cells.at(m_pos).is_seen_by_player)
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The lid comes off.");
                 }
@@ -3418,7 +3415,7 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
 
         auto id_to_spawn = actor::Id::END;
 
-        const bool is_seen = map::g_cells.at(m_pos).is_seen_by_player;
+        const bool is_seen = map::g_seen.at(m_pos);
 
         switch (m_trait)
         {
@@ -3656,7 +3653,7 @@ void Chest::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a chest here.");
 
@@ -3727,7 +3724,7 @@ DidOpen Chest::open(actor::Actor* const actor_opening)
                 // Chest is closed
                 m_is_open = true;
 
-                if (map::g_cells.at(m_pos).is_seen_by_player)
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The chest opens.");
                 }
@@ -3809,7 +3806,7 @@ WasDestroyed Chest::on_finished_burning()
 
 void Chest::on_player_kick()
 {
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 // If player is blind, call the parent hit function
                 // instead (generic kicking)
@@ -4111,7 +4108,7 @@ void Fountain::bump(actor::Actor& actor_bumping)
 
         PropHandler& properties = map::g_player->m_properties;
 
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 msg_log::clear();
 
@@ -4238,7 +4235,7 @@ void Fountain::bump(actor::Actor& actor_bumping)
 void Fountain::on_new_turn()
 {
         if (map::g_player->m_pos.is_adjacent(m_pos) &&
-            map::g_cells.at(m_pos).is_seen_by_player)
+            map::g_seen.at(m_pos))
         {
                 hints::display(hints::Id::fountains);
         }
@@ -4264,7 +4261,7 @@ void Fountain::bless()
 
         m_fountain_effect = FountainEffect::refreshing;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 const std::string name_the =
                         text_format::first_to_lower(
@@ -4299,7 +4296,7 @@ void Fountain::curse()
 
         m_fountain_effect = (FountainEffect)rnd::range(min, max);
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 std::string name_the =
                         text_format::first_to_lower(
@@ -4500,7 +4497,7 @@ void Cabinet::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a cabinet here.");
 
@@ -4558,7 +4555,7 @@ DidOpen Cabinet::open(actor::Actor* const actor_opening)
                 // Was not already open
                 m_is_open = true;
 
-                if (map::g_cells.at(m_pos).is_seen_by_player)
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The cabinet opens.");
                 }
@@ -4680,7 +4677,7 @@ void Bookshelf::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a bookshelf here.");
 
@@ -4840,7 +4837,7 @@ void AlchemistBench::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a wooden bench here.");
 
@@ -5010,7 +5007,7 @@ void Cocoon::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a cocoon here.");
 
@@ -5146,7 +5143,7 @@ DidOpen Cocoon::open(actor::Actor* const actor_opening)
                 // Was not already open
                 m_is_open = true;
 
-                if (map::g_cells.at(m_pos).is_seen_by_player)
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The cocoon opens.");
                 }

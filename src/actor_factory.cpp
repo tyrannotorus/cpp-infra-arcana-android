@@ -144,9 +144,9 @@ Actor* make(const Id id, const P& pos)
         actor->m_properties.on_placed();
 
 #ifndef NDEBUG
-        if (map::nr_cells() != 0)
+        if (map::nr_positions() != 0)
         {
-                const auto* const t = map::g_cells.at(pos).terrain;
+                const auto* const t = map::g_terrain.at(pos);
 
                 if (t->id() == terrain::Id::door)
                 {

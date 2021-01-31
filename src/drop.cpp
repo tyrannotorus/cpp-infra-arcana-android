@@ -129,7 +129,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
         ASSERT(map::is_pos_inside_outer_walls(intended_pos));
 
         // If target cell is bottomless, just destroy the item
-        const auto* const tgt_f = map::g_cells.at(intended_pos).terrain;
+        const auto* const tgt_f = map::g_terrain.at(intended_pos);
 
         if (tgt_f->id() == terrain::Id::chasm ||
             tgt_f->id() == terrain::Id::liquid_deep)
@@ -144,11 +144,10 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
         // Make a vector of all cells on map with no blocking terrain
         Array2<bool> free_cell_array(map::dims());
 
-        const size_t len = map::nr_cells();
-
-        for (size_t i = 0; i < len; ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                auto* const t = map::g_cells.at(i).terrain;
+                auto* const t = map::g_terrain.at(i);
 
                 free_cell_array.at(i) = t->can_have_item();
         }
@@ -215,8 +214,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
                                         break;
                                 }
 
-                                auto* item_on_floor =
-                                        map::g_cells.at(stack_p).item;
+                                auto* item_on_floor = map::g_items.at(stack_p);
 
                                 if (item_on_floor &&
                                     item_on_floor->data().id == item.data().id)
@@ -230,7 +228,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
 
                                         delete item_on_floor;
 
-                                        map::g_cells.at(stack_p).item = &item;
+                                        map::g_items.at(stack_p) = &item;
 
                                         if (map::g_player->m_pos == stack_p)
                                         {
@@ -247,10 +245,10 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
 
                 // Item has not been stacked at this distance
 
-                if (!map::g_cells.at(p).item)
+                if (!map::g_items.at(p))
                 {
                         // Alright, this cell is empty, let's put the item here
-                        map::g_cells.at(p).item = &item;
+                        map::g_items.at(p) = &item;
 
                         if (map::g_player->m_pos == p)
                         {

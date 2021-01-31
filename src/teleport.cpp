@@ -199,13 +199,13 @@ void teleport(
         map_parsers::BlocksActor(actor, ParseActors::no)
                 .run(blocked, blocked.rect());
 
-        const size_t nr_map_cells = map::nr_cells();
+        const size_t nr_positions = map::nr_positions();
 
         // Allow teleporting past non-metal doors for the player, and past any
         // door for monsters
-        for (size_t i = 0; i < nr_map_cells; ++i)
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                const auto* const r = map::g_cells.at(i).terrain;
+                const auto* const r = map::g_terrain.at(i);
 
                 if (r->id() != terrain::Id::door)
                 {
@@ -236,7 +236,7 @@ void teleport(
 
         const auto flood = floodfill(actor.m_pos, blocked);
 
-        for (auto p : map::g_cells.rect().positions())
+        for (const auto p : map::rect().positions())
         {
                 if (flood.at(p) <= 0)
                 {
@@ -361,7 +361,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         }
 
         // Leave current cell
-        map::g_cells.at(actor.m_pos).terrain->on_leave(actor);
+        map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
         // Update actor position to new position
         actor.m_pos = p;
@@ -398,5 +398,5 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         // Bump the target terrain, so that we for example start swimming if
         // teleporting into water
-        map::g_cells.at(p).terrain->bump(actor);
+        map::g_terrain.at(p)->bump(actor);
 }

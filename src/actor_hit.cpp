@@ -150,7 +150,7 @@ ActorDied hit(
                                 map::make_gore(actor.m_pos);
                         }
 
-                        if (map::g_cells.at(actor.m_pos).is_seen_by_player)
+                        if (map::g_seen.at(actor.m_pos))
                         {
                                 msg_log::add(
                                         text_format::first_to_upper(
@@ -271,7 +271,7 @@ ActorDied hit(
 
         if (actor.m_hp <= 0)
         {
-                const auto f_id = map::g_cells.at(actor.m_pos).terrain->id();
+                const auto f_id = map::g_terrain.at(actor.m_pos)->id();
 
                 const bool is_on_bottomless =
                         (f_id == terrain::Id::chasm) ||
@@ -382,11 +382,11 @@ ActorDied hit_sp(
                 msg_log::add(actor_name_the + " has no spirit left!");
         }
 
-        const auto f_id = map::g_cells.at(actor.m_pos).terrain->id();
+        const auto terrain_id = map::g_terrain.at(actor.m_pos)->id();
 
         const bool is_on_bottomless =
-                (f_id == terrain::Id::chasm) ||
-                (f_id == terrain::Id::liquid_deep);
+                (terrain_id == terrain::Id::chasm) ||
+                (terrain_id == terrain::Id::liquid_deep);
 
         const auto is_destroyed =
                 (!actor.m_data->can_leave_corpse ||

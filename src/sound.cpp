@@ -145,8 +145,7 @@ void run(Snd snd)
                         continue;
                 }
 
-                const bool is_origin_seen_by_player =
-                        map::g_cells.at(origin).is_seen_by_player;
+                const bool is_origin_seen_by_player = map::g_seen.at(origin);
 
                 if (actor->is_player())
                 {

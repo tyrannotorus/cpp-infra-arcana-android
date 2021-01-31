@@ -44,10 +44,11 @@ static void show_map_and_freeze(const std::string& msg)
 {
         TRACE_FUNC_BEGIN;
 
-        for (auto& cell : map::g_cells)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                cell.is_explored = true;
-                cell.is_seen_by_player = true;
+                map::g_explored.at(i) = true;
+                map::g_seen.at(i) = true;
         }
 
         for (auto* const actor : game_time::g_actors)
@@ -89,7 +90,7 @@ static void find_stair_path()
         {
                 for (int y = 0; y < map::h(); ++y)
                 {
-                        const auto id = map::g_cells.at(x, y).terrain->id();
+                        const auto id = map::g_terrain.at(x, y)->id();
 
                         if (id == terrain::Id::stairs)
                         {
@@ -132,7 +133,7 @@ static bool walk_to_adj_cell(const P& p)
 
         auto dir = Dir::END;
 
-        if (rnd::fraction(3, 4))
+        if (rnd::fraction(1, 4))
         {
                 dir = (Dir)rnd::range(0, (int)Dir::END - 1);
         }
@@ -383,8 +384,7 @@ void act()
                         }
                 }
 
-                const PropId prop_id = rnd::element(prop_bucket);
-
+                const auto prop_id = rnd::element(prop_bucket);
                 auto* const prop = property_factory::make(prop_id);
 
                 prop->set_duration(5);
@@ -419,9 +419,9 @@ void act()
         // Handle blocking door
         for (const P& d : dir_utils::g_dir_list)
         {
-                const P p(map::g_player->m_pos + d);
+                const auto p = map::g_player->m_pos + d;
 
-                auto* const t = map::g_cells.at(p).terrain;
+                auto* const t = map::g_terrain.at(p);
 
                 if (t->id() == terrain::Id::door)
                 {

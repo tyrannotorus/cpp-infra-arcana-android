@@ -57,7 +57,7 @@ TEST_CASE("Explosions damage walls")
                                 continue;
                         }
 
-                        const auto id = map::g_cells.at(p).terrain->id();
+                        const auto id = map::g_terrain.at(p)->id();
 
                         if (dist == 1)
                         {
@@ -111,20 +111,20 @@ TEST_CASE("Explosions at map edge")
 
         const auto wall_id = terrain::Id::wall;
 
-        REQUIRE(map::g_cells.at(x + 1, y).terrain->id() == wall_id);
-        REQUIRE(map::g_cells.at(x, y + 1).terrain->id() == wall_id);
-        REQUIRE(map::g_cells.at(x - 1, y).terrain->id() == wall_id);
-        REQUIRE(map::g_cells.at(x, y - 1).terrain->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x + 1, y)->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x, y + 1)->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x - 1, y)->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x, y - 1)->id() == wall_id);
 
         for (int i = 0; i < 100; ++i)
         {
                 explosion::run(P(x, y), ExplType::expl);
         }
 
-        REQUIRE(map::g_cells.at(x + 1, y).terrain->id() != wall_id);
-        REQUIRE(map::g_cells.at(x, y + 1).terrain->id() != wall_id);
-        REQUIRE(map::g_cells.at(x - 1, y).terrain->id() == wall_id);
-        REQUIRE(map::g_cells.at(x, y - 1).terrain->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x + 1, y)->id() != wall_id);
+        REQUIRE(map::g_terrain.at(x, y + 1)->id() != wall_id);
+        REQUIRE(map::g_terrain.at(x - 1, y)->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x, y - 1)->id() == wall_id);
 
         // South-east edge
         x = map::w() - 2;
@@ -132,20 +132,20 @@ TEST_CASE("Explosions at map edge")
 
         map::put(new terrain::Floor(P(x, y)));
 
-        REQUIRE(map::g_cells.at(x - 1, y).terrain->id() == wall_id);
-        REQUIRE(map::g_cells.at(x, y - 1).terrain->id() == wall_id);
-        REQUIRE(map::g_cells.at(x + 1, y).terrain->id() == wall_id);
-        REQUIRE(map::g_cells.at(x, y + 1).terrain->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x - 1, y)->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x, y - 1)->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x + 1, y)->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x, y + 1)->id() == wall_id);
 
         for (int i = 0; i < 100; ++i)
         {
                 explosion::run(P(x, y), ExplType::expl);
         }
 
-        REQUIRE(map::g_cells.at(x - 1, y).terrain->id() != wall_id);
-        REQUIRE(map::g_cells.at(x, y - 1).terrain->id() != wall_id);
-        REQUIRE(map::g_cells.at(x + 1, y).terrain->id() == wall_id);
-        REQUIRE(map::g_cells.at(x, y + 1).terrain->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x - 1, y)->id() != wall_id);
+        REQUIRE(map::g_terrain.at(x, y - 1)->id() != wall_id);
+        REQUIRE(map::g_terrain.at(x + 1, y)->id() == wall_id);
+        REQUIRE(map::g_terrain.at(x, y + 1)->id() == wall_id);
 }
 
 TEST_CASE("Explosions damage actors")

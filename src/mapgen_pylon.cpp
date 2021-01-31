@@ -66,10 +66,10 @@ void make_pylons()
                 // pylon or not
                 blocked.at(pylon_p) = true;
 
-                // OK, valid positions found - place Pylon and Lever
+                // OK, valid positions found - place Pylon
                 auto* const pylon = new terrain::Pylon(pylon_p);
 
-                map::g_cells.at(pylon_p).terrain = pylon;
+                map::put(pylon);
 
                 // Don't place other pylons too near
                 {
@@ -100,6 +100,6 @@ void make_pylons()
                         }
                 }
         }  // Pylons loop
-}  // make_pylons_and_levers
+}  // make_pylons
 
 }  // namespace mapgen

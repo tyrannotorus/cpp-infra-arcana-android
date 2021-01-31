@@ -402,7 +402,7 @@ bool MapBuilderStd::build_specific()
                 {
                         const P p(x, y);
 
-                        if (is_free_terrain_parser.cell(p))
+                        if (is_free_terrain_parser.run(p))
                         {
                                 blocked.at(p) = false;
                         }
@@ -504,7 +504,7 @@ bool MapBuilderStd::build_specific()
                         continue;
                 }
 
-                auto* const terrain = map::g_cells.at(choke_point.p).terrain;
+                auto* const terrain = map::g_terrain.at(choke_point.p);
 
                 if (terrain->id() == terrain::Id::door)
                 {
@@ -642,7 +642,8 @@ bool MapBuilderStd::build_specific()
 
                 if (rnd::percent(make_drk_pct))
                 {
-                        for (size_t i = 0; i < map::nr_cells(); ++i)
+                        const size_t nr_positions = map::nr_positions();
+                        for (size_t i = 0; i < nr_positions; ++i)
                         {
                                 map::g_dark.at(i) = true;
                         }

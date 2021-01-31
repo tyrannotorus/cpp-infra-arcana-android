@@ -129,7 +129,7 @@ void make_sub_rooms()
                                                         continue;
                                                 }
 
-                                                const auto& f_id = map::g_cells.at(x, y).terrain->id();
+                                                const auto& f_id = map::g_terrain.at(x, y)->id();
 
                                                 const Room* const room = map::g_room_map.at(x, y);
 

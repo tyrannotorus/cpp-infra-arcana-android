@@ -363,7 +363,8 @@ Array2<bool> forbidden_spawn_positions()
 
                 const auto flood = floodfill(player_p, blocks_projectiles);
 
-                for (size_t i = 0; i < map::nr_cells(); ++i)
+                const size_t nr_positions = map::nr_positions();
+                for (size_t i = 0; i < nr_positions; ++i)
                 {
                         const int v = flood.at(i);
 
@@ -450,7 +451,7 @@ void spawn_for_repopulate_over_time()
                 return;
         }
 
-        if (map::g_cells.at(origin).is_explored)
+        if (map::g_explored.at(origin))
         {
                 const int nr_ood = random_out_of_depth();
 

@@ -150,7 +150,7 @@ void draw_blast_at_seen_cells(
 
         for (const P& p : positions)
         {
-                if (map::g_cells.at(p).is_seen_by_player)
+                if (map::g_seen.at(p))
                 {
                         positions_with_vision.push_back(p);
                 }

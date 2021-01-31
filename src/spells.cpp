@@ -189,7 +189,7 @@ static void swap_wall_floor(const Context& context)
         {
                 const bool is_free_terrain =
                         map_parsers::IsAnyOfTerrains(free_terrains)
-                                .cell(p);
+                                .run(p);
 
                 if (is_free_terrain)
                 {
@@ -211,13 +211,13 @@ static void swap_wall_floor(const Context& context)
         {
                 if (!map::is_pos_inside_outer_walls(p) ||
                     has_actor.at(p) ||
-                    map::g_cells.at(p).item ||
+                    map::g_items.at(p) ||
                     !rnd::one_in(14))
                 {
                         continue;
                 }
 
-                const auto terrain_id = map::g_cells.at(p).terrain->id();
+                const auto terrain_id = map::g_terrain.at(p)->id();
 
                 if (terrain_id == terrain::Id::wall)
                 {
@@ -285,7 +285,7 @@ static void ignite_terrain(const Context& context)
                         printed_msg = true;
                 }
 
-                auto* const terrain = map::g_cells.at(p).terrain;
+                auto* const terrain = map::g_terrain.at(p);
 
                 terrain->hit(DmgType::fire, nullptr);
         }
@@ -313,12 +313,12 @@ static void open_close_doors(const Context& context)
         bool printed_msg = false;
         for (const auto& p : context.nearby_positions)
         {
-                if (has_actor.at(p) || map::g_cells.at(p).item)
+                if (has_actor.at(p) || map::g_items.at(p))
                 {
                         continue;
                 }
 
-                auto* const terrain = map::g_cells.at(p).terrain;
+                auto* const terrain = map::g_terrain.at(p);
 
                 if (terrain->id() != terrain::Id::door)
                 {
@@ -424,7 +424,7 @@ static void create_water(const Context& context)
 
         for (const auto& p : context.nearby_positions)
         {
-                if ((map::g_cells.at(p).terrain->id() != terrain::Id::floor) ||
+                if ((map::g_terrain.at(p)->id() != terrain::Id::floor) ||
                     !rnd::one_in(8))
                 {
                         continue;
@@ -466,7 +466,7 @@ static void create_trees(const Context& context)
         {
                 const bool is_free_terrain =
                         map_parsers::IsAnyOfTerrains(free_terrains)
-                                .cell(p);
+                                .run(p);
 
                 if (is_free_terrain)
                 {
@@ -479,11 +479,11 @@ static void create_trees(const Context& context)
         for (const auto& p : context.nearby_positions)
         {
                 const bool is_floor_like =
-                        map::g_cells.at(p).terrain->data().is_floor_like;
+                        map::g_terrain.at(p)->data().is_floor_like;
 
                 const bool is_adj_to_lever =
                         map_parsers::AnyAdjIsAnyOfTerrains(terrain::Id::lever)
-                                .cell(p);
+                                .run(p);
 
                 if (blocked.at(p) || !is_floor_like || is_adj_to_lever)
                 {
@@ -552,12 +552,12 @@ static void create_doors(const Context& context)
         bool printed_msg = false;
         for (const auto& p : context.nearby_positions)
         {
-                const auto id = map::g_cells.at(p).terrain->id();
+                const auto id = map::g_terrain.at(p)->id();
 
                 if (!rnd::one_in(2) ||
                     (id != terrain::Id::wall) ||
-                    adj_door_checker.cell(p) ||
-                    !adj_floor_checker.cell(p))
+                    adj_door_checker.run(p) ||
+                    !adj_floor_checker.run(p))
                 {
                         continue;
                 }
@@ -615,7 +615,7 @@ static void create_dark_void(const Context& context)
         {
                 const bool is_free_terrain =
                         map_parsers::IsAnyOfTerrains(free_terrains)
-                                .cell(p);
+                                .run(p);
 
                 if (is_free_terrain)
                 {
@@ -635,7 +635,7 @@ static void create_dark_void(const Context& context)
                 map::g_dark.at(p) = true;
                 map::g_light.at(p) = false;
 
-                if (map::g_cells.at(p).terrain->id() == terrain::Id::wall)
+                if (map::g_terrain.at(p)->id() == terrain::Id::wall)
                 {
                         blocked.at(p) = false;
 
@@ -661,7 +661,7 @@ static void push_statue(const Context& context)
 
         for (const auto& p : context.nearby_positions)
         {
-                auto* const terrain = map::g_cells.at(p).terrain;
+                auto* const terrain = map::g_terrain.at(p);
 
                 if (terrain->id() != terrain::Id::statue)
                 {
@@ -716,14 +716,14 @@ static terrain::DidOpen run_opening_spell_for_metal_door(
         //
         for (const auto& p : map::rect().positions())
         {
-                const auto& cell = map::g_cells.at(p);
+                auto* const terrain = map::g_terrain.at(p);
 
-                if (cell.terrain->id() != terrain::Id::lever)
+                if (terrain->id() != terrain::Id::lever)
                 {
                         continue;
                 }
 
-                auto* const lever = static_cast<terrain::Lever*>(cell.terrain);
+                auto* const lever = static_cast<terrain::Lever*>(terrain);
 
                 if (!lever->is_linked_to(door))
                 {
@@ -898,7 +898,7 @@ terrain::DidOpen run_opening_spell_effect_at(
                 return terrain::DidOpen::no;
         }
 
-        auto* const terrain = map::g_cells.at(pos).terrain;
+        auto* const terrain = map::g_terrain.at(pos);
 
         if (terrain->id() == terrain::Id::door)
         {
@@ -1509,9 +1509,9 @@ void SpellBolt::run_effect(
 
                         for (int i = idx_0; i > 0; --i)
                         {
-                                const P& p = path[i];
+                                const auto& p = path[i];
 
-                                if (!map::g_cells.at(p).is_seen_by_player ||
+                                if (!map::g_seen.at(p) ||
                                     !viewport::is_in_view(p))
                                 {
                                         continue;
@@ -1534,10 +1534,9 @@ void SpellBolt::run_effect(
                 }
         }
 
-        const P& target_p = target->m_pos;
+        const auto& target_p = target->m_pos;
 
-        const bool player_see_cell =
-                map::g_cells.at(target_p).is_seen_by_player;
+        const bool player_see_cell = map::g_seen.at(target_p);
 
         const bool player_see_tgt = actor::can_player_see_actor(*target);
 
@@ -1844,7 +1843,7 @@ void SpellMayhem::run_effect(
 
         for (const auto& p : positions)
         {
-                const auto* const terrain = map::g_cells.at(p).terrain;
+                const auto* const terrain = map::g_terrain.at(p);
 
                 if (!terrain->is_walkable())
                 {
@@ -1886,7 +1885,7 @@ void SpellMayhem::run_effect(
         // Explode braziers
         for (const auto& p : positions)
         {
-                const auto terrain_id = map::g_cells.at(p).terrain->id();
+                const auto terrain_id = map::g_terrain.at(p)->id();
 
                 if (terrain_id == terrain::Id::brazier)
                 {
@@ -1929,11 +1928,9 @@ void SpellMayhem::run_effect(
 
                         for (const P& d : dir_utils::g_dir_list)
                         {
-                                const P p_adj(p + d);
+                                const auto p_adj = p + d;
 
-                                const auto& cell = map::g_cells.at(p_adj);
-
-                                if (cell.terrain->is_walkable())
+                                if (map::g_terrain.at(p_adj)->is_walkable())
                                 {
                                         is_adj_to_walkable_cell = true;
                                 }
@@ -1941,7 +1938,7 @@ void SpellMayhem::run_effect(
 
                         if (is_adj_to_walkable_cell)
                         {
-                                map::g_cells.at(p).terrain->hit(
+                                map::g_terrain.at(p)->hit(
                                         DmgType::explosion,
                                         nullptr);
                         }
@@ -1951,7 +1948,7 @@ void SpellMayhem::run_effect(
         // Put blood, and set stuff on fire
         for (const auto& p : positions)
         {
-                auto* const terrain = map::g_cells.at(p).terrain;
+                auto* const terrain = map::g_terrain.at(p);
 
                 if (rnd::one_in(10))
                 {
@@ -2122,7 +2119,7 @@ std::vector<std::string> SpellPestilence::descr_specific(
 bool SpellPestilence::allow_mon_cast_now(actor::Mon& mon) const
 {
         const bool is_deep_liquid =
-                map::g_cells.at(mon.m_pos).terrain->id() ==
+                map::g_terrain.at(mon.m_pos)->id() ==
                 terrain::Id::liquid_deep;
 
         return mon.m_ai_state.target &&
@@ -2465,7 +2462,7 @@ void SpellCleansingFire::run_effect(
                         // increase the chance of it catching fire
                         for (int i = 0; i < 6; ++i)
                         {
-                                map::g_cells.at(p).terrain->hit(
+                                map::g_terrain.at(p)->hit(
                                         DmgType::fire,
                                         nullptr);
                         }
@@ -2583,7 +2580,7 @@ void SpellPurge::run_effect(
         {
                 const auto p(caster->m_pos + d);
 
-                auto* const terrain = map::g_cells.at(p).terrain;
+                auto* const terrain = map::g_terrain.at(p);
 
                 switch (terrain->id())
                 {
@@ -3890,7 +3887,7 @@ std::vector<std::string> SpellSummonMon::descr_specific(
 bool SpellSummonMon::allow_mon_cast_now(actor::Mon& mon) const
 {
         const bool is_deep_liquid =
-                map::g_cells.at(mon.m_pos).terrain->id() ==
+                map::g_terrain.at(mon.m_pos)->id() ==
                 terrain::Id::liquid_deep;
 
         return mon.m_ai_state.target &&
@@ -3962,7 +3959,7 @@ void SpellSummonTentacles::run_effect(
 bool SpellSummonTentacles::allow_mon_cast_now(actor::Mon& mon) const
 {
         const bool is_deep_liquid =
-                map::g_cells.at(mon.m_pos).terrain->id() ==
+                map::g_terrain.at(mon.m_pos)->id() ==
                 terrain::Id::liquid_deep;
 
         return mon.m_ai_state.target &&
@@ -4277,9 +4274,7 @@ void SpellTransmut::run_effect(
 
         const P& p = map::g_player->m_pos;
 
-        auto& cell = map::g_cells.at(p);
-
-        auto* item_before = cell.item;
+        auto* item_before = map::g_items.at(p);
 
         if (!item_before)
         {
@@ -4300,7 +4295,7 @@ void SpellTransmut::run_effect(
 
         const auto item_type_before = item_before->data().type;
 
-        const int melee_wpn_plus = item_before->melee_base_dmg().plus();
+        const int melee_plus = item_before->melee_base_dmg().plus();
 
         const auto id_before = item_before->id();
 
@@ -4317,11 +4312,10 @@ void SpellTransmut::run_effect(
         }
 
         // Remove the existing item(s)
-        delete cell.item;
+        delete map::g_items.at(p);
+        map::g_items.at(p) = nullptr;
 
-        cell.item = nullptr;
-
-        if (cell.is_seen_by_player)
+        if (map::g_seen.at(p))
         {
                 msg_log::add(
                         item_name_before + " disappears.",
@@ -4380,9 +4374,9 @@ void SpellTransmut::run_effect(
                 }
         }
         // Converting a melee weapon (with at least one "plus")?
-        else if ((item_type_before == ItemType::melee_wpn) && (melee_wpn_plus >= 1))
+        else if ((item_type_before == ItemType::melee_wpn) && (melee_plus >= 1))
         {
-                pct_chance_per_item += (melee_wpn_plus * 10);
+                pct_chance_per_item += (melee_plus * 10);
 
                 for (size_t item_id = 0;
                      (item::Id)item_id != item::Id::END;
@@ -4450,7 +4444,7 @@ void SpellTransmut::run_effect(
                 item_new->m_nr_items = nr_items_new;
         }
 
-        if (cell.is_seen_by_player)
+        if (map::g_seen.at(p))
         {
                 const std::string item_name_new =
                         text_format::first_to_upper(

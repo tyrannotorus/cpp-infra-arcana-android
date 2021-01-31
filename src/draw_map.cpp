@@ -34,18 +34,17 @@ static void clear_render_array()
 
 static void set_terrains()
 {
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                auto& cell = map::g_cells.at(i);
-
-                if (!cell.is_seen_by_player)
+                if (!map::g_seen.at(i))
                 {
                         continue;
                 }
 
                 auto& render_data = s_render_array.at(i);
 
-                const auto* const t = cell.terrain;
+                const auto* const t = map::g_terrain.at(i);
 
                 gfx::TileId gore_tile = gfx::TileId::END;
 
@@ -102,8 +101,7 @@ static void post_process_wall_tiles()
                         const terrain::Wall* wall = nullptr;
 
                         {
-                                const auto* const t =
-                                        map::g_cells.at(x, y).terrain;
+                                const auto* const t = map::g_terrain.at(x, y);
 
                                 const auto id = t->id();
 
@@ -127,7 +125,7 @@ static void post_process_wall_tiles()
                                 }
                         }
 
-                        if (map::g_cells.at(x, y + 1).is_explored)
+                        if (map::g_explored.at(x, y + 1))
                         {
                                 const auto tile_below =
                                         s_render_array.at(x, y + 1).tile;
@@ -164,7 +162,7 @@ static void set_dead_actors()
         {
                 const P& p(actor->m_pos);
 
-                if (!map::g_cells.at(p).is_seen_by_player ||
+                if (!map::g_seen.at(p) ||
                     !actor->is_corpse() ||
                     (actor->m_data->character == 0) ||
                     (actor->m_data->character == ' ') ||
@@ -183,11 +181,12 @@ static void set_dead_actors()
 
 static void set_items()
 {
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                const auto* const item = map::g_cells.at(i).item;
+                const auto* const item = map::g_items.at(i);
 
-                if (!map::g_cells.at(i).is_seen_by_player || !item)
+                if (!map::g_seen.at(i) || !item)
                 {
                         continue;
                 }
@@ -202,9 +201,10 @@ static void set_items()
 
 static void copy_seen_cells_to_player_memory()
 {
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                if (map::g_cells.at(i).is_seen_by_player)
+                if (map::g_seen.at(i))
                 {
                         s_render_array_player_memory.at(i) =
                                 s_render_array.at(i);
@@ -214,11 +214,12 @@ static void copy_seen_cells_to_player_memory()
 
 static void set_light()
 {
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                const auto* const t = map::g_cells.at(i).terrain;
+                const auto* const t = map::g_terrain.at(i);
 
-                if (map::g_cells.at(i).is_seen_by_player &&
+                if (map::g_seen.at(i) &&
                     map::g_light.at(i) &&
                     t->is_los_passable() &&
                     (t->id() != terrain::Id::chasm))
@@ -243,7 +244,7 @@ static void set_mobiles()
 
                 const char mob_character = mob->character();
 
-                if (map::g_cells.at(p).is_seen_by_player &&
+                if (map::g_seen.at(p) &&
                     mob_tile != gfx::TileId::END &&
                     mob_character != 0 &&
                     mob_character != ' ')
@@ -347,26 +348,26 @@ static void set_living_monsters()
 
 static void set_unseen_cells_from_player_memory()
 {
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 auto& render_data = s_render_array.at(i);
 
-                const Cell& cell = map::g_cells.at(i);
-
-                if (!cell.is_seen_by_player && cell.is_explored)
+                if (map::g_seen.at(i) || !map::g_explored.at(i))
                 {
-                        render_data = s_render_array_player_memory.at(i);
+                        continue;
+                }
 
-                        const double div = 3.0;
+                render_data = s_render_array_player_memory.at(i);
 
-                        render_data.color =
-                                render_data.color.fraction(div);
+                const double div = 3.0;
 
-                        if (render_data.color_bg != colors::black())
-                        {
-                                render_data.color_bg =
-                                        render_data.color_bg.fraction(div);
-                        }
+                render_data.color = render_data.color.fraction(div);
+
+                if (render_data.color_bg != colors::black())
+                {
+                        render_data.color_bg =
+                                render_data.color_bg.fraction(div);
                 }
         }
 }

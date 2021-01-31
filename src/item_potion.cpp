@@ -402,7 +402,8 @@ void Potion::on_actor_turn_in_inv_hook(const InvType inv_type)
 
 void Potion::on_collide(const P& pos, actor::Actor* const actor)
 {
-        const auto& cell = map::g_cells.at(pos);
+        const bool is_seen = map::g_seen.at(pos);
+        const auto* const terrain = map::g_terrain.at(pos);
 
         if (actor)
         {
@@ -426,18 +427,17 @@ void Potion::on_collide(const P& pos, actor::Actor* const actor)
 
                 collide_hook(pos, actor);
         }
-        else if (cell.is_seen_by_player)
+        else if (is_seen)
         {
                 const std::vector<terrain::Id> deep_terrains = {
                         terrain::Id::chasm,
                         terrain::Id::liquid_deep};
 
-                if (!map_parsers::IsAnyOfTerrains(deep_terrains)
-                             .cell(pos))
+                if (!map_parsers::IsAnyOfTerrains(deep_terrains).run(pos))
                 {
                         msg_log::add(
                                 "The potion shatters on " +
-                                cell.terrain->name(Article::the) +
+                                terrain->name(Article::the) +
                                 ".");
                 }
         }

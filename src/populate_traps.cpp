@@ -99,7 +99,7 @@ static std::vector<P> find_allowed_cells_in_room(
                         const P p(x, y);
 
                         if (!blocked.at(p) &&
-                            map::g_cells.at(p).terrain->can_have_trap() &&
+                            map::g_terrain.at(p)->can_have_trap() &&
                             (map::g_room_map.at(p) == &room))
                         {
                                 positions.push_back(p);
@@ -112,7 +112,7 @@ static std::vector<P> find_allowed_cells_in_room(
 
 static terrain::Trap* make_trap(const terrain::TrapId id, const P& pos)
 {
-        const auto* const t = map::g_cells.at(pos).terrain;
+        const auto* const t = map::g_terrain.at(pos);
 
         const auto& d = terrain::data(t->id());
 

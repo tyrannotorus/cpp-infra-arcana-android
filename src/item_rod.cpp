@@ -397,9 +397,7 @@ void Opening::run_effect()
 
         for (const auto& p : map::rect().positions())
         {
-                const auto& cell = map::g_cells.at(p);
-
-                if (!cell.is_seen_by_player)
+                if (!map::g_seen.at(p))
                 {
                         continue;
                 }
@@ -463,7 +461,7 @@ void Shockwave::run_effect()
         {
                 const P p(player_pos + d);
 
-                auto* const terrain = map::g_cells.at(p).terrain;
+                auto* const terrain = map::g_terrain.at(p);
 
                 terrain->hit(DmgType::explosion, nullptr);
         }

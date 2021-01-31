@@ -131,9 +131,10 @@ Door::~Door()
         // Unlink all levers
         if (m_type == DoorType::metal)
         {
-                for (size_t i = 0; i < map::nr_cells(); ++i)
+                const size_t nr_positions = map::nr_positions();
+                for (size_t i = 0; i < nr_positions; ++i)
                 {
-                        auto* const terrain = map::g_cells.at(i).terrain;
+                        auto* const terrain = map::g_terrain.at(i);
 
                         if (terrain && (terrain->id() == terrain::Id::lever))
                         {
@@ -710,7 +711,7 @@ void Door::bump(actor::Actor& actor_bumping)
 
                 // Print messages as if this was a wall
 
-                if (map::g_cells.at(m_pos).is_seen_by_player)
+                if (map::g_seen.at(m_pos))
                 {
                         TRACE << "Player bumped into secret door, "
                               << "with vision in cell" << std::endl;
@@ -748,7 +749,7 @@ void Door::reveal(const Verbose verbose)
 
         if (is_hidden_before &&
             (verbose == Verbose::yes) &&
-            map::g_cells.at(m_pos).is_seen_by_player)
+            map::g_seen.at(m_pos))
         {
                 msg_log::add("A secret is revealed.");
         }
@@ -907,7 +908,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 }
         }
 
-        if (is_blocked_by_actor || map::g_cells.at(m_pos).item)
+        if (is_blocked_by_actor || map::g_items.at(m_pos))
         {
                 if (is_player)
                 {
@@ -1086,10 +1087,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
         TRACE_FUNC_BEGIN;
 
         const bool is_player = actor_trying.is_player();
-
-        const bool player_see_door =
-                map::g_cells.at(m_pos)
-                        .is_seen_by_player;
+        const bool player_see_door = map::g_seen.at(m_pos);
 
         const bool player_see_tryer =
                 is_player

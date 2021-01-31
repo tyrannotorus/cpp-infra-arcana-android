@@ -33,39 +33,51 @@
 // -----------------------------------------------------------------------------
 static P s_dims(0, 0);
 
-// -----------------------------------------------------------------------------
-// Cell
-// -----------------------------------------------------------------------------
-Cell::Cell() :
-        is_explored(false),
-        is_seen_by_player(false),
-
-        item(nullptr),
-        terrain(nullptr)
-{}
-
-Cell::~Cell()
+static void init_layers_data()
 {
-        delete terrain;
-        delete item;
+        LosResult default_los;
+        default_los.is_blocked_hard = true;
+        default_los.is_blocked_by_dark = false;
+
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
+        {
+                map::g_explored.at(i) = false;
+                map::g_seen.at(i) = false;
+                map::g_los.at(i) = default_los;
+                map::g_light.at(i) = false;
+                map::g_dark.at(i) = false;
+                map::g_items.at(i) = nullptr;
+                map::g_terrain.at(i) = nullptr;
+        }
 }
 
-void Cell::reset()
+static void resize_layers()
 {
-        is_explored = false;
+        map::g_explored.resize_no_init(s_dims);
+        map::g_seen.resize_no_init(s_dims);
+        map::g_los.resize_no_init(s_dims);
+        map::g_light.resize_no_init(s_dims);
+        map::g_dark.resize_no_init(s_dims);
+        map::g_items.resize_no_init(s_dims);
+        map::g_terrain.resize_no_init(s_dims);
+}
 
-        is_seen_by_player = false;
+static void free_layers_owned_memory()
+{
+        // Free the memory for all memory-owning layers
 
-        // Init player los as if all cells have walls
-        player_los.is_blocked_hard = true;
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
+        {
+                auto* const terrain_pp = &map::g_terrain.at(i);
+                delete *terrain_pp;
+                *terrain_pp = nullptr;
 
-        player_los.is_blocked_by_dark = false;
-
-        delete terrain;
-        terrain = nullptr;
-
-        delete item;
-        item = nullptr;
+                auto* const item_pp = &map::g_items.at(i);
+                delete *item_pp;
+                *item_pp = nullptr;
+        }
 }
 
 // -----------------------------------------------------------------------------
@@ -73,18 +85,19 @@ void Cell::reset()
 // -----------------------------------------------------------------------------
 namespace map
 {
+Array2<bool> g_explored(0, 0);
+Array2<bool> g_seen(0, 0);
+Array2<LosResult> g_los(0, 0);
+Array2<bool> g_light(0, 0);
+Array2<bool> g_dark(0, 0);
+Array2<item::Item*> g_items(0, 0);
+Array2<terrain::Terrain*> g_terrain(0, 0);
+
 actor::Player* g_player = nullptr;
 
 int g_dlvl = 0;
 
 Color g_wall_color;
-
-Array2<Cell> g_cells(0, 0);
-
-Array2<bool> g_light(0, 0);
-Array2<bool> g_dark(0, 0);
-
-Array2<Color> g_minimap(0, 0);
 
 std::vector<Room*> g_room_list;
 
@@ -105,7 +118,7 @@ void init()
 
 void cleanup()
 {
-        reset(P(0, 0));
+        reset({0, 0});
 
         // NOTE: The player object is deleted elsewhere
         g_player = nullptr;
@@ -123,10 +136,22 @@ void load()
 
 void reset(const P& dims)
 {
+        free_layers_owned_memory();
+
+        s_dims = dims;
+        resize_layers();
+        init_layers_data();
+
+        for (int x = 0; x < w(); ++x)
+        {
+                for (int y = 0; y < h(); ++y)
+                {
+                        put(new terrain::Wall({x, y}));
+                }
+        }
+
         actor::delete_all_mon();
-
         game_time::erase_all_mobs();
-
         game_time::reset_current_actor_idx();
 
         for (auto* room : g_room_list)
@@ -136,33 +161,9 @@ void reset(const P& dims)
 
         g_room_list.clear();
 
-        g_choke_point_data.clear();
-
-        for (auto& cell : g_cells)
-        {
-                cell.reset();
-        }
-
-        s_dims = dims;
-
-        g_cells.resize_no_init(dims);
-
-        for (auto& cell : g_cells)
-        {
-                cell.reset();
-        }
-
-        g_light.resize(s_dims);
-        g_dark.resize(s_dims);
         g_room_map.resize(s_dims);
 
-        for (int x = 0; x < w(); ++x)
-        {
-                for (int y = 0; y < h(); ++y)
-                {
-                        put(new terrain::Wall(P(x, y)));
-                }
-        }
+        g_choke_point_data.clear();
 
         // Occasionally set wall color to something unusual
         if (rnd::one_in(3))
@@ -204,22 +205,22 @@ R rect()
         return R({0, 0}, s_dims - 1);
 }
 
-size_t nr_cells()
+size_t nr_positions()
 {
-        return g_cells.length();
+        return s_dims.x * s_dims.y;
 }
 
 terrain::Terrain* put(terrain::Terrain* const t)
 {
         ASSERT(t);
 
-        const P p = t->pos();
+        const auto p = t->pos();
 
-        Cell& cell = g_cells.at(p);
+        auto& terrain_ref = g_terrain.at(p);
 
-        delete cell.terrain;
+        delete terrain_ref;
 
-        cell.terrain = t;
+        terrain_ref = t;
 
 #ifndef NDEBUG
         if (init::g_is_demo_mapgen)
@@ -228,10 +229,14 @@ terrain::Terrain* put(terrain::Terrain* const t)
                 {
                         viewport::show(p, viewport::ForceCentering::no);
 
-                        for (auto& shown_cell : g_cells)
+                        for (auto& seen : g_seen)
                         {
-                                shown_cell.is_seen_by_player = true;
-                                shown_cell.is_explored = true;
+                                seen = true;
+                        }
+
+                        for (auto& explored : g_explored)
+                        {
+                                explored = true;
                         }
 
                         states::draw();
@@ -278,7 +283,7 @@ void make_blood(const P& origin)
 
                 const auto p = origin + d;
 
-                g_cells.at(p).terrain->try_make_bloody();
+                g_terrain.at(p)->try_make_bloody();
         }
 }
 
@@ -288,11 +293,11 @@ void make_gore(const P& origin)
         {
                 for (int dy = -1; dy <= 1; ++dy)
                 {
-                        const P c = origin + P(dx, dy);
+                        const auto c = origin + P(dx, dy);
 
                         if (rnd::one_in(3))
                         {
-                                g_cells.at(c).terrain->try_put_gore();
+                                g_terrain.at(c)->try_put_gore();
                         }
                 }
         }
@@ -317,7 +322,7 @@ bool is_pos_seen_by_player(const P& p)
 {
         ASSERT(is_pos_inside_map(p));
 
-        return g_cells.at(p).is_seen_by_player;
+        return g_seen.at(p);
 }
 
 actor::Actor* first_actor_at_pos(const P& pos, ActorState state)
@@ -344,18 +349,6 @@ terrain::Terrain* first_mob_at_pos(const P& pos)
         }
 
         return nullptr;
-}
-
-void actor_cells(
-        const std::vector<actor::Actor*>& actors,
-        std::vector<P>& out)
-{
-        out.clear();
-
-        for (const auto* const a : actors)
-        {
-                out.push_back(a->m_pos);
-        }
 }
 
 Array2<std::vector<actor::Actor*>> get_actor_array()

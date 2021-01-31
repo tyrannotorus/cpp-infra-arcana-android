@@ -96,11 +96,9 @@ void PropBlessed::bless_adjacent() const
 
         for (const P& d : dir_utils::g_dir_list_w_center)
         {
-                const P p_adj(p + d);
+                const auto p_adj = p + d;
 
-                Cell& cell = map::g_cells.at(p_adj);
-
-                auto* const terrain = cell.terrain;
+                auto* const terrain = map::g_terrain.at(p_adj);
 
                 if (terrain->id() != terrain::Id::fountain)
                 {
@@ -155,11 +153,9 @@ void PropCursed::curse_adjacent() const
 
         for (const P& d : dir_utils::g_dir_list_w_center)
         {
-                const P p_adj(p + d);
+                const auto p_adj = p + d;
 
-                Cell& cell = map::g_cells.at(p_adj);
-
-                auto* const terrain = cell.terrain;
+                auto* const terrain = map::g_terrain.at(p_adj);
 
                 if (terrain->id() != terrain::Id::fountain)
                 {
@@ -1183,7 +1179,7 @@ void PropHallucinating::create_fake_stairs() const
 
         if ((p.x > 0) && (p.y > 0))
         {
-                auto* const terrain = map::g_cells.at(p).terrain;
+                auto* const terrain = map::g_terrain.at(p);
 
                 if (terrain->id() != terrain::Id::stairs)
                 {
@@ -1200,10 +1196,8 @@ void PropHallucinating::create_fake_stairs() const
 
 void PropHallucinating::clear_all_fake_stairs() const
 {
-        for (auto& cell : map::g_cells)
+        for (auto* const terrain : map::g_terrain)
         {
-                auto* const terrain = cell.terrain;
-
                 if (terrain->id() != terrain::Id::stairs)
                 {
                         continue;
@@ -1840,7 +1834,7 @@ PropEnded PropBurrowing::on_tick()
 {
         const P& p = m_owner->m_pos;
 
-        map::g_cells.at(p).terrain->hit(DmgType::pure, nullptr);
+        map::g_terrain.at(p)->hit(DmgType::pure, nullptr);
 
         return PropEnded::no;
 }
@@ -2001,7 +1995,7 @@ PropEnded PropSplitsOnDeath::on_death()
 
         const P pos = m_owner->m_pos;
 
-        const auto f_id = map::g_cells.at(pos).terrain->id();
+        const auto f_id = map::g_terrain.at(pos)->id();
 
         if (is_very_destroyed ||
             m_owner->m_properties.has(PropId::burning) ||
@@ -2125,7 +2119,7 @@ PropActResult PropTeleports::on_act()
 
 PropActResult PropCorruptsEnvColor::on_act()
 {
-        auto* const terrain = map::g_cells.at(m_owner->m_pos).terrain;
+        auto* const terrain = map::g_terrain.at(m_owner->m_pos);
 
         terrain->try_corrupt_color();
 
@@ -2155,7 +2149,7 @@ void PropAltersEnv::on_std_turn()
 
                         const bool is_free_terrain =
                                 map_parsers::IsAnyOfTerrains(free_terrains)
-                                        .cell(p);
+                                        .run(p);
 
                         if (is_free_terrain)
                         {
@@ -2185,13 +2179,13 @@ void PropAltersEnv::on_std_turn()
         for (const auto& p : area.positions())
         {
                 if (has_actor.at(p) ||
-                    map::g_cells.at(p).item ||
+                    map::g_items.at(p) ||
                     !rnd::one_in(6))
                 {
                         continue;
                 }
 
-                const auto terrain_id = map::g_cells.at(p).terrain->id();
+                const auto terrain_id = map::g_terrain.at(p)->id();
 
                 if (terrain_id == terrain::Id::wall)
                 {
@@ -2237,7 +2231,7 @@ PropActResult PropCorpseRises::on_act()
 
         if (!m_owner->is_corpse() ||
             map::first_actor_at_pos(m_owner->m_pos) ||
-            (map::g_cells.at(pos).terrain->id() == terrain::Id::liquid_deep))
+            (map::g_terrain.at(pos)->id() == terrain::Id::liquid_deep))
         {
                 return {};
         }
@@ -2399,7 +2393,7 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
                 break;
         }
 
-        if (map::g_cells.at(pos).is_seen_by_player)
+        if (map::g_seen.at(pos))
         {
                 ASSERT(!spawn_msg.empty());
 
@@ -2447,12 +2441,13 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_dust() const
 
 bool PropSpawnsZombiePartsOnDestroyed::is_allowed_to_spawn_parts_here() const
 {
-        const P& pos = m_owner->m_pos;
+        const auto& pos = m_owner->m_pos;
 
-        const auto f_id = map::g_cells.at(pos).terrain->id();
+        const auto t_id = map::g_terrain.at(pos)->id();
 
-        return (f_id != terrain::Id::chasm) &&
-                (f_id != terrain::Id::liquid_deep);
+        return (
+                (t_id != terrain::Id::chasm) &&
+                (t_id != terrain::Id::liquid_deep));
 }
 
 void PropBreeds::on_std_turn()
@@ -2760,13 +2755,9 @@ void PropAuraOfDecay::run_effect_on_env() const
 
 void PropAuraOfDecay::run_effect_on_env_at(const P& p) const
 {
-        auto& cell = map::g_cells.at(p);
+        auto* const terrain = map::g_terrain.at(p);
 
-        auto* const terrain = cell.terrain;
-
-        const auto id = terrain->id();
-
-        switch (id)
+        switch (terrain->id())
         {
         case terrain::Id::floor:
         {
@@ -2797,7 +2788,7 @@ void PropAuraOfDecay::run_effect_on_env_at(const P& p) const
         {
                 if (rnd::one_in(250))
                 {
-                        if (cell.is_seen_by_player)
+                        if (map::g_seen.at(p))
                         {
                                 const auto name =
                                         text_format::first_to_upper(
@@ -2948,9 +2939,7 @@ PropEnded PropMagicSearching::on_tick()
         {
                 for (int x = x0; x <= x1; ++x)
                 {
-                        auto& cell = map::g_cells.at(x, y);
-
-                        auto* const t = cell.terrain;
+                        auto* const t = map::g_terrain.at(x, y);
 
                         const auto id = t->id();
 
@@ -2959,9 +2948,8 @@ PropEnded PropMagicSearching::on_tick()
                             (id == terrain::Id::monolith) ||
                             (id == terrain::Id::stairs))
                         {
-                                cell.is_seen_by_player = true;
-
-                                cell.is_explored = true;
+                                map::g_seen.at(x, y) = true;
+                                map::g_explored.at(x, y) = true;
 
                                 if (t->is_hidden())
                                 {
@@ -2973,11 +2961,10 @@ PropEnded PropMagicSearching::on_tick()
                                 }
                         }
 
-                        if (m_allow_reveal_items && cell.item)
+                        if (m_allow_reveal_items && map::g_items.at(x, y))
                         {
-                                cell.is_seen_by_player = true;
-
-                                cell.is_explored = true;
+                                map::g_seen.at(x, y) = true;
+                                map::g_explored.at(x, y) = true;
                         }
                 }
         }

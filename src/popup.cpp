@@ -460,7 +460,10 @@ void PopupState::update()
 {
         if (config::is_bot_playing())
         {
-                *m_menu_choice_result = 0;
+                if (m_menu_choice_result)
+                {
+                        *m_menu_choice_result = 0;
+                }
 
                 states::pop();
 

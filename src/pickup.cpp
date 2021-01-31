@@ -26,9 +26,8 @@ void try_pick()
 {
         msg_log::clear();
 
-        const P& pos = map::g_player->m_pos;
-
-        auto* const item = map::g_cells.at(pos).item;
+        const auto& pos = map::g_player->m_pos;
+        auto* const item = map::g_items.at(pos);
 
         if (!item)
         {
@@ -38,8 +37,6 @@ void try_pick()
         }
 
         const auto pre_pickup_result = item->pre_pickup_hook();
-
-        auto& cell = map::g_cells.at(pos);
 
         switch (pre_pickup_result)
         {
@@ -54,14 +51,14 @@ void try_pick()
                 // NOTE: This may destroy the item (e.g. combine with others)
                 map::g_player->m_inv.put_in_backpack(item);
 
-                cell.item = nullptr;
+                map::g_items.at(pos) = nullptr;
         }
         break;
 
         case ItemPrePickResult::destroy_item:
         {
                 delete item;
-                cell.item = nullptr;
+                map::g_items.at(pos) = nullptr;
         }
         break;
 
@@ -115,7 +112,7 @@ item::Ammo* unload_ranged_wpn(item::Wpn& wpn)
 
 void try_unload_or_pick()
 {
-        auto* item = map::g_cells.at(map::g_player->m_pos).item;
+        auto* item = map::g_items.at(map::g_player->m_pos);
 
         if (item &&
             item->data().ranged.is_ranged_wpn &&

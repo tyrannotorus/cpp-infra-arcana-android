@@ -428,10 +428,10 @@ ConsumeItem ForceField::run_effect()
 
         for (const auto& d : dir_utils::g_dir_list)
         {
-                const P p = map::g_player->m_pos + d;
+                const auto p = map::g_player->m_pos + d;
 
-                if (blocked_parser.cell(p) &&
-                    !specific_allowed_terrains_parser.cell(p))
+                if (blocked_parser.run(p) &&
+                    !specific_allowed_terrains_parser.run(p))
                 {
                         continue;
                 }

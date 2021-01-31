@@ -421,12 +421,14 @@ void Player::item_feeling()
                 return item.data().value == item::Value::supreme_treasure;
         };
 
-        for (auto& cell : map::g_cells)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 // Nice item on the floor, which is not seen by the player?
-                if (cell.item &&
-                    is_nice(*cell.item) &&
-                    !cell.is_seen_by_player)
+                const auto* const floor_item = map::g_items.at(i);
+                const bool is_seen = map::g_seen.at(i);
+
+                if (floor_item && is_nice(*floor_item) && !is_seen)
                 {
                         print_feeling = true;
 
@@ -434,7 +436,8 @@ void Player::item_feeling()
                 }
 
                 // Nice item in container?
-                const auto& items = cell.terrain->m_item_container.items();
+                const auto* const terrain = map::g_terrain.at(i);
+                const auto& items = terrain->m_item_container.items();
 
                 for (const auto* const item : items)
                 {
@@ -594,9 +597,9 @@ void Player::add_shock_from_seen_monsters()
                 else
                 {
                         // Monster cannot be seen
-                        const P mon_p = mon->m_pos;
+                        const auto mon_p = mon->m_pos;
 
-                        if (map::g_cells.at(mon_p).is_seen_by_player)
+                        if (map::g_seen.at(mon_p))
                         {
                                 // There is an invisible monster here!
                                 shock_lvl = ShockLvl::terrifying;
@@ -681,7 +684,7 @@ void Player::update_tmp_shock()
                 {
                         const auto p(m_pos + d);
 
-                        const auto* const t = map::g_cells.at(p).terrain;
+                        const auto* const t = map::g_terrain.at(p);
 
                         const int terrain_shock = (double)t->shock_when_adj();
 
@@ -1118,13 +1121,15 @@ void Player::add_light_hook(Array2<bool>& light_map) const
 
 void Player::update_fov()
 {
-        for (auto& cell : map::g_cells)
+        const size_t nr_map_positions = map::nr_positions();
+
+        for (size_t i = 0; i < nr_map_positions; ++i)
         {
-                cell.is_seen_by_player = false;
+                map::g_seen.at(i) = false;
 
-                cell.player_los.is_blocked_hard = true;
-
-                cell.player_los.is_blocked_by_dark = false;
+                auto& los = map::g_los.at(i);
+                los.is_blocked_hard = true;
+                los.is_blocked_by_dark = false;
         }
 
         const bool has_darkvision = m_properties.has(PropId::darkvision);
@@ -1133,7 +1138,7 @@ void Player::update_fov()
         {
                 Array2<bool> hard_blocked(map::dims());
 
-                const R fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
+                const auto fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
 
                 map_parsers::BlocksLos()
                         .run(hard_blocked,
@@ -1145,27 +1150,29 @@ void Player::update_fov()
                 fov_map.light = &map::g_light;
                 fov_map.dark = &map::g_dark;
 
-                const auto player_fov = fov::run(m_pos, fov_map);
+                const auto fov_result = fov::run(m_pos, fov_map);
 
                 for (int x = fov_lmt.p0.x; x <= fov_lmt.p1.x; ++x)
                 {
                         for (int y = fov_lmt.p0.y; y <= fov_lmt.p1.y; ++y)
                         {
-                                const LosResult& los = player_fov.at(x, y);
+                                const auto& los_result = fov_result.at(x, y);
 
-                                Cell& cell = map::g_cells.at(x, y);
+                                auto& los_to_update = map::g_los.at(x, y);
 
-                                cell.is_seen_by_player =
-                                        !los.is_blocked_hard &&
-                                        (!los.is_blocked_by_dark || has_darkvision);
+                                map::g_seen.at(x, y) =
+                                        !los_result.is_blocked_hard &&
+                                        (!los_result.is_blocked_by_dark ||
+                                         has_darkvision);
 
-                                cell.player_los = los;
+                                los_to_update = los_result;
 
 #ifndef NDEBUG
                                 // Sanity check - if the cell is ONLY blocked by
                                 // darkness (i.e. not by a wall or other
                                 // blocking terrain), it should NOT be lit
-                                if (!los.is_blocked_hard && los.is_blocked_by_dark)
+                                if (!los_result.is_blocked_hard &&
+                                    los_result.is_blocked_by_dark)
                                 {
                                         ASSERT(!map::g_light.at(x, y));
                                 }
@@ -1179,7 +1186,7 @@ void Player::update_fov()
         // The player's current cell is always seen - mostly to update item info
         // while blind (i.e. when you pick up an item you should see it
         // disappear)
-        map::g_cells.at(m_pos).is_seen_by_player = true;
+        map::g_seen.at(m_pos) = true;
 
         // Cheat vision
         if (init::g_is_cheat_vision_enabled)
@@ -1204,11 +1211,11 @@ void Player::update_fov()
                 const auto reveal_expanded =
                         map_parsers::expand(reveal, reveal.rect());
 
-                for (size_t i = 0; i < map::g_cells.length(); ++i)
+                for (size_t i = 0; i < nr_map_positions; ++i)
                 {
                         if (reveal_expanded.at(i))
                         {
-                                map::g_cells.at(i).is_seen_by_player = true;
+                                map::g_seen.at(i) = true;
                         }
                 }
         }
@@ -1220,18 +1227,30 @@ void Player::update_fov()
                 {
                         const P p(x, y);
 
+                        if (!map::g_seen.at(p))
+                        {
+                                continue;
+                        }
+
+                        const bool is_dark =
+                                map::g_dark.at(p);
+
+                        const bool blocks_los =
+                                map_parsers::BlocksLos().run(p);
+
+                        const bool blocks_walking =
+                                map_parsers::BlocksWalking(ParseActors::no)
+                                        .run(p);
+
                         const bool allow_explore =
-                                !map::g_dark.at(p) ||
-                                map_parsers::BlocksLos().cell(p) ||
-                                map_parsers::BlocksWalking(ParseActors::no).cell(p) ||
+                                !is_dark ||
+                                blocks_los ||
+                                blocks_walking ||
                                 has_darkvision;
 
-                        Cell& cell = map::g_cells.at(p);
-
-                        // Do not explore dark floor cells
-                        if (cell.is_seen_by_player && allow_explore)
+                        if (allow_explore)
                         {
-                                cell.is_explored = true;
+                                map::g_explored.at(p) = true;
                         }
                 }
         }
@@ -1261,7 +1280,7 @@ void Player::fov_hack()
                 {
                         const P p(x, y);
 
-                        if (map_parsers::IsAnyOfTerrains(free_terrains).cell(p))
+                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p))
                         {
                                 blocked.at(p) = false;
                         }
@@ -1274,35 +1293,39 @@ void Player::fov_hack()
         {
                 for (int y = 0; y < map::h(); ++y)
                 {
-                        if (blocked_los.at(x, y) && blocked.at(x, y))
+                        if (!blocked_los.at(x, y) || !blocked.at(x, y))
                         {
-                                const P p(x, y);
+                                continue;
+                        }
 
-                                for (const P& d : dir_utils::g_dir_list)
+                        const P p(x, y);
+
+                        for (const auto& d : dir_utils::g_dir_list)
+                        {
+                                const auto p_adj = p + d;
+
+                                if (!map::is_pos_inside_map(p_adj) ||
+                                    !map::g_seen.at(p_adj))
                                 {
-                                        const P p_adj(p + d);
-
-                                        if (map::is_pos_inside_map(p_adj) &&
-                                            map::g_cells.at(p_adj).is_seen_by_player)
-                                        {
-                                                const bool allow_explore =
-                                                        (!map::g_dark.at(p_adj) ||
-                                                         map::g_light.at(p_adj) ||
-                                                         has_darkvision) &&
-                                                        !blocked.at(p_adj);
-
-                                                if (allow_explore)
-                                                {
-                                                        Cell& cell = map::g_cells.at(x, y);
-
-                                                        cell.is_seen_by_player = true;
-
-                                                        cell.player_los.is_blocked_hard = false;
-
-                                                        break;
-                                                }
-                                        }
+                                        continue;
                                 }
+
+                                const bool allow_explore =
+                                        (!map::g_dark.at(p_adj) ||
+                                         map::g_light.at(p_adj) ||
+                                         has_darkvision) &&
+                                        !blocked.at(p_adj);
+
+                                if (!allow_explore)
+                                {
+                                        continue;
+                                }
+
+                                map::g_seen.at(x, y) = true;
+
+                                map::g_los.at(x, y).is_blocked_hard = false;
+
+                                break;
                         }
                 }
         }
@@ -1312,7 +1335,7 @@ void Player::update_mon_awareness()
 {
         const auto my_seen_actors = seen_actors(*this);
 
-        for (Actor* const actor : my_seen_actors)
+        for (auto* const actor : my_seen_actors)
         {
                 static_cast<Mon*>(actor)->set_player_aware_of_me();
         }

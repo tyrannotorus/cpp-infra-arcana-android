@@ -405,8 +405,11 @@ void InsPhobiaDeep::on_new_player_turn(
                 terrain::Id::chasm,
                 terrain::Id::liquid_deep};
 
-        if (map_parsers::AnyAdjIsAnyOfTerrains(deep_terrains)
-                    .cell(map::g_player->m_pos))
+        const auto parser =
+                map_parsers::AnyAdjIsAnyOfTerrains(
+                        deep_terrains);
+
+        if (parser.run(map::g_player->m_pos))
         {
                 msg_log::add("I am plagued by my phobia of deep places!");
 

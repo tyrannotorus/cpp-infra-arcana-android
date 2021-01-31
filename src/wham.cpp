@@ -122,7 +122,7 @@ static void player_attack_corpse(
         const item::Item& wpn,
         const item::Item& kick_wpn)
 {
-        const bool is_seeing_cell = map::g_cells.at(att_pos).is_seen_by_player;
+        const bool is_seeing_cell = map::g_seen.at(att_pos);
 
         std::string corpse_name =
                 is_seeing_cell
@@ -199,7 +199,7 @@ static void player_attack_terrain(
         const item::Item& wpn,
         const item::Item& kick_wpn)
 {
-        auto* const terrain = map::g_cells.at(att_pos).terrain;
+        auto* const terrain = map::g_terrain.at(att_pos);
 
         const auto& wpn_used_att_terrain =
                 is_allowed_use_wpn_on_terrain(wpn, *terrain)

@@ -23,19 +23,19 @@
 // -----------------------------------------------------------------------------
 Array2<Color> s_minimap(0, 0);
 
-static Color map_cell_color(const Cell& map_cell, const bool is_blocked)
+static Color map_cell_color(
+        const terrain::Terrain* const terrain,
+        const item::Item* const item,
+        const bool is_blocked)
 {
-        const auto* const terrain = map_cell.terrain;
-
         const auto terrain_id = terrain->id();
 
-        if (map_cell.item)
+        if (item)
         {
-                if ((map_cell.item->data().type == ItemType::ranged_wpn) &&
-                    !map_cell.item->data().ranged.has_infinite_ammo)
+                if ((item->data().type == ItemType::ranged_wpn) &&
+                    !item->data().ranged.has_infinite_ammo)
                 {
-                        const auto* wpn =
-                                static_cast<const item::Wpn*>(map_cell.item);
+                        const auto* wpn = static_cast<const item::Wpn*>(item);
 
                         if (wpn->m_ammo_loaded == 0)
                         {
@@ -99,13 +99,13 @@ static R get_map_area_explored()
         // Find the most top left and bottom right map cells explored
         R area_explored(INT_MAX, INT_MAX, 0, 0);
 
-        const P& map_dims = s_minimap.dims();
+        const auto& map_dims = s_minimap.dims();
 
         for (int x = 0; x < map_dims.x; ++x)
         {
                 for (int y = 0; y < map_dims.y; ++y)
                 {
-                        if (map::g_cells.at(x, y).is_explored)
+                        if (map::g_explored.at(x, y))
                         {
                                 area_explored.p0.x = std::min(
                                         area_explored.p0.x,
@@ -249,18 +249,21 @@ void update()
         map_parsers::BlocksWalking(ParseActors::no)
                 .run(blocked, blocked.rect());
 
-        const auto nr_cells = map::nr_cells();
-
-        for (size_t i = 0; i < nr_cells; ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
-                const auto& map_cell = map::g_cells.at(i);
+                const auto* const terrain = map::g_terrain.at(i);
+                const auto* const item = map::g_items.at(i);
+                const bool is_seen = map::g_seen.at(i);
 
-                if (!map_cell.is_seen_by_player)
+                if (is_seen)
                 {
-                        continue;
+                        s_minimap.at(i) =
+                                map_cell_color(
+                                        terrain,
+                                        item,
+                                        blocked.at(i));
                 }
-
-                s_minimap.at(i) = map_cell_color(map_cell, blocked.at(i));
         }
 }
 

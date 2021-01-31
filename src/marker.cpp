@@ -145,9 +145,7 @@ void MarkerState::draw()
                                 break;
                         }
 
-                        const Cell& c = map::g_cells.at(p);
-
-                        if (c.is_seen_by_player && blocked_parser.cell(p))
+                        if (map::g_seen.at(p) && blocked_parser.run(p))
                         {
                                 red_from_idx = i;
                                 break;
@@ -439,14 +437,19 @@ void MarkerState::try_go_to_closest_enemy()
 {
         const auto seen_foes = actor::seen_foes(*map::g_player);
 
-        std::vector<P> seen_foes_cells;
+        std::vector<P> seen_foes_positions;
 
-        map::actor_cells(seen_foes, seen_foes_cells);
+        seen_foes_positions.reserve(seen_foes.size());
+
+        for (const auto actor : seen_foes)
+        {
+                seen_foes_positions.push_back(actor->m_pos);
+        }
 
         // If player sees enemies, suggest one for targeting
-        if (!seen_foes_cells.empty())
+        if (!seen_foes_positions.empty())
         {
-                m_pos = closest_pos(map::g_player->m_pos, seen_foes_cells);
+                m_pos = closest_pos(map::g_player->m_pos, seen_foes_positions);
 
                 map::g_player->m_tgt = map::first_actor_at_pos(m_pos);
         }
@@ -884,7 +887,7 @@ void ThrowingExplosive::on_draw()
 
                         if (!viewport::is_in_view(p) ||
                             !map::is_pos_inside_map(p) ||
-                            !map::g_cells.at(p).is_explored)
+                            !map::g_explored.at(p))
                         {
                                 continue;
                         }

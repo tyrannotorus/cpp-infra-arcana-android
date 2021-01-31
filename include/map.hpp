@@ -32,21 +32,6 @@ class Terrain;
 
 class Room;
 
-// TODO: This should probably be removed, and multiple smaller arrays should be
-// used instead
-struct Cell
-{
-        Cell();
-        ~Cell();
-
-        void reset();
-
-        bool is_explored, is_seen_by_player;
-        LosResult player_los;  // Updated when player updates FOV
-        item::Item* item;
-        terrain::Terrain* terrain;
-};
-
 struct ChokePointData
 {
         ChokePointData() = default;
@@ -89,18 +74,21 @@ struct ChokePointData
 
 namespace map
 {
+extern Array2<bool> g_explored;
+extern Array2<bool> g_seen;
+extern Array2<LosResult> g_los;
+extern Array2<bool> g_light;
+extern Array2<bool> g_dark;
+extern Array2<item::Item*> g_items;
+extern Array2<terrain::Terrain*> g_terrain;
+
 extern actor::Player* g_player;
 
 extern int g_dlvl;
 
-extern Array2<Cell> g_cells;
-
-extern Array2<bool> g_light;
-extern Array2<bool> g_dark;
-
 extern Color g_wall_color;
 
-// This vector is the room owner
+// This vector is the room memory owner
 extern std::vector<Room*> g_room_list;
 
 // Helper array, for convenience and optimization
@@ -112,26 +100,20 @@ extern std::vector<ChokePointData> g_choke_point_data;
 
 void init();
 void cleanup();
-
 void save();
 void load();
-
 void reset(const P& dims);
 
 int w();
-
 int h();
-
 P dims();
-
 R rect();
-
-size_t nr_cells();
+size_t nr_positions();
 
 terrain::Terrain* put(terrain::Terrain* terrain);
 
-// This should be called when e.g. a door closes, or a wall is destoyed -
-// updates light map, player fov (etc).
+// Updates light map, player fov (etc). This should be called when e.g. a door
+// is closed, or a wall is destoyed.
 void update_vision();
 
 void make_blood(const P& origin);
@@ -147,10 +129,6 @@ actor::Actor* first_actor_at_pos(
 
 terrain::Terrain* first_mob_at_pos(const P& pos);
 
-void actor_cells(
-        const std::vector<actor::Actor*>& actors,
-        std::vector<P>& out);
-
 Array2<std::vector<actor::Actor*>> get_actor_array();
 
 actor::Actor* random_closest_actor(
@@ -158,9 +136,7 @@ actor::Actor* random_closest_actor(
         const std::vector<actor::Actor*>& actors);
 
 bool is_pos_inside_map(const P& pos);
-
 bool is_pos_inside_outer_walls(const P& pos);
-
 bool is_area_inside_map(const R& area);
 
 }  // namespace map

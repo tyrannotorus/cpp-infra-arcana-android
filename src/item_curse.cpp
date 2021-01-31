@@ -766,7 +766,7 @@ void Fire::run_fire(const item::Item& item) const
                         if (rnd::one_in(fire_cell_one_in_n) &&
                             (p != origin))
                         {
-                                map::g_cells.at(p).terrain->hit(
+                                map::g_terrain.at(p)->hit(
                                         DmgType::fire,
                                         nullptr);
                         }

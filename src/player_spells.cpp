@@ -310,7 +310,7 @@ bool is_getting_altar_bonus()
         {
                 const auto p = map::g_player->m_pos + d;
 
-                if (map::g_cells.at(p).terrain->id() == terrain::Id::altar)
+                if (map::g_terrain.at(p)->id() == terrain::Id::altar)
                 {
                         return true;
                 }

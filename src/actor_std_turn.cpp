@@ -120,9 +120,13 @@ static void player_std_turn()
 
                 if (player.m_properties.has(PropId::wound))
                 {
-                        Prop* const prop = player.m_properties.prop(PropId::wound);
+                        auto* const prop =
+                                player.m_properties.prop(PropId::wound);
 
-                        nr_wounds = static_cast<PropWound*>(prop)->nr_wounds();
+                        auto* const wound =
+                                static_cast<PropWound*>(prop);
+
+                        nr_wounds = wound->nr_wounds();
                 }
 
                 const bool is_survivalist =
@@ -169,16 +173,18 @@ static void player_std_turn()
         const int player_search_skill =
                 map::g_player->ability(AbilityId::searching, true);
 
-        if (!player.m_properties.has(PropId::confused) && player.m_properties.allow_see())
+        if (!player.m_properties.has(PropId::confused) &&
+            player.m_properties.allow_see())
         {
-                for (size_t i = 0; i < map::g_cells.length(); ++i)
+                const size_t nr_positions = map::nr_positions();
+                for (size_t i = 0; i < nr_positions; ++i)
                 {
-                        if (!map::g_cells.at(i).is_seen_by_player)
+                        if (!map::g_seen.at(i))
                         {
                                 continue;
                         }
 
-                        auto* t = map::g_cells.at(i).terrain;
+                        auto* t = map::g_terrain.at(i);
 
                         if (!t->is_hidden())
                         {

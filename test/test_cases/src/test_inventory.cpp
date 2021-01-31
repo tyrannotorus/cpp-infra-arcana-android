@@ -103,8 +103,7 @@ TEST_CASE("Properties from item applied and removed for actor")
 
         REQUIRE(!body_slot.item);
 
-        Cell& cell = map::g_cells.at(map::g_player->m_pos);
-        REQUIRE(cell.item);
+        REQUIRE(map::g_items.at(map::g_player->m_pos));
 
         // Check that the properties are cleared
         for (int i = 0; i < (int)PropId::END; ++i)
@@ -115,10 +114,10 @@ TEST_CASE("Properties from item applied and removed for actor")
         // Wear the same dropped asbesthos suit again
         inv.put_in_slot(
                 SlotId::body,
-                cell.item,
+                map::g_items.at(map::g_player->m_pos),
                 Verbose::yes);
 
-        cell.item = nullptr;
+        map::g_items.at(map::g_player->m_pos) = nullptr;
 
         // Check that the properties are applied
         nr_props = 0;

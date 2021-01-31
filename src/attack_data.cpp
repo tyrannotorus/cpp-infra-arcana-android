@@ -305,7 +305,7 @@ RangedAttData::RangedAttData(
                                 // No actor aimed at
                                 const bool is_cell_blocked =
                                         map_parsers::BlocksProjectiles()
-                                                .cell(aim_pos);
+                                                .run(aim_pos);
 
                                 aim_lvl =
                                         is_cell_blocked
@@ -513,7 +513,7 @@ ThrowAttData::ThrowAttData(
                 // Not aiming at actor
                 const bool is_cell_blocked =
                         map_parsers::BlocksProjectiles()
-                                .cell(current_pos);
+                                .run(current_pos);
 
                 aim_lvl =
                         is_cell_blocked

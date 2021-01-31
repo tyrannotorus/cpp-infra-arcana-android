@@ -41,7 +41,7 @@ void EventWallCrumble::on_new_turn()
         }
 
         auto is_wall = [](const P& p) {
-                const auto id = map::g_cells.at(p).terrain->id();
+                const auto id = map::g_terrain.at(p)->id();
 
                 return (id == terrain::Id::wall) ||
                         (id == terrain::Id::rubble_high);
@@ -154,7 +154,7 @@ void EventWallCrumble::on_new_turn()
                         map::g_dark.at(p) = true;
                 }
 
-                auto* const t = map::g_cells.at(p).terrain;
+                auto* const t = map::g_terrain.at(p);
 
                 t->hit(DmgType::pure, nullptr);
         }
@@ -167,7 +167,7 @@ void EventWallCrumble::on_new_turn()
                         map::g_dark.at(p) = true;
                 }
 
-                auto* const t = map::g_cells.at(p).terrain;
+                auto* const t = map::g_terrain.at(p);
 
                 t->hit(DmgType::pure, nullptr);
 
@@ -280,10 +280,11 @@ bool EventSnakeEmerge::is_ok_terrain_at(const P& p) const
 {
         ASSERT(map::is_pos_inside_map(p));
 
-        const auto id = map::g_cells.at(p).terrain->id();
+        const auto id = map::g_terrain.at(p)->id();
 
-        return id == terrain::Id::floor ||
-                id == terrain::Id::rubble_low;
+        return (
+                (id == terrain::Id::floor) ||
+                (id == terrain::Id::rubble_low));
 }
 
 std::vector<P> EventSnakeEmerge::emerge_p_bucket(
@@ -405,7 +406,7 @@ void EventSnakeEmerge::on_new_turn()
 
                 const P& p(tgt_bucket[i]);
 
-                if (map::g_cells.at(p).is_seen_by_player)
+                if (map::g_seen.at(p))
                 {
                         seen_tgt_positions.push_back(p);
                 }

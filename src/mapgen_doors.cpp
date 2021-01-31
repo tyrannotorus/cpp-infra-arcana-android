@@ -17,7 +17,7 @@
 
 static bool is_wall(const P& p)
 {
-        return map::g_cells.at(p).terrain->id() == terrain::Id::wall;
+        return map::g_terrain.at(p)->id() == terrain::Id::wall;
 }
 
 static void try_make_door(const P& p)
@@ -28,8 +28,11 @@ static void try_make_door(const P& p)
                 terrain::Id::liquid_shallow,
                 terrain::Id::liquid_deep};
 
-        if (map_parsers::AnyAdjIsAnyOfTerrains(forbidden_adj_terrains)
-                    .cell(p))
+        const auto parser =
+                map_parsers::AnyAdjIsAnyOfTerrains(
+                        forbidden_adj_terrains);
+
+        if (parser.run(p))
         {
                 return;
         }
@@ -142,7 +145,7 @@ void make_metal_doors_and_levers()
 
                         const P& p = chokepoint.p;
 
-                        auto id = map::g_cells.at(p).terrain->id();
+                        auto id = map::g_terrain.at(p)->id();
 
                         if (id == terrain::Id::door)
                         {
@@ -194,8 +197,11 @@ void make_metal_doors_and_levers()
                         {
                                 const P p(x, y);
 
-                                if (map_parsers::IsAnyOfTerrains(free_terrains)
-                                            .cell(p))
+                                const auto parser =
+                                        map_parsers::IsAnyOfTerrains(
+                                                free_terrains);
+
+                                if (parser.run(p))
                                 {
                                         blocks_player.at(p) = false;
                                 }
@@ -212,11 +218,11 @@ void make_metal_doors_and_levers()
                         .run(blocks_reaching_levers,
                              blocks_reaching_levers.rect());
 
-                for (size_t cell_idx = 0;
-                     cell_idx < map::nr_cells();
-                     ++cell_idx)
+                const size_t nr_positions = map::nr_positions();
+
+                for (size_t cell_idx = 0; cell_idx < nr_positions; ++cell_idx)
                 {
-                        const auto* r = map::g_cells.at(cell_idx).terrain;
+                        const auto* r = map::g_terrain.at(cell_idx);
 
                         if (r->id() == terrain::Id::door)
                         {
@@ -244,7 +250,7 @@ void make_metal_doors_and_levers()
                         const P& door_p = chokepoint->p;
 
                         {
-                                const auto* r = map::g_cells.at(door_p).terrain;
+                                const auto* r = map::g_terrain.at(door_p);
 
                                 if (r->id() == terrain::Id::door)
                                 {
@@ -266,13 +272,15 @@ void make_metal_doors_and_levers()
 
                         // Cells generally blocked for placing levers -
                         // e.g. cells too close to walls
-                        memcpy(blocks_lever_1.data(),
-                               blocks_levers.data(),
-                               map::nr_cells());
+                        std::memcpy(
+                                blocks_lever_1.data(),
+                                blocks_levers.data(),
+                                nr_positions);
 
-                        memcpy(blocks_lever_2.data(),
-                               blocks_levers.data(),
-                               map::nr_cells());
+                        std::memcpy(
+                                blocks_lever_2.data(),
+                                blocks_levers.data(),
+                                nr_positions);
 
                         // Make a floodfill from the door to all
                         // player-reachable cells
@@ -293,7 +301,7 @@ void make_metal_doors_and_levers()
                         // lever (annoying and weird)
                         const int max_dist_from_player = 40;
 
-                        for (size_t i = 0; i < map::nr_cells(); ++i)
+                        for (size_t i = 0; i < nr_positions; ++i)
                         {
                                 const bool is_unreachable =
                                         (lever_reach_flood.at(i) == 0);

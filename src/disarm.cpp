@@ -54,14 +54,14 @@ void player_disarm()
 
         const auto pos = map::g_player->m_pos + dir_utils::offset(input_dir);
 
-        if (!map::g_cells.at(pos).is_seen_by_player)
+        if (!map::g_seen.at(pos))
         {
                 msg_log::add("I cannot see there.");
 
                 return;
         }
 
-        auto* const terrain = map::g_cells.at(pos).terrain;
+        auto* const terrain = map::g_terrain.at(pos);
 
         terrain::Trap* trap = nullptr;
 

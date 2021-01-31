@@ -46,8 +46,11 @@ void MapControllerBoss::on_start()
         {
                 if (!actor->is_player())
                 {
-                        static_cast<actor::Mon*>(actor)->become_aware_player(actor::AwareSource::other);
+                        continue;
                 }
+
+                static_cast<actor::Mon*>(actor)
+                        ->become_aware_player(actor::AwareSource::other);
         }
 }
 
@@ -56,7 +59,7 @@ void MapControllerBoss::on_std_turn()
         const P stair_pos(map::w() - 2, 11);
 
         const auto terrain_at_stair_pos =
-                map::g_cells.at(stair_pos).terrain->id();
+                map::g_terrain.at(stair_pos)->id();
 
         if (terrain_at_stair_pos == terrain::Id::stairs)
         {

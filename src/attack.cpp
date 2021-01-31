@@ -259,7 +259,7 @@ static void print_mon_melee_miss_msg(const MeleeAttData& att_data)
                 can_player_see_actor(*att_data.defender);
 
         const bool is_attacker_pos_seen =
-                map::g_cells.at(att_data.attacker->m_pos).is_seen_by_player;
+                map::g_seen.at(att_data.attacker->m_pos);
 
         if (!is_attacker_pos_seen ||
             (!is_player_seeing_attacker && !is_player_seeing_defender))
@@ -411,7 +411,7 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
                 can_player_see_actor(*att_data.defender);
 
         const bool is_attacker_pos_seen =
-                map::g_cells.at(att_data.attacker->m_pos).is_seen_by_player;
+                map::g_seen.at(att_data.attacker->m_pos);
 
         if (!is_attacker_pos_seen ||
             (!is_player_seeing_attacker && !is_player_seeing_defender))
@@ -859,9 +859,9 @@ static void print_projectile_hit_actor_msg(const Projectile& projectile)
         else
         {
                 // Defender is monster
-                const P& pos = projectile.att_data->defender->m_pos;
+                const auto& pos = projectile.att_data->defender->m_pos;
 
-                if (!map::g_cells.at(pos).is_seen_by_player)
+                if (!map::g_seen.at(pos))
                 {
                         return;
                 }
@@ -970,7 +970,7 @@ static actor::Actor* get_actor_hit_by_projectile(
 
 static terrain::Terrain* get_terrain_blocking_projectile(const P& pos)
 {
-        auto* terrain = map::g_cells.at(pos).terrain;
+        auto* terrain = map::g_terrain.at(pos);
 
         if (!terrain->is_projectile_passable())
         {
@@ -1002,7 +1002,7 @@ static terrain::Terrain* get_ground_blocking_projectile(
 
         if (has_hit_ground)
         {
-                return map::g_cells.at(pos).terrain;
+                return map::g_terrain.at(pos);
         }
         else
         {
@@ -1416,9 +1416,7 @@ static void update_projectile_states(ProjectileFireData& fire_data)
                 projectile.dmg =
                         projectile.att_data->dmg_range.total_range().roll();
 
-                projectile.is_seen_by_player =
-                        map::g_cells.at(projectile_pos)
-                                .is_seen_by_player;
+                projectile.is_seen_by_player = map::g_seen.at(projectile_pos);
 
                 // Projectile out of weapon max range?
                 const int max_range = fire_data.wpn->data().ranged.max_range;

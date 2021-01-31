@@ -54,7 +54,7 @@ Trap::Trap(const P& pos, Terrain* const mimic_terrain, TrapId id) :
 
         m_is_hidden = true;
 
-        auto* const terrain_here = map::g_cells.at(pos).terrain;
+        auto* const terrain_here = map::g_terrain.at(pos);
 
         if (!terrain_here->can_have_trap())
         {
@@ -339,7 +339,7 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
                 return AllowAction::yes;
         }
 
-        if (map::g_cells.at(m_pos).is_seen_by_player &&
+        if (map::g_seen.at(m_pos) &&
             !m_is_hidden &&
             !actor_bumping.m_properties.has(PropId::ethereal) &&
             !actor_bumping.m_properties.has(PropId::flying))
@@ -496,7 +496,7 @@ void Trap::reveal(const Verbose verbose)
 
         if (is_hidden_before &&
             (verbose == Verbose::yes) &&
-            map::g_cells.at(m_pos).is_seen_by_player)
+            map::g_seen.at(m_pos))
         {
                 states::draw();
 
@@ -541,7 +541,7 @@ Color Trap::color_default() const
 
 Color Trap::color_bg_default() const
 {
-        const auto* const item = map::g_cells.at(m_pos).item;
+        const auto* const item = map::g_items.at(m_pos);
 
         const auto* const corpse =
                 map::first_actor_at_pos(
@@ -591,7 +591,7 @@ TrapPlacementValid MagicTrapImpl::on_place()
         {
                 const P p(m_pos + d);
 
-                const auto* const t = map::g_cells.at(p).terrain;
+                const auto* const t = map::g_terrain.at(p);
 
                 if (!t->is_walkable())
                 {
@@ -628,7 +628,7 @@ TrapPlacementValid TrapDart::on_place()
                 {
                         p += d;
 
-                        const auto* const terrain = map::g_cells.at(p).terrain;
+                        const auto* const terrain = map::g_terrain.at(p);
 
                         const bool is_wall = terrain->id() == terrain::Id::wall;
 
@@ -677,9 +677,7 @@ void TrapDart::trigger()
         ASSERT((m_dart_origin.x == m_pos.x) || (m_dart_origin.y == m_pos.y));
         ASSERT(m_dart_origin != m_pos);
 
-        const auto& origin_cell = map::g_cells.at(m_dart_origin);
-
-        if (origin_cell.terrain->id() != terrain::Id::wall)
+        if (map::g_terrain.at(m_dart_origin)->id() != terrain::Id::wall)
         {
                 // NOTE: This is permanently set from now on
                 m_is_dart_origin_destroyed = true;
@@ -709,10 +707,11 @@ void TrapDart::trigger()
                         : (map::w() - 1);
         }
 
-        if (origin_cell.is_seen_by_player)
+        if (map::g_seen.at(m_dart_origin))
         {
                 const std::string name =
-                        origin_cell.terrain->name(Article::the);
+                        map::g_terrain.at(m_dart_origin)
+                                ->name(Article::the);
 
                 msg_log::add("A dart is launched from " + name + "!");
         }
@@ -763,7 +762,7 @@ TrapPlacementValid TrapSpear::on_place()
         {
                 const P p = m_pos + d;
 
-                const auto* const terrain = map::g_cells.at(p).terrain;
+                const auto* const terrain = map::g_terrain.at(p);
 
                 const bool is_wall = terrain->id() == terrain::Id::wall;
 
@@ -795,9 +794,7 @@ void TrapSpear::trigger()
         ASSERT(m_spear_origin.x == m_pos.x || m_spear_origin.y == m_pos.y);
         ASSERT(m_spear_origin != m_pos);
 
-        const auto& origin_cell = map::g_cells.at(m_spear_origin);
-
-        if (origin_cell.terrain->id() != terrain::Id::wall)
+        if (map::g_terrain.at(m_spear_origin)->id() != terrain::Id::wall)
         {
                 // NOTE: This is permanently set from now on
                 m_is_spear_origin_destroyed = true;
@@ -808,10 +805,11 @@ void TrapSpear::trigger()
                 return;
         }
 
-        if (origin_cell.is_seen_by_player)
+        if (map::g_seen.at(m_spear_origin))
         {
                 const std::string name =
-                        origin_cell.terrain->name(Article::the);
+                        map::g_terrain.at(m_spear_origin)
+                                ->name(Article::the);
 
                 msg_log::add("A spear shoots out from " + name + "!");
         }
@@ -853,7 +851,7 @@ void TrapGasConfusion::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add(
                         "A burst of gas is released from a vent in the floor!");
@@ -887,7 +885,7 @@ void TrapGasParalyzation::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add(
                         "A burst of gas is released from a vent in the floor!");
@@ -921,7 +919,7 @@ void TrapGasFear::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add(
                         "A burst of gas is released from a vent in the floor!");
@@ -955,7 +953,7 @@ void TrapBlindingFlash::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("There is an intense flash of light!");
         }
@@ -976,7 +974,7 @@ void TrapDeafening::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add(
                         "There is suddenly a crushing pressure in the air!");
@@ -1298,7 +1296,7 @@ void TrapSmoke::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add(
                         "A burst of smoke is released from a vent in the "
@@ -1325,7 +1323,7 @@ void TrapFire::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("Flames burst out from a vent in the floor!");
         }
@@ -1356,7 +1354,7 @@ void TrapAlarm::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_cells.at(m_pos).is_seen_by_player)
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("An alarm sounds!");
         }

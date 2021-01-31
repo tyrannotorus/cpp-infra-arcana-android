@@ -57,9 +57,9 @@ void player_throw_lit_explosive(const P& aim_cell)
         // Remove cells after blocked cells
         for (size_t i = 1; i < path.size(); ++i)
         {
-                const P p = path[i];
+                const auto p = path[i];
 
-                const auto* t = map::g_cells.at(p).terrain;
+                const auto* t = map::g_terrain.at(p);
 
                 if (!t->is_projectile_passable())
                 {
@@ -84,7 +84,7 @@ void player_throw_lit_explosive(const P& aim_cell)
                 {
                         states::draw();
 
-                        if (map::g_cells.at(p).is_seen_by_player &&
+                        if (map::g_seen.at(p) &&
                             viewport::is_in_view(p))
                         {
                                 io::draw_symbol(
@@ -102,7 +102,7 @@ void player_throw_lit_explosive(const P& aim_cell)
                 }
         }
 
-        const auto f_id = map::g_cells.at(end_pos).terrain->id();
+        const auto f_id = map::g_terrain.at(end_pos)->id();
 
         if (f_id != terrain::Id::chasm &&
             f_id != terrain::Id::liquid_deep)
@@ -156,9 +156,9 @@ void throw_item(
         else
         {
                 // Monster throwing
-                const P& p = path.front();
+                const auto& p = path.front();
 
-                if (map::g_cells.at(p).is_seen_by_player)
+                if (map::g_seen.at(p))
                 {
                         const std::string name_the =
                                 text_format::first_to_upper(
@@ -233,7 +233,7 @@ void throw_item(
                                         ItemType::potion;
 
                                 const bool player_see_cell =
-                                        map::g_cells.at(pos).is_seen_by_player;
+                                        map::g_seen.at(pos);
 
                                 if (player_see_cell)
                                 {
@@ -339,7 +339,7 @@ void throw_item(
                         }
                 }  // if actor hit
 
-                const auto* terrain_here = map::g_cells.at(pos).terrain;
+                const auto* terrain_here = map::g_terrain.at(pos);
 
                 if (!terrain_here->is_projectile_passable())
                 {
@@ -349,7 +349,7 @@ void throw_item(
                         break;
                 }
 
-                if (map::g_cells.at(pos).is_seen_by_player &&
+                if (map::g_seen.at(pos) &&
                     viewport::is_in_view(pos))
                 {
                         io::draw_symbol(
@@ -461,10 +461,10 @@ void throw_item(
         if (!is_actor_hit)
         {
                 const Matl matl_at_last_pos =
-                        map::g_cells.at(pos).terrain->matl();
+                        map::g_terrain.at(pos)->matl();
 
                 const Matl matl_at_drop_pos =
-                        map::g_cells.at(drop_pos).terrain->matl();
+                        map::g_terrain.at(drop_pos)->matl();
 
                 if (is_noisy_matl(matl_at_last_pos) ||
                     is_noisy_matl(matl_at_drop_pos))

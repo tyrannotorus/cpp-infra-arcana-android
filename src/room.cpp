@@ -130,7 +130,7 @@ static int walk_blockers_in_dir(const Dir dir, const P& pos)
                 for (int dy = -1; dy <= 1; ++dy)
                 {
                         const auto* const t =
-                                map::g_cells.at(pos.x + 1, pos.y + dy).terrain;
+                                map::g_terrain.at(pos.x + 1, pos.y + dy);
 
                         if (!t->is_walkable())
                         {
@@ -143,7 +143,7 @@ static int walk_blockers_in_dir(const Dir dir, const P& pos)
                 for (int dx = -1; dx <= 1; ++dx)
                 {
                         const auto* const t =
-                                map::g_cells.at(pos.x + dx, pos.y + 1).terrain;
+                                map::g_terrain.at(pos.x + dx, pos.y + 1);
 
                         if (!t->is_walkable())
                         {
@@ -156,7 +156,7 @@ static int walk_blockers_in_dir(const Dir dir, const P& pos)
                 for (int dy = -1; dy <= 1; ++dy)
                 {
                         const auto* const t =
-                                map::g_cells.at(pos.x - 1, pos.y + dy).terrain;
+                                map::g_terrain.at(pos.x - 1, pos.y + dy);
 
                         if (!t->is_walkable())
                         {
@@ -169,7 +169,7 @@ static int walk_blockers_in_dir(const Dir dir, const P& pos)
                 for (int dx = -1; dx <= 1; ++dx)
                 {
                         const auto* const t =
-                                map::g_cells.at(pos.x + dx, pos.y - 1).terrain;
+                                map::g_terrain.at(pos.x + dx, pos.y - 1);
 
                         if (!t->is_walkable())
                         {
@@ -216,7 +216,7 @@ static void get_positions_in_room_relative_to_walls(
                                 continue;
                         }
 
-                        auto* const t = map::g_cells.at(x, y).terrain;
+                        auto* const t = map::g_terrain.at(x, y);
 
                         if (t->is_walkable() && t->is_floor_like())
                         {
@@ -251,8 +251,8 @@ static void get_positions_in_room_relative_to_walls(
                         for (int dy = -1; dy <= 1; ++dy)
                         {
                                 const auto* const t =
-                                        map::g_cells.at(pos.x + dx, pos.y + dy)
-                                                .terrain;
+                                        map::g_terrain.at(
+                                                pos.x + dx, pos.y + dy);
 
                                 if (t->id() == terrain::Id::door)
                                 {
@@ -507,7 +507,8 @@ std::vector<P> Room::positions_in_room() const
 
 void Room::make_dark() const
 {
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 if (map::g_room_map.at(i) == this)
                 {
@@ -550,7 +551,7 @@ void StdRoom::on_post_connect(Array2<bool>& door_proposals)
                         // way, but currently the only map terrains that are
                         // light sources are braziers - so it works for now.
 
-                        const auto id = map::g_cells.at(x, y).terrain->id();
+                        const auto id = map::g_terrain.at(x, y)->id();
 
                         if (id == terrain::Id::brazier)
                         {
@@ -928,7 +929,7 @@ void RitualRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                 {
                         for (int x = m_r.p0.x; x <= m_r.p1.x; ++x)
                         {
-                                if (map::g_cells.at(x, y).terrain->id() ==
+                                if (map::g_terrain.at(x, y)->id() ==
                                     terrain::Id::altar)
                                 {
                                         origin = P(x, y);
@@ -1060,7 +1061,7 @@ void SnakePitRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                         const P p(x, y);
 
-                        if (map::g_cells.at(x, y).terrain->is_floor_like() &&
+                        if (map::g_terrain.at(x, y)->is_floor_like() &&
                             rnd::coin_toss())
                         {
                                 map::put(new terrain::RubbleLow(p));
@@ -1578,11 +1579,11 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                 terrain::Id::liquid_deep,
         };
 
-        for (const P& p : blocked.rect().positions())
+        for (const auto& p : blocked.rect().positions())
         {
                 const bool is_free_terrain =
                         map_parsers::IsAnyOfTerrains(free_terrains)
-                                .cell(p);
+                                .run(p);
 
                 if (is_free_terrain)
                 {
@@ -1595,7 +1596,7 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
         for (const auto& p : m_r.positions())
         {
                 const bool is_floor_like =
-                        map::g_cells.at(p).terrain->data().is_floor_like;
+                        map::g_terrain.at(p)->data().is_floor_like;
 
                 const bool is_this_room = (map::g_room_map.at(p) == this);
 
@@ -1678,7 +1679,8 @@ void ChasmRoom::on_post_connect_hook(Array2<bool>& door_proposals)
         map_parsers::BlocksWalking(ParseActors::no)
                 .run(blocked, blocked.rect());
 
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 if (map::g_room_map.at(i) != this)
                 {
@@ -1775,7 +1777,8 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                                         {
                                                 if (centers.at(x, y))
                                                 {
-                                                        closest_center0 = i_outer;
+                                                        closest_center0 =
+                                                                i_outer;
                                                         break;
                                                 }
                                         }
@@ -1802,7 +1805,8 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                                         {
                                                 if (centers.at(x, y))
                                                 {
-                                                        closest_center1 = i_outer;
+                                                        closest_center1 =
+                                                                i_outer;
                                                         break;
                                                 }
                                         }
@@ -1955,18 +1959,27 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
 
                 if (m_axis == Axis::hor)
                 {
-                        mark_sides(Range(1, map::w() - 2), Range(1, map::h() - 2), x, y);
+                        mark_sides(
+                                Range(1, map::w() - 2),
+                                Range(1, map::h() - 2),
+                                x,
+                                y);
                 }
                 else
                 {
-                        mark_sides(Range(1, map::h() - 2), Range(1, map::w() - 2), y, x);
+                        mark_sides(
+                                Range(1, map::h() - 2),
+                                Range(1, map::w() - 2),
+                                y,
+                                x);
                 }
         }
 
         Array2<bool> valid_room_entries0(map::dims());
         Array2<bool> valid_room_entries1(map::dims());
 
-        for (size_t i = 0; i < map::nr_cells(); ++i)
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
         {
                 valid_room_entries0.at(i) = valid_room_entries1.at(i) = false;
         }
@@ -1978,7 +1991,7 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                 for (int y = edge_d; y < map::h() - edge_d; ++y)
                 {
                         const auto terrain_id =
-                                map::g_cells.at(x, y).terrain->id();
+                                map::g_terrain.at(x, y)->id();
 
                         if ((terrain_id != terrain::Id::wall) ||
                             map::g_room_map.at(x, y))
@@ -1994,8 +2007,7 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                         {
                                 const auto p_adj(p + d);
 
-                                const auto* const t =
-                                        map::g_cells.at(p_adj).terrain;
+                                const auto* const t = map::g_terrain.at(p_adj);
 
                                 if (t->id() == terrain::Id::floor)
                                 {

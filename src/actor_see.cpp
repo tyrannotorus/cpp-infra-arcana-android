@@ -222,9 +222,7 @@ bool can_player_see_actor(const Actor& other)
                 return true;
         }
 
-        const Cell& cell = map::g_cells.at(other.m_pos);
-
-        if (!other.is_alive() && cell.is_seen_by_player)
+        if (!other.is_alive() && map::g_seen.at(other.m_pos))
         {
                 // Dead actor in seen cell
                 return true;
@@ -236,7 +234,7 @@ bool can_player_see_actor(const Actor& other)
                 return false;
         }
 
-        if (cell.player_los.is_blocked_hard)
+        if (map::g_los.at(other.m_pos).is_blocked_hard)
         {
                 // LOS blocked hard (e.g. a wall)
                 return false;
@@ -260,7 +258,8 @@ bool can_player_see_actor(const Actor& other)
 
         const bool can_see_other_in_drk = can_see_invis || has_darkvision;
 
-        if (cell.player_los.is_blocked_by_dark && !can_see_other_in_drk)
+        if (map::g_los.at(other.m_pos).is_blocked_by_dark &&
+            !can_see_other_in_drk)
         {
                 // Blocked by darkness, and cannot see creatures in darkness
                 return false;
@@ -392,9 +391,10 @@ bool is_player_seeing_burning_terrain()
 
         for (const auto& pos : fov_r.positions())
         {
-                const auto& cell = map::g_cells.at(pos);
+                const bool is_seen = map::g_seen.at(pos);
+                const auto* const terrain = map::g_terrain.at(pos);
 
-                if (cell.is_seen_by_player && cell.terrain->is_burning())
+                if (is_seen && terrain->is_burning())
                 {
                         return true;
                 }

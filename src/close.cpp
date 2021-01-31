@@ -111,16 +111,18 @@ void player_try_close_or_jam()
                 MorePromptOnMsg::no,
                 CopyToMsgHistory::no);
 
-        const Dir input_dir = query::dir(AllowCenter::no);
+        const auto input_dir = query::dir(AllowCenter::no);
 
         msg_log::clear();
 
         if ((input_dir != Dir::END) && (input_dir != Dir::center))
         {
                 // Valid direction
-                const P p(map::g_player->m_pos + dir_utils::offset(input_dir));
+                const auto p =
+                        map::g_player->m_pos +
+                        dir_utils::offset(input_dir);
 
-                player_try_close_or_jam_terrain(map::g_cells.at(p).terrain);
+                player_try_close_or_jam_terrain(map::g_terrain.at(p));
         }
 }
 

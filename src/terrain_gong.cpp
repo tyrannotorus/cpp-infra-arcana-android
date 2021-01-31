@@ -310,7 +310,7 @@ void Gong::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        if (!map::g_cells.at(m_pos).is_seen_by_player)
+        if (!map::g_seen.at(m_pos))
         {
                 msg_log::clear();
 
