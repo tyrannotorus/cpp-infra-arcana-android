@@ -223,7 +223,6 @@ ConsumeItem HornOfMalice::activate(actor::Actor* const actor)
                 map::g_player,
                 SndVol::high,
                 AlertsMon::yes,
-                MorePromptOnMsg::no,
                 effect);
 
         snd.run();
@@ -301,7 +300,6 @@ ConsumeItem HornOfBanishment::activate(actor::Actor* const actor)
                 map::g_player,
                 SndVol::high,
                 AlertsMon::yes,
-                MorePromptOnMsg::no,
                 effect);
 
         snd.run();

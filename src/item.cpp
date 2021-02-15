@@ -993,14 +993,14 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
             is_feed_needed &&
             rnd::one_in(6))
         {
-                Snd snd("",
+                Snd snd(
+                        "",
                         audio::SfxId::bite,
                         IgnoreMsgIfOriginSeen::yes,
                         actor_hit.m_pos,
                         map::g_player,
                         SndVol::low,
-                        AlertsMon::yes,
-                        MorePromptOnMsg::no);
+                        AlertsMon::yes);
 
                 snd.run();
 

@@ -47,6 +47,8 @@ static void init_layers_data()
                 map::g_los.at(i) = default_los;
                 map::g_light.at(i) = false;
                 map::g_dark.at(i) = false;
+                map::g_smell.at(i) = {};
+                map::g_smell_spread.at(i) = {};
                 map::g_items.at(i) = nullptr;
                 map::g_terrain.at(i) = nullptr;
         }
@@ -59,6 +61,8 @@ static void resize_layers()
         map::g_los.resize_no_init(s_dims);
         map::g_light.resize_no_init(s_dims);
         map::g_dark.resize_no_init(s_dims);
+        map::g_smell.resize_no_init(s_dims);
+        map::g_smell_spread.resize_no_init(s_dims);
         map::g_items.resize_no_init(s_dims);
         map::g_terrain.resize_no_init(s_dims);
 }
@@ -81,6 +85,36 @@ static void free_layers_owned_memory()
 }
 
 // -----------------------------------------------------------------------------
+// ChokePointData
+// -----------------------------------------------------------------------------
+ChokePointData::ChokePointData(const ChokePointData& other) :
+        p(other.p),
+        player_side(other.player_side),
+        stairs_side(other.stairs_side)
+{
+        sides[0] = other.sides[0];
+        sides[1] = other.sides[1];
+}
+
+ChokePointData& ChokePointData::operator=(const ChokePointData& other)
+{
+        if (&other == this)
+        {
+                return *this;
+        }
+
+        p = other.p;
+
+        player_side = other.player_side;
+        stairs_side = other.stairs_side;
+
+        sides[0] = other.sides[0];
+        sides[1] = other.sides[1];
+
+        return *this;
+}
+
+// -----------------------------------------------------------------------------
 // map
 // -----------------------------------------------------------------------------
 namespace map
@@ -90,6 +124,8 @@ Array2<bool> g_seen(0, 0);
 Array2<LosResult> g_los(0, 0);
 Array2<bool> g_light(0, 0);
 Array2<bool> g_dark(0, 0);
+Array2<smell::Smell> g_smell(0, 0);
+Array2<smell::Smell> g_smell_spread(0, 0);
 Array2<item::Item*> g_items(0, 0);
 Array2<terrain::Terrain*> g_terrain(0, 0);
 

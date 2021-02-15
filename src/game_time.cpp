@@ -217,13 +217,11 @@ static void run_std_turn_events()
                 }
         }
 
-        // New turn for terrains
         for (auto* const terrain : map::g_terrain)
         {
                 terrain->on_new_turn();
         }
 
-        // New turn for mobs
         const std::vector<terrain::Terrain*> mobs_cpy = game_time::g_mobs;
 
         for (auto* t : mobs_cpy)
@@ -249,6 +247,8 @@ static void run_std_turn_events()
                         slot.item->on_std_turn_in_inv(InvType::slots);
                 }
         }
+
+        smell::on_std_turn();
 
         snd_emit::reset_nr_snd_msg_printed_current_turn();
 

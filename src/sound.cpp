@@ -36,7 +36,6 @@ Snd::Snd(
         actor::Actor* const actor_who_made_sound,
         const SndVol vol,
         const AlertsMon alerting_mon,
-        const MorePromptOnMsg add_more_prompt_on_msg,
         std::shared_ptr<SndHeardEffect> snd_heard_effect) :
 
         m_msg(std::move(msg)),
@@ -46,7 +45,6 @@ Snd::Snd(
         m_actor_who_made_sound(actor_who_made_sound),
         m_vol(vol),
         m_is_alerting_mon(alerting_mon),
-        m_add_more_prompt_on_msg(add_more_prompt_on_msg),
         m_snd_heard_effect(std::move(snd_heard_effect))
 {
 }

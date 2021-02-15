@@ -514,8 +514,7 @@ DidAction Actor::try_eat_corpse()
                         m_pos,
                         this,
                         SndVol::low,
-                        AlertsMon::no,
-                        MorePromptOnMsg::no);
+                        AlertsMon::no);
 
                 snd.run();
 

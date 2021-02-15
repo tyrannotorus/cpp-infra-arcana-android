@@ -30,18 +30,13 @@ static_assert(
         "Representation of ticks isn't an integral value.");
 
 static std::vector<Mix_Chunk*> s_audio_chunks;
-
 static std::vector<Mix_Music*> s_mus_chunks;
 
 // TODO: Also use std::chrono for sound effects?
 static uint32_t s_ms_at_sfx_played[(size_t)audio::SfxId::END];
-
 static int s_current_channel = 0;
-
 static const auto s_min_seconds_between_amb = 20s;
-
 static auto s_seconds_at_amb_played = 0s;
-
 static int s_nr_files_loaded = 0;
 
 static void load(const audio::SfxId sfx, const std::string& filename)

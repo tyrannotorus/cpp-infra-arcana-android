@@ -37,6 +37,7 @@
 #include "query.hpp"
 #include "reload.hpp"
 #include "saving.hpp"
+#include "smell.hpp"
 #include "state.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
@@ -1099,8 +1100,13 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                map::g_player->m_properties.apply(
-                        property_factory::make(PropId::blind));
+                // const auto pos = map::g_player->m_pos.with_x_offset(0);
+
+                // smell::Smell smell;
+                // smell.id = smell::SmellId::zombie;
+                // smell.strength_pct = 60;
+
+                // smell::try_put_smell(smell, pos);
         }
         break;
 

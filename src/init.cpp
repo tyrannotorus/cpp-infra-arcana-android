@@ -36,6 +36,7 @@
 #include "property_data.hpp"
 #include "query.hpp"
 #include "saving.hpp"
+#include "smell.hpp"
 
 namespace init
 {
@@ -121,6 +122,7 @@ void init_session()
         player_spells::init();
         highscore::init();
         hints::init();
+        smell::init();
 
         TRACE_FUNC_END;
 }

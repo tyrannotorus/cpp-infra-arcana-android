@@ -117,6 +117,7 @@ set(COMMON_SRC
         include/reload.hpp
         include/room.hpp
         include/saving.hpp
+        include/smell.hpp
         include/sound.hpp
         include/spells.hpp
         include/state.hpp
@@ -252,6 +253,7 @@ set(COMMON_SRC
         src/reload.cpp
         src/room.cpp
         src/saving.cpp
+        src/smell.cpp
         src/sound.cpp
         src/spells.cpp
         src/state.cpp
@@ -438,36 +440,10 @@ file(GLOB INSTALLED_FILES "installed_files/*")
 file(COPY ${INSTALLED_FILES} DESTINATION .)
 
 # ------------------------------------------------------------------------------
-# Retrieve abbreviated git commit
+# Dependencies
 # ------------------------------------------------------------------------------
 find_package(Git)
 
-set(GENERATED_GIT_SHA1_PATH ${CMAKE_BINARY_DIR}/data/git-sha1.txt)
-
-if(GIT_FOUND)
-        message("Running revision command with Git executable: '${GIT_EXECUTABLE}'")
-
-        message("Revision output path: '${GENERATED_GIT_SHA1_PATH}'")
-
-        execute_process(
-                COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-                OUTPUT_FILE ${GENERATED_GIT_SHA1_PATH}
-                RESULT_VARIABLE REVISION_COMMAND_RESULT
-                ERROR_VARIABLE REVISION_COMMAND_ERRORS
-                )
-
-        message("Revision command result: '${REVISION_COMMAND_RESULT}'")
-
-        message("Revision command errors: '${REVISION_COMMAND_ERRORS}'")
-else()
-        message("Could not find Git - will not write revision")
-endif()
-
-# ------------------------------------------------------------------------------
-# Dependencies
-# ------------------------------------------------------------------------------
 if(WIN32)
 
         if (NOT DEFINED ARCH)
@@ -633,6 +609,32 @@ else()
         # https://stackoverflow.com/questions/39827412
         # target_link_libraries(ia-debug PUBLIC -pg -no-pie)
 
+endif()
+
+# ------------------------------------------------------------------------------
+# Retrieve abbreviated git commit
+# ------------------------------------------------------------------------------
+set(GENERATED_GIT_SHA1_PATH ${CMAKE_BINARY_DIR}/data/git-sha1.txt)
+
+if(GIT_FOUND)
+        message("Running revision command with Git executable: '${GIT_EXECUTABLE}'")
+
+        message("Revision output path: '${GENERATED_GIT_SHA1_PATH}'")
+
+        execute_process(
+                COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                OUTPUT_FILE ${GENERATED_GIT_SHA1_PATH}
+                RESULT_VARIABLE REVISION_COMMAND_RESULT
+                ERROR_VARIABLE REVISION_COMMAND_ERRORS
+                )
+
+        message("Revision command result: '${REVISION_COMMAND_RESULT}'")
+
+        message("Revision command errors: '${REVISION_COMMAND_ERRORS}'")
+else()
+        message("Could not find Git - will not write revision")
 endif()
 
 # ------------------------------------------------------------------------------

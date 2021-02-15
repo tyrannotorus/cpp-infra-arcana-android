@@ -30,6 +30,7 @@
 #include "player_bon.hpp"
 #include "player_spells.hpp"
 #include "postmortem.hpp"
+#include "smell.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -71,6 +72,7 @@ static void save_modules()
         player_spells::save();
         map_templates::save();
         hints::save();
+        smell::save();
 
         TRACE_FUNC_END;
 }
@@ -106,6 +108,7 @@ static void load_modules()
         player_spells::load();
         map_templates::load();
         hints::load();
+        smell::load();
 
         TRACE_FUNC_END;
 }

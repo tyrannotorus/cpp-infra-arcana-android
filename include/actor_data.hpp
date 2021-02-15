@@ -237,6 +237,7 @@ struct ActorData
         bool is_unique;
         bool is_auto_spawn_allowed;
         std::string descr;
+        std::string smell_msg;
         std::string wary_msg;
         std::string aware_msg_mon_seen;
         std::string aware_msg_mon_hidden;

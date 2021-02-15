@@ -600,11 +600,25 @@ void Inventory::swap_wielded_and_prepared()
         slot2.item = item1;
 }
 
-bool Inventory::has_item_in_slot(SlotId id) const
+bool Inventory::has_item_in_slot(const SlotId id) const
 {
         ASSERT(id != SlotId::END && "Illegal slot id");
 
         return m_slots[int(id)].item;
+}
+
+bool Inventory::has_item_in_slot(
+        const SlotId slot_id,
+        item::Id item_id) const
+{
+        if (!has_item_in_slot(slot_id))
+        {
+                return false;
+        }
+
+        auto* const item = item_in_slot(slot_id);
+
+        return item->id() == item_id;
 }
 
 item::Item* Inventory::item_in_backpack(const item::Id id) const

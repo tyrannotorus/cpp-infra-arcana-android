@@ -223,6 +223,11 @@ static void dump_text(xml::Element* text_e, actor::ActorData& data)
                         xml::first_child(
                                 text_e, "allow_generated_description"));
 
+        data.smell_msg =
+                xml::get_text_str(
+                        xml::first_child(
+                                text_e, "smell_message"));
+
         data.wary_msg =
                 xml::get_text_str(
                         xml::first_child(
@@ -877,6 +882,7 @@ void ActorData::reset()
         aware_msg_mon_hidden = "";
         use_cultist_aware_msg_mon_seen = false;
         use_cultist_aware_msg_mon_hidden = false;
+        smell_msg = "";
         aware_sfx_mon_seen = audio::SfxId::END;
         aware_sfx_mon_hidden = audio::SfxId::END;
         spell_msg = "";

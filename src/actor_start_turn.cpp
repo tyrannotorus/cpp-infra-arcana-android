@@ -18,6 +18,7 @@
 #include "hints.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
+#include "smell.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -439,6 +440,8 @@ static void player_start_turn()
         {
                 interrupt_player_burning_terrain();
         }
+
+        smell::player_try_sense_smell();
 
         // Handle monsters coming into vision, detect sneaking monsters, ...
         player_discover_monsters();

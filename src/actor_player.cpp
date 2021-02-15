@@ -886,18 +886,12 @@ void Player::hear_sound(
         }
 
         const audio::SfxId sfx = snd.sfx();
-
         const std::string& msg = snd.msg();
-
         const bool has_snd_msg = !msg.empty() && msg != " ";
 
         if (has_snd_msg)
         {
-                msg_log::add(
-                        msg,
-                        colors::text(),
-                        MsgInterruptPlayer::no,
-                        snd.should_add_more_prompt_on_msg());
+                msg_log::add(msg, colors::text(), MsgInterruptPlayer::no);
         }
 
         // Play audio after message to ensure sync between audio and animation.
@@ -907,8 +901,7 @@ void Player::hear_sound(
         {
                 Actor* const actor_who_made_snd = snd.actor_who_made_sound();
 
-                if (actor_who_made_snd &&
-                    (actor_who_made_snd != this))
+                if (actor_who_made_snd && (actor_who_made_snd != this))
                 {
                         static_cast<Mon*>(actor_who_made_snd)
                                 ->set_player_aware_of_me();

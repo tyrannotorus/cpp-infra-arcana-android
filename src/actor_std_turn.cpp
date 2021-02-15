@@ -223,6 +223,8 @@ static void player_std_turn()
 
 static void mon_std_turn(actor::Mon& mon)
 {
+        smell::put_smell_for_mon(mon);
+
         // Countdown all spell cooldowns
         for (auto& spell : mon.m_mon_spells)
         {

@@ -352,8 +352,7 @@ void Gong::bump(actor::Actor& actor_bumping)
                 m_pos,
                 map::g_player,
                 SndVol::high,
-                AlertsMon::yes,
-                MorePromptOnMsg::no);
+                AlertsMon::yes);
 
         snd.run();
 

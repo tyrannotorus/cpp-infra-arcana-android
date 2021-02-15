@@ -13,6 +13,7 @@
 #include "config.hpp"
 #include "fov.hpp"
 #include "pos.hpp"
+#include "smell.hpp"
 
 namespace item
 {
@@ -35,33 +36,8 @@ class Room;
 struct ChokePointData
 {
         ChokePointData() = default;
-
-        ChokePointData(const ChokePointData& other) :
-                p(other.p),
-                player_side(other.player_side),
-                stairs_side(other.stairs_side)
-        {
-                sides[0] = other.sides[0];
-                sides[1] = other.sides[1];
-        }
-
-        ChokePointData& operator=(const ChokePointData& other)
-        {
-                if (&other == this)
-                {
-                        return *this;
-                }
-
-                p = other.p;
-
-                player_side = other.player_side;
-                stairs_side = other.stairs_side;
-
-                sides[0] = other.sides[0];
-                sides[1] = other.sides[1];
-
-                return *this;
-        }
+        ChokePointData(const ChokePointData& other);
+        ChokePointData& operator=(const ChokePointData& other);
 
         P p {};
 
@@ -79,6 +55,8 @@ extern Array2<bool> g_seen;
 extern Array2<LosResult> g_los;
 extern Array2<bool> g_light;
 extern Array2<bool> g_dark;
+extern Array2<smell::Smell> g_smell;
+extern Array2<smell::Smell> g_smell_spread;
 extern Array2<item::Item*> g_items;
 extern Array2<terrain::Terrain*> g_terrain;
 

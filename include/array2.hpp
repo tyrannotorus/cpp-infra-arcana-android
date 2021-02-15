@@ -57,7 +57,10 @@ public:
                         return *this;
                 }
 
-                resize_no_init(other.m_dims);
+                if (m_dims != other.m_dims)
+                {
+                        resize_no_init(other.m_dims);
+                }
 
                 std::copy(
                         std::begin(other),

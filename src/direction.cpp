@@ -46,20 +46,13 @@ const std::vector<P> g_dir_list_w_center {
         {1, -1},
         {1, 1}};
 
-static const std::string g_compass_dir_names[3][3] =
-        {
-                {"NW", "N", "NE"},
-                {
-                        "W",
-                        "",
-                        "E",
-                },
-                {"SW", "S", "SE"}};
+static const std::string g_compass_dir_names[3][3] = {
+        {"NW", "N", "NE"},
+        {"W", "", "E"},
+        {"SW", "S", "SE"}};
 
 static const double s_pi_db = 3.14159265;
-
 static const double s_angle_45_db = 2 * s_pi_db / 8;
-
 static const double s_angle_45_half_db = s_angle_45_db / 2.0;
 
 static const double edge[4] =
@@ -76,22 +69,55 @@ Dir dir(const P& offset)
                offset.x <= 1 &&
                offset.y <= 1);
 
+        Dir dir = Dir::END;
+
         if (offset.y == -1)
         {
-                return offset.x == -1 ? Dir::up_left : offset.x == 0 ? Dir::up : offset.x == 1 ? Dir::up_right : Dir::END;
+                if (offset.x == -1)
+                {
+                        dir = Dir::up_left;
+                }
+                else if (offset.x == 0)
+                {
+                        dir = Dir::up;
+                }
+                else if (offset.x == 1)
+                {
+                        dir = Dir::up_right;
+                }
         }
-
-        if (offset.y == 0)
+        else if (offset.y == 0)
         {
-                return offset.x == -1 ? Dir::left : offset.x == 0 ? Dir::center : offset.x == 1 ? Dir::right : Dir::END;
+                if (offset.x == -1)
+                {
+                        dir = Dir::left;
+                }
+                else if (offset.x == 0)
+                {
+                        dir = Dir::center;
+                }
+                else if (offset.x == 1)
+                {
+                        dir = Dir::right;
+                }
         }
-
-        if (offset.y == 1)
+        else if (offset.y == 1)
         {
-                return offset.x == -1 ? Dir::down_left : offset.x == 0 ? Dir::down : offset.x == 1 ? Dir::down_right : Dir::END;
+                if (offset.x == -1)
+                {
+                        dir = Dir::down_left;
+                }
+                else if (offset.x == 0)
+                {
+                        dir = Dir::down;
+                }
+                else if (offset.x == 1)
+                {
+                        dir = Dir::down_right;
+                }
         }
 
-        return Dir::END;
+        return dir;
 }
 
 P offset(const Dir dir)

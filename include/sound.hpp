@@ -61,7 +61,6 @@ public:
                 actor::Actor* actor_who_made_sound,
                 SndVol vol,
                 AlertsMon alerting_mon,
-                MorePromptOnMsg add_more_prompt_on_msg = MorePromptOnMsg::no,
                 std::shared_ptr<SndHeardEffect> snd_heard_effect = nullptr);
 
         Snd() = default;
@@ -106,11 +105,6 @@ public:
                 m_is_alerting_mon = alerts;
         }
 
-        MorePromptOnMsg should_add_more_prompt_on_msg() const
-        {
-                return m_add_more_prompt_on_msg;
-        }
-
         P origin() const
         {
                 return m_origin;
@@ -141,7 +135,6 @@ private:
         actor::Actor* m_actor_who_made_sound;
         SndVol m_vol;
         AlertsMon m_is_alerting_mon;
-        MorePromptOnMsg m_add_more_prompt_on_msg;
         std::shared_ptr<SndHeardEffect> m_snd_heard_effect;
 };
 

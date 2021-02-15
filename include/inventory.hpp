@@ -99,6 +99,8 @@ public:
 
         bool has_item_in_slot(SlotId id) const;
 
+        bool has_item_in_slot(const SlotId slot_id, item::Id item_id) const;
+
         bool has_ammo_for_firearm_in_inventory() const;
 
         item::Item* item_in_backpack(item::Id id) const;
