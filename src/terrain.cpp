@@ -1097,7 +1097,7 @@ void Statue::topple(
         const Dir direction,
         actor::Actor* const actor_toppling)
 {
-        const AlertsMon alerts_mon =
+        const auto alerts_mon =
                 (actor_toppling == map::g_player)
                 ? AlertsMon::yes
                 : AlertsMon::no;
@@ -1558,6 +1558,11 @@ void LiquidShallow::bump(actor::Actor& actor_bumping)
                         ? ""
                         : "I hear a splash.";
 
+                const auto alerts_mon =
+                        actor_bumping.is_player()
+                        ? AlertsMon::yes
+                        : AlertsMon::no;
+
                 Snd snd(
                         msg,
                         audio::SfxId::wade,
@@ -1565,7 +1570,7 @@ void LiquidShallow::bump(actor::Actor& actor_bumping)
                         actor_bumping.m_pos,
                         &actor_bumping,
                         SndVol::low,
-                        AlertsMon::yes);
+                        alerts_mon);
 
                 snd_emit::run(snd);
         }
@@ -1790,6 +1795,11 @@ void LiquidDeep::bump(actor::Actor& actor_bumping)
                         ? ""
                         : "I hear a splash.";
 
+                const auto alerts_mon =
+                        actor_bumping.is_player()
+                        ? AlertsMon::yes
+                        : AlertsMon::no;
+
                 Snd snd(
                         msg,
                         audio::SfxId::swim,
@@ -1797,7 +1807,7 @@ void LiquidDeep::bump(actor::Actor& actor_bumping)
                         actor_bumping.m_pos,
                         &actor_bumping,
                         SndVol::low,
-                        AlertsMon::yes);
+                        alerts_mon);
 
                 snd_emit::run(snd);
         }
@@ -2491,7 +2501,7 @@ void Chains::bump(actor::Actor& actor_bumping)
                         msg = "I hear chains rattling.";
                 }
 
-                const AlertsMon alerts_mon =
+                const auto alerts_mon =
                         actor_bumping.is_player()
                         ? AlertsMon::yes
                         : AlertsMon::no;
@@ -2720,7 +2730,7 @@ void Brazier::on_hit(
                         return;
                 }
 
-                const AlertsMon alerts_mon =
+                const auto alerts_mon =
                         (actor == map::g_player)
                         ? AlertsMon::yes
                         : AlertsMon::no;
