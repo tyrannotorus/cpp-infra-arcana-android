@@ -7,6 +7,7 @@
 #include "smell.hpp"
 
 #include "actor_player.hpp"
+#include "actor_see.hpp"
 #include "direction.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -93,6 +94,34 @@ static void update_smell_spread_map(const Array2<bool>& blocked)
                         spread_smell_from_pos({x, y}, blocked);
                 }
         }
+}
+
+static bool is_wearing_item_preventing_detecting_smell()
+{
+        const auto& inv = map::g_player->m_inv;
+
+        const bool is_prevented =
+                (inv.has_item_in_slot(SlotId::body, item::Id::armor_asb_suit) ||
+                 inv.has_item_in_slot(SlotId::head, item::Id::gas_mask));
+
+        return is_prevented;
+}
+
+static bool is_seeing_mon_with_smell_msg(const std::string msg)
+{
+        const auto seen_actors = actor::seen_actors(*map::g_player);
+
+        for (auto* const actor : seen_actors)
+        {
+                const auto mon_smell_msg = actor->m_data->smell_msg;
+
+                if (mon_smell_msg == msg)
+                {
+                        return true;
+                }
+        }
+
+        return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -197,11 +226,7 @@ void player_try_sense_smell()
                 return;
         }
 
-        // Weaing Asbestos Suite or Gas Mask prevents detecting smells
-        const auto& inv = map::g_player->m_inv;
-
-        if (inv.has_item_in_slot(SlotId::body, item::Id::armor_asb_suit) ||
-            inv.has_item_in_slot(SlotId::head, item::Id::gas_mask))
+        if (is_wearing_item_preventing_detecting_smell())
         {
                 return;
         }
@@ -209,6 +234,11 @@ void player_try_sense_smell()
         ASSERT((smell.strength_pct > 0) && (smell.strength_pct <= 100));
 
         if (!rnd::percent(smell.strength_pct))
+        {
+                return;
+        }
+
+        if (is_seeing_mon_with_smell_msg(*smell.msg_ptr))
         {
                 return;
         }
