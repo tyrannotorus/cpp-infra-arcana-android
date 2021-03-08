@@ -5490,6 +5490,7 @@
             <property>splits_on_death</property>
             <property>darkvision</property>
             <property>r_blind</property>
+            <property>r_poison</property>
             <property>reduced_pierce_dmg</property>
             <property>short_hearing_range</property>
         </properties>
@@ -5585,6 +5586,7 @@
             <property>splits_on_death</property>
             <property>darkvision</property>
             <property>r_blind</property>
+            <property>r_poison</property>
             <property>reduced_pierce_dmg</property>
             <property>short_hearing_range</property>
         </properties>
@@ -5682,6 +5684,7 @@
             <property>r_disease</property>
             <property>r_blind</property>
             <property>r_para</property>
+            <property>r_fire</property>
             <property>flying</property>
         </properties>
 
