@@ -3523,7 +3523,8 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
                                 0,
                                 ExplExclCenter::no,
                                 {prop},
-                                fume_color);
+                                fume_color,
+                                ExplIsGas::yes);
                 }
                 else
                 {
