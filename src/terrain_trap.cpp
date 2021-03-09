@@ -1354,15 +1354,10 @@ void TrapAlarm::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_seen.at(m_pos))
-        {
-                msg_log::add("An alarm sounds!");
-        }
-
         Snd snd(
-                "I hear an alarm sounding!",
+                "An alarm sounds!",
                 audio::SfxId::END,
-                IgnoreMsgIfOriginSeen::yes,
+                IgnoreMsgIfOriginSeen::no,
                 m_pos,
                 nullptr,
                 SndVol::high,
