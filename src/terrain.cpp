@@ -4117,21 +4117,36 @@ void Fountain::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        PropHandler& properties = map::g_player->m_properties;
+        const bool is_seen = map::g_seen.at(m_pos);
 
-        if (!map::g_seen.at(m_pos))
+        const auto is_bad =
+                m_fountain_effect >
+                FountainEffect::START_OF_BAD_EFFECTS;
+
+        if (!is_seen || (m_is_tried && is_bad))
         {
                 msg_log::clear();
 
-                const std::string name_a =
-                        text_format::first_to_lower(
-                                name(Article::a));
+                std::string msg;
 
-                const std::string msg =
-                        ("There is " +
-                         name_a +
-                         " here. Drink from it? ") +
-                        common_text::g_yes_or_no_hint;
+                if (is_seen)
+                {
+                        const std::string name_the =
+                                text_format::first_to_lower(
+                                        name(Article::the));
+
+                        msg = "Drink from " + name_the + "?";
+                }
+                else
+                {
+                        const std::string name_a =
+                                text_format::first_to_lower(
+                                        name(Article::a));
+
+                        msg = "There is " + name_a + " here. Drink from it?";
+                }
+
+                msg += " " + common_text::g_yes_or_no_hint;
 
                 msg_log::add(
                         msg,
@@ -4149,6 +4164,8 @@ void Fountain::bump(actor::Actor& actor_bumping)
                         return;
                 }
         }
+
+        auto& properties = map::g_player->m_properties;
 
         if (!properties.allow_eat(Verbose::yes))
         {
