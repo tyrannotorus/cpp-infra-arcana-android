@@ -2784,7 +2784,8 @@ void PropAuraOfDecay::run_effect_on_env_at(const P& p) const
         }
         break;
 
-        default:
+        case terrain::Id::wall:
+        case terrain::Id::rubble_high:
         {
                 if (rnd::one_in(250))
                 {
@@ -2801,6 +2802,11 @@ void PropAuraOfDecay::run_effect_on_env_at(const P& p) const
 
                         terrain->hit(DmgType::pure, nullptr);
                 }
+        }
+        break;
+
+        default:
+        {
         }
         break;
         }
