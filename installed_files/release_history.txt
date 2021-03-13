@@ -33,6 +33,7 @@ Gameplay
 * The stairs position is always lit, to make it less tedious to discover in huge dark rooms
 * Pylons are now always activated, instead of being activated by a switch - also removed some pylon types which wouldn't work well if they were always activated (e.g. burning)
 * Winning characters show up as statues inside the church building on the intro level, instead of graves outside the church
+* Players can now melee attack monsters while nailed by a Spike Gun (but still not while entangled)
 
 User interface
 * All fonts have been replaced with new ones (the reason for this is that the origins and license information of the previous ones was unknown - now this information is clearly listed in a font license text file distributed with the game)

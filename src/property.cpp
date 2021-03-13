@@ -35,6 +35,19 @@
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static bool is_player_aware_of_hostile_mon_at(const P& pos)
+{
+        const auto* const mon = map::first_actor_at_pos(pos);
+
+        return (
+                mon &&
+                mon->is_player_aware_of_me() &&
+                !map::g_player->is_leader_of(mon));
+}
+
+// -----------------------------------------------------------------------------
 // Property base class
 // -----------------------------------------------------------------------------
 Prop::Prop(PropId id) :
@@ -763,6 +776,19 @@ PropEnded PropNailed::affect_move_dir(const P& actor_pos, Dir& dir)
                 return PropEnded::no;
         }
 
+        // Allow the player to melee attack adjacent known monsters
+        if (m_owner->is_player())
+        {
+                const auto intended_target =
+                        actor_pos +
+                        dir_utils::offset(dir);
+
+                if (is_player_aware_of_hostile_mon_at(intended_target))
+                {
+                        return PropEnded::no;
+                }
+        }
+
         dir = Dir::center;
 
         if (m_owner->is_player())
@@ -812,6 +838,21 @@ PropEnded PropNailed::affect_move_dir(const P& actor_pos, Dir& dir)
         }
 
         return PropEnded::no;
+}
+
+int PropNailed::ability_mod(const AbilityId ability) const
+{
+        switch (ability)
+        {
+        case AbilityId::ranged:
+                return -10;
+
+        case AbilityId::melee:
+                return -20;
+
+        default:
+                return 0;
+        }
 }
 
 void PropWound::save() const
@@ -1059,9 +1100,9 @@ PropEnded PropConfused::affect_move_dir(const P& actor_pos, Dir& dir)
         {
                 std::vector<P> d_bucket;
 
-                for (const P& d : dir_utils::g_dir_list)
+                for (const auto& d : dir_utils::g_dir_list)
                 {
-                        const P tgt_p(actor_pos + d);
+                        const auto tgt_p = actor_pos + d;
 
                         if (!blocked.at(tgt_p))
                         {
@@ -1071,7 +1112,7 @@ PropEnded PropConfused::affect_move_dir(const P& actor_pos, Dir& dir)
 
                 if (!d_bucket.empty())
                 {
-                        const P& d = rnd::element(d_bucket);
+                        const auto& d = rnd::element(d_bucket);
 
                         dir = dir_utils::dir(d);
                 }
@@ -1340,7 +1381,7 @@ PropEnded PropFrenzied::affect_move_dir(const P& actor_pos, Dir& dir)
                 std::end(seen_foes_cells),
                 IsCloserToPos(actor_pos));
 
-        const P& closest_mon_pos = seen_foes_cells[0];
+        const auto& closest_mon_pos = seen_foes_cells[0];
 
         Array2<bool> blocked(map::dims());
 

@@ -154,7 +154,8 @@ static void print_corpses_at_player_msgs()
 {
         for (auto* const actor : game_time::g_actors)
         {
-                if ((actor->m_pos == map::g_player->m_pos) && (actor->m_state == ActorState::corpse))
+                if ((actor->m_pos == map::g_player->m_pos) &&
+                    (actor->m_state == ActorState::corpse))
                 {
                         const std::string name =
                                 text_format::first_to_upper(
@@ -182,9 +183,11 @@ static bool is_player_staggering_from_wounds()
         return nr_wounds >= min_nr_wounds_for_stagger;
 }
 
-static AllowAction pre_bump_terrains(actor::Actor& actor, const P& tgt)
+static AllowAction pre_bump_terrains(
+        actor::Actor& actor,
+        const P& target)
 {
-        const auto mobs = game_time::mobs_at_pos(tgt);
+        const auto mobs = game_time::mobs_at_pos(target);
 
         for (auto* mob : mobs)
         {
@@ -196,7 +199,7 @@ static AllowAction pre_bump_terrains(actor::Actor& actor, const P& tgt)
                 }
         }
 
-        const auto result = map::g_terrain.at(tgt)->pre_bump(actor);
+        const auto result = map::g_terrain.at(target)->pre_bump(actor);
 
         return result;
 }
@@ -254,16 +257,16 @@ static void print_mon_enter_non_walkable_terrain_msg(
         }
 }
 
-static void bump_terrains(actor::Actor& actor, const P& tgt)
+static void bump_terrains(actor::Actor& actor, const P& target)
 {
-        const auto mobs = game_time::mobs_at_pos(tgt);
+        const auto mobs = game_time::mobs_at_pos(target);
 
         for (auto* mob : mobs)
         {
                 mob->bump(actor);
         }
 
-        auto* const terrain = map::g_terrain.at(tgt);
+        auto* const terrain = map::g_terrain.at(target);
 
         if (!actor.is_player() &&
             !terrain->is_walkable() &&
@@ -320,17 +323,17 @@ static bool should_player_stagger(const P& target)
         }
 }
 
-static void move_player_non_center_direction(const P& tgt)
+static void move_player_non_center_direction(const P& target)
 {
         auto& player = *map::g_player;
 
-        const bool is_terrains_blocking_move =
+        const bool is_terrain_blocking_move =
                 map_parsers::BlocksActor(player, ParseActors::no)
-                        .run(tgt);
+                        .run(target);
 
         auto* const mon =
                 static_cast<actor::Mon*>(
-                        map::first_actor_at_pos(tgt));
+                        map::first_actor_at_pos(target));
 
         const auto is_aware_of_mon = (mon && mon->is_player_aware_of_me());
 
@@ -341,7 +344,7 @@ static void move_player_non_center_direction(const P& tgt)
                 return;
         }
 
-        const auto pre_move_result = pre_bump_terrains(player, tgt);
+        const auto pre_move_result = pre_bump_terrains(player, target);
 
         if (pre_move_result == AllowAction::no)
         {
@@ -350,7 +353,7 @@ static void move_player_non_center_direction(const P& tgt)
 
         if (mon &&
             !player.is_leader_of(mon) &&
-            !is_terrains_blocking_move &&
+            !is_terrain_blocking_move &&
             !is_aware_of_mon)
         {
                 player_bump_unkown_hostile_mon(*mon);
@@ -358,7 +361,7 @@ static void move_player_non_center_direction(const P& tgt)
                 return;
         }
 
-        if (!is_terrains_blocking_move)
+        if (!is_terrain_blocking_move)
         {
                 if (should_player_be_immobile())
                 {
@@ -369,7 +372,7 @@ static void move_player_non_center_direction(const P& tgt)
 
                         return;
                 }
-                else if (should_player_stagger(tgt))
+                else if (should_player_stagger(target))
                 {
                         msg_log::add("I stagger.", colors::msg_note());
 
@@ -383,7 +386,7 @@ static void move_player_non_center_direction(const P& tgt)
 
                 map::g_terrain.at(player.m_pos)->on_leave(player);
 
-                player.m_pos = tgt;
+                player.m_pos = target;
 
                 player_walk_on_item(map::g_items.at(player.m_pos));
 
@@ -393,7 +396,7 @@ static void move_player_non_center_direction(const P& tgt)
                 player.m_properties.end_prop(PropId::sanctuary);
         }
 
-        bump_terrains(player, tgt);
+        bump_terrains(player, target);
 }
 
 static void move_player(Dir dir)
@@ -409,7 +412,7 @@ static void move_player(Dir dir)
 
         player.m_properties.affect_move_dir(player.m_pos, dir);
 
-        const auto tgt = player.m_pos + dir_utils::offset(dir);
+        const auto target = player.m_pos + dir_utils::offset(dir);
 
         if (intended_dir == Dir::center)
         {
@@ -417,10 +420,10 @@ static void move_player(Dir dir)
         }
         else if (dir != Dir::center)
         {
-                move_player_non_center_direction(tgt);
+                move_player_non_center_direction(target);
         }
 
-        if (player.m_pos == tgt)
+        if (player.m_pos == target)
         {
                 // We are at the target position, this means that either:
                 // * the player moved to a different position, or

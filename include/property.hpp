@@ -785,6 +785,8 @@ public:
                 ++m_nr_spikes;
         }
 
+        int ability_mod(const AbilityId ability) const override;
+
         bool is_finished() const override
         {
                 return m_nr_spikes <= 0;
