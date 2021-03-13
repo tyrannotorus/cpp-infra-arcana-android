@@ -691,18 +691,31 @@ static void push_statue(const Context& context)
 
 using SpellSideEffect = std::function<void(const Context&)>;
 
-static const std::vector<SpellSideEffect> s_spell_side_effects {
-        create_dark_void,
-        create_doors,
-        create_trees,
-        create_water,
-        flay_human,
-        ignite_terrain,
-        open_close_doors,
-        push_statue,
-        spawn_monsters,
-        swap_wall_floor,
-};
+WeightedItems<SpellSideEffect> s_spell_side_effects {
+        {
+                create_dark_void,
+                create_doors,
+                create_trees,
+                create_water,
+                flay_human,
+                ignite_terrain,
+                open_close_doors,
+                push_statue,
+                spawn_monsters,
+                swap_wall_floor,
+        },
+        {
+                10,  // create_dark_void
+                15,  // create_doors
+                30,  // create_trees
+                30,  // create_water
+                50,  // flay_human
+                50,  // ignite_terrain
+                90,  // open_close_doors
+                90,  // push_statue
+                50,  // spawn_monsters
+                70,  // swap_wall_floor
+        }};
 
 }  // namespace spell_side_effects
 
@@ -1082,7 +1095,7 @@ void Spell::cast(
             caster->is_alive() &&
             allow_cast &&
             (base_max_spi_cost(skill) > 0) &&
-            rnd::one_in(10))
+            rnd::one_in(7))
         {
                 // Run a random side effect
                 const int d = 3;
@@ -1098,7 +1111,8 @@ void Spell::cast(
                 rnd::shuffle(nearby_positions);
 
                 const auto& side_effect =
-                        rnd::element(spell_side_effects::s_spell_side_effects);
+                        rnd::weighted_choice(
+                                spell_side_effects::s_spell_side_effects);
 
                 TRACE << "Running spell side effect" << std::endl;
 
