@@ -83,7 +83,8 @@ static void player_bump_known_hostile_mon(actor::Mon& mon)
 
         // If this is also a ranged weapon, ask if player really
         // intended to use it as melee weapon
-        if (wpn.data().ranged.is_ranged_wpn && config::warn_on_ranged_wpn_melee())
+        if (wpn.data().ranged.is_ranged_wpn &&
+            config::warn_on_ranged_wpn_melee())
         {
                 const auto answer =
                         query_player_attack_mon_with_ranged_wpn(wpn, mon);
@@ -98,11 +99,7 @@ static void player_bump_known_hostile_mon(actor::Mon& mon)
 
         player.m_tgt = &mon;
 
-        attack::melee(
-                &player,
-                player.m_pos,
-                mon,
-                wpn);
+        attack::melee(&player, player.m_pos, mon, wpn);
 }
 
 static void player_bump_unkown_hostile_mon(actor::Mon& mon)
@@ -301,6 +298,28 @@ static void on_player_waiting()
         }
 }
 
+static bool should_player_be_immobile()
+{
+        return map::g_player->enc_percent() >= g_enc_immobile_lvl;
+}
+
+static bool should_player_stagger(const P& target)
+{
+        const int enc = map::g_player->enc_percent();
+
+        const auto terrain_id = map::g_terrain.at(target)->id();
+
+        if (terrain_id == terrain::Id::liquid_shallow ||
+            terrain_id == terrain::Id::liquid_deep)
+        {
+                return false;
+        }
+        else
+        {
+                return enc >= 100 || is_player_staggering_from_wounds();
+        }
+}
+
 static void move_player_non_center_direction(const P& tgt)
 {
         auto& player = *map::g_player;
@@ -341,9 +360,7 @@ static void move_player_non_center_direction(const P& tgt)
 
         if (!is_terrains_blocking_move)
         {
-                const int enc = player.enc_percent();
-
-                if (enc >= g_enc_immobile_lvl)
+                if (should_player_be_immobile())
                 {
                         // TODO: Currently you can attempt to attack hidden
                         // adjacent monsters "for free" while you are too
@@ -352,10 +369,8 @@ static void move_player_non_center_direction(const P& tgt)
 
                         return;
                 }
-                else if ((enc >= 100) || is_player_staggering_from_wounds())
+                else if (should_player_stagger(tgt))
                 {
-                        // TODO: This probably sounds weird when also swimming
-                        // or wading
                         msg_log::add("I stagger.", colors::msg_note());
 
                         player.m_properties.apply(new PropWaiting());
@@ -437,7 +452,7 @@ static void move_mon(actor::Mon& mon, Dir dir)
         // Movement direction is stored for AI purposes
         mon.m_ai_state.last_dir_moved = dir;
 
-        const P target_p(mon.m_pos + dir_utils::offset(dir));
+        const auto target_p = mon.m_pos + dir_utils::offset(dir);
 
 #ifndef NDEBUG
         if (target_p != mon.m_pos)

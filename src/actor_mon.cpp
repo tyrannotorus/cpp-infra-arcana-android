@@ -183,7 +183,7 @@ std::vector<Actor*> Mon::foes_aware_of() const
                 const auto flood = floodfill(m_pos, blocked);
 
                 // Add all player-hostile monsters which the player is aware of
-                for (Actor* const actor : game_time::g_actors)
+                for (auto* const actor : game_time::g_actors)
                 {
                         if (!actor->is_player() &&
                             !actor->is_actor_my_leader(map::g_player) &&
@@ -194,12 +194,11 @@ std::vector<Actor*> Mon::foes_aware_of() const
                         }
                 }
         }
-        // Player is not my leader
         else if (is_aware_of_player())
         {
                 result.push_back(map::g_player);
 
-                for (Actor* const actor : game_time::g_actors)
+                for (auto* const actor : game_time::g_actors)
                 {
                         if (!actor->is_player() &&
                             actor->is_actor_my_leader(map::g_player))
