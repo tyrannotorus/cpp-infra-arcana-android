@@ -54,8 +54,7 @@ static bool s_is_tiles_mode = false;
 static bool s_is_fullscreen = false;
 static bool s_is_2x_scale_fullscreen_requested = false;
 static bool s_is_2x_scale_fullscreen_enabled = false;
-static bool s_is_tiles_wall_full_square = false;
-static bool s_is_text_mode_wall_full_square = false;
+static bool s_text_mode_filled_walls = true;
 static bool s_warn_on_throw_valuable = false;
 static bool s_warn_on_light_explosive = false;
 static bool s_warn_on_drink_malign_potion = false;
@@ -232,8 +231,7 @@ static void set_default_variables()
         s_is_fullscreen = false;
         s_is_2x_scale_fullscreen_requested = true;
         s_is_2x_scale_fullscreen_enabled = true;
-        s_is_tiles_wall_full_square = false;
-        s_is_text_mode_wall_full_square = true;
+        s_text_mode_filled_walls = true;
         s_is_intro_lvl_skipped = false;
         s_is_intro_popup_skipped = false;
         s_is_any_key_confirm_more = false;
@@ -427,41 +425,33 @@ static void player_sets_option(
 
         case 9:
         {
-                // Tiles mode wall symbol
-                s_is_tiles_wall_full_square = !s_is_tiles_wall_full_square;
+                // Draw walls as filled rectangle in text mode
+                s_text_mode_filled_walls = !s_text_mode_filled_walls;
         }
         break;
 
         case 10:
-        {
-                // Text mode wall symbol
-                s_is_text_mode_wall_full_square =
-                        !s_is_text_mode_wall_full_square;
-        }
-        break;
-
-        case 11:
         {
                 // Skip intro level
                 s_is_intro_lvl_skipped = !s_is_intro_lvl_skipped;
         }
         break;
 
-        case 12:
+        case 11:
         {
                 // Skip intro popup
                 s_is_intro_popup_skipped = !s_is_intro_popup_skipped;
         }
         break;
 
-        case 13:
+        case 12:
         {
                 // Confirm "more" with any key
                 s_is_any_key_confirm_more = !s_is_any_key_confirm_more;
         }
         break;
 
-        case 14:
+        case 13:
         {
                 // Display hints
                 s_display_hints = !s_display_hints;
@@ -470,49 +460,49 @@ static void player_sets_option(
         }
         break;
 
-        case 15:
+        case 14:
         {
                 // Always warn when a new monster appears
                 s_always_warn_new_mon = !s_always_warn_new_mon;
         }
         break;
 
-        case 16:
+        case 15:
         {
                 // Warn when throwing valuable items
                 s_warn_on_throw_valuable = !s_warn_on_throw_valuable;
         }
         break;
 
-        case 17:
+        case 16:
         {
                 // Warn when lighting explovies
                 s_warn_on_light_explosive = !s_warn_on_light_explosive;
         }
         break;
 
-        case 18:
+        case 17:
         {
                 // Warn when drinking known malign potions
                 s_warn_on_drink_malign_potion = !s_warn_on_drink_malign_potion;
         }
         break;
 
-        case 19:
+        case 18:
         {
                 // Print warning when melee attacking with ranged weapons
                 s_warn_on_ranged_wpn_melee = !s_warn_on_ranged_wpn_melee;
         }
         break;
 
-        case 20:
+        case 19:
         {
                 // Ranged weapon auto reload
                 s_is_ranged_wpn_auto_reload = !s_is_ranged_wpn_auto_reload;
         }
         break;
 
-        case 21:
+        case 20:
         {
                 // Projectile delay
                 const P p(s_opt_values_x_pos, browser.y());
@@ -554,7 +544,7 @@ static void player_sets_option(
         }
         break;
 
-        case 22:
+        case 21:
         {
                 // Shotgun delay
                 const P p(s_opt_values_x_pos, browser.y());
@@ -596,7 +586,7 @@ static void player_sets_option(
         }
         break;
 
-        case 23:
+        case 22:
         {
                 // Explosion delay
                 const P p(s_opt_values_x_pos, browser.y());
@@ -638,7 +628,7 @@ static void player_sets_option(
         }
         break;
 
-        case 24:
+        case 23:
         {
                 // Reset to defaults
                 if (direction == OptionToggleDirecton::enter)
@@ -720,10 +710,7 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_is_2x_scale_fullscreen_enabled = lines.front() == "1";
         lines.erase(std::begin(lines));
 
-        s_is_tiles_wall_full_square = lines.front() == "1";
-        lines.erase(std::begin(lines));
-
-        s_is_text_mode_wall_full_square = lines.front() == "1";
+        s_text_mode_filled_walls = lines.front() == "1";
         lines.erase(std::begin(lines));
 
         s_is_intro_lvl_skipped = lines.front() == "1";
@@ -817,8 +804,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(s_is_fullscreen ? "1" : "0");
         lines.emplace_back(s_is_2x_scale_fullscreen_requested ? "1" : "0");
         lines.emplace_back(s_is_2x_scale_fullscreen_enabled ? "1" : "0");
-        lines.emplace_back(s_is_tiles_wall_full_square ? "1" : "0");
-        lines.emplace_back(s_is_text_mode_wall_full_square ? "1" : "0");
+        lines.emplace_back(s_text_mode_filled_walls ? "1" : "0");
         lines.emplace_back(s_is_intro_lvl_skipped ? "1" : "0");
         lines.emplace_back(s_is_intro_popup_skipped ? "1" : "0");
         lines.emplace_back(s_is_any_key_confirm_more ? "1" : "0");
@@ -960,14 +946,9 @@ int map_cell_px_h()
         return s_map_cell_px_h;
 }
 
-bool is_tiles_wall_full_square()
+bool text_mode_filled_walls()
 {
-        return s_is_tiles_wall_full_square;
-}
-
-bool is_text_mode_wall_full_square()
-{
-        return s_is_text_mode_wall_full_square;
+        return s_text_mode_filled_walls;
 }
 
 bool is_audio_enabled()
@@ -1108,7 +1089,7 @@ void set_2x_scale_fullscreen_enabled(const bool value)
 // -----------------------------------------------------------------------------
 ConfigState::ConfigState() :
 
-        m_browser(25)
+        m_browser(24)
 {
         m_browser.enable_left_right_keys();
 }
@@ -1264,14 +1245,9 @@ void ConfigState::draw()
                          ? "Yes (if possible)"
                          : "No"},
 
-                {"Tiles mode wall symbol",
-                 s_is_tiles_wall_full_square
-                         ? "Full square"
-                         : "Pseudo-3D"},
-
                 {"Text mode wall symbol",
-                 s_is_text_mode_wall_full_square
-                         ? "Full square"
+                 s_text_mode_filled_walls
+                         ? "Filled rectangle"
                          : "Hash sign"},
 
                 {"Skip intro level",

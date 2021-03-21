@@ -24,6 +24,8 @@
 static Array2<CellRenderData> s_render_array(0, 0);
 static Array2<CellRenderData> s_render_array_player_memory(0, 0);
 
+static char s_filled_rect_char = 1;
+
 static void clear_render_array()
 {
         std::fill(
@@ -56,26 +58,34 @@ static void set_terrains()
                         gore_character = t->gore_character();
                 }
 
-                if (gore_tile == gfx::TileId::END)
+                if (gore_tile != gfx::TileId::END)
                 {
-                        render_data.tile = t->tile();
-                        render_data.character = t->character();
-                        render_data.color = t->color();
-
-                        const Color terrain_color_bg = t->color_bg();
-
-                        if (terrain_color_bg != colors::black())
-                        {
-                                render_data.color_bg =
-                                        terrain_color_bg;
-                        }
-                }
-                else
-                {
-                        // Has gore
+                        // Override with "gore"
                         render_data.tile = gore_tile;
                         render_data.character = gore_character;
                         render_data.color = colors::red();
+
+                        continue;
+                }
+
+                render_data.tile = t->tile();
+                render_data.character = t->character();
+                render_data.color = t->color();
+
+                const Color terrain_color_bg = t->color_bg();
+
+                if (terrain_color_bg != colors::black())
+                {
+                        render_data.color_bg =
+                                terrain_color_bg;
+                }
+
+                // TODO: Do in post_process_wall_tiles instead (but it needs
+                // refactoring first)
+                if ((map::g_terrain.at(i)->id() == terrain::Id::wall) &&
+                    config::text_mode_filled_walls())
+                {
+                        render_data.character = s_filled_rect_char;
                 }
         }
 }
@@ -372,6 +382,60 @@ static void set_unseen_cells_from_player_memory()
         }
 }
 
+static void draw_filled_rect(const P& view_pos, const Color& color)
+{
+        const auto px_pos = io::gui_to_px_coords(Panel::map, view_pos);
+
+        const auto px_dims =
+                P(config::gui_cell_px_w(),
+                  config::gui_cell_px_h());
+
+        io::draw_rectangle_filled({px_pos, px_pos + px_dims - 1}, color);
+}
+
+static void draw_render_array_tile(const P& view_pos, CellRenderData& data)
+{
+        const bool has_drawable_tile = data.tile != gfx::TileId::END;
+
+        if (has_drawable_tile)
+        {
+                io::draw_tile(
+                        data.tile,
+                        Panel::map,
+                        view_pos,
+                        data.color,
+                        io::DrawBg::yes,
+                        data.color_bg);
+        }
+}
+
+static void draw_render_array_char(const P& view_pos, CellRenderData& data)
+{
+        if (data.character == s_filled_rect_char)
+        {
+                draw_filled_rect(view_pos, data.color);
+
+                return;
+        }
+
+        const bool has_drawable_char =
+                (data.character != 0) &&
+                (data.character != ' ');
+
+        if (!has_drawable_char)
+        {
+                return;
+        }
+
+        io::draw_character(
+                data.character,
+                Panel::map,
+                view_pos,
+                data.color,
+                io::DrawBg::yes,
+                data.color_bg);
+}
+
 static void draw_render_array()
 {
         const R map_view = viewport::get_map_view_area();
@@ -380,8 +444,7 @@ static void draw_render_array()
         {
                 for (int y = map_view.p0.y; y <= map_view.p1.y; ++y)
                 {
-                        const P map_pos = P(x, y);
-
+                        const P map_pos(x, y);
                         const P view_pos = viewport::to_view_pos(map_pos);
 
                         if (!map::is_pos_inside_map(map_pos))
@@ -391,28 +454,13 @@ static void draw_render_array()
 
                         auto& render_data = s_render_array.at(map_pos);
 
-                        if (config::is_tiles_mode() &&
-                            (render_data.tile != gfx::TileId::END))
+                        if (config::is_tiles_mode())
                         {
-                                io::draw_tile(
-                                        render_data.tile,
-                                        Panel::map,
-                                        view_pos,
-                                        render_data.color,
-                                        io::DrawBg::yes,
-                                        render_data.color_bg);
+                                draw_render_array_tile(view_pos, render_data);
                         }
-                        else if (
-                                (render_data.character != 0) &&
-                                (render_data.character != ' '))
+                        else
                         {
-                                io::draw_character(
-                                        render_data.character,
-                                        Panel::map,
-                                        view_pos,
-                                        render_data.color,
-                                        io::DrawBg::yes,
-                                        render_data.color_bg);
+                                draw_render_array_char(view_pos, render_data);
                         }
                 }
         }
@@ -597,7 +645,7 @@ void run()
 
         set_terrains();
 
-        if (config::is_tiles_mode() && !config::is_tiles_wall_full_square())
+        if (config::is_tiles_mode())
         {
                 post_process_wall_tiles();
         }

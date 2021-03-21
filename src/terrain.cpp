@@ -395,24 +395,16 @@ void Terrain::try_put_gore()
                 return;
         }
 
-        const int roll_character = rnd::range(1, 4);
+        const int roll_character = rnd::range(1, 2);
 
         switch (roll_character)
         {
         case 1:
-                m_gore_character = ',';
+                m_gore_character = '\'';
                 break;
 
         case 2:
                 m_gore_character = '`';
-                break;
-
-        case 3:
-                m_gore_character = 39;
-                break;
-
-        case 4:
-                m_gore_character = ';';
                 break;
 
         default:
@@ -778,50 +770,23 @@ Color Wall::color_default() const
         return colors::yellow();
 }
 
-char Wall::character() const
-{
-        return config::is_text_mode_wall_full_square()
-                ? 10
-                : '#';
-}
-
 gfx::TileId Wall::front_wall_tile() const
 {
-        if (config::is_tiles_wall_full_square())
+        switch (m_type)
         {
-                switch (m_type)
-                {
-                case WallType::common:
-                case WallType::common_alt:
-                        return gfx::TileId::wall_top;
+        case WallType::common:
+                return gfx::TileId::wall_front;
 
-                case WallType::cliff:
-                case WallType::cave:
-                        return gfx::TileId::cave_wall_top;
+        case WallType::common_alt:
+                return gfx::TileId::wall_front_alt1;
 
-                case WallType::leng_monestary:
-                case WallType::egypt:
-                        return gfx::TileId::egypt_wall_top;
-                }
-        }
-        else
-        {
-                switch (m_type)
-                {
-                case WallType::common:
-                        return gfx::TileId::wall_front;
+        case WallType::cliff:
+        case WallType::cave:
+                return gfx::TileId::cave_wall_front;
 
-                case WallType::common_alt:
-                        return gfx::TileId::wall_front_alt1;
-
-                case WallType::cliff:
-                case WallType::cave:
-                        return gfx::TileId::cave_wall_front;
-
-                case WallType::leng_monestary:
-                case WallType::egypt:
-                        return gfx::TileId::egypt_wall_front;
-                }
+        case WallType::leng_monestary:
+        case WallType::egypt:
+                return gfx::TileId::egypt_wall_front;
         }
 
         ASSERT(false && "Failed to set front wall tile");

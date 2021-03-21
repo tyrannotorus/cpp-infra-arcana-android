@@ -582,7 +582,6 @@ public:
         }
 
         std::string name(Article article) const override;
-        char character() const override;
         gfx::TileId front_wall_tile() const;
         gfx::TileId top_wall_tile() const;
 

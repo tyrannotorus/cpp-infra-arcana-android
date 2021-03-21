@@ -68,7 +68,7 @@ static void init_data_list()
         d.make_obj = [](const P& p) {
                 return new terrain::Wall(p);
         };
-        d.character = config::is_text_mode_wall_full_square() ? 10 : '#';
+        d.character = '#';
         d.tile = gfx::TileId::wall_top;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::burrowing);
@@ -338,7 +338,7 @@ static void init_data_list()
         d.make_obj = [](const P& p) {
                 return new terrain::RubbleHigh(p);
         };
-        d.character = 8;
+        d.character = ';';
         d.tile = gfx::TileId::rubble_high;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::ooze);
@@ -384,7 +384,7 @@ static void init_data_list()
         d.make_obj = [](const P& p) {
                 return new terrain::Statue(p);
         };
-        d.character = 5;  //Paragraph sign
+        d.character = '|';
         d.tile = gfx::TileId::witch_or_warlock;
         d.is_projectile_passable = false;
         d.is_los_passable = false;
@@ -417,7 +417,7 @@ static void init_data_list()
         d.make_obj = [](const P& p) {
                 return new terrain::Chest(p);
         };
-        d.character = '+';
+        d.character = '7';
         d.tile = gfx::TileId::chest_closed;
         d.can_have_blood = false;
         d.can_have_gore = false;
@@ -542,7 +542,7 @@ static void init_data_list()
         d.make_obj = [](const P& p) {
                 return new terrain::Tomb(p);
         };
-        d.character = ']';
+        d.character = '7';
         d.tile = gfx::TileId::tomb_closed;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::flying);

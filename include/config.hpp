@@ -58,9 +58,7 @@ int map_cell_px_w();
 
 int map_cell_px_h();
 
-bool is_text_mode_wall_full_square();
-
-bool is_tiles_wall_full_square();
+bool text_mode_filled_walls();
 
 bool is_audio_enabled();
 

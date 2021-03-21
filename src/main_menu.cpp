@@ -255,7 +255,7 @@ void MainMenuState::draw()
                         Panel::screen,
                         {panels::center_x(Panel::screen),
                          (panels::h(Panel::screen) * 3) / 12},
-                        colors::gold());
+                        colors::light_white());
         }
 
         if (config::is_gj_mode())
