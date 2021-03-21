@@ -127,6 +127,7 @@ enum class Id
         scroll_opening,
         scroll_pest,
         scroll_premonition,
+        scroll_erudition,
         scroll_res,
         scroll_see_invis,
         scroll_slow,

@@ -48,6 +48,7 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"poisoned", PropId::poisoned},
         {"hallucinating", PropId::hallucinating},
         {"premonition", PropId::premonition},
+        {"erudition", PropId::erudition},
         {"r_acid", PropId::r_acid},
         {"r_blind", PropId::r_blind},
         {"r_breath", PropId::r_breath},
@@ -728,6 +729,17 @@ static void init_data_list()
         d.descr = "+75% chance to evade attacks.";
         d.msg_start_player = "I feel unassailable.";
         d.msg_end_player = "I feel more vulnerable.";
+        d.allow_display_turns = true;
+        d.allow_test_on_bot = true;
+        d.alignment = PropAlignment::good;
+        add(d);
+
+        d.id = PropId::erudition;
+        d.name = "Erudition";
+        d.name_short = "Erudition";
+        d.descr = "Spell skill is improved by one level.";
+        d.msg_start_player = "Mystic secrets are revealed to me!";
+        d.msg_end_player = "I feel more ignorant.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::good;

@@ -54,7 +54,7 @@ typedef std::unordered_map<std::string, SpellId> StrToSpellIdMap;
 
 static const StrToSpellIdMap s_str_to_spell_id_map = {
         {"aura_of_decay", SpellId::aura_of_decay},
-        {"spectral_wpns", SpellId::spectral_wpns},
+        {"spectral_weapons", SpellId::spectral_weapons},
         {"aza_wrath", SpellId::aza_wrath},
         {"bless", SpellId::bless},
         {"burn", SpellId::burn},
@@ -63,6 +63,7 @@ static const StrToSpellIdMap s_str_to_spell_id_map = {
         {"deafen", SpellId::deafen},
         {"disease", SpellId::disease},
         {"premonition", SpellId::premonition},
+        {"erudition", SpellId::erudition},
         {"enfeeble", SpellId::enfeeble},
         {"cleansing_fire", SpellId::cleansing_fire},
         {"sanctuary", SpellId::sanctuary},
@@ -76,7 +77,7 @@ static const StrToSpellIdMap s_str_to_spell_id_map = {
         {"mi_go_hypno", SpellId::mi_go_hypno},
         {"opening", SpellId::opening},
         {"pestilence", SpellId::pestilence},
-        {"res", SpellId::res},
+        {"res", SpellId::resistance},
         {"see_invis", SpellId::see_invis},
         {"slow", SpellId::slow},
         {"haste", SpellId::haste},
@@ -755,6 +756,63 @@ static terrain::DidOpen run_opening_spell_for_metal_door(
         return terrain::DidOpen::no;
 }
 
+static std::string get_noise_descr(const bool is_noisy)
+{
+        const std::string str =
+                is_noisy
+                ? "Casting this spell requires making sounds."
+                : "This spell can be cast silently.";
+
+        return str;
+}
+
+static std::string get_skill_descr(
+        const SpellSkill skill,
+        const SpellSrc source)
+{
+        std::string str = "Skill level: ";
+
+        str += text_format::first_to_upper(spells::skill_to_str(skill));
+
+        std::vector<std::string> bon_words;
+
+        if (source == SpellSrc::manuscript)
+        {
+                bon_words.emplace_back("manuscript");
+        }
+
+        if (player_spells::is_getting_altar_bonus())
+        {
+                bon_words.emplace_back("altar");
+        }
+
+        if (map::g_player->m_properties.has(PropId::erudition))
+        {
+                bon_words.emplace_back("erudition");
+        }
+
+        for (size_t i = 0; i < bon_words.size(); ++i)
+        {
+                if (i == 0)
+                {
+                        str += " (";
+                }
+
+                str += bon_words[i];
+
+                if (i < (bon_words.size() - 1))
+                {
+                        str += ", ";
+                }
+                else
+                {
+                        str += ")";
+                }
+        }
+
+        return str;
+}
+
 // -----------------------------------------------------------------------------
 // spells
 // -----------------------------------------------------------------------------
@@ -809,8 +867,8 @@ Spell* make(const SpellId spell_id)
         case SpellId::pestilence:
                 return new SpellPestilence();
 
-        case SpellId::spectral_wpns:
-                return new SpellSpectralWpns();
+        case SpellId::spectral_weapons:
+                return new SpellSpectralWeapons();
 
         case SpellId::opening:
                 return new SpellOpening();
@@ -839,8 +897,8 @@ Spell* make(const SpellId spell_id)
         case SpellId::deafen:
                 return new SpellDeafen();
 
-        case SpellId::res:
-                return new SpellRes();
+        case SpellId::resistance:
+                return new SpellResistance();
 
         case SpellId::light:
                 return new SpellLight();
@@ -859,6 +917,9 @@ Spell* make(const SpellId spell_id)
 
         case SpellId::premonition:
                 return new SpellPremonition();
+
+        case SpellId::erudition:
+                return new SpellErudition();
 
         case SpellId::identify:
                 return new SpellIdentify();
@@ -1087,8 +1148,14 @@ void Spell::cast(
         {
                 run_effect(caster, skill);
 
-                // Casting spells ends cloaking
+                // Casting spells ends cloaking and erudition (but do not end
+                // erudition if that is the spell that was cast now).
                 caster->m_properties.end_prop(PropId::cloaked);
+
+                if (id() != SpellId::erudition)
+                {
+                        caster->m_properties.end_prop(PropId::erudition);
+                }
         }
 
         if (caster->is_player() &&
@@ -1162,17 +1229,7 @@ std::vector<std::string> Spell::descr(
 
         if (spell_src != SpellSrc::manuscript)
         {
-                if (is_noisy(skill))
-                {
-                        lines.emplace_back(
-                                "Casting this spell requires making sounds.");
-                }
-                else
-                {
-                        // The spell is silent
-                        lines.emplace_back(
-                                "This spell can be cast silently.");
-                }
+                lines.push_back(get_noise_descr(is_noisy(skill)));
         }
 
         if (!player_bon::is_bg(Bg::exorcist))
@@ -1187,42 +1244,9 @@ std::vector<std::string> Spell::descr(
 
         if (can_be_improved_with_skill())
         {
-                std::string skill_str =
-                        text_format::first_to_upper(
-                                spells::skill_to_str(skill));
+                const auto level_descr = get_skill_descr(skill, spell_src);
 
-                const bool is_scroll =
-                        (spell_src == SpellSrc::manuscript);
-
-                const bool is_altar_bonus =
-                        player_spells::is_getting_altar_bonus();
-
-                if (is_scroll || is_altar_bonus)
-                {
-                        skill_str += " (";
-                }
-
-                if (is_scroll)
-                {
-                        skill_str += "casting from manuscript";
-                }
-
-                if (is_altar_bonus)
-                {
-                        if (is_scroll)
-                        {
-                                skill_str += ", ";
-                        }
-
-                        skill_str += "standing at altar";
-                }
-
-                if (is_scroll || is_altar_bonus)
-                {
-                        skill_str += ")";
-                }
-
-                lines.push_back("Skill level: " + skill_str);
+                lines.push_back(level_descr);
         }
 
         return lines;
@@ -2144,7 +2168,7 @@ bool SpellPestilence::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 // Animate weapons
 // -----------------------------------------------------------------------------
-void SpellSpectralWpns::run_effect(
+void SpellSpectralWeapons::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
 {
@@ -2261,7 +2285,7 @@ void SpellSpectralWpns::run_effect(
         TRACE_FUNC_END;
 }
 
-std::vector<std::string> SpellSpectralWpns::descr_specific(
+std::vector<std::string> SpellSpectralWeapons::descr_specific(
         const SpellSkill skill) const
 {
         std::vector<std::string> descr;
@@ -2876,10 +2900,6 @@ std::vector<std::string> SpellSpellShield::descr_specific(
                 "Grants protection against harmful spells. The effect lasts "
                 "until a spell is blocked.");
 
-        descr.emplace_back(
-                "Skill level affects the amount of Spirit one needs to spend "
-                "to cast the spell.");
-
         return descr;
 }
 
@@ -2983,10 +3003,61 @@ std::vector<std::string> SpellPremonition::descr_specific(
         duration_range.min = 4 + (int)skill * 4;
         duration_range.max = duration_range.min * 2;
 
-        descr.push_back(
+        descr.emplace_back(
                 "The spell lasts " +
                 duration_range.str() +
                 " turns.");
+
+        return descr;
+}
+
+// -----------------------------------------------------------------------------
+// Erudition
+// -----------------------------------------------------------------------------
+int SpellErudition::base_max_spi_cost(const SpellSkill skill) const
+{
+        return 7 - (int)skill;
+}
+
+Range SpellErudition::get_duration_range(SpellSkill skill) const
+{
+        Range duration_range;
+        duration_range.min = ((int)skill + 1) * 2;
+        duration_range.max = duration_range.min * 2;
+
+        return duration_range;
+}
+
+void SpellErudition::run_effect(
+        actor::Actor* const caster,
+        const SpellSkill skill) const
+{
+        const auto duration_range = get_duration_range(skill);
+
+        auto* prop = property_factory::make(PropId::erudition);
+
+        prop->set_duration(duration_range.roll());
+
+        caster->m_properties.apply(prop);
+}
+
+std::vector<std::string> SpellErudition::descr_specific(
+        const SpellSkill skill) const
+{
+        std::vector<std::string> descr;
+
+        descr.emplace_back(
+                "Temporarily bestows the caster with an expanded understanding "
+                "of the esoteric mechanisms behind magical practice. For "
+                "the next spell casting, skill is improved by one level.");
+
+        const auto duration_range = get_duration_range(skill);
+
+        descr.emplace_back(
+                "The spell lasts " +
+                duration_range.str() +
+                " turns, or until a spell is cast (either from a Manuscript "
+                "or from memory).");
 
         return descr;
 }
@@ -3131,7 +3202,7 @@ std::vector<std::string> SpellTeleport::descr_specific(
 // -----------------------------------------------------------------------------
 // Resistance
 // -----------------------------------------------------------------------------
-void SpellRes::run_effect(
+void SpellResistance::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
 {
@@ -3147,7 +3218,7 @@ void SpellRes::run_effect(
         caster->m_properties.apply(prop_r_elec);
 }
 
-std::vector<std::string> SpellRes::descr_specific(
+std::vector<std::string> SpellResistance::descr_specific(
         const SpellSkill skill) const
 {
         std::vector<std::string> descr;
@@ -3165,7 +3236,7 @@ std::vector<std::string> SpellRes::descr_specific(
         return descr;
 }
 
-bool SpellRes::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellResistance::allow_mon_cast_now(actor::Mon& mon) const
 {
         const bool has_rfire = mon.m_properties.has(PropId::r_fire);
         const bool has_relec = mon.m_properties.has(PropId::r_elec);

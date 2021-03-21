@@ -57,6 +57,7 @@ enum class PropId
         blessed,
         cursed,
         premonition,
+        erudition,
         magic_searching,
         entangled,
         tele_ctrl,

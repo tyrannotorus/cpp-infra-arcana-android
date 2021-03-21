@@ -279,7 +279,16 @@ SpellSkill spell_skill(const SpellId id)
 
         auto skill = s_spell_skills[(size_t)id];
 
-        if ((skill != SpellSkill::master) && is_getting_altar_bonus())
+        // Raise the skill one level if at an altar
+        if ((skill != SpellSkill::master) &&
+            is_getting_altar_bonus())
+        {
+                skill = (SpellSkill)((int)skill + 1);
+        }
+
+        // Raise the skill one level if player has erudition
+        if ((skill != SpellSkill::master) &&
+            map::g_player->m_properties.has(PropId::erudition))
         {
                 skill = (SpellSkill)((int)skill + 1);
         }

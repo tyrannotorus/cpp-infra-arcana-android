@@ -109,6 +109,9 @@ Prop* make(const PropId id)
         case PropId::premonition:
                 return new PropPremonition();
 
+        case PropId::erudition:
+                return new Prop(id);
+
         case PropId::magic_searching:
                 return new PropMagicSearching();
 

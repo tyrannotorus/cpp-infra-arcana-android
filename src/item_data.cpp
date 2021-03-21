@@ -1545,7 +1545,7 @@ void init()
 
         reset_data(d, ItemType::scroll);
         d.id = Id::scroll_res;
-        d.spell_cast_from_scroll = SpellId::res;
+        d.spell_cast_from_scroll = SpellId::resistance;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
@@ -1560,7 +1560,7 @@ void init()
 
         reset_data(d, ItemType::scroll);
         d.id = Id::scroll_spectral_wpns;
-        d.spell_cast_from_scroll = SpellId::spectral_wpns;
+        d.spell_cast_from_scroll = SpellId::spectral_weapons;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
@@ -1581,6 +1581,11 @@ void init()
         reset_data(d, ItemType::scroll);
         d.id = Id::scroll_premonition;
         d.spell_cast_from_scroll = SpellId::premonition;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::scroll);
+        d.id = Id::scroll_erudition;
+        d.spell_cast_from_scroll = SpellId::erudition;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);

@@ -1093,9 +1093,9 @@ std::vector<ColoredString> bg_descr(const Bg id)
                     std::to_string(s_occultist_upgrade_lvl_1) +
                     " and " +
                     std::to_string(s_occultist_upgrade_lvl_2) +
-                    ", all spells "
-                    "belonging to the chosen domain are cast with greater "
-                    "power. This choice also determines starting spells");
+                    ", all spells belonging to the chosen domain are cast at "
+                    "a higher skill level. This choice also determines "
+                    "starting spells");
                 put("");
                 put("-50% shock taken from casting spells, and from carrying, "
                     "using or identifying strange items (e.g. drinking a "

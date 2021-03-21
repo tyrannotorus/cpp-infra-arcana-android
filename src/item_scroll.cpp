@@ -41,6 +41,13 @@ static SpellSkill player_skill_for_scroll(SpellId spell_id)
                 skill = (SpellSkill)((int)skill + 1);
         }
 
+        // Raise the skill one level if player has erudition
+        if ((skill != SpellSkill::master) &&
+            map::g_player->m_properties.has(PropId::erudition))
+        {
+                skill = (SpellSkill)((int)skill + 1);
+        }
+
         return skill;
 }
 

@@ -40,15 +40,16 @@ enum class SpellId
         terrify,
 
         // Player only
-        spectral_wpns,
+        spectral_weapons,
         aza_wrath,
         bless,
         premonition,
+        erudition,
         identify,
         light,
         mayhem,
         opening,
-        res,
+        resistance,
         see_invis,
         transmut,
 
@@ -750,10 +751,10 @@ private:
         }
 };
 
-class SpellSpectralWpns : public Spell
+class SpellSpectralWeapons : public Spell
 {
 public:
-        SpellSpectralWpns() = default;
+        SpellSpectralWeapons() = default;
 
         bool player_can_learn() const override
         {
@@ -767,7 +768,7 @@ public:
 
         SpellId id() const override
         {
-                return SpellId::spectral_wpns;
+                return SpellId::spectral_weapons;
         }
 
         OccultistDomain domain() const override
@@ -1594,6 +1595,56 @@ private:
         }
 };
 
+class SpellErudition : public Spell
+{
+public:
+        SpellErudition() = default;
+
+        bool player_can_learn() const override
+        {
+                return true;
+        }
+
+        std::string name() const override
+        {
+                return "Erudition";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::erudition;
+        }
+
+        OccultistDomain domain() const override
+        {
+                return OccultistDomain::clairvoyant;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::disturbing;
+        }
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override;
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill) const override;
+
+private:
+        int base_max_spi_cost(SpellSkill skill) const override;
+
+        bool is_noisy(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return false;
+        }
+
+        Range get_duration_range(SpellSkill skill) const;
+};
+
 class SpellIdentify : public Spell
 {
 public:
@@ -1642,10 +1693,10 @@ private:
         }
 };
 
-class SpellRes : public Spell
+class SpellResistance : public Spell
 {
 public:
-        SpellRes() = default;
+        SpellResistance() = default;
 
         bool allow_mon_cast_now(actor::Mon& mon) const override;
 
@@ -1666,7 +1717,7 @@ public:
 
         SpellId id() const override
         {
-                return SpellId::res;
+                return SpellId::resistance;
         }
 
         OccultistDomain domain() const override

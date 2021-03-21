@@ -6,7 +6,13 @@
 
 #include "catch.hpp"
 
+#include "actor_player.hpp"
+#include "item.hpp"
+#include "item_factory.hpp"
+#include "item_scroll.hpp"
 #include "map.hpp"
+#include "player_spells.hpp"
+#include "property_factory.hpp"
 #include "spells.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
@@ -78,4 +84,96 @@ TEST_CASE("Test opening spell effect")
         REQUIRE(metal_door->is_open());
         REQUIRE(!lever_1->is_left_pos());
         REQUIRE(!lever_2->is_left_pos());
+}
+
+TEST_CASE("Test spell bonuses for learned spells")
+{
+        test_utils::init_all();
+
+        auto& player = *map::g_player;
+
+        player.m_pos.set(5, 5);
+
+        player_spells::learn_spell(SpellId::heal, Verbose::no);
+
+        REQUIRE(player_spells::is_spell_learned(SpellId::heal));
+
+        REQUIRE(
+                player_spells::spell_skill(SpellId::heal) ==
+                SpellSkill::basic);
+
+        map::put(new terrain::Altar(player.m_pos.with_x_offset(1)));
+
+        REQUIRE(
+                player_spells::spell_skill(SpellId::heal) ==
+                SpellSkill::expert);
+
+        player.m_properties.apply(property_factory::make(PropId::erudition));
+
+        REQUIRE(
+                player_spells::spell_skill(SpellId::heal) ==
+                SpellSkill::master);
+
+        map::put(new terrain::Wall(player.m_pos.with_x_offset(1)));
+
+        REQUIRE(
+                player_spells::spell_skill(SpellId::heal) ==
+                SpellSkill::expert);
+}
+
+TEST_CASE("Test spell bonuses for manuscripts")
+{
+        // NOTE: There is no functionality to get a spell skill from a scroll,
+        // so instead we actually cast the spell and check the effect. This is
+        // somewhat ugly though since it depends on game design.
+
+        test_utils::init_all();
+
+        auto& player = *map::g_player;
+
+        player.m_pos.set(5, 5);
+
+        auto* const item = item::make(item::Id::scroll_heal);
+        auto* const scroll = static_cast<scroll::Scroll*>(item);
+
+        // Casting healing from manuscript (expert level) should clear disease,
+        // but not poison.
+        player.m_properties.apply(property_factory::make(PropId::diseased));
+        player.m_properties.apply(property_factory::make(PropId::poisoned));
+
+        REQUIRE(player.m_properties.has(PropId::diseased));
+        REQUIRE(player.m_properties.has(PropId::poisoned));
+
+        scroll->activate(map::g_player);
+
+        REQUIRE(!player.m_properties.has(PropId::diseased));
+        REQUIRE(player.m_properties.has(PropId::poisoned));
+
+        // Casting healing from manuscript at altar (master level) should clear
+        // both disease and poison.
+        map::put(new terrain::Altar(player.m_pos.with_x_offset(1)));
+
+        player.m_properties.apply(property_factory::make(PropId::diseased));
+        player.m_properties.apply(property_factory::make(PropId::poisoned));
+
+        scroll->activate(map::g_player);
+
+        REQUIRE(!player.m_properties.has(PropId::diseased));
+        REQUIRE(!player.m_properties.has(PropId::poisoned));
+
+        // Remove the altar
+        map::put(new terrain::Wall(player.m_pos.with_x_offset(1)));
+
+        // Casting healing from manuscript with erudition (master level) should
+        // clear both disease and poison.
+        player.m_properties.apply(
+                property_factory::make(PropId::erudition));
+
+        player.m_properties.apply(property_factory::make(PropId::diseased));
+        player.m_properties.apply(property_factory::make(PropId::poisoned));
+
+        scroll->activate(map::g_player);
+
+        REQUIRE(!player.m_properties.has(PropId::diseased));
+        REQUIRE(!player.m_properties.has(PropId::poisoned));
 }
