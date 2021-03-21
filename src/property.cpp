@@ -2367,6 +2367,11 @@ void PropSpawnsZombiePartsOnDestroyed::on_destroyed_corpse()
 
 void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
 {
+        if (m_owner->m_properties.has(PropId::burning))
+        {
+                return;
+        }
+
         if (!is_allowed_to_spawn_parts_here())
         {
                 return;
