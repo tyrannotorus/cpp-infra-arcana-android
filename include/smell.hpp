@@ -36,7 +36,7 @@ void on_std_turn();
 
 void put_smell_for_mon(const actor::Actor& actor);
 
-void player_try_sense_smell();
+void on_player_turn_start();
 
 }  // namespace smell
 

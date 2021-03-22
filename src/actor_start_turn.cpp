@@ -441,7 +441,7 @@ static void player_start_turn()
                 interrupt_player_burning_terrain();
         }
 
-        smell::player_try_sense_smell();
+        smell::on_player_turn_start();
 
         // Handle monsters coming into vision, detect sneaking monsters, ...
         player_discover_monsters();

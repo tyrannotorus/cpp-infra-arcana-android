@@ -21,8 +21,8 @@ using namespace smell;
 // -----------------------------------------------------------------------------
 static int s_strength_decay_per_turn = 1;
 static int s_strength_decay_on_spread = 3;
-const static int s_std_turn_countdown_between_msg = 50;
-static int s_msg_std_turn_countdown = 0;
+const static int s_msg_countdown_reset_value = 50;
+static int s_msg_countdown = 0;
 
 static void decay(Smell& smell, const int decay_value)
 {
@@ -107,7 +107,7 @@ static bool is_wearing_item_preventing_detecting_smell()
         return is_prevented;
 }
 
-static bool is_seeing_mon_with_smell_msg(const std::string msg)
+static bool is_seeing_mon_with_smell_msg()
 {
         const auto seen_actors = actor::seen_actors(*map::g_player);
 
@@ -115,7 +115,7 @@ static bool is_seeing_mon_with_smell_msg(const std::string msg)
         {
                 const auto mon_smell_msg = actor->m_data->smell_msg;
 
-                if (mon_smell_msg == msg)
+                if (!mon_smell_msg.empty())
                 {
                         return true;
                 }
@@ -131,24 +131,24 @@ namespace smell
 {
 void init()
 {
-        s_msg_std_turn_countdown = 0;
+        s_msg_countdown = 0;
 }
 
 void save()
 {
-        saving::put_int(s_msg_std_turn_countdown);
+        saving::put_int(s_msg_countdown);
 }
 
 void load()
 {
-        s_msg_std_turn_countdown = saving::get_int();
+        s_msg_countdown = saving::get_int();
 }
 
 void on_std_turn()
 {
-        if (s_msg_std_turn_countdown > 0)
+        if (s_msg_countdown > 0)
         {
-                --s_msg_std_turn_countdown;
+                --s_msg_countdown;
         }
 
         decay_smells_for_new_turn();
@@ -212,9 +212,18 @@ void put_smell_for_mon(const actor::Actor& mon)
         }
 }
 
-void player_try_sense_smell()
+void on_player_turn_start()
 {
-        if (s_msg_std_turn_countdown > 0)
+        if (is_seeing_mon_with_smell_msg())
+        {
+                // A smelly monster is currently seen, reset the smell message
+                // countdown (we don't want to print smell messages after just
+                // seeing a monster).
+                s_msg_countdown = s_msg_countdown_reset_value;
+                return;
+        }
+
+        if (s_msg_countdown > 0)
         {
                 return;
         }
@@ -238,18 +247,13 @@ void player_try_sense_smell()
                 return;
         }
 
-        if (is_seeing_mon_with_smell_msg(*smell.msg_ptr))
-        {
-                return;
-        }
-
         msg_log::add(
                 *smell.msg_ptr,
                 colors::text(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::yes);
 
-        s_msg_std_turn_countdown = s_std_turn_countdown_between_msg;
+        s_msg_countdown = s_msg_countdown_reset_value;
 }
 
 }  // namespace smell
