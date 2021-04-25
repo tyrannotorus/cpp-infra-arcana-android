@@ -268,6 +268,8 @@ private:
 class CtrlObjAction
 {
 public:
+        virtual ~CtrlObjAction() = default;
+
         virtual bool can_control(
                 const terrain::Terrain& terrain,
                 const SpellSkill skill) const = 0;
