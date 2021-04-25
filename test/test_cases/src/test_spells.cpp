@@ -62,7 +62,6 @@ TEST_CASE("Test opening spell effect")
         const auto did_open_wood_door =
                 spells::run_opening_spell_effect_at(
                         wood_door_pos,
-                        100,  // 100% chance
                         SpellSkill::master);
 
         REQUIRE(did_open_wood_door == terrain::DidOpen::yes);
@@ -75,7 +74,6 @@ TEST_CASE("Test opening spell effect")
         const auto did_open_metal_door =
                 spells::run_opening_spell_effect_at(
                         metal_door_pos,
-                        100,  // 100% chance
                         SpellSkill::master);
 
         REQUIRE(did_open_metal_door == terrain::DidOpen::yes);

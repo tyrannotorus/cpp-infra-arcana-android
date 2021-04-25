@@ -36,7 +36,7 @@ TEST_CASE("Saving and loading the game")
                 item::g_data[(size_t)item::Id::scroll_telep]
                         .is_spell_domain_known = true;
 
-                item::g_data[(size_t)item::Id::scroll_opening]
+                item::g_data[(size_t)item::Id::scroll_control_object]
                         .is_identified = true;
 
                 // Background
@@ -230,10 +230,10 @@ TEST_CASE("Saving and loading the game")
                 REQUIRE(!item::g_data[(size_t)item::Id::scroll_telep]
                                  .is_identified);
 
-                REQUIRE(item::g_data[(size_t)item::Id::scroll_opening]
+                REQUIRE(item::g_data[(size_t)item::Id::scroll_control_object]
                                 .is_identified);
 
-                REQUIRE(!item::g_data[(size_t)item::Id::scroll_opening]
+                REQUIRE(!item::g_data[(size_t)item::Id::scroll_control_object]
                                  .is_spell_domain_known);
 
                 REQUIRE(!item::g_data[(size_t)item::Id::scroll_summon_mon]
