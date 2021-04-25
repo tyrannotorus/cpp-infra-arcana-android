@@ -46,6 +46,9 @@ const std::string g_any_key_hint =
 const std::string g_yes_or_no_hint =
         "[y/n]";
 
+const std::string g_direction_query =
+        "Which direction?";
+
 const std::string g_disarm_no_trap =
         "I find nothing there to disarm.";
 

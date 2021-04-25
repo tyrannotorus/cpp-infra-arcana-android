@@ -124,7 +124,7 @@ enum class Id
         scroll_heal,
         scroll_light,
         scroll_mayhem,
-        scroll_opening,
+        scroll_control_object,
         scroll_pest,
         scroll_premonition,
         scroll_erudition,

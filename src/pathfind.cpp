@@ -7,6 +7,7 @@
 #include "pathfind.hpp"
 
 #include "debug.hpp"
+#include "direction.hpp"
 #include "flood.hpp"
 #include "random.hpp"
 

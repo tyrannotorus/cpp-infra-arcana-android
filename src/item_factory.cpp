@@ -205,7 +205,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::scroll_bless:
         case Id::scroll_darkbolt:
         case Id::scroll_aza_wrath:
-        case Id::scroll_opening:
+        case Id::scroll_control_object:
         case Id::scroll_res:
         case Id::scroll_summon_mon:
         case Id::scroll_light:

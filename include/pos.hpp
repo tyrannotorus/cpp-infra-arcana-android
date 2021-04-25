@@ -7,7 +7,7 @@
 #ifndef POS_HPP
 #define POS_HPP
 
-#include "direction.hpp"
+enum class Dir;
 
 struct P
 {
@@ -47,6 +47,8 @@ public:
                 return *this;
         }
 
+        P& operator-=(Dir dir);
+
         P& operator++()
         {
                 ++x;
@@ -84,6 +86,8 @@ public:
         {
                 return P(x - v, y - v);
         }
+
+        P operator-(Dir dir) const;
 
         P with_offsets(const int x_offset, const int y_offset) const
         {
@@ -152,8 +156,8 @@ public:
 
         P signs() const
         {
-                const int x_sign = (x == 0) ? 0 : (x > 0) ? 1 : -1;
-                const int y_sign = (y == 0) ? 0 : (y > 0) ? 1 : -1;
+                const int x_sign = (x == 0) ? 0 : ((x > 0) ? 1 : -1);
+                const int y_sign = (y == 0) ? 0 : ((y > 0) ? 1 : -1);
 
                 return {x_sign, y_sign};
         }

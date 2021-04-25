@@ -28,9 +28,12 @@
 #include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "popup.hpp"
 #include "query.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
+#include "terrain_door.hpp"
+#include "text_format.hpp"
 #include "throwing.hpp"
 #include "viewport.hpp"
 
@@ -97,6 +100,11 @@ void MarkerState::on_popped()
 
 void MarkerState::draw()
 {
+        if (!m_allow_draw)
+        {
+                return;
+        }
+
         if (!viewport::is_in_view(m_pos))
         {
                 viewport::show(m_pos, viewport::ForceCentering::yes);
@@ -517,13 +525,13 @@ void Viewing::handle_input(const InputData& input)
                 auto* const actor = map::first_actor_at_pos(m_pos);
 
                 if (actor &&
-                    actor != map::g_player &&
+                    !actor->is_player() &&
                     actor::can_player_see_actor(*actor))
                 {
                         msg_log::clear();
 
-                        std::unique_ptr<ViewActorDescr>
-                                view_actor_descr(new ViewActorDescr(*actor));
+                        auto view_actor_descr =
+                                std::make_unique<ViewActorDescr>(*actor);
 
                         states::push(std::move(view_actor_descr));
                 }
@@ -1002,11 +1010,11 @@ CtrlTele::CtrlTele(const P& origin, Array2<bool> blocked, const int max_dist) :
 {
 }
 
-int CtrlTele::chance_of_success_pct(const P& tgt) const
+int CtrlTele::chance_of_success_pct() const
 {
-        const int dist = king_dist(map::g_player->m_pos, tgt);
+        const int dist = king_dist(map::g_player->m_pos, m_pos);
 
-        if ((m_max_dist > 0) && king_dist(m_origin, tgt) > m_max_dist)
+        if ((m_max_dist > 0) && (dist > m_max_dist))
         {
                 // Target is too far away
                 return 0;
@@ -1033,7 +1041,7 @@ void CtrlTele::on_moved()
 
         if (m_pos != map::g_player->m_pos)
         {
-                const int chance_pct = chance_of_success_pct(m_pos);
+                const int chance_pct = chance_of_success_pct();
 
                 msg_log::add(
                         std::to_string(chance_pct) + "% chance of success.",
@@ -1053,40 +1061,629 @@ void CtrlTele::on_moved()
 
 void CtrlTele::handle_input(const InputData& input)
 {
-        if ((input.key == SDLK_RETURN) && (m_pos != map::g_player->m_pos))
+        if ((input.key != SDLK_RETURN) || (m_pos == map::g_player->m_pos))
         {
-                const int chance = chance_of_success_pct(m_pos);
+                return;
+        }
 
-                const bool roll_ok = rnd::percent(chance);
+        const int chance = chance_of_success_pct();
 
-                const bool is_tele_success =
-                        roll_ok &&
-                        m_blocked.rect().is_pos_inside(m_pos) &&
-                        !m_blocked.at(m_pos);
+        const bool roll_ok = rnd::percent(chance);
 
-                const P tgt_p(m_pos);
+        const bool is_success =
+                roll_ok &&
+                m_blocked.rect().is_pos_inside(m_pos) &&
+                !m_blocked.at(m_pos);
 
-                states::pop();
+        // Copy position before object is deleted
+        const P tgt_p = m_pos;
 
-                // NOTE: This object is now destroyed
+        states::pop();
 
-                if (is_tele_success)
+        // NOTE: This object is now destroyed
+
+        if (is_success)
+        {
+                // Teleport to this exact destination
+                teleport(*map::g_player, tgt_p, m_blocked);
+        }
+        else
+        {
+                // Failed to teleport (blocked or roll failed)
+                msg_log::add(
+                        "I failed to go there...",
+                        colors::white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::yes,
+                        CopyToMsgHistory::yes);
+
+                // Run a randomized teleport with no teleport control
+                teleport(*map::g_player, ShouldCtrlTele::never);
+        }
+}
+
+// -----------------------------------------------------------------------------
+// Control Object marker state
+// -----------------------------------------------------------------------------
+bool CtrlObjOpen::can_control(
+        const terrain::Terrain& terrain,
+        const SpellSkill skill) const
+{
+        switch (terrain.id())
+        {
+        case terrain::Id::chest:
+        {
+                return !static_cast<const terrain::Chest&>(terrain).is_open();
+        }
+        break;
+
+        case terrain::Id::cabinet:
+        {
+                return !static_cast<const terrain::Cabinet&>(terrain).is_open();
+        }
+        break;
+
+        case terrain::Id::tomb:
+        {
+                return !static_cast<const terrain::Tomb&>(terrain).is_open();
+        }
+        break;
+
+        case terrain::Id::door:
+        {
+                const auto& door = static_cast<const terrain::Door&>(terrain);
+                const bool is_metal = door.type() == terrain::DoorType::metal;
+                const bool is_basic_skill = skill == SpellSkill::basic;
+
+                if (door.is_open() || door.is_hidden())
                 {
-                        // Teleport to this exact destination
-                        teleport(*map::g_player, tgt_p, m_blocked);
+                        return false;
+                }
+                else if (is_metal)
+                {
+                        return !is_basic_skill;
                 }
                 else
                 {
-                        // Failed to teleport (blocked or roll failed)
-                        msg_log::add(
-                                "I failed to go there...",
-                                colors::white(),
-                                MsgInterruptPlayer::no,
-                                MorePromptOnMsg::yes,
-                                CopyToMsgHistory::yes);
-
-                        // Run a randomized teleport with no teleport control
-                        teleport(*map::g_player, ShouldCtrlTele::never);
+                        return !door.is_known_stuck();
                 }
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+
+        return false;
+}
+
+DidAction CtrlObjOpen::run(
+        terrain::Terrain& terrain,
+        const P& marker_pos,
+        const SpellSkill skill) const
+{
+        (void)marker_pos;
+
+        if (terrain.id() == terrain::Id::door)
+        {
+                auto& door = static_cast<terrain::Door&>(terrain);
+                const bool is_metal = door.type() == terrain::DoorType::metal;
+
+                if (door.is_stuck() && !is_metal)
+                {
+                        ASSERT(!door.is_known_stuck());
+
+                        door.reveal_stuck_status();
+
+                        return DidAction::yes;
+                }
+        }
+
+        spells::run_opening_spell_effect_at(terrain.pos(), skill);
+
+        return DidAction::yes;
+}
+
+std::string CtrlObjOpen::menu_label(const terrain::Terrain& terrain) const
+{
+        const std::string name = terrain.name(Article::the);
+
+        return "(o) Open " + name;
+}
+
+char CtrlObjOpen::menu_key() const
+{
+        return 'o';
+}
+
+bool CtrlObjCloseDoor::can_control(
+        const terrain::Terrain& terrain,
+        const SpellSkill skill) const
+{
+        if (terrain.id() != terrain::Id::door)
+        {
+                return false;
+        }
+
+        const auto& door = static_cast<const terrain::Door&>(terrain);
+        const bool is_metal = door.type() == terrain::DoorType::metal;
+        const bool is_basic_skill = skill == SpellSkill::basic;
+
+        return (
+                door.is_open() &&
+                !door.is_hidden() &&
+                !(is_metal && is_basic_skill));
+}
+
+DidAction CtrlObjCloseDoor::run(
+        terrain::Terrain& terrain,
+        const P& marker_pos,
+        const SpellSkill skill) const
+{
+        (void)marker_pos;
+
+        spells::run_close_spell_effect_at(terrain.pos(), skill);
+
+        return DidAction::yes;
+}
+
+std::string CtrlObjCloseDoor::menu_label(const terrain::Terrain& terrain) const
+{
+        const std::string name = terrain.name(Article::the);
+
+        return "(c) Close " + name;
+}
+
+char CtrlObjCloseDoor::menu_key() const
+{
+        return 'c';
+}
+
+bool CtrlObjJamDoor::can_control(
+        const terrain::Terrain& terrain,
+        const SpellSkill skill) const
+{
+        (void)skill;
+
+        if (terrain.id() != terrain::Id::door)
+        {
+                return false;
+        }
+
+        const auto& door = static_cast<const terrain::Door&>(terrain);
+        const bool is_metal = door.type() == terrain::DoorType::metal;
+
+        return (
+                !door.is_open() &&
+                !door.is_hidden() &&
+                !door.is_known_stuck() &&
+                !is_metal);
+}
+
+DidAction CtrlObjJamDoor::run(
+        terrain::Terrain& terrain,
+        const P& marker_pos,
+        const SpellSkill skill) const
+{
+        (void)marker_pos;
+        (void)skill;
+
+        auto& door = static_cast<terrain::Door&>(terrain);
+
+        const auto name_the =
+                text_format::first_to_upper(
+                        door.name(Article::the));
+
+        msg_log::add(name_the + " is jammed.");
+
+        door.jam(map::g_player);
+
+        return DidAction::yes;
+}
+
+std::string CtrlObjJamDoor::menu_label(const terrain::Terrain& terrain) const
+{
+        const std::string name = terrain.name(Article::the);
+
+        return "(c) Jam " + name;
+}
+
+char CtrlObjJamDoor::menu_key() const
+{
+        return 'c';
+}
+
+bool CtrlObjToggleLever::can_control(
+        const terrain::Terrain& terrain,
+        const SpellSkill skill) const
+{
+        (void)skill;
+
+        return terrain.id() == terrain::Id::lever;
+}
+
+DidAction CtrlObjToggleLever::run(
+        terrain::Terrain& terrain,
+        const P& marker_pos,
+        const SpellSkill skill) const
+{
+        (void)marker_pos;
+        (void)skill;
+
+        auto& lever = static_cast<terrain::Lever&>(terrain);
+
+        const auto name_the =
+                text_format::first_to_upper(
+                        lever.name(Article::the));
+
+        msg_log::add(name_the + " is toggled.");
+
+        lever.toggle();
+
+        return DidAction::yes;
+}
+
+std::string CtrlObjToggleLever::menu_label(
+        const terrain::Terrain& terrain) const
+{
+        (void)terrain;
+
+        return "(t) Toggle lever";
+}
+
+char CtrlObjToggleLever::menu_key() const
+{
+        return 't';
+}
+
+bool CtrlObjStrike::can_control(
+        const terrain::Terrain& terrain,
+        const SpellSkill skill) const
+{
+        (void)skill;
+
+        switch (terrain.id())
+        {
+        case terrain::Id::door:
+        {
+                const auto& door = static_cast<const terrain::Door&>(terrain);
+                const bool is_metal = door.type() == terrain::DoorType::metal;
+
+                return !door.is_open() && !door.is_hidden() && !is_metal;
+        }
+        break;
+
+        case terrain::Id::brazier:
+        case terrain::Id::statue:
+        {
+                return true;
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+
+        return false;
+}
+
+DidAction CtrlObjStrike::run(
+        terrain::Terrain& terrain,
+        const P& marker_pos,
+        const SpellSkill skill) const
+{
+        (void)skill;
+
+        switch (terrain.id())
+        {
+        case terrain::Id::door:
+        {
+                const int dmg = 15;
+
+                terrain.hit(
+                        DmgType::control_object_spell,
+                        map::g_player,
+                        marker_pos,
+                        dmg);
+
+                return DidAction::yes;
+        }
+        break;
+
+        case terrain::Id::brazier:
+        case terrain::Id::statue:
+        {
+                const std::string query_msg =
+                        common_text::g_direction_query +
+                        " " +
+                        common_text::g_cancel_hint;
+
+                msg_log::add(
+                        query_msg,
+                        colors::light_white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+
+                const auto input_dir = query::dir(AllowCenter::no);
+
+                if (input_dir == Dir::END)
+                {
+                        return DidAction::no;
+                }
+
+                const auto from_pos = terrain.pos() - input_dir;
+
+                const int dmg = 15;
+
+                terrain.hit(
+                        DmgType::control_object_spell,
+                        map::g_player,
+                        from_pos,
+                        dmg);
+
+                return DidAction::yes;
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+
+        ASSERT(false);
+
+        return DidAction::no;
+}
+
+std::string CtrlObjStrike::menu_label(const terrain::Terrain& terrain) const
+{
+        const std::string name = terrain.name(Article::the);
+
+        return "(w) Strike " + name;
+}
+
+char CtrlObjStrike::menu_key() const
+{
+        return 'w';
+}
+
+CtrlObj::CtrlObj(const P& origin, const int max_dist, SpellSkill skill) :
+        MarkerState(origin),
+        m_origin(origin),
+        m_max_dist(max_dist),
+        m_skill(skill)
+{
+}
+
+int CtrlObj::current_dist() const
+{
+        return king_dist(map::g_player->m_pos, m_pos);
+}
+
+bool CtrlObj::is_allowed_at_dist() const
+{
+        return (current_dist() <= m_max_dist);
+}
+
+void CtrlObj::on_start_hook()
+{
+        msg_log::add(
+                "Select an object to control.",
+                colors::white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::yes,
+                CopyToMsgHistory::no);
+
+        set_terrain();
+        set_possible_actions();
+}
+
+void CtrlObj::on_moved()
+{
+        set_terrain();
+        set_possible_actions();
+
+        look::print_location_info_msgs(m_pos);
+
+        const std::string dist_str = std::to_string(current_dist());
+        const std::string max_dist_str = std::to_string(m_max_dist);
+
+        const auto dist_msg_color =
+                is_allowed_at_dist()
+                ? colors::msg_good()
+                : colors::msg_bad();
+
+        const std::string dist_msg =
+                "Distance: " +
+                dist_str +
+                " Max: " +
+                max_dist_str;
+
+        msg_log::add(
+                dist_msg,
+                dist_msg_color,
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+
+        if (is_allowed_at_dist() && !m_possible_actions.empty())
+        {
+                const auto* const terrain = map::g_terrain.at(m_pos);
+                const auto name_the = terrain->name(Article::the);
+
+                const std::string control_str =
+                        "[enter] to control " + name_the;
+
+                msg_log::add(
+                        control_str,
+                        colors::light_white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+        }
+
+        msg_log::add(
+                common_text::g_cancel_hint,
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+}
+
+void CtrlObj::handle_input(const InputData& input)
+{
+        if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE))
+        {
+                msg_log::clear();
+
+                states::pop();
+        }
+
+        if (input.key != SDLK_RETURN)
+        {
+                return;
+        }
+
+        if (!map::g_seen.at(m_pos))
+        {
+                msg_log::add(
+                        "I have no vision here.",
+                        colors::white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+
+                return;
+        }
+
+        if (!is_allowed_at_dist())
+        {
+                msg_log::add(
+                        "The distance is too great.",
+                        colors::white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+
+                return;
+        }
+
+        if (m_possible_actions.empty())
+        {
+                msg_log::add(
+                        "I cannot control any object here.",
+                        colors::white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+
+                return;
+        }
+
+        const auto action = query_control();
+
+        if (!action)
+        {
+                return;
+        }
+
+        m_allow_draw = false;
+        const auto did_action = action->run(*m_terrain, m_pos, m_skill);
+        m_allow_draw = true;
+
+        if (did_action == DidAction::yes)
+        {
+                states::pop();
+        }
+}
+
+void CtrlObj::set_terrain()
+{
+        m_terrain = map::g_terrain.at(m_pos);
+}
+
+void CtrlObj::set_possible_actions()
+{
+        std::vector<CtrlObjActionPtr> all_actions;
+
+        // ---------------------------------------------------------------------
+        // Add all possible control actions here
+        // ---------------------------------------------------------------------
+        all_actions.emplace_back(
+                std::make_shared<CtrlObjOpen>());
+
+        all_actions.emplace_back(
+                std::make_shared<CtrlObjCloseDoor>());
+
+        all_actions.emplace_back(
+                std::make_shared<CtrlObjJamDoor>());
+
+        all_actions.emplace_back(
+                std::make_shared<CtrlObjToggleLever>());
+
+        all_actions.emplace_back(
+                std::make_shared<CtrlObjStrike>());
+        // ---------------------------------------------------------------------
+
+        m_possible_actions.clear();
+
+        m_possible_actions.reserve(all_actions.size());
+
+        std::copy_if(
+                std::begin(all_actions),
+                std::end(all_actions),
+                std::back_inserter(m_possible_actions),
+                [this](auto& action) {
+                        return action->can_control(*m_terrain, m_skill);
+                });
+
+        std::sort(
+                std::begin(m_possible_actions),
+                std::end(m_possible_actions),
+                [](const auto& a1, const auto& a2) {
+                        return a1->menu_key() < a2->menu_key();
+                });
+}
+
+CtrlObjActionPtr CtrlObj::query_control() const
+{
+        popup::Popup popup(popup::AddToMsgHistory::no);
+
+        std::vector<char> menu_keys;
+        std::vector<std::string> menu_labels;
+
+        menu_keys.reserve(m_possible_actions.size());
+        menu_labels.reserve(m_possible_actions.size());
+
+        for (const auto& action : m_possible_actions)
+        {
+                menu_keys.push_back(action->menu_key());
+                menu_labels.push_back(action->menu_label(*m_terrain));
+        }
+
+        menu_keys.push_back(0);
+        menu_labels.push_back("(space, esc) Choose another position");
+
+        int choice = 0;
+
+        popup.set_menu(menu_labels, menu_keys, &choice);
+
+        popup.set_title("Control object");
+
+        popup.run();
+
+        if ((choice == -1) || (choice == (int)m_possible_actions.size()))
+        {
+                return {};
+        }
+        else
+        {
+                return m_possible_actions[choice];
         }
 }

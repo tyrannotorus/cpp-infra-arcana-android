@@ -9,10 +9,11 @@
 
 #include <vector>
 
-#include "global.hpp"
 #include "random.hpp"
 
 struct InputData;
+
+enum class VerDir;
 
 enum class MenuAction
 {

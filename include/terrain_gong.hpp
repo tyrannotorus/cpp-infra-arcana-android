@@ -43,9 +43,10 @@ private:
         Color color_default() const override;
 
         void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                int dmg = -1) override;
+                const DmgType dmg_type,
+                actor::Actor* const actor,
+                const P& from_pos,
+                int dmg) override;
 
         bool m_is_used {false};
 };

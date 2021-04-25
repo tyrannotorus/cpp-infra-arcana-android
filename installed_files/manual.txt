@@ -4,24 +4,24 @@ Command list
 Gameplay commands:
    a         INVENTORY, only showing items that can be CONSUMED or ACTIVATED
    c         CLOSE DOOR, or jam closed door with an iron spike
-   C (@)     Character information
+   C (@)     CHARACTER information
    d         DROP item
    f         AIM/FIRE weapon
    g (,)     PICK UP item
    h (M)     MESSAGE history
    i         INVENTORY (wield, equip, remove, consume, or activate items)
    k (w)     KICK or strike objects, or DESTROY CORPSES
-   m         Minimap
+   m         MINIMAP
    n (o)     Make NOISE
    p         DISARM trap
-   r         Reload
-   s         Wait five turns
+   r         RELOAD
+   s         WAIT five turns
    t         THROW item, throw lit EXPLOSIVE
    u (G)     UNLOAD firearm on the ground, or pick up item
    v         VIEW descriptions of things on the map
    x         CAST spell
    z         SWAP to readied weapon
-   Q         Quit
+   Q         QUIT
    Shift     Hold while pressing a move key to move until interrupted
    Tab       Melee attack adjacent monster
 

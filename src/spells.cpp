@@ -31,6 +31,7 @@
 #include "line_calc.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
+#include "marker.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
 #include "pathfind.hpp"
@@ -75,7 +76,7 @@ static const StrToSpellIdMap s_str_to_spell_id_map = {
         {"light", SpellId::light},
         {"mayhem", SpellId::mayhem},
         {"mi_go_hypno", SpellId::mi_go_hypno},
-        {"opening", SpellId::opening},
+        {"control_object", SpellId::control_object},
         {"pestilence", SpellId::pestilence},
         {"res", SpellId::resistance},
         {"see_invis", SpellId::see_invis},
@@ -720,8 +721,7 @@ WeightedItems<SpellSideEffect> s_spell_side_effects {
 
 }  // namespace spell_side_effects
 
-static terrain::DidOpen run_opening_spell_for_metal_door(
-        const terrain::Terrain& door)
+static DidAction toggle_metal_door(const terrain::Terrain& door)
 {
         // Find ANY lever for this door, and toggle it.
         //
@@ -746,14 +746,14 @@ static terrain::DidOpen run_opening_spell_for_metal_door(
 
                 lever->toggle();
 
-                return terrain::DidOpen::yes;
+                return DidAction::yes;
         }
 
         // Reaching this point means we didn't find a lever for the metal door,
         // which is not supposed to happen.
         ASSERT(false);
 
-        return terrain::DidOpen::no;
+        return DidAction::no;
 }
 
 static std::string get_noise_descr(const bool is_noisy)
@@ -870,8 +870,8 @@ Spell* make(const SpellId spell_id)
         case SpellId::spectral_weapons:
                 return new SpellSpectralWeapons();
 
-        case SpellId::opening:
-                return new SpellOpening();
+        case SpellId::control_object:
+                return new SpellControlObject();
 
         case SpellId::cleansing_fire:
                 return new SpellCleansingFire();
@@ -964,42 +964,82 @@ std::string skill_to_str(const SpellSkill skill)
 
 terrain::DidOpen run_opening_spell_effect_at(
         const P& pos,
-        const int chance,
         const SpellSkill skill)
 {
-        if (!rnd::percent(chance))
+        auto* const terrain = map::g_terrain.at(pos);
+
+        terrain::Door* door = nullptr;
+
+        if (terrain->id() == terrain::Id::door)
         {
-                return terrain::DidOpen::no;
+                door = static_cast<terrain::Door*>(terrain);
+
+                if (door->is_open())
+                {
+                        return terrain::DidOpen::no;
+                }
+
+                if ((door->type() == terrain::DoorType::metal))
+                {
+                        if (skill == SpellSkill::basic)
+                        {
+                                return terrain::DidOpen::no;
+                        }
+
+                        const auto did_toggle = toggle_metal_door(*door);
+
+                        const auto did_open =
+                                (did_toggle == DidAction::yes)
+                                ? terrain::DidOpen::yes
+                                : terrain::DidOpen::no;
+
+                        return did_open;
+                }
         }
 
+        // TODO: Shouldn't the actor parameter be the caster here?
+        const auto did_open = terrain->open(nullptr);
+
+        return did_open;
+}
+
+terrain::DidClose run_close_spell_effect_at(
+        const P& pos,
+        const SpellSkill skill)
+{
         auto* const terrain = map::g_terrain.at(pos);
 
         if (terrain->id() == terrain::Id::door)
         {
                 auto* const door = static_cast<terrain::Door*>(terrain);
 
+                if (!door->is_open())
+                {
+                        return terrain::DidClose::no;
+                }
+
                 if ((door->type() == terrain::DoorType::metal))
                 {
-                        const bool is_skill_enough =
-                                ((int)skill >= (int)SpellSkill::expert);
-
-                        if (is_skill_enough && !door->is_open())
+                        if (skill == SpellSkill::basic)
                         {
-                                const auto did_open =
-                                        run_opening_spell_for_metal_door(*door);
+                                return terrain::DidClose::no;
+                        }
 
-                                return did_open;
-                        }
-                        else
-                        {
-                                return terrain::DidOpen::no;
-                        }
+                        const auto did_toggle = toggle_metal_door(*door);
+
+                        const auto did_close =
+                                (did_toggle == DidAction::yes)
+                                ? terrain::DidClose::yes
+                                : terrain::DidClose::no;
+
+                        return did_close;
                 }
         }
 
-        const auto did_open = terrain->open(nullptr);
+        // TODO: Shouldn't the actor parameter be the caster here?
+        const auto did_close = terrain->close(nullptr);
 
-        return did_open;
+        return did_close;
 }
 
 }  // namespace spells
@@ -2332,100 +2372,102 @@ std::vector<std::string> SpellSpectralWeapons::descr_specific(
 }
 
 // -----------------------------------------------------------------------------
-// Opening
+// Control Object
 // -----------------------------------------------------------------------------
-void SpellOpening::run_effect(
+int SpellControlObject::max_dist(const SpellSkill skill) const
+{
+        return ((int)skill + 1) * 2;
+}
+
+void SpellControlObject::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
 {
-        (void)caster;
+        const auto origin = caster->m_pos;
 
-        const int range = 1 + (int)skill * 3;
+        auto ctrl_obj_state =
+                std::make_unique<CtrlObj>(
+                        origin,
+                        max_dist(skill),
+                        skill);
 
-        const int orig_x = map::g_player->m_pos.x;
-        const int orig_y = map::g_player->m_pos.y;
-
-        const R area(
-                std::max(0, orig_x - range),
-                std::max(0, orig_y - range),
-                std::min(map::w() - 1, orig_x + range),
-                std::min(map::h() - 1, orig_y + range));
-
-        bool is_any_opened = false;
-
-        const int chance = 50 + (int)skill * 25;
-
-        for (const auto& p : area.positions())
-        {
-                const auto did_open =
-                        spells::run_opening_spell_effect_at(
-                                p,
-                                chance,
-                                skill);
-
-                if (did_open == terrain::DidOpen::yes)
-                {
-                        is_any_opened = true;
-                }
-        }
-
-        if (is_any_opened)
-        {
-                map::update_vision();
-        }
-        else
-        {
-                // Nothing was opened
-                msg_log::add("I hear faint rattling and knocking.");
-        }
+        // Run the state immediately, so that spell side effects happen AFTER
+        // the player has finished casting the spell.
+        states::run_until_state_done(std::move(ctrl_obj_state));
 }
 
-std::vector<std::string> SpellOpening::descr_specific(
+std::vector<std::string> SpellControlObject::descr_specific(
         const SpellSkill skill) const
 {
         std::vector<std::string> descr;
 
-        std::string str = "Opens all locks, lids and doors";
+        descr.emplace_back("Opens doors, chests, tombs, or cabinets.");
+        descr.emplace_back("Closes or jams doors.");
+        descr.emplace_back("Strikes doors, braziers, or statues.");
 
         if (skill == SpellSkill::basic)
         {
-                str += " (except heavy doors operated externally by a switch)";
-        }
-
-        str += ".";
-
-        descr.push_back(str);
-
-        if ((int)skill >= (int)SpellSkill::expert)
-        {
                 descr.emplace_back(
-                        "If cast within range of a door operated by a lever, "
-                        "then the lever is toggled.");
-        }
-
-        const int range = 1 + (int)skill * 3;
-
-        if (range == 1)
-        {
-                descr.emplace_back("Only adjacent objects are opened.");
+                        "Heavy doors operated externally by a switch cannot "
+                        "be opened or closed.");
         }
         else
         {
-                // Range > 1
-                descr.push_back(
-                        "Opens objects within a distance of " +
-                        std::to_string(range) +
-                        " cells.");
+                descr.emplace_back(
+                        "Heavy doors operated externally by a switch can also "
+                        "be opened or closed.");
         }
 
-        const int chance_to_open = 50 + (int)skill * 25;
+        descr.emplace_back(
+                "Maximum control distance is " +
+                std::to_string(max_dist(skill)) +
+                " cells.");
 
-        descr.push_back(std::to_string(chance_to_open) + "% chance to open.");
+        descr.emplace_back(
+                "When casting the spell, select a seen object to control "
+                "within the maximum distance.");
+
+        // std::string str = "Opens all locks, lids and doors";
+
+        // if (skill == SpellSkill::basic)
+        // {
+        //         str += " (except heavy doors operated externally by a switch)";
+        // }
+
+        // str += ".";
+
+        // descr.push_back(str);
+
+        // if ((int)skill >= (int)SpellSkill::expert)
+        // {
+        //         descr.emplace_back(
+        //                 "If cast within range of a door operated by a lever, "
+        //                 "then the lever is toggled.");
+        // }
+
+        // const int range = 1 + (int)skill * 3;
+
+        // if (range == 1)
+        // {
+        //         descr.emplace_back("Only adjacent objects are opened.");
+        // }
+        // else
+        // {
+        //         // Range > 1
+        //         descr.push_back(
+        //                 "Opens objects within a distance of " +
+        //                 std::to_string(range) +
+        //                 " cells.");
+        // }
+
+        // const int chance_to_open = 50 + (int)skill * 25;
+
+        // descr.push_back(std::to_string(chance_to_open) + "% chance to open.");
 
         return descr;
 }
 
-bool SpellOpening::is_noisy(const SpellSkill skill) const
+bool SpellControlObject::is_noisy(const SpellSkill skill) const
 {
         return (skill == SpellSkill::basic);
 }

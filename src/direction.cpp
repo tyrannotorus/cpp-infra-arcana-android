@@ -120,6 +120,46 @@ Dir dir(const P& offset)
         return dir;
 }
 
+Dir reversed_dir(const Dir dir)
+{
+        switch (dir)
+        {
+        case Dir::down_left:
+                return Dir::up_right;
+
+        case Dir::down:
+                return Dir::up;
+
+        case Dir::down_right:
+                return Dir::up_left;
+
+        case Dir::left:
+                return Dir::right;
+
+        case Dir::center:
+                return Dir::center;
+
+        case Dir::right:
+                return Dir::left;
+
+        case Dir::up_left:
+                return Dir::down_right;
+
+        case Dir::up:
+                return Dir::down;
+
+        case Dir::up_right:
+                return Dir::down_left;
+
+        case Dir::END:
+                break;
+        }
+
+        ASSERT(false);
+
+        return Dir::right;
+}
+
 P offset(const Dir dir)
 {
         ASSERT(dir != Dir::END);

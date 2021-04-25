@@ -290,7 +290,7 @@ bool Color::operator!=(const Color& other) const
 
 Color Color::fraction(const double div) const
 {
-        auto result =
+        const auto result =
                 Color(
                         (uint8_t)((double)m_sdl_color.r / div),
                         (uint8_t)((double)m_sdl_color.g / div),
@@ -305,7 +305,7 @@ Color Color::shaded(int pct) const
 
         const double f = (double)(100 - pct) / 100.0;
 
-        auto result =
+        const auto result =
                 Color(
                         (uint8_t)((double)m_sdl_color.r * f),
                         (uint8_t)((double)m_sdl_color.g * f),

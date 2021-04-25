@@ -9,6 +9,7 @@
 #include "array2.hpp"
 #include "audio.hpp"
 #include "config.hpp"
+#include "global.hpp"
 #include "io.hpp"
 #include "misc.hpp"
 

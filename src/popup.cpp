@@ -22,12 +22,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-enum class HighlightMenuKeys
-{
-        no,
-        yes
-};
-
 static int get_x0(const int width)
 {
         return panels::center_x(Panel::screen) - (width / 2);
@@ -71,6 +65,31 @@ static void draw_horizontal_line(const int line_w, const int line_y)
                         .with_y_offset(cell_px_dims.y / 2);
 
         io::draw_rectangle({p0, p1}, colors::dark_gray());
+}
+
+static int find_key_str_len(const std::string& str)
+{
+        if (str.empty())
+        {
+                ASSERT(false);
+
+                return 0;
+        }
+
+        if (str[0] != '(')
+        {
+                return 0;
+        }
+
+        for (size_t i = 0; i < str.size(); ++i)
+        {
+                if (str[i] == ')')
+                {
+                        return i + 1;
+                }
+        }
+
+        return 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -407,29 +426,35 @@ void PopupState::draw_menu_popup() const
         for (size_t i = 0; i < m_menu_choices.size(); ++i)
         {
                 const auto choice_str = m_menu_choices[i];
-                const auto key_str = choice_str.substr(0, 3);
+
+                const int key_str_len = find_key_str_len(choice_str);
 
                 int draw_x_pos = choice_x_pos;
 
-                const auto key_color =
-                        m_browser.is_at_idx(i)
-                        ? colors::menu_key_highlight()
-                        : colors::menu_key_dark();
+                if (key_str_len > 0)
+                {
+                        const auto key_str = choice_str.substr(0, key_str_len);
 
-                io::draw_text(
-                        key_str,
-                        Panel::screen,
-                        {draw_x_pos, y},
-                        key_color,
-                        io::DrawBg::no);
+                        const auto key_color =
+                                m_browser.is_at_idx(i)
+                                ? colors::menu_key_highlight()
+                                : colors::menu_key_dark();
 
-                const auto choice_suffix_start = key_str.length();
+                        io::draw_text(
+                                key_str,
+                                Panel::screen,
+                                {draw_x_pos, y},
+                                key_color,
+                                io::DrawBg::no);
+                }
 
-                draw_x_pos = choice_x_pos + (int)key_str.length();
+                const auto choice_label_start = key_str_len;
+
+                draw_x_pos = choice_x_pos + key_str_len;
 
                 const auto choice_suffix =
                         choice_str.substr(
-                                choice_suffix_start,
+                                choice_label_start,
                                 std::string::npos);
 
                 const auto color =
@@ -500,7 +525,7 @@ void PopupState::update()
 
                 case MenuAction::esc:
                 case MenuAction::space:
-                        *m_menu_choice_result = (int)m_menu_choices.size() - 1;
+                        *m_menu_choice_result = -1;
                         states::pop();
                         break;
 

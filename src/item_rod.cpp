@@ -393,8 +393,6 @@ void Opening::run_effect()
 {
         bool is_any_opened = false;
 
-        const int chance = 100;
-
         for (const auto& p : map::rect().positions())
         {
                 if (!map::g_seen.at(p))
@@ -405,7 +403,6 @@ void Opening::run_effect()
                 const auto did_open =
                         spells::run_opening_spell_effect_at(
                                 p,
-                                chance,
                                 SpellSkill::master);
 
                 if (did_open == terrain::DidOpen::yes)

@@ -997,7 +997,7 @@ void handle(const GameCmd cmd)
                         // Options
                         states::push(std::make_unique<ConfigState>());
                 }
-                else if (choice == 2)
+                else if ((choice == 2) || (choice == -1))
                 {
                         // Quit
                         query_quit();
@@ -1100,8 +1100,9 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                map::g_player->m_properties.apply(
-                        property_factory::make(PropId::weakened));
+                player_spells::learn_spell(
+                        SpellId::control_object,
+                        Verbose::yes);
         }
         break;
 

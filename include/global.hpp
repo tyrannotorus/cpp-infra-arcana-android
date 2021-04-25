@@ -203,6 +203,7 @@ enum class DmgType
         spirit,
         light,
         pure,
+        control_object_spell,
         END
 };
 
@@ -245,6 +246,9 @@ constexpr bool is_physical_dmg_type(const DmgType type)
 
         case DmgType::pure:
                 return false;
+
+        case DmgType::control_object_spell:
+                return false;  // Shouldn't really matter...
 
         case DmgType::END:
                 return false;

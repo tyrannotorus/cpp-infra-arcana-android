@@ -23,12 +23,14 @@ Monolith::Monolith(const P& p) :
         m_is_activated(false) {}
 
 void Monolith::on_hit(
-        const DmgType dmg_type,
-        actor::Actor* const actor,
-        const int dmg)
+        DmgType dmg_type,
+        actor::Actor* actor,
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {

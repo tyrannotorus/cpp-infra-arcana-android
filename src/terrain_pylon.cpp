@@ -80,13 +80,15 @@ Color Pylon::color_default() const
 }
 
 void Pylon::on_hit(
-        const DmgType dmg_type,
-        actor::Actor* const actor,
-        const int dmg)
+        DmgType dmg_type,
+        actor::Actor* actor,
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         // TODO
 }

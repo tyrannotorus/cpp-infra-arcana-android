@@ -11,10 +11,10 @@
 
 #include "ability_values.hpp"
 #include "colors.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
 #include "global.hpp"
 #include "property_data.hpp"
+
+enum class Dir;
 
 namespace item
 {
@@ -94,14 +94,7 @@ public:
                 return m_nr_turns_left;
         }
 
-        void set_duration(const int nr_turns)
-        {
-                ASSERT(nr_turns > 0);
-
-                m_duration_mode = PropDurationMode::specific;
-
-                m_nr_turns_left = nr_turns;
-        }
+        void set_duration(const int nr_turns);
 
         void set_indefinite()
         {

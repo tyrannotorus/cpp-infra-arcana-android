@@ -865,6 +865,15 @@ void PropWound::load()
         m_nr_wounds = saving::get_int();
 }
 
+void Prop::set_duration(const int nr_turns)
+{
+        ASSERT(nr_turns > 0);
+
+        m_duration_mode = PropDurationMode::specific;
+
+        m_nr_turns_left = nr_turns;
+}
+
 int PropWound::ability_mod(const AbilityId ability) const
 {
         // A player with Survivalist receives no ability penalties

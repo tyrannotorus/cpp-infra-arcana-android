@@ -8,6 +8,7 @@
 
 #include <string>
 
+#include "actor.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
 #include "actor_mon.hpp"
@@ -285,12 +286,13 @@ WasDestroyed Terrain::on_finished_burning()
 
 void Terrain::hit(
         const DmgType dmg_type,
-        actor::Actor* actor,
-        const int dmg)
+        actor::Actor* const actor,
+        std::optional<P> from_pos,
+        std::optional<int> dmg)
 {
         bool is_terrain_hit = true;
 
-        if (actor == map::g_player)
+        if (actor && actor->is_player())
         {
                 switch (dmg_type)
                 {
@@ -346,7 +348,11 @@ void Terrain::hit(
 
         if (is_terrain_hit)
         {
-                on_hit(dmg_type, actor, dmg);
+                on_hit(
+                        dmg_type,
+                        actor,
+                        from_pos.value_or(actor ? actor->m_pos : m_pos),
+                        dmg.value_or(-1));
         }
 }
 
@@ -567,9 +573,11 @@ Floor::Floor(const P& p) :
 void Floor::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -648,10 +656,12 @@ Wall::Wall(const P& p) :
 void Wall::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -836,10 +846,12 @@ RubbleHigh::RubbleHigh(const P& p) :
 void RubbleHigh::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -876,10 +888,12 @@ RubbleLow::RubbleLow(const P& p) :
 void RubbleLow::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -924,11 +938,13 @@ Bones::Bones(const P& p) :
 void Bones::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 std::string Bones::name(const Article article) const
@@ -957,11 +973,13 @@ GraveStone::GraveStone(const P& p) :
 void GraveStone::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 void GraveStone::bump(actor::Actor& actor_bumping)
@@ -993,9 +1011,11 @@ ChurchBench::ChurchBench(const P& p) :
 void ChurchBench::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -1149,24 +1169,27 @@ void Statue::topple(
 void Statue::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)dmg;
 
         switch (dmg_type)
         {
         case DmgType::kicking:
+        case DmgType::control_object_spell:
         {
                 ASSERT(actor);
 
-                if (actor->m_properties.has(PropId::weakened))
+                if ((dmg_type == DmgType::kicking) &&
+                    actor->m_properties.has(PropId::weakened))
                 {
                         msg_log::add("It wiggles a bit.");
 
                         return;
                 }
 
-                const auto direction = dir_utils::dir(m_pos - actor->m_pos);
+                const auto direction = dir_utils::dir(m_pos - from_pos);
 
                 // NOTE: This call deletes the object!
                 topple(direction, actor);
@@ -1271,10 +1294,12 @@ Stalagmite::Stalagmite(const P& p) :
 void Stalagmite::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -1310,11 +1335,13 @@ Stairs::Stairs(const P& p) :
 void Stairs::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 void Stairs::on_new_turn_hook()
@@ -1324,63 +1351,68 @@ void Stairs::on_new_turn_hook()
 
 void Stairs::bump(actor::Actor& actor_bumping)
 {
-        if (actor_bumping.is_player())
+        if (!actor_bumping.is_player())
         {
-                int choice = 0;
+                return;
+        }
 
-                popup::Popup(popup::AddToMsgHistory::no)
-                        .set_title("A staircase leading downwards")
-                        .set_menu(
-                                {"(D)escend", "(S)ave and quit", "(C)ancel"},
-                                {'d', 's', 'c'},
-                                &choice)
-                        .run();
+        int choice = 0;
 
-                switch (choice)
+        popup::Popup(popup::AddToMsgHistory::no)
+                .set_title("A staircase leading downwards")
+                .set_menu(
+                        {"(D)escend",
+                         "(S)ave and quit",
+                         "(space, esc) Cancel"},
+                        {'d', 's', 0},
+                        &choice)
+                .run();
+
+        switch (choice)
+        {
+        case 0:
+                map::g_player->m_pos = m_pos;
+
+                if (is_fake())
                 {
-                case 0:
-                        map::g_player->m_pos = m_pos;
+                        // NOTE: This destroys this object
+                        player_use_fake_stairs();
 
-                        if (is_fake())
-                        {
-                                // NOTE: This destroys this object
-                                player_use_fake_stairs();
-
-                                return;
-                        }
-
-                        msg_log::clear();
-
-                        msg_log::add("I descend the stairs.");
-
-                        // Always auto-save the game when descending
-                        // NOTE: We descend one dlvl when loading the game, so
-                        // auto-saving should be done BEFORE descending here
-                        saving::save_game();
-
-                        map_travel::go_to_nxt();
-                        break;
-
-                case 1:
-                        map::g_player->m_pos = m_pos;
-
-                        if (is_fake())
-                        {
-                                // NOTE: This destroys this object
-                                player_use_fake_stairs();
-
-                                return;
-                        }
-
-                        saving::save_game();
-
-                        states::pop();
-                        break;
-
-                default:
-                        msg_log::clear();
-                        break;
+                        return;
                 }
+
+                msg_log::clear();
+
+                msg_log::add("I descend the stairs.");
+
+                // Always auto-save the game when descending
+                //
+                // NOTE: We descend one dlvl when loading the game, so
+                // auto-saving should be done BEFORE descending here
+                saving::save_game();
+
+                map_travel::go_to_nxt();
+                break;
+
+        case 1:
+                map::g_player->m_pos = m_pos;
+
+                if (is_fake())
+                {
+                        // NOTE: This destroys this object
+                        player_use_fake_stairs();
+
+                        return;
+                }
+
+                saving::save_game();
+
+                states::pop();
+                break;
+
+        default:
+                msg_log::clear();
+                break;
         }
 }
 
@@ -1437,11 +1469,13 @@ gfx::TileId Bridge::tile() const
 void Bridge::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 char Bridge::character() const
@@ -1473,11 +1507,13 @@ LiquidShallow::LiquidShallow(const P& p) :
 void LiquidShallow::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 void LiquidShallow::bump(actor::Actor& actor_bumping)
@@ -1664,11 +1700,13 @@ LiquidDeep::LiquidDeep(const P& p) :
 void LiquidDeep::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 bool LiquidDeep::must_swim_on_enter(const actor::Actor& actor) const
@@ -1875,11 +1913,13 @@ Chasm::Chasm(const P& p) :
 void Chasm::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 std::string Chasm::name(const Article article) const
@@ -1905,11 +1945,13 @@ Lever::Lever(const P& p) :
 void Lever::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 std::string Lever::name(const Article article) const
@@ -2032,10 +2074,12 @@ Altar::Altar(const P& p) :
 void Altar::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -2122,9 +2166,11 @@ Carpet::Carpet(const P& p) :
 void Carpet::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -2176,9 +2222,11 @@ Grass::Grass(const P& p) :
 void Grass::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -2270,9 +2318,11 @@ Bush::Bush(const P& p) :
 void Bush::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -2352,9 +2402,11 @@ Vines::Vines(const P& p) :
 void Vines::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -2487,9 +2539,11 @@ void Chains::bump(actor::Actor& actor_bumping)
 void Chains::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -2514,10 +2568,12 @@ Grate::Grate(const P& p) :
 void Grate::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -2582,9 +2638,11 @@ Tree::Tree(const P& p) :
 void Tree::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -2679,19 +2737,23 @@ std::string Brazier::name(const Article article) const
 void Brazier::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)dmg;
 
         switch (dmg_type)
         {
         case DmgType::kicking:
+        case DmgType::control_object_spell:
         {
                 ASSERT(actor);
 
-                if (actor->m_properties.has(PropId::weakened))
+                if ((dmg_type == DmgType::kicking) &&
+                    actor->m_properties.has(PropId::weakened))
                 {
                         msg_log::add("It wiggles a bit.");
+
                         return;
                 }
 
@@ -2716,7 +2778,7 @@ void Brazier::on_hit(
 
                 snd_emit::run(snd);
 
-                const P dst_pos = m_pos + (m_pos - actor->m_pos);
+                const P dst_pos = m_pos + (m_pos - from_pos);
 
                 const P my_pos = m_pos;
 
@@ -3137,10 +3199,12 @@ Tomb::Tomb(const P& p) :
 void Tomb::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -3697,7 +3761,6 @@ DidOpen Chest::open(actor::Actor* const actor_opening)
         }
         else
         {
-                // Chest is closed
                 m_is_open = true;
 
                 if (map::g_seen.at(m_pos))
@@ -3710,12 +3773,14 @@ DidOpen Chest::open(actor::Actor* const actor_opening)
 }
 
 void Chest::hit(
-        const DmgType dmg_type,
+        DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        std::optional<P> from_pos,
+        std::optional<int> dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -3731,10 +3796,12 @@ void Chest::hit(
 void Chest::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -3984,10 +4051,12 @@ Fountain::Fountain(const P& p) :
 void Fountain::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -4437,9 +4506,11 @@ Cabinet::Cabinet(const P& p) :
 void Cabinet::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -4616,10 +4687,12 @@ Bookshelf::Bookshelf(const P& p) :
 void Bookshelf::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 
         switch (dmg_type)
         {
@@ -4776,9 +4849,11 @@ AlchemistBench::AlchemistBench(const P& p) :
 void AlchemistBench::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)
@@ -4947,9 +5022,11 @@ Cocoon::Cocoon(const P& p) :
 void Cocoon::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
-        const int dmg)
+        const P& from_pos,
+        int dmg)
 {
         (void)actor;
+        (void)from_pos;
         (void)dmg;
 
         switch (dmg_type)

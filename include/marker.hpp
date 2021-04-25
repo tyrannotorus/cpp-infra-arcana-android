@@ -15,11 +15,18 @@
 #include "random.hpp"
 #include "state.hpp"
 
+enum class SpellSkill;
+
 namespace item
 {
 class Item;
 class Wpn;
 }  // namespace item
+
+namespace terrain
+{
+class Terrain;
+}  // namespace terrain
 
 struct InputData;
 
@@ -30,8 +37,6 @@ class MarkerState : public State
 {
 public:
         MarkerState(const P& origin) :
-
-                m_marker_render_data(P(0, 0)),
                 m_origin(origin)
         {}
 
@@ -94,11 +99,14 @@ protected:
         }
 
         // Necessary e.g. for marker states drawing overlayed graphics
-        Array2<CellRenderData> m_marker_render_data;
+        Array2<CellRenderData> m_marker_render_data {{0, 0}};
 
         const P m_origin;
 
-        P m_pos;
+        P m_pos {0, 0};
+
+        // Can be set by child classes to temporarily enable/disable drawing
+        bool m_allow_draw {true};
 
 private:
         void init_marker_render_data();
@@ -247,11 +255,148 @@ protected:
         void handle_input(const InputData& input) override;
 
 private:
-        int chance_of_success_pct(const P& tgt) const;
+        int chance_of_success_pct() const;
 
         P m_origin;
         int m_max_dist;
         Array2<bool> m_blocked;
+};
+
+// -----------------------------------------------------------------------------
+// Control Object marker state
+// -----------------------------------------------------------------------------
+class CtrlObjAction
+{
+public:
+        virtual bool can_control(
+                const terrain::Terrain& terrain,
+                const SpellSkill skill) const = 0;
+
+        virtual DidAction run(
+                terrain::Terrain& terrain,
+                const P& marker_pos,
+                const SpellSkill skill) const = 0;
+
+        virtual std::string menu_label(
+                const terrain::Terrain& terrain) const = 0;
+
+        virtual char menu_key() const = 0;
+};
+
+class CtrlObjOpen : public CtrlObjAction
+{
+public:
+        bool can_control(
+                const terrain::Terrain& terrain,
+                const SpellSkill skill) const override;
+
+        DidAction run(
+                terrain::Terrain& terrain,
+                const P& marker_pos,
+                const SpellSkill skill) const override;
+
+        std::string menu_label(const terrain::Terrain& terrain) const override;
+
+        char menu_key() const override;
+};
+
+class CtrlObjCloseDoor : public CtrlObjAction
+{
+public:
+        bool can_control(
+                const terrain::Terrain& terrain,
+                const SpellSkill skill) const override;
+
+        DidAction run(
+                terrain::Terrain& terrain,
+                const P& marker_pos,
+                const SpellSkill skill) const override;
+
+        std::string menu_label(const terrain::Terrain& terrain) const override;
+
+        char menu_key() const override;
+};
+
+class CtrlObjJamDoor : public CtrlObjAction
+{
+public:
+        bool can_control(
+                const terrain::Terrain& terrain,
+                const SpellSkill skill) const override;
+
+        DidAction run(
+                terrain::Terrain& terrain,
+                const P& marker_pos,
+                const SpellSkill skill) const override;
+
+        std::string menu_label(const terrain::Terrain& terrain) const override;
+
+        char menu_key() const override;
+};
+
+class CtrlObjToggleLever : public CtrlObjAction
+{
+public:
+        bool can_control(
+                const terrain::Terrain& terrain,
+                const SpellSkill skill) const override;
+
+        DidAction run(
+                terrain::Terrain& terrain,
+                const P& marker_pos,
+                const SpellSkill skill) const override;
+
+        std::string menu_label(const terrain::Terrain& terrain) const override;
+
+        char menu_key() const override;
+};
+
+class CtrlObjStrike : public CtrlObjAction
+{
+public:
+        bool can_control(
+                const terrain::Terrain& terrain,
+                const SpellSkill skill) const override;
+
+        DidAction run(
+                terrain::Terrain& terrain,
+                const P& marker_pos,
+                const SpellSkill skill) const override;
+
+        std::string menu_label(const terrain::Terrain& terrain) const override;
+
+        char menu_key() const override;
+};
+
+typedef std::shared_ptr<CtrlObjAction> CtrlObjActionPtr;
+
+class CtrlObj : public MarkerState
+{
+public:
+        CtrlObj(const P& origin, int max_dist, SpellSkill skill);
+
+protected:
+        void on_start_hook() override;
+
+        void on_moved() override;
+
+        void handle_input(const InputData& input) override;
+
+private:
+        int current_dist() const;
+
+        bool is_allowed_at_dist() const;
+
+        void set_terrain();
+        void set_possible_actions();
+
+        CtrlObjActionPtr query_control() const;
+
+        P m_origin;
+        int m_max_dist;
+        SpellSkill m_skill;
+        std::vector<CtrlObjActionPtr> m_possible_actions {};
+        terrain::Terrain* m_terrain {nullptr};
 };
 
 #endif  // MARKER_HPP

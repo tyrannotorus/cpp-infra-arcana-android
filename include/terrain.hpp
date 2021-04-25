@@ -242,8 +242,9 @@ public:
 
         virtual void hit(
                 DmgType dmg_type,
-                actor::Actor* actor,
-                int dmg = -1);
+                actor::Actor* const actor,
+                std::optional<P> from_pos = std::nullopt,
+                std::optional<int> dmg = std::nullopt);
 
         virtual void reveal(const Verbose verbose)
         {
@@ -298,10 +299,12 @@ protected:
         virtual void on_hit(
                 const DmgType dmg_type,
                 actor::Actor* const actor,
-                int dmg = -1)
+                const P& from_pos,
+                const int dmg)
         {
                 (void)dmg_type;
                 (void)actor;
+                (void)from_pos;
                 (void)dmg;
         }
 
@@ -371,9 +374,10 @@ private:
         Color color_default() const override;
 
         void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                int dmg = -1) override;
+                const DmgType dmg_type,
+                actor::Actor* const actor,
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Carpet : public Terrain
@@ -398,7 +402,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 enum class GrassType
@@ -430,7 +435,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Bush : public Terrain
@@ -456,7 +462,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Vines : public Terrain
@@ -480,7 +487,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Chains : public Terrain
@@ -507,7 +515,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Grate : public Terrain
@@ -530,7 +539,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Brazier : public Terrain
@@ -554,7 +564,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         void add_light_hook(Array2<bool>& light) const override;
 };
@@ -600,7 +611,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class RubbleLow : public Terrain
@@ -623,7 +635,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Bones : public Terrain
@@ -646,7 +659,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class RubbleHigh : public Terrain
@@ -669,7 +683,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class GraveStone : public Terrain
@@ -699,7 +714,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         std::string m_inscr {};
 };
@@ -724,7 +740,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 enum class StatueType
@@ -772,7 +789,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         int base_shock_when_adj() const override;
 
@@ -800,7 +818,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Stairs : public Terrain
@@ -838,7 +857,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         void player_use_fake_stairs();
 
@@ -874,7 +894,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         Axis m_axis;
 };
@@ -904,7 +925,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         void run_magic_pool_effects_on_player();
 };
@@ -938,7 +960,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         bool must_swim_on_enter(const actor::Actor& actor) const;
 };
@@ -962,7 +985,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Lever : public Terrain
@@ -1017,7 +1041,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         bool m_is_left_pos;
 
@@ -1050,7 +1075,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 };
 
 class Tree : public Terrain
@@ -1076,7 +1102,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         bool is_fungi() const;
 
@@ -1119,8 +1146,16 @@ public:
         }
 
         std::string name(Article article) const override;
+
         gfx::TileId tile() const override;
+
         void bump(actor::Actor& actor_bumping) override;
+
+        bool is_open() const
+        {
+                return m_is_open;
+        }
+
         DidOpen open(actor::Actor* actor_opening) override;
 
 private:
@@ -1129,7 +1164,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         DidTriggerTrap trigger_trap(actor::Actor* actor) override;
 
@@ -1167,12 +1203,18 @@ public:
 
         void bump(actor::Actor& actor_bumping) override;
 
+        bool is_open() const
+        {
+                return m_is_open;
+        }
+
         DidOpen open(actor::Actor* actor_opening) override;
 
         void hit(
                 DmgType dmg_type,
-                actor::Actor* actor,
-                int dmg = -1) override;
+                actor::Actor* const actor,
+                std::optional<P> from_pos = std::nullopt,
+                std::optional<int> dmg = std::nullopt) override;
 
         WasDestroyed on_finished_burning() override;
 
@@ -1182,7 +1224,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         void on_player_kick();
 
@@ -1211,6 +1254,11 @@ public:
 
         void bump(actor::Actor& actor_bumping) override;
 
+        bool is_open() const
+        {
+                return m_is_open;
+        }
+
         DidOpen open(actor::Actor* actor_opening) override;
 
         WasDestroyed on_finished_burning() override;
@@ -1221,7 +1269,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         void player_loot();
 
@@ -1253,7 +1302,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         void player_loot();
 
@@ -1285,7 +1335,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         void player_loot();
 
@@ -1355,7 +1406,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         FountainEffect m_fountain_effect {FountainEffect::END};
         bool m_has_drinks_left {true};
@@ -1390,7 +1442,8 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
 
         void player_loot();
 

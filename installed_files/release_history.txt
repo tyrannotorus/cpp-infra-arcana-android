@@ -24,6 +24,7 @@ Gameplay
 * The standard map generator can now also split rooms, for more map variety
 * Casting spells now occasionally trigger random chaotic side effects, typically affecting the surrounding area (for example walls may appear or disappear, statues knocked over, etc)
 * Added spell "Erudition" - the next spell is cast at a higher skill level
+* Changed the "Opening" spell to "Control Object", which can do more things (e.g. open/close/jam/strike doors, or strike statues/braziers, etc)
 * The Searching spell has been removed, and is instead a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
 * Reduced the maximum number of weapons summoned by Spectral Weapons for basic/expert/master skill level to 1/2/3 (from 2/3/4)
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell

@@ -5,6 +5,7 @@
 // =============================================================================
 
 #include "flood.hpp"
+#include "direction.hpp"
 
 Array2<int> floodfill(
         const P& p0,

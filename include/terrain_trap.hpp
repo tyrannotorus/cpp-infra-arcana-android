@@ -128,9 +128,10 @@ private:
         Color color_bg_default() const override;
 
         void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                int dmg = -1) override;
+                const DmgType dmg_type,
+                actor::Actor* const actor,
+                const P& from_pos,
+                int dmg) override;
 
         DidTriggerTrap trigger_trap(actor::Actor* actor) override;
 

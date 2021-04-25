@@ -24,6 +24,7 @@ extern const std::string g_cancel_hint;
 extern const std::string g_confirm_hint;
 extern const std::string g_any_key_hint;
 extern const std::string g_yes_or_no_hint;
+extern const std::string g_direction_query;
 extern const std::string g_disarm_no_trap;
 extern const std::string g_mon_prevent_cmd;
 extern const std::string g_fire_prevent_cmd;

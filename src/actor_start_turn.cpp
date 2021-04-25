@@ -19,6 +19,8 @@
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "smell.hpp"
+#include "terrain.hpp"
+#include "terrain_door.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -396,6 +398,25 @@ static void player_items_start_turn()
         }
 }
 
+static void player_detect_stuck_doors()
+{
+        for (const auto& d : dir_utils::g_dir_list)
+        {
+                const auto p = map::g_player->m_pos + d;
+
+                auto* const terrain = map::g_terrain.at(p);
+
+                if (terrain->id() != terrain::Id::door)
+                {
+                        continue;
+                }
+
+                auto* const door = static_cast<terrain::Door*>(terrain);
+
+                door->reveal_stuck_status();
+        }
+}
+
 static bool should_print_unload_wpn_hint()
 {
         const auto* const item = map::g_items.at(map::g_player->m_pos);
@@ -460,6 +481,8 @@ static void player_start_turn()
         player.add_shock_from_seen_monsters();
 
         player_incr_passive_shock();
+
+        player_detect_stuck_doors();
 
         player_items_start_turn();
 

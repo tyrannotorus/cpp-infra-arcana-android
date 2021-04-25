@@ -200,13 +200,15 @@ TrapImpl* Trap::make_trap_impl_from_id(const TrapId trap_id)
 }
 
 void Trap::on_hit(
-        const DmgType dmg_type,
-        actor::Actor* const actor,
-        const int dmg)
+        DmgType dmg_type,
+        actor::Actor* actor,
+        const P& from_pos,
+        int dmg)
 {
-        (void)dmg;
         (void)dmg_type;
         (void)actor;
+        (void)from_pos;
+        (void)dmg;
 }
 
 TrapId Trap::type() const

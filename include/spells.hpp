@@ -22,6 +22,7 @@ class Mon;
 namespace terrain
 {
 enum class DidOpen;
+enum class DidClose;
 }  // namespace terrain
 
 enum class SpellId
@@ -48,7 +49,7 @@ enum class SpellId
         identify,
         light,
         mayhem,
-        opening,
+        control_object,
         resistance,
         see_invis,
         transmut,
@@ -106,7 +107,10 @@ std::string skill_to_str(SpellSkill skill);
 
 terrain::DidOpen run_opening_spell_effect_at(
         const P& pos,
-        const int chance,
+        const SpellSkill skill);
+
+terrain::DidClose run_close_spell_effect_at(
+        const P& pos,
         const SpellSkill skill);
 
 }  // namespace spells
@@ -804,10 +808,10 @@ private:
         }
 };
 
-class SpellOpening : public Spell
+class SpellControlObject : public Spell
 {
 public:
-        SpellOpening() = default;
+        SpellControlObject() = default;
 
         bool player_can_learn() const override
         {
@@ -816,12 +820,12 @@ public:
 
         std::string name() const override
         {
-                return "Opening";
+                return "Control Object";
         }
 
         SpellId id() const override
         {
-                return SpellId::opening;
+                return SpellId::control_object;
         }
 
         OccultistDomain domain() const override
@@ -848,6 +852,8 @@ private:
 
                 return 4;
         }
+
+        int max_dist(const SpellSkill skill) const;
 
         bool is_noisy(SpellSkill skill) const override;
 };

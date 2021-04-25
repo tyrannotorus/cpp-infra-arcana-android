@@ -96,11 +96,18 @@ public:
                 return m_is_stuck;
         }
 
+        bool is_known_stuck() const
+        {
+                return m_is_known_stuck;
+        }
+
         Matl matl() const override;
 
         void reveal(Verbose verbose) override;
 
         void on_revealed_from_searching() override;
+
+        void reveal_stuck_status();
 
         void set_secret();
 
@@ -110,11 +117,11 @@ public:
                 m_is_stuck = true;
         }
 
-        // NOTE: These do not affect levers - they only open or close the door
-        // itself. Do NOT just call these functions from e.g. an opening spell
-        // or other such effect, since it will leave the levers inverted.
+        // NOTE: These do not affect levers - they only open or close the door.
         DidOpen open(actor::Actor* actor_opening) override;
         DidClose close(actor::Actor* actor_closing) override;
+
+        void jam(actor::Actor* const actor_jamming);
 
         actor::Actor* actor_currently_opening() const
         {
@@ -128,8 +135,10 @@ public:
 
         static bool is_tile_any_door(const gfx::TileId tile)
         {
-                return tile == gfx::TileId::door_closed ||
-                        tile == gfx::TileId::door_open;
+                return (
+                        tile == gfx::TileId::door_closed ||
+                        tile == gfx::TileId::door_open ||
+                        tile == gfx::TileId::door_stuck);
         }
 
         const Wall* mimic() const
@@ -148,14 +157,20 @@ private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                int dmg = -1) override;
+                const P& from_pos,
+                int dmg) override;
+
+        void bash(const DmgType dmg_type, actor::Actor& actor, const int dmg);
+        void player_bash(const DmgType dmg_type, const int dmg);
+        void mon_bash(actor::Actor& mon);
 
         const Wall* const m_mimic_terrain {nullptr};
 
-        int m_nr_spikes {0};
-
         bool m_is_open {false};
         bool m_is_stuck {false};
+        bool m_is_known_stuck {false};
+
+        int m_jam_level {0};
 
         DoorType m_type {DoorType::wood};
 

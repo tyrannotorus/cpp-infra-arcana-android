@@ -6,6 +6,8 @@
 
 #include "pos.hpp"
 
+#include "direction.hpp"
+
 P::P(const Dir dir) :
         x(0),
         y(0)
@@ -27,9 +29,18 @@ P& P::operator+=(const Dir dir)
         return *this;
 }
 
+P& P::operator-=(const Dir dir)
+{
+        const auto reversed_dir = dir_utils::reversed_dir(dir);
+
+        *this += dir_utils::offset(reversed_dir);
+
+        return *this;
+}
+
 P P::operator+(const Dir dir) const
 {
-        P result(*this);
+        auto result = *this;
 
         result += dir;
 
@@ -39,4 +50,13 @@ P P::operator+(const Dir dir) const
 Dir P::to_dir() const
 {
         return dir_utils::dir(*this);
+}
+
+P P::operator-(Dir dir) const
+{
+        auto result = *this;
+
+        result -= dir;
+
+        return result;
 }

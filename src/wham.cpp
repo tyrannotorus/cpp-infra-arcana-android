@@ -213,6 +213,7 @@ static void player_attack_terrain(
         terrain->hit(
                 wpn_used_att_terrain->data().melee.dmg_type,
                 map::g_player,
+                map::g_player->m_pos,
                 dmg);
 
         // Attacking ends cloaking
@@ -267,9 +268,14 @@ void run()
 {
         msg_log::clear();
 
+        const std::string query_msg =
+                common_text::g_direction_query +
+                " " +
+                common_text::g_cancel_hint;
+
         // Choose direction
         msg_log::add(
-                "Which direction? " + common_text::g_cancel_hint,
+                query_msg,
                 colors::light_white(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::no,

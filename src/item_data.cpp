@@ -1539,8 +1539,8 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
-        d.id = Id::scroll_opening;
-        d.spell_cast_from_scroll = SpellId::opening;
+        d.id = Id::scroll_control_object;
+        d.spell_cast_from_scroll = SpellId::control_object;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);

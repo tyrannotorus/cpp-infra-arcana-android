@@ -44,14 +44,15 @@ public:
 
         std::string name(Article article) const override;
 
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                int dmg = -1) override;
-
         void add_light_hook(Array2<bool>& light) const override;
 
 private:
+        void on_hit(
+                const DmgType dmg_type,
+                actor::Actor* const actor,
+                const P& from_pos,
+                int dmg) override;
+
         PylonImpl* make_pylon_impl_from_id(PylonId id);
 
         void on_new_turn_hook() override;
