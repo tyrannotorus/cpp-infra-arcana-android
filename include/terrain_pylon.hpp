@@ -8,8 +8,19 @@
 #define TERRAIN_PYLON_HPP
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "terrain.hpp"
+#include "colors.hpp"
+#include "global.hpp"
+#include "pos.hpp"
+#include "terrain_data.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
+template <typename T> class Array2;
 
 namespace terrain
 {

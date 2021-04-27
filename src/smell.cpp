@@ -6,6 +6,9 @@
 
 #include "smell.hpp"
 
+#include <stddef.h>
+#include <vector>
+
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "direction.hpp"
@@ -13,6 +16,19 @@
 #include "map_parsing.hpp"
 #include "pos.hpp"
 #include "saving.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "item_data.hpp"
+#include "msg_log.hpp"
+#include "player_bon.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
 
 using namespace smell;
 

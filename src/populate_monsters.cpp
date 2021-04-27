@@ -6,20 +6,27 @@
 
 #include "populate_monsters.hpp"
 
+#include <stddef.h>
 #include <algorithm>
+#include <iterator>
+#include <memory>
+#include <ostream>
+#include <string>
 
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "debug.hpp"
 #include "flood.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
-#include "misc.hpp"
 #include "random.hpp"
-#include "terrain_trap.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "config.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

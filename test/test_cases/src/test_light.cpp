@@ -4,13 +4,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <algorithm>
+#include <iterator>
+#include <vector>
 
+#include "catch.hpp"
 #include "actor_player.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
+#include "array2.hpp"
+#include "direction.hpp"
+#include "global.hpp"
+#include "pos.hpp"
 
 TEST_CASE("Test light map")
 {

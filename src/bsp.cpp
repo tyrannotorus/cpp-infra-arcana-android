@@ -7,11 +7,13 @@
 #include "bsp.hpp"
 
 #include <optional>
+#include <algorithm>
+#include <iterator>
 
-#include "debug.hpp"
-#include "direction.hpp"
 #include "global.hpp"
 #include "random.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -6,34 +6,44 @@
 
 #include "terrain_gong.hpp"
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
+#include <stddef.h>
+#include <utility>
 #include <vector>
 
+#include "actor.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
-#include "audio.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
 #include "common_text.hpp"
+#include "debug.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
-#include "io.hpp"
+#include "inventory.hpp"
 #include "item.hpp"
+#include "item_curse.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "item_scroll.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
+#include "player_bon.hpp"
 #include "player_spells.hpp"
-#include "popup.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
+#include "property_handler.hpp"
 #include "query.hpp"
 #include "random.hpp"
-#include "saving.hpp"
+#include "sound.hpp"
 #include "spells.hpp"
 #include "terrain.hpp"
-#include "text_format.hpp"
+
+struct P;
 
 // -----------------------------------------------------------------------------
 // Private

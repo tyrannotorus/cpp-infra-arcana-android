@@ -8,7 +8,6 @@
 
 #include <unordered_map>
 
-#include "config.hpp"
 #include "pos.hpp"
 
 // -----------------------------------------------------------------------------

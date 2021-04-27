@@ -6,7 +6,10 @@
 
 #include "minimap.hpp"
 
+#include <stddef.h>
 #include <climits>
+#include <algorithm>
+#include <string>
 
 #include "actor_player.hpp"
 #include "common_text.hpp"
@@ -17,6 +20,15 @@
 #include "panel.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
+#include "SDL_keycode.h"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "global.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

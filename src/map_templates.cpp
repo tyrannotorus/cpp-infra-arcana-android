@@ -10,6 +10,9 @@
 #include <fstream>
 #include <unordered_map>
 #include <vector>
+#include <iterator>
+#include <memory>
+#include <string>
 
 #include "debug.hpp"
 #include "paths.hpp"

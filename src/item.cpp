@@ -4,10 +4,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "init.hpp"
+#include <stddef.h>
+#include <algorithm>
+#include <memory>
+#include <ostream>
 
 #include "item.hpp"
-
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
 #include "actor_player.hpp"
@@ -18,14 +20,10 @@
 #include "game_over.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
-#include "io.hpp"
-#include "item.hpp"
 #include "item_curse.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
-#include "map_parsing.hpp"
-#include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
@@ -37,6 +35,20 @@
 #include "terrain.hpp"
 #include "terrain_mob.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "inventory.hpp"
+#include "property_data.hpp"
+#include "random.hpp"
+#include "sound.hpp"
+#include "state.hpp"
+#include "terrain_data.hpp"
+
+struct ItemAttProp;
 
 namespace item
 {

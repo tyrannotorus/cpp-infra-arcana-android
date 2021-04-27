@@ -8,6 +8,8 @@
 #define CREATE_CHARACTER_HPP
 
 #include <utility>
+#include <string>
+#include <vector>
 
 #include "browser.hpp"
 #include "player_bon.hpp"

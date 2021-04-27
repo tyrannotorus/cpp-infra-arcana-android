@@ -6,6 +6,8 @@
 
 #include "direction.hpp"
 
+#include <math.h>
+
 #include "debug.hpp"
 #include "pos.hpp"
 #include "random.hpp"

@@ -4,35 +4,46 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "init.hpp"
-
 #include "bot.hpp"
 
 #include <algorithm>
+#include <ostream>
+#include <stddef.h>
+#include <string>
 #include <vector>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
-#include "attack.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "explosion.hpp"
 #include "game_commands.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "map_travel.hpp"
 #include "misc.hpp"
+#include "panel.hpp"
 #include "pathfind.hpp"
+#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "random.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
+#include "terrain_data.hpp"
 #include "terrain_door.hpp"
 
 // -----------------------------------------------------------------------------

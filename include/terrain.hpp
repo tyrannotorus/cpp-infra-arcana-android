@@ -7,13 +7,16 @@
 #ifndef TERRAIN_HPP
 #define TERRAIN_HPP
 
-#include <memory>
 #include <vector>
+#include <optional>
+#include <string>
 
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "pos.hpp"
 #include "terrain_data.hpp"
+#include "direction.hpp"
+#include "global.hpp"
 
 namespace actor
 {
@@ -63,9 +66,7 @@ enum class DidClose
         yes
 };
 
-class Terrain;
 enum class Id;
-struct TerrainData;
 class Lever;
 
 class ItemContainer

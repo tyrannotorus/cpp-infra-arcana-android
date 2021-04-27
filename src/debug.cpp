@@ -7,6 +7,7 @@
 #include "debug.hpp"
 
 #include <cassert>
+#include <iostream>
 
 // -----------------------------------------------------------------------------
 // Private

@@ -6,13 +6,17 @@
 
 #include "game.hpp"
 
+#include <math.h>
+#include <algorithm>
+#include <memory>
+#include <ostream>
+
 #include "actor_act.hpp"
 #include "actor_items.hpp"
 #include "actor_player.hpp"
 #include "common_text.hpp"
 #include "create_character.hpp"
 #include "draw_map.hpp"
-#include "game_commands.hpp"
 #include "game_over.hpp"
 #include "game_time.hpp"
 #include "init.hpp"
@@ -25,13 +29,26 @@
 #include "minimap.hpp"
 #include "msg_log.hpp"
 #include "popup.hpp"
-#include "postmortem.hpp"
 #include "property.hpp"
 #include "property_factory.hpp"
-#include "query.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
+#include "SDL_keycode.h"
+#include "ability_values.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "audio.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "insanity.hpp"
+#include "panel.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

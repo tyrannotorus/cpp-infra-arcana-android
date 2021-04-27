@@ -8,12 +8,17 @@
 
 #include <cmath>
 #include <unordered_map>
+#include <algorithm>
+#include <string>
 
-#include "actor_player.hpp"
-#include "colors.hpp"
 #include "debug.hpp"
 #include "player_bon.hpp"
 #include "property_handler.hpp"
+#include "actor.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "random.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

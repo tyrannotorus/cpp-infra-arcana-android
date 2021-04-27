@@ -6,11 +6,13 @@
 
 #include "actor_death.hpp"
 
+#include <string>
+#include <vector>
+
 #include "actor.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "drop.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "io.hpp"
@@ -21,6 +23,18 @@
 #include "popup.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "sound.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

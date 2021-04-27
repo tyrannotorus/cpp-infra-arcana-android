@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <stddef.h>
 
+#include "catch.hpp"
 #include "actor_player.hpp"
 #include "drop.hpp"
 #include "explosion.hpp"
@@ -14,8 +15,11 @@
 #include "map.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
-#include "terrain.hpp"
 #include "test_utils.hpp"
+#include "array2.hpp"
+#include "global.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
 
 TEST_CASE("Properties from item applied and removed for actor")
 {

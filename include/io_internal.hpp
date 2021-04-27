@@ -14,6 +14,11 @@
 #include "panel.hpp"
 #include "pos.hpp"
 
+struct SDL_Window;
+struct SDL_Renderer;
+struct SDL_Texture;
+struct SDL_Surface;
+
 namespace io
 {
 extern SDL_Window* g_sdl_window;

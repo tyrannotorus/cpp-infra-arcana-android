@@ -9,9 +9,9 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "browser.hpp"
-#include "global.hpp"
 #include "info_screen_state.hpp"
 #include "state.hpp"
 

@@ -7,10 +7,6 @@
 #ifndef DRAW_MAP_HPP
 #define DRAW_MAP_HPP
 
-#include "colors.hpp"
-#include "gfx.hpp"
-#include "global.hpp"
-
 struct CellRenderData;
 
 namespace draw_map

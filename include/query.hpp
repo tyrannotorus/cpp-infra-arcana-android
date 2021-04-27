@@ -9,9 +9,10 @@
 
 #include "colors.hpp"
 #include "direction.hpp"
-#include "random.hpp"
 
 struct InputData;
+struct P;
+struct Range;
 
 enum class BinaryAnswer
 {

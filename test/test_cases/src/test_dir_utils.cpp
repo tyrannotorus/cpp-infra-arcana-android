@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <string>
 
+#include "catch.hpp"
 #include "direction.hpp"
 #include "pos.hpp"
 

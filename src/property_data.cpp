@@ -7,6 +7,7 @@
 #include "property_data.hpp"
 
 #include <unordered_map>
+#include <algorithm>
 
 // -----------------------------------------------------------------------------
 // Private

@@ -7,7 +7,17 @@
 #ifndef TERRAIN_MONOLITH_HPP
 #define TERRAIN_MONOLITH_HPP
 
+#include <string>
+
 #include "terrain.hpp"
+#include "colors.hpp"
+#include "global.hpp"
+#include "terrain_data.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
+struct P;
 
 namespace terrain
 {

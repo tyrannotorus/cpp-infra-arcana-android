@@ -6,35 +6,29 @@
 
 #include "actor.hpp"
 
-#include "init.hpp"
+#include <algorithm>
+#include <limits.h>
 
-#include "actor_death.hpp"
-#include "actor_hit.hpp"
 #include "actor_items.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "drop.hpp"
-#include "explosion.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
 #include "fov.hpp"
-#include "game.hpp"
 #include "game_time.hpp"
 #include "inventory.hpp"
-#include "io.hpp"
 #include "item.hpp"
-#include "look.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
-#include "map_travel.hpp"
-#include "marker.hpp"
 #include "msg_log.hpp"
-#include "popup.hpp"
+#include "player_bon.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
-#include "terrain_door.hpp"
-#include "terrain_mob.hpp"
-#include "terrain_trap.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "sound.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------

@@ -6,17 +6,26 @@
 
 #include "disarm.hpp"
 
+#include <string>
+
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "common_text.hpp"
 #include "game_time.hpp"
-#include "inventory.hpp"
-#include "io.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
-#include "property_factory.hpp"
 #include "query.hpp"
 #include "terrain_trap.hpp"
+#include "actor.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "direction.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "state.hpp"
+#include "terrain.hpp"
+#include "terrain_data.hpp"
 
 namespace disarm
 {

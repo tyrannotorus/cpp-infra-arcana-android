@@ -6,12 +6,15 @@
 
 #include "map_mode_gui.hpp"
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 #include "actor_player.hpp"
 #include "colors.hpp"
 #include "config.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
-#include "game_time.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
 #include "item.hpp"
@@ -21,6 +24,10 @@
 #include "player_bon.hpp"
 #include "property_handler.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "global.hpp"
+#include "item_data.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

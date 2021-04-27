@@ -6,6 +6,12 @@
 
 #include "popup.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <ostream>
+#include <utility>
+
 #include "audio.hpp"
 #include "browser.hpp"
 #include "colors.hpp"
@@ -15,9 +21,11 @@
 #include "io.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
-#include "query.hpp"
 #include "rect.hpp"
 #include "text_format.hpp"
+#include "SDL_keycode.h"
+#include "debug.hpp"
+#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

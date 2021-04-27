@@ -5,6 +5,9 @@
 // =============================================================================
 
 #include "mapgen.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "rect.hpp"
 
 R Region::rnd_room_rect() const
 {

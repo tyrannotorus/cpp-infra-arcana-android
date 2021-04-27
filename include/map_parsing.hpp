@@ -10,9 +10,11 @@
 #include <utility>
 #include <vector>
 
-#include "config.hpp"
 #include "pos.hpp"
 #include "terrain_data.hpp"
+#include "terrain.hpp"
+
+struct Range;
 
 namespace actor
 {
@@ -20,7 +22,6 @@ class Actor;
 }  // namespace actor
 
 struct R;
-
 template <typename T>
 class Array2;
 

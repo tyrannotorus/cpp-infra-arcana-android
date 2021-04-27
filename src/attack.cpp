@@ -6,31 +6,52 @@
 
 #include "attack.hpp"
 
+#include <algorithm>
+#include <memory>
+#include <optional>
+#include <ostream>
+#include <stddef.h>
+#include <string>
+#include <vector>
+
+#include "ability_values.hpp"
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_hit.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
 #include "attack_data.hpp"
-#include "drop.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "dmg_range.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
+#include "gfx.hpp"
+#include "inventory.hpp"
 #include "io.hpp"
 #include "item.hpp"
+#include "item_att_property.hpp"
+#include "item_data.hpp"
 #include "knockback.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
-#include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "panel.hpp"
 #include "player_bon.hpp"
+#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "random.hpp"
+#include "sound.hpp"
+#include "state.hpp"
 #include "terrain.hpp"
-#include "terrain_mob.hpp"
-#include "terrain_trap.hpp"
+#include "terrain_data.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
 

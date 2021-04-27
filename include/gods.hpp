@@ -8,7 +8,6 @@
 #define GODS_HPP
 
 #include <string>
-#include <vector>
 
 struct God
 {

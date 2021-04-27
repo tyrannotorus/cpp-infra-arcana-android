@@ -6,12 +6,16 @@
 
 #include "query.hpp"
 
-#include <iostream>
+#include <algorithm>
+#include <string>
 
 #include "config.hpp"
 #include "game_commands.hpp"
 #include "io.hpp"
 #include "pos.hpp"
+#include "SDL_keycode.h"
+#include "panel.hpp"
+#include "random.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

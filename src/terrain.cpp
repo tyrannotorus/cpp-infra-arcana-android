@@ -6,22 +6,36 @@
 
 #include "terrain.hpp"
 
+#include <algorithm>
+#include <ctype.h>
+#include <iterator>
+#include <ostream>
+#include <stddef.h>
+#include <stdint.h>
 #include <string>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "audio.hpp"
+#include "audio_data.hpp"
 #include "common_text.hpp"
+#include "debug.hpp"
 #include "drop.hpp"
 #include "explosion.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "hints.hpp"
-#include "init.hpp"
-#include "io.hpp"
+#include "insanity.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_curse.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -35,8 +49,10 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
+#include "random.hpp"
 #include "saving.hpp"
 #include "sound.hpp"
+#include "state.hpp"
 #include "terrain_dmg.hpp"
 #include "terrain_mob.hpp"
 #include "text_format.hpp"

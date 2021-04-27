@@ -6,20 +6,28 @@
 
 #include "map_builder.hpp"
 
+#include <algorithm>
+#include <iterator>
+#include <ostream>
+#include <ratio>
+#include <stddef.h>
+
 #ifndef NDEBUG
 #include <chrono>
 #endif  // NDEBUG
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
+#include "debug.hpp"
 #include "game_time.hpp"
 #include "gods.hpp"
 #include "map.hpp"
 #include "map_controller.hpp"
 #include "map_templates.hpp"
-#include "mapgen.hpp"
+#include "random.hpp"
 
 // -----------------------------------------------------------------------------
 // map_builder

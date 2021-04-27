@@ -6,17 +6,18 @@
 
 #include "saving.hpp"
 
+#include <stddef.h>
 #include <fstream>
-#include <iostream>
+#include <algorithm>
+#include <iterator>
+#include <vector>
 
 #include "actor_player.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "hints.hpp"
-#include "init.hpp"
 #include "insanity.hpp"
 #include "inventory.hpp"
-#include "io.hpp"
 #include "item_curse.hpp"
 #include "item_potion.hpp"
 #include "item_rod.hpp"
@@ -25,12 +26,13 @@
 #include "map_templates.hpp"
 #include "map_travel.hpp"
 #include "misc.hpp"
-#include "msg_log.hpp"
 #include "paths.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
-#include "postmortem.hpp"
 #include "smell.hpp"
+#include "actor_data.hpp"
+#include "debug.hpp"
+#include "item_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

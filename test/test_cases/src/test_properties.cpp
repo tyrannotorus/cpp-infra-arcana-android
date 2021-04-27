@@ -5,10 +5,7 @@
 // =============================================================================
 
 #include "catch.hpp"
-
-#include "actor.hpp"
 #include "actor_player.hpp"
-#include "game_time.hpp"
 #include "map.hpp"
 #include "property.hpp"
 #include "property_data.hpp"

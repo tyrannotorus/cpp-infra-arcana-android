@@ -7,6 +7,9 @@
 #ifndef PROPERTY_DATA_HPP
 #define PROPERTY_DATA_HPP
 
+#include <stddef.h>
+#include <string>
+
 #include "random.hpp"
 
 // NOTE: When updating this, also update the two maps below

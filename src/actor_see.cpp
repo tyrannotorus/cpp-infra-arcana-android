@@ -6,6 +6,9 @@
 
 #include "actor_see.hpp"
 
+#include <algorithm>
+#include <iterator>
+
 #include "actor.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
@@ -15,6 +18,11 @@
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "terrain.hpp"
+#include "global.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

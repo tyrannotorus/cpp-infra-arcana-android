@@ -6,7 +6,13 @@
 
 #include "teleport.hpp"
 
+#include <stddef.h>
 #include <memory>
+#include <algorithm>
+#include <iterator>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
@@ -21,9 +27,22 @@
 #include "msg_log.hpp"
 #include "property.hpp"
 #include "terrain_door.hpp"
-#include "terrain_mob.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "fov.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "state.hpp"
+#include "terrain.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -8,7 +8,8 @@
 #define DRAW_BOX_HPP
 
 #include "colors.hpp"
-#include "rect.hpp"
+
+struct R;
 
 void draw_box(R border, const Color& color = colors::dark_gray());
 

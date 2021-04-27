@@ -12,6 +12,8 @@
 #include "query.hpp"
 #include "random.hpp"
 #include "terrain.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
 
 static void put_floor_and_walls_on_map()
 {

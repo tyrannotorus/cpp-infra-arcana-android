@@ -7,16 +7,15 @@
 #ifndef IO_HPP
 #define IO_HPP
 
-#include "SDL.h"
-#include "SDL_image.h"
-#include "SDL_video.h"
-
+#include <stdint.h>
 #include <vector>
+#include <string>
 
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "panel.hpp"
 #include "rect.hpp"
+#include "pos.hpp"
 
 namespace actor
 {

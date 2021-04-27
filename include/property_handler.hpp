@@ -7,19 +7,21 @@
 #ifndef PROPERTY_HANDLER_HPP
 #define PROPERTY_HANDLER_HPP
 
+#include <stddef.h>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ability_values.hpp"
 #include "direction.hpp"
 #include "global.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "colors.hpp"
 
 namespace item
 {
 class Item;
-class Wpn;
 }  // namespace item
 
 namespace actor

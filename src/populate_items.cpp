@@ -6,7 +6,10 @@
 
 #include "populate_items.hpp"
 
+#include <stddef.h>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 #include "actor_player.hpp"
 #include "item_factory.hpp"
@@ -14,9 +17,12 @@
 #include "map_parsing.hpp"
 #include "mapgen.hpp"
 #include "player_bon.hpp"
-#include "terrain.hpp"
-#include "terrain_door.hpp"
-#include "terrain_trap.hpp"
+#include "array2.hpp"
+#include "global.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

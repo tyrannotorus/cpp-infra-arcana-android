@@ -6,8 +6,9 @@
 
 #include "hints.hpp"
 
+#include <string.h>
 #include <string>
-#include <unordered_map>
+#include <utility>
 
 #include "config.hpp"
 #include "debug.hpp"
@@ -15,6 +16,7 @@
 #include "msg_log.hpp"
 #include "popup.hpp"
 #include "saving.hpp"
+#include "state.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

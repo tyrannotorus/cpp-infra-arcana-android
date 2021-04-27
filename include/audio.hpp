@@ -7,8 +7,6 @@
 #ifndef AUDIO_HPP
 #define AUDIO_HPP
 
-#include <string>
-
 #include "audio_data.hpp"
 #include "direction.hpp"
 

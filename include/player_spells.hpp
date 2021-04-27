@@ -7,13 +7,10 @@
 #ifndef PLAYER_SPELLS_HPP
 #define PLAYER_SPELLS_HPP
 
-#include <vector>
-
 #include "browser.hpp"
 #include "spells.hpp"
 #include "state.hpp"
-
-class Spell;
+#include "global.hpp"
 
 namespace player_spells
 {

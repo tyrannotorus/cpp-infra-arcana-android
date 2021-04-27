@@ -6,12 +6,17 @@
 
 #include "terrain_dmg.hpp"
 
-#include "debug.hpp"
+#include <vector>
+
 #include "direction.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "terrain.hpp"
+#include "array2.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "terrain_data.hpp"
 
 // // --------------------------------------------------------------------------
 // // Private

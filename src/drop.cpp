@@ -8,13 +8,13 @@
 
 #include <algorithm>
 #include <string>
+#include <iterator>
+#include <ostream>
+#include <vector>
 
 #include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "game_time.hpp"
-#include "init.hpp"
 #include "inventory.hpp"
-#include "io.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -22,6 +22,14 @@
 #include "msg_log.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "terrain_data.hpp"
 
 namespace item_drop
 {

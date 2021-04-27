@@ -8,30 +8,39 @@
 
 #include <algorithm>
 #include <vector>
+#include <memory>
 
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "audio.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
-#include "knockback.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
-#include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "saving.hpp"
 #include "teleport.hpp"
-#include "terrain.hpp"
 #include "terrain_mob.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "item_data.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "spells.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // device

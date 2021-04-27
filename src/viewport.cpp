@@ -6,6 +6,8 @@
 
 #include "viewport.hpp"
 
+#include <algorithm>
+
 #include "config.hpp"
 #include "global.hpp"
 #include "io.hpp"

@@ -6,8 +6,12 @@
 
 #include "draw_map.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <vector>
+
 #include "actor.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "game_time.hpp"
@@ -15,8 +19,21 @@
 #include "map.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
-#include "terrain_mob.hpp"
 #include "viewport.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "gfx.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "panel.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "property_handler.hpp"
+#include "rect.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

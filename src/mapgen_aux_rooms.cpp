@@ -4,14 +4,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "mapgen.hpp"
+#include <ostream>
+#include <vector>
 
+#include "mapgen.hpp"
 #include "debug.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "terrain.hpp"
 #include "terrain_event.hpp"
+#include "array2.hpp"
+#include "global.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "room.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

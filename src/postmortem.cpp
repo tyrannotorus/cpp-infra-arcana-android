@@ -6,13 +6,14 @@
 
 #include "postmortem.hpp"
 
-#include "SDL.h"
+#include <algorithm>
 
 #include "common_text.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
 #include "panel.hpp"
-#include "pos.hpp"
+#include "SDL_keycode.h"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Postmortem info

@@ -6,6 +6,7 @@
 
 #include "time.hpp"
 
+#include <bits/types/struct_tm.h>
 #include <ctime>
 
 std::string TimeData::time_str(

@@ -9,8 +9,6 @@
 
 #include <string>
 
-struct P;
-
 namespace actor
 {
 class Actor;

@@ -8,17 +8,16 @@
 
 #include <algorithm>
 #include <fstream>
-#include <iostream>
 #include <utility>
 #include <vector>
+#include <iterator>
+#include <memory>
 
 #include "actor_player.hpp"
 #include "common_text.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
-#include "highscore.hpp"
-#include "init.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "misc.hpp"
@@ -26,6 +25,11 @@
 #include "paths.hpp"
 #include "popup.hpp"
 #include "rect.hpp"
+#include "SDL_keycode.h"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "random.hpp"
+#include "time.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

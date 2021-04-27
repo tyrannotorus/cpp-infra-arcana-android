@@ -6,8 +6,13 @@
 
 #include "config.hpp"
 
-#include "SDL_image.h"
+#include <ext/alloc_traits.h>
+#include <stddef.h>
 #include <fstream>
+#include <algorithm>
+#include <iterator>
+#include <utility>
+#include <vector>
 
 #include "audio.hpp"
 #include "browser.hpp"
@@ -15,7 +20,6 @@
 #include "debug.hpp"
 #include "draw_box.hpp"
 #include "hints.hpp"
-#include "init.hpp"
 #include "io.hpp"
 #include "misc.hpp"
 #include "panel.hpp"
@@ -24,7 +28,8 @@
 #include "query.hpp"
 #include "rect.hpp"
 #include "terrain_data.hpp"
-#include "text_format.hpp"
+#include "colors.hpp"
+#include "random.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

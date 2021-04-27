@@ -6,6 +6,13 @@
 
 #include "item_potion.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ostream>
+
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
@@ -13,15 +20,10 @@
 #include "common_text.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
-#include "inventory.hpp"
-#include "io.hpp"
 #include "item_factory.hpp"
-#include "item_scroll.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
-#include "player_spells.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
@@ -30,6 +32,19 @@
 #include "saving.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "insanity.hpp"
+#include "inventory_handling.hpp"
+#include "item_data.hpp"
+#include "random.hpp"
+#include "state.hpp"
+#include "terrain_data.hpp"
+
+struct P;
 
 // -----------------------------------------------------------------------------
 // Private

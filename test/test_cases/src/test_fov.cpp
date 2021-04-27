@@ -4,11 +4,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <memory>
 
+#include "catch.hpp"
 #include "array2.hpp"
 #include "fov.hpp"
 #include "line_calc.hpp"
+#include "global.hpp"
+#include "pos.hpp"
 
 TEST_CASE("fov")
 {

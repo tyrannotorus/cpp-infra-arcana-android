@@ -7,14 +7,18 @@
 #include "terrain_monolith.hpp"
 
 #include "actor.hpp"
-#include "actor_factory.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "common_text.hpp"
 #include "game.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "property_handler.hpp"
+#include "audio.hpp"
+#include "audio_data.hpp"
+#include "player_bon.hpp"
+#include "random.hpp"
+
+struct P;
 
 namespace terrain
 {

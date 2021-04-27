@@ -10,12 +10,8 @@
 #ifndef PLAYER_BON_HPP
 #define PLAYER_BON_HPP
 
-#include <algorithm>
-#include <cmath>
 #include <string>
 #include <vector>
-
-#include "global.hpp"
 
 namespace actor
 {

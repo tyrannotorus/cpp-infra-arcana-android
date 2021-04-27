@@ -4,8 +4,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "map_builder.hpp"
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <ostream>
+#include <vector>
 
+#include "map_builder.hpp"
 #include "actor_player.hpp"
 #include "game_time.hpp"
 #include "map_controller.hpp"
@@ -17,6 +23,17 @@
 #include "terrain.hpp"
 #include "terrain_door.hpp"
 #include "terrain_event.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "map.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "room.hpp"
+#include "state.hpp"
+#include "terrain_data.hpp"
 
 // For map generation demo
 #ifndef NDEBUG

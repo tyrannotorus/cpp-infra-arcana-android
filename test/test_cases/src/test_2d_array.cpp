@@ -5,8 +5,8 @@
 // =============================================================================
 
 #include "catch.hpp"
-
 #include "array2.hpp"
+#include "pos.hpp"
 
 TEST_CASE("Dynamic 2d array")
 {

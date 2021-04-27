@@ -6,15 +6,15 @@
 
 #include "item_rod.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <optional>
+
 #include "actor_hit.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "fov.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
-#include "io.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "knockback.hpp"
@@ -28,6 +28,16 @@
 #include "spells.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "sound.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

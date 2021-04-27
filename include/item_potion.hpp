@@ -11,6 +11,16 @@
 #include <vector>
 
 #include "item.hpp"
+#include "colors.hpp"
+#include "global.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
+namespace item {
+struct ItemData;
+}  // namespace item
+struct P;
 
 namespace potion
 {

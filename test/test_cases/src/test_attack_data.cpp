@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <stddef.h>
 
+#include "catch.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
@@ -19,6 +20,13 @@
 #include "property_factory.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
+#include "ability_values.hpp"
+#include "actor.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
 
 TEST_CASE("Melee attack data")
 {

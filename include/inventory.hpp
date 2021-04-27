@@ -7,6 +7,7 @@
 #ifndef INVENTORY_HPP
 #define INVENTORY_HPP
 
+#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -16,6 +17,7 @@
 namespace item
 {
 class Item;
+
 enum class Id;
 }  // namespace item
 

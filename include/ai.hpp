@@ -9,8 +9,9 @@
 
 #include <vector>
 
-#include "array2.hpp"
 #include "global.hpp"
+
+template <typename T> class Array2;
 
 namespace actor
 {

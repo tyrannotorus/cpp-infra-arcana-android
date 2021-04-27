@@ -6,30 +6,38 @@
 
 #include "game_time.hpp"
 
+#include <string.h>
 #include <vector>
+#include <algorithm>
+#include <memory>
 
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "actor_start_turn.hpp"
 #include "actor_std_turn.hpp"
 #include "audio.hpp"
-#include "init.hpp"
 #include "inventory.hpp"
-#include "inventory_handling.hpp"
 #include "item.hpp"
 #include "map.hpp"
 #include "map_controller.hpp"
-#include "map_parsing.hpp"
 #include "map_travel.hpp"
 #include "msg_log.hpp"
-#include "player_bon.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "saving.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
-#include "terrain_mob.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
+#include "smell.hpp"
+#include "sound.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

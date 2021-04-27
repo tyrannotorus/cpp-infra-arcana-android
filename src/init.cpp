@@ -6,7 +6,7 @@
 
 #include "init.hpp"
 
-#include <cassert>
+#include <memory>
 
 #include "audio.hpp"
 #include "bot.hpp"
@@ -19,13 +19,11 @@
 #include "hints.hpp"
 #include "insanity.hpp"
 #include "io.hpp"
-#include "item_artifact.hpp"
 #include "item_curse.hpp"
 #include "item_potion.hpp"
 #include "item_rod.hpp"
 #include "item_scroll.hpp"
 #include "line_calc.hpp"
-#include "manual.hpp"
 #include "map.hpp"
 #include "map_templates.hpp"
 #include "map_travel.hpp"
@@ -37,6 +35,11 @@
 #include "query.hpp"
 #include "saving.hpp"
 #include "smell.hpp"
+#include "actor_data.hpp"
+#include "colors.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "terrain_data.hpp"
 
 namespace init
 {

@@ -7,7 +7,16 @@
 #ifndef ITEM_SCROLL_HPP
 #define ITEM_SCROLL_HPP
 
+#include <string>
+#include <vector>
+
 #include "item.hpp"
+#include "colors.hpp"
+#include "global.hpp"
+
+namespace item {
+struct ItemData;
+}  // namespace item
 
 namespace actor
 {

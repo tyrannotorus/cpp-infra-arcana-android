@@ -7,9 +7,15 @@
 #ifndef ITEM_ARTIFACT_HPP
 #define ITEM_ARTIFACT_HPP
 
+#include <string>
+
 #include "item.hpp"
 #include "item_curse_ids.hpp"
 #include "sound.hpp"
+#include "global.hpp"
+#include "random.hpp"
+
+class DmgRange;
 
 namespace actor
 {
@@ -18,6 +24,8 @@ class Actor;
 
 namespace item
 {
+struct ItemData;
+
 // -----------------------------------------------------------------------------
 // Staff of the Pharaohs
 // -----------------------------------------------------------------------------

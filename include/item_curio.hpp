@@ -8,9 +8,16 @@
 #define ITEM_CURIO_HPP
 
 #include "item.hpp"
+#include "global.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
 
 namespace item
 {
+struct ItemData;
+
 class ZombieDust : public Wpn
 {
 public:

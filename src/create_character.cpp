@@ -6,20 +6,29 @@
 
 #include "create_character.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <memory>
+
 #include "actor_player.hpp"
 #include "browser.hpp"
 #include "common_text.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
 #include "global.hpp"
-#include "init.hpp"
 #include "io.hpp"
 #include "map.hpp"
-#include "map_travel.hpp"
-#include "msg_log.hpp"
 #include "panel.hpp"
 #include "popup.hpp"
 #include "text_format.hpp"
+#include "SDL_keycode.h"
+#include "actor_data.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "random.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // New game state

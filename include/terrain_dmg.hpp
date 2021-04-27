@@ -1,13 +1,12 @@
 #ifndef TERRAIN_DMG_HPP
 #define TERRAIN_DMG_HPP
 
+struct P;
 // =============================================================================
 // Copyright 2011-2020 Martin Törnqvist <m.tornq@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
-
-#include "pos.hpp"
 
 namespace terrain
 {

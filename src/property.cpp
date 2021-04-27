@@ -6,7 +6,12 @@
 
 #include "property.hpp"
 
+#include <ext/alloc_traits.h>
+#include <math.h>
+#include <stddef.h>
 #include <algorithm>
+#include <iterator>
+#include <ostream>
 
 #include "actor.hpp"
 #include "actor_death.hpp"
@@ -33,6 +38,24 @@
 #include "teleport.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "fov.hpp"
+#include "insanity.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "sound.hpp"
+#include "state.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

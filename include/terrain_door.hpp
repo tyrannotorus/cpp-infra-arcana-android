@@ -7,7 +7,18 @@
 #ifndef TERRAIN_DOOR_HPP
 #define TERRAIN_DOOR_HPP
 
+#include <string>
+
 #include "terrain.hpp"
+#include "colors.hpp"
+#include "gfx.hpp"
+#include "global.hpp"
+#include "terrain_data.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
+struct P;
 
 namespace terrain
 {

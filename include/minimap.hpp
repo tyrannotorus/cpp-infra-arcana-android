@@ -7,7 +7,6 @@
 #ifndef MINIMAP_HPP
 #define MINIMAP_HPP
 
-#include "colors.hpp"
 #include "state.hpp"
 
 // -----------------------------------------------------------------------------

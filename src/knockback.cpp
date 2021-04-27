@@ -6,17 +6,13 @@
 
 #include "knockback.hpp"
 
-#include <algorithm>
 #include <vector>
+#include <string>
 
 #include "actor_death.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "attack.hpp"
 #include "config.hpp"
 #include "game_time.hpp"
-#include "io.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
@@ -24,9 +20,15 @@
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "terrain.hpp"
-#include "terrain_mob.hpp"
-#include "terrain_trap.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "pos.hpp"
+#include "property_handler.hpp"
+#include "terrain_data.hpp"
 
 namespace knockback
 {

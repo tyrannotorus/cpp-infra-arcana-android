@@ -5,18 +5,25 @@
 // =============================================================================
 
 #include "catch.hpp"
-
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
-#include "game_time.hpp"
-#include "init.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
-#include "line_calc.hpp"
 #include "map.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
 #include "throwing.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "global.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+
+namespace item {
+class Item;
+}  // namespace item
 
 TEST_CASE("Throw weapon at wall")
 {

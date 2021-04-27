@@ -4,19 +4,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+#include <string>
+
 #include "catch.hpp"
-
-#include <memory>
-
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
 #include "actor_move.hpp"
 #include "actor_player.hpp"
 #include "map.hpp"
 #include "sound.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
+#include "actor.hpp"
+#include "audio_data.hpp"
+#include "direction.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
 
 TEST_CASE("Sound alerts monster")
 {

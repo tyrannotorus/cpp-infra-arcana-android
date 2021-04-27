@@ -6,31 +6,27 @@
 
 #include "terrain_trap.hpp"
 
+#include <stddef.h>
 #include <algorithm>
+#include <iterator>
+#include <ostream>
+#include <vector>
 
 #include "actor_factory.hpp"
-#include "actor_hit.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "attack.hpp"
 #include "common_text.hpp"
-#include "drop.hpp"
 #include "explosion.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
-#include "inventory.hpp"
-#include "io.hpp"
 #include "item.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
-#include "map_parsing.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
-#include "popup.hpp"
-#include "postmortem.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
@@ -40,6 +36,15 @@
 #include "teleport.hpp"
 #include "terrain_data.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "item_data.hpp"
+#include "spells.hpp"
+#include "state.hpp"
 
 namespace terrain
 {

@@ -6,6 +6,10 @@
 
 #include "actor_std_turn.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <vector>
+
 #include "actor.hpp"
 #include "actor_hit.hpp"
 #include "actor_mon.hpp"
@@ -16,6 +20,21 @@
 #include "misc.hpp"
 #include "property_factory.hpp"
 #include "terrain.hpp"
+#include "ability_values.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "msg_log.hpp"
+#include "player_bon.hpp"
+#include "property.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "smell.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

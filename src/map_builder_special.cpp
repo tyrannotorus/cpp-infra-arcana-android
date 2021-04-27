@@ -4,8 +4,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "map_builder.hpp"
+#include <stddef.h>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <vector>
 
+#include "map_builder.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
@@ -22,6 +27,18 @@
 #include "terrain_event.hpp"
 #include "terrain_gong.hpp"
 #include "terrain_monolith.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "global.hpp"
+#include "item_data.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "room.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

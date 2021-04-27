@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
-
 #include <climits>
 
+#include "catch.hpp"
 #include "array2.hpp"
 #include "flood.hpp"
+#include "pos.hpp"
 
 TEST_CASE("Floodfill")
 {

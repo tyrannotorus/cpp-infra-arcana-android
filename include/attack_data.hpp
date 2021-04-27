@@ -9,21 +9,15 @@
 
 #include <optional>
 
-#include "ability_values.hpp"
 #include "actor_data.hpp"
 #include "dmg_range.hpp"
+#include "item.hpp"
+#include "pos.hpp"
 
 namespace actor
 {
 class Actor;
 }  // namespace actor
-
-namespace item
-{
-class Item;
-}  // namespace item
-
-struct P;
 
 struct AttData
 {

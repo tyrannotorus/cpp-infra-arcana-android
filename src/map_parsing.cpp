@@ -6,17 +6,27 @@
 
 #include "map_parsing.hpp"
 
+#include <stddef.h>
 #include <algorithm>
 #include <climits>
+#include <iterator>
 
-#include "actor_player.hpp"
 #include "flood.hpp"
 #include "game_time.hpp"
 #include "init.hpp"
 #include "map.hpp"
 #include "misc.hpp"
 #include "terrain.hpp"
-#include "terrain_mob.hpp"
+#include "actor.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "gfx.hpp"
+#include "panel.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "state.hpp"
 
 #ifndef NDEBUG
 #include "io.hpp"

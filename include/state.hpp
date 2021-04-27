@@ -8,7 +8,6 @@
 #define STATE_HPP
 
 #include <memory>
-#include <vector>
 
 enum class StateId
 {

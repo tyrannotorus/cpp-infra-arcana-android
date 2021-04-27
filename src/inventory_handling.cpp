@@ -6,11 +6,12 @@
 
 #include "inventory_handling.hpp"
 
-#include "init.hpp"
-
-#include <iomanip>
 #include <sstream>
 #include <vector>
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <string>
 
 #include "actor_player.hpp"
 #include "audio.hpp"
@@ -20,14 +21,25 @@
 #include "drop.hpp"
 #include "game_time.hpp"
 #include "io.hpp"
-#include "item_factory.hpp"
-#include "item_potion.hpp"
-#include "item_scroll.hpp"
 #include "map.hpp"
 #include "marker.hpp"
 #include "msg_log.hpp"
 #include "query.hpp"
 #include "text_format.hpp"
+#include "SDL_keycode.h"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "item.hpp"
+#include "item_curse.hpp"
+#include "item_data.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

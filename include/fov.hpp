@@ -8,7 +8,9 @@
 #define FOV_HPP
 
 #include "array2.hpp"
-#include "global.hpp"
+#include "rect.hpp"
+
+struct P;
 
 struct FovMap
 {

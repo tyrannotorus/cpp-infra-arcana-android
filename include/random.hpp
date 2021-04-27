@@ -7,6 +7,8 @@
 #ifndef RANDOM_HPP
 #define RANDOM_HPP
 
+#include <stddef.h>
+#include <stdint.h>
 #include <algorithm>
 #include <random>
 #include <string>

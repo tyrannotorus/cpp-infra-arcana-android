@@ -6,9 +6,11 @@
 
 #include "text_format.hpp"
 
+#include <ctype.h>
+#include <ext/alloc_traits.h>
 #include <algorithm>
-
-#include "init.hpp"
+#include <iterator>
+#include <memory>
 
 // -----------------------------------------------------------------------------
 // Private

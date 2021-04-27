@@ -7,12 +7,14 @@
 #ifndef ACTOR_PLAYER_HPP
 #define ACTOR_PLAYER_HPP
 
-#include <cmath>
-
 #include "actor.hpp"
 #include "colors.hpp"
 #include "global.hpp"
-#include "insanity.hpp"
+#include "direction.hpp"
+#include "spells.hpp"
+
+class Snd;
+template <typename T> class Array2;
 
 namespace item
 {

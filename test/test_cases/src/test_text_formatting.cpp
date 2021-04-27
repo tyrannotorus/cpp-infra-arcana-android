@@ -4,8 +4,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <ext/alloc_traits.h>
+#include <string>
+#include <vector>
 
+#include "catch.hpp"
 #include "text_format.hpp"
 
 TEST_CASE("Text formatting")

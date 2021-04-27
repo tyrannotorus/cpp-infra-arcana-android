@@ -7,11 +7,19 @@
 #ifndef TERRAIN_TRAP_HPP
 #define TERRAIN_TRAP_HPP
 
-#include "ability_values.hpp"
+#include <string>
+
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
 #include "terrain.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "terrain_data.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
 
 namespace terrain
 {

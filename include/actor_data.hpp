@@ -7,18 +7,22 @@
 #ifndef ACTOR_DATA_HPP
 #define ACTOR_DATA_HPP
 
+#include <stddef.h>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "ability_values.hpp"
-#include "audio.hpp"
 #include "global.hpp"
 #include "item_att_property.hpp"
 #include "item_data.hpp"
 #include "property_data.hpp"
 #include "room.hpp"
 #include "spells.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "gfx.hpp"
+#include "random.hpp"
 
 namespace actor
 {

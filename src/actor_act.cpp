@@ -6,6 +6,13 @@
 
 #include "actor_act.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "actor.hpp"
 #include "actor_mon.hpp"
 #include "actor_move.hpp"
@@ -19,10 +26,23 @@
 #include "game_time.hpp"
 #include "io.hpp"
 #include "map.hpp"
-#include "misc.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
 #include "terrain_trap.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "sound.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

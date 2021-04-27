@@ -7,6 +7,8 @@
 #ifndef INFO_SCREEN_STATE_HPP
 #define INFO_SCREEN_STATE_HPP
 
+#include <string>
+
 #include "state.hpp"
 
 enum class InfoScreenType

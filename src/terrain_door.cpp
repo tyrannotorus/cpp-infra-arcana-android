@@ -6,21 +6,33 @@
 
 #include "terrain_door.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <ostream>
+#include <vector>
+
 #include "actor.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "debug.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
 #include "map.hpp"
-#include "map_parsing.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
-#include "postmortem.hpp"
 #include "property_handler.hpp"
 #include "terrain_data.hpp"
 #include "text_format.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "random.hpp"
+#include "sound.hpp"
+
+namespace item {
+class Item;
+}  // namespace item
 
 namespace terrain
 {

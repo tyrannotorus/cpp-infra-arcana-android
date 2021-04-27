@@ -5,7 +5,12 @@
 // =============================================================================
 
 #include "flood.hpp"
+
+#include <stddef.h>
+#include <vector>
+
 #include "direction.hpp"
+#include "rect.hpp"
 
 Array2<int> floodfill(
         const P& p0,

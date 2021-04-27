@@ -12,6 +12,7 @@
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
+#include "colors.hpp"
 
 void InfoScreenState::draw_interface() const
 {

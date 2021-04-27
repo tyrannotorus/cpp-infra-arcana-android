@@ -4,10 +4,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "io.hpp"
-#include "io_internal.hpp"
+#include <stdint.h>
+#include <ostream>
 
+#include "io_internal.hpp"
 #include "debug.hpp"
+#include "SDL_endian.h"
+#include "SDL_pixels.h"
+#include "SDL_stdinc.h"
+#include "SDL_surface.h"
+#include "colors.hpp"
+#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

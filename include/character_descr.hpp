@@ -7,9 +7,12 @@
 #ifndef CHARACTER_DESCR_HPP
 #define CHARACTER_DESCR_HPP
 
+#include <string>
+#include <vector>
+
 #include "colors.hpp"
-#include "global.hpp"
 #include "info_screen_state.hpp"
+#include "state.hpp"
 
 class CharacterDescr : public InfoScreenState
 {

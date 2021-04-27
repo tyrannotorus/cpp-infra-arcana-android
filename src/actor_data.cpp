@@ -6,10 +6,14 @@
 
 #include "actor_data.hpp"
 
-#include <cmath>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
+#include <iterator>
+#include <optional>
+#include <ostream>
+#include <utility>
 
 #include "colors.hpp"
 #include "item_att_property.hpp"
@@ -20,6 +24,7 @@
 #include "property_factory.hpp"
 #include "saving.hpp"
 #include "xml.hpp"
+#include "debug.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

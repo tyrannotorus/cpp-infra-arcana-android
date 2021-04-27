@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <ext/alloc_traits.h>
+#include <vector>
 
+#include "catch.hpp"
 #include "global.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"

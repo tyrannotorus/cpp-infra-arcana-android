@@ -8,7 +8,6 @@
 #define ABILITY_VALUES_HPP
 
 #include <cstddef>
-#include <string>
 
 namespace actor
 {

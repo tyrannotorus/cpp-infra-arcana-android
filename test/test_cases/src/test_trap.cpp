@@ -5,7 +5,6 @@
 // =============================================================================
 
 #include "catch.hpp"
-
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_move.hpp"
@@ -18,6 +17,12 @@
 #include "terrain.hpp"
 #include "terrain_trap.hpp"
 #include "test_utils.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "direction.hpp"
+#include "global.hpp"
+#include "player_bon.hpp"
+#include "spells.hpp"
 
 TEST_CASE("Spider web")
 {

@@ -8,11 +8,17 @@
 #define PROPERTY_HPP
 
 #include <string>
+#include <optional>
+#include <vector>
 
 #include "ability_values.hpp"
 #include "colors.hpp"
 #include "global.hpp"
 #include "property_data.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
 
 enum class Dir;
 

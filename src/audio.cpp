@@ -6,18 +6,28 @@
 
 #include "audio.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
-#include <unordered_map>
+#include <ostream>
+#include <ratio>
+#include <stddef.h>
+#include <string>
+#include <type_traits>
+#include <vector>
 
+#include "SDL_events.h"
 #include "SDL_mixer.h"
-
+#include "SDL_timer.h"
 #include "actor_player.hpp"
-#include "init.hpp"
-#include "io.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "global.hpp"
 #include "map.hpp"
 #include "paths.hpp"
 #include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
 #include "text_format.hpp"
 
 using namespace std::chrono_literals;

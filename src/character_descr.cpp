@@ -6,6 +6,7 @@
 
 #include "character_descr.hpp"
 
+#include <stddef.h>
 #include <algorithm>
 
 #include "actor_player.hpp"
@@ -13,12 +14,15 @@
 #include "io.hpp"
 #include "item.hpp"
 #include "item_factory.hpp"
-#include "item_potion.hpp"
-#include "item_scroll.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"
-#include "property_factory.hpp"
 #include "text_format.hpp"
+#include "SDL_keycode.h"
+#include "global.hpp"
+#include "insanity.hpp"
+#include "item_data.hpp"
+#include "panel.hpp"
+#include "property_handler.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

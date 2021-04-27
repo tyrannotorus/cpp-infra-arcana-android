@@ -6,8 +6,10 @@
 
 #include "attack_data.hpp"
 
+#include <algorithm>
+#include <ostream>
+
 #include "actor.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "global.hpp"
@@ -15,9 +17,18 @@
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "misc.hpp"
-#include "property.hpp"
-#include "terrain.hpp"
-#include "terrain_trap.hpp"
+#include "ability_values.hpp"
+#include "array2.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "fov.hpp"
+#include "inventory.hpp"
+#include "item_data.hpp"
+#include "player_bon.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

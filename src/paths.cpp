@@ -6,6 +6,8 @@
 
 #include "paths.hpp"
 
+#include <ostream>
+
 #include "debug.hpp"
 #include "io.hpp"
 

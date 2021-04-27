@@ -6,11 +6,15 @@
 
 #include "spells.hpp"
 
+#include <stddef.h>
 #include <algorithm>
 #include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iterator>
+#include <ostream>
+#include <utility>
 
 #include "actor_death.hpp"
 #include "actor_factory.hpp"
@@ -20,15 +24,11 @@
 #include "actor_see.hpp"
 #include "explosion.hpp"
 #include "flood.hpp"
-#include "game.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
 #include "item_factory.hpp"
-#include "item_scroll.hpp"
 #include "knockback.hpp"
-#include "line_calc.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "marker.hpp"
@@ -37,7 +37,6 @@
 #include "pathfind.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
-#include "postmortem.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
@@ -47,6 +46,27 @@
 #include "terrain_door.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "dmg_range.hpp"
+#include "gfx.hpp"
+#include "global.hpp"
+#include "inventory_handling.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
+#include "sound.hpp"
+#include "state.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

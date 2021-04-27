@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-struct P;
+#include "pos.hpp"
 
 enum class Dir
 {

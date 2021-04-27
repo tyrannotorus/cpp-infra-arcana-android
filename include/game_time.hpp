@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include "actor_data.hpp"
+struct P;
 
 namespace actor
 {

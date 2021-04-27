@@ -7,13 +7,17 @@
 #ifndef MARKER_HPP
 #define MARKER_HPP
 
-#include <climits>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "array2.hpp"
 #include "global.hpp"
 #include "io.hpp"
 #include "random.hpp"
 #include "state.hpp"
+#include "direction.hpp"
+#include "pos.hpp"
 
 enum class SpellSkill;
 
@@ -27,8 +31,6 @@ namespace terrain
 {
 class Terrain;
 }  // namespace terrain
-
-struct InputData;
 
 // -----------------------------------------------------------------------------
 // Abstract marker state base class

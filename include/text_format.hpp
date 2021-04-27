@@ -7,6 +7,7 @@
 #ifndef TEXT_FORMAT_HPP
 #define TEXT_FORMAT_HPP
 
+#include <stddef.h>
 #include <string>
 #include <vector>
 

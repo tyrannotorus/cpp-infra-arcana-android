@@ -4,9 +4,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "mapgen.hpp"
+#include <stddef.h>
+#include <iterator>
+#include <ostream>
+#include <vector>
 
+#include "mapgen.hpp"
 #include "debug.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "rect.hpp"
 
 namespace mapgen
 {

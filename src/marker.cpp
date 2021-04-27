@@ -9,6 +9,9 @@
 #include <cstring>
 #include <utility>
 #include <vector>
+#include <algorithm>
+#include <climits>
+#include <iterator>
 
 #include "actor_player.hpp"
 #include "actor_see.hpp"
@@ -19,7 +22,6 @@
 #include "draw_map.hpp"
 #include "explosion.hpp"
 #include "game_commands.hpp"
-#include "inventory_handling.hpp"
 #include "io.hpp"
 #include "item_factory.hpp"
 #include "line_calc.hpp"
@@ -36,6 +38,19 @@
 #include "text_format.hpp"
 #include "throwing.hpp"
 #include "viewport.hpp"
+#include "SDL_keycode.h"
+#include "ability_values.hpp"
+#include "actor.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "gfx.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "panel.hpp"
+#include "rect.hpp"
+#include "spells.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

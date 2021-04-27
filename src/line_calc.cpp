@@ -8,10 +8,12 @@
 
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 #include "global.hpp"
 #include "map.hpp"
 #include "misc.hpp"
+#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

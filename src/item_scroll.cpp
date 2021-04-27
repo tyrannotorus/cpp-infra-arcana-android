@@ -6,13 +6,14 @@
 
 #include "item_scroll.hpp"
 
+#include <stddef.h>
 #include <string>
+#include <algorithm>
+#include <memory>
+#include <ostream>
 
 #include "actor_player.hpp"
 #include "game.hpp"
-#include "init.hpp"
-#include "inventory.hpp"
-#include "io.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
@@ -21,6 +22,15 @@
 #include "property_handler.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "item_data.hpp"
+#include "property_data.hpp"
+#include "random.hpp"
+#include "spells.hpp"
+
+struct P;
 
 // -----------------------------------------------------------------------------
 // Private

@@ -8,6 +8,7 @@
 #define DEBUG_HPP
 
 #include <iostream>
+#include <stdlib.h>
 
 //------------------------------------------------------------------------------
 // Trace level (use -D build flag to override)

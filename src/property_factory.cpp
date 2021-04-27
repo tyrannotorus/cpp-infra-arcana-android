@@ -7,6 +7,7 @@
 #include "property_factory.hpp"
 
 #include "property.hpp"
+#include "debug.hpp"
 
 namespace property_factory
 {

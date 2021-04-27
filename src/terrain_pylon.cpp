@@ -6,20 +6,20 @@
 
 #include "terrain_pylon.hpp"
 
+#include <ostream>
+
 #include "actor.hpp"
-#include "actor_see.hpp"
-#include "flood.hpp"
 #include "game_time.hpp"
 #include "knockback.hpp"
-#include "map.hpp"
-#include "map_parsing.hpp"
 #include "misc.hpp"
-#include "msg_log.hpp"
 #include "property.hpp"
 #include "property_factory.hpp"
 #include "random.hpp"
-#include "sound.hpp"
-#include "teleport.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
 
 namespace terrain
 {

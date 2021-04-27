@@ -6,23 +6,15 @@
 
 #include "item_data.hpp"
 
-#include <climits>
-#include <iostream>
 #include <unordered_map>
 
-#include "actor_data.hpp"
-#include "actor_player.hpp"
 #include "colors.hpp"
-#include "game_time.hpp"
-#include "init.hpp"
-#include "item.hpp"
 #include "item_att_property.hpp"
-#include "item_device.hpp"
-#include "map.hpp"
 #include "property.hpp"
 #include "random.hpp"
 #include "saving.hpp"
 #include "sound.hpp"
+#include "debug.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

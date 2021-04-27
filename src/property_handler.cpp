@@ -6,8 +6,13 @@
 
 #include "property_handler.hpp"
 
+#include <algorithm>
+#include <iterator>
+#include <optional>
+#include <ostream>
+#include <utility>
+
 #include "actor.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "game.hpp"
@@ -17,6 +22,9 @@
 #include "property_factory.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
+#include "actor_data.hpp"
+#include "debug.hpp"
+#include "player_bon.hpp"
 
 // -----------------------------------------------------------------------------
 // Property handler

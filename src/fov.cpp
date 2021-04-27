@@ -6,14 +6,15 @@
 
 #include "fov.hpp"
 
-#include "init.hpp"
-
-#include <cmath>
+#include <stddef.h>
 #include <vector>
+#include <algorithm>
 
 #include "debug.hpp"
 #include "line_calc.hpp"
 #include "misc.hpp"
+#include "global.hpp"
+#include "pos.hpp"
 
 namespace fov
 {

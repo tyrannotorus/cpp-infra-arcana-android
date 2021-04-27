@@ -6,8 +6,12 @@
 
 #include "io.hpp"
 #include "io_internal.hpp"
-
 #include "config.hpp"
+#include "SDL_rect.h"
+#include "SDL_render.h"
+#include "colors.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

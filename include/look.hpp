@@ -8,9 +8,11 @@
 #define LOOK_HPP
 
 #include <string>
+#include <vector>
 
 #include "colors.hpp"
 #include "info_screen_state.hpp"
+#include "state.hpp"
 
 namespace actor
 {

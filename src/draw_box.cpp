@@ -9,6 +9,7 @@
 #include "config.hpp"
 #include "io.hpp"
 #include "rect.hpp"
+#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

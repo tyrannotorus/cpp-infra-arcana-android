@@ -6,8 +6,13 @@
 
 #include "random.hpp"
 
+#include <math.h>
+#include <time.h>
 #include <iomanip>
 #include <sstream>
+#include <functional>
+#include <iterator>
+#include <numeric>
 
 #include "debug.hpp"
 

@@ -6,8 +6,10 @@
 
 #include "io.hpp"
 #include "io_internal.hpp"
-
 #include "config.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

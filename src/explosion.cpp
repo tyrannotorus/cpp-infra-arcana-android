@@ -6,21 +6,41 @@
 
 #include "explosion.hpp"
 
+#include <algorithm>
+#include <memory>
 #include <optional>
+#include <stddef.h>
+#include <string>
 
+#include "actor.hpp"
 #include "actor_hit.hpp"
 #include "actor_player.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "config.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "gfx.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
 #include "io.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
-#include "player_bon.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
 #include "property.hpp"
+#include "property_data.hpp"
 #include "property_factory.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "sound.hpp"
+#include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_mob.hpp"
 #include "viewport.hpp"

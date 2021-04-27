@@ -5,15 +5,34 @@
 // =============================================================================
 
 #include "io.hpp"
-#include "io_internal.hpp"
 
+#include <algorithm>
+#include <ostream>
+#include <stddef.h>
+
+#include "SDL.h"
+#include "SDL_error.h"
+#include "SDL_events.h"
+#include "SDL_filesystem.h"
+#include "SDL_image.h"
 #include "SDL_mixer.h"
-
+#include "SDL_pixels.h"
+#include "SDL_rect.h"
+#include "SDL_render.h"
+#include "SDL_stdinc.h"
+#include "SDL_surface.h"
+#include "SDL_timer.h"
+#include "SDL_video.h"
 #include "audio.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "direction.hpp"
+#include "io_internal.hpp"
 #include "paths.hpp"
+#include "state.hpp"
 #include "version.hpp"
+
+struct SDL_Texture;
 
 // -----------------------------------------------------------------------------
 // Private

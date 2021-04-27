@@ -6,10 +6,11 @@
 
 #include "look.hpp"
 
-#include <climits>
+#include <stddef.h>
 #include <string>
+#include <algorithm>
+#include <iterator>
 
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "attack_data.hpp"
@@ -18,15 +19,21 @@
 #include "io.hpp"
 #include "item.hpp"
 #include "map.hpp"
-#include "marker.hpp"
 #include "msg_log.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
-#include "query.hpp"
 #include "terrain.hpp"
-#include "terrain_mob.hpp"
 #include "text_format.hpp"
+#include "SDL_keycode.h"
+#include "ability_values.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // private

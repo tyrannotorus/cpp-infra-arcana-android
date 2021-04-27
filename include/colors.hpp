@@ -7,11 +7,12 @@
 #ifndef COLORS_HPP
 #define COLORS_HPP
 
+#include <stdint.h>
 #include <optional>
 #include <string>
 #include <utility>
 
-#include "SDL_video.h"
+#include "SDL_pixels.h"
 
 //-----------------------------------------------------------------------------
 // Color

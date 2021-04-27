@@ -5,7 +5,6 @@
 // =============================================================================
 
 #include "catch.hpp"
-
 #include "actor.hpp"
 #include "actor_death.hpp"
 #include "actor_factory.hpp"
@@ -18,6 +17,16 @@
 #include "property_factory.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "terrain_data.hpp"
 
 TEST_CASE("Explosions damage walls")
 {

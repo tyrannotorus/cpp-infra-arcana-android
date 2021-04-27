@@ -6,23 +6,31 @@
 
 #include "map.hpp"
 
+#include <algorithm>
 #include <climits>
 
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
 #include "debug.hpp"
+#include "direction.hpp"
+#include "fov.hpp"
 #include "game_time.hpp"
+#include "gfx.hpp"
 #include "init.hpp"
 #include "io.hpp"
 #include "item.hpp"
-#include "item_factory.hpp"
-#include "mapgen.hpp"
 #include "misc.hpp"
+#include "panel.hpp"
 #include "pos.hpp"
 #include "random.hpp"
+#include "room.hpp"
 #include "saving.hpp"
+#include "smell.hpp"
+#include "state.hpp"
 #include "terrain.hpp"
-#include "terrain_mob.hpp"
+#include "terrain_data.hpp"
 
 #ifndef NDEBUG
 #include "viewport.hpp"
@@ -204,7 +212,7 @@ void reset(const P& dims)
         // Occasionally set wall color to something unusual
         if (rnd::one_in(3))
         {
-                std::vector<Color> wall_color_bucket = {
+                const std::vector<Color> wall_color_bucket = {
                         colors::red(),
                         colors::sepia(),
                         colors::dark_sepia(),

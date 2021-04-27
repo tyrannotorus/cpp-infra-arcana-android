@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "io.hpp"
-#include "io_internal.hpp"
+#include <algorithm>
+#include <vector>
 
+#include "io.hpp"
 #include "actor.hpp"
 #include "config.hpp"
 #include "debug.hpp"
@@ -14,6 +15,11 @@
 #include "state.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "gfx.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

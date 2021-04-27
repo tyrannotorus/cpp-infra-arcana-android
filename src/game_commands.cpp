@@ -6,7 +6,11 @@
 
 #include "game_commands.hpp"
 
+#include <stddef.h>
 #include <vector>
+#include <memory>
+#include <ostream>
+#include <string>
 
 #include "actor_factory.hpp"
 #include "actor_move.hpp"
@@ -19,7 +23,6 @@
 #include "config.hpp"
 #include "disarm.hpp"
 #include "game.hpp"
-#include "game_over.hpp"
 #include "game_time.hpp"
 #include "init.hpp"
 #include "item_factory.hpp"
@@ -32,16 +35,32 @@
 #include "pickup.hpp"
 #include "player_spells.hpp"
 #include "popup.hpp"
-#include "postmortem.hpp"
 #include "property_factory.hpp"
 #include "query.hpp"
 #include "reload.hpp"
 #include "saving.hpp"
-#include "smell.hpp"
 #include "state.hpp"
 #include "teleport.hpp"
-#include "terrain.hpp"
 #include "wham.hpp"
+#include "SDL_keycode.h"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "inventory_handling.hpp"
+#include "io.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "panel.hpp"
+#include "player_bon.hpp"
+#include "property.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "sound.hpp"
+#include "spells.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

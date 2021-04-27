@@ -8,6 +8,7 @@
 #define FLOOD_HPP
 
 #include "array2.hpp"
+#include "pos.hpp"
 
 Array2<int> floodfill(
         const P& p0,

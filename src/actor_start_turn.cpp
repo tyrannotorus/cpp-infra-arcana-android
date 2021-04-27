@@ -6,6 +6,10 @@
 
 #include "actor_start_turn.hpp"
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 #include "actor.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
@@ -22,6 +26,24 @@
 #include "terrain.hpp"
 #include "terrain_door.hpp"
 #include "text_format.hpp"
+#include "ability_values.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "global.hpp"
+#include "insanity.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "msg_log.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "rect.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

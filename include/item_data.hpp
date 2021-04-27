@@ -7,17 +7,23 @@
 #ifndef ITEM_DATA_HPP
 #define ITEM_DATA_HPP
 
+#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>
+#include <algorithm>
 
 #include "ability_values.hpp"
-#include "audio.hpp"
 #include "dmg_range.hpp"
 #include "item_att_property.hpp"
 #include "room.hpp"
 #include "spells.hpp"
 #include "terrain_data.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "gfx.hpp"
+#include "global.hpp"
+#include "random.hpp"
 
 enum class SndVol;
 

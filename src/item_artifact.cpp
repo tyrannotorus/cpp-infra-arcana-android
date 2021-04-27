@@ -4,21 +4,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "init.hpp"
+#include <math.h>
+#include <memory>
+#include <vector>
 
 #include "item_artifact.hpp"
-
-#include "actor_factory.hpp"
-#include "actor_hit.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "common_text.hpp"
-#include "explosion.hpp"
 #include "fov.hpp"
-#include "game.hpp"
 #include "game_time.hpp"
-#include "io.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
@@ -26,14 +21,23 @@
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "saving.hpp"
-#include "terrain.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "dmg_range.hpp"
+#include "property_handler.hpp"
 
 // -----------------------------------------------------------------------------
 // item
 // -----------------------------------------------------------------------------
 namespace item
 {
+struct ItemData;
+
 // -----------------------------------------------------------------------------
 // Staff of the pharaohs
 // -----------------------------------------------------------------------------

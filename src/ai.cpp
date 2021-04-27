@@ -6,6 +6,10 @@
 
 #include "ai.hpp"
 
+#include <ext/alloc_traits.h>
+#include <algorithm>
+#include <string>
+
 #include "actor.hpp"
 #include "actor_mon.hpp"
 #include "actor_move.hpp"
@@ -22,8 +26,18 @@
 #include "pathfind.hpp"
 #include "property_handler.hpp"
 #include "terrain_door.hpp"
-#include "terrain_mob.hpp"
 #include "text_format.hpp"
+#include "ability_values.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "spells.hpp"
+#include "terrain.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

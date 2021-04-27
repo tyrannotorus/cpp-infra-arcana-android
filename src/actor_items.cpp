@@ -6,7 +6,10 @@
 
 #include "actor_items.hpp"
 
+#include <stddef.h>
 #include <vector>
+#include <algorithm>
+#include <memory>
 
 #include "actor.hpp"
 #include "actor_mon.hpp"
@@ -14,10 +17,17 @@
 #include "game.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
-#include "item_rod.hpp"
 #include "map.hpp"
 #include "player_spells.hpp"
 #include "spells.hpp"
+#include "actor_data.hpp"
+#include "debug.hpp"
+#include "dmg_range.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "player_bon.hpp"
+#include "random.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

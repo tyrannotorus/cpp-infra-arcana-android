@@ -7,10 +7,9 @@
 #ifndef BSP_HPP
 #define BSP_HPP
 
-#include <memory>
 #include <vector>
 
-#include "rect.hpp"
+struct R;
 
 namespace bsp
 {

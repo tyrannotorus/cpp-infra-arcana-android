@@ -7,7 +7,6 @@
 #ifndef PANEL_HPP
 #define PANEL_HPP
 
-struct PxPos;
 struct R;
 struct P;
 

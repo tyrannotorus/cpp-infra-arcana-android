@@ -9,9 +9,13 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
-#include "item.hpp"
 #include "player_bon.hpp"
+#include "random.hpp"
+
+class Spell;
+struct P;
 
 namespace actor
 {

@@ -6,16 +6,16 @@
 
 #include "room.hpp"
 
+#include <stddef.h>
 #include <algorithm>
 #include <climits>
 #include <numeric>
 #include <unordered_map>
+#include <functional>
+#include <iterator>
+#include <ostream>
 
-#include "actor_factory.hpp"
-#include "actor_player.hpp"
 #include "flood.hpp"
-#include "game_time.hpp"
-#include "gods.hpp"
 #include "init.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -23,6 +23,14 @@
 #include "misc.hpp"
 #include "populate_monsters.hpp"
 #include "terrain.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "panel.hpp"
+#include "random.hpp"
+#include "state.hpp"
 
 #ifndef NDEBUG
 #include "io.hpp"

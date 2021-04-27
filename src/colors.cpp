@@ -6,15 +6,16 @@
 
 #include "colors.hpp"
 
-#include "SDL_video.h"
 #include <algorithm>
 #include <vector>
+#include <iterator>
+#include <ostream>
 
 #include "debug.hpp"
-#include "misc.hpp"
 #include "paths.hpp"
 #include "random.hpp"
 #include "xml.hpp"
+#include "tinyxml2.h"
 
 //-----------------------------------------------------------------------------
 // Private

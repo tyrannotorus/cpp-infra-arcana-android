@@ -6,12 +6,15 @@
 
 #include "browser.hpp"
 
-#include "array2.hpp"
+#include <algorithm>
+#include <iterator>
+
 #include "audio.hpp"
-#include "config.hpp"
 #include "global.hpp"
 #include "io.hpp"
-#include "misc.hpp"
+#include "SDL_keycode.h"
+#include "audio_data.hpp"
+#include "debug.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -6,18 +6,19 @@
 
 #include "player_spells.hpp"
 
+#include <stddef.h>
 #include <algorithm>
 #include <memory>
 #include <vector>
+#include <iterator>
+#include <ostream>
+#include <string>
 
 #include "actor_player.hpp"
 #include "browser.hpp"
 #include "common_text.hpp"
 #include "draw_box.hpp"
-#include "init.hpp"
-#include "inventory.hpp"
 #include "io.hpp"
-#include "item_factory.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
@@ -26,6 +27,15 @@
 #include "query.hpp"
 #include "saving.hpp"
 #include "terrain.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

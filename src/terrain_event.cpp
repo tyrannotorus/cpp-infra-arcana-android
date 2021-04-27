@@ -6,11 +6,15 @@
 
 #include "terrain_event.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <utility>
+
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "misc.hpp"
@@ -19,6 +23,12 @@
 #include "property.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "fov.hpp"
+#include "insanity.hpp"
 
 namespace terrain
 {

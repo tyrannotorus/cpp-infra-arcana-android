@@ -8,7 +8,8 @@
 #define TELEPORT_HPP
 
 #include "global.hpp"
-#include "pos.hpp"
+
+struct P;
 
 namespace actor
 {

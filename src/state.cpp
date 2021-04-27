@@ -6,6 +6,10 @@
 
 #include "state.hpp"
 
+#include <iterator>
+#include <utility>
+#include <vector>
+
 #include "debug.hpp"
 #include "io.hpp"
 

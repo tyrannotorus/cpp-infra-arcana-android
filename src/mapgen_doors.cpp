@@ -4,16 +4,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "mapgen.hpp"
-
 #include <cstring>
+#include <algorithm>
+#include <ostream>
+#include <vector>
 
+#include "mapgen.hpp"
 #include "actor.hpp"
 #include "actor_player.hpp"
 #include "flood.hpp"
 #include "game_time.hpp"
 #include "map_parsing.hpp"
 #include "terrain_door.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "map.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "terrain.hpp"
+#include "terrain_data.hpp"
 
 static bool is_wall(const P& p)
 {

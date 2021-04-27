@@ -7,16 +7,14 @@
 #ifndef EXPLOSION_HPP
 #define EXPLOSION_HPP
 
+#include <optional>
 #include <vector>
 
-#include <optional>
-
-#include "audio.hpp"
 #include "colors.hpp"
-#include "global.hpp"
 #include "rect.hpp"
 
 class Prop;
+struct P;
 
 enum class ExplType
 {

@@ -6,6 +6,11 @@
 
 #include "item_curse.hpp"
 
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
+#include <utility>
+
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
 #include "colors.hpp"
@@ -19,6 +24,16 @@
 #include "teleport.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "property.hpp"
+#include "property_handler.hpp"
+#include "sound.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -6,19 +6,23 @@
 
 #include "pickup.hpp"
 
+#include <stddef.h>
 #include <string>
 
 #include "actor_player.hpp"
 #include "audio.hpp"
-#include "drop.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
 #include "item.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
-#include "query.hpp"
 #include "state.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "item_data.hpp"
 
 namespace item_pickup
 {

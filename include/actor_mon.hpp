@@ -15,6 +15,13 @@
 #include "global.hpp"
 #include "item.hpp"
 #include "sound.hpp"
+#include "actor_data.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "gfx.hpp"
+#include "spells.hpp"
+
+struct P;
 
 struct AiAttData
 {

@@ -10,6 +10,7 @@
 #include "actor.hpp"
 #include "map.hpp"
 #include "misc.hpp"
+#include "array2.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -7,10 +7,7 @@
 #ifndef MAP_TRAVEL_HPP
 #define MAP_TRAVEL_HPP
 
-#include <string>
-#include <vector>
 
-#include "map_builder.hpp"
 
 namespace map_travel
 {

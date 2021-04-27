@@ -6,11 +6,15 @@
 
 #include "wham.hpp"
 
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "actor_hit.hpp"
 #include "actor_player.hpp"
 #include "common_text.hpp"
 #include "game_time.hpp"
-#include "init.hpp"
 #include "io.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
@@ -22,6 +26,21 @@
 #include "terrain.hpp"
 #include "terrain_door.hpp"
 #include "text_format.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "dmg_range.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

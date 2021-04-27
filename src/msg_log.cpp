@@ -8,15 +8,23 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <ostream>
 
 #include "actor_player.hpp"
 #include "draw_box.hpp"
-#include "init.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "query.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
+#include "SDL_keycode.h"
+#include "debug.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

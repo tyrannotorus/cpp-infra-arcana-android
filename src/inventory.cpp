@@ -6,22 +6,24 @@
 
 #include "inventory.hpp"
 
+#include <ext/alloc_traits.h>
 #include <algorithm>
 #include <vector>
+#include <iterator>
+#include <memory>
+#include <ostream>
 
 #include "actor_player.hpp"
-#include "create_character.hpp"
 #include "drop.hpp"
-#include "game.hpp"
-#include "init.hpp"
-#include "io.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
-#include "player_bon.hpp"
 #include "saving.hpp"
+#include "actor.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
 
 Inventory::Inventory(actor::Actor* const owning_actor) :
         m_owning_actor(owning_actor)

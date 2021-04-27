@@ -5,16 +5,18 @@
 // =============================================================================
 
 #include "catch.hpp"
-
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
 #include "attack.hpp"
-#include "direction.hpp"
 #include "item.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
 
 TEST_CASE("Incinerator projectile explodes on hitting creature")
 {

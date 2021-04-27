@@ -5,9 +5,7 @@
 // =============================================================================
 
 #include "catch.hpp"
-
 #include "actor_player.hpp"
-#include "item.hpp"
 #include "item_factory.hpp"
 #include "item_scroll.hpp"
 #include "map.hpp"
@@ -17,6 +15,11 @@
 #include "terrain.hpp"
 #include "terrain_door.hpp"
 #include "test_utils.hpp"
+#include "global.hpp"
+#include "item_data.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
 
 TEST_CASE("Test opening spell effect")
 {

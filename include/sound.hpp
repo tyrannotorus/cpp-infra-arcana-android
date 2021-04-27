@@ -8,9 +8,10 @@
 #define SOUND_HPP
 
 #include <string>
+#include <memory>
 
-#include "item_data.hpp"
-#include "msg_log.hpp"
+#include "audio_data.hpp"
+#include "pos.hpp"
 
 namespace actor
 {

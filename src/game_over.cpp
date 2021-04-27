@@ -6,8 +6,13 @@
 
 #include "game_over.hpp"
 
+#include <stddef.h>
 #include <fstream>
 #include <vector>
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <string>
 
 #include "actor_data.hpp"
 #include "actor_player.hpp"
@@ -19,6 +24,11 @@
 #include "paths.hpp"
 #include "postmortem.hpp"
 #include "text_format.hpp"
+#include "insanity.hpp"
+#include "msg_log.hpp"
+#include "player_bon.hpp"
+#include "state.hpp"
+#include "time.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

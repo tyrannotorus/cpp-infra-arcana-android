@@ -6,6 +6,10 @@
 
 #include "actor_move.hpp"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "actor.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
@@ -22,8 +26,20 @@
 #include "reload.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
-#include "terrain_mob.hpp"
 #include "text_format.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "item_data.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

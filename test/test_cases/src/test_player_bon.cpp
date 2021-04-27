@@ -4,8 +4,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <algorithm>
+#include <iterator>
+#include <vector>
 
+#include "catch.hpp"
 #include "player_bon.hpp"
 #include "test_utils.hpp"
 

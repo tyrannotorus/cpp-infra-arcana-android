@@ -8,10 +8,16 @@
 #define TERRAIN_EVENT_HPP
 
 #include <vector>
+#include <string>
 
 #include "colors.hpp"
 #include "rect.hpp"
 #include "terrain.hpp"
+#include "array2.hpp"
+#include "global.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "terrain_data.hpp"
 
 // TODO: Events should probably not be terrain
 

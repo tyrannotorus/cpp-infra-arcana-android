@@ -5,7 +5,6 @@
 // =============================================================================
 
 #include "catch.hpp"
-
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
 #include "knockback.hpp"
@@ -13,6 +12,11 @@
 #include "pos.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "global.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
 
 TEST_CASE("Player cannot be knocked into deep liquid occupied by other actor")
 {

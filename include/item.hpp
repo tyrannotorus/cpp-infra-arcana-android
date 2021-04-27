@@ -7,15 +7,20 @@
 #ifndef ITEM_HPP
 #define ITEM_HPP
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "colors.hpp"
 #include "dmg_range.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
-#include "inventory_handling.hpp"
-#include "item_att_property.hpp"
 #include "item_curse.hpp"
-#include "pos.hpp"
-#include "random.hpp"
+#include "item_curse_ids.hpp"
+
+class Inventory;
+struct ItemAttProp;
+struct P;
 
 namespace actor
 {
@@ -23,7 +28,6 @@ class Actor;
 }  // namespace actor
 
 class Prop;
-class Spell;
 
 namespace item
 {

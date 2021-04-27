@@ -7,6 +7,8 @@
 #ifndef DROP_HPP
 #define DROP_HPP
 
+#include <stddef.h>
+
 #include "global.hpp"
 
 namespace item

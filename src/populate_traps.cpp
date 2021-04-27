@@ -7,15 +7,22 @@
 #include "populate_traps.hpp"
 
 #include <algorithm>
+#include <functional>
+#include <ostream>
+#include <vector>
 
 #include "actor_player.hpp"
-#include "game_time.hpp"
-#include "init.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
-#include "mapgen.hpp"
 #include "terrain_data.hpp"
 #include "terrain_trap.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "room.hpp"
+#include "terrain.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

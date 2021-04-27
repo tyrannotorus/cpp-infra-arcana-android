@@ -6,19 +6,22 @@
 
 #include "manual.hpp"
 
-#include "init.hpp"
-
+#include <ext/alloc_traits.h>
+#include <stddef.h>
 #include <fstream>
 #include <vector>
+#include <memory>
+#include <utility>
 
 #include "common_text.hpp"
 #include "debug.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
 #include "panel.hpp"
-#include "pos.hpp"
 #include "rect.hpp"
 #include "text_format.hpp"
+#include "SDL_keycode.h"
+#include "colors.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

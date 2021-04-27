@@ -8,10 +8,14 @@
 #define TERRAIN_DATA_HPP
 
 #include <functional>
+#include <string>
+#include <vector>
 
 #include "gfx.hpp"
 #include "global.hpp"
 #include "property_data.hpp"
+
+struct P;
 
 namespace actor
 {

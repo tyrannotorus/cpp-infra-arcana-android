@@ -4,8 +4,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include <stddef.h>
+#include <memory>
+#include <string>
+#include <vector>
 
+#include "catch.hpp"
 #include "actor_player.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
@@ -15,14 +19,20 @@
 #include "item_device.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
-#include "map_travel.hpp"
-#include "paths.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
 #include "property.hpp"
 #include "property_handler.hpp"
 #include "saving.hpp"
 #include "test_utils.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "item.hpp"
+#include "item_curse_ids.hpp"
+#include "property_data.hpp"
+#include "spells.hpp"
 
 TEST_CASE("Saving and loading the game")
 {

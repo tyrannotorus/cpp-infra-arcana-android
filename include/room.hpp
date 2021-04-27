@@ -8,10 +8,12 @@
 #define ROOM_HPP
 
 #include <vector>
+#include <string>
 
 #include "global.hpp"
 #include "rect.hpp"
 #include "terrain_data.hpp"
+#include "pos.hpp"
 
 // Room theming occurs both pre- and post-connect (before/after corridors).
 //
@@ -36,7 +38,6 @@
 // RoomType ids which doesn't have a corresponding Room class at all.
 
 class Room;
-
 template <typename T>
 class Array2;
 

@@ -6,10 +6,11 @@
 
 #include "terrain_data.hpp"
 
-#include "init.hpp"
+#include <stddef.h>
+#include <algorithm>
+#include <iterator>
 
 #include "actor.hpp"
-#include "game_time.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
@@ -20,6 +21,9 @@
 #include "terrain_monolith.hpp"
 #include "terrain_pylon.hpp"
 #include "terrain_trap.hpp"
+#include "debug.hpp"
+
+struct P;
 
 // -----------------------------------------------------------------------------
 // Private

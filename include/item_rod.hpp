@@ -7,7 +7,16 @@
 #ifndef ITEM_ROD_HPP
 #define ITEM_ROD_HPP
 
+#include <string>
+#include <vector>
+
 #include "item.hpp"
+#include "colors.hpp"
+#include "global.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
 
 namespace item
 {

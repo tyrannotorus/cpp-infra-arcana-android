@@ -13,9 +13,19 @@
 #include "actor_data.hpp"
 #include "spells.hpp"
 #include "terrain.hpp"
+#include "colors.hpp"
+#include "global.hpp"
+#include "terrain_data.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
+struct P;
 
 namespace item
 {
+class Item;
+
 enum class Id;
 }  // namespace item
 

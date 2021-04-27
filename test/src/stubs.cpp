@@ -4,11 +4,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "actor.hpp"
+#include <string>
+#include <vector>
+
 #include "io.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
+#include "SDL_keycode.h"
+#include "SDL_stdinc.h"
+#include "audio.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "direction.hpp"
+#include "gfx.hpp"
+
+namespace actor {
+class Actor;
+}  // namespace actor
 
 // -----------------------------------------------------------------------------
 // io

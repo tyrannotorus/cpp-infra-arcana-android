@@ -11,9 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include "browser.hpp"
 #include "colors.hpp"
-#include "global.hpp"
 #include "info_screen_state.hpp"
 #include "state.hpp"
 

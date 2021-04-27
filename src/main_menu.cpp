@@ -6,28 +6,33 @@
 
 #include "main_menu.hpp"
 
+#include <stddef.h>
 #include <string>
+#include <algorithm>
+#include <memory>
+#include <utility>
+#include <vector>
 
-#include "actor.hpp"
-#include "actor_player.hpp"
 #include "audio.hpp"
 #include "colors.hpp"
 #include "create_character.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
-#include "game_time.hpp"
 #include "highscore.hpp"
 #include "init.hpp"
 #include "io.hpp"
 #include "manual.hpp"
-#include "map.hpp"
-#include "map_travel.hpp"
-#include "misc.hpp"
 #include "panel.hpp"
 #include "popup.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
 #include "version.hpp"
+#include "audio_data.hpp"
+#include "config.hpp"
+#include "global.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

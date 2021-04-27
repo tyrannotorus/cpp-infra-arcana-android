@@ -7,13 +7,14 @@
 #ifndef MSG_LOG_HPP
 #define MSG_LOG_HPP
 
+#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "colors.hpp"
-#include "global.hpp"
 #include "info_screen_state.hpp"
+#include "state.hpp"
 
 enum class MorePromptOnMsg
 {

@@ -6,6 +6,10 @@
 
 #include "actor_hit.hpp"
 
+#include <algorithm>
+#include <ostream>
+#include <string>
+
 #include "actor.hpp"
 #include "actor_death.hpp"
 #include "actor_player.hpp"
@@ -14,6 +18,20 @@
 #include "msg_log.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "config.hpp"
+#include "debug.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "player_bon.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "sound.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
