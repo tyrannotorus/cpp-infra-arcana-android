@@ -8,8 +8,6 @@ Checks: >
     -modernize-use-nodiscard,
 
 
-
-
     -bugprone-branch-clone,
     -cert-dcl58-cpp,
     -cert-err58-cpp,
@@ -20,6 +18,7 @@ Checks: >
     -clang-analyzer-security.FloatLoopCounter,
     -cppcoreguidelines-avoid-c-arrays,
     -cppcoreguidelines-avoid-magic-numbers,
+    -cppcoreguidelines-avoid-non-const-global-variables,
     -cppcoreguidelines-explicit-virtual-functions,
     -cppcoreguidelines-macro-usage,
     -cppcoreguidelines-no-malloc,
@@ -61,7 +60,9 @@ Checks: >
     -hicpp-use-equals-default,
     -hicpp-use-equals-default,
     -hicpp-use-override,
+    -llvm-else-after-return,
     -llvm-qualified-auto,
+    -llvmlibc-callee-namespace,
     -misc-non-private-member-variables-in-classes,
     -modernize-avoid-c-arrays,
     -modernize-loop-convert,

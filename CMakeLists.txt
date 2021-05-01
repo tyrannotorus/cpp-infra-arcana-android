@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Project
 # ------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.20)
 
 project(ia)
 
@@ -319,7 +319,7 @@ add_executable(ia ${SRC} ${RC_FILE})
 set_target_properties(ia PROPERTIES OUTPUT_NAME ia)
 
 add_executable(ia-debug ${SRC} ${RC_FILE})
-set_target_properties(ia-debug PROPERTIES OUTPUT_NAME ia-debug)
+set_target_properties(ia-debug PROPERTIES OUTPUT_NAME ia-debug EXPORT_COMPILE_COMMANDS 1)
 
 enable_testing()
 
