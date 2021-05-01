@@ -7,8 +7,8 @@
 #include "look.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
-#include <stddef.h>
 #include <string>
 
 #include "SDL_keycode.h"
@@ -272,11 +272,6 @@ StateId ViewActorDescr::id() const
 
 void ViewActorDescr::on_start()
 {
-        const auto* const actor_data =
-                m_actor.m_mimic_data
-                ? m_actor.m_mimic_data
-                : m_actor.m_data;
-
         // Fixed decription
         {
                 const auto fixed_lines =
@@ -286,18 +281,13 @@ void ViewActorDescr::on_start()
 
                 for (const auto& line : fixed_lines)
                 {
-                        m_lines.emplace_back(
-                                line,
-                                colors::text());
+                        m_lines.emplace_back(line, colors::text());
                 }
         }
 
         // Auto description
         {
-                const auto auto_descr =
-                        actor_data->allow_generated_descr
-                        ? auto_description_str()
-                        : "";
+                const auto auto_descr = auto_description_str();
 
                 if (!auto_descr.empty())
                 {
@@ -477,9 +467,12 @@ std::string ViewActorDescr::auto_description_str() const
                 str,
                 get_melee_hit_chance_descr(m_actor));
 
-        text_format::append_with_space(
-                str,
-                get_mon_dlvl_descr(actor_data, m_actor));
+        if (actor_data.allow_spawn_dlvl_descr)
+        {
+                text_format::append_with_space(
+                        str,
+                        get_mon_dlvl_descr(actor_data, m_actor));
+        }
 
         text_format::append_with_space(
                 str,

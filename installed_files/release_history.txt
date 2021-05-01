@@ -18,6 +18,7 @@ Gameplay
 * Added messages when Ooze type monsters or small crawling monsters pass though things which normally cannot be walked though
 * Cultists have a kick attack
 * Some monsters now have a smell that can be detected by the player (with a certain chance depending on how old the smell is and how far it has spread)
+* A generated description is now printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters (so that things like melee hit chance and movement speed can be read)
 * Forcing a metal door open (e.g. with a Rod of Opening or the Opening spell) now also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
 * Stuck doors are drawn with a different color, and have "stuck" added to their names if the player is adjacent to the door
 * Added trait "Crippling Strikes" - melee attacks have 60% chance to Weaken the target for 2-3 turns

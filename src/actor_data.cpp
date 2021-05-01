@@ -128,8 +128,8 @@ static const std::unordered_map<std::string, actor::Speed> str_to_speed_map = {
         {"fast", actor::Speed::fast},
         {"very_fast", actor::Speed::very_fast}};
 
-typedef std::unordered_map<std::string, actor::MonGroupSize>
-        StrToMonGroupSizeMap;
+using StrToMonGroupSizeMap =
+        std::unordered_map<std::string, actor::MonGroupSize>;
 
 static const StrToMonGroupSizeMap s_str_to_group_size_map = {
         {"alone", actor::MonGroupSize::alone},
@@ -137,7 +137,8 @@ static const StrToMonGroupSizeMap s_str_to_group_size_map = {
         {"pack", actor::MonGroupSize::pack},
         {"swarm", actor::MonGroupSize::swarm}};
 
-using MonGroupSizeToStrMap = std::unordered_map<actor::MonGroupSize, std::string>;
+using MonGroupSizeToStrMap =
+        std::unordered_map<actor::MonGroupSize, std::string>;
 
 static const MonGroupSizeToStrMap s_group_size_to_str_map = {
         {actor::MonGroupSize::alone, "alone"},
@@ -145,21 +146,24 @@ static const MonGroupSizeToStrMap s_group_size_to_str_map = {
         {actor::MonGroupSize::pack, "pack"},
         {actor::MonGroupSize::swarm, "swarm"}};
 
-using StrToSizeMap = std::unordered_map<std::string, actor::Size>;
+using StrToSizeMap =
+        std::unordered_map<std::string, actor::Size>;
 
 static const StrToSizeMap s_str_to_actor_size_map = {
         {"floor", actor::Size::floor},
         {"humanoid", actor::Size::humanoid},
         {"giant", actor::Size::giant}};
 
-using SizeToStrMap = std::unordered_map<actor::Size, std::string>;
+using SizeToStrMap =
+        std::unordered_map<actor::Size, std::string>;
 
 static const SizeToStrMap s_actor_size_to_str_map = {
         {actor::Size::floor, "floor"},
         {actor::Size::humanoid, "humanoid"},
         {actor::Size::giant, "giant"}};
 
-using StrToAiIdMap = std::unordered_map<std::string, actor::AiId>;
+using StrToAiIdMap =
+        std::unordered_map<std::string, actor::AiId>;
 
 static const StrToAiIdMap s_str_to_ai_id_map = {
         {"looks", actor::AiId::looks},
@@ -172,7 +176,8 @@ static const StrToAiIdMap s_str_to_ai_id_map = {
         {"moves_randomly_when_unaware",
          actor::AiId::moves_randomly_when_unaware}};
 
-using AiIdToStrMap = std::unordered_map<actor::AiId, std::string>;
+using AiIdToStrMap =
+        std::unordered_map<actor::AiId, std::string>;
 
 static const AiIdToStrMap s_ai_id_to_str_map = {
         {actor::AiId::looks, "looks"},
@@ -200,46 +205,55 @@ static void dump_text(xml::Element* text_e, actor::ActorData& data)
         data.name_a =
                 xml::get_text_str(
                         xml::first_child(
-                                text_e, "name_a"));
+                                text_e,
+                                "name_a"));
 
         data.name_the =
                 xml::get_text_str(
                         xml::first_child(
-                                text_e, "name_the"));
+                                text_e,
+                                "name_the"));
 
         data.corpse_name_a =
                 xml::get_text_str(
                         xml::first_child(
-                                text_e, "corpse_name_a"));
+                                text_e,
+                                "corpse_name_a"));
 
         data.corpse_name_the =
                 xml::get_text_str(
                         xml::first_child(
-                                text_e, "corpse_name_the"));
+                                text_e,
+                                "corpse_name_the"));
 
         data.descr =
                 xml::get_text_str(
                         xml::first_child(
-                                text_e, "description"));
+                                text_e,
+                                "description"));
 
-        data.allow_generated_descr =
+        data.allow_spawn_dlvl_descr =
                 xml::get_text_bool(
                         xml::first_child(
-                                text_e, "allow_generated_description"));
+                                text_e,
+                                "allow_spawn_dlvl_description"));
 
         data.smell_msg =
                 xml::get_text_str(
                         xml::first_child(
-                                text_e, "smell_message"));
+                                text_e,
+                                "smell_message"));
 
         data.wary_msg =
                 xml::get_text_str(
                         xml::first_child(
-                                text_e, "wary_message"));
+                                text_e,
+                                "wary_message"));
 
         auto* aware_msg_seen_e =
                 xml::first_child(
-                        text_e, "aware_message_seen");
+                        text_e,
+                        "aware_message_seen");
 
         data.aware_msg_mon_seen =
                 xml::get_text_str(aware_msg_seen_e);
@@ -251,7 +265,8 @@ static void dump_text(xml::Element* text_e, actor::ActorData& data)
 
         auto* aware_msg_hidden_e =
                 xml::first_child(
-                        text_e, "aware_message_hidden");
+                        text_e,
+                        "aware_message_hidden");
 
         data.aware_msg_mon_hidden = xml::get_text_str(aware_msg_hidden_e);
 
@@ -263,7 +278,8 @@ static void dump_text(xml::Element* text_e, actor::ActorData& data)
         data.spell_msg =
                 xml::get_text_str(
                         xml::first_child(
-                                text_e, "spell_message"));
+                                text_e,
+                                "spell_message"));
 
         auto* death_msg_e = xml::first_child(text_e, "death_message");
 
@@ -873,7 +889,7 @@ void ActorData::reset()
         spawn_max_dlvl = -1;
         spawn_weight = 100;
         actor_size = Size::humanoid;
-        allow_generated_descr = true;
+        allow_spawn_dlvl_descr = true;
         nr_kills = 0;
         has_player_seen = false;
         can_open_doors = can_bash_doors = false;
