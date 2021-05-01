@@ -6,43 +6,43 @@
 
 #include "actor_act.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_mon.hpp"
 #include "actor_move.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "ai.hpp"
+#include "array2.hpp"
 #include "bot.hpp"
 #include "config.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "drop.hpp"
 #include "game_commands.hpp"
 #include "game_time.hpp"
-#include "io.hpp"
-#include "map.hpp"
-#include "terrain.hpp"
-#include "terrain_door.hpp"
-#include "terrain_trap.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
+#include "io.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "map.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "sound.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
+#include "terrain_trap.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -6,16 +6,17 @@
 
 #include "actor_data.hpp"
 
-#include <string>
-#include <unordered_map>
-#include <vector>
 #include <algorithm>
 #include <iterator>
 #include <optional>
 #include <ostream>
+#include <string>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "colors.hpp"
+#include "debug.hpp"
 #include "item_att_property.hpp"
 #include "item_data.hpp"
 #include "paths.hpp"
@@ -24,12 +25,11 @@
 #include "property_factory.hpp"
 #include "saving.hpp"
 #include "xml.hpp"
-#include "debug.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
+static const std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
         {"player", actor::Id::player},
         {"zombie", actor::Id::zombie},
         {"bloated_zombie", actor::Id::bloated_zombie},
@@ -92,9 +92,8 @@ static std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
         {"dust_vortex", actor::Id::dust_vortex},
         {"fire_vortex", actor::Id::fire_vortex},
         {"energy_vortex", actor::Id::energy_vortex},
-        {"ooze_black", actor::Id::ooze_black},
-        {"ooze_clear", actor::Id::ooze_clear},
         {"ooze_putrid", actor::Id::ooze_putrid},
+        {"ooze_lurking", actor::Id::ooze_lurking},
         {"ooze_poison", actor::Id::ooze_poison},
         {"glasuu", actor::Id::glasuu},
         {"strange_color", actor::Id::strange_color},

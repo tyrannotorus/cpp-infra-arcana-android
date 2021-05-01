@@ -8,43 +8,43 @@
 
 #include <algorithm>
 #include <cstring>
-#include <vector>
 #include <iterator>
+#include <vector>
 
+#include "ability_values.hpp"
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
 #include "attack.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "flood.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
 #include "gods.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "item_data.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
-#include "reload.hpp"
-#include "sound.hpp"
-#include "terrain_door.hpp"
-#include "text_format.hpp"
-#include "ability_values.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
-#include "item_data.hpp"
-#include "player_bon.hpp"
-#include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "reload.hpp"
+#include "sound.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -240,6 +240,12 @@ Color Mon::color() const
         }
 
         Color tmp_color;
+
+        // TODO: Make this a property:
+        if (id() == Id::ooze_lurking)
+        {
+                return map::g_wall_color;
+        }
 
         if (m_properties.affect_actor_color(tmp_color))
         {

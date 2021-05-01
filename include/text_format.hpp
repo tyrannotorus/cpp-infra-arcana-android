@@ -19,7 +19,12 @@ namespace text_format
 // is simply added to the output vector, breaking the maximum width).
 std::vector<std::string> split(std::string line, int max_w);
 
-std::vector<std::string> space_separated_list(const std::string& line);
+std::vector<std::string> split_by_delim(
+        std::string line,
+        const char delim);
+
+std::vector<std::string> split_by_space(const std::string& line);
+std::vector<std::string> split_by_newline(const std::string& line);
 
 std::string replace_all(
         const std::string& line,

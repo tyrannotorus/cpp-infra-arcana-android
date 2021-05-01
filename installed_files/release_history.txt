@@ -11,9 +11,10 @@ Gameplay
 * The stealth penalty in lit positions is much higher than before (see also bug fixes below concerning stealth and darkness)
 * Added more sound effects
 * Added more monsters
-* Monsters no longer become aware of the player from negative properties (burning, infections, etc) or from taking damage (it is the attack actions and sounds which makes them aware), so now it is possible to for example throw a Molotov Cocktail at a monster, and escape with Cloud Minds while it is burning
+* Monsters no longer become aware of the player from negative properties (burning, etc) or from taking damage (it is the attack actions and sounds which alerts them) - so now it is possible to for example throw a Molotov Cocktail at a monster, and escape with Cloud Minds while it is burning
 * Updated Worm Masses and Mind Worms - they are now blind, slow (instead of normal speed), have much more hit points, are unsettling (causes shock to see), take much less damage from piercing attacks (such as pistol shots or dagger strikes), and have a very limited hearing range
 * Worm Masses and Mind Worms can no longer split while burning
+* Added completely new descriptions for all Ooze monsters, removed Black Ooze, changed Putrid Ooze to be weaker and spawn earlier, renamed Clear Ooze to Lurking Ooze
 * Added messages when Ooze type monsters or small crawling monsters pass though things which normally cannot be walked though
 * Cultists have a kick attack
 * Some monsters now have a smell that can be detected by the player (with a certain chance depending on how old the smell is and how far it has spread)

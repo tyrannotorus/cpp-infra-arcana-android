@@ -11,14 +11,10 @@
 #include <string>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_death.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "map.hpp"
-#include "msg_log.hpp"
-#include "terrain.hpp"
-#include "text_format.hpp"
-#include "actor_data.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
@@ -26,12 +22,16 @@
 #include "debug.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "map.hpp"
+#include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "sound.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -68,9 +68,9 @@ static int hit_armor(actor::Actor& actor, int dmg)
                                                         ItemRefInf::none);
 
                                         msg_log::add(
-                                                "My " +
-                                                        armor_name +
-                                                        " is torn apart!",
+                                                ("My " +
+                                                 armor_name +
+                                                 " is torn apart!"),
                                                 colors::msg_note());
                                 }
 

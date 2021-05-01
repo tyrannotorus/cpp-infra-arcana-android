@@ -7,22 +7,22 @@
 #ifndef ACTOR_DATA_HPP
 #define ACTOR_DATA_HPP
 
-#include <stddef.h>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "ability_values.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
+#include "gfx.hpp"
 #include "global.hpp"
 #include "item_att_property.hpp"
 #include "item_data.hpp"
 #include "property_data.hpp"
+#include "random.hpp"
 #include "room.hpp"
 #include "spells.hpp"
-#include "audio_data.hpp"
-#include "colors.hpp"
-#include "gfx.hpp"
-#include "random.hpp"
 
 namespace actor
 {
@@ -90,9 +90,8 @@ enum class Id
         dust_vortex,
         fire_vortex,
         energy_vortex,
-        ooze_black,
-        ooze_clear,
         ooze_putrid,
+        ooze_lurking,
         ooze_poison,
         glasuu,
         strange_color,

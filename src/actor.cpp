@@ -7,7 +7,7 @@
 #include "actor.hpp"
 
 #include <algorithm>
-#include <limits.h>
+#include <climits>
 
 #include "actor_items.hpp"
 #include "actor_mon.hpp"
@@ -159,7 +159,7 @@ gfx::TileId Actor::tile() const
                 return gfx::TileId::corpse2;
         }
 
-        auto* const data =
+        const auto* const data =
                 m_mimic_data
                 ? m_mimic_data
                 : m_data;
@@ -174,7 +174,7 @@ char Actor::character() const
                 return '&';
         }
 
-        auto* const data =
+        const auto* const data =
                 m_mimic_data
                 ? m_mimic_data
                 : m_data;
@@ -184,7 +184,7 @@ char Actor::character() const
 
 std::string Actor::name_the() const
 {
-        auto* const data =
+        const auto* const data =
                 m_mimic_data
                 ? m_mimic_data
                 : m_data;
@@ -194,7 +194,7 @@ std::string Actor::name_the() const
 
 std::string Actor::name_a() const
 {
-        auto* const data =
+        const auto* const data =
                 m_mimic_data
                 ? m_mimic_data
                 : m_data;
@@ -204,7 +204,7 @@ std::string Actor::name_a() const
 
 std::string Actor::descr() const
 {
-        auto* const data =
+        const auto* const data =
                 m_mimic_data
                 ? m_mimic_data
                 : m_data;

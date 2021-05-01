@@ -6,9 +6,9 @@
 
 #include "text_format.hpp"
 
+#include <algorithm>
 #include <ctype.h>
 #include <ext/alloc_traits.h>
-#include <algorithm>
 #include <iterator>
 #include <memory>
 
@@ -94,18 +94,25 @@ std::vector<std::string> split(std::string line, const int max_w)
         return result;
 }
 
-std::vector<std::string> space_separated_list(const std::string& line)
+std::vector<std::string> split_by_delim(
+        std::string line,
+        const char delim)
 {
-        std::vector<std::string> result;
+        if (line.empty())
+        {
+                return {};
+        }
 
+        line.push_back(delim);
+
+        std::vector<std::string> result;
         std::string current_line;
 
         for (char c : line)
         {
-                if (c == ' ')
+                if (c == delim)
                 {
                         result.push_back(current_line);
-
                         current_line = "";
                 }
                 else
@@ -115,6 +122,16 @@ std::vector<std::string> space_separated_list(const std::string& line)
         }
 
         return result;
+}
+
+std::vector<std::string> split_by_space(const std::string& line)
+{
+        return split_by_delim(line, ' ');
+}
+
+std::vector<std::string> split_by_newline(const std::string& line)
+{
+        return split_by_delim(line, '\n');
 }
 
 std::string replace_all(

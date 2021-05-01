@@ -6,24 +6,34 @@
 
 #include "property.hpp"
 
-#include <ext/alloc_traits.h>
-#include <math.h>
-#include <stddef.h>
 #include <algorithm>
+#include <ext/alloc_traits.h>
 #include <iterator>
+#include <math.h>
 #include <ostream>
+#include <stddef.h>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_death.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "explosion.hpp"
+#include "fov.hpp"
 #include "game_time.hpp"
 #include "hints.hpp"
+#include "insanity.hpp"
+#include "inventory.hpp"
 #include "io.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "knockback.hpp"
 #include "line_calc.hpp"
@@ -32,30 +42,20 @@
 #include "mapgen.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
-#include "property_data.hpp"
-#include "property_factory.hpp"
-#include "saving.hpp"
-#include "teleport.hpp"
-#include "terrain.hpp"
-#include "text_format.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "audio_data.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
-#include "fov.hpp"
-#include "insanity.hpp"
-#include "inventory.hpp"
-#include "item.hpp"
-#include "item_data.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
+#include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "saving.hpp"
 #include "sound.hpp"
 #include "state.hpp"
+#include "teleport.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -2602,9 +2602,8 @@ void PropVomitsOoze::on_std_turn()
         const auto area_allowed = R(m_owner->m_pos - 1, m_owner->m_pos + 1);
 
         actor::Id ooze_ids[] = {
-                actor::Id::ooze_black,
                 actor::Id::ooze_putrid,
-                actor::Id::ooze_clear,
+                actor::Id::ooze_lurking,
                 actor::Id::ooze_poison};
 
         std::vector<actor::Id> id_bucket;
@@ -2619,10 +2618,10 @@ void PropVomitsOoze::on_std_turn()
                 }
         }
 
-        // Robustness - always allow at least Black Ooze
+        // Robustness - always allow at least Putrid Ooze
         if (id_bucket.empty())
         {
-                id_bucket.push_back(actor::Id::ooze_black);
+                id_bucket.push_back(actor::Id::ooze_putrid);
         }
 
         actor::Id id_to_spawn = rnd::element(id_bucket);

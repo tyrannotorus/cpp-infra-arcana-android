@@ -6,34 +6,34 @@
 
 #include "look.hpp"
 
-#include <stddef.h>
-#include <string>
 #include <algorithm>
 #include <iterator>
+#include <stddef.h>
+#include <string>
 
+#include "SDL_keycode.h"
+#include "ability_values.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
 #include "attack_data.hpp"
+#include "debug.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
 #include "item.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
-#include "SDL_keycode.h"
-#include "ability_values.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
-#include "global.hpp"
-#include "panel.hpp"
-#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // private
@@ -278,12 +278,10 @@ void ViewActorDescr::on_start()
                 : m_actor.m_data;
 
         // Fixed decription
-        const auto fixed_descr = m_actor.descr();
-
         {
                 const auto fixed_lines =
                         text_format::split(
-                                fixed_descr,
+                                m_actor.descr(),
                                 panels::w(Panel::info_screen_content));
 
                 for (const auto& line : fixed_lines)
