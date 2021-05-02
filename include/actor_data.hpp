@@ -228,6 +228,7 @@ struct ActorData
         int spawn_weight;
         Size actor_size;
         bool allow_spawn_dlvl_descr;
+        bool allow_wielded_wpn_descr;
         int nr_kills;
         bool has_player_seen;
         bool can_open_doors;

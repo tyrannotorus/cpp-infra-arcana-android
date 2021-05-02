@@ -17,6 +17,7 @@
 #include "audio_data.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
 #include "map.hpp"
@@ -30,6 +31,10 @@
 #include "rect.hpp"
 #include "sound.hpp"
 #include "text_format.hpp"
+
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 // actor
@@ -159,12 +164,48 @@ gfx::TileId Actor::tile() const
                 return gfx::TileId::corpse2;
         }
 
-        const auto* const data =
-                m_mimic_data
-                ? m_mimic_data
-                : m_data;
+        if (m_mimic_data)
+        {
+                return m_mimic_data->tile;
+        }
 
-        return data->tile;
+        // HACK: Overriding tile for (firearm) Cultists
+        if (id() == Id::cultist)
+        {
+                const auto* const wpn = m_inv.item_in_slot(SlotId::wpn);
+
+                ASSERT(wpn);
+
+                if (!wpn)
+                {
+                        return gfx::TileId::cultist_pistol;
+                }
+
+                switch (wpn->id())
+                {
+                case item::Id::pistol:
+                case item::Id::revolver:
+                        return gfx::TileId::pistol;
+
+                case item::Id::pump_shotgun:
+                        return gfx::TileId::cultist_pump_shotgun;
+
+                case item::Id::sawed_off:
+                        return gfx::TileId::cultist_sawed_off_shotgun;
+
+                case item::Id::machine_gun:
+                        return gfx::TileId::cultist_tommygun;
+
+                case item::Id::rifle:
+                        return gfx::TileId::cultist_rifle;
+
+                default:
+                        ASSERT(false);
+                        return gfx::TileId::pistol;
+                }
+        }
+
+        return m_data->tile;
 }
 
 char Actor::character() const
@@ -184,32 +225,32 @@ char Actor::character() const
 
 std::string Actor::name_the() const
 {
-        const auto* const data =
-                m_mimic_data
-                ? m_mimic_data
-                : m_data;
+        if (m_mimic_data)
+        {
+                return m_mimic_data->name_the;
+        }
 
-        return data->name_the;
+        return m_data->name_the;
 }
 
 std::string Actor::name_a() const
 {
-        const auto* const data =
-                m_mimic_data
-                ? m_mimic_data
-                : m_data;
+        if (m_mimic_data)
+        {
+                return m_mimic_data->name_a;
+        }
 
-        return data->name_a;
+        return m_data->name_a;
 }
 
 std::string Actor::descr() const
 {
-        const auto* const data =
-                m_mimic_data
-                ? m_mimic_data
-                : m_data;
+        if (m_mimic_data)
+        {
+                return m_mimic_data->descr;
+        }
 
-        return data->descr;
+        return m_data->descr;
 }
 
 bool Actor::restore_hp(

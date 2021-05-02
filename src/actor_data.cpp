@@ -238,6 +238,12 @@ static void dump_text(xml::Element* text_e, actor::ActorData& data)
                                 text_e,
                                 "allow_spawn_dlvl_description"));
 
+        data.allow_wielded_wpn_descr =
+                xml::get_text_bool(
+                        xml::first_child(
+                                text_e,
+                                "allow_wielded_weapon_description"));
+
         data.smell_msg =
                 xml::get_text_str(
                         xml::first_child(

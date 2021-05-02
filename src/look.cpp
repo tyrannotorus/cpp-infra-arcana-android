@@ -202,24 +202,37 @@ static std::string get_mon_shock_descr(
                 return "";
         }
 
-        if (actor_data.is_unique)
+        const std::string prefix_str =
+                actor_data.is_unique
+                ? (actor.name_the() + " is ")
+                : ("They are ");
+
+        return prefix_str + shock_str + " to behold" + shock_punct_str;
+}
+
+static std::string get_mon_wielded_wpn_str(
+        const actor::ActorData& actor_data,
+        const actor::Actor& actor)
+{
+        const auto* const wpn = actor.m_inv.item_in_slot(SlotId::wpn);
+
+        if (!wpn)
         {
-                return (
-                        actor.name_the() +
-                        " is " +
-                        shock_str +
-                        " to behold" +
-                        shock_punct_str);
+                return "";
         }
-        else
-        {
-                // Not unique
-                return (
-                        "They are " +
-                        shock_str +
-                        " to behold" +
-                        shock_punct_str);
-        }
+
+        const std::string pronoun_str =
+                actor_data.is_unique
+                ? actor.name_the()
+                : "It";
+
+        const std::string wpn_name_a =
+                wpn->name(
+                        ItemRefType::a,
+                        ItemRefInf::none,
+                        ItemRefAttInf::none);
+
+        return pronoun_str + " is wielding " + wpn_name_a + ".";
 }
 
 static std::string get_melee_hit_chance_descr(actor::Actor& actor)
@@ -492,6 +505,13 @@ std::string ViewActorDescr::auto_description_str() const
         text_format::append_with_space(
                 str,
                 get_mon_shock_descr(actor_data, m_actor));
+
+        if (actor_data.allow_wielded_wpn_descr)
+        {
+                text_format::append_with_space(
+                        str,
+                        get_mon_wielded_wpn_str(actor_data, m_actor));
+        }
 
         return str;
 }
