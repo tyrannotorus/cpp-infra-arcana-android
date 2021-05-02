@@ -83,9 +83,7 @@ static const std::string s_intro_msg_exorcist =
 static const std::vector<std::string> s_win_msg_default = {
         {"As I approach the crystal, an eerie glow illuminates the area. "
          "I notice a figure observing me from the edge of the light. There is "
-         "no doubt concerning the nature of this entity; it is the "
-         "Faceless God who dwells in the depths of the earth - "
-         "Nyarlathotep!"},
+         "no doubt in my mind concerning the nature of this entity."},
 
         {"I panic. Why is it I find myself here, stumbling around in "
          "darkness? Is this all part of a plan? The being beckons me to "
