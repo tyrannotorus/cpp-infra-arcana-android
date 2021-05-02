@@ -9,13 +9,14 @@
 
 #include <string>
 
-#include "terrain.hpp"
 #include "colors.hpp"
 #include "global.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 
 struct P;
-template <typename T> class Array2;
+template <typename T>
+class Array2;
 
 namespace terrain
 {

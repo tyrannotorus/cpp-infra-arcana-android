@@ -6,13 +6,13 @@
 
 #include "game_over.hpp"
 
-#include <stddef.h>
-#include <fstream>
-#include <vector>
 #include <algorithm>
+#include <cstddef>
+#include <fstream>
 #include <iterator>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "actor_data.hpp"
 #include "actor_player.hpp"
@@ -20,14 +20,14 @@
 #include "game.hpp"
 #include "highscore.hpp"
 #include "init.hpp"
-#include "map.hpp"
-#include "paths.hpp"
-#include "postmortem.hpp"
-#include "text_format.hpp"
 #include "insanity.hpp"
+#include "map.hpp"
 #include "msg_log.hpp"
+#include "paths.hpp"
 #include "player_bon.hpp"
+#include "postmortem.hpp"
 #include "state.hpp"
+#include "text_format.hpp"
 #include "time.hpp"
 
 // -----------------------------------------------------------------------------

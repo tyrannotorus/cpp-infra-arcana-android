@@ -7,29 +7,29 @@
 #include "drop.hpp"
 
 #include <algorithm>
-#include <string>
 #include <iterator>
 #include <ostream>
+#include <string>
 #include <vector>
 
+#include "actor.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
 #include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
-#include "terrain.hpp"
-#include "text_format.hpp"
-#include "actor.hpp"
-#include "array2.hpp"
-#include "colors.hpp"
-#include "debug.hpp"
-#include "item.hpp"
-#include "item_data.hpp"
 #include "pos.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "text_format.hpp"
 
 namespace item_drop
 {

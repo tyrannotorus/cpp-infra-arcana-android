@@ -7,8 +7,8 @@
 #ifndef SOUND_HPP
 #define SOUND_HPP
 
-#include <string>
 #include <memory>
+#include <string>
 
 #include "audio_data.hpp"
 #include "pos.hpp"

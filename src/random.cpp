@@ -6,13 +6,13 @@
 
 #include "random.hpp"
 
-#include <math.h>
-#include <time.h>
-#include <iomanip>
-#include <sstream>
+#include <cmath>
+#include <ctime>
 #include <functional>
+#include <iomanip>
 #include <iterator>
 #include <numeric>
+#include <sstream>
 
 #include "debug.hpp"
 

@@ -7,15 +7,15 @@
 #ifndef IO_HPP
 #define IO_HPP
 
-#include <stdint.h>
-#include <vector>
+#include <cstdint>
 #include <string>
+#include <vector>
 
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "panel.hpp"
-#include "rect.hpp"
 #include "pos.hpp"
+#include "rect.hpp"
 
 namespace actor
 {

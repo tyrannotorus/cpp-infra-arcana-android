@@ -252,7 +252,7 @@ Color Mon::color() const
                 return tmp_color;
         }
 
-        auto* const data =
+        const auto* const data =
                 m_mimic_data
                 ? m_mimic_data
                 : m_data;
@@ -594,22 +594,21 @@ bool Mon::is_friend_blocking_ranged_attack(const P& target_pos) const
                         9999,
                         false);
 
-        for (const P& line_pos : line)
-        {
-                if ((line_pos != m_pos) && (line_pos != target_pos))
+        auto is_blocking_at = [this, target_pos](const auto& p) {
+                if ((p == m_pos) || (p == target_pos))
                 {
-                        auto* const actor_here =
-                                map::first_actor_at_pos(line_pos);
-
-                        // TODO: This does not consider who is allied/hostile!
-                        if (actor_here)
-                        {
-                                return true;
-                        }
+                        return false;
                 }
-        }
 
-        return false;
+                // TODO: This does not consider who is allied or hostile.
+                return map::first_actor_at_pos(p) != nullptr;
+        };
+
+        return (
+                std::any_of(
+                        std::cbegin(line),
+                        std::cend(line),
+                        is_blocking_at));
 }
 
 AiAvailAttacksData Mon::avail_attacks(Actor& defender) const

@@ -148,7 +148,7 @@ public:
                 m_menu_keys = keys;
         }
 
-        void remove_key(const char key);
+        void remove_key(char key);
 
         void disable_selection_audio()
         {

@@ -6,25 +6,25 @@
 
 #include "item_factory.hpp"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <utility>
 
 #include "debug.hpp"
+#include "dmg_range.hpp"
 #include "drop.hpp"
+#include "global.hpp"
+#include "item.hpp"
 #include "item_artifact.hpp"
 #include "item_curio.hpp"
 #include "item_curse.hpp"
+#include "item_curse_ids.hpp"
 #include "item_data.hpp"
 #include "item_device.hpp"
 #include "item_potion.hpp"
 #include "item_rod.hpp"
 #include "item_scroll.hpp"
-#include "dmg_range.hpp"
-#include "global.hpp"
-#include "item.hpp"
-#include "item_curse_ids.hpp"
 #include "random.hpp"
 
 namespace item

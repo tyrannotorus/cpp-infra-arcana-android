@@ -7,7 +7,7 @@
 #ifndef INVENTORY_HPP
 #define INVENTORY_HPP
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
@@ -44,14 +44,11 @@ struct InvSlot
                 name(std::move(name_)),
                 item(nullptr) {}
 
-        InvSlot() :
-                id(SlotId::wpn),
-                name(""),
-                item(nullptr) {}
+        InvSlot() = default;
 
-        SlotId id;
-        std::string name;
-        item::Item* item;
+        SlotId id {SlotId::wpn};
+        std::string name {};
+        item::Item* item {nullptr};
 };
 
 class Inventory
@@ -101,7 +98,7 @@ public:
 
         bool has_item_in_slot(SlotId id) const;
 
-        bool has_item_in_slot(const SlotId slot_id, item::Id item_id) const;
+        bool has_item_in_slot(SlotId slot_id, item::Id item_id) const;
 
         bool has_ammo_for_firearm_in_inventory() const;
 

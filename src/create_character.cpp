@@ -6,14 +6,19 @@
 
 #include "create_character.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 
+#include "SDL_keycode.h"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
 #include "browser.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
+#include "config.hpp"
+#include "debug.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
 #include "global.hpp"
@@ -21,14 +26,9 @@
 #include "map.hpp"
 #include "panel.hpp"
 #include "popup.hpp"
-#include "text_format.hpp"
-#include "SDL_keycode.h"
-#include "actor_data.hpp"
-#include "colors.hpp"
-#include "config.hpp"
-#include "debug.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // New game state
@@ -621,7 +621,7 @@ void PickTraitState::draw()
 
                 x += (int)label.length() + 1;
 
-                x = draw_trait_prereq_info(prereq_data, x, y);
+                draw_trait_prereq_info(prereq_data, x, y);
         }
 }
 
@@ -684,7 +684,7 @@ void PickTraitState::draw_trait_menu_item(
                 color);
 }
 
-int PickTraitState::draw_trait_prereq_info(
+void PickTraitState::draw_trait_prereq_info(
         const player_bon::TraitPrereqData& prereq_data,
         int x,
         const int y) const
@@ -752,8 +752,6 @@ int PickTraitState::draw_trait_prereq_info(
 
                 ++x;
         }
-
-        return x;
 }
 
 // -----------------------------------------------------------------------------

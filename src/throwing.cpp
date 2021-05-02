@@ -6,47 +6,47 @@
 
 #include "throwing.hpp"
 
-#include <stddef.h>
-#include <vector>
+#include <cstddef>
 #include <ostream>
 #include <string>
+#include <vector>
 
+#include "ability_values.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_hit.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "attack_data.hpp"
-#include "drop.hpp"
-#include "game_time.hpp"
-#include "io.hpp"
-#include "item.hpp"
-#include "item_potion.hpp"
-#include "line_calc.hpp"
-#include "map.hpp"
-#include "misc.hpp"
-#include "msg_log.hpp"
-#include "property_data.hpp"
-#include "property_handler.hpp"
-#include "terrain.hpp"
-#include "text_format.hpp"
-#include "viewport.hpp"
-#include "ability_values.hpp"
 #include "array2.hpp"
+#include "attack_data.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
 #include "dmg_range.hpp"
+#include "drop.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
+#include "io.hpp"
+#include "item.hpp"
 #include "item_data.hpp"
+#include "item_potion.hpp"
+#include "line_calc.hpp"
+#include "map.hpp"
+#include "misc.hpp"
+#include "msg_log.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
 #include "random.hpp"
 #include "sound.hpp"
 #include "state.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "text_format.hpp"
+#include "viewport.hpp"
 
 namespace throwing
 {

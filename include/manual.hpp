@@ -7,9 +7,9 @@
 #ifndef MANUAL_HPP
 #define MANUAL_HPP
 
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "browser.hpp"
 #include "info_screen_state.hpp"
@@ -17,9 +17,8 @@
 
 struct ManualPage
 {
-        std::string title = "";
-
-        std::vector<std::string> lines = {};
+        std::string title {};
+        std::vector<std::string> lines {};
 };
 
 class BrowseManual : public State

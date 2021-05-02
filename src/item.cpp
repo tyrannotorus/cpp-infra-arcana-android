@@ -4,22 +4,29 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <ostream>
 
-#include "item.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
 #include "common_text.hpp"
+#include "config.hpp"
+#include "debug.hpp"
 #include "explosion.hpp"
 #include "game.hpp"
 #include "game_over.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
 #include "item_curse.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
@@ -28,25 +35,18 @@
 #include "player_bon.hpp"
 #include "pos.hpp"
 #include "property.hpp"
+#include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
-#include "saving.hpp"
-#include "terrain.hpp"
-#include "terrain_mob.hpp"
-#include "text_format.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "audio_data.hpp"
-#include "config.hpp"
-#include "debug.hpp"
-#include "inventory.hpp"
-#include "property_data.hpp"
 #include "random.hpp"
+#include "saving.hpp"
 #include "sound.hpp"
 #include "state.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_mob.hpp"
+#include "text_format.hpp"
 
 struct ItemAttProp;
 

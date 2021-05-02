@@ -7,10 +7,10 @@
 #include "map_builder.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <ostream>
 #include <ratio>
-#include <stddef.h>
 
 #ifndef NDEBUG
 #include <chrono>

@@ -8,9 +8,9 @@
 #define PLAYER_SPELLS_HPP
 
 #include "browser.hpp"
+#include "global.hpp"
 #include "spells.hpp"
 #include "state.hpp"
-#include "global.hpp"
 
 namespace player_spells
 {

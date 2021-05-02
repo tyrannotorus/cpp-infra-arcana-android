@@ -6,16 +6,19 @@
 
 #include "map_travel.hpp"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "actor_player.hpp"
+#include "debug.hpp"
 #include "draw_map.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
+#include "insanity.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "map_builder.hpp"
@@ -23,14 +26,11 @@
 #include "minimap.hpp"
 #include "msg_log.hpp"
 #include "property.hpp"
+#include "property_data.hpp"
 #include "property_handler.hpp"
+#include "random.hpp"
 #include "saving.hpp"
 #include "viewport.hpp"
-#include "debug.hpp"
-#include "global.hpp"
-#include "insanity.hpp"
-#include "property_data.hpp"
-#include "random.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

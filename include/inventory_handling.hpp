@@ -7,17 +7,18 @@
 #ifndef INVENTORY_HANDLING_HPP
 #define INVENTORY_HANDLING_HPP
 
-#include <stddef.h>
+#include <cstddef>
 #include <utility>
 #include <vector>
 
 #include "browser.hpp"
+#include "global.hpp"
 #include "inventory.hpp"
 #include "state.hpp"
-#include "global.hpp"
 
 class Color;
-namespace item {
+namespace item
+{
 class Item;
 }  // namespace item
 struct P;

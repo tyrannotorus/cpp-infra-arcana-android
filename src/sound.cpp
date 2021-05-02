@@ -10,17 +10,17 @@
 #include <utility>
 #include <vector>
 
+#include "actor.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
-#include "flood.hpp"
-#include "game_time.hpp"
-#include "map.hpp"
-#include "map_parsing.hpp"
-#include "actor.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "flood.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
+#include "map.hpp"
+#include "map_parsing.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 

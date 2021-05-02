@@ -6,27 +6,27 @@
 
 #include "map_parsing.hpp"
 
-#include <stddef.h>
 #include <algorithm>
 #include <climits>
+#include <cstddef>
 #include <iterator>
 
-#include "flood.hpp"
-#include "game_time.hpp"
-#include "init.hpp"
-#include "map.hpp"
-#include "misc.hpp"
-#include "terrain.hpp"
 #include "actor.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "flood.hpp"
+#include "game_time.hpp"
 #include "gfx.hpp"
+#include "init.hpp"
+#include "map.hpp"
+#include "misc.hpp"
 #include "panel.hpp"
 #include "random.hpp"
 #include "rect.hpp"
 #include "state.hpp"
+#include "terrain.hpp"
 
 #ifndef NDEBUG
 #include "io.hpp"
@@ -343,15 +343,13 @@ bool IsAnyOfTerrains::parse_terrain(
 {
         (void)pos;
 
-        for (auto search_id : m_terrains)
-        {
-                if (search_id == t.id())
-                {
-                        return true;
-                }
-        }
-
-        return false;
+        return (
+                std::any_of(
+                        std::cbegin(m_terrains),
+                        std::cend(m_terrains),
+                        [&t](const auto search_id) {
+                                return search_id == t.id();
+                        }));
 }
 
 bool AnyAdjIsAnyOfTerrains::parse_terrain(

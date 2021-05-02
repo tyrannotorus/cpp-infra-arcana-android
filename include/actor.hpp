@@ -10,18 +10,19 @@
 #include <string>
 #include <vector>
 
+#include "ability_values.hpp"
 #include "actor_data.hpp"
+#include "colors.hpp"
+#include "direction.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
+#include "pos.hpp"
 #include "property_handler.hpp"
 #include "spells.hpp"
-#include "ability_values.hpp"
-#include "colors.hpp"
-#include "direction.hpp"
-#include "pos.hpp"
 
-template <typename T> class Array2;
+template <typename T>
+class Array2;
 
 namespace actor
 {

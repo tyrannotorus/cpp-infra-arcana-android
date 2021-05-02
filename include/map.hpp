@@ -7,16 +7,17 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
-#include "colors.hpp"
-#include "pos.hpp"
 #include "array2.hpp"
+#include "colors.hpp"
 #include "global.hpp"
+#include "pos.hpp"
 #include "rect.hpp"
 
-namespace smell {
+namespace smell
+{
 struct Smell;
 }  // namespace smell
 struct LosResult;

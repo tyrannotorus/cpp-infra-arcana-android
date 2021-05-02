@@ -11,13 +11,14 @@
 #include <vector>
 
 #include "actor_data.hpp"
-#include "spells.hpp"
-#include "terrain.hpp"
 #include "colors.hpp"
 #include "global.hpp"
+#include "spells.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 
-namespace actor {
+namespace actor
+{
 class Actor;
 }  // namespace actor
 struct P;
@@ -53,8 +54,8 @@ private:
         Color color_default() const override;
 
         void on_hit(
-                const DmgType dmg_type,
-                actor::Actor* const actor,
+                DmgType dmg_type,
+                actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 

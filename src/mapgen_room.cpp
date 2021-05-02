@@ -6,18 +6,18 @@
 
 #include <ostream>
 
-#include "mapgen.hpp"
-#include "debug.hpp"
-#include "room.hpp"
-#include "terrain.hpp"
-#include "terrain_door.hpp"
 #include "array2.hpp"
+#include "debug.hpp"
 #include "global.hpp"
 #include "map.hpp"
 #include "map_templates.hpp"
+#include "mapgen.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "room.hpp"
+#include "terrain.hpp"
+#include "terrain_door.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -169,7 +169,9 @@ static Room* make_template_room(const RoomTempl& templ, Region& region)
         const P dims(templ.symbols.dims());
 
         // Random position inside the region
-        const P p0(region.r.p0.x + rnd::range(0, region.r.w() - dims.x), region.r.p0.y + rnd::range(0, region.r.h() - dims.y));
+        const P p0(
+                region.r.p0.x + rnd::range(0, region.r.w() - dims.x),
+                region.r.p0.y + rnd::range(0, region.r.h() - dims.y));
 
         const P p1(p0.x + dims.x - 1, p0.y + dims.y - 1);
 

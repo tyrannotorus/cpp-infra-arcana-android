@@ -9,12 +9,12 @@
 #include <algorithm>
 #include <string>
 
+#include "SDL_keycode.h"
 #include "config.hpp"
 #include "game_commands.hpp"
 #include "io.hpp"
-#include "pos.hpp"
-#include "SDL_keycode.h"
 #include "panel.hpp"
+#include "pos.hpp"
 #include "random.hpp"
 
 // -----------------------------------------------------------------------------

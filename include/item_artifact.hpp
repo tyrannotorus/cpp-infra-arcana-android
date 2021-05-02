@@ -9,11 +9,11 @@
 
 #include <string>
 
+#include "global.hpp"
 #include "item.hpp"
 #include "item_curse_ids.hpp"
-#include "sound.hpp"
-#include "global.hpp"
 #include "random.hpp"
+#include "sound.hpp"
 
 class DmgRange;
 

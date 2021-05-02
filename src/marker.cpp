@@ -6,23 +6,32 @@
 
 #include "marker.hpp"
 
-#include <cstring>
-#include <utility>
-#include <vector>
 #include <algorithm>
 #include <climits>
+#include <cstring>
 #include <iterator>
+#include <utility>
+#include <vector>
 
+#include "SDL_keycode.h"
+#include "ability_values.hpp"
+#include "actor.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "attack.hpp"
 #include "attack_data.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
 #include "config.hpp"
+#include "debug.hpp"
 #include "draw_map.hpp"
 #include "explosion.hpp"
 #include "game_commands.hpp"
+#include "gfx.hpp"
+#include "inventory.hpp"
 #include "io.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "line_calc.hpp"
 #include "look.hpp"
@@ -30,27 +39,18 @@
 #include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "panel.hpp"
 #include "popup.hpp"
 #include "query.hpp"
+#include "rect.hpp"
+#include "spells.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
+#include "terrain_data.hpp"
 #include "terrain_door.hpp"
 #include "text_format.hpp"
 #include "throwing.hpp"
 #include "viewport.hpp"
-#include "SDL_keycode.h"
-#include "ability_values.hpp"
-#include "actor.hpp"
-#include "colors.hpp"
-#include "debug.hpp"
-#include "gfx.hpp"
-#include "inventory.hpp"
-#include "item.hpp"
-#include "item_data.hpp"
-#include "panel.hpp"
-#include "rect.hpp"
-#include "spells.hpp"
-#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -464,7 +464,7 @@ void MarkerState::try_go_to_closest_enemy()
 
         seen_foes_positions.reserve(seen_foes.size());
 
-        for (const auto actor : seen_foes)
+        for (const auto* const actor : seen_foes)
         {
                 seen_foes_positions.push_back(actor->m_pos);
         }
@@ -1683,7 +1683,7 @@ CtrlObjActionPtr CtrlObj::query_control() const
         }
 
         menu_keys.push_back(0);
-        menu_labels.push_back("(space, esc) Choose another position");
+        menu_labels.emplace_back("(space, esc) Choose another position");
 
         int choice = 0;
 

@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-typedef std::unordered_map<std::string, audio::SfxId> StrToSfxIdMap;
+using StrToSfxIdMap = std::unordered_map<std::string, audio::SfxId>;
 
 static const StrToSfxIdMap s_str_to_sfx_id_map = {
         {"dog_snarl", audio::SfxId::dog_snarl},

@@ -4,32 +4,32 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <vector>
 
-#include "item_artifact.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
+#include "debug.hpp"
+#include "dmg_range.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
+#include "item_artifact.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
+#include "property_handler.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "audio_data.hpp"
-#include "colors.hpp"
-#include "debug.hpp"
-#include "dmg_range.hpp"
-#include "property_handler.hpp"
 
 // -----------------------------------------------------------------------------
 // item

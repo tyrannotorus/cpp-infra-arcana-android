@@ -9,12 +9,12 @@
 #include <algorithm>
 #include <iterator>
 
-#include "audio.hpp"
-#include "global.hpp"
-#include "io.hpp"
 #include "SDL_keycode.h"
+#include "audio.hpp"
 #include "audio_data.hpp"
 #include "debug.hpp"
+#include "global.hpp"
+#include "io.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

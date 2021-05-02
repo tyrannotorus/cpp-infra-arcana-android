@@ -6,24 +6,24 @@
 
 #include "ability_values.hpp"
 
-#include <cmath>
-#include <unordered_map>
 #include <algorithm>
+#include <cmath>
 #include <string>
+#include <unordered_map>
 
-#include "debug.hpp"
-#include "player_bon.hpp"
-#include "property_handler.hpp"
 #include "actor.hpp"
+#include "debug.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "player_bon.hpp"
+#include "property_handler.hpp"
 #include "random.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-typedef std::unordered_map<std::string, AbilityId> StrToAbilityIdMap;
+using StrToAbilityIdMap = std::unordered_map<std::string, AbilityId>;
 
 static const StrToAbilityIdMap s_str_to_ability_id_map = {
         {"melee", AbilityId::melee},
@@ -34,6 +34,7 @@ static const StrToAbilityIdMap s_str_to_ability_id_map = {
 };
 
 using AbilityIdToStrMap = std::unordered_map<AbilityId, std::string>;
+
 static const AbilityIdToStrMap s_ability_id_to_str_map = {
         {AbilityId::melee, "melee"},
         {AbilityId::ranged, "ranged"},

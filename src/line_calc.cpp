@@ -6,9 +6,9 @@
 
 #include "line_calc.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
-#include <algorithm>
 
 #include "global.hpp"
 #include "map.hpp"

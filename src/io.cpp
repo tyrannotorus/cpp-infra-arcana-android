@@ -7,8 +7,8 @@
 #include "io.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <ostream>
-#include <stddef.h>
 
 #include "SDL.h"
 #include "SDL_error.h"
@@ -101,26 +101,27 @@ static bool should_put_contour_at(
         // Draw a contour here if it has a neighbour with different color than
         // the background or contour color (i.e. if it has a neighbour with a
         // color that will be drawn to the screen)
-        for (const auto& d : dir_utils::g_dir_list)
-        {
+        auto pred = [&](const auto d) {
                 const auto adj_p = surface_px_pos + d;
 
                 if (!surface_px_rect.is_pos_inside(adj_p))
                 {
-                        continue;
+                        return false;
                 }
 
                 const auto adj_color = io::read_px_on_surface(surface, adj_p);
 
-                if ((adj_color == bg_color) || (adj_color == contour_color))
-                {
-                        continue;
-                }
+                const bool is_bg_color = (adj_color == bg_color);
+                const bool is_contour_color = (adj_color == contour_color);
 
-                return true;
-        }
+                return !is_bg_color && !is_contour_color;
+        };
 
-        return false;
+        return (
+                std::any_of(
+                        std::cbegin(dir_utils::g_dir_list),
+                        std::cend(dir_utils::g_dir_list),
+                        pred));
 }
 
 static void draw_black_contour_for_surface(

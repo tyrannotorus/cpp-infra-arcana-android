@@ -35,7 +35,7 @@ extern const std::vector<P> g_dir_list_w_center;
 
 Dir dir(const P& offset_values);
 
-Dir reversed_dir(const Dir dir);
+Dir reversed_dir(Dir dir);
 
 P offset(Dir dir);
 

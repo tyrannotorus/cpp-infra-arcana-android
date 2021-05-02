@@ -13,18 +13,18 @@
 #include <utility>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "debug.hpp"
 #include "game.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
+#include "player_bon.hpp"
 #include "property.hpp"
 #include "property_factory.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
-#include "actor_data.hpp"
-#include "debug.hpp"
-#include "player_bon.hpp"
 
 // -----------------------------------------------------------------------------
 // Property handler
@@ -677,15 +677,13 @@ bool PropHandler::has_temporary_negative_prop_mon() const
 {
         ASSERT(m_owner != map::g_player);
 
-        for (const auto& prop : m_props)
-        {
-                if (is_temporary_negative_prop(*prop))
-                {
-                        return true;
-                }
-        }
-
-        return false;
+        return (
+                std::any_of(
+                        std::begin(m_props),
+                        std::cend(m_props),
+                        [this](const auto& prop) {
+                                return is_temporary_negative_prop(*prop);
+                        }));
 }
 
 std::vector<ColoredString> PropHandler::property_names_short() const

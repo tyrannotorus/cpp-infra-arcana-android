@@ -7,23 +7,23 @@
 #ifndef ITEM_DATA_HPP
 #define ITEM_DATA_HPP
 
-#include <stddef.h>
+#include <algorithm>
+#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
-#include <algorithm>
 
 #include "ability_values.hpp"
+#include "audio_data.hpp"
+#include "colors.hpp"
 #include "dmg_range.hpp"
+#include "gfx.hpp"
+#include "global.hpp"
 #include "item_att_property.hpp"
+#include "random.hpp"
 #include "room.hpp"
 #include "spells.hpp"
 #include "terrain_data.hpp"
-#include "audio_data.hpp"
-#include "colors.hpp"
-#include "gfx.hpp"
-#include "global.hpp"
-#include "random.hpp"
 
 enum class SndVol;
 
@@ -263,15 +263,14 @@ struct ItemName
 
 struct ItemAttMsgs
 {
-        ItemAttMsgs() :
-                player(""),
-                other("") {}
+        ItemAttMsgs() = default;
 
         ItemAttMsgs(std::string player_, std::string other_) :
                 player(std::move(player_)),
                 other(std::move(other_)) {}
 
-        std::string player, other;
+        std::string player {};
+        std::string other {};
 };
 
 struct ContainerSpawnRule

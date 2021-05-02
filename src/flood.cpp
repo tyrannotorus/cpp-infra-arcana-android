@@ -6,7 +6,7 @@
 
 #include "flood.hpp"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "direction.hpp"

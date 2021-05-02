@@ -7,9 +7,9 @@
 #include <memory>
 #include <string>
 
-#include "init.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "init.hpp"
 #include "main_menu.hpp"
 #include "random.hpp"
 #include "state.hpp"

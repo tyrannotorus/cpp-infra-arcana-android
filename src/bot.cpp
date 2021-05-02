@@ -7,8 +7,8 @@
 #include "bot.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <ostream>
-#include <stddef.h>
 #include <string>
 #include <vector>
 

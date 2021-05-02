@@ -7,19 +7,19 @@
 #include <ostream>
 #include <vector>
 
-#include "mapgen.hpp"
+#include "array2.hpp"
 #include "debug.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
-#include "terrain.hpp"
-#include "terrain_event.hpp"
-#include "array2.hpp"
-#include "global.hpp"
+#include "mapgen.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
 #include "room.hpp"
+#include "terrain.hpp"
+#include "terrain_event.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

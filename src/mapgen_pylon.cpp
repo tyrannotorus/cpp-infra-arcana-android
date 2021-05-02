@@ -7,18 +7,18 @@
 #include <algorithm>
 #include <vector>
 
-#include "mapgen.hpp"
 #include "actor.hpp"
 #include "actor_player.hpp"
-#include "game_time.hpp"
-#include "map_parsing.hpp"
-#include "misc.hpp"
-#include "terrain_pylon.hpp"
 #include "array2.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
+#include "mapgen.hpp"
+#include "misc.hpp"
 #include "pos.hpp"
 #include "random.hpp"
+#include "terrain_pylon.hpp"
 
 namespace mapgen
 {

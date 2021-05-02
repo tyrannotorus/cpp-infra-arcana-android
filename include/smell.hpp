@@ -32,7 +32,7 @@ void load();
 
 void on_std_turn();
 
-void put_smell_for_mon(const actor::Actor& actor);
+void put_smell_for_mon(const actor::Actor& mon);
 
 void on_player_turn_start();
 

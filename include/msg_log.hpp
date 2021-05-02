@@ -7,7 +7,7 @@
 #ifndef MSG_LOG_HPP
 #define MSG_LOG_HPP
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
@@ -88,8 +88,8 @@ public:
         }
 
 private:
-        std::string m_text {""};
-        std::string m_repeats_str {""};
+        std::string m_text {};
+        std::string m_repeats_str {};
         Color m_color {colors::white()};
         int m_nr_repeats {1};
         int m_x_pos {0};

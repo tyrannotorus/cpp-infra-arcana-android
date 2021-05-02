@@ -9,19 +9,19 @@
 #include <string>
 
 #include "actor_player.hpp"
-#include "common_text.hpp"
-#include "map.hpp"
-#include "msg_log.hpp"
-#include "query.hpp"
-#include "terrain_door.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
+#include "common_text.hpp"
 #include "direction.hpp"
 #include "inventory.hpp"
 #include "item_data.hpp"
+#include "map.hpp"
+#include "msg_log.hpp"
 #include "pos.hpp"
+#include "query.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

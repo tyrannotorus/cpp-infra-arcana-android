@@ -3,23 +3,23 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <vector>
 
-#include "mapgen.hpp"
+#include "array2.hpp"
 #include "bsp.hpp"
 #include "debug.hpp"
-#include "map_parsing.hpp"
-#include "terrain.hpp"
-#include "array2.hpp"
 #include "global.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
+#include "mapgen.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
 #include "room.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------

@@ -7,9 +7,9 @@
 #include "explosion.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <optional>
-#include <stddef.h>
 #include <string>
 
 #include "actor.hpp"

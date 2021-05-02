@@ -6,20 +6,26 @@
 
 #include "actor_player.hpp"
 
-#include <stddef.h>
-#include <cmath>
-#include <string>
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <ostream>
+#include <string>
 #include <vector>
 
+#include "ability_values.hpp"
+#include "actor_data.hpp"
 #include "actor_death.hpp"
 #include "actor_mon.hpp"
 #include "actor_move.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
 #include "attack.hpp"
 #include "audio.hpp"
+#include "audio_data.hpp"
 #include "common_text.hpp"
+#include "config.hpp"
+#include "debug.hpp"
 #include "fov.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
@@ -27,6 +33,7 @@
 #include "insanity.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "item_data.hpp"
 #include "item_device.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
@@ -37,21 +44,14 @@
 #include "player_bon.hpp"
 #include "player_spells.hpp"
 #include "popup.hpp"
+#include "pos.hpp"
 #include "property.hpp"
+#include "property_data.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
-#include "saving.hpp"
-#include "ability_values.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "audio_data.hpp"
-#include "config.hpp"
-#include "debug.hpp"
-#include "item_data.hpp"
-#include "pos.hpp"
-#include "property_data.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "saving.hpp"
 #include "sound.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
@@ -685,7 +685,7 @@ void Player::update_tmp_shock()
 
                         const auto* const t = map::g_terrain.at(p);
 
-                        const int terrain_shock = (double)t->shock_when_adj();
+                        const int terrain_shock = t->shock_when_adj();
 
                         increased_tmp_shock +=
                                 shock_taken_after_mods(

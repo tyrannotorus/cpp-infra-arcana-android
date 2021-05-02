@@ -6,29 +6,29 @@
 
 #include "item_scroll.hpp"
 
-#include <stddef.h>
-#include <string>
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <ostream>
+#include <string>
 
+#include "actor.hpp"
 #include "actor_player.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
 #include "game.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
-#include "property_handler.hpp"
-#include "saving.hpp"
-#include "text_format.hpp"
-#include "actor.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
-#include "item_data.hpp"
 #include "property_data.hpp"
+#include "property_handler.hpp"
 #include "random.hpp"
+#include "saving.hpp"
 #include "spells.hpp"
+#include "text_format.hpp"
 
 struct P;
 

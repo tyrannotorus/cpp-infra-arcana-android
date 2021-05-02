@@ -7,13 +7,13 @@
 #ifndef ROOM_HPP
 #define ROOM_HPP
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "global.hpp"
+#include "pos.hpp"
 #include "rect.hpp"
 #include "terrain_data.hpp"
-#include "pos.hpp"
 
 // Room theming occurs both pre- and post-connect (before/after corridors).
 //

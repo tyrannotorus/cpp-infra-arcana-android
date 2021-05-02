@@ -6,35 +6,35 @@
 
 #include "player_spells.hpp"
 
-#include <stddef.h>
 #include <algorithm>
-#include <memory>
-#include <vector>
+#include <cstddef>
 #include <iterator>
+#include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "actor_player.hpp"
+#include "array2.hpp"
 #include "browser.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
 #include "player_bon.hpp"
-#include "property_handler.hpp"
-#include "query.hpp"
-#include "saving.hpp"
-#include "terrain.hpp"
-#include "array2.hpp"
-#include "colors.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
+#include "property_handler.hpp"
+#include "query.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "saving.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
@@ -159,15 +159,13 @@ void load()
 
 bool is_spell_learned(const SpellId id)
 {
-        for (auto* s : s_learned_spells)
-        {
-                if (s->id() == id)
-                {
-                        return true;
-                }
-        }
-
-        return false;
+        return (
+                std::any_of(
+                        std::cbegin(s_learned_spells),
+                        std::cend(s_learned_spells),
+                        [id](const auto* const s) {
+                                return s->id() == id;
+                        }));
 }
 
 void learn_spell(const SpellId id, const Verbose verbose)

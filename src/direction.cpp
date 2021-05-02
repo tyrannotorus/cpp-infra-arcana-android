@@ -6,7 +6,7 @@
 
 #include "direction.hpp"
 
-#include <math.h>
+#include <cmath>
 
 #include "debug.hpp"
 #include "pos.hpp"

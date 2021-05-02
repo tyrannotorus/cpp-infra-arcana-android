@@ -8,11 +8,11 @@
 
 #include <algorithm>
 
+#include "SDL_keycode.h"
 #include "common_text.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
 #include "panel.hpp"
-#include "SDL_keycode.h"
 #include "rect.hpp"
 
 // -----------------------------------------------------------------------------

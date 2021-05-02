@@ -7,17 +7,17 @@
 #include <ostream>
 #include <vector>
 
-#include "mapgen.hpp"
-#include "debug.hpp"
-#include "map.hpp"
-#include "misc.hpp"
-#include "terrain.hpp"
 #include "array2.hpp"
+#include "debug.hpp"
 #include "global.hpp"
+#include "map.hpp"
+#include "mapgen.hpp"
+#include "misc.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
 #include "room.hpp"
+#include "terrain.hpp"
 
 namespace mapgen
 {

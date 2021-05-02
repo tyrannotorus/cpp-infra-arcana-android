@@ -8,13 +8,16 @@
 
 #include <algorithm>
 #include <fstream>
-#include <utility>
-#include <vector>
 #include <iterator>
 #include <memory>
+#include <utility>
+#include <vector>
 
+#include "SDL_keycode.h"
 #include "actor_player.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
+#include "debug.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
@@ -24,11 +27,8 @@
 #include "panel.hpp"
 #include "paths.hpp"
 #include "popup.hpp"
-#include "rect.hpp"
-#include "SDL_keycode.h"
-#include "colors.hpp"
-#include "debug.hpp"
 #include "random.hpp"
+#include "rect.hpp"
 #include "time.hpp"
 
 // -----------------------------------------------------------------------------

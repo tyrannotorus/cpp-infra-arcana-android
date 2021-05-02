@@ -7,7 +7,7 @@
 #ifndef PROPERTY_DATA_HPP
 #define PROPERTY_DATA_HPP
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "random.hpp"

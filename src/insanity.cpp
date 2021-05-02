@@ -6,32 +6,32 @@
 
 #include "insanity.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
 #include "game.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
+#include "player_bon.hpp"
 #include "popup.hpp"
+#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
+#include "random.hpp"
 #include "saving.hpp"
 #include "sound.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "audio_data.hpp"
-#include "debug.hpp"
-#include "player_bon.hpp"
-#include "pos.hpp"
-#include "random.hpp"
 #include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------

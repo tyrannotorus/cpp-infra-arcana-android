@@ -6,29 +6,29 @@
 
 #include "reload.hpp"
 
-#include <stddef.h>
 #include <climits>
+#include <cstddef>
 #include <string>
 #include <vector>
 
+#include "actor.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "audio.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
-#include "text_format.hpp"
-#include "actor.hpp"
-#include "audio_data.hpp"
-#include "debug.hpp"
-#include "global.hpp"
-#include "item_data.hpp"
 #include "random.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

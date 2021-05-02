@@ -7,10 +7,11 @@
 #ifndef ITEM_CURIO_HPP
 #define ITEM_CURIO_HPP
 
-#include "item.hpp"
 #include "global.hpp"
+#include "item.hpp"
 
-namespace actor {
+namespace actor
+{
 class Actor;
 }  // namespace actor
 
@@ -33,7 +34,7 @@ public:
         WitchesEye(ItemData* const item_data) :
                 Item(item_data) {}
 
-        ConsumeItem activate(actor::Actor* actor);
+        ConsumeItem activate(actor::Actor* actor) override;
 
         // TODO: Consider interface color for "Other Curiosities". Should they
         // all share the same color?
@@ -67,7 +68,7 @@ public:
         FluctuatingMaterial(ItemData* const item_data) :
                 Item(item_data) {}
 
-        ConsumeItem activate(actor::Actor* actor);
+        ConsumeItem activate(actor::Actor* actor) override;
 };
 
 // class BatWingSalve : public Item
@@ -85,7 +86,7 @@ public:
         AstralOpium(ItemData* const item_data) :
                 Item(item_data) {}
 
-        ConsumeItem activate(actor::Actor* actor);
+        ConsumeItem activate(actor::Actor* actor) override;
 };
 
 }  // namespace item

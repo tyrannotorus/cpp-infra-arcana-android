@@ -6,31 +6,30 @@
 
 #include "smell.hpp"
 
-#include <stddef.h>
+#include <algorithm>
+#include <cstddef>
 #include <vector>
 
-#include "actor_player.hpp"
-#include "actor_see.hpp"
-#include "direction.hpp"
-#include "map.hpp"
-#include "map_parsing.hpp"
-#include "pos.hpp"
-#include "saving.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
+#include "actor_player.hpp"
+#include "actor_see.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
+#include "direction.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
 #include "item_data.hpp"
+#include "map.hpp"
+#include "map_parsing.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
+#include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
-
-using namespace smell;
+#include "saving.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -40,7 +39,7 @@ static int s_strength_decay_on_spread = 3;
 const static int s_msg_countdown_reset_value = 50;
 static int s_msg_countdown = 0;
 
-static void decay(Smell& smell, const int decay_value)
+static void decay(smell::Smell& smell, const int decay_value)
 {
         smell.strength_pct -= decay_value;
 
@@ -127,15 +126,12 @@ static bool is_seeing_mon_with_smell_msg()
 {
         const auto seen_actors = actor::seen_actors(*map::g_player);
 
-        for (auto* const actor : seen_actors)
-        {
-                const auto mon_smell_msg = actor->m_data->smell_msg;
-
-                if (!mon_smell_msg.empty())
-                {
-                        return true;
-                }
-        }
+        std::any_of(
+                std::cbegin(seen_actors),
+                std::cend(seen_actors),
+                [](const auto* const actor) {
+                        return !actor->m_data->smell_msg.empty();
+                });
 
         return false;
 }

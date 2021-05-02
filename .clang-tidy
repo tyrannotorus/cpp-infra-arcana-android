@@ -3,12 +3,11 @@ Checks: >
     clang-analyzer-*,
     *,
 
-
-
-    -modernize-use-nodiscard,
-
-
+    -abseil-string-find-str-contains,
     -bugprone-branch-clone,
+    -bugprone-reserved-identifier,
+    -cert-dcl37-c,
+    -cert-dcl51-cpp,
     -cert-dcl58-cpp,
     -cert-err58-cpp,
     -cert-flp30-c,
@@ -51,6 +50,7 @@ Checks: >
     -hicpp-explicit-conversions,
     -hicpp-function-size,
     -hicpp-member-init,
+    -hicpp-multiway-paths-covered,
     -hicpp-no-array-decay,
     -hicpp-no-malloc,
     -hicpp-noexcept-move,
@@ -63,11 +63,16 @@ Checks: >
     -llvm-else-after-return,
     -llvm-qualified-auto,
     -llvmlibc-callee-namespace,
+    -llvmlibc-implementation-in-namespace,
+    -llvmlibc-restrict-system-libc-headers,
+    -misc-no-recursion,
     -misc-non-private-member-variables-in-classes,
     -modernize-avoid-c-arrays,
     -modernize-loop-convert,
     -modernize-use-default-member-init,
+    -modernize-use-nodiscard,
     -modernize-use-trailing-return-type,
+    -performance-inefficient-string-concatenation,
     -performance-noexcept-move-constructor,
     -readability-braces-around-statements,
     -readability-convert-member-functions-to-static,
@@ -265,16 +270,12 @@ CheckOptions:
     value:           CamelCase
   - key:             modernize-make-shared.IgnoreMacros
     value:           '1'
-  - key:             modernize-make-shared.IncludeStyle
-    value:           '0'
   - key:             modernize-make-shared.MakeSmartPtrFunction
     value:           'std::make_shared'
   - key:             modernize-make-shared.MakeSmartPtrFunctionHeader
     value:           memory
   - key:             modernize-make-unique.IgnoreMacros
     value:           '1'
-  - key:             modernize-make-unique.IncludeStyle
-    value:           '0'
   - key:             modernize-make-unique.MakeSmartPtrFunction
     value:           'std::make_unique'
   - key:             modernize-make-unique.MakeSmartPtrFunctionHeader

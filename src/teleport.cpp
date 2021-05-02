@@ -6,36 +6,33 @@
 
 #include "teleport.hpp"
 
-#include <stddef.h>
-#include <memory>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
 #include "common_text.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "flood.hpp"
+#include "fov.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "marker.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
-#include "property.hpp"
-#include "terrain_door.hpp"
-#include "text_format.hpp"
-#include "viewport.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
-#include "fov.hpp"
 #include "pos.hpp"
+#include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
@@ -43,6 +40,9 @@
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
+#include "text_format.hpp"
+#include "viewport.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

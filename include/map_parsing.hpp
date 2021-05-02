@@ -11,8 +11,8 @@
 #include <vector>
 
 #include "pos.hpp"
-#include "terrain_data.hpp"
 #include "terrain.hpp"
+#include "terrain_data.hpp"
 
 struct Range;
 

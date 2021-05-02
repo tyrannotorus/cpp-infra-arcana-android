@@ -10,14 +10,14 @@
 #include <string>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
 #include "create_character.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "property.hpp"
-#include "property_factory.hpp"
-#include "actor_data.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "state.hpp"

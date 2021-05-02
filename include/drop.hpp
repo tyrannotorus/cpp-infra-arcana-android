@@ -7,7 +7,7 @@
 #ifndef DROP_HPP
 #define DROP_HPP
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "global.hpp"
 

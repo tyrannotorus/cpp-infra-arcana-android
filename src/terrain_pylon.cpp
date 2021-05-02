@@ -9,17 +9,17 @@
 #include <ostream>
 
 #include "actor.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "game_time.hpp"
 #include "knockback.hpp"
 #include "misc.hpp"
 #include "property.hpp"
-#include "property_factory.hpp"
-#include "random.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "random.hpp"
 
 namespace terrain
 {

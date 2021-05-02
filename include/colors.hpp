@@ -7,7 +7,7 @@
 #ifndef COLORS_HPP
 #define COLORS_HPP
 
-#include <stdint.h>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <utility>

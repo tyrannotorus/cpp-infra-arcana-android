@@ -6,15 +6,15 @@
 
 #include "misc.hpp"
 
-#include <stdlib.h>
+#include <algorithm>
 #include <climits>
+#include <cstdlib>
 #include <sstream>
 #include <string>
-#include <algorithm>
 
 #include "array2.hpp"
-#include "rect.hpp"
 #include "pos.hpp"
+#include "rect.hpp"
 
 std::vector<P> to_vec(
         const Array2<bool>& a,

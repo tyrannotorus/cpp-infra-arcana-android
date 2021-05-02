@@ -8,8 +8,10 @@
 
 #include <memory>
 
+#include "actor_data.hpp"
 #include "audio.hpp"
 #include "bot.hpp"
+#include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
 #include "draw_map.hpp"
@@ -20,6 +22,7 @@
 #include "insanity.hpp"
 #include "io.hpp"
 #include "item_curse.hpp"
+#include "item_data.hpp"
 #include "item_potion.hpp"
 #include "item_rod.hpp"
 #include "item_scroll.hpp"
@@ -31,14 +34,11 @@
 #include "panel.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
+#include "pos.hpp"
 #include "property_data.hpp"
 #include "query.hpp"
 #include "saving.hpp"
 #include "smell.hpp"
-#include "actor_data.hpp"
-#include "colors.hpp"
-#include "item_data.hpp"
-#include "pos.hpp"
 #include "terrain_data.hpp"
 
 namespace init

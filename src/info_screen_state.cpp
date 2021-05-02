@@ -6,13 +6,13 @@
 
 #include "info_screen_state.hpp"
 
+#include "colors.hpp"
 #include "common_text.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
-#include "colors.hpp"
 
 void InfoScreenState::draw_interface() const
 {

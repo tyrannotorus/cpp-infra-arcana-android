@@ -12,12 +12,12 @@
 #include <vector>
 
 #include "array2.hpp"
+#include "direction.hpp"
 #include "global.hpp"
 #include "io.hpp"
+#include "pos.hpp"
 #include "random.hpp"
 #include "state.hpp"
-#include "direction.hpp"
-#include "pos.hpp"
 
 enum class SpellSkill;
 
@@ -274,12 +274,12 @@ public:
 
         virtual bool can_control(
                 const terrain::Terrain& terrain,
-                const SpellSkill skill) const = 0;
+                SpellSkill skill) const = 0;
 
         virtual DidAction run(
                 terrain::Terrain& terrain,
                 const P& marker_pos,
-                const SpellSkill skill) const = 0;
+                SpellSkill skill) const = 0;
 
         virtual std::string menu_label(
                 const terrain::Terrain& terrain) const = 0;
@@ -292,12 +292,12 @@ class CtrlObjOpen : public CtrlObjAction
 public:
         bool can_control(
                 const terrain::Terrain& terrain,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         DidAction run(
                 terrain::Terrain& terrain,
                 const P& marker_pos,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
 
@@ -309,12 +309,12 @@ class CtrlObjCloseDoor : public CtrlObjAction
 public:
         bool can_control(
                 const terrain::Terrain& terrain,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         DidAction run(
                 terrain::Terrain& terrain,
                 const P& marker_pos,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
 
@@ -326,12 +326,12 @@ class CtrlObjJamDoor : public CtrlObjAction
 public:
         bool can_control(
                 const terrain::Terrain& terrain,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         DidAction run(
                 terrain::Terrain& terrain,
                 const P& marker_pos,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
 
@@ -343,12 +343,12 @@ class CtrlObjToggleLever : public CtrlObjAction
 public:
         bool can_control(
                 const terrain::Terrain& terrain,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         DidAction run(
                 terrain::Terrain& terrain,
                 const P& marker_pos,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
 
@@ -360,19 +360,19 @@ class CtrlObjStrike : public CtrlObjAction
 public:
         bool can_control(
                 const terrain::Terrain& terrain,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         DidAction run(
                 terrain::Terrain& terrain,
                 const P& marker_pos,
-                const SpellSkill skill) const override;
+                SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
 
         char menu_key() const override;
 };
 
-typedef std::shared_ptr<CtrlObjAction> CtrlObjActionPtr;
+using CtrlObjActionPtr = std::shared_ptr<CtrlObjAction>;
 
 class CtrlObj : public MarkerState
 {

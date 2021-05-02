@@ -6,25 +6,25 @@
 
 #include "msg_log.hpp"
 
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <ostream>
+#include <string>
+#include <vector>
 
+#include "SDL_keycode.h"
 #include "actor_player.hpp"
+#include "debug.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
 #include "map.hpp"
-#include "query.hpp"
-#include "saving.hpp"
-#include "text_format.hpp"
-#include "SDL_keycode.h"
-#include "debug.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
+#include "query.hpp"
 #include "rect.hpp"
+#include "saving.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

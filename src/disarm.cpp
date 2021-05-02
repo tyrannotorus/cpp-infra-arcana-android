@@ -8,24 +8,24 @@
 
 #include <string>
 
+#include "actor.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
+#include "direction.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
-#include "query.hpp"
-#include "terrain_trap.hpp"
-#include "actor.hpp"
-#include "array2.hpp"
-#include "colors.hpp"
-#include "direction.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
+#include "query.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_trap.hpp"
 
 namespace disarm
 {

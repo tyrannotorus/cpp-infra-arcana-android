@@ -7,8 +7,8 @@
 #ifndef PROPERTY_HPP
 #define PROPERTY_HPP
 
-#include <string>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "ability_values.hpp"
@@ -16,7 +16,8 @@
 #include "global.hpp"
 #include "property_data.hpp"
 
-namespace actor {
+namespace actor
+{
 class Actor;
 }  // namespace actor
 
@@ -100,7 +101,7 @@ public:
                 return m_nr_turns_left;
         }
 
-        void set_duration(const int nr_turns);
+        void set_duration(int nr_turns);
 
         void set_indefinite()
         {
@@ -784,7 +785,7 @@ public:
                 ++m_nr_spikes;
         }
 
-        int ability_mod(const AbilityId ability) const override;
+        int ability_mod(AbilityId ability) const override;
 
         bool is_finished() const override
         {

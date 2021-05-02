@@ -7,9 +7,9 @@
 #ifndef SPELLS_HPP
 #define SPELLS_HPP
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "player_bon.hpp"
 #include "random.hpp"
@@ -111,11 +111,11 @@ std::string skill_to_str(SpellSkill skill);
 
 terrain::DidOpen run_opening_spell_effect_at(
         const P& pos,
-        const SpellSkill skill);
+        SpellSkill skill);
 
 terrain::DidClose run_close_spell_effect_at(
         const P& pos,
-        const SpellSkill skill);
+        SpellSkill skill);
 
 }  // namespace spells
 
@@ -857,7 +857,7 @@ private:
                 return 4;
         }
 
-        int max_dist(const SpellSkill skill) const;
+        int max_dist(SpellSkill skill) const;
 
         bool is_noisy(SpellSkill skill) const override;
 };

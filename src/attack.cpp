@@ -7,10 +7,10 @@
 #include "attack.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <ostream>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
@@ -92,7 +92,7 @@ struct Projectile
                         << " - OBSTRUCTED AT IDX: "
                         << p.obstructed_in_path_idx;
 
-                const auto live_str =
+                const std::string live_str =
                         p.is_dead
                         ? " - DEAD"
                         : " - LIVE";
@@ -1292,15 +1292,13 @@ static ProjectileFireData init_projectiles_fire_data(
 static bool is_all_projectiles_dead(
         const std::vector<Projectile>& projectiles)
 {
-        for (const auto& projectile : projectiles)
-        {
-                if (!projectile.is_dead)
-                {
-                        return false;
-                }
-        }
-
-        return true;
+        return (
+                std::all_of(
+                        std::cbegin(projectiles),
+                        std::cend(projectiles),
+                        [](const auto& projectile) {
+                                return projectile.is_dead;
+                        }));
 }
 
 static void run_projectile_hits(ProjectileFireData& fire_data)
@@ -1657,15 +1655,13 @@ static void draw_projectiles(ProjectileFireData& fire_data)
 
 static bool is_any_projectile_seen(const std::vector<Projectile>& projectiles)
 {
-        for (const auto& projectile : projectiles)
-        {
-                if (projectile.is_seen_by_player)
-                {
-                        return true;
-                }
-        }
-
-        return false;
+        return (
+                std::any_of(
+                        std::cbegin(projectiles),
+                        std::cend(projectiles),
+                        [](const auto& projectile) {
+                                return projectile.is_seen_by_player;
+                        }));
 }
 
 static ProjectileFireData fire_projectiles(

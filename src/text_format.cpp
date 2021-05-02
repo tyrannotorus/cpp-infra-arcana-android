@@ -7,7 +7,7 @@
 #include "text_format.hpp"
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
 #include <ext/alloc_traits.h>
 #include <iterator>
 #include <memory>

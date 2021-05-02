@@ -6,8 +6,8 @@
 
 #include "actor_factory.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 
 #include "actor.hpp"
@@ -15,19 +15,19 @@
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "misc.hpp"
-#include "terrain.hpp"
-#include "terrain_door.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

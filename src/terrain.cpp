@@ -7,11 +7,11 @@
 #include "terrain.hpp"
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <ostream>
-#include <stddef.h>
-#include <stdint.h>
 #include <string>
 
 #include "actor.hpp"
@@ -1229,7 +1229,7 @@ void Statue::on_hit(
 
 void Statue::bump(actor::Actor& actor_bumping)
 {
-        if ((m_inscr != "") && actor_bumping.is_player())
+        if (!m_inscr.empty() && actor_bumping.is_player())
         {
                 msg_log::add(m_inscr);
         }
@@ -1254,7 +1254,7 @@ std::string Statue::name(const Article article) const
                 break;
         }
 
-        if (m_inscr != "")
+        if (!m_inscr.empty())
         {
                 ret += " (\"" + m_inscr + "\")";
         }
@@ -1434,7 +1434,7 @@ void Stairs::bump(actor::Actor& actor_bumping)
 
 void Stairs::player_use_fake_stairs()
 {
-        const auto msg =
+        const auto* const msg =
                 "As I descend the stairs and observe my surroundings, to my "
                 "great bewilderment I realize that I have stepped out into "
                 "the very same ground from which I started my downward climb! "

@@ -9,17 +9,17 @@
 #include <unordered_map>
 
 #include "colors.hpp"
+#include "debug.hpp"
 #include "item_att_property.hpp"
 #include "property.hpp"
 #include "random.hpp"
 #include "saving.hpp"
 #include "sound.hpp"
-#include "debug.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-typedef std::unordered_map<std::string, item::Id> StrToIdMap;
+using StrToIdMap = std::unordered_map<std::string, item::Id>;
 
 static const StrToIdMap s_str_to_intr_item_id_map = {
         {"kick", item::Id::intr_kick},
@@ -2289,7 +2289,6 @@ RangedData::RangedData() :
         projectile_color(colors::white()),
         projectile_leaves_trail(false),
 
-        snd_msg(""),
         snd_vol(SndVol::low),
         makes_ricochet_snd(false),
         att_sfx(audio::SfxId::END),

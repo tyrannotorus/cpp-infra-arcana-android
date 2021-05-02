@@ -4,47 +4,47 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "map_builder.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "highscore.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
+#include "map_builder.hpp"
 #include "map_controller.hpp"
+#include "player_bon.hpp"
 #include "populate_items.hpp"
 #include "populate_monsters.hpp"
+#include "pos.hpp"
 #include "property.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "room.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
 #include "terrain_event.hpp"
 #include "terrain_gong.hpp"
 #include "terrain_monolith.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
-#include "global.hpp"
-#include "item_data.hpp"
-#include "player_bon.hpp"
-#include "pos.hpp"
-#include "property_handler.hpp"
-#include "random.hpp"
-#include "room.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
 static void put_intro_forest_graves(
-        const std::vector<P> available_positions,
+        const std::vector<P>& available_positions,
         const std::vector<HighscoreEntry>& highscores)
 {
         size_t entry_idx = 0;
@@ -85,7 +85,7 @@ static void put_intro_forest_graves(
 }
 
 static void put_intro_forest_statues(
-        const std::vector<P> available_positions,
+        const std::vector<P>& available_positions,
         const std::vector<HighscoreEntry>& highscores)
 {
         size_t entry_idx = 0;

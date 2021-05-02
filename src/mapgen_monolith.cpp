@@ -4,26 +4,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <vector>
 
-#include "mapgen.hpp"
 #include "actor.hpp"
 #include "actor_player.hpp"
-#include "game_time.hpp"
-#include "map_parsing.hpp"
-#include "misc.hpp"
-#include "terrain_monolith.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
+#include "mapgen.hpp"
+#include "misc.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "terrain_monolith.hpp"
 
 namespace mapgen
 {

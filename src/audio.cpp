@@ -8,10 +8,10 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <ostream>
 #include <ratio>
-#include <stddef.h>
 #include <string>
 #include <type_traits>
 #include <vector>

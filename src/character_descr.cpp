@@ -6,23 +6,23 @@
 
 #include "character_descr.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 
+#include "SDL_keycode.h"
 #include "actor_player.hpp"
 #include "game.hpp"
-#include "io.hpp"
-#include "item.hpp"
-#include "item_factory.hpp"
-#include "map.hpp"
-#include "player_bon.hpp"
-#include "text_format.hpp"
-#include "SDL_keycode.h"
 #include "global.hpp"
 #include "insanity.hpp"
+#include "io.hpp"
+#include "item.hpp"
 #include "item_data.hpp"
+#include "item_factory.hpp"
+#include "map.hpp"
 #include "panel.hpp"
+#include "player_bon.hpp"
 #include "property_handler.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

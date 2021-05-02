@@ -4,40 +4,41 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+#include <algorithm>
 #include <climits>
 #include <cstring>
-#include <vector>
-#include <algorithm>
 #include <iterator>
 #include <ostream>
 #include <utility>
+#include <vector>
 
-#include "init.hpp"
-#include "mapgen.hpp"
-#include "actor_player.hpp"
-#include "flood.hpp"
-#include "game_time.hpp"
-#include "map.hpp"
-#include "map_parsing.hpp"
-#include "misc.hpp"
-#include "pathfind.hpp"
-#include "terrain.hpp"
-#include "terrain_door.hpp"
 #include "actor.hpp"
+#include "actor_player.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "flood.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
+#include "init.hpp"
+#include "map.hpp"
+#include "map_parsing.hpp"
+#include "mapgen.hpp"
+#include "misc.hpp"
 #include "panel.hpp"
+#include "pathfind.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
 #include "room.hpp"
 #include "state.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
 
-namespace item {
+namespace item
+{
 class Item;
 }  // namespace item
 

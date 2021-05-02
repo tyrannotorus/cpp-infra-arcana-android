@@ -9,13 +9,14 @@
 
 #include <string>
 
-#include "terrain.hpp"
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 
-namespace actor {
+namespace actor
+{
 class Actor;
 }  // namespace actor
 struct P;
@@ -132,7 +133,7 @@ public:
         DidOpen open(actor::Actor* actor_opening) override;
         DidClose close(actor::Actor* actor_closing) override;
 
-        void jam(actor::Actor* const actor_jamming);
+        void jam(actor::Actor* actor_jamming);
 
         actor::Actor* actor_currently_opening() const
         {
@@ -171,8 +172,8 @@ private:
                 const P& from_pos,
                 int dmg) override;
 
-        void bash(const DmgType dmg_type, actor::Actor& actor, const int dmg);
-        void player_bash(const DmgType dmg_type, const int dmg);
+        void bash(DmgType dmg_type, actor::Actor& actor, int dmg);
+        void player_bash(DmgType dmg_type, int dmg);
         void mon_bash(actor::Actor& mon);
 
         const Wall* const m_mimic_terrain {nullptr};

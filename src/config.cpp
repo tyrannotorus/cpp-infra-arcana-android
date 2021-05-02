@@ -6,16 +6,17 @@
 
 #include "config.hpp"
 
-#include <ext/alloc_traits.h>
-#include <stddef.h>
-#include <fstream>
 #include <algorithm>
+#include <cstddef>
+#include <ext/alloc_traits.h>
+#include <fstream>
 #include <iterator>
 #include <utility>
 #include <vector>
 
 #include "audio.hpp"
 #include "browser.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
 #include "debug.hpp"
 #include "draw_box.hpp"
@@ -26,10 +27,9 @@
 #include "paths.hpp"
 #include "pos.hpp"
 #include "query.hpp"
+#include "random.hpp"
 #include "rect.hpp"
 #include "terrain_data.hpp"
-#include "colors.hpp"
-#include "random.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

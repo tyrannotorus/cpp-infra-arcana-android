@@ -8,14 +8,14 @@
 
 #include "actor.hpp"
 #include "actor_player.hpp"
+#include "audio.hpp"
+#include "audio_data.hpp"
 #include "common_text.hpp"
 #include "game.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
-#include "property_handler.hpp"
-#include "audio.hpp"
-#include "audio_data.hpp"
 #include "player_bon.hpp"
+#include "property_handler.hpp"
 #include "random.hpp"
 
 struct P;

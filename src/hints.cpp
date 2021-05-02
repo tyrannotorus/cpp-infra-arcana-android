@@ -6,7 +6,7 @@
 
 #include "hints.hpp"
 
-#include <string.h>
+#include <cstring>
 #include <string>
 #include <utility>
 

@@ -6,30 +6,30 @@
 
 #include "player_bon.hpp"
 
-#include <stddef.h>
-#include <functional>
 #include <algorithm>
+#include <cstddef>
+#include <functional>
 #include <iterator>
 #include <memory>
 
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
+#include "colors.hpp"
 #include "create_character.hpp"
+#include "debug.hpp"
 #include "game.hpp"
+#include "global.hpp"
+#include "item_data.hpp"
 #include "map.hpp"
 #include "player_spells.hpp"
 #include "property.hpp"
+#include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "random.hpp"
 #include "saving.hpp"
 #include "spells.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "colors.hpp"
-#include "debug.hpp"
-#include "global.hpp"
-#include "item_data.hpp"
-#include "property_data.hpp"
-#include "random.hpp"
 #include "state.hpp"
 
 // -----------------------------------------------------------------------------

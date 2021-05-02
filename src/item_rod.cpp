@@ -6,13 +6,18 @@
 
 #include "item_rod.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <optional>
 
+#include "actor.hpp"
 #include "actor_hit.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "item_data.hpp"
@@ -21,23 +26,18 @@
 #include "map.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "player_bon.hpp"
+#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
+#include "random.hpp"
+#include "rect.hpp"
 #include "saving.hpp"
+#include "sound.hpp"
 #include "spells.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
-#include "actor.hpp"
-#include "array2.hpp"
-#include "audio_data.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
-#include "player_bon.hpp"
-#include "pos.hpp"
-#include "random.hpp"
-#include "rect.hpp"
-#include "sound.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -6,15 +6,15 @@
 
 #include "panel.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <ostream>
 
-#include "io.hpp"
 #include "debug.hpp"
+#include "io.hpp"
 #include "msg_log.hpp"
-#include "rect.hpp"
 #include "pos.hpp"
+#include "rect.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

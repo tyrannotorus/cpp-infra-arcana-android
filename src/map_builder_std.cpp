@@ -4,36 +4,36 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <ostream>
 #include <vector>
 
-#include "map_builder.hpp"
 #include "actor_player.hpp"
-#include "game_time.hpp"
-#include "map_controller.hpp"
-#include "map_parsing.hpp"
-#include "mapgen.hpp"
-#include "populate_items.hpp"
-#include "populate_monsters.hpp"
-#include "populate_traps.hpp"
-#include "terrain.hpp"
-#include "terrain_door.hpp"
-#include "terrain_event.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
 #include "map.hpp"
+#include "map_builder.hpp"
+#include "map_controller.hpp"
+#include "map_parsing.hpp"
+#include "mapgen.hpp"
 #include "panel.hpp"
+#include "populate_items.hpp"
+#include "populate_monsters.hpp"
+#include "populate_traps.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "room.hpp"
 #include "state.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
+#include "terrain_event.hpp"
 
 // For map generation demo
 #ifndef NDEBUG

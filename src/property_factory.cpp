@@ -6,8 +6,8 @@
 
 #include "property_factory.hpp"
 
-#include "property.hpp"
 #include "debug.hpp"
+#include "property.hpp"
 
 namespace property_factory
 {

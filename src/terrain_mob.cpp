@@ -4,33 +4,33 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <vector>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
+#include "array2.hpp"
+#include "audio_data.hpp"
 #include "explosion.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "item_data.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
-#include "property.hpp"
-#include "property_handler.hpp"
-#include "terrain.hpp"
-#include "terrain_mob.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "audio_data.hpp"
-#include "item_data.hpp"
 #include "pos.hpp"
+#include "property.hpp"
 #include "property_data.hpp"
+#include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"
 #include "sound.hpp"
+#include "terrain.hpp"
+#include "terrain_mob.hpp"
 
 namespace terrain
 {

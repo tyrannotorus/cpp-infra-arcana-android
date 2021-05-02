@@ -7,9 +7,9 @@
 #ifndef RANDOM_HPP
 #define RANDOM_HPP
 
-#include <stddef.h>
-#include <stdint.h>
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <random>
 #include <string>
 #include <vector>
@@ -120,8 +120,7 @@ template <typename T>
 T weighted_choice(const WeightedItems<T>& weighted_items)
 {
         ASSERT(weighted_items.items.size() == weighted_items.weights.size());
-
-        ASSERT(weighted_items.items.size() > 0);
+        ASSERT(!weighted_items.items.empty());
 
         const size_t idx = weighted_choice(weighted_items.weights);
 

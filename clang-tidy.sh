@@ -31,7 +31,7 @@ sources_regex="src/[a-z0-9_]*.cpp"
 
 rm -f clang-tidy-commands.log
 
-for c in $(grep -oE "[^\"]*ia.dir[^\"]*" compile_commands.json); do
+for c in $(grep -oE "[^\"]*ia-debug.dir[^\"]*" compile_commands.json); do
     f=$(echo $c | grep -oE "[^ ]*.cpp$")
 
     # echo "================================================================================"

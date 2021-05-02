@@ -6,16 +6,21 @@
 
 #include "ai.hpp"
 
-#include <ext/alloc_traits.h>
 #include <algorithm>
+#include <ext/alloc_traits.h>
 #include <string>
 
+#include "ability_values.hpp"
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_mon.hpp"
 #include "actor_move.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "actor_sneak.hpp"
+#include "array2.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
 #include "line_calc.hpp"
@@ -24,20 +29,15 @@
 #include "misc.hpp"
 #include "msg_log.hpp"
 #include "pathfind.hpp"
-#include "property_handler.hpp"
-#include "terrain_door.hpp"
-#include "text_format.hpp"
-#include "ability_values.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
 #include "pos.hpp"
+#include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"
 #include "spells.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -62,17 +62,20 @@ static bool is_pos_on_line(const P& p, const P& line_p0, const P& line_p1)
         // OK, we could be on the line!
 
         const auto line =
-                line_calc::calc_new_line(line_p0, line_p1, true, 9999, false);
+                line_calc::calc_new_line(
+                        line_p0,
+                        line_p1,
+                        true,
+                        9999,
+                        false);
 
-        for (const P& pos_in_line : line)
-        {
-                if (p == pos_in_line)
-                {
-                        return true;
-                }
-        }
-
-        return false;
+        return (
+                std::any_of(
+                        std::cbegin(line),
+                        std::cend(line),
+                        [&p](const auto& pos_in_line) {
+                                return p == pos_in_line;
+                        }));
 }
 
 // Returns all free positions around the acting monster that is closer to the

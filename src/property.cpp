@@ -7,11 +7,11 @@
 #include "property.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <ext/alloc_traits.h>
 #include <iterator>
-#include <math.h>
 #include <ostream>
-#include <stddef.h>
 
 #include "actor.hpp"
 #include "actor_data.hpp"

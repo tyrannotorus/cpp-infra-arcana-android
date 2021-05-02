@@ -6,19 +6,22 @@
 
 #include "saving.hpp"
 
-#include <stddef.h>
-#include <fstream>
 #include <algorithm>
+#include <cstddef>
+#include <fstream>
 #include <iterator>
 #include <vector>
 
+#include "actor_data.hpp"
 #include "actor_player.hpp"
+#include "debug.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "hints.hpp"
 #include "insanity.hpp"
 #include "inventory.hpp"
 #include "item_curse.hpp"
+#include "item_data.hpp"
 #include "item_potion.hpp"
 #include "item_rod.hpp"
 #include "item_scroll.hpp"
@@ -30,9 +33,6 @@
 #include "player_bon.hpp"
 #include "player_spells.hpp"
 #include "smell.hpp"
-#include "actor_data.hpp"
-#include "debug.hpp"
-#include "item_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

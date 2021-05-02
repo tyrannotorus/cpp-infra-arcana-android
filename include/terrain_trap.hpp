@@ -12,12 +12,13 @@
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
-#include "terrain.hpp"
 #include "pos.hpp"
 #include "random.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 
-namespace actor {
+namespace actor
+{
 class Actor;
 }  // namespace actor
 
@@ -136,8 +137,8 @@ private:
         Color color_bg_default() const override;
 
         void on_hit(
-                const DmgType dmg_type,
-                actor::Actor* const actor,
+                DmgType dmg_type,
+                actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 

@@ -6,13 +6,13 @@
 
 #include "bsp.hpp"
 
-#include <optional>
 #include <algorithm>
 #include <iterator>
+#include <optional>
 
 #include "global.hpp"
-#include "random.hpp"
 #include "pos.hpp"
+#include "random.hpp"
 #include "rect.hpp"
 
 // -----------------------------------------------------------------------------
@@ -26,15 +26,17 @@ static Axis random_child_layout(const P& parent_dims)
 
         if (split_largest_dim)
         {
-                return (parent_dims.x > parent_dims.y)
-                        ? Axis::hor
-                        : Axis::ver;
+                return (
+                        (parent_dims.x > parent_dims.y)
+                                ? Axis::hor
+                                : Axis::ver);
         }
         else
         {
-                return rnd::coin_toss()
-                        ? Axis::hor
-                        : Axis::ver;
+                return (
+                        rnd::coin_toss()
+                                ? Axis::hor
+                                : Axis::ver);
         }
 }
 

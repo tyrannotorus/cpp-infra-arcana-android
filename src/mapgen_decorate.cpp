@@ -6,15 +6,15 @@
 
 #include <vector>
 
+#include "array2.hpp"
 #include "direction.hpp"
+#include "global.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "mapgen.hpp"
-#include "terrain.hpp"
-#include "array2.hpp"
-#include "global.hpp"
 #include "pos.hpp"
 #include "random.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------

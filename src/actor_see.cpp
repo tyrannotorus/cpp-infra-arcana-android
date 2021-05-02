@@ -14,15 +14,15 @@
 #include "actor_player.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "init.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
-#include "terrain.hpp"
-#include "global.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "rect.hpp"
+#include "terrain.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -12,17 +12,17 @@
 #include <vector>
 
 #include "actor_player.hpp"
-#include "map.hpp"
-#include "map_parsing.hpp"
-#include "terrain_data.hpp"
-#include "terrain_trap.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
+#include "map.hpp"
+#include "map_parsing.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
 #include "room.hpp"
 #include "terrain.hpp"
+#include "terrain_data.hpp"
+#include "terrain_trap.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

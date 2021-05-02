@@ -7,9 +7,9 @@
 #include "terrain_gong.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <memory>
-#include <stddef.h>
 #include <utility>
 #include <vector>
 

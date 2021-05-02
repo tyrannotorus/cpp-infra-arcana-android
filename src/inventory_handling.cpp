@@ -6,40 +6,40 @@
 
 #include "inventory_handling.hpp"
 
-#include <sstream>
-#include <vector>
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <vector>
 
+#include "SDL_keycode.h"
 #include "actor_player.hpp"
 #include "audio.hpp"
+#include "audio_data.hpp"
 #include "browser.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
+#include "config.hpp"
+#include "debug.hpp"
 #include "draw_box.hpp"
 #include "drop.hpp"
 #include "game_time.hpp"
 #include "io.hpp"
-#include "map.hpp"
-#include "marker.hpp"
-#include "msg_log.hpp"
-#include "query.hpp"
-#include "text_format.hpp"
-#include "SDL_keycode.h"
-#include "audio_data.hpp"
-#include "colors.hpp"
-#include "config.hpp"
-#include "debug.hpp"
 #include "item.hpp"
 #include "item_curse.hpp"
 #include "item_data.hpp"
+#include "map.hpp"
+#include "marker.hpp"
+#include "msg_log.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
+#include "query.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

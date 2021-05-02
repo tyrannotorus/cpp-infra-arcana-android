@@ -6,14 +6,14 @@
 
 #include "pathfind.hpp"
 
-#include <stddef.h>
+#include <cstddef>
 
+#include "array2.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
 #include "flood.hpp"
-#include "random.hpp"
-#include "array2.hpp"
 #include "pos.hpp"
+#include "random.hpp"
 #include "rect.hpp"
 
 std::vector<P> pathfind(

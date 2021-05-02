@@ -6,6 +6,7 @@
 
 #include "state.hpp"
 
+#include <algorithm>
 #include <iterator>
 #include <utility>
 #include <vector>
@@ -220,28 +221,24 @@ void pop_all()
 
 bool contains_state(const StateId id)
 {
-        for (auto& state : s_current_states)
-        {
-                if (state->id() == id)
-                {
-                        return true;
-                }
-        }
-
-        return false;
+        return (
+                std::any_of(
+                        std::cbegin(s_current_states),
+                        std::cend(s_current_states),
+                        [id](const auto& state) {
+                                return state->id() == id;
+                        }));
 }
 
 bool contains_state(const State* const state)
 {
-        for (auto& state_found : s_current_states)
-        {
-                if (state_found.get() == state)
-                {
-                        return true;
-                }
-        }
-
-        return false;
+        return (
+                std::any_of(
+                        std::cbegin(s_current_states),
+                        std::cend(s_current_states),
+                        [state](const auto& state_found) {
+                                return state_found.get() == state;
+                        }));
 }
 
 void pop_until(const StateId id)

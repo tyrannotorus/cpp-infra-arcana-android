@@ -7,10 +7,10 @@
 #include "populate_monsters.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <ostream>
-#include <stddef.h>
 #include <string>
 
 #include "actor.hpp"

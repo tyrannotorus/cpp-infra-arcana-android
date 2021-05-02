@@ -7,8 +7,8 @@
 #ifndef CREATE_CHARACTER_HPP
 #define CREATE_CHARACTER_HPP
 
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "browser.hpp"
@@ -99,15 +99,15 @@ private:
         void init_browsers();
 
         void draw_trait_menu_item(
-                const Trait trait,
-                const int y,
-                const bool is_marked,
+                Trait trait,
+                int y,
+                bool is_marked,
                 const MenuBrowser& browser) const;
 
-        int draw_trait_prereq_info(
+        void draw_trait_prereq_info(
                 const player_bon::TraitPrereqData& prereq_data,
                 int x,
-                const int y) const;
+                int y) const;
 
         MenuBrowser m_browser_traits_avail {};
         MenuBrowser m_browser_traits_unavail {};
@@ -140,9 +140,9 @@ private:
         void init_browser();
 
         void draw_trait_menu_item(
-                const Trait trait,
-                const int y,
-                const bool is_marked,
+                Trait trait,
+                int y,
+                bool is_marked,
                 const MenuBrowser& browser) const;
 
         MenuBrowser m_browser {};

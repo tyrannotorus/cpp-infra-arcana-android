@@ -6,33 +6,33 @@
 
 #include "main_menu.hpp"
 
-#include <stddef.h>
-#include <string>
 #include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include "audio.hpp"
+#include "audio_data.hpp"
 #include "colors.hpp"
+#include "config.hpp"
 #include "create_character.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
+#include "global.hpp"
 #include "highscore.hpp"
 #include "init.hpp"
 #include "io.hpp"
 #include "manual.hpp"
 #include "panel.hpp"
 #include "popup.hpp"
-#include "saving.hpp"
-#include "text_format.hpp"
-#include "version.hpp"
-#include "audio_data.hpp"
-#include "config.hpp"
-#include "global.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "saving.hpp"
+#include "text_format.hpp"
+#include "version.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

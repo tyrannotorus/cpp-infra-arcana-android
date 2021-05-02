@@ -12,13 +12,13 @@
 #include <vector>
 
 #include "actor.hpp"
-#include "global.hpp"
-#include "item.hpp"
-#include "sound.hpp"
 #include "actor_data.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
 #include "gfx.hpp"
+#include "global.hpp"
+#include "item.hpp"
+#include "sound.hpp"
 #include "spells.hpp"
 
 struct P;

@@ -7,15 +7,15 @@
 #include "colors.hpp"
 
 #include <algorithm>
-#include <vector>
 #include <iterator>
 #include <ostream>
+#include <vector>
 
 #include "debug.hpp"
 #include "paths.hpp"
 #include "random.hpp"
-#include "xml.hpp"
 #include "tinyxml2.h"
+#include "xml.hpp"
 
 //-----------------------------------------------------------------------------
 // Private

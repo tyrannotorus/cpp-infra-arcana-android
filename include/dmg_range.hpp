@@ -7,8 +7,8 @@
 #ifndef DMG_RANGE_HPP
 #define DMG_RANGE_HPP
 
-#include <string>
 #include <algorithm>
+#include <string>
 
 #include "random.hpp"
 

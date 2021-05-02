@@ -7,11 +7,11 @@
 #ifndef MAP_TEMPLATES_HPP
 #define MAP_TEMPLATES_HPP
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "array2.hpp"
-#include "room.hpp"
 #include "pos.hpp"
+#include "room.hpp"
 
 enum class LevelTemplId
 {

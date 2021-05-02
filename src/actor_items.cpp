@@ -6,28 +6,28 @@
 
 #include "actor_items.hpp"
 
-#include <stddef.h>
-#include <vector>
 #include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <vector>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
-#include "game.hpp"
-#include "item_data.hpp"
-#include "item_factory.hpp"
-#include "map.hpp"
-#include "player_spells.hpp"
-#include "spells.hpp"
-#include "actor_data.hpp"
 #include "debug.hpp"
 #include "dmg_range.hpp"
+#include "game.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "item_data.hpp"
+#include "item_factory.hpp"
+#include "map.hpp"
 #include "player_bon.hpp"
+#include "player_spells.hpp"
 #include "random.hpp"
+#include "spells.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

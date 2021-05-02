@@ -7,7 +7,7 @@
 #ifndef TEXT_FORMAT_HPP
 #define TEXT_FORMAT_HPP
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -21,7 +21,7 @@ std::vector<std::string> split(std::string line, int max_w);
 
 std::vector<std::string> split_by_delim(
         std::string line,
-        const char delim);
+        char delim);
 
 std::vector<std::string> split_by_space(const std::string& line);
 std::vector<std::string> split_by_newline(const std::string& line);

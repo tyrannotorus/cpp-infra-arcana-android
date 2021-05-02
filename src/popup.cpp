@@ -6,26 +6,26 @@
 
 #include "popup.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <ostream>
 #include <utility>
 
+#include "SDL_keycode.h"
 #include "audio.hpp"
 #include "browser.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "config.hpp"
+#include "debug.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
+#include "pos.hpp"
 #include "rect.hpp"
 #include "text_format.hpp"
-#include "SDL_keycode.h"
-#include "debug.hpp"
-#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -93,7 +93,7 @@ static int find_key_str_len(const std::string& str)
         {
                 if (str[i] == ')')
                 {
-                        return i + 1;
+                        return (int)i + 1;
                 }
         }
 

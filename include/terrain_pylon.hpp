@@ -11,16 +11,18 @@
 #include <string>
 #include <vector>
 
-#include "terrain.hpp"
 #include "colors.hpp"
 #include "global.hpp"
 #include "pos.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 
-namespace actor {
+namespace actor
+{
 class Actor;
 }  // namespace actor
-template <typename T> class Array2;
+template <typename T>
+class Array2;
 
 namespace terrain
 {
@@ -59,8 +61,8 @@ public:
 
 private:
         void on_hit(
-                const DmgType dmg_type,
-                actor::Actor* const actor,
+                DmgType dmg_type,
+                actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 

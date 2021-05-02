@@ -7,19 +7,19 @@
 #include <algorithm>
 #include <vector>
 
-#include "io.hpp"
 #include "actor.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "gfx.hpp"
+#include "io.hpp"
 #include "map.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
 #include "state.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
-#include "array2.hpp"
-#include "colors.hpp"
-#include "gfx.hpp"
-#include "panel.hpp"
-#include "pos.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -7,9 +7,9 @@
 #ifndef POPUP_HPP
 #define POPUP_HPP
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "audio_data.hpp"
 #include "browser.hpp"

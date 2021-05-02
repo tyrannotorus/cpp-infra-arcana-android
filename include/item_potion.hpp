@@ -10,14 +10,16 @@
 #include <string>
 #include <vector>
 
-#include "item.hpp"
 #include "colors.hpp"
 #include "global.hpp"
+#include "item.hpp"
 
-namespace actor {
+namespace actor
+{
 class Actor;
 }  // namespace actor
-namespace item {
+namespace item
+{
 struct ItemData;
 }  // namespace item
 struct P;

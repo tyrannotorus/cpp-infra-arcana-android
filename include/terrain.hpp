@@ -7,16 +7,16 @@
 #ifndef TERRAIN_HPP
 #define TERRAIN_HPP
 
-#include <vector>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "colors.hpp"
+#include "direction.hpp"
 #include "gfx.hpp"
+#include "global.hpp"
 #include "pos.hpp"
 #include "terrain_data.hpp"
-#include "direction.hpp"
-#include "global.hpp"
 
 namespace actor
 {
@@ -243,7 +243,7 @@ public:
 
         virtual void hit(
                 DmgType dmg_type,
-                actor::Actor* const actor,
+                actor::Actor* actor,
                 std::optional<P> from_pos = std::nullopt,
                 std::optional<int> dmg = std::nullopt);
 
@@ -337,7 +337,7 @@ protected:
         bool m_is_hidden {false};
         gfx::TileId m_gore_tile {gfx::TileId::END};
         char m_gore_character {0};
-        P m_pos;
+        P m_pos {};
 
 private:
         bool m_is_bloody {false};
@@ -375,8 +375,8 @@ private:
         Color color_default() const override;
 
         void on_hit(
-                const DmgType dmg_type,
-                actor::Actor* const actor,
+                DmgType dmg_type,
+                actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 };
@@ -776,13 +776,11 @@ public:
                 m_inscr = str;
         }
 
-        void set_player_bg(const Bg bg);
+        void set_player_bg(Bg bg);
 
         gfx::TileId tile() const override;
 
-        void topple(
-                const Dir direction,
-                actor::Actor* const actor_toppling = nullptr);
+        void topple(Dir direction, actor::Actor* actor_toppling = nullptr);
 
 private:
         Color color_default() const override;
@@ -1213,7 +1211,7 @@ public:
 
         void hit(
                 DmgType dmg_type,
-                actor::Actor* const actor,
+                actor::Actor* actor,
                 std::optional<P> from_pos = std::nullopt,
                 std::optional<int> dmg = std::nullopt) override;
 

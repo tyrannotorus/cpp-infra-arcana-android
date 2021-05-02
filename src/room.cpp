@@ -6,31 +6,31 @@
 
 #include "room.hpp"
 
-#include <stddef.h>
 #include <algorithm>
 #include <climits>
-#include <numeric>
-#include <unordered_map>
+#include <cstddef>
 #include <functional>
 #include <iterator>
+#include <numeric>
 #include <ostream>
+#include <unordered_map>
 
+#include "actor_data.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "flood.hpp"
 #include "init.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "mapgen.hpp"
 #include "misc.hpp"
-#include "populate_monsters.hpp"
-#include "terrain.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "colors.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
 #include "panel.hpp"
+#include "populate_monsters.hpp"
 #include "random.hpp"
 #include "state.hpp"
+#include "terrain.hpp"
 
 #ifndef NDEBUG
 #include "io.hpp"
@@ -41,7 +41,7 @@
 // -----------------------------------------------------------------------------
 static std::vector<RoomType> s_room_bucket;
 
-typedef std::unordered_map<std::string, RoomType> StrToRoomTypeMap;
+using StrToRoomTypeMap = std::unordered_map<std::string, RoomType>;
 
 static const StrToRoomTypeMap s_str_to_room_type_map = {
         {"plain", RoomType::plain},

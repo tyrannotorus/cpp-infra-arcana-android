@@ -6,15 +6,21 @@
 
 #include "terrain_event.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <utility>
 
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
+#include "fov.hpp"
 #include "game_time.hpp"
+#include "insanity.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "misc.hpp"
@@ -23,12 +29,29 @@
 #include "property.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "debug.hpp"
-#include "direction.hpp"
-#include "fov.hpp"
-#include "insanity.hpp"
+
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static bool is_wall(const P& p)
+{
+        const auto id = map::g_terrain.at(p)->id();
+
+        return (
+                (id == terrain::Id::wall) ||
+                (id == terrain::Id::rubble_high));
+}
+
+static bool has_only_walls(const std::vector<P>& positions)
+{
+        return (
+                std::all_of(
+                        std::cbegin(positions),
+                        std::cend(positions),
+                        [](const auto& p) {
+                                return is_wall(p);
+                        }));
+}
 
 namespace terrain
 {
@@ -50,26 +73,7 @@ void EventWallCrumble::on_new_turn()
                 return;
         }
 
-        auto is_wall = [](const P& p) {
-                const auto id = map::g_terrain.at(p)->id();
-
-                return (id == terrain::Id::wall) ||
-                        (id == terrain::Id::rubble_high);
-        };
-
         // Check that it still makes sense to run the crumbling
-        auto has_only_walls = [is_wall](const std::vector<P>& positions) {
-                for (const P& p : positions)
-                {
-                        if (!is_wall(p))
-                        {
-                                return false;
-                        }
-                }
-
-                return true;
-        };
-
         const bool edge_ok = has_only_walls(m_wall_cells);
         const bool inner_ok = has_only_walls(m_inner_cells);
 
@@ -242,7 +246,7 @@ void EventWallCrumble::on_new_turn()
 // Snake emerge
 // -----------------------------------------------------------------------------
 EventSnakeEmerge::EventSnakeEmerge() :
-        Event(P(-1, -1)) {}
+        Event({-1, -1}) {}
 
 bool EventSnakeEmerge::try_find_p()
 {
@@ -257,21 +261,22 @@ bool EventSnakeEmerge::try_find_p()
 
         rnd::shuffle(p_bucket);
 
-        for (const P& p : p_bucket)
+        m_pos.set(-1, -1);
+
+        for (const auto& p : p_bucket)
         {
-                const R r = allowed_emerge_rect(p);
+                const auto r = allowed_emerge_rect(p);
 
                 const auto emerge_bucket = emerge_p_bucket(p, blocked, r);
 
                 if ((int)emerge_bucket.size() >= m_min_nr_snakes)
                 {
                         m_pos = p;
-
-                        return true;
+                        break;
                 }
         }
 
-        return false;
+        return (m_pos.x != -1);
 }
 
 R EventSnakeEmerge::allowed_emerge_rect(const P& p) const

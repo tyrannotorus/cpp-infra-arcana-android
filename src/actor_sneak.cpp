@@ -8,9 +8,9 @@
 
 #include "ability_values.hpp"
 #include "actor.hpp"
+#include "array2.hpp"
 #include "map.hpp"
 #include "misc.hpp"
-#include "array2.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -6,20 +6,20 @@
 
 #include "populate_items.hpp"
 
-#include <stddef.h>
-#include <vector>
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
+#include <vector>
 
 #include "actor_player.hpp"
+#include "array2.hpp"
+#include "global.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "mapgen.hpp"
 #include "player_bon.hpp"
-#include "array2.hpp"
-#include "global.hpp"
-#include "item_data.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "terrain_data.hpp"

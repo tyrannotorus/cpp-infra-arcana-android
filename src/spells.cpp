@@ -6,48 +6,24 @@
 
 #include "spells.hpp"
 
-#include <stddef.h>
 #include <algorithm>
+#include <cstddef>
 #include <functional>
-#include <string>
-#include <unordered_map>
-#include <vector>
 #include <iterator>
 #include <ostream>
+#include <string>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_death.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "explosion.hpp"
-#include "flood.hpp"
-#include "game_time.hpp"
-#include "inventory.hpp"
-#include "io.hpp"
-#include "item_factory.hpp"
-#include "knockback.hpp"
-#include "map.hpp"
-#include "map_parsing.hpp"
-#include "marker.hpp"
-#include "misc.hpp"
-#include "msg_log.hpp"
-#include "pathfind.hpp"
-#include "player_bon.hpp"
-#include "player_spells.hpp"
-#include "property.hpp"
-#include "property_data.hpp"
-#include "property_factory.hpp"
-#include "property_handler.hpp"
-#include "teleport.hpp"
-#include "terrain.hpp"
-#include "terrain_door.hpp"
-#include "text_format.hpp"
-#include "viewport.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
@@ -56,22 +32,46 @@
 #include "debug.hpp"
 #include "direction.hpp"
 #include "dmg_range.hpp"
+#include "explosion.hpp"
+#include "flood.hpp"
+#include "game_time.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
+#include "inventory.hpp"
 #include "inventory_handling.hpp"
+#include "io.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_factory.hpp"
+#include "knockback.hpp"
+#include "map.hpp"
+#include "map_parsing.hpp"
+#include "marker.hpp"
+#include "misc.hpp"
+#include "msg_log.hpp"
 #include "panel.hpp"
+#include "pathfind.hpp"
+#include "player_bon.hpp"
+#include "player_spells.hpp"
 #include "pos.hpp"
+#include "property.hpp"
+#include "property_data.hpp"
+#include "property_factory.hpp"
+#include "property_handler.hpp"
 #include "rect.hpp"
 #include "sound.hpp"
 #include "state.hpp"
+#include "teleport.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
+#include "text_format.hpp"
+#include "viewport.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-typedef std::unordered_map<std::string, SpellId> StrToSpellIdMap;
+using StrToSpellIdMap = std::unordered_map<std::string, SpellId>;
 
 static const StrToSpellIdMap s_str_to_spell_id_map = {
         {"aura_of_decay", SpellId::aura_of_decay},
@@ -679,8 +679,6 @@ static void push_statue(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
-        bool printed_msg = false;
-
         for (const auto& p : context.nearby_positions)
         {
                 auto* const terrain = map::g_terrain.at(p);
@@ -690,11 +688,7 @@ static void push_statue(const Context& context)
                         continue;
                 }
 
-                if (!printed_msg)
-                {
-                        print_side_effect_trigger_message();
-                        printed_msg = true;
-                }
+                print_side_effect_trigger_message();
 
                 auto* const statue = static_cast<terrain::Statue*>(terrain);
 
@@ -778,7 +772,7 @@ static DidAction toggle_metal_door(const terrain::Terrain& door)
 
 static std::string get_noise_descr(const bool is_noisy)
 {
-        const std::string str =
+        std::string str =
                 is_noisy
                 ? "Casting this spell requires making sounds."
                 : "This spell can be cast silently.";

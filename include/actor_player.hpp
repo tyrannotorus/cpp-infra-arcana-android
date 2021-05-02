@@ -9,12 +9,13 @@
 
 #include "actor.hpp"
 #include "colors.hpp"
-#include "global.hpp"
 #include "direction.hpp"
+#include "global.hpp"
 #include "spells.hpp"
 
 class Snd;
-template <typename T> class Array2;
+template <typename T>
+class Array2;
 
 namespace item
 {

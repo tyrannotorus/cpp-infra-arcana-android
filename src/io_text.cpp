@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
+#include "colors.hpp"
+#include "config.hpp"
 #include "io.hpp"
 #include "io_internal.hpp"
-#include "config.hpp"
-#include "colors.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 
