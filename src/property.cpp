@@ -1222,7 +1222,8 @@ PropHallucinating::get_allowed_fake_mon_data() const
         {
                 if ((d.id == actor::Id::player) ||
                     (d.id == actor::Id::spectral_wpn) ||
-                    (d.id == actor::Id::strange_color))
+                    (d.id == actor::Id::strange_color) ||
+                    (d.id == actor::Id::cultist))
                 {
                         continue;
                 }
