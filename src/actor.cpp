@@ -185,7 +185,7 @@ gfx::TileId Actor::tile() const
                 {
                 case item::Id::pistol:
                 case item::Id::revolver:
-                        return gfx::TileId::pistol;
+                        return gfx::TileId::cultist_pistol;
 
                 case item::Id::pump_shotgun:
                         return gfx::TileId::cultist_pump_shotgun;
@@ -201,7 +201,7 @@ gfx::TileId Actor::tile() const
 
                 default:
                         ASSERT(false);
-                        return gfx::TileId::pistol;
+                        return gfx::TileId::cultist_pistol;
                 }
         }
 
