@@ -249,11 +249,12 @@ void make_pillars_in_room(const Room& room)
         auto allow_place_at = [](const P& p) {
                 for (const P& d : dir_utils::g_dir_list_w_center)
                 {
-                        const P check_p(p + d);
+                        const auto check_p = p + d;
 
                         const auto id = map::g_terrain.at(check_p)->id();
 
                         if ((id == terrain::Id::wall) ||
+                            (id == terrain::Id::rubble_high) ||
                             (id == terrain::Id::grate))
                         {
                                 return false;
@@ -263,15 +264,14 @@ void make_pillars_in_room(const Room& room)
                 return true;
         };
 
-        // Place pillars in rows and columns
         auto step_size = []() {
-                return rnd::range(1, 3);
+                return rnd::range(1, 4);
         };
 
         const int dx = step_size();
         const int dy = step_size();
 
-        const int place_one_in_n = rnd::range(2, 3);
+        const int place_one_in_n = rnd::range(1, 4);
 
         for (int y = room_p0.y + 1; y <= room_p1.y - 1; y += dy)
         {
@@ -279,17 +279,26 @@ void make_pillars_in_room(const Room& room)
                 {
                         const P p(x, y);
 
-                        if (!rnd::one_in(place_one_in_n))
-                        {
-                                continue;
-                        }
-
                         if (!allow_place_at(p))
                         {
                                 continue;
                         }
 
-                        map::put(new terrain::Wall(p));
+                        if (rnd::one_in(place_one_in_n))
+                        {
+                                if (rnd::fraction(4, 5))
+                                {
+                                        map::put(new terrain::Wall(p));
+                                }
+                                else
+                                {
+                                        map::put(new terrain::RubbleHigh(p));
+                                }
+                        }
+                        else if (rnd::coin_toss())
+                        {
+                                map::put(new terrain::RubbleLow(p));
+                        }
                 }
         }
 }
@@ -798,28 +807,6 @@ void make_pathfind_corridor(
                 // to floor
                 blocked_expanded = map_parsers::expand(blocked, blocked.rect());
 
-                // Randomly mark some cells as blocked, this helps avoid boring
-                // super long straight corridors
-                // for (int x = 0; x < map_w; ++x)
-                // {
-                //     for (int y = 0; y < map_h; ++y)
-                //     {
-                //         // Blocking a high amount of cells in the late game levels
-                //         // creates very nice cave corridors
-                //         const int block_one_in_n =
-                //             map::g_dlvl >= dlvl_first_late_game   ? 3 :
-                //             map::g_dlvl >= dlvl_first_mid_game    ? 6 :
-                //             10;
-
-                //         if (rnd::one_in(block_one_in_n))
-                //         {
-                //             blocked_expanded[x][y] = true;
-
-                //             continue;
-                //         }
-                //     }
-                // }
-
                 // We know from above that p0 and p1 are actually OK - so mark
                 // them as free in the expanded blocking array
                 blocked_expanded.at(p0) = false;
@@ -830,9 +817,8 @@ void make_pathfind_corridor(
                         (map::g_dlvl >= g_dlvl_first_late_game);
 
                 // Randomizing step choices (i.e. when to change directions)
-                // creates more "snaky" paths (note that this does NOT create
-                // longer paths - it just randomizes the variation of optimal
-                // path)
+                // creates more "snaky" paths (this does not create longer paths
+                // - it just randomizes the variation of optimal path)
                 const bool randomize_step_choices = true;
 
                 path = pathfind(

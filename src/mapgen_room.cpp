@@ -22,10 +22,136 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static void put_templ_symbol_at(const P& p, const char c)
+{
+        switch (c)
+        {
+        case '.':
+        {
+                map::put(new terrain::Floor(p));
+        }
+        break;
+
+        case '#':
+        {
+                map::put(new terrain::Wall(p));
+        }
+        break;
+
+        case '-':
+        {
+                map::put(new terrain::Altar(p));
+        }
+        break;
+
+        case '~':
+        {
+                auto* liquid = new terrain::LiquidShallow(p);
+
+                liquid->m_type = LiquidType::water;
+
+                map::put(liquid);
+        }
+        break;
+
+        case '0':
+        {
+                map::put(new terrain::Brazier(p));
+        }
+        break;
+
+        case 'P':
+        {
+                map::put(new terrain::Statue(p));
+        }
+        break;
+
+        case '+':
+        {
+                auto* mimic = new terrain::Wall(p);
+
+                map::put(
+                        new terrain::Door(
+                                p,
+                                mimic,
+                                terrain::DoorType::wood));
+        }
+        break;
+
+        case 'x':
+        {
+                map::put(
+                        new terrain::Door(
+                                p,
+                                nullptr,
+                                terrain::DoorType::gate));
+        }
+        break;
+
+        case '=':
+        {
+                map::put(new terrain::Grate(p));
+        }
+        break;
+
+        case '"':
+        {
+                map::put(new terrain::Vines(p));
+        }
+        break;
+
+        case '*':
+        {
+                map::put(new terrain::Chains(p));
+        }
+        break;
+
+        // Space
+        case ' ':
+        {
+                // Do nothing
+        }
+        break;
+
+        default:
+        {
+                TRACE
+                        << "Illegal template character \""
+                        << c
+                        << "\""
+                        << std::endl;
+
+                // Release mode robustness: invalidate the map
+                mapgen::g_is_map_valid = false;
+
+                ASSERT(false);
+
+                return;
+        }
+        break;
+
+        }  // switch
+}
+
+static bool is_symbol_room_cell(const char c)
+{
+        switch (c)
+        {
+        case '#':
+        case ' ':
+                return false;
+
+        default:
+                return true;
+        }
+}
+
 static void put_templ_terrains(
         const Array2<char>& templ,
         const P& p0)
 {
+        const bool generate_optional_walls = rnd::coin_toss();
+
         const P dims(templ.dims());
 
         for (int templ_x = 0; templ_x < dims.x; ++templ_x)
@@ -34,134 +160,23 @@ static void put_templ_terrains(
                 {
                         const P templ_p(templ_x, templ_y);
 
-                        const P p(p0 + templ_p);
+                        const auto p = p0 + templ_p;
 
-                        const char c = templ.at(templ_p);
+                        char c = templ.at(templ_p);
 
-                        bool is_room_cell = true;
-
-                        switch (c)
+                        if (c == '?')
                         {
-                        case '.':
-                        {
-                                map::put(new terrain::Floor(p));
+                                c = generate_optional_walls ? '#' : '.';
                         }
-                        break;
 
-                        case '#':
-                        {
-                                map::put(new terrain::Wall(p));
+                        put_templ_symbol_at(p, c);
 
-                                is_room_cell = false;
-                        }
-                        break;
-
-                        case '-':
-                        {
-                                map::put(new terrain::Altar(p));
-                        }
-                        break;
-
-                        case '~':
-                        {
-                                auto* liquid = new terrain::LiquidShallow(p);
-
-                                liquid->m_type = LiquidType::water;
-
-                                map::put(liquid);
-                        }
-                        break;
-
-                        case '0':
-                        {
-                                map::put(new terrain::Brazier(p));
-                        }
-                        break;
-
-                        case 'P':
-                        {
-                                map::put(new terrain::Statue(p));
-                        }
-                        break;
-
-                        case '+':
-                        {
-                                auto* mimic = new terrain::Wall(p);
-
-                                map::put(
-                                        new terrain::Door(
-                                                p,
-                                                mimic,
-                                                terrain::DoorType::wood));
-                        }
-                        break;
-
-                        case 'x':
-                        {
-                                map::put(
-                                        new terrain::Door(
-                                                p,
-                                                nullptr,
-                                                terrain::DoorType::gate));
-                        }
-                        break;
-
-                        case '=':
-                        {
-                                map::put(new terrain::Grate(p));
-                        }
-                        break;
-
-                        case '"':
-                        {
-                                map::put(new terrain::Vines(p));
-                        }
-                        break;
-
-                        case '*':
-                        {
-                                map::put(new terrain::Chains(p));
-                        }
-                        break;
-
-                        // (Space)
-                        case ' ':
-                        {
-                                // Do nothing
-
-                                is_room_cell = false;
-                        }
-                        break;
-
-                        default:
-                        {
-                                TRACE << "Illegal template character \""
-                                      << c
-                                      << "\""
-                                      << " (at template pos "
-                                      << templ_x
-                                      << ", "
-                                      << templ_y
-                                      << ")"
-                                      << std::endl;
-
-                                // Release mode robustness: invalidate the map
-                                mapgen::g_is_map_valid = false;
-
-                                ASSERT(false);
-
-                                return;
-                        }
-                        break;
-
-                        }  // switch
-
-                        if (!is_room_cell)
+                        if (!is_symbol_room_cell(c))
                         {
                                 map::g_room_map.at(p) = nullptr;
                         }
-                }  // y loop
-        }  // x loop
+                }
+        }
 }
 
 static Room* make_template_room(const RoomTempl& templ, Region& region)
@@ -194,6 +209,34 @@ static Room* make_template_room(const RoomTempl& templ, Region& region)
 
 }  // make_template_room
 
+static Room* try_make_template_room(Region& region)
+{
+        const P max_dims(region.r.dims());
+
+        const auto* templ = map_templates::random_room_templ(max_dims);
+
+        if (!templ)
+        {
+                return nullptr;
+        }
+
+        const auto& symbols = templ->symbols;
+
+        if ((symbols.dims().x > max_dims.x) ||
+            (symbols.dims().y > max_dims.y))
+        {
+                ASSERT(false);
+
+                return nullptr;
+        }
+
+        auto* const room = make_template_room(*templ, region);
+
+        map_templates::on_base_room_template_placed(*templ);
+
+        return room;
+}
+
 // -----------------------------------------------------------------------------
 // mapgen
 // -----------------------------------------------------------------------------
@@ -211,38 +254,19 @@ Room* make_room(Region& region)
         if ((map::g_dlvl <= g_dlvl_last_mid_game) &&
             rnd::one_in(templ_room_one_in_n))
         {
-                const P max_dims(region.r.dims());
+                auto* const room = try_make_template_room(region);
 
-                const auto* templ = map_templates::random_room_templ(max_dims);
-
-                if (templ)
+                if (room)
                 {
-                        const auto& symbols = templ->symbols;
-
-                        if ((symbols.dims().x > max_dims.x) ||
-                            (symbols.dims().y > max_dims.y))
-                        {
-                                ASSERT(false);
-                        }
-                        else
-                        {
-                                Room* const room =
-                                        make_template_room(*templ, region);
-
-                                map_templates::on_base_room_template_placed(
-                                        *templ);
-
-                                return room;
-                        }
+                        return room;
                 }
 
-                // Failed to make a templated room - fine, make a normal
-                // procedural room
+                // Fine, make a normal procedural room instead...
         }
 
         // Make a procedural room
 
-        const R room_rect = region.rnd_room_rect();
+        const auto room_rect = region.rnd_room_rect();
 
         auto* room = room_factory::make_random_room(room_rect, IsSubRoom::no);
 

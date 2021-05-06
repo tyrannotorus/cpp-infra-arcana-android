@@ -25,6 +25,7 @@ Gameplay
 * Added trait "Crippling Strikes" - melee attacks have 60% chance to Weaken the target for 2-3 turns
 * Small crawling creatures (rats, snakes, crawling hands, etc) can pass through some terrain types such as gates and piles of debris
 * The standard map generator can now also split rooms, for more map variety
+* Added more room templates
 * Casting spells now occasionally trigger random chaotic side effects, typically affecting the surrounding area (for example walls may appear or disappear, statues knocked over, etc)
 * Added spell "Erudition" - the next spell is cast at a higher skill level
 * Changed the "Opening" spell to "Control Object", which can do more things (e.g. open/close/jam/strike doors, or strike statues/braziers, etc)

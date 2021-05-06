@@ -115,7 +115,7 @@ void make_doors()
         {
                 for (int y = 0; y < map::h(); ++y)
                 {
-                        if (g_door_proposals.at(x, y) && rnd::fraction(4, 5))
+                        if (g_door_proposals.at(x, y) && rnd::fraction(3, 5))
                         {
                                 try_make_door(P(x, y));
                         }

@@ -159,35 +159,42 @@ static void convert_walls_to_cave()
         }
 }
 
-static void decorate_floor_at(const P& pos)
+static void put_a_bunch_of_vines_at(const P& p)
 {
-        if (map::g_terrain.at(pos)->id() != terrain::Id::floor)
+        for (const auto& d : dir_utils::g_dir_list_w_center)
+        {
+                const auto adj_p = p + d;
+
+                if (!map::is_pos_inside_outer_walls(adj_p))
+                {
+                        continue;
+                }
+
+                const auto& id = map::g_terrain.at(adj_p)->id();
+                const bool is_floor = (id == terrain::Id::floor);
+
+                if (is_floor && ((p == adj_p) || rnd::one_in(3)))
+                {
+                        map::put(new terrain::Vines(adj_p));
+                }
+        }
+}
+
+static void decorate_floor_at(const P& p)
+{
+        if (map::g_terrain.at(p)->id() != terrain::Id::floor)
         {
                 return;
         }
 
         if (rnd::one_in(100))
         {
-                map::put(new terrain::RubbleLow(pos));
+                map::put(new terrain::RubbleLow(p));
         }
 
         if (rnd::one_in(150))
         {
-                for (const auto& d : dir_utils::g_dir_list_w_center)
-                {
-                        const auto adj_p = pos + d;
-
-                        const auto& adj_id =
-                                map::g_terrain.at(adj_p)->id();
-
-                        const bool adj_is_floor =
-                                adj_id == terrain::Id::floor;
-
-                        if (adj_is_floor && rnd::one_in(3))
-                        {
-                                map::put(new terrain::Vines(adj_p));
-                        }
-                }
+                put_a_bunch_of_vines_at(p);
         }
 }
 
@@ -200,6 +207,32 @@ static void decorate_floor()
                         const P pos(x, y);
 
                         decorate_floor_at(pos);
+                }
+        }
+}
+
+static void decorate_door_proposals()
+{
+        const auto dims = mapgen::g_door_proposals.dims();
+
+        for (int x = 0; x < dims.x; ++x)
+        {
+                for (int y = 0; y < dims.y; ++y)
+                {
+                        const P p(x, y);
+
+                        const auto id = map::g_terrain.at(p)->id();
+
+                        if (!mapgen::g_door_proposals.at(p) ||
+                            (id == terrain::Id::door))
+                        {
+                                continue;
+                        }
+
+                        if (rnd::one_in(30))
+                        {
+                                put_a_bunch_of_vines_at(p);
+                        }
                 }
         }
 }
@@ -247,6 +280,8 @@ void decorate()
         decorate_floor();
 
         decorate_walls();
+
+        decorate_door_proposals();
 
         convert_walls_to_cave();
 

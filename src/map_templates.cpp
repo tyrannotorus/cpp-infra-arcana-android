@@ -321,6 +321,16 @@ static void load_room_templates()
         TRACE_FUNC_END;
 }
 
+static bool is_templ_allowed_to_be_placed(const RoomTempl& templ)
+{
+        // Only plain room templates are allowed to be reused
+        const auto status = s_room_templ_status[templ.base_templ_idx];
+        const bool is_unused = status == RoomTemplStatus::unused;
+        const bool is_plain = templ.type == RoomType::plain;
+
+        return is_unused || is_plain;
+}
+
 // -----------------------------------------------------------------------------
 // map_templates
 // -----------------------------------------------------------------------------
@@ -376,27 +386,28 @@ RoomTempl* random_room_templ(const P& max_dims)
 
         for (auto& templ : s_room_templates)
         {
-                const auto status = s_room_templ_status[templ.base_templ_idx];
-
-                if (status != RoomTemplStatus::unused)
+                if (!is_templ_allowed_to_be_placed(templ))
                 {
                         continue;
                 }
 
-                const P templ_dims(templ.symbols.dims());
+                const auto templ_dims(templ.symbols.dims());
 
-                if (templ_dims.x <= max_dims.x &&
-                    templ_dims.y <= max_dims.y)
+                if ((templ_dims.x > max_dims.x) ||
+                    (templ_dims.y > max_dims.y))
                 {
-                        bucket.push_back(&templ);
+                        continue;
                 }
+
+                bucket.push_back(&templ);
         }
 
-        TRACE << "Attempting to find valid room template, for max dimensions: "
-              << max_dims.x << "x" << max_dims.y
-              << std::endl
-              << "Number of candidates found: " << bucket.size()
-              << std::endl;
+        TRACE
+                << "Attempting to find valid room template, for max dimensions: "
+                << max_dims.x << "x" << max_dims.y
+                << std::endl
+                << "Number of candidates found: " << bucket.size()
+                << std::endl;
 
         if (bucket.empty())
         {
@@ -417,10 +428,7 @@ void clear_base_room_templates_used()
 void on_base_room_template_placed(const RoomTempl& templ)
 {
         ASSERT(templ.base_templ_idx < s_room_templ_status.size());
-
-        ASSERT(
-                s_room_templ_status[templ.base_templ_idx] ==
-                RoomTemplStatus::unused);
+        ASSERT(is_templ_allowed_to_be_placed(templ));
 
         s_room_templ_status[templ.base_templ_idx] = RoomTemplStatus::placed;
 }
