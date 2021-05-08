@@ -605,7 +605,7 @@ void PropShapeshifts::shapeshift(const Verbose verbose) const
         for (const auto& d : actor::g_data)
         {
                 const Range allowed_mon_depth_range(
-                        d.spawn_min_dlvl - 4,
+                        d.spawn_min_dlvl - 2,
                         d.spawn_max_dlvl);
 
                 if (!d.can_be_shapeshifted_into ||
