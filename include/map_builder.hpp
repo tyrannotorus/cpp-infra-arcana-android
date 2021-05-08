@@ -115,11 +115,6 @@ private:
                 return LevelTemplId::deep_one_lair;
         }
 
-        bool allow_transform_template() const override
-        {
-                return true;
-        }
-
         void handle_template_pos(const P& p, char c) override;
 
         void on_template_built() override;
@@ -141,11 +136,6 @@ private:
         LevelTemplId template_id() const override
         {
                 return LevelTemplId::magic_pool;
-        }
-
-        bool allow_transform_template() const override
-        {
-                return true;
         }
 
         void handle_template_pos(const P& p, char c) override;
@@ -219,6 +209,11 @@ private:
         LevelTemplId template_id() const override
         {
                 return LevelTemplId::rat_cave;
+        }
+
+        bool allow_transform_template() const override
+        {
+                return false;
         }
 
         void handle_template_pos(const P& p, char c) override;

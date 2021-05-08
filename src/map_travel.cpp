@@ -129,7 +129,7 @@ void go_to_nxt()
 
         s_map_list.erase(std::begin(s_map_list));
 
-        const MapType map_type = s_map_list.front();
+        const auto map_type = s_map_list.front();
 
         ++map::g_dlvl;
 
