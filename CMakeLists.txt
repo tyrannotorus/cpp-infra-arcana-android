@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Project
 # ------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.0)
 
 project(ia)
 
@@ -319,7 +319,16 @@ add_executable(ia ${SRC} ${RC_FILE})
 set_target_properties(ia PROPERTIES OUTPUT_NAME ia)
 
 add_executable(ia-debug ${SRC} ${RC_FILE})
-set_target_properties(ia-debug PROPERTIES OUTPUT_NAME ia-debug EXPORT_COMPILE_COMMANDS 1)
+
+if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER_EQUAL 3.20)
+        message(STATUS "cmake version >= 3.20, setting EXPORT_COMPILE_COMMANDS" for target ia-debug)
+
+        set_target_properties(ia-debug PROPERTIES OUTPUT_NAME ia-debug EXPORT_COMPILE_COMMANDS 1)
+else()
+        message(STATUS "cmake version < 3.20")
+
+        set_target_properties(ia-debug PROPERTIES OUTPUT_NAME ia-debug)
+endif()
 
 enable_testing()
 
