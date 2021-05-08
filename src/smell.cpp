@@ -36,7 +36,7 @@
 // -----------------------------------------------------------------------------
 static int s_strength_decay_per_turn = 1;
 static int s_strength_decay_on_spread = 3;
-const static int s_msg_countdown_reset_value = 50;
+const static int s_msg_countdown_reset_value = 40;
 static int s_msg_countdown = 0;
 
 static void decay(smell::Smell& smell, const int decay_value)
@@ -126,14 +126,12 @@ static bool is_seeing_mon_with_smell_msg()
 {
         const auto seen_actors = actor::seen_actors(*map::g_player);
 
-        std::any_of(
+        return std::any_of(
                 std::cbegin(seen_actors),
                 std::cend(seen_actors),
                 [](const auto* const actor) {
                         return !actor->m_data->smell_msg.empty();
                 });
-
-        return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -185,12 +183,7 @@ void put_smell_for_mon(const actor::Actor& mon)
 {
         const std::string* const msg_ptr = &mon.m_data->smell_msg;
 
-        if (msg_ptr->empty())
-        {
-                return;
-        }
-
-        if (mon.m_state == ActorState::destroyed)
+        if (msg_ptr->empty() || !mon.is_alive())
         {
                 return;
         }

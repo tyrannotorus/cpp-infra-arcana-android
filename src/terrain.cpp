@@ -384,10 +384,6 @@ int Terrain::shock_when_adj() const
         {
                 shock += 3;
         }
-        else if (is_bloody())
-        {
-                shock += 1;
-        }
 
         return shock;
 }
