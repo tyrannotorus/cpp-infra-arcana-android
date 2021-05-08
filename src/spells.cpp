@@ -2096,11 +2096,16 @@ bool SpellMayhem::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 // Pestilence
 // -----------------------------------------------------------------------------
+int SpellPestilence::nr_rats_summoned(SpellSkill skill) const
+{
+        return 6 + (int)skill * 3;
+}
+
 void SpellPestilence::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
 {
-        const size_t nr_mon = 6 + (int)skill * 6;
+        const size_t nr_mon = nr_rats_summoned(skill);
 
         actor::Actor* leader = nullptr;
 
@@ -2196,7 +2201,7 @@ std::vector<std::string> SpellPestilence::descr_specific(
 
         descr.emplace_back("A pack of rats appear around the caster.");
 
-        const size_t nr_mon = 6 + (int)skill * 6;
+        const size_t nr_mon = nr_rats_summoned(skill);
 
         descr.push_back("Summons " + std::to_string(nr_mon) + " rats.");
 

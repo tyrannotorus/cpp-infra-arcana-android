@@ -745,11 +745,13 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        int nr_rats_summoned(SpellSkill skill) const;
+
         int base_max_spi_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
-                return 6;
+                return 7;
         }
 
         bool is_noisy(const SpellSkill skill) const override
