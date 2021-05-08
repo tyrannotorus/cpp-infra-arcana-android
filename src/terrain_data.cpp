@@ -100,7 +100,6 @@ static void init_data_list()
         d.can_have_gore = false;
         d.can_have_corpse = false;
         d.can_have_item = false;
-        d.msg_on_player_blocked = "There is a tree in the way.";
         d.matl_type = Matl::wood;
         d.shock_when_adjacent = 1;
         add_to_list_and_reset(d);
