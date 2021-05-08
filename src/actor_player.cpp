@@ -653,7 +653,22 @@ void Player::update_tmp_shock()
                 increased_tmp_shock += (double)g_shock_from_obsession;
         }
 
-        if (m_properties.allow_see())
+        if (m_properties.has(PropId::blind))
+        {
+                // NOTE: Here we assume that blindness is the ONLY property that
+                // prevents the player from seeing, that should cause shock
+                // (fainting also prevents seeing, but should not cause shock).
+
+                auto* const blind = m_properties.prop(PropId::blind);
+
+                const int blind_shock = std::min(blind->nr_turns_active(), 30);
+
+                increased_tmp_shock +=
+                        shock_taken_after_mods(
+                                (double)blind_shock,
+                                ShockSrc::misc);
+        }
+        else
         {
                 const bool is_ghoul = player_bon::is_bg(Bg::ghoul);
 
@@ -692,14 +707,6 @@ void Player::update_tmp_shock()
                                         (double)terrain_shock,
                                         ShockSrc::misc);
                 }
-        }
-        // Is blind
-        else if (!m_properties.has(PropId::fainted))
-        {
-                increased_tmp_shock +=
-                        shock_taken_after_mods(
-                                30.0,
-                                ShockSrc::misc);
         }
 
         if (m_properties.has(PropId::r_shock))

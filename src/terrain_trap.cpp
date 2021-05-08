@@ -881,7 +881,7 @@ void TrapGasConfusion::trigger()
                 EmitExplSnd::no,
                 -1,
                 ExplExclCenter::no,
-                {new PropConfused()},
+                {property_factory::make(PropId::confused)},
                 colors::magenta(),
                 ExplIsGas::yes);
 
@@ -915,7 +915,7 @@ void TrapGasParalyzation::trigger()
                 EmitExplSnd::no,
                 -1,
                 ExplExclCenter::no,
-                {new PropParalyzed()},
+                {property_factory::make(PropId::paralyzed)},
                 colors::magenta(),
                 ExplIsGas::yes);
 
@@ -949,7 +949,7 @@ void TrapGasFear::trigger()
                 EmitExplSnd::no,
                 -1,
                 ExplExclCenter::no,
-                {new PropTerrified()},
+                {property_factory::make(PropId::terrified)},
                 colors::magenta(),
                 ExplIsGas::yes);
 
@@ -971,7 +971,7 @@ void TrapBlindingFlash::trigger()
                 EmitExplSnd::no,
                 -1,
                 ExplExclCenter::no,
-                {new PropBlind()},
+                {property_factory::make(PropId::blind)},
                 colors::yellow());
 
         TRACE_FUNC_END_VERBOSE;
@@ -1143,13 +1143,17 @@ void TrapSummonMon::trigger()
                         std::begin(summoned.monsters),
                         std::end(summoned.monsters),
                         [](auto* const mon) {
-                                auto* prop_summoned = new PropSummoned();
+                                auto* prop_summoned =
+                                        property_factory::make(
+                                                PropId::summoned);
 
                                 prop_summoned->set_indefinite();
 
                                 mon->m_properties.apply(prop_summoned);
 
-                                auto* prop_waiting = new PropWaiting();
+                                auto* prop_waiting =
+                                        property_factory::make(
+                                                PropId::waiting);
 
                                 prop_waiting->set_duration(2);
 
@@ -1226,7 +1230,7 @@ void TrapHpSap::trigger()
                 msg_log::add("I feel a peculiar energy around me!");
         }
 
-        auto* const hp_sap = new PropHpSap();
+        auto* const hp_sap = property_factory::make(PropId::hp_sap);
 
         hp_sap->set_indefinite();
 
@@ -1290,7 +1294,7 @@ void TrapSpiSap::trigger()
                 msg_log::add("I feel a peculiar energy around me!");
         }
 
-        auto* const sp_sap = new PropSpiSap();
+        auto* const sp_sap = property_factory::make(PropId::spi_sap);
 
         sp_sap->set_indefinite();
 
@@ -1352,7 +1356,7 @@ void TrapFire::trigger()
                 EmitExplSnd::no,
                 -1,
                 ExplExclCenter::no,
-                {new PropBurning()});
+                {property_factory::make(PropId::burning)});
 
         TRACE_FUNC_END_VERBOSE;
 }
@@ -1417,7 +1421,7 @@ void TrapWeb::trigger()
                 }
         }
 
-        Prop* const entangled = new PropEntangled();
+        auto* const entangled = property_factory::make(PropId::entangled);
 
         entangled->set_indefinite();
 
@@ -1462,7 +1466,8 @@ void TrapSlow::trigger()
                 return;
         }
 
-        actor_here->m_properties.apply(new PropSlowed());
+        actor_here->m_properties.apply(
+                property_factory::make(PropId::slowed));
 
         TRACE_FUNC_END_VERBOSE;
 }
@@ -1481,7 +1486,8 @@ void TrapCurse::trigger()
                 return;
         }
 
-        actor_here->m_properties.apply(new PropCursed());
+        actor_here->m_properties.apply(
+                property_factory::make(PropId::cursed));
 
         TRACE_FUNC_END_VERBOSE;
 }

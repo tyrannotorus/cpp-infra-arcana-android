@@ -101,6 +101,11 @@ public:
                 return m_nr_turns_left;
         }
 
+        int nr_turns_active() const
+        {
+                return m_nr_turns_active;
+        }
+
         void set_duration(int nr_turns);
 
         void set_indefinite()
@@ -184,7 +189,7 @@ public:
 
         virtual void on_placed() {}
 
-        virtual PropEnded on_tick()
+        virtual PropEnded on_actor_turn()
         {
                 return PropEnded::no;
         }
@@ -331,11 +336,13 @@ protected:
         int m_nr_turns_left;
         int m_nr_dlvls_left;
 
-        PropDurationMode m_duration_mode;
+        int m_nr_turns_active {0};
 
-        actor::Actor* m_owner;
-        PropSrc m_src;
-        const item::Item* m_item_applying;
+        PropDurationMode m_duration_mode {PropDurationMode::standard};
+
+        actor::Actor* m_owner {nullptr};
+        PropSrc m_src {PropSrc::END};
+        const item::Item* m_item_applying {nullptr};
 };
 
 // -----------------------------------------------------------------------------
@@ -380,7 +387,7 @@ public:
                 return colors::orange();
         }
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 
         void on_applied() override;
 
@@ -407,7 +414,7 @@ public:
         PropDescend() :
                 Prop(PropId::descend) {}
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 };
 
 class PropBurrowing : public Prop
@@ -416,7 +423,7 @@ public:
         PropBurrowing() :
                 Prop(PropId::burrowing) {}
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 };
 
 class PropZuulPossessPriest : public Prop
@@ -466,7 +473,7 @@ public:
         PropPoisoned() :
                 Prop(PropId::poisoned) {}
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 };
 
 class PropAiming : public Prop
@@ -613,7 +620,7 @@ public:
 
         void load() override;
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 
         void set_range(const int range)
         {
@@ -643,7 +650,7 @@ public:
         PropEntangled() :
                 Prop(PropId::entangled) {}
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 
         void on_applied() override;
 
@@ -681,7 +688,7 @@ public:
 
         bool allow_attack_ranged(Verbose verbose) const override;
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 };
 
 class PropFlared : public Prop
@@ -690,7 +697,7 @@ public:
         PropFlared() :
                 Prop(PropId::flared) {}
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 };
 
 class PropConfused : public Prop
@@ -990,7 +997,7 @@ public:
         PropParalyzed() :
                 Prop(PropId::paralyzed) {}
 
-        PropEnded on_tick() override;
+        PropEnded on_actor_turn() override;
 
         void on_applied() override;
 

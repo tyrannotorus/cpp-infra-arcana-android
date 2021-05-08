@@ -84,6 +84,7 @@ void PropHandler::save() const
                         saving::put_int((int)prop->m_id);
                         saving::put_int(prop->m_nr_turns_left);
                         saving::put_int(prop->m_nr_dlvls_left);
+                        saving::put_int(prop->m_nr_turns_active);
 
                         prop->save();
                 }
@@ -101,26 +102,24 @@ void PropHandler::load()
         for (int i = 0; i < nr_props; ++i)
         {
                 const auto prop_id = (PropId)saving::get_int();
-
-                const int nr_turns = saving::get_int();
-
-                const int nr_dlvls = saving::get_int();
+                const int nr_turns_left = saving::get_int();
+                const int nr_dlvls_left = saving::get_int();
+                const int nr_turns_active = saving::get_int();
 
                 Prop* const prop = property_factory::make(prop_id);
 
-                if (nr_turns == -1)
+                if (nr_turns_left == -1)
                 {
                         prop->set_indefinite();
                 }
                 else
                 {
-                        prop->set_duration(nr_turns);
-
-                        prop->m_nr_dlvls_left = nr_dlvls;
+                        prop->set_duration(nr_turns_left);
+                        prop->m_nr_dlvls_left = nr_dlvls_left;
                 }
 
+                prop->m_nr_turns_active = nr_turns_active;
                 prop->m_owner = m_owner;
-
                 prop->m_src = PropSrc::intr;
 
                 m_props.push_back(std::unique_ptr<Prop>(prop));
@@ -325,6 +324,12 @@ bool PropHandler::try_apply_more_on_existing_intr_prop(
                                                 new_prop.m_nr_turns_left);
                         }
                 }
+
+                // Use longest number of turns active
+                old_prop->m_nr_turns_active =
+                        std::max(
+                                new_prop.m_nr_turns_active,
+                                old_prop->m_nr_turns_active);
 
                 if (verbose == Verbose::yes)
                 {
@@ -572,10 +577,11 @@ void PropHandler::on_turn_begin()
                         --prop->m_nr_turns_left;
                 }
 
-                const auto prop_ended = prop->on_tick();
+                const auto prop_ended = prop->on_actor_turn();
 
                 if (prop_ended == PropEnded::no)
                 {
+                        ++prop->m_nr_turns_active;
                         ++i;
                 }
         }

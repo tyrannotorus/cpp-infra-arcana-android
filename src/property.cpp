@@ -77,11 +77,7 @@ Prop::Prop(PropId id) :
         m_id(id),
         m_data(property_data::g_data[(size_t)id]),
         m_nr_turns_left(m_data.std_rnd_turns.roll()),
-        m_nr_dlvls_left(m_data.std_rnd_dlvls.roll()),
-        m_duration_mode(PropDurationMode::standard),
-        m_owner(nullptr),
-        m_src(PropSrc::END),
-        m_item_applying(nullptr)
+        m_nr_dlvls_left(m_data.std_rnd_dlvls.roll())
 {
 }
 
@@ -202,7 +198,7 @@ void PropCursed::curse_adjacent() const
         }
 }
 
-PropEnded PropEntangled::on_tick()
+PropEnded PropEntangled::on_actor_turn()
 {
         // Handle drowning
 
@@ -351,7 +347,7 @@ void PropSummoned::on_end()
         actor::unset_actor_as_leader_for_all_mon(*m_owner);
 }
 
-PropEnded PropInfected::on_tick()
+PropEnded PropInfected::on_actor_turn()
 {
 #ifndef NDEBUG
         ASSERT(!m_owner->m_properties.has(PropId::diseased));
@@ -445,7 +441,7 @@ bool PropDiseased::is_resisting_other_prop(const PropId prop_id) const
         return prop_id == PropId::infected;
 }
 
-PropEnded PropDescend::on_tick()
+PropEnded PropDescend::on_actor_turn()
 {
         ASSERT(m_owner->is_player());
 
@@ -692,7 +688,7 @@ void PropShapeshifts::shapeshift(const Verbose verbose) const
         }
 }
 
-PropEnded PropPoisoned::on_tick()
+PropEnded PropPoisoned::on_actor_turn()
 {
         if (!m_owner->is_alive())
         {
@@ -1508,7 +1504,7 @@ bool PropFrenzied::allow_pray(Verbose verbose) const
         return false;
 }
 
-PropEnded PropBurning::on_tick()
+PropEnded PropBurning::on_actor_turn()
 {
         if (m_owner->is_player())
         {
@@ -1611,7 +1607,7 @@ bool PropBlind::should_update_vision_on_toggled() const
         return m_owner->is_player();
 }
 
-PropEnded PropParalyzed::on_tick()
+PropEnded PropParalyzed::on_actor_turn()
 {
         // Handle drowning
 
@@ -1663,7 +1659,7 @@ bool PropFainted::should_update_vision_on_toggled() const
         return m_owner->is_player();
 }
 
-PropEnded PropFlared::on_tick()
+PropEnded PropFlared::on_actor_turn()
 {
         actor::hit(*m_owner, 1, DmgType::fire);
 
@@ -1904,7 +1900,7 @@ void PropSeeInvis::on_applied()
                         PropEndAllowHistoricMsg::yes));
 }
 
-PropEnded PropBurrowing::on_tick()
+PropEnded PropBurrowing::on_actor_turn()
 {
         const P& p = m_owner->m_pos;
 
@@ -2996,7 +2992,7 @@ void PropMagicSearching::load()
         m_allow_reveal_creatures = saving::get_bool();
 }
 
-PropEnded PropMagicSearching::on_tick()
+PropEnded PropMagicSearching::on_actor_turn()
 {
         ASSERT(m_owner->is_player());
 
