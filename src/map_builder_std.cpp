@@ -50,7 +50,15 @@ bool MapBuilderStd::build_specific()
         TRACE_FUNC_BEGIN;
 
         // TODO: Using hard coded values for now
-        map::reset({48, 48});
+        if (map::g_dlvl >= g_dlvl_first_late_game)
+        {
+                // Make late game levels slightly bigger
+                map::reset({54, 54});
+        }
+        else
+        {
+                map::reset({48, 48});
+        }
 
         mapgen::g_is_map_valid = true;
 
