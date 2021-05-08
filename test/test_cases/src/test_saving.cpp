@@ -4,17 +4,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
 #include <memory>
+#include <stddef.h>
 #include <string>
 #include <vector>
 
-#include "catch.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
+#include "catch.hpp"
+#include "debug.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "inventory.hpp"
+#include "item.hpp"
 #include "item_curse.hpp"
+#include "item_curse_ids.hpp"
 #include "item_data.hpp"
 #include "item_device.hpp"
 #include "item_factory.hpp"
@@ -22,17 +28,11 @@
 #include "player_bon.hpp"
 #include "player_spells.hpp"
 #include "property.hpp"
+#include "property_data.hpp"
 #include "property_handler.hpp"
 #include "saving.hpp"
-#include "test_utils.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "debug.hpp"
-#include "global.hpp"
-#include "item.hpp"
-#include "item_curse_ids.hpp"
-#include "property_data.hpp"
 #include "spells.hpp"
+#include "test_utils.hpp"
 
 TEST_CASE("Saving and loading the game")
 {
@@ -246,10 +246,10 @@ TEST_CASE("Saving and loading the game")
                 REQUIRE(!item::g_data[(size_t)item::Id::scroll_control_object]
                                  .is_spell_domain_known);
 
-                REQUIRE(!item::g_data[(size_t)item::Id::scroll_summon_mon]
+                REQUIRE(!item::g_data[(size_t)item::Id::scroll_light]
                                  .is_spell_domain_known);
 
-                REQUIRE(!item::g_data[(size_t)item::Id::scroll_summon_mon]
+                REQUIRE(!item::g_data[(size_t)item::Id::scroll_light]
                                  .is_identified);
 
                 // Player

@@ -40,7 +40,7 @@ enum class SpellId
         slow,
         haste,
         spell_shield,
-        summon,
+
         teleport,
         terrify,
 
@@ -73,6 +73,7 @@ enum class SpellId
         disease,
         knockback,
         mi_go_hypno,
+        summon,
         summon_tentacles,
 
         END
@@ -728,7 +729,7 @@ public:
 
         OccultistDomain domain() const override
         {
-                return OccultistDomain::END;
+                return OccultistDomain::transmuter;
         }
 
         SpellShock shock_type() const override
@@ -781,7 +782,7 @@ public:
 
         OccultistDomain domain() const override
         {
-                return OccultistDomain::END;
+                return OccultistDomain::transmuter;
         }
 
         SpellShock shock_type() const override
@@ -1842,12 +1843,12 @@ public:
 
         bool player_can_learn() const override
         {
-                return true;
+                return false;
         }
 
         std::string name() const override
         {
-                return "Summon Creature";
+                return "";
         }
 
         SpellId id() const override
@@ -1866,7 +1867,12 @@ public:
         }
 
         std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+                const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return {};
+        }
 
         void run_effect(
                 actor::Actor* caster,

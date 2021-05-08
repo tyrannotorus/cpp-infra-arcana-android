@@ -140,7 +140,6 @@ enum class Id
         scroll_haste,
         scroll_spectral_wpns,
         scroll_spell_shield,
-        scroll_summon_mon,
         scroll_telep,
         scroll_terrify,
         scroll_transmut,

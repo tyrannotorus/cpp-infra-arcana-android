@@ -3850,49 +3850,43 @@ void SpellSummonMon::run_effect(
 {
         std::vector<actor::Id> summon_bucket;
 
-        if (caster->is_player())
+        // Caster is monster
+        int max_dlvl_spawned =
+                (skill == SpellSkill::basic)
+                ? g_dlvl_last_early_game
+                : ((skill == SpellSkill::expert)
+                           ? g_dlvl_last_mid_game
+                           : g_dlvl_last);
+
+        const int nr_dlvls_ood_allowed = 3;
+
+        max_dlvl_spawned =
+                std::min(
+                        max_dlvl_spawned,
+                        map::g_dlvl + nr_dlvls_ood_allowed);
+
+        const int min_dlvl_spawned = max_dlvl_spawned - 10;
+
+        for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
         {
-                // Player summong, pick from predefined lists
-                if ((skill == SpellSkill::basic) ||
-                    (skill == SpellSkill::expert))
+                const auto& data = actor::g_data[i];
+
+                if (!data.can_be_summoned_by_mon)
                 {
-                        summon_bucket.push_back(actor::Id::raven);
-                        summon_bucket.push_back(actor::Id::wolf);
+                        continue;
                 }
 
-                if ((skill == SpellSkill::expert) ||
-                    (skill == SpellSkill::master))
+                if ((data.spawn_min_dlvl <= max_dlvl_spawned) &&
+                    (data.spawn_min_dlvl >= min_dlvl_spawned))
                 {
-                        summon_bucket.push_back(actor::Id::green_spider);
-                        summon_bucket.push_back(actor::Id::white_spider);
-                }
-
-                if (skill == SpellSkill::master)
-                {
-                        summon_bucket.push_back(actor::Id::leng_spider);
-                        summon_bucket.push_back(actor::Id::energy_hound);
-                        summon_bucket.push_back(actor::Id::fire_hound);
+                        summon_bucket.push_back(actor::Id(i));
                 }
         }
-        else
+
+        // If no monsters could be found which matched the level
+        // criteria, try again, but without the min level criterium
+        if (summon_bucket.empty())
         {
-                // Caster is monster
-                int max_dlvl_spawned =
-                        (skill == SpellSkill::basic)
-                        ? g_dlvl_last_early_game
-                        : ((skill == SpellSkill::expert)
-                                   ? g_dlvl_last_mid_game
-                                   : g_dlvl_last);
-
-                const int nr_dlvls_ood_allowed = 3;
-
-                max_dlvl_spawned =
-                        std::min(
-                                max_dlvl_spawned,
-                                map::g_dlvl + nr_dlvls_ood_allowed);
-
-                const int min_dlvl_spawned = max_dlvl_spawned - 10;
-
                 for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
                 {
                         const auto& data = actor::g_data[i];
@@ -3902,30 +3896,9 @@ void SpellSummonMon::run_effect(
                                 continue;
                         }
 
-                        if ((data.spawn_min_dlvl <= max_dlvl_spawned) &&
-                            (data.spawn_min_dlvl >= min_dlvl_spawned))
+                        if (data.spawn_min_dlvl <= max_dlvl_spawned)
                         {
                                 summon_bucket.push_back(actor::Id(i));
-                        }
-                }
-
-                // If no monsters could be found which matched the level
-                // criteria, try again, but without the min level criterium
-                if (summon_bucket.empty())
-                {
-                        for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
-                        {
-                                const auto& data = actor::g_data[i];
-
-                                if (!data.can_be_summoned_by_mon)
-                                {
-                                        continue;
-                                }
-
-                                if (data.spawn_min_dlvl <= max_dlvl_spawned)
-                                {
-                                        summon_bucket.push_back(actor::Id(i));
-                                }
                         }
                 }
         }
@@ -3941,35 +3914,21 @@ void SpellSummonMon::run_effect(
         }
 
 #ifndef NDEBUG
-        if (!caster->is_player())
+        for (const auto id : summon_bucket)
         {
-                for (const auto id : summon_bucket)
-                {
-                        ASSERT(actor::g_data[(size_t)id]
-                                       .can_be_summoned_by_mon);
-                }
+                ASSERT(actor::g_data[(size_t)id].can_be_summoned_by_mon);
         }
 #endif  // NDEBUG
 
-        const actor::Id mon_id = rnd::element(summon_bucket);
+        const auto mon_id = rnd::element(summon_bucket);
 
-        actor::Actor* leader = nullptr;
+        auto* const caster_leader =
+                static_cast<actor::Mon*>(caster)->m_leader;
 
-        if (caster->is_player())
-        {
-                leader = caster;
-        }
-        else
-        {
-                // Caster is monster
-                auto* const caster_leader =
-                        static_cast<actor::Mon*>(caster)->m_leader;
-
-                leader =
-                        caster_leader
-                        ? caster_leader
-                        : caster;
-        }
+        auto* const leader =
+                caster_leader
+                ? caster_leader
+                : caster;
 
         const auto summoned =
                 actor::spawn(
@@ -4002,27 +3961,9 @@ void SpellSummonMon::run_effect(
         if (actor::can_player_see_actor(*mon))
         {
                 msg_log::add(
-                        text_format::first_to_upper(
-                                mon->name_a()) +
+                        text_format::first_to_upper(mon->name_a()) +
                         " appears!");
         }
-
-        // Player cannot see monster
-        else if (caster->is_player())
-        {
-                msg_log::add("I sense a new presence.");
-        }
-}
-
-std::vector<std::string> SpellSummonMon::descr_specific(
-        const SpellSkill skill) const
-{
-        (void)skill;
-
-        return {
-                "Summons a creature to do the caster's bidding. "
-                "A more skilled sorcerer summons beings of greater might and "
-                "rarity."};
 }
 
 bool SpellSummonMon::allow_mon_cast_now(actor::Mon& mon) const
