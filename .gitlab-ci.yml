@@ -1,7 +1,7 @@
 # TODO: Would like to set the artifact names from variables, but cannot get it
 # to work - so there's a lot of copy/pasted names and commands here
 
-image: gcc:latest
+image: gcc:8.3.0
 
 before_script:
         - apt-get update && apt-get install -y cmake libsdl2-2.0-0 libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev
