@@ -35,6 +35,56 @@ namespace item
 class Item;
 }  // namespace item
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static terrain::DoorSpawnState get_random_spawn_state(
+        const terrain::DoorType door_type)
+{
+        // NOTE: The chances below are just generic default behavior for random
+        // doors placed wherever. Doors may be explicitly set to other states
+        // elsewhere during map generation (e.g. set to secret to hide an
+        // optional branch of the map).
+
+        const int pct_secret = 10 + (map::g_dlvl - 1);
+        const int pct_stuck = 10;
+
+        if ((door_type != terrain::DoorType::gate) && rnd::percent(pct_secret))
+        {
+                // Secret
+
+                if (rnd::percent(pct_stuck))
+                {
+                        return terrain::DoorSpawnState::secret_and_stuck;
+                }
+                else
+                {
+                        return terrain::DoorSpawnState::secret;
+                }
+        }
+        else
+        {
+                // Not secret
+
+                if (rnd::coin_toss())
+                {
+                        // Open
+                        return terrain::DoorSpawnState::open;
+                }
+                else if (rnd::percent(pct_stuck))
+                {
+                        return terrain::DoorSpawnState::stuck;
+                }
+                else
+                {
+                        return terrain::DoorSpawnState::closed;
+                }
+        }
+}
+
+// -----------------------------------------------------------------------------
+// terrain
+// -----------------------------------------------------------------------------
 namespace terrain
 {
 Door::Door(
@@ -48,7 +98,7 @@ Door::Door(
         m_type(type)
 {
         // Gates should never be secret
-        ASSERT(!(m_type == DoorType::gate && m_mimic_terrain));
+        ASSERT(!((m_type == DoorType::gate) && m_mimic_terrain));
 
         ASSERT(
                 !(m_type == DoorType::gate &&
@@ -57,40 +107,7 @@ Door::Door(
 
         if (spawn_state == DoorSpawnState::any)
         {
-                // NOTE: The chances below are just generic default behavior for
-                // random doors placed wherever. Doors may be explicitly set to
-                // other states elsewhere during map generation (e.g. set to
-                // secret to hide an optional branch of the map).
-
-                const int pct_secret = 10 + (map::g_dlvl - 1);
-                const int pct_stuck = 10;
-
-                if ((m_type != DoorType::gate) && rnd::percent(pct_secret))
-                {
-                        // Secret
-                        spawn_state =
-                                rnd::percent(pct_stuck)
-                                ? DoorSpawnState::secret_and_stuck
-                                : DoorSpawnState::secret;
-                }
-                else
-                {
-                        // Not secret
-
-                        if (rnd::coin_toss())
-                        {
-                                // Open
-                                spawn_state = DoorSpawnState::open;
-                        }
-                        else
-                        {
-                                // Closed
-                                spawn_state =
-                                        rnd::percent(pct_stuck)
-                                        ? DoorSpawnState::stuck
-                                        : DoorSpawnState::closed;
-                        }
-                }
+                spawn_state = get_random_spawn_state(m_type);
         }
 
         switch (DoorSpawnState(spawn_state))
@@ -369,7 +386,8 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                                 ? audio::SfxId::END
                                 : audio::SfxId::door_bang;
 
-                        Snd snd("",
+                        Snd snd(
+                                "",
                                 sfx,
                                 IgnoreMsgIfOriginSeen::no,
                                 m_pos,
@@ -827,6 +845,14 @@ void Door::reveal(const Verbose verbose)
         {
                 msg_log::add("A secret is revealed.");
         }
+
+        // If the player is adjacent, also reveal stuck status to avoid an
+        // inconsistent state (the player standing next to a revealed door that
+        // they don't know is stuck).
+        if (m_pos.is_adjacent(map::g_player->m_pos))
+        {
+                reveal_stuck_status();
+        }
 }
 
 void Door::on_revealed_from_searching()
@@ -836,6 +862,8 @@ void Door::on_revealed_from_searching()
 
 void Door::reveal_stuck_status()
 {
+        ASSERT(!m_is_hidden);
+
         if (!m_is_stuck)
         {
                 return;

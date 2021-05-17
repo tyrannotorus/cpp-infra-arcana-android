@@ -425,7 +425,6 @@ static void player_detect_stuck_doors()
         for (const auto& d : dir_utils::g_dir_list)
         {
                 const auto p = map::g_player->m_pos + d;
-
                 auto* const terrain = map::g_terrain.at(p);
 
                 if (terrain->id() != terrain::Id::door)
@@ -434,6 +433,11 @@ static void player_detect_stuck_doors()
                 }
 
                 auto* const door = static_cast<terrain::Door*>(terrain);
+
+                if (door->is_hidden())
+                {
+                        continue;
+                }
 
                 door->reveal_stuck_status();
         }

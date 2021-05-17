@@ -501,8 +501,9 @@ bool MapBuilderStd::build_specific()
                 }  // y loop
         }  // x loop
 
-        TRACE << "Found " << map::g_choke_point_data.size()
-              << " choke points" << std::endl;
+        TRACE
+                << "Found " << map::g_choke_point_data.size()
+                << " choke points" << std::endl;
 
         if (!mapgen::g_is_map_valid)
         {

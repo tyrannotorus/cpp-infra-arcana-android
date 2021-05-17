@@ -1375,16 +1375,17 @@ void reveal_doors_on_path_to_stairs(const P& stairs_pos)
                 }
         }
 
-        const auto path = pathfind(
-                map::g_player->m_pos,
-                stairs_pos,
-                blocks_player);
+        const auto path =
+                pathfind(
+                        map::g_player->m_pos,
+                        stairs_pos,
+                        blocks_player);
 
         ASSERT(!path.empty());
 
         TRACE << "Travelling along path and revealing all doors" << std::endl;
 
-        for (const P& pos : path)
+        for (const auto& pos : path)
         {
                 auto* const terrain = map::g_terrain.at(pos);
 
