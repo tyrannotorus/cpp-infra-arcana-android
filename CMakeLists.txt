@@ -343,14 +343,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX
                 -std=c++17
                 -fno-rtti
                 -Wpedantic
-                -pedantic-errors
+                # Disabled for the same reason as -Werror, see comment below.
+                # -pedantic-errors
                 -Wall
                 -Wextra
                 # NOTE: While warnings should not be accepted, -Werror can cause
-                # problems for people trying to build the game with more recent
-                # compiler versions than it was developed on. Therefore, instead
-                # of turning warnings into errors, warnings should be (manually)
-                # checked and fixed during development.
+                # problems when building the game with different compilers or
+                # compiler versions than it was developed on.
                 # -Werror
                 -Wmissing-declarations
                 -Wunused
