@@ -133,7 +133,9 @@ public:
         //----------------------------------------------------------------------
         // Hooks called from various places
         //----------------------------------------------------------------------
-        void affect_move_dir(const P& actor_pos, Dir& dir) const;
+        void affect_move_dir(Dir& dir) const;
+
+        bool allow_move_dir(Dir dir) const;
 
         int affect_max_hp(int hp_max) const;
         int affect_max_spi(int spi_max) const;
@@ -187,6 +189,8 @@ public:
         // 'DidAction::yes' (each property implementing this callback must
         // make sure to do this).
         DidAction on_act();
+
+        void on_player_see();
 
         bool is_resisting_dmg(
                 DmgType dmg_type,

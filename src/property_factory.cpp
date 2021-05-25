@@ -227,6 +227,12 @@ Prop* make(const PropId id)
         case PropId::teleports:
                 return new PropTeleports();
 
+        case PropId::teleports_away:
+                return new PropTeleportsAway();
+
+        case PropId::always_aware:
+                return new PropAlwaysAware();
+
         case PropId::alters_env:
                 return new PropAltersEnv();
 
@@ -247,6 +253,9 @@ Prop* make(const PropId id)
 
         case PropId::confuses_adjacent:
                 return new PropConfusesAdjacent();
+
+        case PropId::frenzy_player_on_seen:
+                return new PropFrenzyPlayerOnSeen();
 
         case PropId::speaks_curses:
                 return new PropSpeaksCurses();

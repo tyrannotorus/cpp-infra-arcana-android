@@ -11,6 +11,7 @@
             <description></description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message></wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -74,6 +75,7 @@
             <description>This rotting thing appears to have been brought back to life through some abominable process. It has grown sharp claws to attack with.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
             <aware_message_seen>growls.</aware_message_seen>
@@ -176,6 +178,7 @@
             <description>A walking cadaver of towering proportions, it seems to have had the skin of countless other bodies poorly sewn over that of its own. Festering wounds on its hulk continually disgorge an acidic liquid which has bleached it beyond belief.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -278,6 +281,7 @@
             <description>Major Sir Eric Moreland Clapham-Lee was once a commanding officer during the Great War. Shortly after his plane was shot down, his body was stolen. Now he roams these halls as a resurrected warrior in service of the cult, commanding a squad of undead.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -374,6 +378,7 @@
             <description>Once an influential figure at the forefront of a prestigious institution, this fetid carcass now prowls among an army of the dead.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -469,6 +474,7 @@
             <description>A writhing mass of crawling intestines.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>starts groping and feeling around.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -561,6 +567,7 @@
             <description>A disembodied hand, crawling around frantically on its fingertips like a spider.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -653,6 +660,7 @@
             <description>A particularly nasty disembodied hand, crawling around frantically on its fingertips like a spider. Beware of the Thing.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -750,6 +758,7 @@
             <description>A severed head floating through the air.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -844,6 +853,7 @@
             <description>A fanatic cultist of the lowest rank, madly gibbering in some half-lost language. They may occasionally have learned to cast a spell or two, although never with any great skill. Therefore they tend to rely on mundane firearms to handle threats.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>true</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen use_cultist_messages="true"/>
@@ -944,6 +954,7 @@
             <description>Beckoned by The Thousand-Faced Moon into laying its mind bare for the occult, the psyche of this hierophant was ravaged by scores of entities from fiendish realities. They had it gouge out its eyes and tongue, and left it a husk of former humanity. Now it lumbers about aimlessly, brandishing a spiked mace with which it flays itself in mockery of physical anguish.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>screams in agony.</aware_message_seen>
@@ -1034,6 +1045,7 @@
             <description>A vile dwarfish creature, clad in coarse brown robes. It has a cruel grin on its pale face, and its eyes are gleaming with hatred. The Bog Tcher are mechanically inclined, which they put to use by crafting sadistic weapons and traps. Their favored weapon is their "spike gun", which can pin the target against solid objects for prolonged suffering.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -1121,6 +1133,7 @@
             <description>A shrivelled hag who croaks of deviltry and possesses knowledge beyond the ken of a sane mind. She reigns over the myriad man-rat hybrids crawling within the dungeon, humoring her most cherished like a child: not once does she deny it the black blood that flows inside her veins.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>chortles in a croaking voice.</aware_message_seen>
@@ -1226,6 +1239,7 @@
             <description>This man-rodent beast slinks through cracks in the church's walls and pounces on its victims, raking at their flesh with its undeveloped limbs. Being the black matron's mongrel of choice, it titters senselessly whenever it feasts on her blood.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>titters in a loathsome voice.</aware_message_seen>
@@ -1319,6 +1333,7 @@
             <description>Marred by a mass of purplish cysts, the hide of this beast has been distended to absurdity, rendering it the size of a cow. It weaves webs as quickly as it strides, and its jaws are thick with rank lather.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -1415,6 +1430,7 @@
             <description>A fanatic cultist of the Priest rank, madly gibbering in some half-lost language.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen use_cultist_messages="true"/>
@@ -1515,6 +1531,7 @@
             <description>A fanatic cultist of the Wizard rank, madly gibbering in some half-lost language.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen use_cultist_messages="true"/>
@@ -1614,6 +1631,7 @@
             <description>A fanatic cultist of the Arch Wizard rank, madly gibbering in some half-lost language.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen use_cultist_messages="true"/>
@@ -1713,6 +1731,7 @@
             <description>An enormous green spider.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -1805,6 +1824,7 @@
             <description>An enormous white spider.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -1897,6 +1917,7 @@
             <description>An enormous red spider.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -1989,6 +2010,7 @@
             <description>A faint shadow of a huge spider, lurking in the periphery.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -2083,6 +2105,7 @@
             <description>A large aggressive rodent.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -2174,6 +2197,7 @@
             <description>A malformed cross of rat and man, birthed from witchcraft. It has a warped human face and vestigial hands for forepaws.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -2268,6 +2292,7 @@
             <description>A fierce predator. It hisses menacingly, and venom drips from its fangs.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>hisses.</aware_message_seen>
@@ -2362,6 +2387,7 @@
             <description>A fierce predator. It hisses menacingly, and venom drips from its fangs.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>hisses.</aware_message_seen>
@@ -2459,6 +2485,7 @@
             <description>A fierce predator. It hisses menacingly, and venom drips from its fangs.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>hisses.</aware_message_seen>
@@ -2553,6 +2580,7 @@
             <description>This extremely aggressive canine seems to be part corporeal and part fire. It breathes searing flames.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>snarls.</aware_message_seen>
@@ -2651,6 +2679,7 @@
             <description>This extremely aggressive canine seems to be part corporeal and part energy. It breathes lightning.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>snarls.</aware_message_seen>
@@ -2749,6 +2778,7 @@
             <description>Zuul the Gatekeeper of Gozer is a demigod and minion of Gozer. It was worshiped by the Sumerians and Hittites in 6000 BC, along with Gozer.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>snarls.</aware_message_seen>
@@ -2844,6 +2874,7 @@
             <description>An amalgam of crustacean, insect and fungi whose droning voice resembles a swarm of maddened hornets. It employs an irregular set of appendages as limbs and is capable of making use of advanced technology.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>speaks in a droning voice.</aware_message_seen>
@@ -2945,6 +2976,7 @@
             <description>Part of a higher echelon of the Mi-Go, the buzz of this creature's commanding tone dims that of its insectoid wings. A protective bio-mechanical suit is fused to its carapace.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>speaks in a droning voice.</aware_message_seen>
@@ -3046,6 +3078,7 @@
             <description>Flying polyps are a horrible elder race of half polypous, utterly alien entities. They are only partly material and have the power of aerial motion, despite the absence of wings. Their senses does not include sight, but what senses they have can penetrate all material obstructions. They are invulnerable to normal means of damage, though they can be destroyed by certain forms of electrical energy.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>makes shrill whistling sounds.</aware_message_seen>
@@ -3147,6 +3180,7 @@
             <description>Flying polyps are a horrible elder race of half polypous, utterly alien entities. They are only partly material and have the power of aerial motion, despite the absence of wings. Their senses does not include sight, but what senses they have can penetrate all material obstructions. They are invulnerable to normal means of damage, though they can be destroyed by certain forms of electrical energy.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>makes shrill whistling sounds.</aware_message_seen>
@@ -3248,6 +3282,7 @@
             <description>A tentacled alien creature, mysteriously floating through the air in a ghostly manner. They somehow sustain themselves on the brain activity of other beings. This will usually not kill the victim, but the experience is horrific beyond words. They only feed on sound minds however - a strange or chaotic mind will cause them great distress.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -3340,6 +3375,7 @@
             <description>A gaunt, bipedal predator bearing canine features. Dried blood mottles its snout and its claws are filthy with sodden earth and chunks of flesh.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>It smells like an open grave here.</smell_message>
             <aware_message_seen>growls.</aware_message_seen>
@@ -3437,6 +3473,7 @@
             <description>A living shadow.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -3530,6 +3567,7 @@
             <description>A mysterious humanoid figure stalking for prey. It is invisible to normal eyes.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -3623,6 +3661,7 @@
             <description>A large wolf with eyes full of cunning.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>snarls.</aware_message_seen>
@@ -3713,6 +3752,7 @@
             <description>A restless spirit.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -3809,6 +3849,7 @@
             <description>A powerful spirit.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -3909,6 +3950,7 @@
             <description>A nightmarish creature of humanoid shape. It has a hideous gangly physique and sickly pale skin. Its arms are as long as its body is tall, and it attacks with ripping claws. It can appear anywhere it desires at any time, and can also snatch teleporting creatures from their voyage and draw them to it.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4000,6 +4042,7 @@
             <description>A nightmarish creature of humanoid shape. It has a hideous gangly physique and sickly pale skin. Its arms are as long as its body is tall, and it attacks with ripping claws. It can appear anywhere it desires at any time, and can also snatch teleporting creatures from their voyage and draw them to it. This ancient individual has learned the art of spellcasting.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4098,6 +4141,7 @@
             <description>A vicious black bird.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4188,6 +4232,7 @@
             <description>An unknown species, perhaps stemming from some hidden bowels of the earth. It is about as tall as a full-grown human.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4280,6 +4325,7 @@
             <description>An unknown species, perhaps stemming from some hidden bowels of the earth. It is about as tall as a full-grown human. Its attack drains health from the victim.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4371,6 +4417,7 @@
             <description>A colossal white bat, spoken of in ancient traditions as "Abaxu the Destroyer" (or a variation thereof). It has eternal life, which it sustains by feeding on other creatures - allegedly including human sacrifice. This has surely given rise to certain vampire myths over the years.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4464,6 +4511,7 @@
             <description>"There flapped rhythmically a horde of tame, trained, hybrid winged things... not altogether crows, nor moles, nor buzzards, nor ants, nor decomposed human beings, but something I cannot and must not recall."-H.P. Lovecraft, "The Festival".</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4556,6 +4604,7 @@
             <description>An otherworldly life form, akin to a macroscopic amoeba. It disrupts physical space around it, likely an effect of its dissonance with any other cosmos than its own.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4653,6 +4702,7 @@
             <description>A huge predatory insect.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4741,6 +4791,7 @@
             <description>A huge swarming insect.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4830,6 +4881,7 @@
             <description>A mummified human being, possibly dating back millennia.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -4929,6 +4981,7 @@
             <description>A grotesque mummified hybrid creature, with the body of a human and the head of a crocodile. It is wielding a spear.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5018,6 +5071,7 @@
             <description>The mummified fourth dynasty Egyptian pharaoh Khephren. How he came to dwell here is beyond anyone's guess.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5122,6 +5176,7 @@
             <description>The mummified sixth dynasty Egyptian pharaoh Nitokris. How she came to dwell here is beyond anyone's guess. Her name is found in the histories of Herodotus and writings of Manetho. According to the writings of the former, she took the throne by inviting her brother's murderers to a banquet. Then killed them by flooding the sealed room with the Nile.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5227,6 +5282,7 @@
             <description>A shambling thing which could be taken for a man were it not for its briny whiff and scaly skin. Slits on its neck emit a labored inflection, marking its struggle to gulp at breathable air. It hoists a rust-eaten spear and a net through which the thrashing remains of its last feast can be seen.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a briny smell here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5319,6 +5375,7 @@
             <description>A deacon for the deep-sea folk, this damnable shaman commands sorcery that backs its kin and wracks its foes. It is coated in copper scales which boast of majesty, and disdain is innate to its cold glare.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a briny smell here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5409,6 +5466,7 @@
             <description>An extremely aggressive species of great ape. Their pale skin and excellent night vision indicates that they adapted to subterranean life a very long time ago.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>howls.</aware_message_seen>
@@ -5500,6 +5558,7 @@
             <description>A slithering conglomeration of carnivorous worms. Piercing attacks such as pistol shots or dagger strikes are very ineffective against them.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5596,6 +5655,7 @@
             <description>A slithering conglomeration of carnivorous worms. Their bite causes heavy disorientation. Piercing attacks such as pistol shots or dagger strikes are very ineffective against them.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5693,6 +5753,7 @@
             <description>A spinning force of destruction.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5789,6 +5850,7 @@
             <description>A spinning force of fire and destruction.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5887,6 +5949,7 @@
             <description>A spinning force of pure energy.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -5985,6 +6048,7 @@
             <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. A malodorous broth of purulence bubbles about its nucleus, indicating it is ridden with disease.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message>It smells like filth and decrepitude here.</smell_message>
             <aware_message_seen>makes a gurgling noise.</aware_message_seen>
@@ -6084,6 +6148,7 @@
             <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. This species has developed a trait that allows it to mimic the colors of its surroundings, rendering it nearly invisible to its prey.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message>It smells like filth and decrepitude here.</smell_message>
             <aware_message_seen>makes a gurgling noise.</aware_message_seen>
@@ -6182,6 +6247,7 @@
             <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. The alarmingly green hue of this particular specimen indicates its utter venomousness.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message>It smells like filth and decrepitude here.</smell_message>
             <aware_message_seen>makes a gurgling noise.</aware_message_seen>
@@ -6281,6 +6347,7 @@
             <description>A loathsome beast hauling around a great sagging body on strained legs. Through its translucent, stretched skin the vile content of the creature's husk is clearly visible: carrion, human remains in various states of decomposition, trash, and sewage - along with other less recognizable things. Its head droops to the ground, where a tentacled mouth devours whatever filth it happens upon. It occasionally spews forth half-solid chunks of ooze, which after fermenting in the remarkable conditions of the creature's bowels, takes on a form of life of it's own - hunting for biological matter to decompose in order to feed its creator.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message>It smells like filth and decrepitude here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -6371,6 +6438,7 @@
             <description>A peculiar floating speck of strange shifting colors. It is very confusing to look at. Wherever they pass, they corrupt the environment around them. They are invulnerable to attacks from common materials like iron or steel, but can be destroyed by other forms of damage, such as fire or electricity.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -6422,6 +6490,7 @@
             <property>regenerates</property>
             <property>r_phys</property>
             <property>r_poison</property>
+            <property>r_fire</property>
             <property>r_fear</property>
             <property>r_conf</property>
             <property>r_disease</property>
@@ -6458,6 +6527,108 @@
             <native_room>plain</native_room>
             <native_room>damp</native_room>
             <native_room>chasm</native_room>
+            <native_room>cave</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- ghastly_light -->
+    <!--************************************************************-->
+    <monster id="ghastly_light">
+        <text>
+            <name_a>a Ghastly Light</name_a>
+            <name_the>the Ghastly Light</name_the>
+            <corpse_name_a></corpse_name_a>
+            <corpse_name_the></corpse_name_the>
+            <description>The freezing radiance emanating from this dancing flame provides no sense of comfort whatsoever - gazing upon it is disturbing to the very soul, and fills one with bitter hatred.</description>
+            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>false</allow_speed_description>
+            <wary_message></wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message></spell_message>
+            <death_message>fades out.</death_message>
+        </text>
+
+        <graphics>
+            <tile>gas_spore</tile>
+            <character>Q</character>
+            <color>light_green</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>8</hit_points>
+            <spirit>40</spirit>
+            <speed>very_fast</speed>
+            <shock_level>frightening</shock_level>
+            <melee>70</melee>
+            <ranged>0</ranged>
+            <dodging>0</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>false</can_bash_doors>
+            <can_swim>false</can_swim>
+            <size>humanoid</size>
+            <always_prevent_knockback>true</always_prevent_knockback>
+            <can_bleed>false</can_bleed>
+            <can_leave_corpse>false</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <properties>
+            <property>frenzy_player_on_seen</property>
+            <property>teleports_away</property>
+            <property>always_aware</property>
+            <property>deaf</property>
+            <property>r_phys</property>
+            <property>r_elec</property>
+            <property>r_poison</property>
+            <property>r_fire</property>
+            <property>r_fear</property>
+            <property>r_conf</property>
+            <property>r_disease</property>
+            <property>r_blind</property>
+            <property>r_para</property>
+            <property>darkvision</property>
+            <property>ethereal</property>
+            <property>radiant_adjacent</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>0</erratic_move_percent>
+            <turns_aware>8</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <looks>false</looks>
+            <avoids_blocking_friend>false</avoids_blocking_friend>
+            <attacks>false</attacks>
+            <paths_to_target_when_aware>false</paths_to_target_when_aware>
+            <moves_to_target_when_los>false</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>false</moves_to_leader>
+            <moves_randomly_when_unaware>false</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>21</min_dungeon_level>
+            <max_dungeon_level>26</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size>alone</group_size>
+            <native_room>plain</native_room>
+            <native_room>damp</native_room>
+            <native_room>chasm</native_room>
+            <native_room>cave</native_room>
         </spawning>
     </monster>
 
@@ -6473,6 +6644,7 @@
             <description>It resembles an immense squid, with reaching, groping tentacles, and a pulpy, elongated sack of a body. Chthonians are powerful burrowers, and live for more than a thousand years.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -6564,6 +6736,7 @@
             <description>A ropy, winged worm of vast size and vaporous composition. Brought forth from another plane of existence it drifts in endless search of sustenance, its maw hanging so agape it could swallow an ox whole.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -6657,6 +6830,7 @@
             <description>Shifting in and out of sight, this creature resembles a piece of cloth sailing through the aether, seemingly folding time-space along with its dreamy soar. Atop its craned neck rests an oblong orb with which it conjures deadly bolts to heave onto any threat.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -6766,6 +6940,7 @@
             <description>A vast, fully matured Khaga, the flight of this cryptic being conceals it from ordinary eyesight. It wails a disarmingly beautiful mantra which dissonates with the roar of the bolts it summons from its orb-like head.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -6873,6 +7048,7 @@
             <description>An infernal piece of technology, seemingly designed to serve as a sort of guard. It hovers around, searching the area for interlopers to blast on sight. It appears to have some organic parts, and may even be a conscious living being.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen>makes a deep buzzing sound.</aware_message_seen>
@@ -6969,6 +7145,7 @@
             <description></description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message></wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7059,6 +7236,7 @@
             <description>A sickly growth thriving in damp areas. It produces toxic spores which it stores in its slimy heads.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>false</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7159,6 +7337,7 @@
             <description>A sickly growth thriving in damp areas. The toxic spores of this particular species are strongly hallucinogenic.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>false</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7259,6 +7438,7 @@
             <description>An array of writhing tentacles sprouting up from the ground.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seem disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7351,6 +7531,7 @@
             <description>A vaguely intelligent floating fungus-based organism. It contains a highly explosive gas and will detonate very easily, which it seems to desire.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7406,11 +7587,11 @@
             <erratic_move_percent>15</erratic_move_percent>
             <turns_aware>5</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
-            <looks>true</looks>
+            <looks>false</looks>
             <avoids_blocking_friend>false</avoids_blocking_friend>
             <attacks>false</attacks>
             <paths_to_target_when_aware>false</paths_to_target_when_aware>
-            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_target_when_los>false</moves_to_target_when_los>
             <moves_to_lair>true</moves_to_lair>
             <moves_to_leader>false</moves_to_leader>
             <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
@@ -7445,6 +7626,7 @@
             <description>A living incarnation of death. With its goat-like features, it is eerily similar to the imagery of Devils and Demons seen in medieval woodcuts.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>It smells like death here.</smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7548,6 +7730,7 @@
             <description>A gelatinous worm which contorts and mutates itself into different beings. Destroying the mutated form will revert the creature back to its original shape.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7645,6 +7828,7 @@
             <description>The Supreme Wizard of the Cult of Starry Wisdom. He appears incredibly old, like a hideous ancient vampire or a grim reaper. Tattered crimson robes flow from his skeletal frame, his bony fingers extends into razor sharp claws, and he has a grim expression on his face.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7750,6 +7934,7 @@
             <description>Balastha is an undead master of arms and warfare, bound to guard the High Priest for all eternity. He is wielding a Tommy Gun.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7838,6 +8023,7 @@
             <description>Uraga is an undead master of deception and assassination, bound to guard the High Priest for all eternity.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
@@ -7926,6 +8112,7 @@
             <description>Vrka is a monstrous wolf-like creature dwelling in the High Priest's chambers, serving as a guardian.</description>
             <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>

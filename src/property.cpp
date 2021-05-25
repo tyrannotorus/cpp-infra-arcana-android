@@ -28,6 +28,7 @@
 #include "explosion.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "hints.hpp"
 #include "insanity.hpp"
 #include "inventory.hpp"
@@ -239,10 +240,8 @@ void PropEntangled::on_applied()
         try_player_end_with_machete();
 }
 
-PropEnded PropEntangled::affect_move_dir(const P& actor_pos, Dir& dir)
+PropEnded PropEntangled::affect_move_dir(Dir& dir)
 {
-        (void)actor_pos;
-
         if (dir == Dir::center)
         {
                 return PropEnded::no;
@@ -786,10 +785,8 @@ void PropTerrified::on_applied()
         }
 }
 
-PropEnded PropNailed::affect_move_dir(const P& actor_pos, Dir& dir)
+PropEnded PropNailed::affect_move_dir(Dir& dir)
 {
-        (void)actor_pos;
-
         if (dir == Dir::center)
         {
                 return PropEnded::no;
@@ -799,7 +796,7 @@ PropEnded PropNailed::affect_move_dir(const P& actor_pos, Dir& dir)
         if (m_owner->is_player())
         {
                 const auto intended_target =
-                        actor_pos +
+                        m_owner->m_pos +
                         dir_utils::offset(dir);
 
                 if (is_player_aware_of_hostile_mon_at(intended_target))
@@ -1106,7 +1103,7 @@ bool PropConfused::allow_attack_ranged(const Verbose verbose) const
         return true;
 }
 
-PropEnded PropConfused::affect_move_dir(const P& actor_pos, Dir& dir)
+PropEnded PropConfused::affect_move_dir(Dir& dir)
 {
         if (dir == Dir::center)
         {
@@ -1116,34 +1113,36 @@ PropEnded PropConfused::affect_move_dir(const P& actor_pos, Dir& dir)
         Array2<bool> blocked(map::dims());
 
         const R area_check_blocked(
-                actor_pos - P(1, 1),
-                actor_pos + P(1, 1));
+                m_owner->m_pos - P(1, 1),
+                m_owner->m_pos + P(1, 1));
 
         map_parsers::BlocksActor(*m_owner, ParseActors::yes)
                 .run(blocked,
                      area_check_blocked,
                      MapParseMode::overwrite);
 
-        if (rnd::one_in(8))
+        if (!rnd::one_in(8))
         {
-                std::vector<P> d_bucket;
+                return PropEnded::no;
+        }
 
-                for (const auto& d : dir_utils::g_dir_list)
+        std::vector<P> d_bucket;
+
+        for (const auto& d : dir_utils::g_dir_list)
+        {
+                const auto tgt_p = m_owner->m_pos + d;
+
+                if (!blocked.at(tgt_p))
                 {
-                        const auto tgt_p = actor_pos + d;
-
-                        if (!blocked.at(tgt_p))
-                        {
-                                d_bucket.push_back(d);
-                        }
+                        d_bucket.push_back(d);
                 }
+        }
 
-                if (!d_bucket.empty())
-                {
-                        const auto& d = rnd::element(d_bucket);
+        if (!d_bucket.empty())
+        {
+                const auto& d = rnd::element(d_bucket);
 
-                        dir = dir_utils::dir(d);
-                }
+                dir = dir_utils::dir(d);
         }
 
         return PropEnded::no;
@@ -1381,64 +1380,84 @@ int PropAstralOpiumAddict::affect_shock(const int shock) const
         return result;
 }
 
-PropEnded PropFrenzied::affect_move_dir(const P& actor_pos, Dir& dir)
+bool PropFrenzied::allow_move_dir(const Dir dir)
 {
-        if (!m_owner->is_player() ||
-            (dir == Dir::center))
+        if (!m_owner->is_player() || (dir == Dir::center))
         {
-                return PropEnded::no;
+                return true;
         }
 
         const auto seen_foes = actor::seen_foes(*m_owner);
 
         if (seen_foes.empty())
         {
-                return PropEnded::no;
+                return true;
         }
-
-        std::vector<P> seen_foes_cells;
-
-        seen_foes_cells.clear();
-
-        for (auto* actor : seen_foes)
-        {
-                seen_foes_cells.push_back(actor->m_pos);
-        }
-
-        std::sort(
-                std::begin(seen_foes_cells),
-                std::end(seen_foes_cells),
-                IsCloserToPos(actor_pos));
-
-        const auto& closest_mon_pos = seen_foes_cells[0];
 
         Array2<bool> blocked(map::dims());
 
         map_parsers::BlocksActor(*m_owner, ParseActors::no)
                 .run(blocked, blocked.rect());
 
-        const auto line =
-                line_calc::calc_new_line(
-                        actor_pos,
-                        closest_mon_pos,
-                        true,
-                        999,
-                        false);
+        std::vector<const actor::Actor*> seen_reachable_foes;
+        seen_reachable_foes.reserve(seen_foes.size());
 
-        if (line.size() > 1)
+        for (const auto* const actor : seen_foes)
         {
-                for (const P& pos : line)
+                const auto line =
+                        line_calc::calc_new_line(
+                                m_owner->m_pos,
+                                actor->m_pos,
+                                true,
+                                999,
+                                false);
+
+                if (line.empty())
                 {
-                        if (blocked.at(pos))
-                        {
-                                return PropEnded::no;
-                        }
+                        continue;
                 }
 
-                dir = dir_utils::dir(line[1] - actor_pos);
+                const auto is_blocked =
+                        std::any_of(
+                                std::begin(line),
+                                std::end(line),
+                                [&blocked](const P& p) {
+                                        return blocked.at(p);
+                                });
+
+                if (is_blocked)
+                {
+                        continue;
+                }
+
+                seen_reachable_foes.push_back(actor);
         }
 
-        return PropEnded::no;
+        if (seen_reachable_foes.empty())
+        {
+                return true;
+        }
+
+        // There are seen reachable seen foes
+
+        const auto new_pos = m_owner->m_pos + dir_utils::offset(dir);
+
+        for (const auto* actor : seen_reachable_foes)
+        {
+                const int old_dist = king_dist(m_owner->m_pos, actor->m_pos);
+                const int new_dist = king_dist(new_pos, actor->m_pos);
+
+                if (new_dist < old_dist)
+                {
+                        // This step would take the player closer to at least
+                        // one reachable seen foe - allow the move.
+                        return true;
+                }
+        }
+
+        msg_log::add("I will not step away!");
+
+        return false;
 }
 
 bool PropFrenzied::is_resisting_other_prop(const PropId prop_id) const
@@ -2166,25 +2185,53 @@ PropActResult PropCorpseEater::on_act()
 
 PropActResult PropTeleports::on_act()
 {
-        auto did_action = DidAction::no;
-
         const int teleport_one_in_n = 12;
 
-        if (m_owner->is_alive() && rnd::one_in(teleport_one_in_n))
+        if (!m_owner->is_alive() || !rnd::one_in(teleport_one_in_n))
         {
-                teleport(*m_owner);
-
-                game_time::tick();
-
-                did_action = DidAction::yes;
+                return {};
         }
 
+        teleport(*m_owner);
+
+        game_time::tick();
+
         PropActResult result;
-
-        result.did_action = did_action;
+        result.did_action = DidAction::yes;
         result.prop_ended = PropEnded::no;
-
         return result;
+}
+
+PropActResult PropTeleportsAway::on_act()
+{
+        const int dist = king_dist(m_owner->m_pos, map::g_player->m_pos);
+        const bool is_player_near = (dist <= 1);
+
+        if (!is_player_near ||
+            !m_owner->is_alive() ||
+            m_owner->is_actor_my_leader(map::g_player))
+        {
+                return {};
+        }
+
+        const int max_dist = rnd::one_in(50) ? -1 : rnd::range(3, 4);
+
+        teleport(
+                *m_owner,
+                ShouldCtrlTele::never,
+                max_dist);
+
+        game_time::tick();
+
+        PropActResult result;
+        result.did_action = DidAction::yes;
+        result.prop_ended = PropEnded::no;
+        return result;
+}
+
+void PropAlwaysAware::on_std_turn()
+{
+        m_owner->m_mon_aware_state.aware_counter = 10;
 }
 
 PropActResult PropCorruptsEnvColor::on_act()
@@ -2695,6 +2742,29 @@ void PropConfusesAdjacent::on_std_turn()
         map::g_player->m_properties.apply(prop_confusd);
 }
 
+void PropFrenzyPlayerOnSeen::on_player_see()
+{
+        const int taunt_on_in_n = 3;
+
+        auto& properties = map::g_player->m_properties;
+
+        if (!properties.has(PropId::frenzied) &&
+            rnd::one_in(taunt_on_in_n))
+        {
+                const auto name =
+                        text_format::first_to_upper(
+                                m_owner->name_the());
+
+                msg_log::add(name + " is taunting me!");
+
+                auto* const frenzy = property_factory::make(PropId::frenzied);
+
+                frenzy->set_duration(rnd::range(20, 35));
+
+                properties.apply(frenzy);
+        }
+}
+
 PropActResult PropSpeaksCurses::on_act()
 {
         if (m_owner->is_player())
@@ -2702,16 +2772,21 @@ PropActResult PropSpeaksCurses::on_act()
                 return {};
         }
 
+        const int curse_one_in_n = 3;
+
         if (!m_owner->is_alive() ||
             !m_owner->is_aware_of_player() ||
-            !rnd::one_in(3))
+            !rnd::one_in(curse_one_in_n))
         {
                 return {};
         }
 
         Array2<bool> blocked_los(map::dims());
 
-        const R fov_rect = fov::fov_rect(m_owner->m_pos, blocked_los.dims());
+        const auto fov_rect =
+                fov::fov_rect(
+                        m_owner->m_pos,
+                        blocked_los.dims());
 
         map_parsers::BlocksLos().run(
                 blocked_los,

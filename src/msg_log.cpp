@@ -323,9 +323,8 @@ void add(
         }
 
         // If frenzied, change the message
-        // NOTE: This is done through a recursive call - the reason for this is
-        // is to allow the parameter string to be a const reference.
         if (map::g_player->m_properties.has(PropId::frenzied) &&
+            (copy_to_history == CopyToMsgHistory::yes) &&
             allow_convert_to_frenzied_str(str))
         {
                 const std::string frenzied_str = convert_to_frenzied_str(str);

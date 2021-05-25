@@ -424,9 +424,14 @@ static void move_player(Dir dir)
                 return;
         }
 
+        if (!player.m_properties.allow_move_dir(dir))
+        {
+                return;
+        }
+
         const auto intended_dir = dir;
 
-        player.m_properties.affect_move_dir(player.m_pos, dir);
+        player.m_properties.affect_move_dir(dir);
 
         const auto target = player.m_pos + dir_utils::offset(dir);
 
@@ -466,7 +471,7 @@ static void move_mon(actor::Mon& mon, Dir dir)
         }
 #endif  // NDEBUG
 
-        mon.m_properties.affect_move_dir(mon.m_pos, dir);
+        mon.m_properties.affect_move_dir(dir);
 
         // Movement direction is stored for AI purposes
         mon.m_ai_state.last_dir_moved = dir;

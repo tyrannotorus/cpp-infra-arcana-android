@@ -201,6 +201,8 @@ public:
                 return {};
         }
 
+        virtual void on_player_see() {}
+
         virtual void on_applied() {}
 
         virtual void on_end() {}
@@ -306,12 +308,18 @@ public:
                 return 0;
         }
 
-        virtual PropEnded affect_move_dir(const P& actor_pos, Dir& dir)
+        virtual PropEnded affect_move_dir(Dir& dir)
         {
-                (void)actor_pos;
                 (void)dir;
 
                 return PropEnded::no;
+        }
+
+        virtual bool allow_move_dir(Dir dir)
+        {
+                (void)dir;
+
+                return true;
         }
 
         virtual bool is_resisting_other_prop(const PropId prop_id) const
@@ -654,7 +662,7 @@ public:
 
         void on_applied() override;
 
-        PropEnded affect_move_dir(const P& actor_pos, Dir& dir) override;
+        PropEnded affect_move_dir(Dir& dir) override;
 
 private:
         bool try_player_end_with_machete();
@@ -706,7 +714,7 @@ public:
         PropConfused() :
                 Prop(PropId::confused) {}
 
-        PropEnded affect_move_dir(const P& actor_pos, Dir& dir) override;
+        PropEnded affect_move_dir(Dir& dir) override;
 
         bool allow_attack_melee(Verbose verbose) const override;
         bool allow_attack_ranged(Verbose verbose) const override;
@@ -783,7 +791,7 @@ public:
                 return "Nailed(" + std::to_string(m_nr_spikes) + ")";
         }
 
-        PropEnded affect_move_dir(const P& actor_pos, Dir& dir) override;
+        PropEnded affect_move_dir(Dir& dir) override;
 
         void on_more(const Prop& new_prop) override
         {
@@ -1124,7 +1132,7 @@ public:
         void on_applied() override;
         void on_end() override;
 
-        PropEnded affect_move_dir(const P& actor_pos, Dir& dir) override;
+        bool allow_move_dir(Dir dir) override;
 
         bool allow_read_absolute(Verbose verbose) const override;
         bool allow_cast_intr_spell_absolute(Verbose verbose) const override;
@@ -1340,6 +1348,24 @@ public:
         PropActResult on_act() override;
 };
 
+class PropTeleportsAway : public Prop
+{
+public:
+        PropTeleportsAway() :
+                Prop(PropId::teleports_away) {}
+
+        PropActResult on_act() override;
+};
+
+class PropAlwaysAware : public Prop
+{
+public:
+        PropAlwaysAware() :
+                Prop(PropId::always_aware) {}
+
+        void on_std_turn() override;
+};
+
 class PropCorruptsEnvColor : public Prop
 {
 public:
@@ -1429,6 +1455,15 @@ public:
                 Prop(PropId::confuses_adjacent) {}
 
         void on_std_turn() override;
+};
+
+class PropFrenzyPlayerOnSeen : public Prop
+{
+public:
+        PropFrenzyPlayerOnSeen() :
+                Prop(PropId::frenzy_player_on_seen) {}
+
+        void on_player_see() override;
 };
 
 class PropSpeaksCurses : public Prop

@@ -299,8 +299,15 @@ void Mon::hear_sound(const Snd& snd)
         }
 }
 
-void Mon::speak_phrase(const AlertsMon alerts_others)
+void Mon::speak_phrase(AlertsMon alerts_others)
 {
+        if (m_properties.has(PropId::always_aware))
+        {
+                // This monster is always aware of the player - avoid
+                // continuously alerting other mosnters.
+                alerts_others = AlertsMon::no;
+        }
+
         const bool is_seen_by_player = can_player_see_actor(*this);
 
         std::string msg =

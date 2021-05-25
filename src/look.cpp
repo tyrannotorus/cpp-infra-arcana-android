@@ -487,9 +487,12 @@ std::string ViewActorDescr::auto_description_str() const
                         get_mon_dlvl_descr(actor_data, m_actor));
         }
 
-        text_format::append_with_space(
-                str,
-                get_mon_speed_descr(actor_data, m_actor));
+        if (actor_data.allow_speed_descr)
+        {
+                text_format::append_with_space(
+                        str,
+                        get_mon_speed_descr(actor_data, m_actor));
+        }
 
         text_format::append_with_space(
                 str,

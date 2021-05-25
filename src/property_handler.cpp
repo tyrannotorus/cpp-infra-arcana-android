@@ -641,6 +641,14 @@ DidAction PropHandler::on_act()
         return DidAction::no;
 }
 
+void PropHandler::on_player_see()
+{
+        for (auto& prop : m_props)
+        {
+                prop->on_player_see();
+        }
+}
+
 bool PropHandler::is_temporary_negative_prop(const Prop& prop) const
 {
         const auto id = prop.m_id;
@@ -966,19 +974,32 @@ int PropHandler::affect_shock(const int shock) const
         return new_shock;
 }
 
-void PropHandler::affect_move_dir(const P& actor_pos, Dir& dir) const
+void PropHandler::affect_move_dir(Dir& dir) const
 {
         for (size_t i = 0; i < m_props.size();)
         {
                 const auto& prop = m_props[i];
 
-                const auto prop_ended = prop->affect_move_dir(actor_pos, dir);
+                const auto prop_ended = prop->affect_move_dir(dir);
 
                 if (prop_ended == PropEnded::no)
                 {
                         ++i;
                 }
         }
+}
+
+bool PropHandler::allow_move_dir(const Dir dir) const
+{
+        for (const auto& prop : m_props)
+        {
+                if (!prop->allow_move_dir(dir))
+                {
+                        return false;
+                }
+        }
+
+        return true;
 }
 
 bool PropHandler::allow_attack(const Verbose verbose) const

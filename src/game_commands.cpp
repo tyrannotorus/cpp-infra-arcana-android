@@ -1119,9 +1119,8 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                player_spells::learn_spell(
-                        SpellId::control_object,
-                        Verbose::yes);
+                map::g_player->m_properties.apply(
+                        property_factory::make(PropId::clockwork_hasted));
         }
         break;
 

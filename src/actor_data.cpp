@@ -97,6 +97,7 @@ static const std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
         {"ooze_poison", actor::Id::ooze_poison},
         {"glasuu", actor::Id::glasuu},
         {"strange_color", actor::Id::strange_color},
+        {"ghastly_light", actor::Id::ghastly_light},
         {"chthonian", actor::Id::chthonian},
         {"hunting_horror", actor::Id::hunting_horror},
         {"sentry_drone", actor::Id::sentry_drone},
@@ -243,6 +244,12 @@ static void dump_text(xml::Element* text_e, actor::ActorData& data)
                         xml::first_child(
                                 text_e,
                                 "allow_wielded_weapon_description"));
+
+        data.allow_speed_descr =
+                xml::get_text_bool(
+                        xml::first_child(
+                                text_e,
+                                "allow_speed_description"));
 
         data.smell_msg =
                 xml::get_text_str(

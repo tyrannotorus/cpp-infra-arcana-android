@@ -580,25 +580,21 @@ void Player::add_shock_from_seen_monsters()
                         continue;
                 }
 
-                Mon* mon = static_cast<Mon*>(actor);
-
-                if (!mon->is_player_aware_of_me())
+                if (!actor->is_player_aware_of_me())
                 {
                         continue;
                 }
 
                 ShockLvl shock_lvl = ShockLvl::none;
 
-                if (can_player_see_actor(*mon))
+                if (can_player_see_actor(*actor))
                 {
-                        shock_lvl = mon->m_data->mon_shock_lvl;
+                        shock_lvl = actor->m_data->mon_shock_lvl;
                 }
                 else
                 {
                         // Monster cannot be seen
-                        const auto mon_p = mon->m_pos;
-
-                        if (map::g_seen.at(mon_p))
+                        if (map::g_seen.at(actor->m_pos))
                         {
                                 // There is an invisible monster here!
                                 shock_lvl = ShockLvl::terrifying;

@@ -42,7 +42,7 @@ int xp_pct();
 int xp_accumulated();
 TimeData start_time();
 
-void on_mon_seen(actor::Actor& actor);
+void player_discover_monster(actor::Actor& actor);
 
 void on_mon_killed(actor::Actor& actor);
 

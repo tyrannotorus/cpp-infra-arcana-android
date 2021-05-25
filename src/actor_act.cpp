@@ -67,6 +67,34 @@ static void remove_player_with_sanctuary(std::vector<actor::Actor*>& actors)
         }
 }
 
+static std::vector<const terrain::Door*> adj_known_closed_doors(const P& p)
+{
+        std::vector<const terrain::Door*> doors;
+
+        for (const P& d : dir_utils::g_dir_list_w_center)
+        {
+                const auto p_adj = p + d;
+                const auto* const adj_terrain = map::g_terrain.at(p_adj);
+                const bool is_adj_seen = map::g_seen.at(p_adj);
+
+                if (!is_adj_seen ||
+                    (adj_terrain->id() != terrain::Id::door))
+                {
+                        continue;
+                }
+
+                const auto* const door =
+                        static_cast<const terrain::Door*>(adj_terrain);
+
+                if (!door->is_hidden() && !door->is_open())
+                {
+                        doors.push_back(door);
+                }
+        }
+
+        return doors;
+}
+
 static void player_act()
 {
         actor::Player& player = *map::g_player;
@@ -255,34 +283,6 @@ static void player_act()
                                 return;
                         }
                 }
-
-                auto adj_known_closed_doors = [](const P& p) {
-                        std::vector<const terrain::Door*> doors;
-
-                        for (const P& d : dir_utils::g_dir_list_w_center)
-                        {
-                                const P p_adj(p + d);
-
-                                const auto* const adj_terrain =
-                                        map::g_terrain.at(p_adj);
-
-                                const bool is_adj_seen = map::g_seen.at(p_adj);
-
-                                if (is_adj_seen &&
-                                    (adj_terrain->id() == terrain::Id::door))
-                                {
-                                        const auto* const door =
-                                                static_cast<const terrain::Door*>(adj_terrain);
-
-                                        if (!door->is_hidden() && !door->is_open())
-                                        {
-                                                doors.push_back(door);
-                                        }
-                                }
-                        }
-
-                        return doors;
-                };
 
                 const auto adj_known_closed_doors_before =
                         adj_known_closed_doors(player.m_pos);

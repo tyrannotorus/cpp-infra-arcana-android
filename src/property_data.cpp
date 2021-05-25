@@ -25,6 +25,7 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"conflict", PropId::conflict},
         {"confused", PropId::confused},
         {"confuses_adjacent", PropId::confuses_adjacent},
+        {"frenzy_player_on_seen", PropId::frenzy_player_on_seen},
         {"corpse_eater", PropId::corpse_eater},
         {"corpse_rises", PropId::corpse_rises},
         {"corrupts_environment_color", PropId::corrupts_env_color},
@@ -82,6 +83,8 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"stunned", PropId::stunned},
         {"tele_ctrl", PropId::tele_ctrl},
         {"teleports", PropId::teleports},
+        {"teleports_away", PropId::teleports_away},
+        {"always_aware", PropId::always_aware},
         {"terrified", PropId::terrified},
         {"vortex", PropId::vortex},
         {"weakened", PropId::weakened},
@@ -922,6 +925,12 @@ static void init_data_list()
         d.id = PropId::teleports;
         add(d);
 
+        d.id = PropId::teleports_away;
+        add(d);
+
+        d.id = PropId::always_aware;
+        add(d);
+
         d.id = PropId::corrupts_env_color;
         add(d);
 
@@ -941,6 +950,9 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::confuses_adjacent;
+        add(d);
+
+        d.id = PropId::frenzy_player_on_seen;
         add(d);
 
         d.id = PropId::speaks_curses;

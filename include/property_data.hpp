@@ -71,6 +71,8 @@ enum class PropId
         splits_on_death,
         corpse_eater,
         teleports,
+        teleports_away,
+        always_aware,
         corrupts_env_color,  // "Strange color" monster corrupting the area
         alters_env,
         regenerates,
@@ -79,6 +81,7 @@ enum class PropId
         breeds,
         vomits_ooze,  // Gla'Suu
         confuses_adjacent,  // "Strange color" confusing player when seen
+        frenzy_player_on_seen,  // Ghastly Light
         speaks_curses,
         aura_of_decay,  // Damages adjacent hostile creatures
         reduced_pierce_dmg,  // E.g. worm masses

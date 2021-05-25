@@ -95,6 +95,7 @@ enum class Id
         ooze_poison,
         glasuu,
         strange_color,
+        ghastly_light,
         chthonian,
         hunting_horror,
         sentry_drone,
@@ -229,6 +230,7 @@ struct ActorData
         Size actor_size;
         bool allow_spawn_dlvl_descr;
         bool allow_wielded_wpn_descr;
+        bool allow_speed_descr;
         int nr_kills;
         bool has_player_seen;
         bool can_open_doors;

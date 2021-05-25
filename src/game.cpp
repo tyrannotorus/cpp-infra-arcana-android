@@ -265,12 +265,10 @@ void incr_clvl_number()
         ++s_clvl;
 }
 
-void on_mon_seen(actor::Actor& actor)
+void player_discover_monster(actor::Actor& actor)
 {
         if (actor.m_mimic_data)
         {
-                // Player is hallucinating the appearance of this monster - do
-                // not give experience for discovering the actual monster.
                 return;
         }
 
@@ -515,7 +513,7 @@ void GameState::update()
         while (true)
         {
                 // Let the current actor act
-                auto* actor = game_time::current_actor();
+                auto* const actor = game_time::current_actor();
 
                 const bool allow_act = actor->m_properties.allow_act();
 

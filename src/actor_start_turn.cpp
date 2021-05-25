@@ -501,7 +501,9 @@ static void player_start_turn()
         {
                 static_cast<actor::Mon*>(actor)->set_player_aware_of_me();
 
-                game::on_mon_seen(*actor);
+                game::player_discover_monster(*actor);
+
+                actor->m_properties.on_player_see();
         }
 
         player.add_shock_from_seen_monsters();

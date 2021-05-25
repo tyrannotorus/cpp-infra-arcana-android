@@ -33,6 +33,7 @@ Gameplay
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
 * Added a message when spells are upgraded (e.g. by a Gong)
 * Being blind no longer immediately raises shock by 30% - instead the shock ramps up each turn up to 30%
+* Reworked the "Frenzied" property - instead of changing the player's movement direction on a move command, moves away from monsters are now simply prevented (not an action)
 * The Ghoul ability "Frenzy" no longer costs spirit to use
 * The Ghoul trait "Toxic" now has 75% chance to apply poison, instead of 25%
 * A lot more terrain objects can be destroyed or lit on fire (for example altars or monoliths are destroyed by explosions, and wooden chests or bookshelves can be lit on fire)

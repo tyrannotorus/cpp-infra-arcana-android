@@ -87,12 +87,9 @@ static void make_all_mon_not_seeing_player_unaware()
 {
         Array2<bool> blocks_los(map::dims());
 
-        const R r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
+        const auto r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
 
-        map_parsers::BlocksLos()
-                .run(blocks_los,
-                     r,
-                     MapParseMode::overwrite);
+        map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
 
         for (auto* const mon : game_time::g_actors)
         {
@@ -274,7 +271,13 @@ void teleport(
                 }
         }
 
+        // Do not allow teleporting into any cell that blocks this actor
         map_parsers::BlocksActor(actor, ParseActors::yes)
+                .run(blocked, blocked.rect(), MapParseMode::append);
+
+        // Do not allow teleporting into any cell that blocks walking (otherwise
+        // for example ethereal monsters could teleport far into the walls).
+        map_parsers::BlocksWalking(ParseActors::no)
                 .run(blocked, blocked.rect(), MapParseMode::append);
 
         blocked.at(actor.m_pos) = false;
@@ -310,17 +313,8 @@ void teleport(
 
 void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 {
-        if (!actor.is_player() && actor::can_player_see_actor(actor))
-        {
-                const std::string actor_name_the =
-                        text_format::first_to_upper(
-                                actor.name_the());
-
-                msg_log::add(
-                        actor_name_the +
-                        " " +
-                        common_text::g_mon_disappear);
-        }
+        const bool player_can_see_actor_before =
+                actor::can_player_see_actor(actor);
 
         if (!actor.is_player())
         {
@@ -399,6 +393,27 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                 static_cast<actor::Player&>(actor).update_tmp_shock();
 
                 make_all_mon_not_seeing_player_unaware();
+        }
+        else if (player_can_see_actor_before)
+        {
+                const bool player_can_see_actor =
+                        actor::can_player_see_actor(actor);
+
+                if (!player_can_see_actor)
+                {
+                        actor.m_mon_aware_state.player_aware_of_me_counter = 0;
+                }
+
+                const std::string actor_name_the =
+                        text_format::first_to_upper(
+                                actor.name_the());
+
+                const auto msg_ending =
+                        player_can_see_actor
+                        ? common_text::g_mon_disappear_reappear
+                        : common_text::g_mon_disappear;
+
+                msg_log::add(actor_name_the + " " + msg_ending);
         }
 
         make_player_aware_of_all_seen_mon();
