@@ -60,7 +60,7 @@ int map_cell_px_h();
 
 bool text_mode_filled_walls();
 
-bool is_audio_enabled();
+int master_volume_pct();
 
 bool is_amb_audio_enabled();
 

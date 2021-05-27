@@ -11,6 +11,7 @@
 #include <ext/alloc_traits.h>
 #include <fstream>
 #include <iterator>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -76,7 +77,7 @@ static int s_delay_explosion = -1;
 static std::string s_default_player_name;
 static bool s_is_bot_playing = false;
 static bool s_is_gj_mode = false;
-static bool s_is_audio_enabled = false;
+static int s_master_volume_pct = 100;
 static bool s_is_amb_audio_enabled = false;
 static bool s_is_amb_audio_preloaded = false;
 static int s_screen_px_w = -1;
@@ -189,26 +190,29 @@ static void set_default_variables()
         static_assert(default_nr_gui_cells_y >= io::g_min_nr_gui_cells_y);
 
 #ifndef NDEBUG
-        TRACE << "Default number of gui cells: "
-              << default_nr_gui_cells_x
-              << "x"
-              << default_nr_gui_cells_y
-              << std::endl;
+        TRACE
+                << "Default number of gui cells: "
+                << default_nr_gui_cells_x
+                << "x"
+                << default_nr_gui_cells_y
+                << std::endl;
 
         const int default_res_w = default_nr_gui_cells_x * s_gui_cell_px_w;
         const int default_res_h = default_nr_gui_cells_y * s_gui_cell_px_h;
 
-        TRACE << "Default resolution: "
-              << default_res_w
-              << "x"
-              << default_res_h
-              << std::endl;
+        TRACE
+                << "Default resolution: "
+                << default_res_w
+                << "x"
+                << default_res_h
+                << std::endl;
 
-        TRACE << "Minimum required resolution: "
-              << io::g_min_res_w
-              << "x"
-              << io::g_min_res_h
-              << std::endl;
+        TRACE
+                << "Minimum required resolution: "
+                << io::g_min_res_w
+                << "x"
+                << io::g_min_res_h
+                << std::endl;
 
         // Minimum resolution cannot be statically asserted since it depends on
         // the font dimensions
@@ -225,10 +229,10 @@ static void set_default_variables()
         s_screen_px_h = s_gui_cell_px_h * default_nr_gui_cells_y;
 
 #ifdef NDEBUG
-        s_is_audio_enabled = true;
+        s_master_volume_pct = 100;
 #else
         // Hearing the audio all the time while debug testing gets old...
-        s_is_audio_enabled = false;
+        s_master_volume_pct = 0;
 #endif  // NDEBUG
 
         s_is_amb_audio_enabled = true;
@@ -263,6 +267,56 @@ static void player_sets_option(
         {
         case 0:
         {
+                // Audio master volume
+
+                const bool was_enabled_before = (s_master_volume_pct > 0);
+
+                const int step = 10;
+
+                if ((direction == OptionToggleDirecton::enter) ||
+                    (direction == OptionToggleDirecton::right))
+                {
+                        // Enter or right
+                        s_master_volume_pct += step;
+                }
+                else
+                {
+                        //Left
+                        s_master_volume_pct -= step;
+                }
+
+                s_master_volume_pct = std::clamp(s_master_volume_pct, 0, 100);
+
+                audio::set_music_volume(s_master_volume_pct);
+
+                const bool is_enaled = (s_master_volume_pct > 0);
+
+                if ((was_enabled_before && !is_enaled) ||
+                    (!was_enabled_before && is_enaled))
+                {
+                        audio::init();
+                }
+        }
+        break;
+
+        case 1:
+        {
+                // Ambient audio
+                s_is_amb_audio_enabled = !s_is_amb_audio_enabled;
+
+                audio::init();
+        }
+        break;
+
+        case 2:
+        {
+                // Ambient audio
+                s_is_amb_audio_preloaded = !s_is_amb_audio_preloaded;
+        }
+        break;
+
+        case 3:
+        {
                 // Input mode
                 auto input_mode_nr = (int)s_input_mode;
                 const auto nr_input_modes = (int)InputMode::END;
@@ -294,31 +348,6 @@ static void player_sets_option(
                 }
 
                 s_input_mode = (InputMode)(input_mode_nr);
-        }
-        break;
-
-        case 1:
-        {
-                // Audio
-                s_is_audio_enabled = !s_is_audio_enabled;
-
-                audio::init();
-        }
-        break;
-
-        case 2:
-        {
-                // Ambient audio
-                s_is_amb_audio_enabled = !s_is_amb_audio_enabled;
-
-                audio::init();
-        }
-        break;
-
-        case 3:
-        {
-                // Ambient audio
-                s_is_amb_audio_preloaded = !s_is_amb_audio_preloaded;
         }
         break;
 
@@ -510,7 +539,9 @@ static void player_sets_option(
         case 20:
         {
                 // Projectile delay
-                const P p(s_opt_values_x_pos, browser.y());
+                const auto p =
+                        panels::p0(Panel::info_screen_content)
+                                .with_offsets(s_opt_values_x_pos, browser.y());
 
                 const Range allowed_range(0, 900);
 
@@ -552,7 +583,9 @@ static void player_sets_option(
         case 21:
         {
                 // Shotgun delay
-                const P p(s_opt_values_x_pos, browser.y());
+                const auto p =
+                        panels::p0(Panel::info_screen_content)
+                                .with_offsets(s_opt_values_x_pos, browser.y());
 
                 const Range allowed_range(0, 900);
 
@@ -594,7 +627,9 @@ static void player_sets_option(
         case 22:
         {
                 // Explosion delay
-                const P p(s_opt_values_x_pos, browser.y());
+                const auto p =
+                        panels::p0(Panel::info_screen_content)
+                                .with_offsets(s_opt_values_x_pos, browser.y());
 
                 const Range allowed_range(0, 900);
 
@@ -677,16 +712,16 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
 {
         TRACE_FUNC_BEGIN;
 
-        s_input_mode = (InputMode)to_int(lines.front());
-        lines.erase(std::begin(lines));
-
-        s_is_audio_enabled = lines.front() == "1";
+        s_master_volume_pct = to_int(lines.front());
         lines.erase(std::begin(lines));
 
         s_is_amb_audio_enabled = lines.front() == "1";
         lines.erase(std::begin(lines));
 
         s_is_amb_audio_preloaded = lines.front() == "1";
+        lines.erase(std::begin(lines));
+
+        s_input_mode = (InputMode)to_int(lines.front());
         lines.erase(std::begin(lines));
 
         s_screen_px_w = to_int(lines.front());
@@ -797,10 +832,10 @@ static std::vector<std::string> lines_from_variables()
 
         std::vector<std::string> lines;
 
-        lines.push_back(std::to_string((int)s_input_mode));
-        lines.emplace_back(s_is_audio_enabled ? "1" : "0");
+        lines.emplace_back(std::to_string(s_master_volume_pct));
         lines.emplace_back(s_is_amb_audio_enabled ? "1" : "0");
         lines.emplace_back(s_is_amb_audio_preloaded ? "1" : "0");
+        lines.push_back(std::to_string((int)s_input_mode));
         lines.push_back(std::to_string(s_screen_px_w));
         lines.push_back(std::to_string(s_screen_px_h));
         lines.emplace_back(s_always_center_view_on_player ? "1" : "0");
@@ -956,9 +991,9 @@ bool text_mode_filled_walls()
         return s_text_mode_filled_walls;
 }
 
-bool is_audio_enabled()
+int master_volume_pct()
 {
-        return s_is_audio_enabled;
+        return s_master_volume_pct;
 }
 
 bool is_amb_audio_enabled()
@@ -1209,14 +1244,13 @@ void ConfigState::draw()
                 break;
         }
 
-        const std::vector<std::pair<std::string, std::string>> labels = {
-                {"Input mode",
-                 input_mode_value_str},
+        std::string master_volume_str(11, '-');
+        master_volume_str[s_master_volume_pct / 10] = '|';
+        master_volume_str += " " + std::to_string(s_master_volume_pct) + "%";
 
-                {"Enable audio",
-                 s_is_audio_enabled
-                         ? "Yes"
-                         : "No"},
+        const std::vector<std::pair<std::string, std::string>> labels = {
+                {"Audio volume level",
+                 master_volume_str},
 
                 {"Play ambient sounds",
                  s_is_amb_audio_enabled
@@ -1227,6 +1261,9 @@ void ConfigState::draw()
                  s_is_amb_audio_preloaded
                          ? "Yes"
                          : "No"},
+
+                {"Input mode",
+                 input_mode_value_str},
 
                 {"Always center view on player",
                  s_always_center_view_on_player

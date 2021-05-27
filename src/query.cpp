@@ -10,6 +10,7 @@
 #include <string>
 
 #include "SDL_keycode.h"
+#include "colors.hpp"
 #include "config.hpp"
 #include "game_commands.hpp"
 #include "io.hpp"
@@ -21,6 +22,54 @@
 // Private
 // -----------------------------------------------------------------------------
 static bool s_is_inited = false;
+
+static std::string query_nr_make_input_str(
+        const int v,
+        const bool has_player_entered_value)
+{
+        std::string nr_str;
+
+        if (v > 0)
+        {
+                nr_str = std::to_string(v);
+        }
+
+        if (has_player_entered_value)
+        {
+                nr_str += "_";
+        }
+
+        return nr_str;
+}
+
+static void query_nr_draw(
+        const Color& color,
+        const P& pos,
+        const std::string& input_str,
+        const bool has_player_entered_value)
+{
+        Color fg_color;
+        Color bg_color;
+
+        if (has_player_entered_value)
+        {
+                fg_color = color;
+                bg_color = colors::black();
+        }
+        else
+        {
+                fg_color = colors::light_white();
+                bg_color = colors::blue();
+        }
+
+        io::draw_text(
+                input_str,
+                Panel::screen,
+                pos,
+                fg_color,
+                io::DrawBg::yes,
+                bg_color);
+};
 
 // -----------------------------------------------------------------------------
 // query
@@ -136,50 +185,6 @@ int number(
                 return 0;
         }
 
-        auto make_input_str = [](
-                                      const int v,
-                                      const bool has_player_entered_value) {
-                std::string nr_str;
-
-                if (v > 0)
-                {
-                        nr_str = std::to_string(v);
-                }
-
-                if (has_player_entered_value)
-                {
-                        nr_str += "_";
-                }
-
-                return nr_str;
-        };
-
-        auto draw = [color, pos](
-                            const std::string& input_str,
-                            const bool has_player_entered_value) {
-                Color fg_color;
-                Color bg_color;
-
-                if (has_player_entered_value)
-                {
-                        fg_color = color;
-                        bg_color = colors::black();
-                }
-                else
-                {
-                        fg_color = colors::light_white();
-                        bg_color = colors::blue();
-                }
-
-                io::draw_text(
-                        input_str,
-                        Panel::screen,
-                        pos,
-                        fg_color,
-                        io::DrawBg::yes,
-                        bg_color);
-        };
-
         int ret_num =
                 std::clamp(
                         default_value,
@@ -209,9 +214,16 @@ int number(
 
         bool has_player_entered_value = false;
 
-        auto input_str = make_input_str(ret_num, has_player_entered_value);
+        auto input_str =
+                query_nr_make_input_str(
+                        ret_num,
+                        has_player_entered_value);
 
-        draw(input_str, has_player_entered_value);
+        query_nr_draw(
+                color,
+                pos,
+                input_str,
+                has_player_entered_value);
 
         io::update_screen();
 
@@ -293,11 +305,15 @@ int number(
                                 {max_input_str_len, 1});
 
                         input_str =
-                                make_input_str(
+                                query_nr_make_input_str(
                                         ret_num,
                                         has_player_entered_value);
 
-                        draw(input_str, has_player_entered_value);
+                        query_nr_draw(
+                                color,
+                                pos,
+                                input_str,
+                                has_player_entered_value);
 
                         io::update_screen();
 
@@ -314,11 +330,15 @@ int number(
                                 {max_input_str_len, 1});
 
                         input_str =
-                                make_input_str(
+                                query_nr_make_input_str(
                                         ret_num,
                                         has_player_entered_value);
 
-                        draw(input_str, has_player_entered_value);
+                        query_nr_draw(
+                                color,
+                                pos,
+                                input_str,
+                                has_player_entered_value);
 
                         io::update_screen();
                 }
@@ -346,11 +366,15 @@ int number(
                                 P(max_input_str_len, 1));
 
                         input_str =
-                                make_input_str(
+                                query_nr_make_input_str(
                                         ret_num,
                                         has_player_entered_value);
 
-                        draw(input_str, has_player_entered_value);
+                        query_nr_draw(
+                                color,
+                                pos,
+                                input_str,
+                                has_player_entered_value);
 
                         io::update_screen();
 

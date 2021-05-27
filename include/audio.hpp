@@ -28,6 +28,8 @@ void play_music(MusId mus);
 
 void fade_out_music();
 
+void set_music_volume(int volume_pct);
+
 }  // namespace audio
 
 #endif  // AUDIO_HPP

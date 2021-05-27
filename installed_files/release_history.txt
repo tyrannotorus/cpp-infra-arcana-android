@@ -56,6 +56,7 @@ User interface
 * The 'i' key is now skipped as a letter index in the inventory menu, instead this key can be used for closing the menu again (to allow more convenient toggling of the menu and to help prevent key press mistakes)
 * Removed the "game over" menu - instead the game summary is first shown, then the high scores, then you return to the main menu
 * In the options menu, left and right can also be used to change option values
+* Added a master volume percent option
 * Added a warning when the player attempts to fire/throw outside the effective range, informing the player that the attack will do 50% damage
 * Added an option to warn when throwing "valuable" items - i.e. potions or equipped items (enabled by default)
 * Added ',' (comma) as an alternative pick up command

@@ -136,7 +136,7 @@ void init()
 
         cleanup();
 
-        if (!config::is_audio_enabled())
+        if (config::master_volume_pct() == 0)
         {
                 TRACE_FUNC_END;
 
@@ -259,6 +259,8 @@ void init()
         s_mus_chunks[(size_t)MusId::cthulhiana_madness] =
                 Mix_LoadMUS(music_path.c_str());
 
+        set_music_volume(config::master_volume_pct());
+
         TRACE_FUNC_END;
 }
 
@@ -293,7 +295,7 @@ void cleanup()
         TRACE_FUNC_END;
 }
 
-void play(const SfxId sfx, const int vol_pct_tot, const int vol_pct_l)
+void play(const SfxId sfx, int vol_pct_tot, const int vol_pct_l)
 {
         // TODO: Ugly hack (although this is probably more robust than for
         // example disabling the audio when deaf is applied, and enabling it
@@ -309,6 +311,9 @@ void play(const SfxId sfx, const int vol_pct_tot, const int vol_pct_l)
         {
                 return;
         }
+
+        // Adjust for master volume
+        vol_pct_tot = (vol_pct_tot * config::master_volume_pct()) / 100;
 
         // Is this an ambient sound which has not yet been loaded?
         if (((int)sfx > (int)SfxId::AMB_START) &&
@@ -426,11 +431,8 @@ void try_play_amb(const int one_in_n_chance_to_play)
                 s_seconds_at_amb_played = seconds_now;
 
                 const int vol_pct = rnd::range(25, 100);
-
                 const int first_int = (int)SfxId::AMB_START + 1;
-
                 const int last_int = (int)SfxId::END - 1;
-
                 const auto sfx = (SfxId)rnd::range(first_int, last_int);
 
                 // NOTE: The ambient sound effect will be loaded by 'play', if
@@ -456,6 +458,11 @@ void play_music(const MusId mus)
 void fade_out_music()
 {
         Mix_FadeOutMusic(2000);
+}
+
+void set_music_volume(int volume_pct)
+{
+        Mix_VolumeMusic(volume_pct);
 }
 
 }  // namespace audio
