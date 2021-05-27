@@ -434,7 +434,8 @@ static void player_detect_stuck_doors()
 
                 auto* const door = static_cast<terrain::Door*>(terrain);
 
-                if (door->is_hidden())
+                if (door->is_hidden() ||
+                    (door->type() == terrain::DoorType::metal))
                 {
                         continue;
                 }

@@ -849,7 +849,8 @@ void Door::reveal(const Verbose verbose)
         // If the player is adjacent, also reveal stuck status to avoid an
         // inconsistent state (the player standing next to a revealed door that
         // they don't know is stuck).
-        if (m_pos.is_adjacent(map::g_player->m_pos))
+        if (m_pos.is_adjacent(map::g_player->m_pos) &&
+            (m_type != DoorType::metal))
         {
                 reveal_stuck_status();
         }
@@ -862,7 +863,17 @@ void Door::on_revealed_from_searching()
 
 void Door::reveal_stuck_status()
 {
-        ASSERT(!m_is_hidden);
+        if (m_is_hidden)
+        {
+                ASSERT(false);
+                return;
+        }
+
+        if (m_type == DoorType::metal)
+        {
+                ASSERT(false);
+                return;
+        }
 
         if (!m_is_stuck)
         {
