@@ -7,10 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "io.hpp"
-#include "panel.hpp"
-#include "pos.hpp"
-#include "rect.hpp"
 #include "SDL_keycode.h"
 #include "SDL_stdinc.h"
 #include "audio.hpp"
@@ -18,8 +14,13 @@
 #include "colors.hpp"
 #include "direction.hpp"
 #include "gfx.hpp"
+#include "io.hpp"
+#include "panel.hpp"
+#include "pos.hpp"
+#include "rect.hpp"
 
-namespace actor {
+namespace actor
+{
 class Actor;
 }  // namespace actor
 
@@ -243,6 +244,8 @@ void play(const SfxId, const Dir, const int) {}
 void try_play_amb(const int) {}
 
 void play_music(const MusId) {}
+
+void set_music_volume(const int) {}
 
 void fade_out_music() {}
 
