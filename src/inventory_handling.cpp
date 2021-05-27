@@ -1049,6 +1049,10 @@ void Drop::on_start()
 
         m_browser.disable_selection_audio();
 
+        // The 'i' key is removed in the inventory menu, so we remove it in this
+        // menu as well for consistency.
+        m_browser.remove_key('i');
+
         audio::play(audio::SfxId::backpack);
 }
 

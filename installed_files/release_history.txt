@@ -53,7 +53,7 @@ User interface
 * General messages for events outside of the player performing an action are drawn gray instead of white, and a newline is always forced after a player action
 * Added more elaborate border graphics (used for example around the player information panel), instead of only simple lines
 * All menus have shortcut keys (either with "(Y)es (N)o" style, or "a) b) c) ...")
-* The 'i' key is now skipped as a letter index in the inventory menu, instead this key can be used for closing the menu again (to allow more convenient toggling of the menu and to help prevent key press mistakes)
+* The "i" key is now skipped as a letter index in the inventory (and drop menu), instead this key can be used for closing the inventory menu again (to allow more convenient toggling of the menu and to help prevent key press mistakes)
 * Removed the "game over" menu - instead the game summary is first shown, then the high scores, then you return to the main menu
 * In the options menu, left and right can also be used to change option values
 * Added a master volume percent option
