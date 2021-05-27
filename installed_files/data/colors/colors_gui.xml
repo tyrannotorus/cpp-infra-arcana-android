@@ -1,5 +1,6 @@
 <gui>
     <text_color type="text" color="white"/>
+    <text_color type="passive_text" color="gray"/>
     <text_color type="menu_highlight" color="light_sepia"/>
     <text_color type="menu_dark" color="dark_sepia"/>
     <text_color type="menu_key_highlight" color="light_white"/>

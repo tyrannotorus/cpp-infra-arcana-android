@@ -57,6 +57,7 @@ static SDL_Color s_dark_teal;
 
 // Defined in colors_gui.xml
 static SDL_Color s_text;
+static SDL_Color s_passive_text;
 static SDL_Color s_menu_highlight;
 static SDL_Color s_menu_dark;
 static SDL_Color s_menu_key_highlight;
@@ -229,6 +230,7 @@ static void load_gui_colors()
         auto* gui_e = xml::first_child(doc);
 
         load_gui_color(gui_e, "text", s_text);
+        load_gui_color(gui_e, "passive_text", s_passive_text);
         load_gui_color(gui_e, "menu_highlight", s_menu_highlight);
         load_gui_color(gui_e, "menu_dark", s_menu_dark);
         load_gui_color(gui_e, "menu_key_highlight", s_menu_key_highlight);
@@ -621,6 +623,11 @@ Color dark_teal()
 Color text()
 {
         return {s_text};
+}
+
+Color passive_text()
+{
+        return {s_passive_text};
 }
 
 Color menu_highlight()

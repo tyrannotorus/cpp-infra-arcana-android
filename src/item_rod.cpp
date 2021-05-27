@@ -297,7 +297,8 @@ void Rod::on_std_turn_in_inv_hook(const InvType inv_type)
 
         --m_nr_charge_turns_left;
 
-        if (m_nr_charge_turns_left == 0)
+        if ((m_nr_charge_turns_left == 0) &&
+            m_data->is_identified)
         {
                 const std::string my_name =
                         name(
@@ -323,20 +324,22 @@ std::vector<std::string> Rod::descr_hook() const
 
 void Rod::identify(const Verbose verbose)
 {
-        if (!m_data->is_identified)
+        if (m_data->is_identified)
         {
-                m_data->is_identified = true;
+                return;
+        }
 
-                if (verbose == Verbose::yes)
-                {
-                        const std::string name_after =
-                                name(ItemRefType::a,
-                                     ItemRefInf::none);
+        m_data->is_identified = true;
 
-                        msg_log::add("I have identified " + name_after + ".");
+        if (verbose == Verbose::yes)
+        {
+                const std::string name_after =
+                        name(ItemRefType::a,
+                             ItemRefInf::none);
 
-                        game::add_history_event("Identified " + name_after);
-                }
+                msg_log::add("I have identified " + name_after + ".");
+
+                game::add_history_event("Identified " + name_after);
         }
 }
 

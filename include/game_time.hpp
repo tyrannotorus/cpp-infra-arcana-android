@@ -27,6 +27,7 @@ extern std::vector<actor::Actor*> g_actors;
 extern std::vector<terrain::Terrain*> g_mobs;
 
 extern bool g_is_magic_descend_nxt_std_turn;
+extern bool g_is_player_acting;
 
 void init();
 void cleanup();

@@ -50,6 +50,7 @@ User interface
 * Many screens such as the background/trait screens and character info screen use a nicer positioning for drawing, and they handle window resizing better
 * Instead of the "stretched" fullscreen mode option, there is now an option for attempting to scale the graphics to 2x size when running fullscreen (if the graphics can be scaled depends on the user's resolution, and the current font)
 * The message log uses three lines instead of two (thus causing much fewer "more" prompts)
+* General messages for events outside of the player performing an action are drawn gray instead of white, and a newline is always forced after a player action
 * Added more elaborate border graphics (used for example around the player information panel), instead of only simple lines
 * All menus have shortcut keys (either with "(Y)es (N)o" style, or "a) b) c) ...")
 * The 'i' key is now skipped as a letter index in the inventory menu, instead this key can be used for closing the menu again (to allow more convenient toggling of the menu and to help prevent key press mistakes)

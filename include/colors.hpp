@@ -106,6 +106,7 @@ Color dark_teal();
 
 // GUI colors (using the colors above)
 Color text();
+Color passive_text();
 Color menu_highlight();
 Color menu_dark();
 Color menu_key_highlight();

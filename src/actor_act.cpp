@@ -97,6 +97,8 @@ static std::vector<const terrain::Door*> adj_known_closed_doors(const P& p)
 
 static void player_act()
 {
+        game_time::g_is_player_acting = true;
+
         actor::Player& player = *map::g_player;
 
         if (!player.is_alive())

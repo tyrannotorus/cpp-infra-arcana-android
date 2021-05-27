@@ -38,11 +38,11 @@ class Msg
 {
 public:
         Msg(std::string text,
-            const Color& color_id,
+            const Color& color,
             const int x_pos,
             CopyToMsgHistory copy_to_history) :
                 m_text(std::move(text)),
-                m_color(color_id),
+                m_color(color),
                 m_x_pos(x_pos),
                 m_copy_to_history(copy_to_history) {}
 
@@ -96,6 +96,12 @@ private:
         CopyToMsgHistory m_copy_to_history {CopyToMsgHistory::yes};
 };
 
+struct MsgLine
+{
+        bool has_forced_line_break {true};
+        std::vector<Msg> messages {};
+};
+
 namespace msg_log
 {
 inline constexpr size_t g_nr_log_lines = 3;
@@ -106,7 +112,7 @@ void draw();
 
 void add(
         const std::string& str,
-        const Color& color = colors::text(),
+        Color color = colors::text(),
         MsgInterruptPlayer interrupt_player = MsgInterruptPlayer::no,
         MorePromptOnMsg add_more_prompt_on_msg = MorePromptOnMsg::no,
         CopyToMsgHistory copy_to_history = CopyToMsgHistory::yes);
@@ -115,6 +121,8 @@ void add(
 // the log, a "more" prompt will be run, and the log is cleared. If the log
 // happens to be empty, nothing is done.
 void more_prompt();
+
+void newline();
 
 void clear();
 

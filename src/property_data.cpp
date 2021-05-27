@@ -532,6 +532,7 @@ static void init_data_list()
         d.name_short = "Extra Hasted";
         d.descr = "Moves very fast.";
         d.msg_start_player = "Everything around me suddenly seems very still.";
+        d.msg_end_player = "Everything around me seems to speed up a lot.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::good;

@@ -13,8 +13,10 @@
 
 #include "SDL_keycode.h"
 #include "actor_player.hpp"
+#include "colors.hpp"
 #include "debug.hpp"
 #include "draw_box.hpp"
+#include "game_time.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "panel.hpp"
@@ -29,7 +31,7 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<Msg> s_lines[msg_log::g_nr_log_lines];
+static MsgLine s_lines[msg_log::g_nr_log_lines];
 
 static const size_t s_history_cap = 200;
 
@@ -38,7 +40,7 @@ static size_t s_history_count = 0;
 
 static Msg s_history[s_history_cap];
 
-static const std::string s_more_str = "-more-";
+static const std::string s_more_str = "[space]";
 
 static const int s_repeat_str_len = 4;
 
@@ -48,7 +50,7 @@ static bool s_is_waiting_more_pompt = false;
 
 static size_t find_current_line_nr()
 {
-        if (s_lines[0].empty())
+        if (s_lines[0].messages.empty())
         {
                 return 0;
         }
@@ -56,7 +58,7 @@ static size_t find_current_line_nr()
         size_t line_nr = 1;
         while (true)
         {
-                if (s_lines[line_nr].empty())
+                if (s_lines[line_nr].messages.empty())
                 {
                         // Empty line found, return previous line number
                         --line_nr;
@@ -182,9 +184,9 @@ static void draw_more_prompt()
 
         const auto& line = s_lines[line_nr];
 
-        if (!line.empty())
+        if (!line.messages.empty())
         {
-                const Msg& last_msg = line.back();
+                const Msg& last_msg = line.messages.back();
 
                 more_x0 = x_after_msg(&last_msg);
 
@@ -224,9 +226,10 @@ namespace msg_log
 {
 void init()
 {
-        for (std::vector<Msg>& line : s_lines)
+        for (auto& line : s_lines)
         {
-                line.clear();
+                line.messages.clear();
+                line.has_forced_line_break = false;
         }
 
         s_history_size = 0;
@@ -246,12 +249,12 @@ void draw()
 
         for (const auto& line : s_lines)
         {
-                if (line.empty())
+                if (line.messages.empty())
                 {
                         break;
                 }
 
-                draw_line(line, Panel::log, {0, y});
+                draw_line(line.messages, Panel::log, {0, y});
 
                 ++y;
         }
@@ -266,7 +269,7 @@ void clear()
 {
         for (auto& line : s_lines)
         {
-                for (auto& msg : line)
+                for (auto& msg : line.messages)
                 {
                         if (msg.should_copy_to_history() ==
                             CopyToMsgHistory::no)
@@ -285,13 +288,14 @@ void clear()
                         }
                 }
 
-                line.clear();
+                line.messages.clear();
+                line.has_forced_line_break = false;
         }
 }
 
 void add(
         const std::string& str,
-        const Color& color,
+        Color color,
         const MsgInterruptPlayer interrupt_player,
         const MorePromptOnMsg add_more_prompt_on_msg,
         const CopyToMsgHistory copy_to_history)
@@ -312,14 +316,22 @@ void add(
 
         if (str[0] == ' ')
         {
-                TRACE << "Message starts with space: \""
-                      << str
-                      << "\""
-                      << std::endl;
+                TRACE
+                        << "Message starts with space: \""
+                        << str
+                        << "\""
+                        << std::endl;
 
                 ASSERT(false);
 
                 return;
+        }
+
+        if ((color == colors::text()) && !game_time::g_is_player_acting)
+        {
+                // This is something happening outside of the player acting,
+                // color the message differently.
+                color = colors::passive_text();
         }
 
         // If frenzied, change the message
@@ -346,7 +358,7 @@ void add(
         size_t next_empty_line_nr = 0;
         while (true)
         {
-                if (s_lines[next_empty_line_nr].empty())
+                if (s_lines[next_empty_line_nr].messages.empty())
                 {
                         break;
                 }
@@ -420,16 +432,27 @@ void add(
         // Find the line number to add the message to
         size_t current_line_nr = find_current_line_nr();
 
-        if ((current_line_nr < (g_nr_log_lines - 1)) &&
-            !s_lines[current_line_nr].empty())
+        // Handle forced line break
+        if (s_lines[current_line_nr].has_forced_line_break)
         {
-                // We are on a non-empty line which is *not* the last line -
-                // check if the message will fit, otherwise increment to the
-                // next line number
+                ++current_line_nr;
+
+                if (current_line_nr > (g_nr_log_lines - 1))
+                {
+                        more_prompt();
+                }
+        }
+
+        // Are we on a non-empty line which is not the last line?
+        if ((current_line_nr < (g_nr_log_lines - 1)) &&
+            !s_lines[current_line_nr].messages.empty())
+        {
+                // Does the new message fit?
                 const int worst_case_w =
                         worst_case_msg_w_for_line_nr(current_line_nr, str);
 
-                const int new_x = x_after_msg(&s_lines[current_line_nr].back());
+                const int new_x =
+                        x_after_msg(&s_lines[current_line_nr].messages.back());
 
                 const int worst_case_x1 = new_x + worst_case_w - 1;
 
@@ -441,9 +464,9 @@ void add(
 
         Msg* prev_msg = nullptr;
 
-        if (!s_lines[current_line_nr].empty())
+        if (!s_lines[current_line_nr].messages.empty())
         {
-                prev_msg = &s_lines[current_line_nr].back();
+                prev_msg = &s_lines[current_line_nr].messages.back();
         }
 
         bool is_repeated = false;
@@ -489,6 +512,7 @@ void add(
                 }
 
                 s_lines[current_line_nr]
+                        .messages
                         .emplace_back(
                                 str,
                                 color,
@@ -519,7 +543,7 @@ void add(
 void more_prompt()
 {
         // If the current log is empty, do nothing
-        if (s_lines[0].empty())
+        if (s_lines[0].messages.empty())
         {
                 return;
         }
@@ -533,6 +557,17 @@ void more_prompt()
         s_is_waiting_more_pompt = false;
 
         clear();
+}
+
+void newline()
+{
+        const auto line_nr = find_current_line_nr();
+        auto& line = s_lines[line_nr];
+
+        if (!line.messages.empty())
+        {
+                line.has_forced_line_break = true;
+        }
 }
 
 void add_line_to_history(const std::string& line_to_add)

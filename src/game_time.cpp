@@ -313,6 +313,7 @@ std::vector<actor::Actor*> g_actors;
 std::vector<terrain::Terrain*> g_mobs;
 
 bool g_is_magic_descend_nxt_std_turn;
+bool g_is_player_acting;
 
 void init()
 {
@@ -325,6 +326,7 @@ void init()
         g_mobs.clear();
 
         g_is_magic_descend_nxt_std_turn = false;
+        g_is_player_acting = false;
 }
 
 void cleanup()
@@ -344,6 +346,7 @@ void cleanup()
         g_mobs.clear();
 
         g_is_magic_descend_nxt_std_turn = false;
+        g_is_player_acting = false;
 }
 
 void save()
@@ -443,7 +446,14 @@ void reset_current_actor_idx()
 
 void tick()
 {
+        g_is_player_acting = false;
+
         auto* actor = current_actor();
+
+        if (actor == map::g_player)
+        {
+                msg_log::newline();
+        }
 
         set_actor_max_delay(*actor);
 
