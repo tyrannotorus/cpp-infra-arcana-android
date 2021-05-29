@@ -570,12 +570,12 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Place pylons and levers
         // ---------------------------------------------------------------------
-        mapgen::make_pylons();
+        // mapgen::make_pylons();
 
-        if (!mapgen::g_is_map_valid)
-        {
-                return false;
-        }
+        // if (!mapgen::g_is_map_valid)
+        // {
+        //         return false;
+        // }
 
         // ---------------------------------------------------------------------
         // Reveal all doors on the path to the stairs
