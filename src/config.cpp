@@ -89,6 +89,10 @@ static int s_map_cell_px_h = -1;
 
 static P parse_dims_from_font_name(std::string font_name)
 {
+        TRACE_FUNC_BEGIN;
+
+        TRACE << "font_name: " << font_name << std::endl;
+
         char ch = font_name.front();
 
         while (ch < '0' || ch > '9')
@@ -97,6 +101,8 @@ static P parse_dims_from_font_name(std::string font_name)
 
                 ch = font_name.front();
         }
+
+        TRACE << "font_name, stripped beginning: " << font_name << std::endl;
 
         std::string w_str;
 
@@ -108,6 +114,8 @@ static P parse_dims_from_font_name(std::string font_name)
 
                 ch = font_name.front();
         }
+
+        TRACE << "w_str: " << w_str << std::endl;
 
         font_name.erase(std::begin(font_name));
 
@@ -124,11 +132,16 @@ static P parse_dims_from_font_name(std::string font_name)
                 ch = font_name.front();
         }
 
-        TRACE << "Parsed font image name, found dims: "
-              << w_str << "x" << h_str << std::endl;
+        TRACE << "h_str: " << h_str << std::endl;
+
+        TRACE
+                << "Parsed font image name, found dims: "
+                << w_str << "x" << h_str << std::endl;
 
         const int w = to_int(w_str);
         const int h = to_int(h_str);
+
+        TRACE_FUNC_END;
 
         return {w, h};
 }
