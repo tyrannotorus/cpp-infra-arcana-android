@@ -1138,7 +1138,7 @@ void handle(const GameCmd cmd)
                         query::number(
                                 {(int)query_str.size(), 0},
                                 colors::light_white(),
-                                {2, (int)actor::Id::END - 1},
+                                {1, (int)actor::Id::END - 1},
                                 (int)actor::Id::zombie,
                                 false);
 

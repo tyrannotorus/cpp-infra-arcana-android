@@ -61,7 +61,8 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static bool is_player_aware_of_hostile_mon_at(const P& pos)
+static bool
+is_player_aware_of_hostile_mon_at(const P& pos)
 {
         const auto* const mon = map::first_actor_at_pos(pos);
 
@@ -489,7 +490,7 @@ void PropZuulPossessPriest::on_placed()
         }
 }
 
-PropEnded PropPossessedByZuul::on_death()
+void PropPossessedByZuul::on_death()
 {
         // An actor possessed by Zuul has died - release Zuul!
 
@@ -507,7 +508,7 @@ PropEnded PropPossessedByZuul::on_death()
 
         m_owner->m_state = ActorState::destroyed;
 
-        const P& pos = m_owner->m_pos;
+        const auto& pos = m_owner->m_pos;
 
         map::make_gore(pos);
 
@@ -521,8 +522,6 @@ PropEnded PropPossessedByZuul::on_death()
                 {actor::Id::zuul},
                 map::rect())
                 .make_aware_of_player();
-
-        return PropEnded::no;
 }
 
 void PropShapeshifts::on_placed()
@@ -556,7 +555,7 @@ void PropShapeshifts::on_std_turn()
         }
 }
 
-PropEnded PropShapeshifts::on_death()
+void PropShapeshifts::on_death()
 {
         m_owner->m_state = ActorState::destroyed;
 
@@ -593,8 +592,6 @@ PropEnded PropShapeshifts::on_death()
 
                 shapeshifter->m_properties.apply(waiting);
         }
-
-        return PropEnded::no;
 }
 
 void PropShapeshifts::shapeshift(const Verbose verbose) const
@@ -2059,7 +2056,7 @@ PropActResult PropVortex::on_act()
         return {};
 }
 
-PropEnded PropExplodesOnDeath::on_death()
+void PropExplodesOnDeath::on_death()
 {
         TRACE_FUNC_BEGIN;
 
@@ -2070,15 +2067,13 @@ PropEnded PropExplodesOnDeath::on_death()
         explosion::run(m_owner->m_pos, ExplType::expl);
 
         TRACE_FUNC_END;
-
-        return PropEnded::no;
 }
 
-PropEnded PropSplitsOnDeath::on_death()
+void PropSplitsOnDeath::on_death()
 {
         if (m_owner->is_player())
         {
-                return PropEnded::no;
+                return;
         }
 
         const bool is_player_seeing_owner =
@@ -2092,7 +2087,7 @@ PropEnded PropSplitsOnDeath::on_death()
                 m_owner->m_hp <=
                 (actor_max_hp * (-5));
 
-        const P pos = m_owner->m_pos;
+        const auto pos = m_owner->m_pos;
 
         const auto f_id = map::g_terrain.at(pos)->id();
 
@@ -2104,23 +2099,13 @@ PropEnded PropSplitsOnDeath::on_death()
         {
                 if (is_player_seeing_owner)
                 {
-                        // Print a standard death message itself
-                        // NOTE: This requires that this property kills itself
-                        // before calling the death message print function
-                        const auto* const owning_actor = m_owner;
+                        // Print a standard death message
+                        m_prevent_std_death_msg = false;
 
-                        // End this property
-                        // NOTE: This deletes this object!
-                        m_owner->m_properties.end_prop(id());
-
-                        actor::print_mon_death_msg(*owning_actor);
-
-                        return PropEnded::yes;
+                        actor::print_mon_death_msg(*m_owner);
                 }
-                else
-                {
-                        return PropEnded::no;
-                }
+
+                return;
         }
 
         // The monster should split
@@ -2128,7 +2113,9 @@ PropEnded PropSplitsOnDeath::on_death()
         if (is_player_seeing_owner)
         {
                 // NOTE: This is printed instead of the standard death message
-                const std::string name = m_owner->name_the();
+                const std::string name =
+                        text_format::first_to_upper(
+                                m_owner->name_the());
 
                 msg_log::add(name + " splits.");
         }
@@ -2167,8 +2154,6 @@ PropEnded PropSplitsOnDeath::on_death()
         {
                 spawned.monsters[1]->m_leader = spawned.monsters[0];
         }
-
-        return PropEnded::no;
 }
 
 PropActResult PropCorpseEater::on_act()
@@ -2423,18 +2408,15 @@ PropActResult PropCorpseRises::on_act()
         return result;
 }
 
-PropEnded PropCorpseRises::on_death()
+void PropCorpseRises::on_death()
 {
         // If we have already risen before, and were killed again leaving a
         // corpse, destroy the corpse to prevent rising multiple times
         if (m_owner->is_corpse() && m_has_risen)
         {
                 m_owner->m_state = ActorState::destroyed;
-
                 m_owner->m_properties.on_destroyed_alive();
         }
-
-        return PropEnded::no;
 }
 
 void PropSpawnsZombiePartsOnDestroyed::on_destroyed_alive()

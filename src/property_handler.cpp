@@ -581,6 +581,8 @@ void PropHandler::on_turn_begin()
 
                 if (prop_ended == PropEnded::no)
                 {
+                        ASSERT(prop.get());
+
                         ++prop->m_nr_turns_active;
                         ++i;
                 }
@@ -1173,16 +1175,9 @@ void PropHandler::on_death()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        for (size_t i = 0; i < m_props.size();)
+        for (auto& prop : m_props)
         {
-                auto& prop = m_props[i];
-
-                const auto prop_ended = prop->on_death();
-
-                if (prop_ended == PropEnded::no)
-                {
-                        ++i;
-                }
+                prop->on_death();
         }
 
         TRACE_FUNC_END_VERBOSE;

@@ -212,14 +212,9 @@ public:
                 (void)new_prop;
         }
 
-        virtual PropEnded on_death()
-        {
-                return PropEnded::no;
-        }
+        virtual void on_death() {}
 
-        virtual void on_new_dlvl()
-        {
-        }
+        virtual void on_new_dlvl() {}
 
         virtual void on_destroyed_alive() {}
 
@@ -449,7 +444,7 @@ public:
         PropPossessedByZuul() :
                 Prop(PropId::possessed_by_zuul) {}
 
-        PropEnded on_death() override;
+        void on_death() override;
 
         int affect_max_hp(const int hp_max) const override
         {
@@ -467,7 +462,7 @@ public:
 
         void on_std_turn() override;
 
-        PropEnded on_death() override;
+        void on_death() override;
 
 private:
         void shapeshift(Verbose verbose) const;
@@ -1318,7 +1313,7 @@ public:
         PropExplodesOnDeath() :
                 Prop(PropId::explodes_on_death) {}
 
-        PropEnded on_death() override;
+        void on_death() override;
 };
 
 class PropSplitsOnDeath : public Prop
@@ -1327,7 +1322,15 @@ public:
         PropSplitsOnDeath() :
                 Prop(PropId::splits_on_death) {}
 
-        PropEnded on_death() override;
+        void on_death() override;
+
+        bool prevent_std_death_msg() const
+        {
+                return m_prevent_std_death_msg;
+        }
+
+private:
+        bool m_prevent_std_death_msg {true};
 };
 
 class PropCorpseEater : public Prop
@@ -1403,7 +1406,7 @@ public:
 
         PropActResult on_act() override;
 
-        PropEnded on_death() override;
+        void on_death() override;
 
 private:
         bool m_has_risen;

@@ -469,7 +469,14 @@ std::string Actor::death_msg() const
         // death (it will print a split message instead)
         if (m_properties.has(PropId::splits_on_death))
         {
-                return "";
+                const auto* const splits =
+                        static_cast<const PropSplitsOnDeath*>(
+                                m_properties.prop(PropId::splits_on_death));
+
+                if (splits->prevent_std_death_msg())
+                {
+                        return "";
+                }
         }
 
         const std::string actor_name_the =
