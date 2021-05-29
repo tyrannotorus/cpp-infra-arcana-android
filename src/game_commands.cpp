@@ -1120,7 +1120,7 @@ void handle(const GameCmd cmd)
         case GameCmd::debug_f8:
         {
                 map::g_player->m_properties.apply(
-                        property_factory::make(PropId::clockwork_hasted));
+                        property_factory::make(PropId::entangled));
         }
         break;
 
@@ -1138,16 +1138,19 @@ void handle(const GameCmd cmd)
                         query::number(
                                 {(int)query_str.size(), 0},
                                 colors::light_white(),
-                                {0, (int)actor::Id::END},
+                                {2, (int)actor::Id::END - 1},
                                 (int)actor::Id::zombie,
                                 false);
 
-                const auto mon_id = (actor::Id)idx;
+                if (idx != -1)
+                {
+                        const auto mon_id = (actor::Id)idx;
 
-                actor::spawn(
-                        map::g_player->m_pos,
-                        {mon_id},
-                        map::rect());
+                        actor::spawn(
+                                map::g_player->m_pos,
+                                {mon_id},
+                                map::rect());
+                }
         }
         break;
 

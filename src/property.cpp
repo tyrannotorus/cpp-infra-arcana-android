@@ -1399,6 +1399,13 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
         map_parsers::BlocksActor(*m_owner, ParseActors::no)
                 .run(blocked, blocked.rect());
 
+        // Mark the positions of all seen actors as free (the monsters may be
+        // inside wall cells, e.g. worms crawling through rubble).
+        for (const auto* const actor : seen_foes)
+        {
+                blocked.at(actor->m_pos) = false;
+        }
+
         std::vector<const actor::Actor*> seen_reachable_foes;
         seen_reachable_foes.reserve(seen_foes.size());
 
@@ -1487,6 +1494,9 @@ void PropFrenzied::on_end()
         // frenzy (it looks weird for monsters)
         if (m_owner->is_player() && (player_bon::bg() != Bg::ghoul))
         {
+                // TODO: Base the weakened duration on the number of turns
+                // frenzied was active (m_nr_turns_active) (within some upper
+                // and lower bounds)?
                 m_owner->m_properties.apply(
                         property_factory::make(PropId::weakened));
         }
