@@ -1,49 +1,50 @@
 --------------------------------------------------------------
 v21.0 *** WORK IN PROGRESS ***
 --------------------------------------------------------------
-Gameplay
+MAJOR CHANGES
 * Added a new background (class) "Exorcist"
 * Added weapons "S&W Model 10 Revolver" and "Winchester Rifle"
 * Added some miscellaneous "weird" items
-* The Electric Gun also disables passive hit point regeneration for a number of turns
-* The Talisman of Resurrection now also teleports the player when activated, to avoid leaving the player in the same situation that killed them to begin with
-* The stealth penalty in lit positions is much higher than before (see also bug fixes below concerning stealth and darkness)
 * Added more sound effects
 * Added more monsters
 * Some monsters now have a smell that can be detected by the player (with a certain chance depending on how old the smell is and how far it has spread)
 * Monsters no longer become aware of the player from negative properties (burning, etc) or from taking damage (it is the attack actions and sounds which alerts them) - so now it is possible to for example throw a Molotov Cocktail at a monster, and escape with Cloud Minds while it is burning
-* Updated Worm Masses and Mind Worms - they are now blind, slow (instead of normal speed), have much more hit points, are unsettling (causes shock to see), take much less damage from piercing attacks (such as pistol shots or dagger strikes), and have a very limited hearing range
-* Worm Masses and Mind Worms can no longer split while burning
-* Added completely new descriptions for all Ooze monsters, removed Black Ooze, changed Putrid Ooze to be weaker and spawn earlier, renamed Clear Ooze to Lurking Ooze
 * Small crawling creatures (rats, snakes, crawling hands, etc) can pass through some terrain types such as gates and piles of debris
 * Cultist now have a different tile depending on their wielded firearm, and their description states what weapon they are wielding
 * Cultists have a kick attack
-* A generated description is now printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters
-* Monster descriptions now display more information, such as resistances
-* Forcing a metal door open (e.g. with a Rod of Opening or the Opening spell) now also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
+* Monster descriptions now display more information, such as resistances or the ability to see in darkness
 * Standing next to a door will reveal if it's stuck - if so it will change name and appearance
 * Added trait "Crippling Strikes" - melee attacks have 60% chance to Weaken the target for 2-3 turns
 * The standard map generator can now also split rooms, for more map variety
 * Added more room templates
 * Casting spells now occasionally trigger random chaotic side effects, typically affecting the surrounding area (for example walls may appear or disappear, statues knocked over, etc)
 * Added spell "Erudition" - the next spell is cast at a higher skill level
+* Reworked the "Frenzied" property - instead of changing the player's movement direction on a move command, moves away from monsters are now simply prevented (not an action)
 * Changed the "Opening" spell to "Control Object", which can do more things (e.g. open/close/jam/strike doors, or strike statues/braziers, etc)
-* Removed the Searching spell - instead this is  a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
-* The Summoning spell is no longer available to player characters (only to monsters)
+
+MINOR TWEAKS AND BALANCING
+* The Electric Gun also disables passive hit point regeneration for a number of turns
+* The Talisman of Resurrection now also teleports the player when activated, to avoid leaving the player in the same situation that killed them to begin with
+* The stealth penalty in lit positions is much higher than before (see also bug fixes below concerning stealth and darkness)
+* Updated Worm Masses and Mind Worms - they are now blind, slow (instead of normal speed), have much more hit points, are unsettling (causes shock to see), take much less damage from piercing attacks (such as pistol shots or dagger strikes), and have a very limited hearing range
+* Worm Masses and Mind Worms can no longer split while burning
+* Added completely new descriptions for all Ooze monsters, removed Black Ooze, changed Putrid Ooze to be weaker and spawn earlier, renamed Clear Ooze to Lurking Ooze
+* A generated description is now printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters
+* Forcing a metal door open (e.g. with a Rod of Opening or the Opening spell) now also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
 * Reduced the maximum number of weapons summoned by Spectral Weapons for basic/expert/master skill level to 1/2/3 (from 2/3/4)
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
+* Removed the Searching spell - instead this is  a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
+* The Summoning spell is no longer available to player characters (only to monsters)
 * Added a message when spells are upgraded (e.g. by a Gong)
 * Being blind no longer immediately raises shock by 30% - instead the shock ramps up each turn up to 30%
-* Reworked the "Frenzied" property - instead of changing the player's movement direction on a move command, moves away from monsters are now simply prevented (not an action)
 * The Ghoul ability "Frenzy" no longer costs spirit to use
 * The Ghoul trait "Toxic" now has 75% chance to apply poison, instead of 25%
 * A lot more terrain objects can be destroyed or lit on fire (for example altars or monoliths are destroyed by explosions, and wooden chests or bookshelves can be lit on fire)
 * The stairs position is always lit, to make it less tedious to discover in huge dark rooms
-* Pylons are now always activated, instead of being activated by a switch - also removed some pylon types which wouldn't work well if they were always activated (e.g. burning)
 * Winning characters show up as statues inside the church building on the intro level, instead of graves outside the church
 * Players can now melee attack monsters while nailed by a Spike Gun (but still not while entangled)
 
-User interface
+USER INTERFACE
 * All fonts have been replaced with new ones (the reason for this is that the origins and license information of the previous ones was unknown - now this information is clearly listed in a font license text file distributed with the game)
 * Added an option to toggle if the view should always be centered on the player, only move when near the edge of the screen (default is to always center)
 * Changed the appearance of popups
@@ -67,7 +68,7 @@ User interface
 * Added a tile for unarmed player
 * Removed the options to draw the walls as filled rectangles in tiles mode
 
-Bug fixes
+BUG FIXES
 * Fixed a bug that prevented messages for Rogues sensing artifacts on the dungeon floor (there were only messages for sensing artifacts in item containers, such as tombs)
 * Darkness did not give a stealth bonus
 * The effect of the Silent trait was inverted for melee attacks  - i.e. attacks were noisy with the Silent trait picked, and vice versa
