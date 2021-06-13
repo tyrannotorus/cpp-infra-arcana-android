@@ -80,7 +80,6 @@ set(COMMON_SRC
         include/item_scroll.hpp
         include/knockback.hpp
         include/line_calc.hpp
-        include/look.hpp
         include/main_menu.hpp
         include/manual.hpp
         include/map.hpp
@@ -132,10 +131,13 @@ set(COMMON_SRC
         include/terrain_monolith.hpp
         include/terrain_pylon.hpp
         include/terrain_trap.hpp
+        include/text.hpp
         include/text_format.hpp
         include/throwing.hpp
         include/time.hpp
         include/version.hpp
+        include/view.hpp
+        include/view_actor_descr.hpp
         include/viewport.hpp
         include/wham.hpp
         include/xml.hpp
@@ -203,7 +205,6 @@ set(COMMON_SRC
         src/item_scroll.cpp
         src/knockback.cpp
         src/line_calc.cpp
-        src/look.cpp
         src/main_menu.cpp
         src/manual.cpp
         src/map.cpp
@@ -268,10 +269,13 @@ set(COMMON_SRC
         src/terrain_monolith.cpp
         src/terrain_pylon.cpp
         src/terrain_trap.cpp
+        src/text.cpp
         src/text_format.cpp
         src/throwing.cpp
         src/time.cpp
         src/version.cpp
+        src/view.cpp
+        src/view_actor_descr.cpp
         src/viewport.cpp
         src/wham.cpp
         src/xml.cpp
@@ -382,7 +386,7 @@ endif()
 if(CMAKE_COMPILER_IS_GNUCXX)
 
         list(APPEND COMMON_COMPILE_FLAGS
-                -Wmaybe-uninitialized
+                -Wuninitialized
                 )
 endif()
 

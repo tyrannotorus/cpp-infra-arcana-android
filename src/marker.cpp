@@ -34,7 +34,6 @@
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "line_calc.hpp"
-#include "look.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "misc.hpp"
@@ -50,6 +49,8 @@
 #include "terrain_door.hpp"
 #include "text_format.hpp"
 #include "throwing.hpp"
+#include "view.hpp"
+#include "view_actor_descr.hpp"
 #include "viewport.hpp"
 
 // -----------------------------------------------------------------------------
@@ -485,7 +486,7 @@ void Viewing::on_moved()
 {
         msg_log::clear();
 
-        look::print_location_info_msgs(m_pos);
+        view::print_location_info_msgs(m_pos);
 
         const auto* const actor = map::first_actor_at_pos(m_pos);
 
@@ -564,7 +565,7 @@ void Viewing::handle_input(const InputData& input)
 // -----------------------------------------------------------------------------
 void Aiming::on_moved()
 {
-        look::print_living_actor_info_msg(m_pos);
+        view::print_living_actor_info_msg(m_pos);
 
         const int dist = king_dist(m_origin, m_pos);
 
@@ -729,7 +730,7 @@ int Aiming::max_king_dist() const
 // -----------------------------------------------------------------------------
 void Throwing::on_moved()
 {
-        look::print_living_actor_info_msg(m_pos);
+        view::print_living_actor_info_msg(m_pos);
 
         const bool is_in_range =
                 king_dist(m_origin, m_pos) <=
@@ -955,7 +956,7 @@ void ThrowingExplosive::on_draw()
 
 void ThrowingExplosive::on_moved()
 {
-        look::print_location_info_msgs(m_pos);
+        view::print_location_info_msgs(m_pos);
 
         // TODO: This should not be specified here
         const auto throw_key = 't';
@@ -1052,7 +1053,7 @@ void CtrlTele::on_start_hook()
 
 void CtrlTele::on_moved()
 {
-        look::print_location_info_msgs(m_pos);
+        view::print_location_info_msgs(m_pos);
 
         if (m_pos != map::g_player->m_pos)
         {
@@ -1504,7 +1505,7 @@ void CtrlObj::on_moved()
         set_terrain();
         set_possible_actions();
 
-        look::print_location_info_msgs(m_pos);
+        view::print_location_info_msgs(m_pos);
 
         const std::string dist_str = std::to_string(current_dist());
         const std::string max_dist_str = std::to_string(m_max_dist);

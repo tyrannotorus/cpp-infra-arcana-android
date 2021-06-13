@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+#include <algorithm>
+#include <cctype>
 #include <cstddef>
+#include <optional>
 #include <string>
 
 #include "colors.hpp"
@@ -118,10 +121,10 @@ void draw_text_at_px(
 }
 
 void draw_text(
-        const std::string& str,
+        Text text,
         const Panel panel,
-        const P pos,
-        const Color& color,
+        P pos,
+        Color color,
         const DrawBg draw_bg,
         const Color& bg_color)
 {
@@ -130,9 +133,49 @@ void draw_text(
                 return;
         }
 
-        P px_pos = gui_to_px_coords(panel, pos);
+        text.set_color(color);
 
-        draw_text_at_px(str, px_pos, color, draw_bg, bg_color);
+        auto origin_pos = pos;
+
+        for (const auto& action : text.actions())
+        {
+                switch (action.id)
+                {
+                case TextActionId::write_str:
+                {
+                        const auto px_pos = gui_to_px_coords(panel, pos);
+
+                        draw_text_at_px(
+                                action.str,
+                                px_pos,
+                                color,
+                                draw_bg,
+                                bg_color);
+
+                        pos.x += action.str.length();
+                }
+                break;
+
+                case TextActionId::newline:
+                {
+                        ++pos.y;
+                        pos.x = origin_pos.x;
+                }
+                break;
+
+                case TextActionId::change_color:
+                {
+                        color = action.color;
+                }
+                break;
+
+                case TextActionId::done:
+                {
+                        return;
+                }
+                break;
+                }
+        }
 }
 
 void draw_text_center(

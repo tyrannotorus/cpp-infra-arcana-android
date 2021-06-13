@@ -18,7 +18,8 @@ Gameplay
 * Small crawling creatures (rats, snakes, crawling hands, etc) can pass through some terrain types such as gates and piles of debris
 * Cultist now have a different tile depending on their wielded firearm, and their description states what weapon they are wielding
 * Cultists have a kick attack
-* A generated description is now printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters (so that things like melee hit chance and movement speed can be read)
+* A generated description is now printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters
+* Monster descriptions now display more information, such as resistances
 * Forcing a metal door open (e.g. with a Rod of Opening or the Opening spell) now also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
 * Standing next to a door will reveal if it's stuck - if so it will change name and appearance
 * Added trait "Crippling Strikes" - melee attacks have 60% chance to Weaken the target for 2-3 turns

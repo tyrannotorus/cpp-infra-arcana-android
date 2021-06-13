@@ -2343,6 +2343,7 @@
         <properties>
             <property>small_crawling</property>
             <property>darkvision</property>
+            <property>r_poison</property>
         </properties>
 
         <ai>
@@ -2441,6 +2442,7 @@
         <properties>
             <property>small_crawling</property>
             <property>darkvision</property>
+            <property>r_poison</property>
         </properties>
 
         <ai>
@@ -2536,6 +2538,7 @@
         <properties>
             <property>small_crawling</property>
             <property>darkvision</property>
+            <property>r_poison</property>
         </properties>
 
         <ai>
@@ -5555,7 +5558,7 @@
             <name_the>the Worm Mass</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
-            <description>A slithering conglomeration of carnivorous worms. Piercing attacks such as pistol shots or dagger strikes are very ineffective against them.</description>
+            <description>A slithering conglomeration of carnivorous worms.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
@@ -5653,7 +5656,7 @@
             <name_the>the Mind Worms</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
-            <description>A slithering conglomeration of carnivorous worms. Their bite causes heavy disorientation. Piercing attacks such as pistol shots or dagger strikes are very ineffective against them.</description>
+            <description>A slithering conglomeration of carnivorous worms. Their bite causes heavy disorientation.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>

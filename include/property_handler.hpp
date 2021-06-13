@@ -49,7 +49,7 @@ enum class PropEndAllowHistoricMsg
         yes
 };
 
-struct PropTextListEntry
+struct PropListEntry
 {
         ColoredString title {};
         std::string descr {};
@@ -124,9 +124,9 @@ public:
 
         std::vector<ColoredString> property_names_short() const;
 
-        std::vector<PropTextListEntry> property_names_and_descr() const;
+        std::vector<PropListEntry> property_names_and_descr() const;
 
-        std::vector<PropTextListEntry> property_names_temporary_negative();
+        std::vector<PropListEntry> temporary_negative_properties();
 
         bool has_temporary_negative_prop_mon() const;
 

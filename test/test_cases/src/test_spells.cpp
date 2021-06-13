@@ -4,22 +4,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include "actor.hpp"
+#include "actor_factory.hpp"
 #include "actor_player.hpp"
+#include "catch.hpp"
+#include "global.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "item_scroll.hpp"
 #include "map.hpp"
 #include "player_spells.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
 #include "property_factory.hpp"
+#include "property_handler.hpp"
 #include "spells.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
 #include "test_utils.hpp"
-#include "global.hpp"
-#include "item_data.hpp"
-#include "pos.hpp"
-#include "property_data.hpp"
-#include "property_handler.hpp"
 
 TEST_CASE("Test opening spell effect")
 {
@@ -177,4 +179,62 @@ TEST_CASE("Test spell bonuses for manuscripts")
 
         REQUIRE(!player.m_properties.has(PropId::diseased));
         REQUIRE(!player.m_properties.has(PropId::poisoned));
+}
+
+TEST_CASE("Test spell shield")
+{
+        test_utils::init_all();
+
+        const P p0(10, 10);
+        const P p1(11, 10);
+
+        map::put(new terrain::Floor(p0));
+        map::put(new terrain::Floor(p1));
+
+        map::g_player->m_pos = p0;
+
+        SECTION("Temporary spell shield")
+        {
+                auto* const mon = actor::make(actor::Id::zombie, p1);
+
+                map::update_vision();
+
+                mon->m_properties.apply(
+                        property_factory::make(PropId::r_spell));
+
+                const auto* const darkbolt = spells::make(SpellId::darkbolt);
+
+                REQUIRE(mon->m_properties.has(PropId::r_spell));
+
+                darkbolt->run_effect(map::g_player, SpellSkill::basic);
+
+                REQUIRE(mon->m_hp == actor::max_hp(*mon));
+                REQUIRE(!mon->m_properties.has(PropId::r_spell));
+
+                darkbolt->run_effect(map::g_player, SpellSkill::basic);
+
+                REQUIRE(mon->m_hp < actor::max_hp(*mon));
+                REQUIRE(!mon->m_properties.has(PropId::r_spell));
+        }
+
+        SECTION("Natural spell shield")
+        {
+                auto* const mon = actor::make(actor::Id::khaga, p1);
+
+                map::update_vision();
+
+                const auto* const darkbolt = spells::make(SpellId::darkbolt);
+
+                REQUIRE(mon->m_properties.has(PropId::r_spell));
+
+                darkbolt->run_effect(map::g_player, SpellSkill::basic);
+
+                REQUIRE(mon->m_hp == actor::max_hp(*mon));
+                REQUIRE(mon->m_properties.has(PropId::r_spell));
+
+                darkbolt->run_effect(map::g_player, SpellSkill::basic);
+
+                REQUIRE(mon->m_hp == actor::max_hp(*mon));
+                REQUIRE(mon->m_properties.has(PropId::r_spell));
+        }
 }

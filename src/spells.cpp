@@ -1263,8 +1263,11 @@ void Spell::on_resist(actor::Actor& target) const
                 io::draw_blast_at_cells({target.m_pos}, colors::white());
         }
 
-        // TODO: Only end r_spell if this is not a natural property
-        target.m_properties.end_prop(PropId::r_spell);
+        // End spell resistance if not a natural property.
+        if (!target.m_data->natural_props[(size_t)PropId::r_spell])
+        {
+                target.m_properties.end_prop(PropId::r_spell);
+        }
 
         if (is_player && player_bon::has_trait(Trait::absorb))
         {

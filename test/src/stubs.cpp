@@ -145,10 +145,10 @@ void draw_character(
         const Color&) {}
 
 void draw_text(
-        const std::string&,
-        const Panel,
+        Text,
+        Panel,
         P,
-        const Color&,
+        Color,
         const DrawBg,
         const Color&) {}
 

@@ -657,21 +657,22 @@ bool PropHandler::is_temporary_negative_prop(const Prop& prop) const
 
         const bool is_natural_prop = m_owner->m_data->natural_props[(size_t)id];
 
-        return !is_natural_prop &&
+        return (
+                !is_natural_prop &&
                 (prop.m_duration_mode != PropDurationMode::indefinite) &&
-                (prop.alignment() == PropAlignment::bad);
+                (prop.alignment() == PropAlignment::bad));
 }
 
-std::vector<PropTextListEntry> PropHandler::property_names_temporary_negative()
+std::vector<PropListEntry> PropHandler::temporary_negative_properties()
 {
         ASSERT(m_owner != map::g_player);
 
-        auto prop_list = m_owner->m_properties.property_names_and_descr();
+        auto prop_list = property_names_and_descr();
 
         // Remove all non-negative properties (we should not show temporary
         // spell resistance for example), and all natural properties (properties
         // which all monsters of this type starts with)
-        for (auto it = begin(prop_list); it != end(prop_list);)
+        for (auto it = std::begin(prop_list); it != std::end(prop_list);)
         {
                 const auto* const prop = it->prop;
 
@@ -788,9 +789,9 @@ std::vector<ColoredString> PropHandler::property_names_short() const
 }
 
 // TODO: Lots of copy paste here, refactor
-std::vector<PropTextListEntry> PropHandler::property_names_and_descr() const
+std::vector<PropListEntry> PropHandler::property_names_and_descr() const
 {
-        std::vector<PropTextListEntry> list;
+        std::vector<PropListEntry> list;
 
         for (const auto& prop : m_props)
         {

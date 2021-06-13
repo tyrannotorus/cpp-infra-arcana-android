@@ -13,6 +13,7 @@
 #include "gfx.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
+#include "xml.hpp"
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -21,15 +22,14 @@ struct SDL_Surface;
 
 namespace io
 {
+class TextBlock;
+
 extern SDL_Window* g_sdl_window;
 extern SDL_Renderer* g_sdl_renderer;
-
 extern SDL_Texture* g_font_texture_with_contours;
 extern SDL_Texture* g_font_texture;
-
 extern SDL_Texture* g_tile_textures_with_contours[(size_t)gfx::TileId::END];
 extern SDL_Texture* g_tile_textures[(size_t)gfx::TileId::END];
-
 extern SDL_Texture* g_logo_texture;
 
 // Used for centering the rendering area on the screen

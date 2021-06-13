@@ -1,0 +1,675 @@
+// =============================================================================
+// Copyright 2011-2020 Martin Törnqvist <m.tornq@gmail.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// =============================================================================
+
+#include "view_actor_descr.hpp"
+
+#include "SDL_keycode.h"
+
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <pmmintrin.h>
+
+#include "ability_values.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
+#include "actor_player.hpp"
+#include "attack_data.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
+#include "io.hpp"
+#include "item.hpp"
+#include "map.hpp"
+#include "panel.hpp"
+#include "property.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "text.hpp"
+#include "text_format.hpp"
+
+// -----------------------------------------------------------------------------
+// private
+// -----------------------------------------------------------------------------
+// NOTE: This is the order that the properties will show up in the description.
+
+// NOTE: r_acid could possibly also go here, but it's not really relevant
+// information for the player...
+
+static const std::string s_cannot_be_harmed_by_start =
+        "They cannot be harmed by";
+
+static const std::pair<PropId, std::string> s_cannot_be_harmed_by_props[] = {
+        {PropId::r_phys, "{gray}physical damage{reset_color}"},
+        {PropId::r_fire, "{light_red}fire{reset_color}"},
+        {PropId::r_elec, "{yellow}electricity{reset_color}"},
+        {PropId::r_poison, "{light_green}poison{reset_color}"},
+        {PropId::r_disease, "{green}disease{reset_color}"},
+        {PropId::r_spell, "{magenta}magic{reset_color}"},
+};
+
+static const std::string s_unaffected_by_start =
+        "They are unaffected by";
+
+static const std::pair<PropId, std::string> s_unaffected_by_props[] = {
+        {PropId::r_fear, "fear"},
+        {PropId::r_conf, "confusion"},
+};
+
+static const std::string s_cannot_be_start =
+        "They cannot be";
+
+static const std::pair<PropId, std::string> s_cannot_be_props[] = {
+        {PropId::r_slow, "slowed"},
+        {PropId::r_para, "paralyzed"},
+};
+
+static const std::string s_can_start =
+        "They can";
+
+static const std::pair<PropId, std::string> s_can_props[] = {
+        {PropId::darkvision, "see in darkness"},
+};
+
+static const std::pair<PropId, std::string> s_custom_props[] = {
+        {PropId::reduced_pierce_dmg,
+         "Piercing attacks such as pistol shots or dagger strikes are "
+         "very ineffective against them"},
+};
+
+struct MonShockStrings
+{
+        std::string color_fmt_str {};
+        std::string shock_str {};
+        std::string punct_str {};
+};
+
+static std::string get_mon_memory_turns_descr(
+        const actor::ActorData& actor_data,
+        const actor::Actor& actor)
+{
+        const int nr_turns_aware = actor_data.nr_turns_aware;
+
+        if (nr_turns_aware <= 0)
+        {
+                return "";
+        }
+
+        const std::string name_a = text_format::first_to_upper(actor.name_a());
+
+        if (nr_turns_aware < 50)
+        {
+                const std::string nr_turns_aware_str =
+                        std::to_string(nr_turns_aware);
+
+                return name_a +
+                        " will remember hostile creatures for at least "
+                        "{dark_yellow}" +
+                        nr_turns_aware_str +
+                        "{_}turns{reset_color}.";
+        }
+        else
+        {
+                // Very high number of turns awareness
+                return (
+                        name_a +
+                        " remembers hostile creatures for a "
+                        "{dark_yellow}very long time{reset_color}.");
+        }
+}
+
+static std::string get_mon_dlvl_descr(
+        const actor::ActorData& actor_data,
+        const actor::Actor& actor)
+{
+        const int dlvl = actor_data.spawn_min_dlvl;
+
+        if ((dlvl <= 1) || (dlvl >= g_dlvl_last))
+        {
+                return "";
+        }
+
+        const std::string dlvl_str = std::to_string(dlvl);
+
+        if (actor_data.is_unique)
+        {
+                return (
+                        actor.name_the() +
+                        " usually dwells beneath level{_}" +
+                        dlvl_str +
+                        ".");
+        }
+        else
+        {
+                // Not unique
+                return (
+                        "They usually dwell beneath level{_}" +
+                        dlvl_str +
+                        ".");
+        }
+}
+
+static std::string mon_speed_type_to_str(const actor::Speed speed)
+{
+        switch (speed)
+        {
+        case actor::Speed::slow:
+                return "slowly";
+
+        case actor::Speed::normal:
+                return "";
+
+        case actor::Speed::fast:
+                return "fast";
+
+        case actor::Speed::very_fast:
+                return "very swiftly";
+        }
+
+        ASSERT(false);
+
+        return "";
+}
+
+static std::string get_mon_speed_descr(
+        const actor::ActorData& actor_data,
+        const actor::Actor& actor)
+{
+        const std::string speed_type_str =
+                mon_speed_type_to_str(
+                        actor_data.speed);
+
+        if (speed_type_str.empty())
+        {
+                return "";
+        }
+
+        if (actor_data.is_unique)
+        {
+                return (
+                        actor.name_the() +
+                        " appears to move{_}" +
+                        speed_type_str +
+                        ".");
+        }
+        else
+        {
+                return (
+                        "They appear to move{_}" +
+                        speed_type_str +
+                        ".");
+        }
+}
+
+static MonShockStrings mon_shock_lvl_to_strings(const ShockLvl shock_lvl)
+{
+        MonShockStrings result;
+
+        switch (shock_lvl)
+        {
+        case ShockLvl::unsettling:
+                result.color_fmt_str = "{dark_brown}";
+                result.shock_str = "unsettling";
+                result.punct_str = ".";
+                break;
+
+        case ShockLvl::frightening:
+                result.color_fmt_str = "{gray}";
+                result.shock_str = "frightening";
+                result.punct_str = ".";
+                break;
+
+        case ShockLvl::terrifying:
+                result.color_fmt_str = "{red}";
+                result.shock_str = "terrifying";
+                result.punct_str = "!";
+                break;
+
+        case ShockLvl::mind_shattering:
+                result.color_fmt_str = "{light_red}";
+                result.shock_str = "mind shattering";
+                result.punct_str = "!";
+                break;
+
+        case ShockLvl::none:
+        case ShockLvl::END:
+                break;
+        }
+
+        return result;
+}
+
+static std::string get_mon_shock_descr(
+        const actor::ActorData& actor_data,
+        const actor::Actor& actor)
+{
+        const auto shock_strings =
+                mon_shock_lvl_to_strings(
+                        actor_data.mon_shock_lvl);
+
+        if (shock_strings.shock_str.empty())
+        {
+                return "";
+        }
+
+        const std::string prefix_str =
+                actor_data.is_unique
+                ? (actor.name_the() + " is ")
+                : ("They are ");
+
+        return (
+                shock_strings.color_fmt_str +
+                prefix_str +
+                shock_strings.shock_str +
+                " to behold" +
+                shock_strings.punct_str +
+                "{reset_color}");
+}
+
+static std::string get_mon_wielded_wpn_str(
+        const actor::ActorData& actor_data,
+        const actor::Actor& actor)
+{
+        const auto* const wpn = actor.m_inv.item_in_slot(SlotId::wpn);
+
+        if (!wpn)
+        {
+                return "";
+        }
+
+        const std::string pronoun_str =
+                actor_data.is_unique
+                ? actor.name_the()
+                : "It";
+
+        const std::string wpn_name_a =
+                wpn->name(
+                        ItemRefType::a,
+                        ItemRefInf::none,
+                        ItemRefAttInf::none);
+
+        return pronoun_str + " is wielding " + wpn_name_a + ".";
+}
+
+static std::string get_melee_hit_chance_descr(actor::Actor& actor)
+{
+        const auto* wielded_item =
+                map::g_player->m_inv.item_in_slot(SlotId::wpn);
+
+        const auto* const player_wpn =
+                wielded_item
+                ? static_cast<const item::Wpn*>(wielded_item)
+                : &map::g_player->unarmed_wpn();
+
+        if (!player_wpn)
+        {
+                ASSERT(false);
+
+                return "";
+        }
+
+        const MeleeAttData att_data(map::g_player, actor, *player_wpn);
+
+        const int hit_chance =
+                ability_roll::hit_chance_pct_actual(
+                        att_data.hit_chance_tot);
+
+        std::string descr =
+                "The chance to hit " +
+                actor.name_the() +
+                " in melee combat is currently{_}{light_green}" +
+                std::to_string(hit_chance) +
+                "%{reset_color}";
+
+        if (att_data.is_backstab)
+        {
+                descr += " (because they are unaware)";
+        }
+
+        descr += ".";
+
+        return descr;
+}
+
+static bool has_natural_property(
+        const actor::ActorData& actor_data,
+        const PropId id)
+{
+        return actor_data.natural_props[(size_t)id];
+}
+
+static void add_or_list_to_sentence(
+        std::string& base_str,
+        const std::vector<std::string>& names)
+{
+        const auto nr_names = names.size();
+
+        for (size_t i = 0; i < nr_names; ++i)
+        {
+                if ((nr_names > 2) && (i > 0))
+                {
+                        base_str += ",";
+                }
+
+                base_str += " ";
+
+                if ((nr_names >= 2) && (i == (nr_names - 1)))
+                {
+                        base_str += "or ";
+                }
+
+                base_str += names[i];
+        }
+}
+
+static std::string get_mon_natural_properties_descr(
+        const actor::ActorData& actor_data)
+{
+        std::string descr;
+
+        std::vector<std::string> cannot_be_harmed_by_names;
+        std::vector<std::string> unaffected_by_names;
+        std::vector<std::string> cannot_be_names;
+        std::vector<std::string> can_names;
+        std::vector<std::string> custom_entries;
+
+        for (const auto& p : s_cannot_be_harmed_by_props)
+        {
+                if (has_natural_property(actor_data, p.first))
+                {
+                        cannot_be_harmed_by_names.push_back(p.second);
+                }
+        }
+
+        for (const auto& p : s_unaffected_by_props)
+        {
+                if (has_natural_property(actor_data, p.first))
+                {
+                        unaffected_by_names.push_back(p.second);
+                }
+        }
+
+        for (const auto& p : s_cannot_be_props)
+        {
+                if (has_natural_property(actor_data, p.first))
+                {
+                        cannot_be_names.push_back(p.second);
+                }
+        }
+
+        for (const auto& p : s_can_props)
+        {
+                if (has_natural_property(actor_data, p.first))
+                {
+                        can_names.push_back(p.second);
+                }
+        }
+
+        for (const auto& p : s_custom_props)
+        {
+                if (has_natural_property(actor_data, p.first))
+                {
+                        custom_entries.push_back(p.second);
+                }
+        }
+
+        if (!cannot_be_harmed_by_names.empty())
+        {
+                descr += s_cannot_be_harmed_by_start;
+                add_or_list_to_sentence(descr, cannot_be_harmed_by_names);
+                descr += ".";
+        }
+
+        if (!unaffected_by_names.empty())
+        {
+                if (!descr.empty())
+                {
+                        descr += " ";
+                }
+
+                descr += s_unaffected_by_start;
+                add_or_list_to_sentence(descr, unaffected_by_names);
+                descr += ".";
+        }
+
+        if (!cannot_be_names.empty())
+        {
+                if (!descr.empty())
+                {
+                        descr += " ";
+                }
+
+                descr += s_cannot_be_start;
+                add_or_list_to_sentence(descr, cannot_be_names);
+                descr += ".";
+        }
+
+        if (!can_names.empty())
+        {
+                if (!descr.empty())
+                {
+                        descr += " ";
+                }
+
+                descr += s_can_start;
+                add_or_list_to_sentence(descr, can_names);
+                descr += ".";
+        }
+
+        for (const auto& entry : custom_entries)
+        {
+                if (!descr.empty())
+                {
+                        descr += " ";
+                }
+
+                descr += entry + ".";
+        }
+
+        return descr;
+}
+
+static std::string auto_description_str(actor::Actor& actor)
+{
+        std::string str;
+
+        const auto& actor_data =
+                actor.m_mimic_data
+                ? *actor.m_mimic_data
+                : *actor.m_data;
+
+        text_format::append_with_space(
+                str,
+                get_melee_hit_chance_descr(actor));
+
+        if (actor_data.allow_spawn_dlvl_descr)
+        {
+                text_format::append_with_space(
+                        str,
+                        get_mon_dlvl_descr(actor_data, actor));
+        }
+
+        if (actor_data.allow_speed_descr)
+        {
+                text_format::append_with_space(
+                        str,
+                        get_mon_speed_descr(actor_data, actor));
+        }
+
+        text_format::append_with_space(
+                str,
+                get_mon_memory_turns_descr(actor_data, actor));
+
+        const auto& ai = actor_data.ai;
+        const auto looks = ai[(size_t)actor::AiId::looks];
+
+        if (!looks)
+        {
+                text_format::append_with_space(
+                        str,
+                        "They cannot visually detect other creatures");
+
+                const auto pursues =
+                        ai[(size_t)actor::AiId::moves_to_target_when_los] ||
+                        ai[(size_t)actor::AiId::paths_to_target_when_aware];
+
+                if (pursues)
+                {
+                        str += " (but will pursue any threat once aware)";
+                }
+
+                str += ".";
+        }
+
+        if (actor_data.is_undead)
+        {
+                text_format::append_with_space(
+                        str,
+                        "{magenta}This creature is undead.{reset_color}");
+        }
+
+        text_format::append_with_space(
+                str,
+                get_mon_shock_descr(actor_data, actor));
+
+        if (actor_data.allow_wielded_wpn_descr)
+        {
+                text_format::append_with_space(
+                        str,
+                        get_mon_wielded_wpn_str(actor_data, actor));
+        }
+
+        const auto natural_properties_descr =
+                get_mon_natural_properties_descr(actor_data);
+
+        if (!natural_properties_descr.empty())
+        {
+                str += "\n\n" + natural_properties_descr;
+        }
+
+        return str;
+}
+
+static std::string temporary_negative_properties_str(actor::Actor& actor)
+{
+        std::string str;
+
+        // Properties
+        auto prop_list = actor.m_properties.temporary_negative_properties();
+
+        for (const auto& entry : prop_list)
+        {
+                if (!str.empty())
+                {
+                        str += "\n";
+                }
+
+                // TODO: This VERY hacky (maybe Text should support RGB?):
+                if (entry.title.color == colors::msg_good())
+                {
+                        str += "{light_green}";
+                }
+                else if (entry.title.color == colors::msg_bad())
+                {
+                        str += "{light_red}";
+                }
+
+                str += entry.title.str;
+                str += "{color_reset}: ";
+                str += entry.descr;
+        }
+
+        return str;
+}
+
+// -----------------------------------------------------------------------------
+// View actor description
+// -----------------------------------------------------------------------------
+StateId ViewActorDescr::id() const
+{
+        return StateId::view_actor;
+}
+
+void ViewActorDescr::draw()
+{
+        io::cover_panel(Panel::screen);
+
+        draw_interface();
+
+        int y = 0;
+
+        // Fixed decription
+        {
+                Text text;
+
+                text.set_w(panels::w(Panel::info_screen_content));
+                text.set_str(m_actor.descr());
+                text.set_color(colors::text());
+
+                text.draw(Panel::info_screen_content, {0, y});
+
+                y += text.nr_lines();
+        }
+
+        ++y;
+
+        // Auto description
+        {
+                Text text;
+
+                text.set_w(panels::w(Panel::info_screen_content));
+                text.set_str(auto_description_str(m_actor));
+                text.set_color(colors::text());
+
+                text.draw(Panel::info_screen_content, {0, y});
+
+                y += text.nr_lines();
+        }
+
+        ++y;
+
+        // Temporary negative properties
+        {
+                Text text;
+
+                text.set_w(panels::w(Panel::info_screen_content));
+                text.set_str(temporary_negative_properties_str(m_actor));
+                text.set_color(colors::text());
+
+                text.draw(Panel::info_screen_content, {0, y});
+
+                y += text.nr_lines();
+        }
+
+        ++y;
+}
+
+void ViewActorDescr::update()
+{
+        const auto input = io::get();
+
+        switch (input.key)
+        {
+        case SDLK_SPACE:
+        case SDLK_ESCAPE:
+        {
+                // Exit screen
+                states::pop();
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+}
+
+std::string ViewActorDescr::title() const
+{
+        return text_format::first_to_upper(m_actor.name_a());
+}

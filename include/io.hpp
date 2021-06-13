@@ -8,6 +8,8 @@
 #define IO_HPP
 
 #include <cstdint>
+#include <ctime>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,6 +18,7 @@
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
+#include "text.hpp"
 
 namespace actor
 {
@@ -117,10 +120,10 @@ void draw_character(
         const Color& bg_color = colors::black());
 
 void draw_text(
-        const std::string& str,
+        Text text,
         Panel panel,
         P pos,
-        const Color& color,
+        Color color,
         DrawBg draw_bg = DrawBg::yes,
         const Color& bg_color = colors::black());
 

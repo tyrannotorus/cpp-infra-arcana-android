@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#ifndef LOOK_HPP
-#define LOOK_HPP
+#ifndef VIEW_ACTOR_DESCR_HPP
+#define VIEW_ACTOR_DESCR_HPP
 
 #include <string>
 #include <vector>
@@ -19,17 +19,11 @@ namespace actor
 class Actor;
 }  // namespace actor
 
-struct P;
-
 class ViewActorDescr : public InfoScreenState
 {
 public:
         ViewActorDescr(actor::Actor& actor) :
-
-                m_actor(actor)
-        {}
-
-        void on_start() override;
+                m_actor(actor) {}
 
         void draw() override;
 
@@ -42,24 +36,10 @@ private:
 
         InfoScreenType type() const override
         {
-                return InfoScreenType::scrolling;
+                return InfoScreenType::single_screen;
         }
-
-        std::string auto_description_str() const;
-
-        std::vector<ColoredString> m_lines {};
-
-        int m_top_idx {0};
 
         actor::Actor& m_actor;
 };
 
-namespace look
-{
-void print_location_info_msgs(const P& pos);
-
-void print_living_actor_info_msg(const P& pos);
-
-}  // namespace look
-
-#endif  // LOOK_HPP
+#endif  // VIEW_ACTOR_DESCR_HPP
