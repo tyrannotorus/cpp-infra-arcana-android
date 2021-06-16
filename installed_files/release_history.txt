@@ -37,6 +37,8 @@ MINOR TWEAKS AND BALANCING
 * The Summoning spell is no longer available to player characters (only to monsters)
 * Added a message when spells are upgraded (e.g. by a Gong)
 * Being blind no longer immediately raises shock by 30% - instead the shock ramps up each turn up to 30%
+* The Tough and Rugged traits now give +6 hit points each, instead of +4
+* Ghoul characters start with +8 hit points, instead of +6
 * The Ghoul ability "Frenzy" no longer costs spirit to use
 * The Ghoul trait "Toxic" now has 75% chance to apply poison, instead of 25%
 * A lot more terrain objects can be destroyed or lit on fire (for example altars or monoliths are destroyed by explosions, and wooden chests or bookshelves can be lit on fire)

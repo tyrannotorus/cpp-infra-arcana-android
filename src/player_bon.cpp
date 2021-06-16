@@ -415,11 +415,11 @@ static void update_trait_data()
         d.id = Trait::tough;
         d.title = "Tough";
         d.descr =
-                "+4 hit points, less likely to sprain when kicking, more "
+                "+6 hit points, less likely to sprain when kicking, more "
                 "likely to succeed with object interactions requiring "
                 "strength (e.g. bashing things open)";
         d.on_picked = []() {
-                const int hp_incr = 4;
+                const int hp_incr = 6;
 
                 map::g_player->change_max_hp(hp_incr, Verbose::no);
 
@@ -429,7 +429,7 @@ static void update_trait_data()
                         Verbose::no);
         };
         d.on_removed = []() {
-                map::g_player->change_max_hp(-4, Verbose::no);
+                map::g_player->change_max_hp(-6, Verbose::no);
         };
         set_trait_data(d);
 
@@ -1042,8 +1042,12 @@ std::vector<ColoredString> bg_descr(const Bg id)
         };
 
         auto put_trait = [&descr](const Trait trait_id) {
-                descr.emplace_back(trait_title(trait_id), colors::white());
-                descr.emplace_back(trait_descr(trait_id), colors::gray());
+                const auto t = trait_title(trait_id);
+                const auto d = trait_descr(trait_id);
+
+                descr.emplace_back(
+                        "{white}" + t + "{color_reset}: " + d,
+                        colors::gray());
         };
 
         switch (id)
@@ -1080,7 +1084,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 put("Can incite frenzy at will, and does not become weakened "
                     "when frenzy ends");
                 put("");
-                put("+6 hit points");
+                put("+8 hit points");
                 put("");
                 put("Is immune to disease and infections");
                 put("");
@@ -1492,7 +1496,7 @@ void pick_bg(const Bg bg)
 
                 player_spells::learn_spell(SpellId::frenzy, Verbose::no);
 
-                map::g_player->change_max_hp(6, Verbose::no);
+                map::g_player->change_max_hp(8, Verbose::no);
         }
         break;
 

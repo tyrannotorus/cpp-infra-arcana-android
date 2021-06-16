@@ -234,32 +234,35 @@ static void add_traits_descr(std::vector<ColoredString>& lines)
 
         for (size_t i = 0; i < (size_t)Trait::END; ++i)
         {
-                if (!player_bon::has_trait((Trait)i))
+                if (player_bon::has_trait((Trait)i))
                 {
-                        continue;
-                }
+                        const auto trait = Trait(i);
 
-                const auto trait = Trait(i);
+                        const std::string title =
+                                player_bon::trait_title(trait);
 
-                std::string str =
-                        player_bon::trait_title(trait) +
-                        ": " +
-                        player_bon::trait_descr(trait);
+                        const std::string descr =
+                                player_bon::trait_descr(trait);
 
-                const auto trait_lines =
-                        text_format::split(
-                                str,
-                                max_descr_w());
-
-                for (const std::string& line : trait_lines)
-                {
                         lines.emplace_back(
-                                line,
-                                color_text_dark());
+                                title,
+                                colors::text());
+
+                        const auto descr_lines =
+                                text_format::split(
+                                        descr,
+                                        max_descr_w());
+
+                        for (const std::string& descr_line : descr_lines)
+                        {
+                                lines.emplace_back(
+                                        descr_line,
+                                        color_text_dark());
+                        }
+
+                        lines.emplace_back("", colors::text());
                 }
         }
-
-        lines.emplace_back("", colors::text());
 }
 
 static void add_history_descr(std::vector<ColoredString>& lines)

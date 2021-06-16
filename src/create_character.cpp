@@ -205,21 +205,14 @@ void PickBgState::draw()
                         continue;
                 }
 
-                const auto formatted_lines =
-                        text_format::split(
-                                descr_entry.str,
-                                panels::w(Panel::create_char_descr));
+                Text text;
+                text.set_str(descr_entry.str);
+                text.set_w(panels::w(Panel::create_char_descr));
+                text.set_color(descr_entry.color);
 
-                for (const std::string& line : formatted_lines)
-                {
-                        io::draw_text(
-                                line,
-                                Panel::create_char_descr,
-                                {0, y},
-                                descr_entry.color);
+                text.draw(Panel::create_char_descr, {0, y});
 
-                        ++y;
-                }
+                y += text.nr_lines();
         }
 }
 

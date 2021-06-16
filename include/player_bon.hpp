@@ -4,9 +4,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-// TODO: Player bonuses should be represented by classes, wich hooks such as
-// "on_picked", "on_player_gained_lvl".
-
 #ifndef PLAYER_BON_HPP
 #define PLAYER_BON_HPP
 

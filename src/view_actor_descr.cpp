@@ -568,7 +568,7 @@ static std::string temporary_negative_properties_str(actor::Actor& actor)
                         str += "\n";
                 }
 
-                // TODO: This VERY hacky (maybe Text should support RGB?):
+                // TODO: This is VERY hacky (maybe Text should support RGB?):
                 if (entry.title.color == colors::msg_good())
                 {
                         str += "{light_green}";
@@ -576,6 +576,10 @@ static std::string temporary_negative_properties_str(actor::Actor& actor)
                 else if (entry.title.color == colors::msg_bad())
                 {
                         str += "{light_red}";
+                }
+                else
+                {
+                        str += "{white}";
                 }
 
                 str += entry.title.str;
