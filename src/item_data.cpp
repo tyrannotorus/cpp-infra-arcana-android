@@ -2174,7 +2174,7 @@ void init()
         d.is_stackable = true;
         d.chance_to_incl_in_spawn_list = 40;
         d.allow_spawn = true;
-        d.max_stack_at_spawn = 3;
+        d.max_stack_at_spawn = 2;
         d.value = item::Value::minor_treasure;
         d.weight = Weight::extra_light;
         d.has_std_activate = true;

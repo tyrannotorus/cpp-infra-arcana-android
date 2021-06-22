@@ -583,10 +583,9 @@ void handle(const GameCmd cmd)
         {
                 if (player_bon::has_trait(Trait::steady_aimer))
                 {
-                        Prop* aiming = new PropAiming();
-
+                        auto* const aiming =
+                                property_factory::make(PropId::aiming);
                         aiming->set_duration(1);
-
                         map::g_player->m_properties.apply(aiming);
                 }
 

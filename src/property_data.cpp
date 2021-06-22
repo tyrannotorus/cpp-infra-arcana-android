@@ -443,7 +443,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::hallucinating;
-        d.std_rnd_turns = Range(200, 300);
+        d.std_rnd_turns = Range(75, 150);
         d.name = "Hallucinating";
         d.name_short = "Halluc.";
         d.descr = "The senses cannot always be trusted.";
