@@ -126,6 +126,10 @@ void player_throw_lit_explosive(const P& aim_cell)
 
         map::g_player->m_active_explosive = nullptr;
 
+        // Attacking ends cloaking and sanctuary
+        map::g_player->m_properties.end_prop(PropId::cloaked);
+        map::g_player->m_properties.end_prop(PropId::sanctuary);
+
         game_time::tick();
 }
 
