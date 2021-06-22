@@ -1938,13 +1938,7 @@ PropEnded PropBurrowing::on_actor_turn()
 
 PropActResult PropVortex::on_act()
 {
-        // Not supported yet
-        if (m_owner->is_player())
-        {
-                return {};
-        }
-
-        if (!m_owner->is_alive())
+        if (m_owner->is_player() || !m_owner->is_alive())
         {
                 return {};
         }
@@ -1954,12 +1948,14 @@ PropActResult PropVortex::on_act()
                 --pull_cooldown;
         }
 
-        if (!m_owner->is_aware_of_player() || (pull_cooldown > 0))
+        if ((m_owner->m_ai_state.target != map::g_player) ||
+            !m_owner->m_ai_state.is_target_seen ||
+            (pull_cooldown > 0))
         {
                 return {};
         }
 
-        const P& player_pos = map::g_player->m_pos;
+        const auto& player_pos = map::g_player->m_pos;
 
         if (is_pos_adj(m_owner->m_pos, player_pos, true) ||
             !rnd::coin_toss())
@@ -1967,8 +1963,9 @@ PropActResult PropVortex::on_act()
                 return {};
         }
 
-        TRACE << "Monster with vortex property attempting to pull player"
-              << std::endl;
+        TRACE
+                << "Monster with vortex property attempting to pull player"
+                << std::endl;
 
         const auto delta = player_pos - m_owner->m_pos;
 
@@ -1999,62 +1996,48 @@ PropActResult PropVortex::on_act()
                 return {};
         }
 
-        TRACE << "Pos found to knockback player from: "
-              << knockback_from_pos.x << ", "
-              << knockback_from_pos.y << std::endl;
+        TRACE
+                << "Pos found to knockback player from: "
+                << knockback_from_pos.x << ", "
+                << knockback_from_pos.y << std::endl;
 
-        TRACE << "Player pos: "
-              << player_pos.x << ", " << player_pos.y << std::endl;
+        TRACE
+                << "Player pos: "
+                << player_pos.x << ", " << player_pos.y << std::endl;
 
-        Array2<bool> blocked_los(map::dims());
+        static_cast<actor::Mon*>(m_owner)->set_player_aware_of_me();
 
-        const R fov_rect = fov::fov_rect(m_owner->m_pos, blocked_los.dims());
-
-        map_parsers::BlocksLos()
-                .run(blocked_los,
-                     fov_rect,
-                     MapParseMode::overwrite);
-
-        if (actor::can_mon_see_actor(*m_owner, *map::g_player, blocked_los))
+        if (actor::can_player_see_actor(*m_owner))
         {
-                TRACE << "Is seeing player" << std::endl;
+                const auto name_the = text_format::first_to_upper(
+                        m_owner->name_the());
 
-                static_cast<actor::Mon*>(m_owner)->set_player_aware_of_me();
-
-                if (actor::can_player_see_actor(*m_owner))
-                {
-                        const auto name_the = text_format::first_to_upper(
-                                m_owner->name_the());
-
-                        msg_log::add(name_the + " pulls me!");
-                }
-                else
-                {
-                        msg_log::add("A powerful wind is pulling me!");
-                }
-
-                TRACE << "Attempt pull (knockback)" << std::endl;
-
-                // TODO: Add sfx
-                knockback::run(
-                        *map::g_player,
-                        knockback_from_pos,
-                        false,
-                        Verbose::no);
-
-                pull_cooldown = 2;
-
-                game_time::tick();
-
-                PropActResult result;
-
-                result.did_action = DidAction::yes;
-                result.prop_ended = PropEnded::no;
-
-                return result;
+                msg_log::add(name_the + " pulls me!");
+        }
+        else
+        {
+                msg_log::add("A powerful wind is pulling me!");
         }
 
-        return {};
+        TRACE << "Attempt pull (knockback)" << std::endl;
+
+        // TODO: Add sfx
+        knockback::run(
+                *map::g_player,
+                knockback_from_pos,
+                false,
+                Verbose::no);
+
+        pull_cooldown = 2;
+
+        game_time::tick();
+
+        PropActResult result;
+
+        result.did_action = DidAction::yes;
+        result.prop_ended = PropEnded::no;
+
+        return result;
 }
 
 void PropExplodesOnDeath::on_death()
@@ -2768,60 +2751,43 @@ PropActResult PropSpeaksCurses::on_act()
         const int curse_one_in_n = 3;
 
         if (!m_owner->is_alive() ||
-            !m_owner->is_aware_of_player() ||
+            (m_owner->m_ai_state.target != map::g_player) ||
+            !m_owner->m_ai_state.is_target_seen ||
             !rnd::one_in(curse_one_in_n))
         {
                 return {};
         }
 
-        Array2<bool> blocked_los(map::dims());
+        const bool player_see_owner = actor::can_player_see_actor(*m_owner);
 
-        const auto fov_rect =
-                fov::fov_rect(
-                        m_owner->m_pos,
-                        blocked_los.dims());
+        std::string snd_msg =
+                player_see_owner
+                ? text_format::first_to_upper(m_owner->name_the())
+                : "Someone";
 
-        map_parsers::BlocksLos().run(
-                blocked_los,
-                fov_rect,
-                MapParseMode::overwrite);
+        snd_msg += " spews forth a litany of curses.";
 
-        if (actor::can_mon_see_actor(*m_owner, *map::g_player, blocked_los))
-        {
-                const bool player_see_owner =
-                        actor::can_player_see_actor(*m_owner);
+        Snd snd(
+                snd_msg,
+                audio::SfxId::END,
+                IgnoreMsgIfOriginSeen::no,
+                m_owner->m_pos,
+                m_owner,
+                SndVol::high,
+                AlertsMon::no);
 
-                std::string snd_msg =
-                        player_see_owner
-                        ? text_format::first_to_upper(m_owner->name_the())
-                        : "Someone";
+        snd_emit::run(snd);
 
-                snd_msg += " spews forth a litany of curses.";
+        map::g_player->m_properties.apply(new PropCursed());
 
-                Snd snd(
-                        snd_msg,
-                        audio::SfxId::END,
-                        IgnoreMsgIfOriginSeen::no,
-                        m_owner->m_pos,
-                        m_owner,
-                        SndVol::high,
-                        AlertsMon::no);
+        game_time::tick();
 
-                snd_emit::run(snd);
+        PropActResult result;
 
-                map::g_player->m_properties.apply(new PropCursed());
+        result.did_action = DidAction::yes;
+        result.prop_ended = PropEnded::no;
 
-                game_time::tick();
-
-                PropActResult result;
-
-                result.did_action = DidAction::yes;
-                result.prop_ended = PropEnded::no;
-
-                return result;
-        }
-
-        return {};
+        return result;
 }
 
 void PropAuraOfDecay::save() const
@@ -2964,26 +2930,10 @@ void PropAuraOfDecay::print_msg_actor_hit(const actor::Actor& actor) const
 
 PropActResult PropMajorClaphamSummon::on_act()
 {
-        if (m_owner->is_player())
-        {
-                return {};
-        }
-
-        if (!m_owner->is_alive() || !m_owner->is_aware_of_player())
-        {
-                return {};
-        }
-
-        Array2<bool> blocked_los(map::dims());
-
-        const R fov_rect = fov::fov_rect(m_owner->m_pos, blocked_los.dims());
-
-        map_parsers::BlocksLos()
-                .run(blocked_los,
-                     fov_rect,
-                     MapParseMode::overwrite);
-
-        if (!actor::can_mon_see_actor(*m_owner, *map::g_player, blocked_los))
+        if (m_owner->is_player() ||
+            !m_owner->is_alive() ||
+            (m_owner->m_ai_state.target != map::g_player) ||
+            !m_owner->m_ai_state.is_target_seen)
         {
                 return {};
         }
