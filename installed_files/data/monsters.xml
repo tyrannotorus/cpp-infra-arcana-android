@@ -731,8 +731,8 @@
 
         <spawning>
             <min_dungeon_level>8</min_dungeon_level>
-            <max_dungeon_level>9</max_dungeon_level>
-            <spawn_weight>1</spawn_weight>
+            <max_dungeon_level>16</max_dungeon_level>
+            <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
