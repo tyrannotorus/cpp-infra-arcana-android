@@ -155,6 +155,7 @@ struct PropData
         std::string historic_msg_end_permanent {};
         bool allow_display_turns {true};
         bool update_vision_on_toggled {false};
+        bool is_preventable_by_player_trait {false};
         bool allow_test_on_bot {false};
         PropAlignment alignment {PropAlignment::neutral};
 };

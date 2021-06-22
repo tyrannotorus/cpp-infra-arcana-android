@@ -1111,7 +1111,8 @@ void handle(const GameCmd cmd)
         case GameCmd::debug_f7:
         {
                 map::g_player->m_properties.apply(
-                        property_factory::make(PropId::r_conf));
+                        property_factory::make(
+                                PropId::r_conf));
 
                 teleport(*map::g_player);
         }
@@ -1119,8 +1120,9 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                map::g_player->m_properties.apply(
-                        property_factory::make(PropId::entangled));
+                auto* const prop = property_factory::make(PropId::poisoned);
+                prop->set_duration(20);
+                map::g_player->m_properties.apply(prop);
         }
         break;
 

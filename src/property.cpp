@@ -1466,10 +1466,11 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
 
 bool PropFrenzied::is_resisting_other_prop(const PropId prop_id) const
 {
-        return prop_id == PropId::confused ||
+        return (
+                prop_id == PropId::confused ||
                 prop_id == PropId::fainted ||
                 prop_id == PropId::terrified ||
-                prop_id == PropId::weakened;
+                prop_id == PropId::weakened);
 }
 
 void PropFrenzied::on_applied()
@@ -1928,7 +1929,7 @@ void PropSeeInvis::on_applied()
 
 PropEnded PropBurrowing::on_actor_turn()
 {
-        const P& p = m_owner->m_pos;
+        const auto& p = m_owner->m_pos;
 
         map::g_terrain.at(p)->hit(DmgType::pure, nullptr);
 

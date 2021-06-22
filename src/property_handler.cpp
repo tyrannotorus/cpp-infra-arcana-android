@@ -23,8 +23,34 @@
 #include "player_bon.hpp"
 #include "property.hpp"
 #include "property_factory.hpp"
+#include "random.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
+
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static int calc_resist_chance_from_player_traits()
+{
+        int resist_chance = 0;
+
+        if (player_bon::has_trait(Trait::tough))
+        {
+                resist_chance += 10;
+        }
+
+        if (player_bon::has_trait(Trait::rugged))
+        {
+                resist_chance += 10;
+        }
+
+        if (player_bon::has_trait(Trait::resistant))
+        {
+                resist_chance += 25;
+        }
+
+        return resist_chance;
+}
 
 // -----------------------------------------------------------------------------
 // Property handler
@@ -106,7 +132,7 @@ void PropHandler::load()
                 const int nr_dlvls_left = saving::get_int();
                 const int nr_turns_active = saving::get_int();
 
-                Prop* const prop = property_factory::make(prop_id);
+                auto* const prop = property_factory::make(prop_id);
 
                 if (nr_turns_left == -1)
                 {
@@ -137,15 +163,35 @@ void PropHandler::apply(
         const Verbose verbose)
 {
         prop->m_owner = m_owner;
-
         prop->m_src = src;
+
+        if (m_owner->is_player() &&
+            player_bon::has_trait(Trait::resistant) &&
+            prop->m_data.is_preventable_by_player_trait &&
+            (prop->m_duration_mode != PropDurationMode::indefinite) &&
+            (prop->m_nr_turns_left >= 4))
+        {
+                prop->m_nr_turns_left /= 2;
+        }
 
         std::unique_ptr<Prop> prop_owned(prop);
 
         // Check if property is resisted
         if (!force_effect)
         {
-                if (is_resisting_prop(prop->m_id))
+                bool is_resisting = is_resisting_prop(prop->m_id);
+
+                if (!is_resisting &&
+                    m_owner->is_player() &&
+                    prop->m_data.is_preventable_by_player_trait)
+                {
+                        const int resist_chance =
+                                calc_resist_chance_from_player_traits();
+
+                        is_resisting = rnd::percent(resist_chance);
+                }
+
+                if (is_resisting)
                 {
                         if ((verbose == Verbose::yes) &&
                             m_owner->is_alive())
@@ -162,7 +208,9 @@ void PropHandler::apply(
         if (prop->m_src == PropSrc::intr)
         {
                 const bool did_apply_more =
-                        try_apply_more_on_existing_intr_prop(*prop, verbose);
+                        try_apply_more_on_existing_intr_prop(
+                                *prop,
+                                verbose);
 
                 if (did_apply_more)
                 {

@@ -415,9 +415,10 @@ static void update_trait_data()
         d.id = Trait::tough;
         d.title = "Tough";
         d.descr =
-                "+6 hit points, less likely to sprain when kicking, more "
-                "likely to succeed with object interactions requiring "
-                "strength (e.g. bashing things open)";
+                "+6 hit points, +10% chance to resist paralysis, burning, and "
+                "poison, less likely to sprain when kicking, more likely to "
+                "succeed with object interactions requiring strength (e.g. "
+                "bashing things open)";
         d.on_picked = []() {
                 const int hp_incr = 6;
 
@@ -450,7 +451,9 @@ static void update_trait_data()
         // --- Resistant ---
         d.id = Trait::resistant;
         d.title = "Resistant";
-        d.descr = "Halved damage from fire and electricity";
+        d.descr =
+                "+25% chance to resist paralysis, burning, and poison - and "
+                "the duration of those effects is halved";
         d.trait_prereqs = {Trait::tough};
         set_trait_data(d);
 

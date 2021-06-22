@@ -1002,6 +1002,8 @@ void Player::kick_mon(Actor& defender)
 
         // TODO: This is REALLY hacky, it should be done another way. Why even
         // have a "stomp" attack?? Why not just kick them as well?
+        // TODO: For a slightly better way, check for the "small crawling"
+        // property instead.
         if ((d.actor_size == Size::floor) &&
             (d.is_spider ||
              d.is_rat ||

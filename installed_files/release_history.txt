@@ -1,7 +1,7 @@
 --------------------------------------------------------------
 v21.0 *** WORK IN PROGRESS ***
 --------------------------------------------------------------
-MAJOR CHANGES
+NEW FEATURES
 * Added a new background (class) "Exorcist"
 * Added weapons "S&W Model 10 Revolver" and "Winchester Rifle"
 * Added some miscellaneous "weird" items
@@ -14,7 +14,8 @@ MAJOR CHANGES
 * Cultists have a kick attack
 * Monster descriptions now display more information, such as resistances or the ability to see in darkness
 * Standing next to a door will reveal if it's stuck - if so it will change name and appearance
-* Added trait "Crippling Strikes" - melee attacks have 60% chance to Weaken the target for 2-3 turns
+* Reworked the "Resistant trait", it now gives +25% chance to resist paralysis, burning, and poison, and the duration of those effects is halved (also Tough and Rugged each give +10% chance to resist)
+* Added trait "Crippling Strikes", melee attacks have 60% chance to Weaken the target for 2-3 turns
 * The standard map generator can now also split rooms, for more map variety
 * Added more room templates
 * Casting spells now occasionally trigger random chaotic side effects, typically affecting the surrounding area (for example walls may appear or disappear, statues knocked over, etc)
@@ -30,7 +31,7 @@ MINOR TWEAKS AND BALANCING
 * Worm Masses and Mind Worms can no longer split while burning
 * Added completely new descriptions for all Ooze monsters, removed Black Ooze, changed Putrid Ooze to be weaker and spawn earlier, renamed Clear Ooze to Lurking Ooze
 * A generated description is now printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters
-* Forcing a metal door open (e.g. with a Rod of Opening or the Opening spell) now also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
+* Forcing a metal door open (e.g. with a Rod of Opening or the Control Object spell) now also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
 * Reduced the maximum number of weapons summoned by Spectral Weapons for basic/expert/master skill level to 1/2/3 (from 2/3/4)
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
 * Removed the Searching spell - instead this is  a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
@@ -46,7 +47,7 @@ MINOR TWEAKS AND BALANCING
 * Winning characters show up as statues inside the church building on the intro level, instead of graves outside the church
 * Players can now melee attack monsters while nailed by a Spike Gun (but still not while entangled)
 
-USER INTERFACE
+USER INTERFACE UPDATES
 * All fonts have been replaced with new ones (the reason for this is that the origins and license information of the previous ones was unknown - now this information is clearly listed in a font license text file distributed with the game)
 * Added an option to toggle if the view should always be centered on the player, only move when near the edge of the screen (default is to always center)
 * Changed the appearance of popups
@@ -70,7 +71,7 @@ USER INTERFACE
 * Added a tile for unarmed player
 * Removed the options to draw the walls as filled rectangles in tiles mode
 
-BUG FIXES
+FIXES
 * Fixed a bug that prevented messages for Rogues sensing artifacts on the dungeon floor (there were only messages for sensing artifacts in item containers, such as tombs)
 * Darkness did not give a stealth bonus
 * The effect of the Silent trait was inverted for melee attacks  - i.e. attacks were noisy with the Silent trait picked, and vice versa
