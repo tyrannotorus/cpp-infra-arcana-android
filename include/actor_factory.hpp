@@ -15,7 +15,6 @@ struct R;
 namespace actor
 {
 class Actor;
-class Mon;
 
 enum class Id;
 
@@ -34,7 +33,7 @@ public:
 
         MonSpawnResult& make_aware_of_player();
 
-        std::vector<Mon*> monsters;
+        std::vector<Actor*> monsters;
 };
 
 void delete_all_mon();

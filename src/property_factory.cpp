@@ -104,6 +104,9 @@ Prop* make(const PropId id)
         case PropId::blessed:
                 return new PropBlessed();
 
+        case PropId::doomed:
+                return new PropDoomed();
+
         case PropId::cursed:
                 return new PropCursed();
 
@@ -256,9 +259,6 @@ Prop* make(const PropId id)
 
         case PropId::frenzy_player_on_seen:
                 return new PropFrenzyPlayerOnSeen();
-
-        case PropId::speaks_curses:
-                return new PropSpeaksCurses();
 
         case PropId::aura_of_decay:
                 return new PropAuraOfDecay();

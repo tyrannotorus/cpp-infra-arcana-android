@@ -1119,7 +1119,7 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                auto* const prop = property_factory::make(PropId::poisoned);
+                auto* const prop = property_factory::make(PropId::cursed);
                 prop->set_duration(20);
                 map::g_player->m_properties.apply(prop);
         }

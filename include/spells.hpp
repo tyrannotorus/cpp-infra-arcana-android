@@ -67,6 +67,7 @@ enum class SpellId
         frenzy,
 
         // Monsters only
+        curse,
         force_bolt,
         burn,
         deafen,
@@ -181,6 +182,62 @@ protected:
         virtual bool is_noisy(SpellSkill skill) const = 0;
 
         void on_resist(actor::Actor& target) const;
+};
+
+class SpellCurse : public Spell
+{
+public:
+        SpellCurse() = default;
+
+        bool allow_mon_cast_now(actor::Mon& mon) const override;
+
+        int mon_cooldown() const override;
+
+        std::string name() const override
+        {
+                return "Curse";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::curse;
+        }
+
+        OccultistDomain domain() const override
+        {
+                return OccultistDomain::enchanter;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::mild;
+        }
+
+        bool player_can_learn() const override
+        {
+                return false;
+        }
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override
+        {
+                (void)skill;
+                return {};
+        }
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill) const override;
+
+protected:
+        int base_max_spi_cost(SpellSkill skill) const override;
+
+        bool is_noisy(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return true;
+        }
 };
 
 class SpellEnfeeble : public Spell
@@ -1308,7 +1365,7 @@ public:
         {
                 (void)skill;
 
-                return {""};
+                return {};
         }
 
         void run_effect(
@@ -1808,7 +1865,7 @@ public:
         {
                 (void)skill;
 
-                return {""};
+                return {};
         }
 
         void run_effect(
@@ -2063,7 +2120,7 @@ public:
         {
                 (void)skill;
 
-                return {""};
+                return {};
         }
 
         void run_effect(
@@ -2128,7 +2185,7 @@ public:
         {
                 (void)skill;
 
-                return {""};
+                return {};
         }
 
         void run_effect(
@@ -2193,7 +2250,7 @@ public:
         {
                 (void)skill;
 
-                return {""};
+                return {};
         }
 
         void run_effect(

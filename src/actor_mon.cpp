@@ -870,12 +870,12 @@ DidAction Khephren::on_act()
         std::for_each(
                 std::begin(summoned.monsters),
                 std::end(summoned.monsters),
-                [](Mon* const mon) {
+                [](Actor* const actor) {
                         auto* prop = new PropSummoned();
 
                         prop->set_indefinite();
 
-                        mon->m_properties.apply(prop);
+                        actor->m_properties.apply(prop);
                 });
 
         m_has_summoned_locusts = true;

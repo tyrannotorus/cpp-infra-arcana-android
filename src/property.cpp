@@ -61,8 +61,7 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static bool
-is_player_aware_of_hostile_mon_at(const P& pos)
+static bool is_player_aware_of_hostile_mon_at(const P& pos)
 {
         const auto* const mon = map::first_actor_at_pos(pos);
 
@@ -70,6 +69,42 @@ is_player_aware_of_hostile_mon_at(const P& pos)
                 mon &&
                 mon->is_player_aware_of_me() &&
                 !map::g_player->is_leader_of(mon));
+}
+
+static void bless_adjacent(const P& pos)
+{
+        // "Bless" adjacent fountains
+        for (const P& d : dir_utils::g_dir_list_w_center)
+        {
+                const auto p_adj = pos + d;
+
+                auto* const terrain = map::g_terrain.at(p_adj);
+
+                if (terrain->id() != terrain::Id::fountain)
+                {
+                        continue;
+                }
+
+                static_cast<terrain::Fountain*>(terrain)->bless();
+        }
+}
+
+static void curse_adjacent(const P& pos)
+{
+        // "Curse" adjacent fountains
+        for (const P& d : dir_utils::g_dir_list_w_center)
+        {
+                const auto p_adj = pos + d;
+
+                auto* const terrain = map::g_terrain.at(p_adj);
+
+                if (terrain->id() != terrain::Id::fountain)
+                {
+                        continue;
+                }
+
+                static_cast<terrain::Fountain*>(terrain)->curse();
+        }
 }
 
 // -----------------------------------------------------------------------------
@@ -95,14 +130,14 @@ void PropBlessed::on_applied()
                         PropEndAllowMsg::no,
                         PropEndAllowHistoricMsg::yes));
 
-        bless_adjacent();
+        bless_adjacent(m_owner->m_pos);
 }
 
 void PropBlessed::on_more(const Prop& new_prop)
 {
         (void)new_prop;
 
-        bless_adjacent();
+        bless_adjacent(m_owner->m_pos);
 }
 
 int PropBlessed::ability_mod(const AbilityId ability) const
@@ -123,26 +158,6 @@ int PropBlessed::ability_mod(const AbilityId ability) const
         return 0;
 }
 
-void PropBlessed::bless_adjacent() const
-{
-        // "Bless" adjacent fountains
-        const P& p = m_owner->m_pos;
-
-        for (const P& d : dir_utils::g_dir_list_w_center)
-        {
-                const auto p_adj = p + d;
-
-                auto* const terrain = map::g_terrain.at(p_adj);
-
-                if (terrain->id() != terrain::Id::fountain)
-                {
-                        continue;
-                }
-
-                static_cast<terrain::Fountain*>(terrain)->bless();
-        }
-}
-
 void PropCursed::on_applied()
 {
         m_owner->m_properties.end_prop(
@@ -152,14 +167,48 @@ void PropCursed::on_applied()
                         PropEndAllowMsg::no,
                         PropEndAllowHistoricMsg::yes));
 
-        curse_adjacent();
+        curse_adjacent(m_owner->m_pos);
 }
 
 void PropCursed::on_more(const Prop& new_prop)
 {
         (void)new_prop;
 
-        curse_adjacent();
+        curse_adjacent(m_owner->m_pos);
+}
+
+bool PropCursed::allow_read_chance(const Verbose verbose) const
+{
+        if (rnd::percent(5))
+        {
+                if (m_owner->is_player() && (verbose == Verbose::yes))
+                {
+                        msg_log::add("I miscast!");
+                }
+
+                return false;
+        }
+        else
+        {
+                return true;
+        }
+}
+
+bool PropCursed::allow_cast_intr_spell_chance(const Verbose verbose) const
+{
+        if (rnd::percent(5))
+        {
+                if (m_owner->is_player() && (verbose == Verbose::yes))
+                {
+                        msg_log::add("I miscast!");
+                }
+
+                return false;
+        }
+        else
+        {
+                return true;
+        }
 }
 
 int PropCursed::ability_mod(const AbilityId ability) const
@@ -180,24 +229,75 @@ int PropCursed::ability_mod(const AbilityId ability) const
         return 0;
 }
 
-void PropCursed::curse_adjacent() const
+void PropDoomed::on_applied()
 {
-        // "Curse" adjacent fountains
-        const P& p = m_owner->m_pos;
+        m_owner->m_properties.end_prop(
+                PropId::blessed,
+                PropEndConfig(
+                        PropEndAllowCallEndHook::no,
+                        PropEndAllowMsg::no,
+                        PropEndAllowHistoricMsg::yes));
 
-        for (const P& d : dir_utils::g_dir_list_w_center)
+        curse_adjacent(m_owner->m_pos);
+}
+
+void PropDoomed::on_more(const Prop& new_prop)
+{
+        (void)new_prop;
+
+        curse_adjacent(m_owner->m_pos);
+}
+
+bool PropDoomed::allow_read_chance(const Verbose verbose) const
+{
+        if (rnd::percent(10))
         {
-                const auto p_adj = p + d;
-
-                auto* const terrain = map::g_terrain.at(p_adj);
-
-                if (terrain->id() != terrain::Id::fountain)
+                if (m_owner->is_player() && (verbose == Verbose::yes))
                 {
-                        continue;
+                        msg_log::add("I miscast!");
                 }
 
-                static_cast<terrain::Fountain*>(terrain)->curse();
+                return false;
         }
+        else
+        {
+                return true;
+        }
+}
+
+bool PropDoomed::allow_cast_intr_spell_chance(const Verbose verbose) const
+{
+        if (rnd::percent(10))
+        {
+                if (m_owner->is_player() && (verbose == Verbose::yes))
+                {
+                        msg_log::add("I miscast!");
+                }
+
+                return false;
+        }
+        else
+        {
+                return true;
+        }
+}
+
+int PropDoomed::ability_mod(const AbilityId ability) const
+{
+        switch (ability)
+        {
+        case AbilityId::melee:
+        case AbilityId::ranged:
+        case AbilityId::dodging:
+        case AbilityId::stealth:
+        case AbilityId::searching:
+                return -20;
+
+        case AbilityId::END:
+                break;
+        }
+
+        return 0;
 }
 
 PropEnded PropEntangled::on_actor_turn()
@@ -1545,7 +1645,7 @@ PropEnded PropBurning::on_actor_turn()
 
 bool PropBurning::allow_read_chance(const Verbose verbose) const
 {
-        if (!rnd::coin_toss())
+        if (rnd::coin_toss())
         {
                 if (m_owner->is_player() && (verbose == Verbose::yes))
                 {
@@ -1554,24 +1654,27 @@ bool PropBurning::allow_read_chance(const Verbose verbose) const
 
                 return false;
         }
-
-        return true;
+        else
+        {
+                return true;
+        }
 }
 
 bool PropBurning::allow_cast_intr_spell_chance(const Verbose verbose) const
 {
-        if (!rnd::coin_toss())
+        if (rnd::coin_toss())
         {
-                if (m_owner->is_player() &&
-                    (verbose == Verbose::yes))
+                if (m_owner->is_player() && (verbose == Verbose::yes))
                 {
                         msg_log::add("I fail to concentrate!");
                 }
 
                 return false;
         }
-
-        return true;
+        else
+        {
+                return true;
+        }
 }
 
 bool PropBurning::allow_pray(Verbose verbose) const
@@ -2739,55 +2842,6 @@ void PropFrenzyPlayerOnSeen::on_player_see()
 
                 properties.apply(frenzy);
         }
-}
-
-PropActResult PropSpeaksCurses::on_act()
-{
-        if (m_owner->is_player())
-        {
-                return {};
-        }
-
-        const int curse_one_in_n = 3;
-
-        if (!m_owner->is_alive() ||
-            (m_owner->m_ai_state.target != map::g_player) ||
-            !m_owner->m_ai_state.is_target_seen ||
-            !rnd::one_in(curse_one_in_n))
-        {
-                return {};
-        }
-
-        const bool player_see_owner = actor::can_player_see_actor(*m_owner);
-
-        std::string snd_msg =
-                player_see_owner
-                ? text_format::first_to_upper(m_owner->name_the())
-                : "Someone";
-
-        snd_msg += " spews forth a litany of curses.";
-
-        Snd snd(
-                snd_msg,
-                audio::SfxId::END,
-                IgnoreMsgIfOriginSeen::no,
-                m_owner->m_pos,
-                m_owner,
-                SndVol::high,
-                AlertsMon::no);
-
-        snd_emit::run(snd);
-
-        map::g_player->m_properties.apply(new PropCursed());
-
-        game_time::tick();
-
-        PropActResult result;
-
-        result.did_action = DidAction::yes;
-        result.prop_ended = PropEnded::no;
-
-        return result;
 }
 
 void PropAuraOfDecay::save() const

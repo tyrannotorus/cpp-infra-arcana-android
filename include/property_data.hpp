@@ -59,6 +59,7 @@ enum class PropId
         frenzied,
         blessed,
         cursed,
+        doomed,
         premonition,
         erudition,
         magic_searching,
@@ -82,7 +83,6 @@ enum class PropId
         vomits_ooze,  // Gla'Suu
         confuses_adjacent,  // "Strange color" confusing player when seen
         frenzy_player_on_seen,  // Ghastly Light
-        speaks_curses,
         aura_of_decay,  // Damages adjacent hostile creatures
         reduced_pierce_dmg,  // E.g. worm masses
         short_hearing_range,

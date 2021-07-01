@@ -1,7 +1,7 @@
 --------------------------------------------------------------
 v21.0 *** WORK IN PROGRESS ***
 --------------------------------------------------------------
-NEW FEATURES
+NEW
 * Added a new background (class) "Exorcist"
 * Added weapons "S&W Model 10 Revolver" and "Winchester Rifle"
 * Added some miscellaneous "weird" items
@@ -22,6 +22,7 @@ NEW FEATURES
 * Added spell "Erudition" - the next spell is cast at a higher skill level
 * Reworked the "Frenzied" property - instead of changing the player's movement direction on a move command, moves away from monsters are now simply prevented (not an action)
 * Changed the "Opening" spell to "Control Object", which can do more things (e.g. open/close/jam/strike doors, or strike statues/braziers, etc)
+* Added Curse as a spell available to monsters (Floating Skulls cast this now instead of applying the property directly, and mummies cast Curse instead of applying it on melee attacks, for example) - also added a stronger version of Cursed called "Doomed" which is applied instead when Curse is cast at master level
 
 MINOR TWEAKS AND BALANCING
 * The Electric Gun also disables passive hit point regeneration for a number of turns
@@ -36,6 +37,7 @@ MINOR TWEAKS AND BALANCING
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
 * Removed the Searching spell - instead this is  a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
 * The Summoning spell is no longer available to player characters (only to monsters)
+* The Cursed status effect now also causes 5% chance to fail spell casting
 * Added a message when spells are upgraded (e.g. by a Gong)
 * Being blind no longer immediately raises shock by 30% - instead the shock ramps up each turn up to 30%
 * The Tough and Rugged traits now give +6 hit points each, instead of +4

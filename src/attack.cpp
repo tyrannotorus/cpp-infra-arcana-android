@@ -1811,22 +1811,36 @@ static bool melee_should_break_wpn(
         const actor::Actor* attacker,
         const item::Item& wpn)
 {
-        const bool is_crit_fail =
-                (att_result == ActionResult::fail_critical);
+        if (attacker != map::g_player)
+        {
+                return false;
+        }
 
-        const bool player_cursed =
-                map::g_player->m_properties.has(PropId::cursed);
+        if (att_result != ActionResult::fail_critical)
+        {
+                return false;
+        }
 
-        const bool is_wielding_wpn =
-                (map::g_player->m_inv.item_in_slot(SlotId::wpn) == &wpn);
+        const bool is_player_cursed =
+                (map::g_player->m_properties.has(PropId::cursed) ||
+                 map::g_player->m_properties.has(PropId::doomed));
 
-        const int break_one_in_n = 32;
+        if (!is_player_cursed)
+        {
+                return false;
+        }
 
-        return (attacker == map::g_player) &&
-                is_wielding_wpn &&
-                player_cursed &&
-                is_crit_fail &&
-                rnd::one_in(break_one_in_n);
+        if (map::g_player->m_inv.item_in_slot(SlotId::wpn) != &wpn)
+        {
+                return false;
+        }
+
+        if (!rnd::one_in(32))
+        {
+                return false;
+        }
+
+        return true;
 }
 
 // -----------------------------------------------------------------------------

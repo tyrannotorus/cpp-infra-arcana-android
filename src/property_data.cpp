@@ -77,7 +77,6 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"small_crawling", PropId::small_crawling},
         {"spawns_zombie_parts_on_destroyed",
          PropId::spawns_zombie_parts_on_destroyed},
-        {"speaks_curses", PropId::speaks_curses},
         {"spell_reflect", PropId::spell_reflect},
         {"splits_on_death", PropId::splits_on_death},
         {"stunned", PropId::stunned},
@@ -708,7 +707,7 @@ static void init_data_list()
         d.descr = "+10% to hit chance, evasion, stealth, and searching.";
         d.msg_start_player = "I feel luckier.";
         d.msg_end_player = "I have normal luck.";
-        d.historic_msg_start_permanent = "I received a great blessing";
+        d.historic_msg_start_permanent = "I received an everlasting blessing";
         d.historic_msg_end_permanent = "My great blessing ceased";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
@@ -719,12 +718,31 @@ static void init_data_list()
         d.std_rnd_turns = Range(50, 100);
         d.name = "Cursed";
         d.name_short = "Cursed";
-        d.descr = "-10% to hit chance, evasion, stealth, and searching.";
+        d.descr =
+                "-10% to hit chance, evasion, stealth, and searching, "
+                "5% chance to fail when attempting to read or cast spells.";
         d.msg_start_player = "I feel misfortunate.";
         d.msg_end_player = "I feel more fortunate.";
         d.msg_res_player = "I resist misfortune.";
-        d.historic_msg_start_permanent = "A terrible curse was put upon me";
+        d.historic_msg_start_permanent = "A perpetual curse was put upon me";
         d.historic_msg_end_permanent = "A terrible curse was lifted from me";
+        d.allow_display_turns = true;
+        d.allow_test_on_bot = true;
+        d.alignment = PropAlignment::bad;
+        add(d);
+
+        d.id = PropId::doomed;
+        d.std_rnd_turns = Range(50, 100);
+        d.name = "Doomed";
+        d.name_short = "Doomed";
+        d.descr =
+                "-20% to hit chance, evasion, stealth, and searching, "
+                "10% chance to fail when attempting to read or cast spells.";
+        d.msg_start_player = "I feel doomed!";
+        d.msg_end_player = "My doom does not feel so certain anymore.";
+        d.msg_res_player = "I resist a great misfortune.";
+        d.historic_msg_start_permanent = "My doom was written";
+        d.historic_msg_end_permanent = "Hope returned again";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::bad;
@@ -957,9 +975,6 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::frenzy_player_on_seen;
-        add(d);
-
-        d.id = PropId::speaks_curses;
         add(d);
 
         d.id = PropId::zuul_possess_priest;

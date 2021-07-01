@@ -50,6 +50,8 @@ static const std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
         {"red_spider", actor::Id::red_spider},
         {"shadow_spider", actor::Id::shadow_spider},
         {"leng_spider", actor::Id::leng_spider},
+        {"leng_doomweaver", actor::Id::leng_doomweaver},
+        {"leng_matriarch", actor::Id::leng_matriarch},
         {"pit_viper", actor::Id::pit_viper},
         {"spitting_cobra", actor::Id::spitting_cobra},
         {"black_mamba", actor::Id::black_mamba},
@@ -737,9 +739,14 @@ static void dump_starting_allies(xml::Element* allies_e, actor::ActorData& data)
         {
                 const std::string id_str = xml::get_attribute_str(e, "id");
 
-                const auto id = str_to_actor_id_map.at(id_str);
+                actor::StartingAllyEntry starting_ally;
 
-                data.starting_allies.push_back(id);
+                starting_ally.id = str_to_actor_id_map.at(id_str);
+
+                xml::try_get_attribute_int(e, "min", starting_ally.nr.min);
+                xml::try_get_attribute_int(e, "max", starting_ally.nr.max);
+
+                data.starting_allies.push_back(starting_ally);
         }
 }
 

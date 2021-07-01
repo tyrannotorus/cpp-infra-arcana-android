@@ -763,7 +763,7 @@
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
             <aware_message_hidden></aware_message_hidden>
-            <spell_message></spell_message>
+            <spell_message>spews forth a litany of curses.</spell_message>
         </text>
 
         <graphics>
@@ -804,8 +804,11 @@
             </attack>
         </attacks>
 
+        <spells>
+            <spell skill="basic">curse</spell>
+        </spells>
+
         <properties>
-            <property>speaks_curses</property>
             <property>darkvision</property>
             <property>flying</property>
         </properties>
@@ -833,10 +836,11 @@
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>alone</group_size>
+            <native_room>jail</native_room>
+            <native_room>crypt</native_room>
             <native_room>monster</native_room>
             <native_room>plain</native_room>
             <native_room>ritual</native_room>
-            <native_room>chasm</native_room>
             <native_room>cave</native_room>
         </spawning>
     </monster>
@@ -906,6 +910,7 @@
 
         <spells>
             <spell skill="basic" percent_chance="5">darkbolt</spell>
+            <spell skill="basic" percent_chance="5">curse</spell>
             <spell skill="basic" percent_chance="5">enfeeble</spell>
             <spell skill="basic" percent_chance="5">slow</spell>
             <spell skill="basic" percent_chance="5">terrify</spell>
@@ -1185,10 +1190,11 @@
             <spell skill="expert">pestilence</spell>
             <spell skill="expert">darkbolt</spell>
             <spell skill="expert">spell_shield</spell>
-            <spell skill="expert" percent_chance="75">deafen</spell>
-            <spell skill="expert" percent_chance="75">enfeeble</spell>
-            <spell skill="expert" percent_chance="75">slow</spell>
-            <spell skill="expert" percent_chance="75">terrify</spell>
+            <spell skill="expert" percent_chance="50">curse</spell>
+            <spell skill="expert" percent_chance="50">deafen</spell>
+            <spell skill="expert" percent_chance="50">enfeeble</spell>
+            <spell skill="expert" percent_chance="50">slow</spell>
+            <spell skill="expert" percent_chance="50">terrify</spell>
             <spell skill="basic">haste</spell>
         </spells>
 
@@ -1354,7 +1360,7 @@
 
         <attributes>
             <hit_points>40</hit_points>
-            <spirit>0</spirit>
+            <spirit>30</spirit>
             <speed>fast</speed>
             <shock_level>frightening</shock_level>
             <melee>80</melee>
@@ -1363,7 +1369,7 @@
             <stealth>0</stealth>
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
-            <can_bash_doors>false</can_bash_doors>
+            <can_bash_doors>true</can_bash_doors>
             <can_swim>false</can_swim>
             <size>giant</size>
             <always_prevent_knockback>false</always_prevent_knockback>
@@ -1378,7 +1384,7 @@
                 <damage>10</damage>
             </attack>
             <attack id="web_bola">
-                <damage>6</damage>
+                <damage>7</damage>
             </attack>
         </attacks>
 
@@ -1387,9 +1393,9 @@
         </properties>
 
         <ai>
-            <erratic_move_percent>15</erratic_move_percent>
+            <erratic_move_percent>25</erratic_move_percent>
             <turns_aware>16</turns_aware>
-            <ranged_cooldown_turns>3</ranged_cooldown_turns>
+            <ranged_cooldown_turns>6</ranged_cooldown_turns>
             <looks>true</looks>
             <avoids_blocking_friend>true</avoids_blocking_friend>
             <attacks>true</attacks>
@@ -1416,6 +1422,203 @@
             <native_room>forest</native_room>
             <native_room>cave</native_room>
         </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- leng_doomweaver -->
+    <!--************************************************************-->
+    <monster id="leng_doomweaver">
+        <text>
+            <name_a>a Leng Doomweaver</name_a>
+            <name_the>the Leng Doomweaver</name_the>
+            <corpse_name_a>a Leng Doomweaver corpse</corpse_name_a>
+            <corpse_name_the>the Leng Doomweaver corpse</corpse_name_the>
+            <description>The webs spun by this transcendental creature are not of any mundane kind - weaving, plucking, gnawing, it taps directly into the fabric of fate, making baleful arrangements according to its ulterior whims.</description>
+            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>seems aggravated.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message>fidgets madly.</spell_message>
+        </text>
+
+        <graphics>
+            <tile>giant_spider</tile>
+            <character>A</character>
+            <color>dark_brown</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>40</hit_points>
+            <spirit>30</spirit>
+            <speed>fast</speed>
+            <shock_level>frightening</shock_level>
+            <melee>80</melee>
+            <ranged>70</ranged>
+            <dodging>30</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <can_swim>false</can_swim>
+            <size>giant</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <spider/>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="bite">
+                <damage>10</damage>
+            </attack>
+        </attacks>
+
+        <spells>
+            <spell skill="master">curse</spell>
+        </spells>
+
+        <properties>
+            <property>darkvision</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>25</erratic_move_percent>
+            <turns_aware>16</turns_aware>
+            <ranged_cooldown_turns>6</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>true</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>16</min_dungeon_level>
+            <max_dungeon_level>-1</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size>alone</group_size>
+            <native_room>plain</native_room>
+            <native_room>spider</native_room>
+            <native_room>forest</native_room>
+            <native_room>cave</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- leng_matriarch -->
+    <!--************************************************************-->
+    <monster id="leng_matriarch">
+        <text>
+            <name_a>a Leng Matriarch</name_a>
+            <name_the>the Leng Matriarch</name_the>
+            <corpse_name_a>a Leng Matriarch corpse</corpse_name_a>
+            <corpse_name_the>the Leng Matriarch corpse</corpse_name_the>
+            <description>Ever watchful with leery eyes of insidious cunning, she fends for her brood as they stride between worlds through space and time.</description>
+            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>seems aggravated.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message>chirps hideously.</spell_message>
+        </text>
+
+        <graphics>
+            <tile>giant_spider</tile>
+            <character>A</character>
+            <color>dark_yellow</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>60</hit_points>
+            <spirit>40</spirit>
+            <speed>fast</speed>
+            <shock_level>terrifying</shock_level>
+            <melee>85</melee>
+            <ranged>80</ranged>
+            <dodging>30</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <can_swim>false</can_swim>
+            <size>giant</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <spider/>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="bite">
+                <damage>12</damage>
+            </attack>
+        </attacks>
+ 
+        <spells>
+            <spell skill="expert">terrify</spell>
+        </spells>
+
+        <properties>
+            <property>darkvision</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>10</erratic_move_percent>
+            <turns_aware>16</turns_aware>
+            <ranged_cooldown_turns>12</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>true</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>20</min_dungeon_level>
+            <max_dungeon_level>-1</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size>alone</group_size>
+            <native_room>plain</native_room>
+            <native_room>spider</native_room>
+            <native_room>forest</native_room>
+            <native_room>cave</native_room>
+        </spawning>
+
+        <starting_allies>
+            <monster id="leng_spider" min="1" max="2"/>
+            <monster id="leng_doomweaver" min="0" max="1"/>
+        </starting_allies>
     </monster>
 
     <!--************************************************************-->
@@ -1580,9 +1783,10 @@
             <spell skill="expert">darkbolt</spell>
             <spell skill="expert">knockback</spell>
             <spell skill="expert">spell_shield</spell>
-            <spell skill="expert" percent_chance="75">enfeeble</spell>
-            <spell skill="expert" percent_chance="75">slow</spell>
-            <spell skill="expert" percent_chance="75">terrify</spell>
+            <spell skill="expert" percent_chance="50">curse</spell>
+            <spell skill="expert" percent_chance="50">enfeeble</spell>
+            <spell skill="expert" percent_chance="50">slow</spell>
+            <spell skill="expert" percent_chance="50">terrify</spell>
             <spell skill="expert" percent_chance="50">teleport</spell>
             <spell skill="expert" percent_chance="50">summon</spell>
             <spell skill="expert" percent_chance="50">pestilence</spell>
@@ -1680,9 +1884,10 @@
             <spell skill="master">darkbolt</spell>
             <spell skill="master">knockback</spell>
             <spell skill="master">spell_shield</spell>
-            <spell skill="master" percent_chance="75">enfeeble</spell>
-            <spell skill="master" percent_chance="75">slow</spell>
-            <spell skill="master" percent_chance="75">terrify</spell>
+            <spell skill="master" percent_chance="50">curse</spell>
+            <spell skill="master" percent_chance="50">enfeeble</spell>
+            <spell skill="master" percent_chance="50">slow</spell>
+            <spell skill="master" percent_chance="50">terrify</spell>
             <spell skill="master" percent_chance="50">teleport</spell>
             <spell skill="master" percent_chance="50">summon</spell>
             <spell skill="master" percent_chance="50">pestilence</spell>
@@ -1783,7 +1988,7 @@
         </properties>
 
         <ai>
-            <erratic_move_percent>15</erratic_move_percent>
+            <erratic_move_percent>25</erratic_move_percent>
             <turns_aware>5</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>true</looks>
@@ -1876,7 +2081,7 @@
         </properties>
 
         <ai>
-            <erratic_move_percent>15</erratic_move_percent>
+            <erratic_move_percent>25</erratic_move_percent>
             <turns_aware>5</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>true</looks>
@@ -1969,7 +2174,7 @@
         </properties>
 
         <ai>
-            <erratic_move_percent>15</erratic_move_percent>
+            <erratic_move_percent>25</erratic_move_percent>
             <turns_aware>5</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>true</looks>
@@ -2062,7 +2267,7 @@
         </properties>
 
         <ai>
-            <erratic_move_percent>15</erratic_move_percent>
+            <erratic_move_percent>25</erratic_move_percent>
             <turns_aware>5</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>true</looks>
@@ -4935,12 +5140,12 @@
             -->
             <attack id="maul">
                 <damage>6</damage>
-                <property_applied>cursed</property_applied>
             </attack>
         </attacks>
 
         <spells>
             <spell skill="expert">disease</spell>
+            <spell skill="expert">curse</spell>
             <spell skill="expert" percent_chance="25">aura_of_decay</spell>
         </spells>
 
@@ -5125,7 +5330,6 @@
             -->
             <attack id="maul">
                 <damage>6</damage>
-                <property_applied>cursed</property_applied>
             </attack>
         </attacks>
 
@@ -5134,9 +5338,10 @@
             <spell skill="expert">disease</spell>
             <spell skill="expert">spell_shield</spell>
             <spell skill="expert">burn</spell>
-            <spell skill="expert">aura_of_decay</spell>
-            <spell skill="expert" percent_chance="75">enfeeble</spell>
-            <spell skill="expert" percent_chance="75">terrify</spell>
+            <spell skill="expert">curse</spell>
+            <spell skill="expert" percent_chance="25">aura_of_decay</spell>
+            <spell skill="expert" percent_chance="50">enfeeble</spell>
+            <spell skill="expert" percent_chance="50">terrify</spell>
         </spells>
 
         <ai>
@@ -5230,7 +5435,6 @@
             -->
             <attack id="maul">
                 <damage>6</damage>
-                <property_applied>cursed</property_applied>
             </attack>
         </attacks>
 
@@ -5239,9 +5443,10 @@
             <spell skill="expert">disease</spell>
             <spell skill="expert">spell_shield</spell>
             <spell skill="expert">burn</spell>
+            <spell skill="expert">curse</spell>
             <spell skill="expert">aura_of_decay</spell>
-            <spell skill="expert" percent_chance="75">enfeeble</spell>
-            <spell skill="expert" percent_chance="75">terrify</spell>
+            <spell skill="expert" percent_chance="50">enfeeble</spell>
+            <spell skill="expert" percent_chance="50">terrify</spell>
         </spells>
 
         <ai>
@@ -5420,9 +5625,9 @@
         </attributes>
 
         <spells>
+            <spell skill="basic">curse</spell>
             <spell skill="basic">enfeeble</spell>
             <spell skill="basic">heal</spell>
-            <spell skill="basic">burn</spell>
         </spells>
 
         <attacks>
@@ -7886,6 +8091,7 @@
             <spell skill="master">burn</spell>
             <spell skill="master">pestilence</spell>
             <spell skill="master">spell_shield</spell>
+            <spell skill="master">curse</spell>
             <spell skill="master">disease</spell>
             <spell skill="master">enfeeble</spell>
             <spell skill="master">slow</spell>

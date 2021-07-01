@@ -50,6 +50,8 @@ enum class Id
         red_spider,
         shadow_spider,
         leng_spider,
+        leng_doomweaver,
+        leng_matriarch,
         rat,
         rat_thing,
         pit_viper,
@@ -168,6 +170,12 @@ struct ActorSpellData
         int pct_chance_to_know {100};
 };
 
+struct StartingAllyEntry
+{
+        Id id {(Id)0};
+        Range nr {1, 1};
+};
+
 enum class Speed
 {
         slow,
@@ -271,7 +279,7 @@ struct ActorData
         bool can_leave_corpse;
         bool prio_corpse_bash;
         std::vector<RoomType> native_rooms;
-        std::vector<Id> starting_allies;
+        std::vector<StartingAllyEntry> starting_allies;
 };
 
 extern ActorData g_data[(size_t)Id::END];

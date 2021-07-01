@@ -30,6 +30,50 @@
 #include "random.hpp"
 
 // -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static std::vector<actor::Id> actor_ids_for_starting_allies(
+        const actor::StartingAllyEntry& allies_entry)
+{
+        return {(size_t)allies_entry.nr.roll(), allies_entry.id};
+}
+
+static void disable_player_feeling_msg(
+        const std::vector<actor::Actor*>& actors)
+{
+        std::for_each(
+                std::begin(actors),
+                std::end(actors),
+                [](auto* mon) {
+                        mon->m_mon_aware_state
+                                .is_player_feeling_msg_allowed = false;
+                });
+}
+
+static void spawn_starting_allies()
+{
+        for (size_t i = 0; i < game_time::g_actors.size(); ++i)
+        {
+                auto* const actor = game_time::g_actors[i];
+
+                for (const auto& allies_entry : actor->m_data->starting_allies)
+                {
+                        const auto ids =
+                                actor_ids_for_starting_allies(allies_entry);
+
+                        auto summoned =
+                                actor::spawn(
+                                        actor->m_pos,
+                                        ids,
+                                        map::rect())
+                                        .set_leader(actor);
+
+                        disable_player_feeling_msg(summoned.monsters);
+                }
+        }
+}
+
+// -----------------------------------------------------------------------------
 // map_builder
 // -----------------------------------------------------------------------------
 namespace map_builder
@@ -106,32 +150,7 @@ void MapBuilder::build()
 
         gods::set_random_god();
 
-        // Spawn starting allies
-        for (size_t i = 0; i < game_time::g_actors.size(); ++i)
-        {
-                auto* const actor = game_time::g_actors[i];
-
-                const auto& allies = actor->m_data->starting_allies;
-
-                if (allies.empty())
-                {
-                        continue;
-                }
-
-                auto summoned = actor::spawn(
-                                        actor->m_pos,
-                                        allies,
-                                        map::rect())
-                                        .set_leader(actor);
-
-                std::for_each(
-                        std::begin(summoned.monsters),
-                        std::end(summoned.monsters),
-                        [](auto* mon) {
-                                mon->m_mon_aware_state
-                                        .is_player_feeling_msg_allowed = false;
-                        });
-        }
+        spawn_starting_allies();
 
         map_control::g_controller = map_controller();
 
@@ -142,10 +161,11 @@ void MapBuilder::build()
                 std::chrono::duration<double, std::milli>(diff_time)
                         .count();
 
-        TRACE << "Map built after " << nr_attempts << " attempt(s)."
-              << std::endl
-              << "Total time taken: " << duration << " ms"
-              << std::endl;
+        TRACE
+                << "Map built after " << nr_attempts << " attempt(s)."
+                << std::endl
+                << "Total time taken: " << duration << " ms"
+                << std::endl;
 #endif  // NDEBUG
 
         TRACE_FUNC_END;

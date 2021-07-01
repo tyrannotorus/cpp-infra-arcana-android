@@ -86,6 +86,7 @@ static const StrToSpellIdMap s_str_to_spell_id_map = {
         {"premonition", SpellId::premonition},
         {"erudition", SpellId::erudition},
         {"enfeeble", SpellId::enfeeble},
+        {"curse", SpellId::curse},
         {"cleansing_fire", SpellId::cleansing_fire},
         {"sanctuary", SpellId::sanctuary},
         {"purge", SpellId::purge},
@@ -842,6 +843,9 @@ Spell* make(const SpellId spell_id)
         case SpellId::enfeeble:
                 return new SpellEnfeeble();
 
+        case SpellId::curse:
+                return new SpellCurse();
+
         case SpellId::slow:
                 return new SpellSlow();
 
@@ -1411,9 +1415,10 @@ int SpellAuraOfDecay::mon_cooldown() const
 
 bool SpellAuraOfDecay::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target &&
+        return (
+                mon.m_ai_state.target &&
                 mon.m_ai_state.is_target_seen &&
-                !mon.m_properties.has(PropId::aura_of_decay);
+                !mon.m_properties.has(PropId::aura_of_decay));
 }
 
 // -----------------------------------------------------------------------------
@@ -1702,7 +1707,9 @@ void SpellBolt::run_effect(
 
 bool SpellBolt::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------
@@ -1880,7 +1887,9 @@ std::vector<std::string> SpellAzaWrath::descr_specific(
 
 bool SpellAzaWrath::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------
@@ -2092,8 +2101,9 @@ std::vector<std::string> SpellMayhem::descr_specific(
 
 bool SpellMayhem::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target &&
-                (mon.m_ai_state.is_target_seen || rnd::one_in(20));
+        return (
+                mon.m_ai_state.target &&
+                (mon.m_ai_state.is_target_seen || rnd::one_in(20)));
 }
 
 // -----------------------------------------------------------------------------
@@ -2218,13 +2228,13 @@ std::vector<std::string> SpellPestilence::descr_specific(
 
 bool SpellPestilence::allow_mon_cast_now(actor::Mon& mon) const
 {
-        const bool is_deep_liquid =
-                map::g_terrain.at(mon.m_pos)->id() ==
-                terrain::Id::liquid_deep;
+        const auto terrain_id = map::g_terrain.at(mon.m_pos)->id();
+        const bool is_deep_liquid = (terrain_id == terrain::Id::liquid_deep);
 
-        return mon.m_ai_state.target &&
+        return (
+                mon.m_ai_state.target &&
                 (mon.m_ai_state.is_target_seen || rnd::one_in(30)) &&
-                !is_deep_liquid;
+                !is_deep_liquid);
 }
 
 // -----------------------------------------------------------------------------
@@ -3023,9 +3033,10 @@ int SpellHaste::mon_cooldown() const
 
 bool SpellHaste::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target &&
+        return (
+                mon.m_ai_state.target &&
                 mon.m_ai_state.is_target_seen &&
-                !mon.m_properties.has(PropId::hasted);
+                !mon.m_properties.has(PropId::hasted));
 }
 
 // -----------------------------------------------------------------------------
@@ -3227,7 +3238,7 @@ int SpellTeleport::max_dist(const SpellSkill skill) const
 
 bool SpellTeleport::allow_mon_cast_now(actor::Mon& mon) const
 {
-        const bool is_low_hp = mon.m_hp <= (actor::max_hp(mon) / 2);
+        const bool is_low_hp = (mon.m_hp <= (actor::max_hp(mon) / 2));
 
         return (
                 mon.is_aware_of_player() &&
@@ -3305,8 +3316,9 @@ bool SpellResistance::allow_mon_cast_now(actor::Mon& mon) const
         const bool has_rfire = mon.m_properties.has(PropId::r_fire);
         const bool has_relec = mon.m_properties.has(PropId::r_elec);
 
-        return (!has_rfire || !has_relec) &&
-                mon.m_ai_state.target;
+        return (
+                (!has_rfire || !has_relec) &&
+                mon.m_ai_state.target);
 }
 
 // -----------------------------------------------------------------------------
@@ -3387,7 +3399,108 @@ void SpellKnockBack::run_effect(
 
 bool SpellKnockBack::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
+}
+
+// -----------------------------------------------------------------------------
+// Curse
+// -----------------------------------------------------------------------------
+int SpellCurse::base_max_spi_cost(const SpellSkill skill) const
+{
+        (void)skill;
+
+        return 3;
+}
+
+int SpellCurse::mon_cooldown() const
+{
+        return 10;
+}
+
+void SpellCurse::run_effect(
+        actor::Actor* const caster,
+        const SpellSkill skill) const
+{
+        Range duration_range;
+        duration_range.min = 15 * ((int)skill + 1);
+        duration_range.max = duration_range.min * 2;
+
+        const int duration = duration_range.roll();
+
+        auto targets = actor::seen_foes(*caster);
+
+        if (targets.empty())
+        {
+                return;
+        }
+
+        // There are targets available
+
+        if (skill == SpellSkill::basic)
+        {
+                auto* const target = rnd::element(targets);
+
+                targets.clear();
+                targets.push_back(target);
+        }
+
+        io::draw_blast_at_seen_actors(targets, colors::magenta());
+
+        for (auto* const target : targets)
+        {
+                // Spell resistance?
+                if (target->m_properties.has(PropId::r_spell))
+                {
+                        on_resist(*target);
+
+                        // Spell reflection?
+                        if (target->m_properties.has(PropId::spell_reflect))
+                        {
+                                if (actor::can_player_see_actor(*target))
+                                {
+                                        msg_log::add(
+                                                s_spell_reflect_msg,
+                                                colors::text(),
+                                                MsgInterruptPlayer::no,
+                                                MorePromptOnMsg::yes);
+                                }
+
+                                // Run effect with target as caster
+                                run_effect(target, skill);
+                        }
+
+                        continue;
+                }
+
+                auto id = PropId::cursed;
+
+                if (skill == SpellSkill::master)
+                {
+                        id = PropId::doomed;
+                }
+
+                auto* const prop = property_factory::make(id);
+
+                prop->set_duration(duration);
+
+                target->m_properties.apply(prop);
+
+                if (!target->is_player())
+                {
+                        static_cast<actor::Mon*>(target)
+                                ->become_aware_player(
+                                        actor::AwareSource::spell_victim);
+                }
+        }
+}
+
+bool SpellCurse::allow_mon_cast_now(actor::Mon& mon) const
+{
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------
@@ -3515,7 +3628,9 @@ std::vector<std::string> SpellEnfeeble::descr_specific(
 
 bool SpellEnfeeble::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------
@@ -3642,7 +3757,9 @@ int SpellSlow::mon_cooldown() const
 
 bool SpellSlow::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------
@@ -3769,7 +3886,9 @@ std::vector<std::string> SpellTerrify::descr_specific(
 
 bool SpellTerrify::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------
@@ -3846,7 +3965,9 @@ void SpellDisease::run_effect(
 
 bool SpellDisease::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------
@@ -3976,13 +4097,13 @@ void SpellSummonMon::run_effect(
 
 bool SpellSummonMon::allow_mon_cast_now(actor::Mon& mon) const
 {
-        const bool is_deep_liquid =
-                map::g_terrain.at(mon.m_pos)->id() ==
-                terrain::Id::liquid_deep;
+        const auto terrain_id = map::g_terrain.at(mon.m_pos)->id();
+        const bool is_deep_liquid = (terrain_id == terrain::Id::liquid_deep);
 
-        return mon.m_ai_state.target &&
+        return (
+                mon.m_ai_state.target &&
                 (mon.m_ai_state.is_target_seen || rnd::one_in(30)) &&
-                !is_deep_liquid;
+                !is_deep_liquid);
 }
 
 // -----------------------------------------------------------------------------
@@ -4048,13 +4169,13 @@ void SpellSummonTentacles::run_effect(
 
 bool SpellSummonTentacles::allow_mon_cast_now(actor::Mon& mon) const
 {
-        const bool is_deep_liquid =
-                map::g_terrain.at(mon.m_pos)->id() ==
-                terrain::Id::liquid_deep;
+        const auto terrain_id = map::g_terrain.at(mon.m_pos)->id();
+        const bool is_deep_liquid = (terrain_id == terrain::Id::liquid_deep);
 
-        return mon.m_ai_state.target &&
+        return (
+                mon.m_ai_state.target &&
                 mon.m_ai_state.is_target_seen &&
-                !is_deep_liquid;
+                !is_deep_liquid);
 }
 
 // -----------------------------------------------------------------------------
@@ -4208,9 +4329,10 @@ void SpellMiGoHypno::run_effect(
 
 bool SpellMiGoHypno::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target &&
+        return (
+                mon.m_ai_state.target &&
                 mon.m_ai_state.is_target_seen &&
-                mon.m_ai_state.target->is_player();
+                mon.m_ai_state.target->is_player());
 }
 
 // -----------------------------------------------------------------------------
@@ -4286,7 +4408,9 @@ void SpellBurn::run_effect(
 
 bool SpellBurn::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------
@@ -4350,7 +4474,9 @@ void SpellDeafen::run_effect(
 
 bool SpellDeafen::allow_mon_cast_now(actor::Mon& mon) const
 {
-        return mon.m_ai_state.target && mon.m_ai_state.is_target_seen;
+        return (
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------

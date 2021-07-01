@@ -568,9 +568,6 @@ public:
         void on_more(const Prop& new_prop) override;
 
         int ability_mod(AbilityId ability) const override;
-
-private:
-        void bless_adjacent() const;
 };
 
 class PropCursed : public Prop
@@ -579,14 +576,36 @@ public:
         PropCursed() :
                 Prop(PropId::cursed) {}
 
+        bool allow_read_chance(
+                Verbose verbose) const override;
+
+        bool allow_cast_intr_spell_chance(
+                Verbose verbose) const override;
+
         int ability_mod(AbilityId ability) const override;
 
         void on_applied() override;
 
         void on_more(const Prop& new_prop) override;
+};
 
-private:
-        void curse_adjacent() const;
+class PropDoomed : public Prop
+{
+public:
+        PropDoomed() :
+                Prop(PropId::doomed) {}
+
+        bool allow_read_chance(
+                Verbose verbose) const override;
+
+        bool allow_cast_intr_spell_chance(
+                Verbose verbose) const override;
+
+        int ability_mod(AbilityId ability) const override;
+
+        void on_applied() override;
+
+        void on_more(const Prop& new_prop) override;
 };
 
 class PropPremonition : public Prop
@@ -669,7 +688,8 @@ public:
         PropBurning() :
                 Prop(PropId::burning) {}
 
-        bool allow_read_chance(Verbose verbose) const override;
+        bool allow_read_chance(
+                Verbose verbose) const override;
 
         bool allow_cast_intr_spell_chance(
                 Verbose verbose) const override;
@@ -1467,15 +1487,6 @@ public:
                 Prop(PropId::frenzy_player_on_seen) {}
 
         void on_player_see() override;
-};
-
-class PropSpeaksCurses : public Prop
-{
-public:
-        PropSpeaksCurses() :
-                Prop(PropId::speaks_curses) {}
-
-        PropActResult on_act() override;
 };
 
 class PropAuraOfDecay : public Prop

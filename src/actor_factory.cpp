@@ -95,9 +95,8 @@ static actor::MonSpawnResult spawn_at_positions(
 
         for (size_t i = 0; i < nr_to_spawn; ++i)
         {
-                const P& pos = positions[i];
-
-                const actor::Id id = ids[i];
+                const auto& pos = positions[i];
+                const auto id = ids[i];
 
                 result.monsters.emplace_back(spawn_at(pos, id));
         }
