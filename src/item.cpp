@@ -1052,11 +1052,9 @@ void PlayerGhoulClaw::on_melee_kill(actor::Actor& actor_killed)
             d.can_leave_corpse &&
             rnd::one_in(3))
         {
-                const size_t nr_worms = rnd::range(1, 2);
-
                 actor::spawn(
                         actor_killed.m_pos,
-                        {nr_worms, actor::Id::worm_mass},
+                        {1, actor::Id::worm_mass},
                         map::rect())
                         .make_aware_of_player()
                         .set_leader(map::g_player);
