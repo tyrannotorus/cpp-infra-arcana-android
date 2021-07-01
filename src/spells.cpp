@@ -2238,8 +2238,13 @@ bool SpellPestilence::allow_mon_cast_now(actor::Mon& mon) const
 }
 
 // -----------------------------------------------------------------------------
-// Animate weapons
+// Spectral Weapons
 // -----------------------------------------------------------------------------
+int SpellSpectralWeapons::max_nr_weapons(const SpellSkill skill) const
+{
+        return 1 + (int)skill;
+}
+
 void SpellSpectralWeapons::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
@@ -2279,11 +2284,11 @@ void SpellSpectralWeapons::run_effect(
         // Cap the number of weapons spawned
         rnd::shuffle(weapons);
 
-        const size_t nr_weapons_max = 1 + (int)skill;
+        const auto nr_max = (size_t)max_nr_weapons(skill);
 
-        if (nr_weapons_max < weapons.size())
+        if (nr_max < weapons.size())
         {
-                weapons.resize(nr_weapons_max);
+                weapons.resize(nr_max);
         }
 
         // Spawn weapon monsters
@@ -2301,9 +2306,16 @@ void SpellSpectralWeapons::run_effect(
                                 new_item,
                                 Verbose::no);
 
-                        mon->m_properties.apply(new PropSummoned());
+                        auto* prop_summoned =
+                                property_factory::make(PropId::summoned);
 
-                        auto* prop_waiting = new PropWaiting();
+                        prop_summoned->set_duration(
+                                prop_summoned->nr_turns_left() / 3);
+
+                        mon->m_properties.apply(prop_summoned);
+
+                        auto* prop_waiting =
+                                property_factory::make(PropId::waiting);
 
                         prop_waiting->set_duration(1);
 
@@ -2364,20 +2376,19 @@ std::vector<std::string> SpellSpectralWeapons::descr_specific(
 
         descr.emplace_back(
                 "Conjures ghostly copies of carried weapons, which will float "
-                "through the air and protect their master. The weapons almost "
-                "always hit their target, but they quickly dematerialize when "
-                "damaged. It is only possible to create copies of basic "
-                "melee weapons - \"modern\" mechanisms such as pistols or "
-                "machine guns are far too complex.");
+                "through the air and protect their master. It is only "
+                "possible to create copies of basic melee weapons - "
+                "\"modern\" mechanisms such as pistols or machine guns are "
+                "far too complex.");
 
-        const size_t nr_weapons_max = 1 + (int)skill;
+        const auto nr_max = (size_t)max_nr_weapons(skill);
 
         std::string nr_summoned_descr =
                 "A maximum of " +
-                std::to_string(nr_weapons_max) +
+                std::to_string(nr_max) +
                 " ";
 
-        if (nr_weapons_max == 1)
+        if (nr_max == 1)
         {
                 nr_summoned_descr += "weapon is";
         }

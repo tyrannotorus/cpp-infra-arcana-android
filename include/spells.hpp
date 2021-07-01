@@ -870,6 +870,8 @@ private:
 
                 return true;
         }
+
+        int max_nr_weapons(SpellSkill skill) const;
 };
 
 class SpellControlObject : public Spell
