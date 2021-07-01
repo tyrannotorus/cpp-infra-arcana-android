@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <optional>
 #include <ostream>
 #include <string>
 
@@ -3029,11 +3030,16 @@ void ItemContainer::on_item_found(
                 msg_log::add("Unload? [u]");
         }
 
-        const BinaryAnswer answer =
-                query::yes_or_no(
-                        is_unloadable_wpn
-                                ? 'u'
-                                : -1);
+        BinaryAnswer answer;
+
+        if (is_unloadable_wpn)
+        {
+                answer = query::yes_or_no('u');
+        }
+        else
+        {
+                answer = query::yes_or_no();
+        }
 
         msg_log::clear();
 

@@ -7,6 +7,8 @@
 #ifndef QUERY_HPP
 #define QUERY_HPP
 
+#include <optional>
+
 #include "colors.hpp"
 #include "direction.hpp"
 
@@ -42,7 +44,7 @@ void cleanup();
 void wait_for_key_press();
 
 BinaryAnswer yes_or_no(
-        char key_for_special_event = -1,
+        std::optional<char> key_for_special_event = std::nullopt,
         AllowSpaceCancel allow_space_cancel = AllowSpaceCancel::yes);
 
 Dir dir(AllowCenter allow_center);

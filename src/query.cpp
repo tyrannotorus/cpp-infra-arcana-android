@@ -69,7 +69,7 @@ static void query_nr_draw(
                 fg_color,
                 io::DrawBg::yes,
                 bg_color);
-};
+}
 
 // -----------------------------------------------------------------------------
 // query
@@ -97,7 +97,7 @@ void wait_for_key_press()
 }
 
 BinaryAnswer yes_or_no(
-        const char key_for_special_event,
+        std::optional<char> key_for_special_event,
         const AllowSpaceCancel allow_space_cancel)
 {
         if (!s_is_inited || config::is_bot_playing())
@@ -114,8 +114,8 @@ BinaryAnswer yes_or_no(
                 input = io::get();
 
                 const bool is_special_key_pressed =
-                        (key_for_special_event != -1) &&
-                        (input.key == key_for_special_event);
+                        key_for_special_event.has_value() &&
+                        (input.key == key_for_special_event.value());
 
                 const bool is_canceled_with_space =
                         (input.key == SDLK_SPACE) &&
@@ -131,15 +131,19 @@ BinaryAnswer yes_or_no(
                 }
         }
 
-        if ((input.key == key_for_special_event) &&
-            (key_for_special_event != -1))
+        if (key_for_special_event.has_value() &&
+            (input.key == key_for_special_event.value()))
         {
                 return BinaryAnswer::special;
         }
-
-        return (input.key == 'y')
-                ? BinaryAnswer::yes
-                : BinaryAnswer::no;
+        else if (input.key == 'y')
+        {
+                return BinaryAnswer::yes;
+        }
+        else
+        {
+                return BinaryAnswer::no;
+        }
 }
 
 InputData letter(const bool accept_enter)
