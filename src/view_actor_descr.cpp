@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
-#include <pmmintrin.h>
 
 #include "ability_values.hpp"
 #include "actor.hpp"

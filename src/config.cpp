@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <ext/alloc_traits.h>
 #include <fstream>
 #include <iterator>
 #include <string>

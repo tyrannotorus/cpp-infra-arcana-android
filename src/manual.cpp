@@ -7,7 +7,6 @@
 #include "manual.hpp"
 
 #include <cstddef>
-#include <ext/alloc_traits.h>
 #include <fstream>
 #include <memory>
 #include <utility>

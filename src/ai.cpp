@@ -7,7 +7,6 @@
 #include "ai.hpp"
 
 #include <algorithm>
-#include <ext/alloc_traits.h>
 #include <string>
 
 #include "ability_values.hpp"

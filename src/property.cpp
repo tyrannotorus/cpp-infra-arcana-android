@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <ext/alloc_traits.h>
 #include <iterator>
 #include <ostream>
 

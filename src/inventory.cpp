@@ -7,7 +7,6 @@
 #include "inventory.hpp"
 
 #include <algorithm>
-#include <ext/alloc_traits.h>
 #include <iterator>
 #include <memory>
 #include <ostream>
