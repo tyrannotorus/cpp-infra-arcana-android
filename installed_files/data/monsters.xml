@@ -7902,7 +7902,7 @@
 
         <ai>
             <erratic_move_percent>0</erratic_move_percent>
-            <turns_aware>5</turns_aware>
+            <turns_aware>10</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>true</looks>
             <avoids_blocking_friend>true</avoids_blocking_friend>
