@@ -807,8 +807,8 @@ static void update_trait_data()
         d.id = Trait::indomitable_fury;
         d.title = "Indomitable Fury";
         d.descr =
-                "While frenzied, you are immune to wounds, and your attacks "
-                "cause fear";
+                "While frenzied, you are immune to wounds, and your claw "
+                "attacks cause fear";
         d.trait_prereqs = {Trait::adept_melee, Trait::tough};
         d.bg_prereq = Bg::ghoul;
         set_trait_data(d);
