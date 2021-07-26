@@ -57,7 +57,7 @@ static WeightedItems<actor::Id> valid_auto_spawn_monsters(
 {
         WeightedItems<actor::Id> weighted_ids;
 
-        int effective_dlvl =
+        int dlvl =
                 std::clamp(
                         map::g_dlvl + nr_lvls_out_of_depth,
                         1,
@@ -65,7 +65,7 @@ static WeightedItems<actor::Id> valid_auto_spawn_monsters(
 
         if (config::is_gj_mode())
         {
-                effective_dlvl = rnd::range(effective_dlvl, g_dlvl_last);
+                dlvl = rnd::range(dlvl, g_dlvl_last);
         }
 
         // Get list of actors currently on the level to help avoid spawning
@@ -94,13 +94,13 @@ static WeightedItems<actor::Id> valid_auto_spawn_monsters(
                         continue;
                 }
 
-                if (effective_dlvl < d.spawn_min_dlvl)
+                if (dlvl < d.spawn_min_dlvl)
                 {
                         continue;
                 }
 
                 if ((d.spawn_max_dlvl != -1) &&
-                    (effective_dlvl > d.spawn_max_dlvl))
+                    (dlvl > d.spawn_max_dlvl))
                 {
                         continue;
                 }

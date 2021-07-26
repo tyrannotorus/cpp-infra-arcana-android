@@ -699,9 +699,14 @@ void PropShapeshifts::shapeshift(const Verbose verbose) const
 
         for (const auto& d : actor::g_data)
         {
-                const Range allowed_mon_depth_range(
+                Range allowed_mon_depth_range(
                         d.spawn_min_dlvl - 2,
                         d.spawn_max_dlvl);
+
+                if (allowed_mon_depth_range.max == -1)
+                {
+                        allowed_mon_depth_range.max = 999;
+                }
 
                 if (!d.can_be_shapeshifted_into ||
                     (d.id == m_owner->id()) ||
@@ -2901,9 +2906,9 @@ void PropAuraOfDecay::run_effect_on_actors() const
 
 void PropAuraOfDecay::run_effect_on_env() const
 {
-        for (const P& d : dir_utils::g_dir_list)
+        for (const auto& d : dir_utils::g_dir_list)
         {
-                const P p = m_owner->m_pos + d;
+                const auto p = m_owner->m_pos + d;
 
                 if (!map::is_pos_inside_outer_walls(p))
                 {

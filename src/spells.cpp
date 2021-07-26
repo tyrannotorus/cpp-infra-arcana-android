@@ -3988,65 +3988,25 @@ void SpellSummonMon::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
 {
-        std::vector<actor::Id> summon_bucket;
+        auto mon_dlvl_range = get_allowed_mon_dlvl_range(skill);
 
-        // Caster is monster
-        int max_dlvl_spawned =
-                (skill == SpellSkill::basic)
-                ? g_dlvl_last_early_game
-                : ((skill == SpellSkill::expert)
-                           ? g_dlvl_last_mid_game
-                           : g_dlvl_last);
+        auto summon_bucket = make_summon_bucket(mon_dlvl_range);
 
-        const int nr_dlvls_ood_allowed = 3;
-
-        max_dlvl_spawned =
-                std::min(
-                        max_dlvl_spawned,
-                        map::g_dlvl + nr_dlvls_ood_allowed);
-
-        const int min_dlvl_spawned = max_dlvl_spawned - 10;
-
-        for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
-        {
-                const auto& data = actor::g_data[i];
-
-                if (!data.can_be_summoned_by_mon)
-                {
-                        continue;
-                }
-
-                if ((data.spawn_min_dlvl <= max_dlvl_spawned) &&
-                    (data.spawn_min_dlvl >= min_dlvl_spawned))
-                {
-                        summon_bucket.push_back(actor::Id(i));
-                }
-        }
-
-        // If no monsters could be found which matched the level
-        // criteria, try again, but without the min level criterium
         if (summon_bucket.empty())
         {
-                for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
-                {
-                        const auto& data = actor::g_data[i];
+                // No eligible monsters found, try again but allow monsters from
+                // as early depth as possible.
 
-                        if (!data.can_be_summoned_by_mon)
-                        {
-                                continue;
-                        }
+                mon_dlvl_range.min = 0;
 
-                        if (data.spawn_min_dlvl <= max_dlvl_spawned)
-                        {
-                                summon_bucket.push_back(actor::Id(i));
-                        }
-                }
+                summon_bucket = make_summon_bucket(mon_dlvl_range);
         }
 
         if (summon_bucket.empty())
         {
-                TRACE << "No elligible monsters found for spawning"
-                      << std::endl;
+                TRACE
+                        << "No elligible monsters found for spawning"
+                        << std::endl;
 
                 ASSERT(false);
 
@@ -4060,8 +4020,73 @@ void SpellSummonMon::run_effect(
         }
 #endif  // NDEBUG
 
-        const auto mon_id = rnd::element(summon_bucket);
+        const auto id = rnd::element(summon_bucket);
 
+        summon(id, caster);
+}
+
+Range SpellSummonMon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
+{
+        Range dlvl_range;
+
+        switch (skill)
+        {
+        case SpellSkill::basic:
+                dlvl_range.min = 0;
+                dlvl_range.max = g_dlvl_last_early_game;
+                break;
+
+        case SpellSkill::expert:
+                dlvl_range.min = 0;
+                dlvl_range.max = g_dlvl_last_mid_game;
+                break;
+
+        case SpellSkill::master:
+                dlvl_range.min = g_dlvl_first_mid_game;
+                dlvl_range.max = g_dlvl_last;
+                break;
+        }
+
+        const int dlvl = map::g_dlvl + 3;
+
+        dlvl_range.min = std::min(dlvl_range.min, dlvl);
+        dlvl_range.max = std::min(dlvl_range.max, dlvl);
+
+        return dlvl_range;
+}
+
+std::vector<actor::Id> SpellSummonMon::make_summon_bucket(
+        const Range& dlvl_range) const
+{
+        std::vector<actor::Id> summon_bucket;
+
+        for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
+        {
+                const auto& data = actor::g_data[i];
+
+                if (!data.can_be_summoned_by_mon)
+                {
+                        continue;
+                }
+
+                // NOTE: The "min" dungeon level in the monster data is used
+                // here as a general "strength" of the monster. The "max"
+                // dungeon level is not considered.
+                const int mon_dlvl = data.spawn_min_dlvl;
+
+                if (!dlvl_range.is_in_range(mon_dlvl))
+                {
+                        continue;
+                }
+
+                summon_bucket.push_back(actor::Id(i));
+        }
+
+        return summon_bucket;
+}
+
+void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
+{
         auto* const caster_leader =
                 static_cast<actor::Mon*>(caster)->m_leader;
 
@@ -4073,7 +4098,7 @@ void SpellSummonMon::run_effect(
         const auto summoned =
                 actor::spawn(
                         caster->m_pos,
-                        {mon_id},
+                        {id},
                         map::rect())
                         .make_aware_of_player()
                         .set_leader(leader);

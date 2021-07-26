@@ -19,6 +19,7 @@ struct P;
 
 namespace actor
 {
+enum class Id;
 class Actor;
 class Mon;
 }  // namespace actor
@@ -1953,6 +1954,13 @@ private:
 
                 return true;
         }
+
+        Range get_allowed_mon_dlvl_range(SpellSkill skill) const;
+
+        std::vector<actor::Id> make_summon_bucket(
+                const Range& dlvl_range) const;
+
+        void summon(actor::Id id, actor::Actor* caster) const;
 };
 
 class SpellSummonTentacles : public Spell
