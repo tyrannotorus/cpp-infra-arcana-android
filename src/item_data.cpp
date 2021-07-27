@@ -2178,7 +2178,7 @@ void init()
         d.value = item::Value::minor_treasure;
         d.weight = Weight::extra_light;
         d.has_std_activate = true;
-        d.color = colors::yellow();
+        d.color = colors::white();
         d.tile = gfx::TileId::astral_opium;
         d.character = '%';
         d.land_on_hard_snd_msg = "I hear a clanking sound.";

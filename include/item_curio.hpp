@@ -4,6 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+// TODO: "Other curiousities" is not really a thing in the game, this should be
+// merged with the artifact files.
+
 #ifndef ITEM_CURIO_HPP
 #define ITEM_CURIO_HPP
 

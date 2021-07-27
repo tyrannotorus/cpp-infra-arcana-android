@@ -780,23 +780,10 @@ static void read_actor_definitions_xml()
 
                 data.id = id;
 
-                TRACE << "Reading text data" << std::endl;
-
                 dump_text(xml::first_child(mon_e, "text"), data);
-
-                TRACE << "Reading graphics data" << std::endl;
-
                 dump_gfx(xml::first_child(mon_e, "graphics"), data);
-
-                TRACE << "Reading audio data" << std::endl;
-
                 dump_audio(xml::first_child(mon_e, "audio"), data);
-
-                TRACE << "Reading attributes data" << std::endl;
-
                 dump_attributes(xml::first_child(mon_e, "attributes"), data);
-
-                TRACE << "Reading items data" << std::endl;
 
                 auto* items_e = xml::first_child(mon_e, "items");
 
@@ -805,16 +792,12 @@ static void read_actor_definitions_xml()
                         dump_items(items_e, data);
                 }
 
-                TRACE << "Reading attacks data" << std::endl;
-
                 auto* attacks_e = xml::first_child(mon_e, "attacks");
 
                 if (attacks_e)
                 {
                         dump_intr_attacks(attacks_e, data);
                 }
-
-                TRACE << "Reading spells data" << std::endl;
 
                 auto* spells_e = xml::first_child(mon_e, "spells");
 
@@ -823,16 +806,12 @@ static void read_actor_definitions_xml()
                         dump_spells(spells_e, data);
                 }
 
-                TRACE << "Reading properties data" << std::endl;
-
                 auto* props_e = xml::first_child(mon_e, "properties");
 
                 if (props_e)
                 {
                         dump_properties(props_e, data);
                 }
-
-                TRACE << "Reading AI data" << std::endl;
 
                 auto* ai_e = xml::first_child(mon_e, "ai");
 
@@ -841,11 +820,7 @@ static void read_actor_definitions_xml()
                         dump_ai(ai_e, data);
                 }
 
-                TRACE << "Reading spawning data" << std::endl;
-
                 dump_spawning(xml::first_child(mon_e, "spawning"), data);
-
-                TRACE << "Reading starting allies data" << std::endl;
 
                 auto* allies_e = xml::first_child(mon_e, "starting_allies");
 
