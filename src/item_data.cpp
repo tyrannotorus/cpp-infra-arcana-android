@@ -256,7 +256,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.is_stackable = false;
                 d.land_on_hard_snd_msg = "I hear a clanking sound.";
                 d.land_on_hard_sfx = audio::SfxId::metal_clank;
-                d.chance_to_incl_in_spawn_list = 5;
+                d.chance_to_incl_in_spawn_list = 10;
                 d.native_containers.push_back(terrain::Id::chest);
                 d.native_containers.push_back(terrain::Id::cocoon);
                 break;
@@ -278,7 +278,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.is_stackable = false;
                 d.land_on_hard_snd_msg = "I hear a clanking sound.";
                 d.land_on_hard_sfx = audio::SfxId::metal_clank;
-                d.chance_to_incl_in_spawn_list = 5;
+                d.chance_to_incl_in_spawn_list = 10;
                 d.native_containers.push_back(terrain::Id::chest);
                 d.native_containers.push_back(terrain::Id::cocoon);
                 break;
@@ -1770,17 +1770,21 @@ void init()
                 "",
                 "the Staff of the Pharaohs"};
         d.base_descr = {
-                "Once wielded by long-forgotten kings in ancient times, this "
-                "powerful artifact grants the power to command mummies. "
-                "On each turn there is 10% chance that a mummy beholding the "
-                "owner will become allied (while the weapon is carried or "
-                "wielded)."};
+                "Wielded by long-forgotten rulers in ancient times, this "
+                "powerful artifact holds power over those that were once "
+                "bound to it. Any mummy beholding the owner will eventually "
+                "convert and become allied (10% chance per turn while the "
+                "weapon is carried or wielded). Also, a devastating curse "
+                "may fall upon those struck by this weapon (50% chance to "
+                "apply doom for a short duration, greatly reducing the "
+                "victim's hit chances, evasion, and searching ability, and "
+                "also causes a small chance to fail when casting spells)."};
         d.color = colors::magenta();
         d.weight = Weight::medium;
         d.tile = gfx::TileId::pharaoh_staff;
         d.melee.att_msgs = {"strike", "strikes"};
         d.melee.dmg = DmgRange(2, 8, 4);
-        d.melee.hit_chance_mod = 0;
+        d.melee.hit_chance_mod = 10;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         d.melee.dmg_type = DmgType::blunt;
         d.ranged.throw_hit_chance_mod = -10;

@@ -110,7 +110,7 @@ protected:
 
         void print_player_see_mon_become_wary_msg() const;
 
-        bool is_friend_blocking_ranged_attack(const P& target_pos) const;
+        bool is_ranged_attack_blocked(const P& target_pos) const;
 
         item::Wpn* avail_wielded_melee() const;
         item::Wpn* avail_wielded_ranged() const;

@@ -561,17 +561,16 @@ DidAction Mon::try_attack(Actor& defender)
                         return DidAction::yes;
                 }
 
-                const bool ignore_blocking_friend = rnd::one_in(20);
-
-                if (!ignore_blocking_friend &&
-                    is_friend_blocking_ranged_attack(defender.m_pos))
+                if (is_ranged_attack_blocked(defender.m_pos))
                 {
                         return DidAction::no;
                 }
 
                 if (m_data->ranged_cooldown_turns > 0)
                 {
-                        auto* prop = new PropDisabledRanged();
+                        auto* prop =
+                                property_factory::make(
+                                        PropId::disabled_ranged);
 
                         prop->set_duration(m_data->ranged_cooldown_turns);
 
@@ -591,7 +590,7 @@ DidAction Mon::try_attack(Actor& defender)
         return DidAction::no;
 }
 
-bool Mon::is_friend_blocking_ranged_attack(const P& target_pos) const
+bool Mon::is_ranged_attack_blocked(const P& target_pos) const
 {
         const auto line =
                 line_calc::calc_new_line(
@@ -601,14 +600,34 @@ bool Mon::is_friend_blocking_ranged_attack(const P& target_pos) const
                         9999,
                         false);
 
-        auto is_blocking_at = [this, target_pos](const auto& p) {
+        const bool ignore_blocking_friend = rnd::one_in(20);
+
+        auto is_blocking_at = [&](const auto& p) {
                 if ((p == m_pos) || (p == target_pos))
                 {
                         return false;
                 }
 
-                // TODO: This does not consider who is allied or hostile.
-                return map::first_actor_at_pos(p) != nullptr;
+                if (!ignore_blocking_friend)
+                {
+                        // TODO: This does not consider allies/hostiles.
+                        const auto* const actor = map::first_actor_at_pos(p);
+
+                        if (actor &&
+                            (actor->m_data->actor_size != actor::Size::floor))
+                        {
+                                return true;
+                        }
+                }
+
+                const auto* const terrain = map::g_terrain.at(p);
+
+                if (!terrain->is_projectile_passable())
+                {
+                        return true;
+                }
+
+                return false;
         };
 
         return (

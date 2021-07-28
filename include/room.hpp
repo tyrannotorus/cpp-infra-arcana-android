@@ -114,7 +114,7 @@ public:
 
         virtual int max_nr_mon_groups_spawned() const
         {
-                return 3;
+                return 2;
         }
 
         virtual bool allow_sub_rooms() const

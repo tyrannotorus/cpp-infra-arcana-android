@@ -120,6 +120,27 @@ void PharaohStaff::on_mon_see_player_carrying(actor::Actor& mon) const
         }
 }
 
+void PharaohStaff::on_melee_hit(actor::Actor& actor_hit, const int dmg)
+{
+        (void)dmg;
+
+        if (!actor_hit.is_alive())
+        {
+                return;
+        }
+
+        const int doomed_pct = 50;
+
+        if (rnd::percent(doomed_pct))
+        {
+                auto* prop = property_factory::make(PropId::doomed);
+
+                prop->set_duration(rnd::range(3, 4));
+
+                actor_hit.m_properties.apply(prop);
+        }
+}
+
 // -----------------------------------------------------------------------------
 // Talisman of Reflection
 // -----------------------------------------------------------------------------

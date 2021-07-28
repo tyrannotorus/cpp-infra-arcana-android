@@ -390,13 +390,13 @@ static void init_data_list()
         d.character = '|';
         d.tile = gfx::TileId::witch_or_warlock;
         d.is_projectile_passable = false;
-        d.is_los_passable = false;
+        d.is_los_passable = true;
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.can_have_corpse = false;
         d.can_have_item = false;
         d.matl_type = Matl::stone;
-        d.auto_spawn_placement = terrain::TerrainPlacement::either;
+        d.auto_spawn_placement = terrain::TerrainPlacement::away_from_walls;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::cocoon;

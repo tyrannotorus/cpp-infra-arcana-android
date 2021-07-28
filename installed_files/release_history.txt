@@ -35,9 +35,10 @@ MINOR TWEAKS AND BALANCING
 * Forcing a metal door open (e.g. with a Rod of Opening or the Control Object spell) now also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
 * Reduced the maximum number of weapons summoned by Spectral Weapons for basic/expert/master skill level to 1/2/3 (from 2/3/4), and reduced the duration of the weapons to 1/3 of the current duration range
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
-* Removed the Searching spell - instead this is  a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
+* Removed the Searching spell - instead this is a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
 * The Summoning spell is no longer available to player characters (only to monsters)
 * The Cursed status effect now also causes 5% chance to fail spell casting
+* The Staff of the Pharaohs also has a chance to apply Doom on hit (a stronger version of Cursed)
 * Added a message when spells are upgraded (e.g. by a Gong)
 * Being blind no longer immediately raises shock by 30% - instead the shock ramps up each turn up to 30%
 * The Tough and Rugged traits now give +6 hit points each, instead of +4
@@ -48,6 +49,7 @@ MINOR TWEAKS AND BALANCING
 * The stairs position is always lit, to make it less tedious to discover in huge dark rooms
 * Winning characters show up as statues inside the church building on the intro level, instead of graves outside the church
 * Players can now melee attack monsters while nailed by a Spike Gun (but still not while entangled)
+* Statues no longer block line of sight, making them much easier to kick into monsters.
 
 USER INTERFACE UPDATES
 * All fonts have been replaced with new ones (the reason for this is that the origins and license information of the previous ones was unknown - now this information is clearly listed in a font license text file distributed with the game)

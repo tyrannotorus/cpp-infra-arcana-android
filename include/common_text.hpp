@@ -31,6 +31,8 @@ extern const std::string g_fire_prevent_cmd;
 extern const std::string g_shock_prevent_cmd;
 extern const std::string g_mon_disappear;
 extern const std::string g_mon_disappear_reappear;
+extern const std::string g_miscast_player;
+extern const std::string g_miscast_mon;
 
 extern const std::vector<std::string> g_exorcist_purge_phrases;
 

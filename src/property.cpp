@@ -22,6 +22,7 @@
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
+#include "common_text.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
 #include "explosion.hpp"
@@ -180,9 +181,23 @@ bool PropCursed::allow_read_chance(const Verbose verbose) const
 {
         if (rnd::percent(5))
         {
-                if (m_owner->is_player() && (verbose == Verbose::yes))
+                if (verbose == Verbose::yes)
                 {
-                        msg_log::add("I miscast!");
+                        if (m_owner->is_player())
+                        {
+                                msg_log::add(common_text::g_miscast_player);
+                        }
+                        else if (actor::can_player_see_actor(*m_owner))
+                        {
+                                const std::string name =
+                                        text_format::first_to_upper(
+                                                m_owner->name_the());
+
+                                msg_log::add(
+                                        name +
+                                        " " +
+                                        common_text::g_miscast_mon);
+                        }
                 }
 
                 return false;
@@ -197,9 +212,23 @@ bool PropCursed::allow_cast_intr_spell_chance(const Verbose verbose) const
 {
         if (rnd::percent(5))
         {
-                if (m_owner->is_player() && (verbose == Verbose::yes))
+                if (verbose == Verbose::yes)
                 {
-                        msg_log::add("I miscast!");
+                        if (m_owner->is_player())
+                        {
+                                msg_log::add(common_text::g_miscast_player);
+                        }
+                        else if (actor::can_player_see_actor(*m_owner))
+                        {
+                                const std::string name =
+                                        text_format::first_to_upper(
+                                                m_owner->name_the());
+
+                                msg_log::add(
+                                        name +
+                                        " " +
+                                        common_text::g_miscast_mon);
+                        }
                 }
 
                 return false;
@@ -251,9 +280,23 @@ bool PropDoomed::allow_read_chance(const Verbose verbose) const
 {
         if (rnd::percent(10))
         {
-                if (m_owner->is_player() && (verbose == Verbose::yes))
+                if (verbose == Verbose::yes)
                 {
-                        msg_log::add("I miscast!");
+                        if (m_owner->is_player())
+                        {
+                                msg_log::add(common_text::g_miscast_player);
+                        }
+                        else if (actor::can_player_see_actor(*m_owner))
+                        {
+                                const std::string name =
+                                        text_format::first_to_upper(
+                                                m_owner->name_the());
+
+                                msg_log::add(
+                                        name +
+                                        " " +
+                                        common_text::g_miscast_mon);
+                        }
                 }
 
                 return false;
@@ -268,9 +311,23 @@ bool PropDoomed::allow_cast_intr_spell_chance(const Verbose verbose) const
 {
         if (rnd::percent(10))
         {
-                if (m_owner->is_player() && (verbose == Verbose::yes))
+                if (verbose == Verbose::yes)
                 {
-                        msg_log::add("I miscast!");
+                        if (m_owner->is_player())
+                        {
+                                msg_log::add(common_text::g_miscast_player);
+                        }
+                        else if (actor::can_player_see_actor(*m_owner))
+                        {
+                                const std::string name =
+                                        text_format::first_to_upper(
+                                                m_owner->name_the());
+
+                                msg_log::add(
+                                        name +
+                                        " " +
+                                        common_text::g_miscast_mon);
+                        }
                 }
 
                 return false;
@@ -1651,9 +1708,23 @@ bool PropBurning::allow_read_chance(const Verbose verbose) const
 {
         if (rnd::coin_toss())
         {
-                if (m_owner->is_player() && (verbose == Verbose::yes))
+                if (verbose == Verbose::yes)
                 {
-                        msg_log::add("I fail to concentrate!");
+                        if (m_owner->is_player())
+                        {
+                                msg_log::add(common_text::g_miscast_player);
+                        }
+                        else if (actor::can_player_see_actor(*m_owner))
+                        {
+                                const std::string name =
+                                        text_format::first_to_upper(
+                                                m_owner->name_the());
+
+                                msg_log::add(
+                                        name +
+                                        " " +
+                                        common_text::g_miscast_mon);
+                        }
                 }
 
                 return false;
@@ -1668,9 +1739,23 @@ bool PropBurning::allow_cast_intr_spell_chance(const Verbose verbose) const
 {
         if (rnd::coin_toss())
         {
-                if (m_owner->is_player() && (verbose == Verbose::yes))
+                if (verbose == Verbose::yes)
                 {
-                        msg_log::add("I fail to concentrate!");
+                        if (m_owner->is_player())
+                        {
+                                msg_log::add(common_text::g_miscast_player);
+                        }
+                        else if (actor::can_player_see_actor(*m_owner))
+                        {
+                                const std::string name =
+                                        text_format::first_to_upper(
+                                                m_owner->name_the());
+
+                                msg_log::add(
+                                        name +
+                                        " " +
+                                        common_text::g_miscast_mon);
+                        }
                 }
 
                 return false;

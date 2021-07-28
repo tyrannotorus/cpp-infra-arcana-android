@@ -38,6 +38,8 @@ public:
 
 private:
         void on_mon_see_player_carrying(actor::Actor& mon) const;
+
+        void on_melee_hit(actor::Actor& actor_hit, int dmg) override;
 };
 
 // -----------------------------------------------------------------------------

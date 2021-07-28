@@ -722,7 +722,9 @@ static void init_data_list()
                 "-10% to hit chance, evasion, stealth, and searching, "
                 "5% chance to fail when attempting to read or cast spells.";
         d.msg_start_player = "I feel misfortunate.";
+        d.msg_start_mon = "is cursed.";
         d.msg_end_player = "I feel more fortunate.";
+        d.msg_end_player = "is no longer cursed.";
         d.msg_res_player = "I resist misfortune.";
         d.historic_msg_start_permanent = "A perpetual curse was put upon me";
         d.historic_msg_end_permanent = "A terrible curse was lifted from me";
@@ -739,7 +741,9 @@ static void init_data_list()
                 "-20% to hit chance, evasion, stealth, and searching, "
                 "10% chance to fail when attempting to read or cast spells.";
         d.msg_start_player = "I feel doomed!";
+        d.msg_start_mon = "is doomed!";
         d.msg_end_player = "My doom does not feel so certain anymore.";
+        d.msg_end_mon = "is no longer doomed.";
         d.msg_res_player = "I resist a great misfortune.";
         d.historic_msg_start_permanent = "My doom was written";
         d.historic_msg_end_permanent = "Hope returned again";

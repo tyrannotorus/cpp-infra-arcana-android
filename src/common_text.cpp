@@ -67,6 +67,12 @@ const std::string g_mon_disappear =
 const std::string g_mon_disappear_reappear =
         "suddenly disappears and reappears!";
 
+const std::string g_miscast_player =
+        "I fail to concentrate!";
+
+const std::string g_miscast_mon =
+        "fails to concentrate.";
+
 const std::vector<std::string> g_exorcist_purge_phrases = {
         "This place feels more serene now.",
         "The sanctity of this place has been somewhat restored.",
