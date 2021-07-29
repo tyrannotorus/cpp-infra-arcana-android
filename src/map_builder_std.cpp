@@ -191,7 +191,7 @@ bool MapBuilderStd::build_specific()
                 io::draw_text(
                         "Press any key to make aux rooms...",
                         Panel::screen,
-                        P(0, 0),
+                        {0, 0},
                         colors::white());
                 io::update_screen();
                 query::wait_for_key_press();
@@ -207,8 +207,31 @@ bool MapBuilderStd::build_specific()
         }
 
         // ---------------------------------------------------------------------
+        // Set all floor and walls to cave in late game
+        // ---------------------------------------------------------------------
+        if (map::g_dlvl >= g_dlvl_first_late_game)
+        {
+                for (const auto& p : map::rect().positions())
+                {
+                        auto* const t = map::g_terrain.at(p);
+
+                        if (t->id() == terrain::Id::floor)
+                        {
+                                static_cast<terrain::Floor*>(t)->m_type =
+                                        terrain::FloorType::cave;
+                        }
+                        else if (t->id() == terrain::Id::wall)
+                        {
+                                static_cast<terrain::Wall*>(t)->m_type =
+                                        terrain::WallType::cave;
+                        }
+                }
+        }
+
+        // ---------------------------------------------------------------------
         // BSP split rooms
         // ---------------------------------------------------------------------
+        // TODO: Allow in late game as well?
         if (map::g_dlvl <= g_dlvl_last_mid_game)
         {
                 mapgen::bsp_split_rooms();
@@ -222,26 +245,23 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Make sub-rooms
         // ---------------------------------------------------------------------
-        if (map::g_dlvl <= g_dlvl_last_mid_game)
-        {
 #ifndef NDEBUG
-                if (init::g_is_demo_mapgen)
-                {
-                        io::cover_panel(Panel::log);
-                        states::draw();
-                        io::draw_text(
-                                "Press any key to make sub rooms...",
-                                Panel::screen,
-                                P(0, 0),
-                                colors::white());
-                        io::update_screen();
-                        query::wait_for_key_press();
-                        io::cover_panel(Panel::log);
-                }
+        if (init::g_is_demo_mapgen)
+        {
+                io::cover_panel(Panel::log);
+                states::draw();
+                io::draw_text(
+                        "Press any key to make sub rooms...",
+                        Panel::screen,
+                        {0, 0},
+                        colors::white());
+                io::update_screen();
+                query::wait_for_key_press();
+                io::cover_panel(Panel::log);
+        }
 #endif  // NDEBUG
 
-                mapgen::make_sub_rooms();
-        }
+        mapgen::make_sub_rooms();
 
         if (!mapgen::g_is_map_valid)
         {
@@ -261,11 +281,6 @@ bool MapBuilderStd::build_specific()
                         return r0->m_type < r1->m_type;
                 });
 
-        if (!mapgen::g_is_map_valid)
-        {
-                return false;
-        }
-
         // ---------------------------------------------------------------------
         // Run the pre-connect hook on all rooms
         // ---------------------------------------------------------------------
@@ -279,7 +294,7 @@ bool MapBuilderStd::build_specific()
                 io::draw_text(
                         "Press any key to run pre-connect on rooms...",
                         Panel::screen,
-                        P(0, 0),
+                        {0, 0},
                         colors::white());
                 io::update_screen();
                 query::wait_for_key_press();
@@ -308,7 +323,7 @@ bool MapBuilderStd::build_specific()
                 io::draw_text(
                         "Press any key to connect rooms...",
                         Panel::screen,
-                        P(0, 0),
+                        {0, 0},
                         colors::white());
                 io::update_screen();
                 query::wait_for_key_press();
@@ -335,7 +350,7 @@ bool MapBuilderStd::build_specific()
                 io::draw_text(
                         "Press any key to run post-connect on rooms...",
                         Panel::screen,
-                        P(0, 0),
+                        {0, 0},
                         colors::white());
                 io::update_screen();
                 query::wait_for_key_press();
@@ -472,25 +487,30 @@ bool MapBuilderStd::build_specific()
                                         {
                                                 ASSERT(d.player_side == -1);
 
-                                                d.player_side = side_idx;
+                                                d.player_side = (int)side_idx;
                                         }
 
                                         if (p == stairs_pos)
                                         {
                                                 ASSERT(d.stairs_side == -1);
 
-                                                d.stairs_side = side_idx;
+                                                d.stairs_side = (int)side_idx;
                                         }
                                 }
                         }
 
-                        ASSERT(d.player_side == 0 || d.player_side == 1);
-                        ASSERT(d.stairs_side == 0 || d.stairs_side == 1);
-
-                        // Robustness for release mode
                         if ((d.player_side != 0 && d.player_side != 1) ||
                             (d.stairs_side != 0 && d.stairs_side != 1))
                         {
+                                TRACE
+                                        << "d.player_side: "
+                                        << d.player_side
+                                        << "    d.stairs_side: "
+                                        << d.stairs_side
+                                        << std::endl;
+
+                                ASSERT(false);
+
                                 // Invalidate the map
                                 mapgen::g_is_map_valid = false;
 

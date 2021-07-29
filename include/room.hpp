@@ -376,8 +376,6 @@ public:
         bool is_allowed() const override;
 
 protected:
-        std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
-
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;

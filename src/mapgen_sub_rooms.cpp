@@ -20,6 +20,370 @@
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static const int s_nr_tries_to_make_room = 100;
+
+// Min allowed size of the sub room, including the walls
+static const P s_walls_min_dims(4, 4);
+
+static bool is_large_room(const R& area)
+{
+        const int large_room_min_size = 15;
+
+        const bool is_large_room =
+                (area.w() >= large_room_min_size) &&
+                (area.h() >= large_room_min_size);
+
+        return is_large_room;
+}
+
+static void put_inner_wall(const P& pos)
+{
+        if (map::g_dlvl >= g_dlvl_first_late_game)
+        {
+                std::vector<int> terrain_weights = {
+                        3,  // Wall
+                        1,  // High rubble
+                        1,  // Low rubble
+                        3,  // Cave floor
+                };
+
+                terrain::Terrain* terrain = nullptr;
+
+                switch (rnd::weighted_choice(terrain_weights))
+                {
+                case 0:
+                {
+                        terrain = new terrain::Wall(pos);
+                }
+                break;
+
+                case 1:
+                {
+                        terrain = new terrain::RubbleHigh(pos);
+                }
+                break;
+
+                case 2:
+                {
+                        terrain = new terrain::RubbleLow(pos);
+                }
+                break;
+
+                case 3:
+                {
+                        auto* const floor = new terrain::Floor(pos);
+                        floor->m_type = terrain::FloorType::cave;
+                        terrain = floor;
+                }
+                break;
+
+                default:
+                {
+                        ASSERT(false);
+                        terrain = new terrain::Wall(pos);
+                }
+                break;
+                }
+
+                map::put(terrain);
+        }
+        else
+        {
+                // Not late game
+                map::put(new terrain::Wall(pos));
+        }
+}
+
+static bool is_pos_on_edge(const P& pos, const R& area)
+{
+        return (
+                (pos.x == area.p0.x) ||
+                (pos.x == area.p1.x) ||
+                (pos.y == area.p0.y) ||
+                (pos.y == area.p1.y));
+}
+
+static bool is_pos_inside_edge(const P& pos, const R& area)
+{
+        return (
+                (pos.x > area.p0.x) &&
+                (pos.y > area.p0.y) &&
+                (pos.x < area.p1.x) &&
+                (pos.y < area.p1.y));
+}
+
+static bool is_pos_on_corner(const P& pos, const R& area)
+{
+        const bool is_on_edge_x = (pos.x == area.p0.x) || (pos.x == area.p1.x);
+        const bool is_on_edge_y = (pos.y == area.p0.y) || (pos.y == area.p1.y);
+
+        return is_on_edge_x && is_on_edge_y;
+}
+
+static R get_random_inner_walls_area(
+        const R& outer_room_area,
+        const P& inner_walls_max_dims)
+{
+        const P inner_walls_dims(
+                rnd::range(
+                        s_walls_min_dims.x,
+                        inner_walls_max_dims.x),
+                rnd::range(
+                        s_walls_min_dims.y,
+                        inner_walls_max_dims.y));
+
+        const P inner_walls_p0(
+                rnd::range(
+                        outer_room_area.p0.x - 1,
+                        outer_room_area.p1.x - inner_walls_dims.x + 2),
+                rnd::range(
+                        outer_room_area.p0.y - 1,
+                        outer_room_area.p1.y - inner_walls_dims.y + 2));
+
+        const auto inner_walls_p1 = inner_walls_p0 + inner_walls_dims - 1;
+
+        const R inner_walls_area(inner_walls_p0, inner_walls_p1);
+
+        ASSERT(map::is_pos_inside_map(inner_walls_p0));
+        ASSERT(map::is_pos_inside_map(inner_walls_p1));
+
+        return inner_walls_area;
+}
+
+static bool allow_put_inner_walls(
+        const R& inner_walls_area,
+        const Room& outer_room)
+{
+        // Rules to allow building:
+        // * Cells belonging to the outer room must be floor
+        // * Cells not belonging to the outer room must be walls
+
+        const R expanded_area(
+                inner_walls_area.p0 - 1,
+                inner_walls_area.p1 + 1);
+
+        for (const P& p : expanded_area.positions())
+        {
+                if (!map::is_pos_inside_map(p))
+                {
+                        return false;
+                }
+
+                const auto f_id = map::g_terrain.at(p)->id();
+                const auto* const room = map::g_room_map.at(p);
+                const bool is_outer_oom = (room == &outer_room);
+
+                if ((is_outer_oom && (f_id != terrain::Id::floor)) ||
+                    (!is_outer_oom && (f_id != terrain::Id::wall)))
+                {
+                        return false;
+                }
+        }
+
+        return true;
+}
+
+static bool try_make_inner_room(
+        Room& outer_room,
+        const P& inner_walls_max_dims)
+{
+        const auto& outer_room_area = outer_room.m_r;
+
+        const R inner_walls_area =
+                get_random_inner_walls_area(
+                        outer_room_area,
+                        inner_walls_max_dims);
+
+        ASSERT(map::is_pos_inside_map(inner_walls_area.p0));
+        ASSERT(map::is_pos_inside_map(inner_walls_area.p1));
+
+        if ((inner_walls_area.p0.x <= outer_room_area.p0.x) &&
+            (inner_walls_area.p0.y <= outer_room_area.p0.y) &&
+            (inner_walls_area.p1.x >= outer_room_area.p1.x) &&
+            (inner_walls_area.p1.y >= outer_room_area.p1.y))
+        {
+                // None of the inner room's walls are inside the edge of the
+                // outer room - there is no point in building such a room.
+                return false;
+        }
+
+        if (!allow_put_inner_walls(inner_walls_area, outer_room))
+        {
+                return false;
+        }
+
+        // OK, we can build the inner room.
+
+        const R sub_room_area(
+                inner_walls_area.p0 + 1,
+                inner_walls_area.p1 - 1);
+
+        auto* const sub_room =
+                mapgen::make_room(
+                        sub_room_area,
+                        IsSubRoom::yes);
+
+        outer_room.m_sub_rooms.push_back(sub_room);
+
+        // Make walls and entrance(s) for our new room
+        std::vector<P> entrance_bucket;
+
+        for (const auto& p : inner_walls_area.positions())
+        {
+                if (!is_pos_on_edge(p, inner_walls_area))
+                {
+                        // Position is not on the inner walls, do not put a wall
+                        // or entrance here.
+                        continue;
+                }
+
+                put_inner_wall(p);
+
+                if (!is_pos_inside_edge(p, outer_room_area))
+                {
+                        // Position is not completely inside the edge of the
+                        // outer room, do not put an entrance here.
+                        continue;
+                }
+
+                if (is_pos_on_corner(p, inner_walls_area))
+                {
+                        // Position is on a corner of the inner walls, do not
+                        // put an entrance here.
+                        continue;
+                }
+
+                entrance_bucket.push_back(p);
+        }
+
+        if (entrance_bucket.empty())
+        {
+                // Not possible to place an entrance to the inner room, Discard
+                // this map.
+                mapgen::g_is_map_valid = false;
+
+                return false;
+        }
+
+        // Sometimes place one entrance, which may have a door (always do this
+        // if there are very few possible entries), and sometimes place multiple
+        // entrances without doors.
+        if (rnd::coin_toss() || entrance_bucket.size() <= 4)
+        {
+                // One entrance that may have a door.
+                const auto door_pos = rnd::element(entrance_bucket);
+
+                map::put(new terrain::Floor(door_pos));
+
+                mapgen::g_door_proposals.at(door_pos) = true;
+        }
+        else
+        {
+                // Place multiple "doorless" entrances.
+                std::vector<P> positions_placed;
+                const int nr_tries = rnd::range(1, 10);
+
+                for (int i = 0; i < nr_tries; ++i)
+                {
+                        const auto try_p = rnd::element(entrance_bucket);
+
+                        bool is_pos_ok = true;
+
+                        // Never make two adjacent entrances.
+                        for (P& prev_pos : positions_placed)
+                        {
+                                if (is_pos_adj(try_p, prev_pos, true))
+                                {
+                                        is_pos_ok = false;
+                                        break;
+                                }
+                        }
+
+                        if (is_pos_ok)
+                        {
+                                map::put(new terrain::Floor(try_p));
+                                positions_placed.push_back(try_p);
+                        }
+                }
+        }
+
+        // This point reached means the room has been built
+        return true;
+}
+
+static void make_sub_rooms_for(Room& outer_room)
+{
+        if (!outer_room.allow_sub_rooms())
+        {
+                return;
+        }
+
+        const auto outer_room_area = outer_room.m_r;
+        const auto outer_room_dims(outer_room_area.dims());
+
+        // Max sub room size, including the walls, in this outer room.
+        const auto inner_walls_max_dims = outer_room_dims + 2;
+
+        if (((inner_walls_max_dims.x < s_walls_min_dims.x)) ||
+            ((inner_walls_max_dims.y < s_walls_min_dims.y)))
+        {
+                // We cannot even build the smallest possible inner room
+                // inside this outer room - no point in trying.
+                return;
+        }
+
+        const bool is_outer_big =
+                (outer_room_dims.x > 16) ||
+                (outer_room_dims.y > 8);
+
+        const bool is_outer_std_room =
+                ((int)outer_room.m_type <
+                 (int)RoomType::END_OF_STD_ROOMS);
+
+        // To build a room inside a room, the outer room shall:
+        // * Be a standard room, and
+        // * Be a "big room" - but we occasionally allow "small rooms"
+        if (!is_outer_std_room || (!is_outer_big && !rnd::one_in(4)))
+        {
+                // Outer room does not meet dimensions criteria - next room.
+                return;
+        }
+
+        const int max_nr_sub_rooms = rnd::one_in(3) ? 1 : 7;
+
+        for (int inner_nr = 0;
+             inner_nr < max_nr_sub_rooms;
+             ++inner_nr)
+        {
+                for (
+                        int try_count = 0;
+                        try_count < s_nr_tries_to_make_room;
+                        ++try_count)
+                {
+                        const bool did_build =
+                                try_make_inner_room(
+                                        outer_room,
+                                        inner_walls_max_dims);
+
+                        if (!mapgen::g_is_map_valid)
+                        {
+                                return;
+                        }
+
+                        if (did_build)
+                        {
+                                break;
+                        }
+                }
+        }
+}
+
+// -----------------------------------------------------------------------------
+// mapgen
+// -----------------------------------------------------------------------------
 namespace mapgen
 {
 // Assumes that all rooms are rectangular
@@ -27,250 +391,26 @@ void make_sub_rooms()
 {
         TRACE_FUNC_BEGIN;
 
-        const int nr_tries_to_make_room = 100;
-
-        const int max_nr_sub_rooms =
-                rnd::one_in(3)
-                ? 1
-                : 7;
-
-        // Min allowed size of the sub room, including the walls
-        const P walls_min_d(4, 4);
-
+        // NOTE: We must iterate by index here since new rooms may be added.
         for (size_t i = 0; i < map::g_room_list.size(); ++i)
         {
                 auto* const outer_room = map::g_room_list[i];
 
-                if (!outer_room->allow_sub_rooms())
+                // Put fewer sub rooms late game. If the outer room is not a
+                // sub-room, and the outer room is not large, we might skip
+                // trying to place sub-rooms in this room. (If the outer room is
+                // a sub-room, then we can go ahead and place as many rooms as
+                // possible within it.)
+                if ((map::g_dlvl >= g_dlvl_first_late_game) &&
+                    !outer_room->m_is_sub_room &&
+                    !is_large_room(outer_room->m_r) &&
+                    !rnd::one_in(3))
                 {
                         continue;
                 }
 
-                const R outer_room_rect = outer_room->m_r;
-
-                const P outer_room_d(outer_room_rect.dims());
-
-                // Max sub room size, including the walls, in this outer room
-                const P walls_max_d(outer_room_d + 2);
-
-                if (walls_max_d.x < walls_min_d.x ||
-                    walls_max_d.y < walls_min_d.y)
-                {
-                        // We cannot even build the smallest possible inner room
-                        // inside this outer room - no point in trying.
-                        continue;
-                }
-
-                const bool is_outer_big =
-                        (outer_room_d.x > 16) ||
-                        (outer_room_d.y > 8);
-
-                const bool is_outer_std_room =
-                        ((int)outer_room->m_type <
-                         (int)RoomType::END_OF_STD_ROOMS);
-
-                // To build a room inside a room, the outer room shall:
-                // * Be a standard room, and
-                // * Be a "big room" - but we occasionally allow "small rooms"
-                if (!is_outer_std_room ||
-                    (!is_outer_big && !rnd::one_in(4)))
-                {
-                        // Outer room does not meet dimensions criteria - next room
-                        continue;
-                }
-
-                for (int nr_inner = 0;
-                     nr_inner < max_nr_sub_rooms;
-                     ++nr_inner)
-                {
-                        for (int try_count = 0;
-                             try_count < nr_tries_to_make_room;
-                             ++try_count)
-                        {
-                                // Determine the rectangle (p0, p1) of the inner room's walls
-
-                                // NOTE: The rectangle of the OUTER room is different - there it
-                                // only represents the floor area of that room (this is how room
-                                // areas are normally represented).
-
-                                const P walls_d(
-                                        rnd::range(
-                                                walls_min_d.x,
-                                                walls_max_d.x),
-                                        rnd::range(
-                                                walls_min_d.y,
-                                                walls_max_d.y));
-
-                                const P p0(
-                                        rnd::range(
-                                                outer_room_rect.p0.x - 1,
-                                                outer_room_rect.p1.x - walls_d.x + 2),
-                                        rnd::range(
-                                                outer_room_rect.p0.y - 1,
-                                                outer_room_rect.p1.y - walls_d.y + 2));
-
-                                const P p1(p0 + walls_d - 1);
-
-                                ASSERT(map::is_pos_inside_map(p0));
-                                ASSERT(map::is_pos_inside_map(p1));
-
-                                if (p0.x <= outer_room_rect.p0.x &&
-                                    p0.y <= outer_room_rect.p0.y &&
-                                    p1.x >= outer_room_rect.p1.x &&
-                                    p1.y >= outer_room_rect.p1.y)
-                                {
-                                        // None of the inner room's walls are inside the edge of the
-                                        // outer room - there is no point in building such a room!
-                                        continue;
-                                }
-
-                                // Check if map terrains allow us to build here
-                                bool is_area_free = true;
-
-                                for (int x = p0.x - 1; x <= p1.x + 1; ++x)
-                                {
-                                        for (int y = p0.y - 1; y <= p1.y + 1; ++y)
-                                        {
-                                                const P p_check(x, y);
-
-                                                if (!map::is_pos_inside_map(p_check))
-                                                {
-                                                        continue;
-                                                }
-
-                                                const auto& f_id = map::g_terrain.at(x, y)->id();
-
-                                                const Room* const room = map::g_room_map.at(x, y);
-
-                                                // Rules to allow building:
-                                                //* Cells belonging to the outer room must be floor
-                                                //* Cells not belonging to the outer room must be walls
-                                                if ((room == outer_room && f_id != terrain::Id::floor) ||
-                                                    (room != outer_room && f_id != terrain::Id::wall))
-                                                {
-                                                        is_area_free = false;
-
-                                                        break;
-                                                }
-
-                                        }  // y loop
-
-                                        if (!is_area_free)
-                                        {
-                                                break;
-                                        }
-                                }  // x loop
-
-                                if (!is_area_free)
-                                {
-                                        // Map terrains prevents us from building here - next try
-                                        continue;
-                                }
-
-                                // Alright, we can build the inner room
-
-                                // Room area of the inner room.
-                                // p0 and p1 represents the inner room's walls, so the actual
-                                // room area lies inside these points
-                                const R sub_room_rect(p0 + 1, p1 - 1);
-
-                                Room* const sub_room = make_room(sub_room_rect, IsSubRoom::yes);
-
-                                outer_room->m_sub_rooms.push_back(sub_room);
-
-                                // Time to make walls and entrance(s) for our new room
-                                std::vector<P> entrance_bucket;
-
-                                for (int x = p0.x; x <= p1.x; ++x)
-                                {
-                                        for (int y = p0.y; y <= p1.y; ++y)
-                                        {
-                                                // Position is on the walls of the inner room?
-                                                if (x == p0.x ||
-                                                    x == p1.x ||
-                                                    y == p0.y ||
-                                                    y == p1.y)
-                                                {
-                                                        const P p(x, y);
-
-                                                        map::put(new terrain::Wall(p));
-
-                                                        // Only consider this position if it is completely
-                                                        // inside the edge of the inner room
-                                                        if (p.x > outer_room_rect.p0.x &&
-                                                            p.y > outer_room_rect.p0.y &&
-                                                            p.x < outer_room_rect.p1.x &&
-                                                            p.y < outer_room_rect.p1.y)
-                                                        {
-                                                                // Do not put entrances on the corners of the
-                                                                // inner room
-                                                                if ((x != p0.x && x != p1.x) ||
-                                                                    (y != p0.y && y != p1.y))
-                                                                {
-                                                                        entrance_bucket.emplace_back(x, y);
-                                                                }
-                                                        }
-                                                }
-                                        }  // y loop
-                                }  // x loop
-
-                                if (entrance_bucket.empty())
-                                {
-                                        // Not possible to place an entrance to the inner room,
-                                        // Discard this map!
-                                        g_is_map_valid = false;
-
-                                        return;
-                                }
-
-                                // Sometimes place one entrance, which may have a door
-                                // (always do this if there are very few possible entries)
-                                if (rnd::coin_toss() || entrance_bucket.size() <= 4)
-                                {
-                                        const auto door_pos =
-                                                rnd::element(entrance_bucket);
-
-                                        map::put(new terrain::Floor(door_pos));
-
-                                        g_door_proposals.at(door_pos) = true;
-                                }
-                                else
-                                {
-                                        // Place multiple "doorless" entrances
-                                        std::vector<P> positions_placed;
-                                        const int nr_tries = rnd::range(1, 10);
-
-                                        for (int j = 0; j < nr_tries; ++j)
-                                        {
-                                                const auto try_p =
-                                                        rnd::element(entrance_bucket);
-
-                                                bool is_pos_ok = true;
-
-                                                // Never make an entrance adjacent to an existing
-                                                for (P& prev_pos : positions_placed)
-                                                {
-                                                        if (is_pos_adj(try_p, prev_pos, true))
-                                                        {
-                                                                is_pos_ok = false;
-                                                                break;
-                                                        }
-                                                }
-
-                                                if (is_pos_ok)
-                                                {
-                                                        map::put(new terrain::Floor(try_p));
-                                                        positions_placed.push_back(try_p);
-                                                }
-                                        }
-                                }
-
-                                // This point reached means the room has been built
-                                break;
-
-                        }  // Try count loop
-                }  // Inner room count loop
-        }  // Room list loop
+                make_sub_rooms_for(*outer_room);
+        }
 
         TRACE_FUNC_END;
 

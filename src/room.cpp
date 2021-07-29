@@ -21,6 +21,7 @@
 #include "debug.hpp"
 #include "direction.hpp"
 #include "flood.hpp"
+#include "global.hpp"
 #include "init.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -426,23 +427,23 @@ Room* make_random_room(const R& r, const IsSubRoom is_subroom)
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        auto s_room_bucketit = std::begin(s_room_bucket);
+        auto room_bucket = std::begin(s_room_bucket);
 
         Room* room = nullptr;
 
         while (true)
         {
-                if (s_room_bucketit == std::end(s_room_bucket))
+                if (room_bucket == std::end(s_room_bucket))
                 {
                         // No more rooms to pick from, generate a new bucket
                         init_room_bucket();
 
-                        s_room_bucketit = std::begin(s_room_bucket);
+                        room_bucket = std::begin(s_room_bucket);
                 }
                 else
                 {
                         // There are still room types in the bucket
-                        const RoomType room_type = *s_room_bucketit;
+                        const RoomType room_type = *room_bucket;
 
                         room = make(room_type, r);
 
@@ -455,11 +456,12 @@ Room* make_random_room(const R& r, const IsSubRoom is_subroom)
 
                         if (std_room->is_allowed())
                         {
-                                s_room_bucket.erase(s_room_bucketit);
+                                s_room_bucket.erase(room_bucket);
 
-                                TRACE_FUNC_END_VERBOSE << "Made room type: "
-                                                       << (int)room_type
-                                                       << std::endl;
+                                TRACE_FUNC_END_VERBOSE
+                                        << "Made room type: "
+                                        << (int)room_type
+                                        << std::endl;
                                 break;
                         }
                         else
@@ -468,7 +470,7 @@ Room* make_random_room(const R& r, const IsSubRoom is_subroom)
                                 delete room;
 
                                 // Try next room type in the bucket
-                                ++s_room_bucketit;
+                                ++room_bucket;
                         }
                 }
         }
@@ -1538,7 +1540,18 @@ std::vector<RoomAutoTerrainRule> CaveRoom::auto_terrains_allowed() const
 
 bool CaveRoom::is_allowed() const
 {
-        return !m_is_sub_room;
+        // NOTE: Caves are only allowed as sub rooms in late game. The rationale
+        // for this is that in the late game there are no "plain" rooms, so
+        // every sub room would otherwise be a pool room, spider room, etc.
+
+        if (map::g_dlvl <= g_dlvl_last_mid_game)
+        {
+                return !m_is_sub_room;
+        }
+        else
+        {
+                return true;
+        }
 }
 
 void CaveRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -1556,17 +1569,9 @@ void CaveRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 // -----------------------------------------------------------------------------
 // Forest room
 // -----------------------------------------------------------------------------
-std::vector<RoomAutoTerrainRule> ForestRoom::auto_terrains_allowed() const
-{
-        return {
-                {terrain::Id::brazier, rnd::range(0, 1)}};
-}
-
 bool ForestRoom::is_allowed() const
 {
-        // TODO: Also check sub_rooms_.empty() ?
-        return !m_is_sub_room &&
-                m_r.min_dim() >= 5;
+        return !m_is_sub_room && (m_r.min_dim() >= 5);
 }
 
 void ForestRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -1667,8 +1672,10 @@ std::vector<RoomAutoTerrainRule> ChasmRoom::auto_terrains_allowed() const
 
 bool ChasmRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 5 &&
-                m_r.max_dim() <= 9;
+        return (
+                (m_r.min_dim() >= 5) &&
+                (m_r.max_dim() <= 9) &&
+                !m_is_sub_room);
 }
 
 void ChasmRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -2306,9 +2313,11 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                                 if (valid_room_entries.at(x, y) &&
                                     map::g_room_map.at(x, y) == this)
                                 {
-                                        auto* const floor = new terrain::Floor(P(x, y));
+                                        auto* const floor =
+                                                new terrain::Floor(P(x, y));
 
-                                        floor->m_type = terrain::FloorType::common;
+                                        floor->m_type =
+                                                terrain::FloorType::common;
 
                                         map::put(floor);
 

@@ -305,6 +305,11 @@ void make_pillars_in_room(const Room& room)
 
 void cavify_room(Room& room)
 {
+        if (room.m_is_sub_room)
+        {
+                return;
+        }
+
         Array2<bool> is_other_room(map::dims());
 
         const size_t nr_positions = map::nr_positions();

@@ -22,32 +22,43 @@
 // -----------------------------------------------------------------------------
 static void decorate_walls()
 {
-        for (int x = 0; x < map::w(); ++x)
+        for (const auto& p : map::rect().positions())
         {
-                for (int y = 0; y < map::h(); ++y)
+                auto* const terrain = map::g_terrain.at(p);
+
+                if (terrain->id() != terrain::Id::wall)
                 {
-                        auto* const terrain = map::g_terrain.at(x, y);
+                        continue;
+                }
 
-                        if (terrain->id() != terrain::Id::wall)
-                        {
-                                continue;
-                        }
+                auto* const wall = static_cast<terrain::Wall*>(terrain);
 
-                        auto* const wall =
-                                static_cast<terrain::Wall*>(terrain);
+                int rubble_one_in_n = 10;
 
-                        if (rnd::one_in(10))
-                        {
-                                map::put(new terrain::RubbleHigh(P(x, y)));
-                        }
-                        else
+                const bool is_common_wall =
+                        wall->m_type == terrain::WallType::common;
+
+                if (is_common_wall && (map::g_dlvl >= g_dlvl_first_late_game))
+                {
+                        // Late game common wall, put a lot of rubble to make it
+                        // look more old and ruined.
+                        rubble_one_in_n = 3;
+                }
+
+                if (rnd::one_in(rubble_one_in_n))
+                {
+                        map::put(new terrain::RubbleHigh(p));
+                }
+                else
+                {
+                        if (is_common_wall)
                         {
                                 wall->set_rnd_common_wall();
+                        }
 
-                                if (rnd::one_in(40))
-                                {
-                                        wall->set_moss_grown();
-                                }
+                        if (rnd::one_in(40))
+                        {
+                                wall->set_moss_grown();
                         }
                 }
         }
@@ -132,7 +143,8 @@ static bool should_convert_wall_to_cave(const P& p)
         }
         else
         {
-                return true;
+                // Not needed late game, this is done elsewhere.
+                return false;
         }
 }
 

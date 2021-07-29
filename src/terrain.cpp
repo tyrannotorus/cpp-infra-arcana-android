@@ -25,12 +25,14 @@
 #include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
 #include "debug.hpp"
 #include "drop.hpp"
 #include "explosion.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "gfx.hpp"
 #include "hints.hpp"
 #include "insanity.hpp"
 #include "inventory.hpp"
@@ -609,9 +611,14 @@ void Floor::on_hit(
 
 gfx::TileId Floor::tile() const
 {
-        return m_burn_state == BurnState::has_burned
-                ? gfx::TileId::scorched_ground
-                : data().tile;
+        if (m_burn_state == BurnState::has_burned)
+        {
+                return gfx::TileId::scorched_ground;
+        }
+        else
+        {
+                return data().tile;
+        }
 }
 
 std::string Floor::name(const Article article) const
