@@ -4,51 +4,53 @@ v21.0 *** WORK IN PROGRESS ***
 NEW
 * Added a new background (class) "Exorcist"
 * Added weapons "S&W Model 10 Revolver" and "Winchester Rifle"
-* Added some miscellaneous "weird" items
-* Added more sound effects
+* Added miscellaneous rare items and artifacts
+* Added more sound effects, removed the generic spell sound effect
 * Added more monsters
-* Some monsters now have a smell that can be detected by the player (with a certain chance depending on how old the smell is and how far it has spread)
-* Monsters no longer become aware of the player from negative properties (burning, etc) or from taking damage (it is the attack actions and sounds which alerts them) - so now it is possible to for example throw a Molotov Cocktail at a monster, and escape with Cloud Minds while it is burning
+* Some monsters have a smell that can be detected by the player
+* Monsters no longer become aware of the player from negative properties (burning, etc) or from taking damage (they are alerted by direct attacks or by attack noises) - so now it is possible to for example throw a Molotov Cocktail at a monster, and escape with Cloud Minds while it is burning
 * Small crawling creatures (rats, snakes, crawling hands, etc) can pass through some terrain types such as gates and piles of debris
-* Cultist now have a different tile depending on their wielded firearm, and their description states what weapon they are wielding
+* Cultist have a different tile depending on their wielded firearm, and their description states what weapon they are wielding
 * Cultists have a kick attack
-* Monster descriptions now display more information, such as resistances or the ability to see in darkness
+* Monster descriptions display more information, such as resistances, if it has the ability to see in darkness, or the chance to stay hidden from the monster
 * Standing next to a door will reveal if it's stuck - if so it will change name and appearance
 * Reworked the "Resistant trait", it now gives +25% chance to resist paralysis, burning, and poison, and the duration of those effects is halved (also Tough and Rugged each give +10% chance to resist)
 * Added trait "Crippling Strikes", melee attacks have 60% chance to Weaken the target for 2-3 turns
-* The standard map generator can now also split rooms, for more map variety
+* The standard map generator can also split rooms, for more map variety
 * Added more room templates
-* Casting spells now occasionally trigger random chaotic side effects, typically affecting the surrounding area (for example walls may appear or disappear, statues knocked over, etc)
+* Casting spells can occasionally trigger random chaotic side effects, typically affecting the surrounding area (for example walls may appear or disappear, statues knocked over, etc)
 * Added spell "Erudition" - the next spell is cast at a higher skill level
 * Reworked the "Frenzied" property - instead of changing the player's movement direction on a move command, moves away from monsters are now simply prevented (not an action)
 * Changed the "Opening" spell to "Control Object", which can do more things (e.g. open/close/jam/strike doors, or strike statues/braziers, etc)
+* Changed the Azathoth's Wrath spell to Azathoth's Gaze, which causes small damage and fainting (instead of acting like a "mass Darkbolt")
 * Added Curse as a spell available to monsters (Floating Skulls cast this now instead of applying the property directly, and mummies cast Curse instead of applying it on melee attacks, for example) - also added a stronger version of Cursed called "Doomed" which is applied instead when Curse is cast at master level
 
 MINOR TWEAKS AND BALANCING
 * The Electric Gun also disables passive hit point regeneration for a number of turns
-* The Talisman of Resurrection now also teleports the player when activated, to avoid leaving the player in the same situation that killed them to begin with
+* The Talisman of Resurrection also teleports the player when activated, to avoid leaving the player in the same situation that killed them to begin with
 * The stealth penalty in lit positions is much higher than before (see also bug fixes below concerning stealth and darkness)
 * Updated Worm Masses and Mind Worms - they are now blind, slow (instead of normal speed), have much more hit points, are unsettling (causes shock to see), take much less damage from piercing attacks (such as pistol shots or dagger strikes), and have a very limited hearing range
 * Worm Masses and Mind Worms can no longer split while burning
 * Added completely new descriptions for all Ooze monsters, removed Black Ooze, changed Putrid Ooze to be weaker and spawn earlier, renamed Clear Ooze to Lurking Ooze
-* A generated description is now printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters
-* Forcing a metal door open (e.g. with a Rod of Opening or the Control Object spell) now also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
-* Reduced the maximum number of weapons summoned by Spectral Weapons for basic/expert/master skill level to 1/2/3 (from 2/3/4), and reduced the duration of the weapons to 1/3 of the current duration range
+* A generated description is printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters
+* Forcing a metal door open (e.g. with a Rod of Opening or the Control Object spell) also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
+* The Spectral Weapons spell always spawn an unlimited number of weapons (one for each carried melee weapon), but the duration of the spawned weapons is very limited (and depends on spell skill level)
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
 * Removed the Searching spell - instead this is a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
 * The Summoning spell is no longer available to player characters (only to monsters)
-* The Cursed status effect now also causes 5% chance to fail spell casting
+* The Vitality potion can no longer increase hit points above maximum, but instead it applies a status effect that increases hit point regeneration, and gives a small chance per turn to heal a wound
+* The Cursed status effect also causes 5% chance to fail spell casting
 * The Staff of the Pharaohs also has a chance to apply Doom on hit (a stronger version of Cursed)
 * Added a message when spells are upgraded (e.g. by a Gong)
 * Being blind no longer immediately raises shock by 30% - instead the shock ramps up each turn up to 30%
-* The Tough and Rugged traits now give +6 hit points each, instead of +4
+* The Tough and Rugged traits give +6 hit points each, instead of +4
 * Ghoul characters start with +8 hit points, instead of +6
 * The Ghoul ability "Frenzy" no longer costs spirit to use
-* The Ghoul trait "Toxic" now has 75% chance to apply poison, instead of 25%
+* The Ghoul trait "Toxic" has 75% chance to apply poison, instead of 25%
 * A lot more terrain objects can be destroyed or lit on fire (for example altars or monoliths are destroyed by explosions, and wooden chests or bookshelves can be lit on fire)
 * The stairs position is always lit, to make it less tedious to discover in huge dark rooms
 * Winning characters show up as statues inside the church building on the intro level, instead of graves outside the church
-* Players can now melee attack monsters while nailed by a Spike Gun (but still not while entangled)
+* Players can melee attack monsters while nailed by a Spike Gun (but still not while entangled)
 * Statues no longer block line of sight, making them much easier to kick into monsters.
 
 USER INTERFACE UPDATES
@@ -60,16 +62,16 @@ USER INTERFACE UPDATES
 * Instead of the "stretched" fullscreen mode option, there is now an option for attempting to scale the graphics to 2x size when running fullscreen (if the graphics can be scaled depends on the user's resolution, and the current font)
 * The message log uses three lines instead of two (thus causing much fewer "more" prompts)
 * General messages for events outside of the player performing an action are drawn gray instead of white, and a newline is always forced after a player action
-* Added more elaborate border graphics (used for example around the player information panel), instead of only simple lines
+* Added more elaborate border graphics (used for example around the player information panel), instead of only simple lines (these graphics existed in older versions of the game)
 * All menus have shortcut keys (either with "(Y)es (N)o" style, or "a) b) c) ...")
-* The "i" key is now skipped as a letter index in the inventory (and drop menu), instead this key can be used for closing the inventory menu again (to allow more convenient toggling of the menu and to help prevent key press mistakes)
+* The "i" key is skipped as a letter index in the inventory (and drop menu), instead this key can be used for closing the inventory menu again (to allow more convenient toggling of the menu and to help prevent key press mistakes)
 * Removed the "game over" menu - instead the game summary is first shown, then the high scores, then you return to the main menu
 * In the options menu, left and right can also be used to change option values
 * Added a master volume percent option
 * Added a warning when the player attempts to fire/throw outside the effective range, informing the player that the attack will do 50% damage
 * Added an option to warn when throwing "valuable" items - i.e. potions or equipped items (enabled by default)
 * Added ',' (comma) as an alternative pick up command
-* 'C' is now the standard key for the character info screen, with '@' as alternative key
+* 'C' is the standard key for the character info screen, with '@' as alternative key
 * Using coloring more for the player stats to convey information (such as drawing the current hit points paler the closer to zero they are, or drawing the weapon info as yellow if ammo is depleted)
 * The infection status effect is drawn with orange color instead of the usual red, to make it more noticeable and to hint that it will get worse and not better over time - also added a warning message when infection nearly triggers DISEASE
 * Added a tile for unarmed player
@@ -80,7 +82,7 @@ FIXES
 * Darkness did not give a stealth bonus
 * The effect of the Silent trait was inverted for melee attacks  - i.e. attacks were noisy with the Silent trait picked, and vice versa
 * The Asbestos Suite was not protecting against gas explosions (from gas traps)
-* Energy Vortex attacks now has a paralyzing effect as they were supposed to have, instead of burning
+* Energy Vortex attacks has a paralyzing effect as they were supposed to have, instead of burning
 
 --------------------------------------------------------------
 v20.0 (December 17, 2019)

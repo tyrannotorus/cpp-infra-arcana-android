@@ -227,11 +227,11 @@ static bool player_try_spot_sneaking_mon(
 
                 if (is_cell_seen)
                 {
-                        actor::SneakData sneak_data;
-                        sneak_data.actor_sneaking = &mon;
-                        sneak_data.actor_searching = map::g_player;
+                        actor::SneakParameters p;
+                        p.actor_sneaking = &mon;
+                        p.actor_searching = map::g_player;
 
-                        sneak_result = roll_sneak(sneak_data);
+                        sneak_result = roll_sneak(p);
                 }
                 else
                 {

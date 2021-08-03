@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#ifndef TEXT_BLOCK_HPP
-#define TEXT_BLOCK_HPP
+#ifndef TEXT_HPP
+#define TEXT_HPP
 
 #include <cstddef>
 #include <string>
@@ -108,4 +108,4 @@ private:
         size_t m_raw_str_pos {0};
 };
 
-#endif  // TEXT_BLOCK_HPP
+#endif  // TEXT_HPP

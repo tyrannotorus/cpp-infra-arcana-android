@@ -31,12 +31,16 @@ static const StrToSfxIdMap s_str_to_sfx_id_map = {
         {"miss_heavy", audio::SfxId::miss_heavy},
         {"pistol_fire", audio::SfxId::pistol_fire},
         {"pistol_reload", audio::SfxId::pistol_reload},
+        {"revolver_fire", audio::SfxId::revolver_fire},
+        {"revolver_spin", audio::SfxId::revolver_spin},
+        {"rifle_fire", audio::SfxId::rifle_fire},
+        {"rifle_revolver_reload", audio::SfxId::rifle_revolver_reload},
         {"shotgun_sawed_off_fire", audio::SfxId::shotgun_sawed_off_fire},
         {"shotgun_pump_fire", audio::SfxId::shotgun_pump_fire},
         {"shotgun_reload", audio::SfxId::shotgun_reload},
         {"machine_gun_fire", audio::SfxId::machine_gun_fire},
         {"machine_gun_reload", audio::SfxId::machine_gun_reload},
-        {"mi_go_gun_fire", audio::SfxId::mi_go_gun_fire},
+        {"migo_gun", audio::SfxId::migo_gun},
         {"spike_gun", audio::SfxId::spike_gun},
         {"bite", audio::SfxId::bite},
         {"metal_clank", audio::SfxId::metal_clank},
@@ -44,6 +48,9 @@ static const StrToSfxIdMap s_str_to_sfx_id_map = {
         {"explosion", audio::SfxId::explosion},
         {"explosion_molotov", audio::SfxId::explosion_molotov},
         {"gas", audio::SfxId::gas},
+        {"darkbolt_impact", audio::SfxId::darkbolt_impact},
+        {"darkbolt_release", audio::SfxId::darkbolt_release},
+        {"aza_gaze", audio::SfxId::aza_gaze},
         {"door_open", audio::SfxId::door_open},
         {"door_close", audio::SfxId::door_close},
         {"door_bang", audio::SfxId::door_bang},
@@ -56,17 +63,19 @@ static const StrToSfxIdMap s_str_to_sfx_id_map = {
         {"statue_crash", audio::SfxId::statue_crash},
         {"lever_pull", audio::SfxId::lever_pull},
         {"monolith", audio::SfxId::monolith},
+        {"thunder", audio::SfxId::thunder},
+        {"gong", audio::SfxId::gong},
+        {"mechanical_trap_trigger", audio::SfxId::mechanical_trap_trigger},
         {"wade", audio::SfxId::wade},
         {"swim", audio::SfxId::swim},
         {"backpack", audio::SfxId::backpack},
         {"pickup", audio::SfxId::pickup},
-        {"lantern", audio::SfxId::lantern},
+        {"electric_lantern", audio::SfxId::electric_lantern},
         {"potion_quaff", audio::SfxId::potion_quaff},
         {"strange_device_activate", audio::SfxId::strange_device_activate},
         {"strange_device_damaged", audio::SfxId::strange_device_damaged},
-        {"spell_generic", audio::SfxId::spell_generic},
         {"spell_shield_break", audio::SfxId::spell_shield_break},
-        {"insanity_rise", audio::SfxId::insanity_rise},
+        {"insanity_rising", audio::SfxId::insanity_rising},
         {"death", audio::SfxId::death},
         {"menu_browse", audio::SfxId::menu_browse},
         {"menu_select", audio::SfxId::menu_select},
@@ -92,12 +101,16 @@ static const SfxIdToStrMap s_sfx_id_to_str_map = {
         {audio::SfxId::miss_heavy, "miss_heavy"},
         {audio::SfxId::pistol_fire, "pistol_fire"},
         {audio::SfxId::pistol_reload, "pistol_reload"},
+        {audio::SfxId::revolver_fire, "revolver_fire"},
+        {audio::SfxId::revolver_spin, "revolver_spin"},
+        {audio::SfxId::rifle_fire, "rifle_fire"},
+        {audio::SfxId::rifle_revolver_reload, "rifle_revolver_reload"},
         {audio::SfxId::shotgun_sawed_off_fire, "shotgun_sawed_off_fire"},
         {audio::SfxId::shotgun_pump_fire, "shotgun_pump_fire"},
         {audio::SfxId::shotgun_reload, "shotgun_reload"},
         {audio::SfxId::machine_gun_fire, "machine_gun_fire"},
         {audio::SfxId::machine_gun_reload, "machine_gun_reload"},
-        {audio::SfxId::mi_go_gun_fire, "mi_go_gun_fire"},
+        {audio::SfxId::migo_gun, "migo_gun"},
         {audio::SfxId::spike_gun, "spike_gun"},
         {audio::SfxId::bite, "bite"},
         {audio::SfxId::metal_clank, "metal_clank"},
@@ -105,6 +118,9 @@ static const SfxIdToStrMap s_sfx_id_to_str_map = {
         {audio::SfxId::explosion, "explosion"},
         {audio::SfxId::explosion_molotov, "explosion_molotov"},
         {audio::SfxId::gas, "gas"},
+        {audio::SfxId::darkbolt_impact, "darkbolt_impact"},
+        {audio::SfxId::darkbolt_release, "darkbolt_release"},
+        {audio::SfxId::aza_gaze, "aza_gaze"},
         {audio::SfxId::door_open, "door_open"},
         {audio::SfxId::door_close, "door_close"},
         {audio::SfxId::door_bang, "door_bang"},
@@ -117,17 +133,19 @@ static const SfxIdToStrMap s_sfx_id_to_str_map = {
         {audio::SfxId::statue_crash, "statue_crash"},
         {audio::SfxId::lever_pull, "lever_pull"},
         {audio::SfxId::monolith, "monolith"},
+        {audio::SfxId::thunder, "thunder"},
+        {audio::SfxId::gong, "gong"},
+        {audio::SfxId::mechanical_trap_trigger, "mechanical_trap_trigger"},
         {audio::SfxId::wade, "wade"},
         {audio::SfxId::swim, "swim"},
         {audio::SfxId::backpack, "backpack"},
         {audio::SfxId::pickup, "pickup"},
-        {audio::SfxId::lantern, "lantern"},
+        {audio::SfxId::electric_lantern, "electric_lantern"},
         {audio::SfxId::potion_quaff, "potion_quaff"},
         {audio::SfxId::strange_device_activate, "strange_device_activate"},
         {audio::SfxId::strange_device_damaged, "strange_device_damaged"},
-        {audio::SfxId::spell_generic, "spell_generic"},
         {audio::SfxId::spell_shield_break, "spell_shield_break"},
-        {audio::SfxId::insanity_rise, "insanity_rise"},
+        {audio::SfxId::insanity_rising, "insanity_rising"},
         {audio::SfxId::death, "death"},
         {audio::SfxId::menu_browse, "menu_browse"},
         {audio::SfxId::menu_select, "menu_select"},
@@ -141,12 +159,30 @@ namespace audio
 {
 SfxId str_to_sfx_id(const std::string& str)
 {
-        return s_str_to_sfx_id_map.at(str);
+        const auto result = s_str_to_sfx_id_map.find(str);
+
+        if (result == std::end(s_str_to_sfx_id_map))
+        {
+                return SfxId::END;
+        }
+        else
+        {
+                return result->second;
+        }
 }
 
 std::string sfx_id_to_str(SfxId id)
 {
-        return s_sfx_id_to_str_map.at(id);
+        const auto result = s_sfx_id_to_str_map.find(id);
+
+        if (result == std::end(s_sfx_id_to_str_map))
+        {
+                return {};
+        }
+        else
+        {
+                return result->second;
+        }
 }
 
 }  // namespace audio

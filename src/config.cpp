@@ -263,7 +263,7 @@ static void set_default_variables()
         s_warn_on_drink_malign_potion = true;
         s_warn_on_ranged_wpn_melee = true;
         s_is_ranged_wpn_auto_reload = false;
-        s_delay_projectile_draw = 20;
+        s_delay_projectile_draw = 50;
         s_delay_shotgun = 75;
         s_delay_explosion = 300;
         s_default_player_name = "";
@@ -1314,7 +1314,7 @@ void ConfigState::draw()
                          ? "Yes"
                          : "No"},
 
-                {"Any key confirms \"-More-\" prompts",
+                {"Any key confirms \"[space]\" prompts",
                  s_is_any_key_confirm_more
                          ? "Yes"
                          : "No"},

@@ -915,6 +915,7 @@
             <spell skill="basic" percent_chance="5">slow</spell>
             <spell skill="basic" percent_chance="5">terrify</spell>
             <spell skill="basic" percent_chance="5">knockback</spell>
+            <spell skill="basic" percent_chance="5">aza_gaze</spell>
         </spells>
 
         <ai>
@@ -1195,6 +1196,7 @@
             <spell skill="expert" percent_chance="50">enfeeble</spell>
             <spell skill="expert" percent_chance="50">slow</spell>
             <spell skill="expert" percent_chance="50">terrify</spell>
+            <spell skill="expert" percent_chance="50">aza_gaze</spell>
             <spell skill="basic">haste</spell>
         </spells>
 
@@ -1689,6 +1691,7 @@
             <spell skill="basic" percent_chance="50">teleport</spell>
             <spell skill="basic" percent_chance="50">summon</spell>
             <spell skill="basic" percent_chance="50">pestilence</spell>
+            <spell skill="basic" percent_chance="50">aza_gaze</spell>
         </spells>
 
         <ai>
@@ -1790,6 +1793,7 @@
             <spell skill="expert" percent_chance="50">teleport</spell>
             <spell skill="expert" percent_chance="50">summon</spell>
             <spell skill="expert" percent_chance="50">pestilence</spell>
+            <spell skill="expert" percent_chance="50">aza_gaze</spell>
         </spells>
 
         <ai>
@@ -1891,6 +1895,7 @@
             <spell skill="master" percent_chance="50">teleport</spell>
             <spell skill="master" percent_chance="50">summon</spell>
             <spell skill="master" percent_chance="50">pestilence</spell>
+            <spell skill="master" percent_chance="50">aza_gaze</spell>
         </spells>
 
         <ai>
@@ -2315,7 +2320,7 @@
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
             <aware_message_hidden></aware_message_hidden>
-            <spell_message></spell_message>
+            <spell_message>chatters.</spell_message>
         </text>
 
         <graphics>
@@ -2387,6 +2392,100 @@
             <group_size weight="5">few</group_size>
             <group_size weight="10">pack</group_size>
             <group_size weight="1">swarm</group_size>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- rat -->
+    <!--************************************************************-->
+    <monster id="transcendent_rat">
+        <text>
+            <name_a>a Rat</name_a>
+            <name_the>the Rat</name_the>
+            <corpse_name_a>a Rat corpse</corpse_name_a>
+            <corpse_name_the>the Rat corpse</corpse_name_the>
+            <description>A large aggressive rodent.</description>
+            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>seems disturbed.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message>chatters.</spell_message>
+        </text>
+
+        <graphics>
+            <tile>rat</tile>
+            <character>r</character>
+            <color>light_cyan</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>6</hit_points>
+            <spirit>20</spirit>
+            <speed>normal</speed>
+            <shock_level>none</shock_level>
+            <melee>30</melee>
+            <ranged>0</ranged>
+            <dodging>-20</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>false</can_bash_doors>
+            <can_swim>true</can_swim>
+            <size>floor</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <rat/>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="bite">
+                <damage>4</damage>
+            </attack>
+        </attacks>
+
+        <spells>
+            <spell skill="basic">darkbolt</spell>
+            <spell skill="basic">heal</spell>
+        </spells>
+
+        <properties>
+            <property>darkvision</property>
+            <property>r_spell</property>
+            <property>ethereal</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>15</erratic_move_percent>
+            <turns_aware>5</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>false</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>false</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>false</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>1</min_dungeon_level>
+            <max_dungeon_level>6</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>false</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
         </spawning>
     </monster>
 
@@ -2938,6 +3037,7 @@
         </attacks>
 
         <properties>
+            <property>r_fire</property>
             <property>r_poison</property>
             <property>r_elec</property>
             <property>r_disease</property>
@@ -3731,6 +3831,7 @@
         <properties>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>light_sensitive</property>
             <property>darkvision</property>
         </properties>
@@ -3824,6 +3925,7 @@
         <properties>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>invis</property>
             <property>darkvision</property>
         </properties>
@@ -4012,6 +4114,7 @@
         <properties>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>invis</property>
             <property>darkvision</property>
             <property>ethereal</property>
@@ -4113,6 +4216,7 @@
         <properties>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>invis</property>
             <property>darkvision</property>
             <property>ethereal</property>
@@ -4863,6 +4967,7 @@
             <property>r_poison</property>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>r_disease</property>
             <property>r_blind</property>
             <property>r_para</property>
@@ -5146,7 +5251,6 @@
         <spells>
             <spell skill="expert">disease</spell>
             <spell skill="expert">curse</spell>
-            <spell skill="expert" percent_chance="25">aura_of_decay</spell>
         </spells>
 
         <ai>
@@ -5339,9 +5443,9 @@
             <spell skill="expert">spell_shield</spell>
             <spell skill="expert">burn</spell>
             <spell skill="expert">curse</spell>
-            <spell skill="expert" percent_chance="25">aura_of_decay</spell>
             <spell skill="expert" percent_chance="50">enfeeble</spell>
             <spell skill="expert" percent_chance="50">terrify</spell>
+            <spell skill="expert" percent_chance="50">aza_gaze</spell>
         </spells>
 
         <ai>
@@ -5447,6 +5551,7 @@
             <spell skill="expert">aura_of_decay</spell>
             <spell skill="expert" percent_chance="50">enfeeble</spell>
             <spell skill="expert" percent_chance="50">terrify</spell>
+            <spell skill="expert" percent_chance="50">aza_gaze</spell>
         </spells>
 
         <ai>
@@ -6013,6 +6118,7 @@
             <property>r_poison</property>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>r_disease</property>
             <property>r_blind</property>
             <property>r_para</property>
@@ -6112,6 +6218,7 @@
             <property>r_poison</property>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>r_disease</property>
             <property>r_blind</property>
             <property>r_para</property>
@@ -6212,6 +6319,7 @@
             <property>r_elec</property>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>r_disease</property>
             <property>r_blind</property>
             <property>r_para</property>
@@ -6312,6 +6420,7 @@
             <property>r_conf</property>
             <property>r_disease</property>
             <property>r_blind</property>
+            <property>r_sleep</property>
             <property>darkvision</property>
             <property>ooze</property>
         </properties>
@@ -6411,6 +6520,7 @@
             <property>r_conf</property>
             <property>r_disease</property>
             <property>r_blind</property>
+            <property>r_sleep</property>
             <property>darkvision</property>
             <property>ooze</property>
         </properties>
@@ -6511,6 +6621,7 @@
             <property>r_conf</property>
             <property>r_disease</property>
             <property>r_blind</property>
+            <property>r_sleep</property>
             <property>darkvision</property>
             <property>ooze</property>
         </properties>
@@ -6703,6 +6814,7 @@
             <property>r_fire</property>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>r_disease</property>
             <property>r_blind</property>
             <property>r_para</property>
@@ -6804,6 +6916,7 @@
             <property>r_fire</property>
             <property>r_fear</property>
             <property>r_conf</property>
+            <property>r_sleep</property>
             <property>r_disease</property>
             <property>r_blind</property>
             <property>r_para</property>
@@ -7306,6 +7419,7 @@
         <properties>
             <property>r_poison</property>
             <property>r_sleep</property>
+            <property>r_conf</property>
             <property>r_fear</property>
             <property>r_breath</property>
             <property>r_disease</property>
@@ -7697,6 +7811,8 @@
         <properties>
             <property>r_breath</property>
             <property>r_blind</property>
+            <property>r_conf</property>
+            <property>r_sleep</property>
         </properties>
 
         <ai>
@@ -7986,9 +8102,6 @@
         <attacks>
         </attacks>
 
-        <spells>
-        </spells>
-
         <properties>
             <property>shapeshifts</property>
         </properties>
@@ -8097,12 +8210,14 @@
             <spell skill="master">slow</spell>
             <spell skill="master">terrify</spell>
             <spell skill="master">haste</spell>
+            <spell skill="master">aza_gaze</spell>
         </spells>
 
         <properties>
             <property>r_fire</property>
             <property>r_fear</property>
             <property>r_conf</property>
+            
             <property>r_breath</property>
         </properties>
 

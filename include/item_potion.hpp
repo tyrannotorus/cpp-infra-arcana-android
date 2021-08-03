@@ -103,10 +103,12 @@ private:
         std::string descr_identified() const override
         {
                 return (
-                        "This elixir heals all wounds and cures blindness, "
-                        "deafness, poisoning, infections, disease, weakening, "
-                        "and life sapping. It can even temporarily raise the "
-                        "consumer's condition past normal levels.");
+                        "This elixir fully restores all hit points, heals all "
+                        "wounds, and cures blindness, deafness, poisoning, "
+                        "infections, disease, weakening, and life sapping. "
+                        "Also, for some duration after consuming the potion, "
+                        "+1 extra hit point is healed per turn, and there is "
+                        "10% chance per turn to heal one wound.");
         }
 
         PotionAlignment alignment() const override
@@ -399,9 +401,9 @@ private:
         std::string descr_identified() const override
         {
                 return (
-                        "Cures blindness, deafness, poisoning, infections, "
-                        "disease, weakening, and life sapping, and restores "
-                        "the consumer's health by a small amount.");
+                        "Restores 3 hit points, and cures blindness, deafness, "
+                        "poisoning, infections, disease, weakening, and "
+                        "life sapping.");
         }
 
         PotionAlignment alignment() const override

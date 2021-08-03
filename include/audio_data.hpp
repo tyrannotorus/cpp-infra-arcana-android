@@ -48,9 +48,14 @@ enum class SfxId
         shotgun_reload,
         machine_gun_fire,
         machine_gun_reload,
-        mi_go_gun_fire,
+        migo_gun,
         spike_gun,
         bite,
+
+        // Spell sounds
+        darkbolt_impact,
+        darkbolt_release,
+        aza_gaze,
 
         // Environment action sounds
         metal_clank,
@@ -79,13 +84,12 @@ enum class SfxId
         // User interface sounds
         backpack,
         pickup,
-        lantern,
+        electric_lantern,
         potion_quaff,
         strange_device_activate,
         strange_device_damaged,
-        spell_generic,
         spell_shield_break,
-        insanity_rise,
+        insanity_rising,
         death,
         menu_browse,
         menu_select,

@@ -856,6 +856,8 @@ public:
 
         void on_more(const Prop& new_prop) override;
 
+        PropEnded on_actor_turn();
+
         bool is_finished() const override
         {
                 return m_nr_wounds <= 0;
@@ -871,6 +873,8 @@ public:
         void heal_one_wound();
 
 private:
+        void print_wound_healed_msg() const;
+
         int m_nr_wounds;
 };
 
@@ -1120,11 +1124,11 @@ public:
         void on_applied() override;
 };
 
-class PropClockworkHasted : public Prop
+class PropExtraHasted : public Prop
 {
 public:
-        PropClockworkHasted() :
-                Prop(PropId::clockwork_hasted) {}
+        PropExtraHasted() :
+                Prop(PropId::extra_hasted) {}
 
         void on_applied() override;
 };
@@ -1501,9 +1505,14 @@ public:
 
         void on_std_turn() override;
 
-        void set_max_dmg(const int dmg)
+        void set_dmg_range(const Range& range)
         {
-                m_max_dmg = dmg;
+                m_dmg_range = range;
+        }
+
+        void set_allow_instant_kill()
+        {
+                m_allow_instant_kill = true;
         }
 
 private:
@@ -1517,7 +1526,9 @@ private:
 
         void print_msg_actor_hit(const actor::Actor& actor) const;
 
-        int m_max_dmg {1};
+        Range m_dmg_range {1, 1};
+
+        bool m_allow_instant_kill {false};
 };
 
 class PropMajorClaphamSummon : public Prop
@@ -1601,6 +1612,26 @@ public:
                 Prop(PropId::cannot_read_curse) {}
 
         bool allow_read_absolute(Verbose verbose) const override;
+};
+
+class PropErudition : public Prop
+{
+public:
+        PropErudition() :
+                Prop(PropId::erudition) {}
+
+        bool should_end_on_spell_cast() const
+        {
+                return m_end_on_spell_cast;
+        }
+
+        void disable_end_on_spell_cast()
+        {
+                m_end_on_spell_cast = false;
+        }
+
+private:
+        bool m_end_on_spell_cast {true};
 };
 
 #endif  // PROPERTY_HPP

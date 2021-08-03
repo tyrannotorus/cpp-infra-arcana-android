@@ -192,7 +192,7 @@ TEST_CASE("Saving and loading the game")
                         Verbose::no);
 
                 player_spells::learn_spell(
-                        SpellId::aza_wrath,
+                        SpellId::aza_gaze,
                         Verbose::no);
 
                 // Applied properties
@@ -427,9 +427,9 @@ TEST_CASE("Saving and loading the game")
                 // Learned spells
                 REQUIRE(player_spells::is_spell_learned(SpellId::bless));
 
-                REQUIRE(player_spells::is_spell_learned(SpellId::aza_wrath));
+                REQUIRE(player_spells::is_spell_learned(SpellId::aza_gaze));
 
-                REQUIRE(!player_spells::is_spell_learned(SpellId::mayhem));
+                REQUIRE(!player_spells::is_spell_learned(SpellId::cataclysm));
 
                 // Properties
                 const auto& props = map::g_player->m_properties;

@@ -487,11 +487,9 @@ void Vitality::quaff_impl(actor::Actor& actor)
                 actor.m_properties.end_prop(prop_id);
         }
 
-        // HP is always restored at least up to maximum, but can go beyond
-        const int hp_max = actor::max_hp(actor);
-        const int hp_restored = std::max(20, hp_max - actor.m_hp);
+        actor.restore_hp(999, false);
 
-        actor.restore_hp(hp_restored, true);
+        actor.m_properties.apply(property_factory::make(PropId::regenerates));
 
         if (actor::can_player_see_actor(actor))
         {
@@ -683,7 +681,7 @@ void Poison::collide_hook(const P& pos, actor::Actor* const actor)
 
 void RFire::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(new PropRFire());
+        actor.m_properties.apply(property_factory::make(PropId::r_fire));
 
         if (actor::can_player_see_actor(actor))
         {
@@ -722,7 +720,7 @@ void Curing::quaff_impl(actor::Actor& actor)
                 }
         }
 
-        if (actor.restore_hp(3, false /* Not allowed above max */))
+        if (actor.restore_hp(3, false))
         {
                 is_noticable = true;
         }

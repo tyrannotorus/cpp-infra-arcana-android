@@ -295,7 +295,7 @@ void Mon::hear_sound(const Snd& snd)
 
         if (is_alive() && snd.is_alerting_mon())
         {
-                become_aware_player(AwareSource::other);
+                become_aware_player(AwareSource::heard_sound);
         }
 }
 
@@ -372,34 +372,43 @@ void Mon::become_aware_player(const AwareSource source, const int factor)
         }
 
         const int nr_turns = m_data->nr_turns_aware * factor;
-
         const int aware_counter_before = m_mon_aware_state.aware_counter;
-
         const bool was_aware_before = is_aware_of_player();
 
         m_mon_aware_state.aware_counter =
                 std::max(nr_turns, aware_counter_before);
 
-        m_mon_aware_state.wary_counter = m_mon_aware_state.aware_counter;
+        m_mon_aware_state.wary_counter =
+                m_mon_aware_state.aware_counter;
 
         bool do_reaction_time = false;
+        bool allow_speak_phrase = false;
 
         switch (source)
         {
         case AwareSource::attacked:
                 do_reaction_time = false;
+                allow_speak_phrase = true;
                 break;
 
         case AwareSource::spell_victim:
                 do_reaction_time = false;
+                allow_speak_phrase = true;
                 break;
 
         case AwareSource::seeing:
                 do_reaction_time = true;
+                allow_speak_phrase = true;
+                break;
+
+        case AwareSource::heard_sound:
+                do_reaction_time = true;
+                allow_speak_phrase = false;
                 break;
 
         case AwareSource::other:
                 do_reaction_time = true;
+                allow_speak_phrase = true;
                 break;
         }
 
@@ -422,7 +431,7 @@ void Mon::become_aware_player(const AwareSource source, const int factor)
                         print_player_see_mon_become_aware_msg();
                 }
 
-                if (rnd::coin_toss())
+                if (allow_speak_phrase && rnd::coin_toss())
                 {
                         speak_phrase(AlertsMon::yes);
                 }

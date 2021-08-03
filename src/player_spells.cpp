@@ -127,7 +127,7 @@ void cleanup()
 
 void save()
 {
-        saving::put_int(s_learned_spells.size());
+        saving::put_int((int)s_learned_spells.size());
 
         for (Spell* s : s_learned_spells)
         {
@@ -178,7 +178,7 @@ void learn_spell(const SpellId id, const Verbose verbose)
                 return;
         }
 
-        Spell* const spell = spells::make(id);
+        auto* const spell = spells::make(id);
 
         const bool player_can_learn = spell->player_can_learn();
 
@@ -192,7 +192,10 @@ void learn_spell(const SpellId id, const Verbose verbose)
 
         if (verbose == Verbose::yes)
         {
-                msg_log::add("I can now cast this incantation from memory.");
+                msg_log::add(
+                        "I can now cast " +
+                        spell->name() +
+                        " from memory.");
         }
 
         s_learned_spells.push_back(spell);
@@ -287,16 +290,26 @@ SpellSkill spell_skill(const SpellId id)
 
         auto skill = s_spell_skills[(size_t)id];
 
-        // Raise the skill one level if at an altar
-        if ((skill != SpellSkill::master) &&
+        // Altar skill bonus - max level is master.
+        if ((skill < SpellSkill::master) &&
             is_getting_altar_bonus())
         {
                 skill = (SpellSkill)((int)skill + 1);
         }
 
-        // Raise the skill one level if player has erudition
-        if ((skill != SpellSkill::master) &&
+        // Erudition skill bonus - max level is master.
+        if ((skill < SpellSkill::master) &&
             map::g_player->m_properties.has(PropId::erudition))
+        {
+                skill = (SpellSkill)((int)skill + 1);
+        }
+
+        // Necronomicon skill bonus - transcendent skill allowed.
+        const bool has_necronomicon =
+                map::g_player->m_inv.has_item_in_backpack(
+                        item::Id::necronomicon);
+
+        if ((skill != SpellSkill::transcendent) && has_necronomicon)
         {
                 skill = (SpellSkill)((int)skill + 1);
         }
@@ -361,7 +374,7 @@ void BrowseSpell::draw()
 {
         draw_box(panels::area(Panel::screen));
 
-        const int nr_spells = s_learned_spells.size();
+        const int nr_spells = (int)s_learned_spells.size();
 
         io::draw_text_center(
                 " Use which power? ",
@@ -382,7 +395,7 @@ void BrowseSpell::draw()
                 auto* const spell = s_learned_spells[i];
                 const auto name = spell->name();
 
-                constexpr int spi_label_x = 24;
+                constexpr int spi_label_x = 23;
                 constexpr int skill_label_x = spi_label_x + 10;
 
                 p.x = 0;
@@ -465,7 +478,7 @@ void BrowseSpell::draw()
                                 p,
                                 colors::dark_gray());
 
-                        p.x += str.size();
+                        p.x += (int)str.size();
 
                         switch (skill)
                         {
@@ -479,6 +492,10 @@ void BrowseSpell::draw()
 
                         case SpellSkill::master:
                                 str = "III";
+                                break;
+
+                        case SpellSkill::transcendent:
+                                str = "IV";
                                 break;
                         }
 

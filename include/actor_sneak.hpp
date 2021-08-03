@@ -13,16 +13,18 @@ namespace actor
 {
 class Actor;
 
-struct SneakData
+struct SneakParameters
 {
         const actor::Actor* actor_sneaking {nullptr};
         const actor::Actor* actor_searching {nullptr};
 };
 
+int calc_total_sneak_ability(const SneakParameters& data);
+
 // This function is not concerned with whether actors are within FOV, or if they
 // are actually hidden or not. It merely performs a skill check, taking various
 // conditions such as light/dark into concern.
-ActionResult roll_sneak(const SneakData& data);
+ActionResult roll_sneak(const SneakParameters& data);
 
 }  // namespace actor
 

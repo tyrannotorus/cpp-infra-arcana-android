@@ -153,8 +153,7 @@ static void player_std_turn()
 
                 const int wound_effect_div = is_survivalist ? 2 : 1;
 
-                nr_turns_per_hp +=
-                        ((nr_wounds * 4) / wound_effect_div);
+                nr_turns_per_hp += ((nr_wounds * 4) / wound_effect_div);
 
                 // Items affect hp regen?
                 for (const auto& slot : player.m_inv.m_slots)

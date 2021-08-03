@@ -30,30 +30,34 @@ enum class DidOpen;
 enum class DidClose;
 }  // namespace terrain
 
+namespace item
+{
+class Item;
+}  // namespace item
+
 enum class SpellId
 {
         // Available for player and monsters
         aura_of_decay,
         darkbolt,
+        aza_gaze,
         enfeeble,
         heal,
         pestilence,
         slow,
         haste,
         spell_shield,
-
         teleport,
         terrify,
 
         // Player only
         spectral_weapons,
-        aza_wrath,
         bless,
         premonition,
         erudition,
         identify,
         light,
-        mayhem,
+        cataclysm,
         control_object,
         resistance,
         see_invis,
@@ -85,7 +89,8 @@ enum class SpellSkill
 {
         basic,
         expert,
-        master
+        master,
+        transcendent
 };
 
 enum class SpellSrc
@@ -283,6 +288,8 @@ public:
                 SpellSkill skill) const override;
 
 protected:
+        Range duration_range(SpellSkill skill) const;
+
         int base_max_spi_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
@@ -335,6 +342,8 @@ public:
                 SpellSkill skill) const override;
 
 protected:
+        Range duration_range(SpellSkill skill) const;
+
         int base_max_spi_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
@@ -449,6 +458,10 @@ private:
 
                 return true;
         }
+
+        Range dmg_range(SpellSkill skill) const;
+
+        Range duration_range(SpellSkill skill) const;
 };
 
 class BoltImpl
@@ -462,6 +475,7 @@ public:
 
         virtual void on_hit(
                 actor::Actor& actor_hit,
+                actor::Actor& caster,
                 SpellSkill skill) const = 0;
 
         virtual std::string hit_msg_ending() const = 0;
@@ -491,9 +505,11 @@ public:
 
         void on_hit(
                 actor::Actor& actor_hit,
+                actor::Actor& caster,
                 const SpellSkill skill) const override
         {
                 (void)actor_hit;
+                (void)caster;
                 (void)skill;
         }
 
@@ -544,6 +560,7 @@ public:
 
         void on_hit(
                 actor::Actor& actor_hit,
+                actor::Actor& caster,
                 SpellSkill skill) const override;
 
         std::string hit_msg_ending() const override
@@ -645,13 +662,17 @@ private:
                 return true;
         }
 
+        void draw_projectile_travel(
+                const actor::Actor& caster,
+                const actor::Actor& target) const;
+
         std::unique_ptr<BoltImpl> m_impl;
 };
 
-class SpellAzaWrath : public Spell
+class SpellAzaGaze : public Spell
 {
 public:
-        SpellAzaWrath() = default;
+        SpellAzaGaze() = default;
 
         bool allow_mon_cast_now(actor::Mon& mon) const override;
 
@@ -667,12 +688,12 @@ public:
 
         std::string name() const override
         {
-                return "Azathoth's Wrath";
+                return "Azathoth's Gaze";
         }
 
         SpellId id() const override
         {
-                return SpellId::aza_wrath;
+                return SpellId::aza_gaze;
         }
 
         OccultistDomain domain() const override
@@ -706,12 +727,30 @@ private:
 
                 return true;
         }
+
+        Range dmg_range(SpellSkill skill) const;
+
+        Range faint_duration_range(SpellSkill skill) const;
+
+        Range conflict_duration_range(SpellSkill skill) const;
+
+        void run_effect_on_target(
+                actor::Actor& target,
+                SpellSkill skill) const;
+
+        void do_damage_on_target(
+                actor::Actor& target,
+                SpellSkill skill) const;
+
+        void apply_properties_on_target(
+                actor::Actor& target,
+                SpellSkill skill) const;
 };
 
-class SpellMayhem : public Spell
+class SpellCataclysm : public Spell
 {
 public:
-        SpellMayhem() = default;
+        SpellCataclysm() = default;
 
         bool allow_mon_cast_now(actor::Mon& mon) const override;
 
@@ -722,12 +761,12 @@ public:
 
         std::string name() const override
         {
-                return "Mayhem";
+                return "Cataclysm";
         }
 
         SpellId id() const override
         {
-                return SpellId::mayhem;
+                return SpellId::cataclysm;
         }
 
         OccultistDomain domain() const override
@@ -748,6 +787,12 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        int destruction_radi(SpellSkill skill) const;
+
+        int nr_explosions(SpellSkill skill) const;
+
+        int nr_destruction_sweeps(SpellSkill skill) const;
+
         int base_max_spi_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
@@ -818,6 +863,8 @@ private:
 
                 return true;
         }
+
+        void on_rat_summoned(actor::Actor* mon, SpellSkill skill) const;
 };
 
 class SpellSpectralWeapons : public Spell
@@ -872,7 +919,12 @@ private:
                 return true;
         }
 
-        int max_nr_weapons(SpellSkill skill) const;
+        Range duration_range(SpellSkill skill) const;
+
+        void on_mon_summoned(
+                item::Item* item,
+                actor::Actor* mon,
+                SpellSkill skill) const;
 };
 
 class SpellControlObject : public Spell
@@ -913,12 +965,7 @@ public:
                 SpellSkill skill) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
-        {
-                (void)skill;
-
-                return 4;
-        }
+        int base_max_spi_cost(const SpellSkill skill) const override;
 
         int max_dist(SpellSkill skill) const;
 
@@ -1206,6 +1253,8 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        Range duration_range(SpellSkill skill) const;
+
         int base_max_spi_cost(const SpellSkill skill) const override
         {
                 (void)skill;
@@ -1259,6 +1308,14 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        int skill_bon(SpellSkill skill) const;
+
+        int chance_scroll(SpellSkill skill) const;
+
+        int chance_potion(SpellSkill skill) const;
+
+        int chance_weapon(SpellSkill skill, int plus) const;
+
         int base_max_spi_cost(const SpellSkill skill) const override
         {
                 (void)skill;
@@ -1311,7 +1368,13 @@ public:
                 SpellSkill skill) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        Range light_duration_range(SpellSkill skill) const;
+
+        Range blind_duration_range(SpellSkill skill) const;
+
+        Range burning_duration_range() const;
+
+        int base_max_spi_cost(SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1436,6 +1499,8 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        int invis_duration(SpellSkill skill) const;
+
         int base_max_spi_cost(const SpellSkill skill) const override
         {
                 (void)skill;
@@ -1498,6 +1563,8 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        Range duration_range(SpellSkill skill) const;
+
         int base_max_spi_cost(const SpellSkill skill) const override
         {
                 (void)skill;
@@ -1610,6 +1677,8 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        Range duration_range(SpellSkill skill) const;
+
         int base_max_spi_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
@@ -1658,6 +1727,8 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        Range duration_range(SpellSkill skill) const;
+
         int base_max_spi_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
@@ -1811,6 +1882,8 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        Range duration_range(SpellSkill skill) const;
+
         int base_max_spi_cost(const SpellSkill skill) const override
         {
                 (void)skill;
@@ -2073,6 +2146,8 @@ public:
                 SpellSkill skill) const override;
 
 private:
+        int nr_hp_restored(SpellSkill skill) const;
+
         int base_max_spi_cost(const SpellSkill skill) const override
         {
                 (void)skill;
@@ -2086,6 +2161,8 @@ private:
 
                 return true;
         }
+
+        Range regen_duration() const;
 };
 
 class SpellMiGoHypno : public Spell

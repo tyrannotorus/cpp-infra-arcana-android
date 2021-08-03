@@ -389,7 +389,7 @@ void Curing::run_effect()
                 }
         }
 
-        if (player.restore_hp(3, false /* Not allowed above max */))
+        if (player.restore_hp(3, false))
         {
                 is_something_healed = true;
         }

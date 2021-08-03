@@ -56,7 +56,7 @@ void InsSympt::on_start()
                 popup::Popup(popup::AddToMsgHistory::yes)
                         .set_title(heading)
                         .set_msg(msg)
-                        .set_sfx(audio::SfxId::insanity_rise)
+                        .set_sfx(audio::SfxId::insanity_rising)
                         .run();
         }
 

@@ -278,7 +278,6 @@ public:
 
         virtual DidAction run(
                 terrain::Terrain& terrain,
-                const P& marker_pos,
                 SpellSkill skill) const = 0;
 
         virtual std::string menu_label(
@@ -296,7 +295,6 @@ public:
 
         DidAction run(
                 terrain::Terrain& terrain,
-                const P& marker_pos,
                 SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
@@ -313,7 +311,6 @@ public:
 
         DidAction run(
                 terrain::Terrain& terrain,
-                const P& marker_pos,
                 SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
@@ -330,7 +327,6 @@ public:
 
         DidAction run(
                 terrain::Terrain& terrain,
-                const P& marker_pos,
                 SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
@@ -347,7 +343,6 @@ public:
 
         DidAction run(
                 terrain::Terrain& terrain,
-                const P& marker_pos,
                 SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;
@@ -364,7 +359,22 @@ public:
 
         DidAction run(
                 terrain::Terrain& terrain,
-                const P& marker_pos,
+                SpellSkill skill) const override;
+
+        std::string menu_label(const terrain::Terrain& terrain) const override;
+
+        char menu_key() const override;
+};
+
+class CtrlObjDestrWall : public CtrlObjAction
+{
+public:
+        bool can_control(
+                const terrain::Terrain& terrain,
+                SpellSkill skill) const override;
+
+        DidAction run(
+                terrain::Terrain& terrain,
                 SpellSkill skill) const override;
 
         std::string menu_label(const terrain::Terrain& terrain) const override;

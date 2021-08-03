@@ -15,12 +15,12 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static int calc_sneak_skill_mod(const actor::SneakData& data)
+static int calc_sneak_skill_mod(const actor::SneakParameters& data)
 {
         return data.actor_sneaking->ability(AbilityId::stealth, true);
 }
 
-static int calc_search_mod(const actor::SneakData& data)
+static int calc_search_mod(const actor::SneakParameters& data)
 {
         const int search_skill =
                 data.actor_searching->ability(
@@ -35,7 +35,7 @@ static int calc_search_mod(const actor::SneakData& data)
         return mod;
 }
 
-static int calc_dist_mod(const actor::SneakData& data)
+static int calc_dist_mod(const actor::SneakParameters& data)
 {
         const int dist =
                 king_dist(
@@ -57,7 +57,7 @@ static int calc_dist_mod(const actor::SneakData& data)
         return dist_mod;
 }
 
-static int calc_light_mod(const actor::SneakData& data)
+static int calc_light_mod(const actor::SneakParameters& data)
 {
         const bool is_lit = map::g_light.at(data.actor_sneaking->m_pos);
 
@@ -66,7 +66,7 @@ static int calc_light_mod(const actor::SneakData& data)
         return light_mod;
 }
 
-static int calc_dark_mod(const actor::SneakData& data)
+static int calc_dark_mod(const actor::SneakParameters& data)
 {
         const bool is_lit = map::g_light.at(data.actor_sneaking->m_pos);
         const bool is_dark = map::g_dark.at(data.actor_sneaking->m_pos);
@@ -81,18 +81,27 @@ static int calc_dark_mod(const actor::SneakData& data)
 // -----------------------------------------------------------------------------
 namespace actor
 {
-ActionResult roll_sneak(const SneakData& data)
+int calc_total_sneak_ability(const SneakParameters& data)
 {
         // NOTE: There is no need to cap the sneak value here, since there's
         // always critical fails
-        const int tot_skill =
+        const int tot_value =
                 calc_sneak_skill_mod(data) +
                 calc_search_mod(data) +
                 calc_dist_mod(data) +
                 calc_light_mod(data) +
                 calc_dark_mod(data);
 
-        const auto result = ability_roll::roll(tot_skill);
+        return tot_value;
+}
+
+ActionResult roll_sneak(const SneakParameters& data)
+{
+        // NOTE: There is no need to cap the sneak value here, since there's
+        // always critical fails
+        const int tot_value = calc_sneak_skill_mod(data);
+
+        const auto result = ability_roll::roll(tot_value);
 
         return result;
 }

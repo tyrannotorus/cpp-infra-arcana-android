@@ -65,8 +65,6 @@ int AbilityValues::val(
 
         if (actor.is_player())
         {
-                // TODO: This should probably also be included for monsters,
-                // especially if they should be able to wear armor
                 for (const InvSlot& slot : actor.m_inv.m_slots)
                 {
                         if (!slot.item)
@@ -155,6 +153,14 @@ int AbilityValues::val(
 
                 case AbilityId::stealth:
                 {
+                        // TODO: This is hacky and should be generalized
+                        // (e.g. an "ability_mods_while_carried" function).
+                        if (actor.m_inv.has_item_in_backpack(
+                                    item::Id::necronomicon))
+                        {
+                                ret -= 20;
+                        }
+
                         if (player_bon::has_trait(Trait::stealthy))
                         {
                                 ret += 45;
@@ -267,7 +273,7 @@ ActionResult roll(const int skill_value)
         return ActionResult::fail_big;
 }
 
-int hit_chance_pct_actual(const int value)
+int success_chance_pct_actual(const int value)
 {
         return std::clamp(value, 2, 98);
 }

@@ -104,7 +104,7 @@ static actor::Speed current_actor_speed(const actor::Actor& actor)
                 return actor::Speed::normal;
         }
 
-        if (actor.m_properties.has(PropId::clockwork_hasted))
+        if (actor.m_properties.has(PropId::extra_hasted))
         {
                 return actor::Speed::very_fast;
         }
@@ -186,7 +186,8 @@ static void run_std_turn_events()
                         delete actor;
 
                         game_time::g_actors.erase(
-                                game_time::g_actors.begin() + i);
+                                std::begin(game_time::g_actors) +
+                                (int)i);
 
                         if (s_current_actor_idx >= game_time::g_actors.size())
                         {

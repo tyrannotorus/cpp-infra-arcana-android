@@ -39,7 +39,14 @@ void MapControllerStd::on_start()
 
 void MapControllerStd::on_std_turn()
 {
-        const int spawn_n_turns = 275;
+        const bool has_necronomicon =
+                map::g_player->m_inv.has_item_in_backpack(
+                        item::Id::necronomicon);
+
+        const int spawn_n_turns =
+                has_necronomicon
+                ? 200
+                : 275;
 
         if (game_time::turn_nr() % spawn_n_turns == 0)
         {

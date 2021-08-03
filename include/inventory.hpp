@@ -102,6 +102,8 @@ public:
 
         bool has_ammo_for_firearm_in_inventory() const;
 
+        std::vector<item::Item*> all_items() const;
+
         item::Item* item_in_backpack(item::Id id) const;
 
         int backpack_idx(item::Id item_id) const;
@@ -134,7 +136,7 @@ public:
 
         int intrinsics_size() const
         {
-                return m_intrinsics.size();
+                return (int)m_intrinsics.size();
         }
 
         item::Item* intrinsic_in_element(int idx) const;

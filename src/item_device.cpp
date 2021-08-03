@@ -302,7 +302,7 @@ ConsumeItem Blaster::run_effect()
         {
                 // Targets are available
                 const std::unique_ptr<Spell> spell(
-                        spells::make(SpellId::aza_wrath));
+                        spells::make(SpellId::aza_gaze));
 
                 spell->cast(
                         map::g_player,
@@ -550,7 +550,7 @@ void Lantern::toggle()
                 nr_turns_left -= 2;
         }
 
-        audio::play(audio::SfxId::lantern);
+        audio::play(audio::SfxId::electric_lantern);
 }
 
 void Lantern::on_std_turn_in_inv_hook(const InvType inv_type)

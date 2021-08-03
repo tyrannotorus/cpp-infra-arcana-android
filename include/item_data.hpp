@@ -123,13 +123,13 @@ enum class Id
         // Scrolls
         // NOTE: There is no scroll for the identify spell - this is on purpose
         scroll_aura_of_decay,
-        scroll_aza_wrath,
+        scroll_aza_gaze,
         scroll_bless,
         scroll_darkbolt,
         scroll_enfeeble,
         scroll_heal,
         scroll_light,
-        scroll_mayhem,
+        scroll_cataclysm,
         scroll_control_object,
         scroll_pest,
         scroll_premonition,
@@ -190,6 +190,7 @@ enum class Id
         resurrect_talisman,
         spirit_dagger,
         tele_ctrl_talisman,
+        necronomicon,
 
         // Other Curiosities
         zombie_dust,
@@ -360,6 +361,7 @@ public:
         bool has_std_activate;  // E.g. potions and scrolls
         bool is_prio_in_backpack_list;  // E.g. Medical Bag
         Value value;
+        bool allow_cursed;
         int weight;
         bool is_unique;
         bool allow_spawn;

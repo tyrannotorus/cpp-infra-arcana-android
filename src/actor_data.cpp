@@ -44,6 +44,7 @@ static const std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
         {"cultist_arch_wizard", actor::Id::cultist_arch_wizard},
         {"bog_tcher", actor::Id::bog_tcher},
         {"rat", actor::Id::rat},
+        {"transcendent_rat", actor::Id::transcendent_rat},
         {"rat_thing", actor::Id::rat_thing},
         {"green_spider", actor::Id::green_spider},
         {"white_spider", actor::Id::white_spider},
@@ -429,23 +430,14 @@ static void dump_attributes(xml::Element* attrib_e, actor::ActorData& data)
                                 attrib_e, "always_prevent_knockback"));
 
         data.is_humanoid = xml::has_child(attrib_e, "humanoid");
-
         data.is_rat = xml::has_child(attrib_e, "rat");
-
         data.is_canine = xml::has_child(attrib_e, "canine");
-
         data.is_spider = xml::has_child(attrib_e, "spider");
-
         data.is_undead = xml::has_child(attrib_e, "undead");
-
         data.is_ghost = xml::has_child(attrib_e, "ghost");
-
         data.is_ghoul = xml::has_child(attrib_e, "ghoul");
-
         data.is_snake = xml::has_child(attrib_e, "snake");
-
         data.is_reptile = xml::has_child(attrib_e, "reptile");
-
         data.is_amphibian = xml::has_child(attrib_e, "amphibian");
 
         data.can_bleed =

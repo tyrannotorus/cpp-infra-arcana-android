@@ -1112,9 +1112,11 @@ std::vector<ColoredString> bg_descr(const Bg id)
                     "a higher skill level. This choice also determines "
                     "starting spells");
                 put("");
-                put("-50% shock taken from casting spells, and from carrying, "
-                    "using or identifying strange items (e.g. drinking a "
-                    "potion or carrying a disturbing artifact)");
+                put("-50% shock taken from casting spells (when casting "
+                    "memorized spells or casting from Manuscripts), and "
+                    "from carrying, using or identifying strange items "
+                    "(e.g. drinking a potion or carrying a disturbing "
+                    "artifact)");
                 put("");
                 put("Can dispel magic traps, doing so grants spirit points");
                 put("");

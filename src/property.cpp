@@ -22,6 +22,7 @@
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
@@ -116,6 +117,15 @@ Prop::Prop(PropId id) :
         m_nr_turns_left(m_data.std_rnd_turns.roll()),
         m_nr_dlvls_left(m_data.std_rnd_dlvls.roll())
 {
+}
+
+void Prop::set_duration(const int nr_turns)
+{
+        ASSERT(nr_turns > 0);
+
+        m_duration_mode = PropDurationMode::specific;
+
+        m_nr_turns_left = nr_turns;
 }
 
 // -----------------------------------------------------------------------------
@@ -486,7 +496,7 @@ void PropHasted::on_applied()
                         PropEndAllowHistoricMsg::yes));
 }
 
-void PropClockworkHasted::on_applied()
+void PropExtraHasted::on_applied()
 {
         m_owner->m_properties.end_prop(
                 PropId::slowed,
@@ -1039,15 +1049,6 @@ void PropWound::load()
         m_nr_wounds = saving::get_int();
 }
 
-void Prop::set_duration(const int nr_turns)
-{
-        ASSERT(nr_turns > 0);
-
-        m_duration_mode = PropDurationMode::specific;
-
-        m_nr_turns_left = nr_turns;
-}
-
 int PropWound::ability_mod(const AbilityId ability) const
 {
         // A player with Survivalist receives no ability penalties
@@ -1088,6 +1089,11 @@ int PropWound::affect_max_hp(const int hp_max) const
         return (hp_max * (100 - hp_pen_pct)) / 100;
 }
 
+void PropWound::print_wound_healed_msg() const
+{
+        msg_log::add("A wound is healed.");
+}
+
 void PropWound::heal_one_wound()
 {
         ASSERT(m_nr_wounds > 0);
@@ -1096,13 +1102,11 @@ void PropWound::heal_one_wound()
 
         if (m_nr_wounds > 0)
         {
-                msg_log::add("A wound is healed.");
+                print_wound_healed_msg();
         }
         else
         {
-                // This was the last wound
-
-                // End self
+                // This was the last wound, end self
                 m_owner->m_properties.end_prop(id());
         }
 }
@@ -1126,6 +1130,30 @@ void PropWound::on_more(const Prop& new_prop)
                         AllowGore::no,
                         AllowDropItems::yes);
         }
+}
+
+PropEnded PropWound::on_actor_turn()
+{
+        if (m_owner->is_player() &&
+            m_owner->m_properties.has(PropId::regenerates) &&
+            rnd::percent(10))
+        {
+                --m_nr_wounds;
+
+                if (m_nr_wounds > 0)
+                {
+                        print_wound_healed_msg();
+
+                        return PropEnded::no;
+                }
+                else
+                {
+                        // This was the last wound, end self
+                        return PropEnded::yes;
+                }
+        }
+
+        return PropEnded::no;
 }
 
 PropHpSap::PropHpSap() :
@@ -2506,11 +2534,13 @@ void PropAltersEnv::on_std_turn()
 
 void PropRegenerates::on_std_turn()
 {
-        if (m_owner->is_alive() &&
-            !m_owner->m_properties.has(PropId::burning))
+        if (!m_owner->is_alive() ||
+            m_owner->m_properties.has(PropId::burning))
         {
-                m_owner->restore_hp(2, false, Verbose::no);
+                return;
         }
+
+        m_owner->restore_hp(1, false, Verbose::no);
 }
 
 PropActResult PropCorpseRises::on_act()
@@ -2935,12 +2965,14 @@ void PropFrenzyPlayerOnSeen::on_player_see()
 
 void PropAuraOfDecay::save() const
 {
-        saving::put_int(m_max_dmg);
+        saving::put_int(m_dmg_range.min);
+        saving::put_int(m_dmg_range.max);
 }
 
 void PropAuraOfDecay::load()
 {
-        m_max_dmg = saving::get_int();
+        m_dmg_range.min = saving::get_int();
+        m_dmg_range.max = saving::get_int();
 }
 
 int PropAuraOfDecay::range() const
@@ -2976,7 +3008,22 @@ void PropAuraOfDecay::run_effect_on_actors() const
                         print_msg_actor_hit(*actor);
                 }
 
-                const int dmg = rnd::range(1, m_max_dmg);
+                if (m_allow_instant_kill && rnd::percent(2))
+                {
+                        io::draw_blast_at_seen_actors(
+                                {actor},
+                                colors::light_red());
+
+                        actor::kill(
+                                *actor,
+                                IsDestroyed::yes,
+                                AllowGore::yes,
+                                AllowDropItems::yes);
+
+                        continue;
+                }
+
+                const int dmg = m_dmg_range.roll();
 
                 actor::hit(*actor, dmg, DmgType::pure);
 

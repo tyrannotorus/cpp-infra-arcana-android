@@ -394,6 +394,29 @@ Author:              Martin Törnqvist
 Original title:      -
 License:             ???
 
+File:                sfx_darkbolt_impact.ogg
+Source:              https://freesound.org/people/zimbot/sounds/117137/
+Author:              zimbot
+Original title:      ExplosionBombBlastAmbient2.wav
+License:             Attribution 3.0 Unported (CC BY 3.0)
+
+File:                sfx_darkbolt_release.ogg
+Source:              https://freesound.org/people/JoelAudio/sounds/77691/
+Author:              JoelAudio
+Original title:      SFX_MAGIC_FIREBALL_001.wav
+License:             Attribution 3.0 Unported (CC BY 3.0)
+
+File:                sfx_aza_gaze.ogg
+Source (1):          https://freesound.org/people/scrbun/sounds/583402/
+Author (1):          scrbun (username on freesound.org)
+Original title (1):  edsscreamr.mp3
+License (1)          CC0 1.0 Universal (CC0 1.0)
+Source (2):          https://freesound.org/people/Wakerone/sounds/513821/
+Author (2):          Wakerone (username on freesound.org)
+Original title (2):  Free Demon Ghost Sounds.mp3
+License (2):         CC0 1.0 Universal (CC0 1.0)
+Changes made:        Mixed small samples of files 1 and 2 above
+
 File:                sfx_death.ogg
 Source:              https://www.freesound.org/people/Autistic%20Lucario/sounds/218887
 Author:              Autistic Lucario
@@ -473,14 +496,14 @@ License:             Sampling Plus 1.0
 Changes made:        Cut parts of the sound
 
 File:                sfx_fountain_drink.ogg
-Source(1):           https://www.freesound.org/people/Abolla/sounds/213193
-Author(1):           Abolla (username on freesound.org)
-Original title(1):   BottleDrinking02.wav
-License(1):          Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)
-Source(2):           https://www.freesound.org/people/Pogotron/sounds/60851
-Author(2):           Pogotron (username on freesound.org)
-Original title(2):   Water Streaming #5.wav
-License(2):          Sampling Plus 1.0
+Source (1):          https://www.freesound.org/people/Abolla/sounds/213193
+Author (1):          Abolla (username on freesound.org)
+Original title (1):  BottleDrinking02.wav
+License (1):         Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)
+Source (2):          https://www.freesound.org/people/Pogotron/sounds/60851
+Author (2):          Pogotron (username on freesound.org)
+Original title (2):  Water Streaming #5.wav
+License (2):         Sampling Plus 1.0
 Changes made:        Mixed small samples of files 1 and 2 above
 
 File:                sfx_ghoul_growl.ogg
@@ -662,13 +685,6 @@ Author:              lensflare8642 (username on freesound.org)
 Original title:      shotgun sounds
 License:             CC0 1.0 Universal (CC0 1.0)
 Changes made:        Cut most of the sound
-
-File:                sfx_spell_generic.ogg
-Source:              https://freesound.org/people/RICHERlandTV/sounds/216089/
-Author:              RICHERlandTV (username on freesound.org)
-Original title:      Magic
-License:             Attribution 3.0 Unported (CC BY 3.0)
-Changes made:        Cut parts of the sound, probably sped it up?
 
 File:                sfx_spike_gun.ogg
 Source:              https://www.freesound.org/people/jgeralyn/sounds/143644

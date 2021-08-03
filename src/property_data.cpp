@@ -340,6 +340,9 @@ static void init_data_list()
         d.std_rnd_turns = Range(100, 200);
         d.name = "Fainted";
         d.name_short = "Fainted";
+        d.descr =
+                "Temporarily lost consciousness, will wake up if any damage "
+                "is taken or enough time passes.";
         d.msg_start_player = "I faint!";
         d.msg_start_mon = "faints.";
         d.msg_end_player = "I am awake.";
@@ -459,7 +462,7 @@ static void init_data_list()
 
         d.id = PropId::astral_opium_addiction;
         d.std_rnd_turns = Range(100, 200);
-        d.std_rnd_dlvls = Range(2, 5);
+        d.std_rnd_dlvls = Range(3, 6);
         d.name = "Astral Opium Addiction";
         d.name_short = "Addict";
         d.descr =
@@ -528,7 +531,7 @@ static void init_data_list()
         d.alignment = PropAlignment::good;
         add(d);
 
-        d.id = PropId::clockwork_hasted;
+        d.id = PropId::extra_hasted;
         d.std_rnd_turns = Range(7, 11);
         d.name = "Extra Hasted";
         d.name_short = "Extra Hasted";
@@ -573,7 +576,7 @@ static void init_data_list()
         d.descr =
                 "For each wound: -5% melee hit chance, -5% chance to evade "
                 "attacks, -10% hit points, and reduced hit point generation "
-                "rate - also, walking takes extra turns if more than two "
+                "rate - also, walking takes extra turns if three or more "
                 "wounds are received.";
         d.msg_start_player = "I am wounded!";
         d.msg_res_player = "I resist wounding!";
@@ -625,7 +628,7 @@ static void init_data_list()
         d.std_rnd_turns = Range(50, 100);
         d.name = "Infected";
         d.name_short = "Infected";
-        d.descr = "A nasty infection, this should be treated immediately.";
+        d.descr = "A nasty infection that will get worse if left untreated.";
         d.msg_start_player = "I am infected!";
         d.msg_start_mon = "is infected.";
         d.msg_end_player = "My infection is cured!";
@@ -769,7 +772,7 @@ static void init_data_list()
         d.name_short = "Erudition";
         d.descr = "Spell skill is improved by one level.";
         d.msg_start_player = "Mystic secrets are revealed to me!";
-        d.msg_end_player = "I feel more ignorant.";
+        d.msg_end_player = "I feel ignorant.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::good;
@@ -964,6 +967,19 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::regenerates;
+        d.std_rnd_turns = Range(50, 100);
+        d.name = "Regenerates";
+        d.name_short = "Regenerates";
+        d.descr =
+                "+1 extra hit point regenerated per turn, and "
+                "10% chance per turn to heal one wound.";
+        d.msg_start_player = "My body starts healing itself much faster.";
+        d.msg_start_mon = "starts regenerating damage very quickly.";
+        d.msg_end_player = "My body heals itself slower now.";
+        d.msg_end_mon = "stops regenerating damage quickly.";
+        d.allow_display_turns = true;
+        d.allow_test_on_bot = true;
+        d.alignment = PropAlignment::good;
         add(d);
 
         d.id = PropId::corpse_rises;
@@ -1160,6 +1176,13 @@ void init()
 PropId str_to_prop_id(const std::string& str)
 {
         return s_str_to_prop_id_map.at(str);
+}
+
+std::string descr(PropId id)
+{
+        ASSERT(id != PropId::END);
+
+        return g_data[(size_t)id].descr;
 }
 
 }  // namespace property_data

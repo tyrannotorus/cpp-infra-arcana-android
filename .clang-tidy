@@ -17,6 +17,7 @@ Checks: >
     -cert-msc51-cpp,
     -clang-analyzer-optin.performance.Padding,
     -clang-analyzer-security.FloatLoopCounter,
+    -clang-analyzer-core.CallAndMessage,
     -cppcoreguidelines-avoid-c-arrays,
     -cppcoreguidelines-avoid-magic-numbers,
     -cppcoreguidelines-avoid-non-const-global-variables,

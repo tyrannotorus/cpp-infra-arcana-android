@@ -204,7 +204,7 @@ Item* make(const Id item_id, const int nr_items)
                 break;
 
         case Id::scroll_aura_of_decay:
-        case Id::scroll_mayhem:
+        case Id::scroll_cataclysm:
         case Id::scroll_telep:
         case Id::scroll_pest:
         case Id::scroll_enfeeble:
@@ -212,7 +212,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::scroll_terrify:
         case Id::scroll_bless:
         case Id::scroll_darkbolt:
-        case Id::scroll_aza_wrath:
+        case Id::scroll_aza_gaze:
         case Id::scroll_control_object:
         case Id::scroll_res:
         case Id::scroll_light:
@@ -371,6 +371,10 @@ Item* make(const Id item_id, const int nr_items)
                 r = new OrbOfLife(d);
                 break;
 
+        case Id::necronomicon:
+                r = new Necronomicon(d);
+                break;
+
         case Id::END:
                 break;
         }
@@ -409,8 +413,9 @@ void set_item_randomized_properties(Item& item)
 {
         const auto& d = item.data();
 
-        ASSERT(d.type != ItemType::melee_wpn_intr &&
-               d.type != ItemType::ranged_wpn_intr);
+        ASSERT(
+                (d.type != ItemType::melee_wpn_intr) &&
+                (d.type != ItemType::ranged_wpn_intr));
 
         // If it is a pure, common melee weapon, and "plus" damage is not
         // already specified, randomize the extra damage
@@ -495,9 +500,7 @@ void set_item_randomized_properties(Item& item)
         // Item curse
         const int cursed_one_in_n = 3;
 
-        if (d.is_unique &&
-            (d.value >= Value::supreme_treasure) &&
-            rnd::one_in(cursed_one_in_n))
+        if (d.allow_cursed && rnd::one_in(cursed_one_in_n))
         {
                 auto curse = item_curse::try_make_random_free_curse(item);
 

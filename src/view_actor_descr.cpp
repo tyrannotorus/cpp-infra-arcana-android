@@ -16,6 +16,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_player.hpp"
+#include "actor_sneak.hpp"
 #include "attack_data.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
@@ -65,6 +66,13 @@ static const std::string s_cannot_be_start =
 static const std::pair<PropId, std::string> s_cannot_be_props[] = {
         {PropId::r_slow, "slowed"},
         {PropId::r_para, "paralyzed"},
+};
+
+static const std::string s_cannot_start =
+        "They cannot";
+
+static const std::pair<PropId, std::string> s_cannot_props[] = {
+        {PropId::r_sleep, "faint"},
 };
 
 static const std::string s_can_start =
@@ -314,7 +322,7 @@ static std::string get_melee_hit_chance_descr(actor::Actor& actor)
         const MeleeAttData att_data(map::g_player, actor, *player_wpn);
 
         const int hit_chance =
-                ability_roll::hit_chance_pct_actual(
+                ability_roll::success_chance_pct_actual(
                         att_data.hit_chance_tot);
 
         std::string descr =
@@ -330,6 +338,26 @@ static std::string get_melee_hit_chance_descr(actor::Actor& actor)
         }
 
         descr += ".";
+
+        return descr;
+}
+
+static std::string get_sneak_chance_descr(actor::Actor& actor)
+{
+        actor::SneakParameters p;
+        p.actor_searching = &actor;
+        p.actor_sneaking = map::g_player;
+
+        const int tot_value =
+                ability_roll::success_chance_pct_actual(
+                        actor::calc_total_sneak_ability(p));
+
+        std::string descr =
+                "The chance to remain undetected by " +
+                actor.name_the() +
+                " is currently{_}{light_green}" +
+                std::to_string(tot_value) +
+                "%{reset_color}.";
 
         return descr;
 }
@@ -373,6 +401,7 @@ static std::string get_mon_natural_properties_descr(
         std::vector<std::string> cannot_be_harmed_by_names;
         std::vector<std::string> unaffected_by_names;
         std::vector<std::string> cannot_be_names;
+        std::vector<std::string> cannot_names;
         std::vector<std::string> can_names;
         std::vector<std::string> custom_entries;
 
@@ -397,6 +426,14 @@ static std::string get_mon_natural_properties_descr(
                 if (has_natural_property(actor_data, p.first))
                 {
                         cannot_be_names.push_back(p.second);
+                }
+        }
+
+        for (const auto& p : s_cannot_props)
+        {
+                if (has_natural_property(actor_data, p.first))
+                {
+                        cannot_names.push_back(p.second);
                 }
         }
 
@@ -447,6 +484,18 @@ static std::string get_mon_natural_properties_descr(
                 descr += ".";
         }
 
+        if (!cannot_names.empty())
+        {
+                if (!descr.empty())
+                {
+                        descr += " ";
+                }
+
+                descr += s_cannot_start;
+                add_or_list_to_sentence(descr, cannot_names);
+                descr += ".";
+        }
+
         if (!can_names.empty())
         {
                 if (!descr.empty())
@@ -484,6 +533,13 @@ static std::string auto_description_str(actor::Actor& actor)
         text_format::append_with_space(
                 str,
                 get_melee_hit_chance_descr(actor));
+
+        if (!actor.is_aware_of_player())
+        {
+                text_format::append_with_space(
+                        str,
+                        get_sneak_chance_descr(actor));
+        }
 
         if (actor_data.allow_spawn_dlvl_descr)
         {

@@ -148,12 +148,13 @@ void Inventory::load()
 
 bool Inventory::has_item_in_backpack(const item::Id id) const
 {
-        auto it = std::find_if(
-                std::begin(m_backpack),
-                std::end(m_backpack),
-                [id](item::Item* item) {
-                        return item->id() == id;
-                });
+        auto it =
+                std::find_if(
+                        std::begin(m_backpack),
+                        std::end(m_backpack),
+                        [id](item::Item* item) {
+                                return item->id() == id;
+                        });
 
         return it != std::end(m_backpack);
 }
@@ -622,14 +623,30 @@ bool Inventory::has_item_in_slot(
         return item->id() == item_id;
 }
 
+std::vector<item::Item*> Inventory::all_items() const
+{
+        std::vector<item::Item*> items = m_backpack;
+
+        for (const auto& slot : m_slots)
+        {
+                if (slot.item)
+                {
+                        items.push_back(slot.item);
+                }
+        }
+
+        return items;
+}
+
 item::Item* Inventory::item_in_backpack(const item::Id id) const
 {
-        auto it = std::find_if(
-                std::begin(m_backpack),
-                std::end(m_backpack),
-                [id](item::Item* item) {
-                        return item->id() == id;
-                });
+        auto it =
+                std::find_if(
+                        std::begin(m_backpack),
+                        std::end(m_backpack),
+                        [id](item::Item* item) {
+                                return item->id() == id;
+                        });
 
         if (it == std::end(m_backpack))
         {
@@ -645,7 +662,7 @@ int Inventory::backpack_idx(const item::Id id) const
         {
                 if (m_backpack[i]->id() == id)
                 {
-                        return i;
+                        return (int)i;
                 }
         }
 

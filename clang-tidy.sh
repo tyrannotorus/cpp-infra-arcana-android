@@ -45,12 +45,12 @@ for c in $(grep -oE "[^\"]*ia-debug.dir[^\"]*" compile_commands.json); do
     fi
 
     cmd="clang-tidy"
-    cmd+=" -quiet"
-    cmd+=" -extra-arg=-Wno-unknown-warning-option"
-    cmd+=" -header-filter=${headers_regex}"
-    cmd+=" $*"
-    cmd+=" ${f}"
-    cmd+=" -- ${c}"
+    cmd=${cmd}" -quiet"
+    cmd=${cmd}" -extra-arg=-Wno-unknown-warning-option"
+    cmd=${cmd}" -header-filter=${headers_regex}"
+    cmd=${cmd}" $*"
+    cmd=${cmd}" ${f}"
+    cmd=${cmd}" -- ${c}"
 
     echo ${cmd} >> clang-tidy-commands.log
     eval ${cmd}

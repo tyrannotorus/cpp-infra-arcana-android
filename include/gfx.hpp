@@ -187,6 +187,7 @@ enum class TileId
         the_high_priest,
         tomb_closed,
         tomb_open,
+        tome,
         tommy_gun,
         trap_general,
         trapez,

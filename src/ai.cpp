@@ -622,12 +622,12 @@ bool look(actor::Mon& mon)
         {
                 if (actor->is_player())
                 {
-                        actor::SneakData sneak_data;
+                        actor::SneakParameters p;
 
-                        sneak_data.actor_sneaking = actor;
-                        sneak_data.actor_searching = &mon;
+                        p.actor_sneaking = actor;
+                        p.actor_searching = &mon;
 
-                        const auto result = actor::roll_sneak(sneak_data);
+                        const auto result = actor::roll_sneak(p);
 
                         const bool is_non_critical_fail =
                                 (result == ActionResult::fail) ||

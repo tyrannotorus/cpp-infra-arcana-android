@@ -535,10 +535,10 @@ void InvState::draw_detailed_item_descr(
                 // -------------------------------------------------------------
                 // Weight
                 // -------------------------------------------------------------
-                const std::string weight_str =
-                        ref_str + item->weight_str() + " to carry.";
-
-                lines.emplace_back(weight_str, colors::green());
+                std::string weight_str =
+                        ref_str +
+                        item->weight_str() +
+                        " to carry";
 
                 const int weight_carried_tot =
                         map::g_player->m_inv.total_item_weight();
@@ -554,17 +554,17 @@ void InvState::draw_detailed_item_descr(
 
                 ASSERT(weight_pct >= 0 && weight_pct <= 100);
 
-                if (weight_pct > 0 && weight_pct < 100)
+                if ((weight_pct > 0) && (weight_pct < 100))
                 {
-                        const std::string pct_str =
-                                "(" +
+                        weight_str +=
+                                " (" +
                                 std::to_string(weight_pct) +
                                 "% of total carried weight)";
-
-                        lines.emplace_back(
-                                pct_str,
-                                colors::green());
                 }
+
+                weight_str += ".";
+
+                lines.emplace_back(weight_str, colors::green());
         }
 
         // We draw the description box regardless of whether the lines are

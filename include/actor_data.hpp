@@ -53,6 +53,7 @@ enum class Id
         leng_doomweaver,
         leng_matriarch,
         rat,
+        transcendent_rat,
         rat_thing,
         pit_viper,
         spitting_cobra,

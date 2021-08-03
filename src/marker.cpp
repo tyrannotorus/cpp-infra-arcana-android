@@ -588,7 +588,7 @@ void Aiming::on_moved()
                                 m_wpn);
 
                         const int hit_chance =
-                                ability_roll::hit_chance_pct_actual(
+                                ability_roll::success_chance_pct_actual(
                                         att_data.hit_chance_tot);
 
                         msg_log::add(
@@ -752,7 +752,7 @@ void Throwing::on_moved()
                                 *m_inv_item);
 
                         const int hit_chance =
-                                ability_roll::hit_chance_pct_actual(
+                                ability_roll::success_chance_pct_actual(
                                         att_data.hit_chance_tot);
 
                         msg_log::add(
@@ -1177,11 +1177,8 @@ bool CtrlObjOpen::can_control(
 
 DidAction CtrlObjOpen::run(
         terrain::Terrain& terrain,
-        const P& marker_pos,
         const SpellSkill skill) const
 {
-        (void)marker_pos;
-
         if (terrain.id() == terrain::Id::door)
         {
                 auto& door = static_cast<terrain::Door&>(terrain);
@@ -1235,11 +1232,8 @@ bool CtrlObjCloseDoor::can_control(
 
 DidAction CtrlObjCloseDoor::run(
         terrain::Terrain& terrain,
-        const P& marker_pos,
         const SpellSkill skill) const
 {
-        (void)marker_pos;
-
         spells::run_close_spell_effect_at(terrain.pos(), skill);
 
         return DidAction::yes;
@@ -1280,10 +1274,8 @@ bool CtrlObjJamDoor::can_control(
 
 DidAction CtrlObjJamDoor::run(
         terrain::Terrain& terrain,
-        const P& marker_pos,
         const SpellSkill skill) const
 {
-        (void)marker_pos;
         (void)skill;
 
         auto& door = static_cast<terrain::Door&>(terrain);
@@ -1322,10 +1314,8 @@ bool CtrlObjToggleLever::can_control(
 
 DidAction CtrlObjToggleLever::run(
         terrain::Terrain& terrain,
-        const P& marker_pos,
         const SpellSkill skill) const
 {
-        (void)marker_pos;
         (void)skill;
 
         auto& lever = static_cast<terrain::Lever&>(terrain);
@@ -1389,7 +1379,6 @@ bool CtrlObjStrike::can_control(
 
 DidAction CtrlObjStrike::run(
         terrain::Terrain& terrain,
-        const P& marker_pos,
         const SpellSkill skill) const
 {
         (void)skill;
@@ -1403,7 +1392,7 @@ DidAction CtrlObjStrike::run(
                 terrain.hit(
                         DmgType::control_object_spell,
                         map::g_player,
-                        marker_pos,
+                        terrain.pos(),
                         dmg);
 
                 return DidAction::yes;
@@ -1469,6 +1458,88 @@ char CtrlObjStrike::menu_key() const
         return 'w';
 }
 
+bool CtrlObjDestrWall::can_control(
+        const terrain::Terrain& terrain,
+        const SpellSkill skill) const
+{
+        if (skill != SpellSkill::transcendent)
+        {
+                return false;
+        }
+
+        switch (terrain.id())
+        {
+        case terrain::Id::wall:
+        case terrain::Id::rubble_high:
+        {
+                return true;
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+
+        return false;
+}
+
+DidAction CtrlObjDestrWall::run(
+        terrain::Terrain& terrain,
+        const SpellSkill skill) const
+{
+        (void)skill;
+
+        if (!map::is_pos_inside_outer_walls(terrain.pos()))
+        {
+                msg_log::add("Nothing happens.");
+
+                return DidAction::yes;
+        }
+
+        switch (terrain.id())
+        {
+        case terrain::Id::door:
+        {
+                // NOTE: The door is hidden.
+                msg_log::add("Nothing happens.");
+
+                return DidAction::yes;
+        }
+        break;
+
+        case terrain::Id::wall:
+        case terrain::Id::rubble_high:
+        {
+                terrain.hit(DmgType::pure, map::g_player);
+
+                return DidAction::yes;
+        };
+
+        default:
+        {
+        }
+        break;
+        }
+
+        ASSERT(false);
+
+        return DidAction::no;
+}
+
+std::string CtrlObjDestrWall::menu_label(const terrain::Terrain& terrain) const
+{
+        const std::string name = terrain.name(Article::the);
+
+        return "(w) Destroy " + name;
+}
+
+char CtrlObjDestrWall::menu_key() const
+{
+        return 'w';
+}
+
 CtrlObj::CtrlObj(const P& origin, const int max_dist, SpellSkill skill) :
         MarkerState(origin),
         m_origin(origin),
@@ -1518,7 +1589,7 @@ void CtrlObj::on_moved()
         const std::string dist_msg =
                 "Distance: " +
                 dist_str +
-                " Max: " +
+                "/" +
                 max_dist_str;
 
         msg_log::add(
@@ -1610,7 +1681,7 @@ void CtrlObj::handle_input(const InputData& input)
         }
 
         m_allow_draw = false;
-        const auto did_action = action->run(*m_terrain, m_pos, m_skill);
+        const auto did_action = action->run(*m_terrain, m_skill);
         m_allow_draw = true;
 
         if (did_action == DidAction::yes)
@@ -1645,6 +1716,9 @@ void CtrlObj::set_possible_actions()
 
         all_actions.emplace_back(
                 std::make_shared<CtrlObjStrike>());
+
+        all_actions.emplace_back(
+                std::make_shared<CtrlObjDestrWall>());
         // ---------------------------------------------------------------------
 
         m_possible_actions.clear();

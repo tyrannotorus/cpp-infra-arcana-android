@@ -483,7 +483,12 @@ void populate_std_lvl()
 
         TRACE_FUNC_BEGIN;
 
-        const int nr_groups_to_spawn = rnd::range(5, 7);
+        int nr_groups_to_spawn = rnd::range(5, 7);
+
+        if (map::g_player->m_inv.has_item_in_backpack(item::Id::necronomicon))
+        {
+                nr_groups_to_spawn += 2;
+        }
 
         int nr_groups_spawned = 0;
 
@@ -669,7 +674,12 @@ void populate_lvl_as_room_types(const std::vector<RoomType>& room_types)
                 return;
         }
 
-        const int nr_groups_to_spawn = rnd::range(5, 7);
+        int nr_groups_to_spawn = rnd::range(5, 7);
+
+        if (map::g_player->m_inv.has_item_in_backpack(item::Id::necronomicon))
+        {
+                nr_groups_to_spawn += 3;
+        }
 
         int nr_groups_spawned = 0;
         int nr_failed = 0;

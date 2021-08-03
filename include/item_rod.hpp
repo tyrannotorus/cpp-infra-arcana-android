@@ -100,10 +100,10 @@ public:
 protected:
         std::string descr_identified() const override
         {
-                return "When activated, this device cures blindness, deafness, "
-                       "poisoning, infections, disease, weakening, and life "
-                       "sapping, and restores the user's health by a small "
-                       "amount.";
+                return (
+                        "When activated, this device restores 3 hit points, "
+                        "and cures blindness, deafness, poisoning, "
+                        "infections, disease, weakening, and life sapping.");
         }
 
         void run_effect() override;

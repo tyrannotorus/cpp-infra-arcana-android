@@ -65,8 +65,8 @@ Prop* make(const PropId id)
         case PropId::hasted:
                 return new PropHasted();
 
-        case PropId::clockwork_hasted:
-                return new PropClockworkHasted();
+        case PropId::extra_hasted:
+                return new PropExtraHasted();
 
         case PropId::summoned:
                 return new PropSummoned();
@@ -114,7 +114,7 @@ Prop* make(const PropId id)
                 return new PropPremonition();
 
         case PropId::erudition:
-                return new Prop(id);
+                return new PropErudition();
 
         case PropId::magic_searching:
                 return new PropMagicSearching();

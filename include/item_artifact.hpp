@@ -228,6 +228,22 @@ private:
         void on_removed_from_inv_hook() override;
 };
 
+// -----------------------------------------------------------------------------
+// Necronomicon
+// -----------------------------------------------------------------------------
+class Necronomicon : public Item
+{
+public:
+        Necronomicon(ItemData* item_data);
+
+        ItemPrePickResult pre_pickup_hook() override;
+
+private:
+        void on_std_turn_in_inv_hook(InvType inv_type) override;
+
+        void on_pickup_hook() override;
+};
+
 }  // namespace item
 
 #endif  // ITEM_ARTIFACT_HPP

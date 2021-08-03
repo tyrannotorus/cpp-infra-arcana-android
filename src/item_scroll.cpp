@@ -37,23 +37,20 @@ struct P;
 // -----------------------------------------------------------------------------
 static std::vector<std::string> s_false_names;
 
-static SpellSkill player_skill_for_scroll(SpellId spell_id)
+static SpellSkill player_skill_for_scroll(const SpellId spell_id)
 {
         auto skill = map::g_player->spell_skill(spell_id);
 
-        // Raise the skill at least to expert level
-        skill = (SpellSkill)std::max(skill, SpellSkill::expert);
+        const bool has_necronomicon =
+                map::g_player->m_inv.has_item_in_backpack(
+                        item::Id::necronomicon);
 
-        // Raise the skill one level if at an altar
-        if ((skill != SpellSkill::master) &&
-            player_spells::is_getting_altar_bonus())
-        {
-                skill = (SpellSkill)((int)skill + 1);
-        }
+        const auto skill_cap =
+                has_necronomicon
+                ? SpellSkill::transcendent
+                : SpellSkill::master;
 
-        // Raise the skill one level if player has erudition
-        if ((skill != SpellSkill::master) &&
-            map::g_player->m_properties.has(PropId::erudition))
+        if (skill < skill_cap)
         {
                 skill = (SpellSkill)((int)skill + 1);
         }

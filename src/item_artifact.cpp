@@ -19,16 +19,23 @@
 #include "debug.hpp"
 #include "dmg_range.hpp"
 #include "fov.hpp"
+#include "game.hpp"
 #include "game_time.hpp"
 #include "item_artifact.hpp"
+#include "item_data.hpp"
+#include "item_factory.hpp"
+#include "item_scroll.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
+#include "player_spells.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "random.hpp"
 #include "saving.hpp"
+#include "spells.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -539,7 +546,7 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
                 return ConsumeItem::no;
         }
 
-        if (map::g_player->m_properties.has(PropId::clockwork_hasted))
+        if (map::g_player->m_properties.has(PropId::extra_hasted))
         {
                 msg_log::add("It will not move.");
 
@@ -557,7 +564,9 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
                 return ConsumeItem::no;
         }
 
-        map::g_player->m_properties.apply(new PropClockworkHasted());
+        map::g_player->m_properties.apply(
+                property_factory::make(
+                        PropId::extra_hasted));
 
         --m_charges;
 
@@ -593,7 +602,7 @@ void SpiritDagger::specific_dmg_mod(
 }
 
 // -----------------------------------------------------------------------------
-// Sorcery Orb
+// Orb of Life
 // -----------------------------------------------------------------------------
 OrbOfLife::OrbOfLife(ItemData* const item_data) :
         Item(item_data)
@@ -622,6 +631,56 @@ void OrbOfLife::on_removed_from_inv_hook()
         map::g_player->change_max_hp(-4, Verbose::yes);
 
         clear_carrier_props();
+}
+
+// -----------------------------------------------------------------------------
+// Necronomicon
+// -----------------------------------------------------------------------------
+Necronomicon::Necronomicon(ItemData* const item_data) :
+        Item(item_data)
+{
+}
+
+void Necronomicon::on_std_turn_in_inv_hook(const InvType inv_type)
+{
+        (void)inv_type;
+
+        if (rnd::percent(2))
+        {
+                Snd snd(
+                        "",
+                        audio::SfxId::END,
+                        IgnoreMsgIfOriginSeen::yes,
+                        map::g_player->m_pos,
+                        map::g_player,
+                        SndVol::high,
+                        AlertsMon::yes);
+
+                snd.run();
+        }
+}
+
+ItemPrePickResult Necronomicon::pre_pickup_hook()
+{
+        if (!player_bon::is_bg(Bg::exorcist))
+        {
+                return ItemPrePickResult::do_pickup;
+        }
+
+        // Is exorcist
+
+        msg_log::add("I destroy the profane text!");
+
+        game::incr_player_xp(10);
+
+        map::g_player->restore_sp(999, false);
+        map::g_player->restore_sp(11, true);
+
+        return ItemPrePickResult::destroy_item;
+}
+
+void Necronomicon::on_pickup_hook()
+{
 }
 
 }  // namespace item

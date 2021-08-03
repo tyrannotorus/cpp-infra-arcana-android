@@ -565,7 +565,7 @@ bool PropHandler::end_prop(
 {
         for (auto it = std::begin(m_props); it != std::end(m_props); ++it)
         {
-                Prop* const prop = it->get();
+                auto* const prop = it->get();
 
                 if ((prop->m_id == id) &&
                     (prop->m_src == PropSrc::intr))

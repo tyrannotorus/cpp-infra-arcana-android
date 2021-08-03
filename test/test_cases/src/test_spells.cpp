@@ -105,27 +105,64 @@ TEST_CASE("Test spell bonuses for learned spells")
                 player_spells::spell_skill(SpellId::heal) ==
                 SpellSkill::basic);
 
+        // With altar bonus
         map::put(new terrain::Altar(player.m_pos.with_x_offset(1)));
 
         REQUIRE(
                 player_spells::spell_skill(SpellId::heal) ==
                 SpellSkill::expert);
 
+        // With eruditon bonus
         player.m_properties.apply(property_factory::make(PropId::erudition));
 
         REQUIRE(
                 player_spells::spell_skill(SpellId::heal) ==
                 SpellSkill::master);
 
+        // Remove altar bonus
         map::put(new terrain::Wall(player.m_pos.with_x_offset(1)));
 
         REQUIRE(
                 player_spells::spell_skill(SpellId::heal) ==
                 SpellSkill::expert);
+
+        // Necronomicon bonus
+        map::g_player->m_inv.put_in_backpack(
+                item::make(item::Id::necronomicon));
+
+        REQUIRE(
+                player_spells::spell_skill(SpellId::heal) ==
+                SpellSkill::master);
+
+        // Re-add the altar bonus
+        map::put(new terrain::Altar(player.m_pos.with_x_offset(1)));
+
+        REQUIRE(
+                player_spells::spell_skill(SpellId::heal) ==
+                SpellSkill::transcendent);
+
+        // Increase spell skill to master level
+        player_spells::incr_spell_skill(SpellId::heal, Verbose::no);
+        player_spells::incr_spell_skill(SpellId::heal, Verbose::no);
+
+        REQUIRE(
+                player_spells::spell_skill(SpellId::heal) ==
+                SpellSkill::transcendent);
+
+        // Remove necronomicon
+        map::g_player->m_inv.drop_all_non_intrinsic(map::g_player->m_pos);
+
+        // Even with intrinsic master level + erudition + altar, the total skill
+        // should still only be master without necronomicon.
+        REQUIRE(
+                player_spells::spell_skill(SpellId::heal) ==
+                SpellSkill::master);
 }
 
 TEST_CASE("Test spell bonuses for manuscripts")
 {
+        // TODO: Add check for Transcendent level casting (with Necronomicon).
+
         // NOTE: There is no functionality to get a spell skill from a scroll,
         // so instead we actually cast the spell and check the effect. This is
         // somewhat ugly though since it depends on game design.

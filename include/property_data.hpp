@@ -12,7 +12,7 @@
 
 #include "random.hpp"
 
-// NOTE: When updating this, also update the two maps below
+// NOTE: When updating this, also update the string -> id map
 enum class PropId
 {
         r_phys,
@@ -53,6 +53,7 @@ enum class PropId
         stunned,
         slowed,
         hasted,
+        extra_hasted,
         infected,
         diseased,
         weakened,
@@ -113,7 +114,6 @@ enum class PropId
         nailed,
         flared,
         wound,
-        clockwork_hasted,  // For the Arcane Clockwork artifact
         summoned,
         swimming,
         hp_sap,
@@ -167,6 +167,8 @@ extern PropData g_data[(size_t)PropId::END];
 void init();
 
 PropId str_to_prop_id(const std::string& str);
+
+std::string descr(PropId id);
 
 }  // namespace property_data
 

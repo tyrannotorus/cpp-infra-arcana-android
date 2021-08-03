@@ -79,7 +79,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
         switch (item_type)
         {
         case ItemType::general:
-                d = item::ItemData();
+                d = {};
                 break;
 
         case ItemType::melee_wpn:
@@ -716,7 +716,7 @@ void init()
         d.melee.att_msgs = {"strike", "strikes"};
         d.ranged.att_msgs = {"fire", "fires"};
         d.ranged.snd_msg = "I hear a bolt of electricity.";
-        d.ranged.att_sfx = audio::SfxId::mi_go_gun_fire;
+        d.ranged.att_sfx = audio::SfxId::migo_gun;
         d.ranged.makes_ricochet_snd = false;
         g_data[(size_t)d.id] = d;
 
@@ -1486,8 +1486,8 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
-        d.id = Id::scroll_mayhem;
-        d.spell_cast_from_scroll = SpellId::mayhem;
+        d.id = Id::scroll_cataclysm;
+        d.spell_cast_from_scroll = SpellId::cataclysm;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
@@ -1526,8 +1526,8 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
-        d.id = Id::scroll_aza_wrath;
-        d.spell_cast_from_scroll = SpellId::aza_wrath;
+        d.id = Id::scroll_aza_gaze;
+        d.spell_cast_from_scroll = SpellId::aza_gaze;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
@@ -1794,6 +1794,7 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::tomb);
         g_data[(size_t)d.id] = d;
@@ -1815,6 +1816,7 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::tomb);
         g_data[(size_t)d.id] = d;
@@ -1836,6 +1838,7 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::tomb);
         g_data[(size_t)d.id] = d;
@@ -1856,6 +1859,7 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::tomb);
         g_data[(size_t)d.id] = d;
@@ -1909,6 +1913,7 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.has_std_activate = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::chest);
@@ -1932,6 +1937,7 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.has_std_activate = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::tomb);
@@ -1953,6 +1959,7 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.has_std_activate = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::tomb);
@@ -1991,6 +1998,7 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::tomb);
         g_data[(size_t)d.id] = d;
@@ -2010,8 +2018,39 @@ void init()
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
         d.chance_to_incl_in_spawn_list = 1;
         d.native_containers.push_back(terrain::Id::tomb);
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::general);
+        d.id = Id::necronomicon;
+        d.base_name = {
+                "Necronomicon",
+                "",
+                "the Necronomicon"};
+        d.base_descr = {
+                "This is the dreaded Necronomicon - the Book of the Dead! "
+                "Its pages contain dire knowledge on esoteric matters such as "
+                "life after death, magical symbols and signs, gateways "
+                "between worlds, time travel, and the true history of Earth.",
+                "While carried, all spells are cast at a higher skill level, "
+                "and it is possible to reach a fourth level, \"Transcendent\".",
+                "All shock taken from all spell casting (for memorized "
+                "spells and Manuscripts) is doubled.",
+                "The presence of one who is consulting such knowledge "
+                "is felt strongly (-20% stealth, 2% chance per turn of "
+                "alerting nearby creatures)."};
+        d.color = colors::dark_sepia();
+        d.weight = Weight::light;
+        d.tile = gfx::TileId::tome;
+        d.character = '?';
+        d.is_unique = true;
+        d.xp_on_found = 20;
+        d.value = Value::supreme_treasure;
+        d.chance_to_incl_in_spawn_list = 1;
+        d.native_containers.push_back(terrain::Id::tomb);
+        d.native_containers.push_back(terrain::Id::bookshelf);
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::throwing_wpn);
@@ -2307,6 +2346,7 @@ ItemData::ItemData() :
         has_std_activate(false),
         is_prio_in_backpack_list(false),
         value(Value::normal),
+        allow_cursed(false),
         weight(Weight::none),
         is_unique(false),
         allow_spawn(true),
