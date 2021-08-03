@@ -689,13 +689,19 @@ Array2<bool> expand(const Array2<bool>& in, const int dist)
 
 bool is_map_connected(const Array2<bool>& blocked)
 {
+        const auto dims = blocked.dims();
+
+        const int x0 = 1;
+        const int y0 = 1;
+        const int x1 = (dims.x - 2);
+        const int y1 = (dims.y - 2);
+
+        // Find a free position to search from.
         P origin(-1, -1);
 
-        const P dims = blocked.dims();
-
-        for (int x = 1; x < dims.x - 1; ++x)
+        for (int x = x0; x <= x1; ++x)
         {
-                for (int y = 1; y < dims.y - 1; ++y)
+                for (int y = y0; y <= y1; ++y)
                 {
                         if (!blocked.at(x, y))
                         {
@@ -720,41 +726,20 @@ bool is_map_connected(const Array2<bool>& blocked)
                         {-1, -1},
                         true);
 
-        // NOTE: We can skip to origin.x immediately, since this is guaranteed
-        // to be the leftmost non-blocked cell.
-        for (int x = origin.x; x < dims.x - 1; ++x)
+        // Check if there is any free position not reached by the flood - if so,
+        // the map is not connected.
+        for (int x = x0; x <= x1; ++x)
         {
-                for (int y = 1; y < dims.y - 1; ++y)
+                for (int y = y0; y <= y1; ++y)
                 {
-                        if ((flood.at(x, y) != 0) ||
-                            blocked.at(x, y) ||
-                            (P(x, y) == origin))
+                        const P p(x, y);
+
+                        if ((p != origin) &&
+                            !blocked.at(p) &&
+                            (flood.at(p) == 0))
                         {
-                                continue;
+                                return false;
                         }
-
-#ifndef NDEBUG
-                        if (init::g_is_demo_mapgen)
-                        {
-                                viewport::show(
-                                        {x, y},
-                                        viewport::ForceCentering::no);
-
-                                states::draw();
-
-                                io::draw_symbol(
-                                        gfx::TileId::excl_mark,
-                                        'X',
-                                        Panel::map,
-                                        viewport::to_view_pos({x, y}),
-                                        colors::light_red());
-
-                                io::update_screen();
-
-                                io::sleep(3);
-                        }
-#endif  // NDEBUG
-                        return false;
                 }
         }
 

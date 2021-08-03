@@ -959,8 +959,9 @@ void make_pathfind_corridor(
                 room_0.m_rooms_con_to.push_back(&room_1);
                 room_1.m_rooms_con_to.push_back(&room_0);
 
-                TRACE_FUNC_END_VERBOSE << "Successfully connected roooms"
-                                       << std::endl;
+                TRACE_FUNC_END_VERBOSE
+                        << "Successfully connected roooms"
+                        << std::endl;
 
                 return;
         }

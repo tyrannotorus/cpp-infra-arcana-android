@@ -423,11 +423,14 @@ bool MapBuilderStd::build_specific()
         // Gather data on choke points in the map (check every position where a
         // door has previously been "proposed")
         // ---------------------------------------------------------------------
+        // TODO: Move this to a separate files
         Array2<bool> blocked(map::dims());
 
         map_parsers::BlocksWalking(ParseActors::no)
                 .run(blocked, blocked.rect());
 
+        // TODO: Considering the stairs free is not ideal for checking map
+        // connectedness, since the stairs could block other positions.
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::door,
                 terrain::Id::liquid_deep,
@@ -436,90 +439,124 @@ bool MapBuilderStd::build_specific()
         const auto is_free_terrain_parser =
                 map_parsers::IsAnyOfTerrains(free_terrains);
 
-        for (int x = 0; x < blocked.w(); ++x)
+        for (const auto& p : map::rect().positions())
         {
-                for (int y = 0; y < blocked.h(); ++y)
+                if (is_free_terrain_parser.run(p))
                 {
-                        const P p(x, y);
-
-                        if (is_free_terrain_parser.run(p))
-                        {
-                                blocked.at(p) = false;
-                        }
+                        blocked.at(p) = false;
                 }
         }
 
-        for (int x = 0; x < map::w(); ++x)
+        // TODO: There should perhaps be a check in both release mode and debug
+        // mode for if the map is connected (late in the generation process),
+        // and in release mode we just invalidate the map and try again.
+#ifndef NDEBUG
+        if (!map_parsers::is_map_connected(blocked))
         {
                 for (int y = 0; y < map::h(); ++y)
                 {
-                        if (blocked.at(x, y) ||
-                            !mapgen::g_door_proposals.at(x, y))
+                        for (int x = 0; x < map::w(); ++x)
                         {
-                                continue;
-                        }
+                                const P print_pos(x, y);
 
-                        ChokePointData d;
+                                std::string sym = " ";
 
-                        const bool is_choke =
-                                mapgen::is_choke_point(
-                                        P(x, y),
-                                        blocked,
-                                        &d);
+                                const auto t_id = map::g_terrain.at(print_pos)->id();
 
-                        // 'is_choke_point' called above may invalidate the map
-                        if (!mapgen::g_is_map_valid)
-                        {
-                                return false;
-                        }
-
-                        if (!is_choke)
-                        {
-                                continue;
-                        }
-
-                        // Find player and stair side
-                        for (size_t side_idx = 0; side_idx < 2; ++side_idx)
-                        {
-                                for (const P& p : d.sides[side_idx])
+                                if (print_pos == map::g_player->m_pos)
                                 {
-                                        if (p == map::g_player->m_pos)
-                                        {
-                                                ASSERT(d.player_side == -1);
+                                        sym = "@";
+                                }
+                                else if (t_id == terrain::Id::stairs)
+                                {
+                                        sym = ">";
+                                }
+                                else if (t_id == terrain::Id::tree)
+                                {
+                                        sym = "|";
+                                }
+                                else if (blocked.at(print_pos))
+                                {
+                                        sym = "#";
+                                }
+                                else
+                                {
+                                        sym = ".";
+                                }
 
-                                                d.player_side = (int)side_idx;
-                                        }
+                                std::cout << sym;
+                        }
 
-                                        if (p == stairs_pos)
-                                        {
-                                                ASSERT(d.stairs_side == -1);
+                        std::cout << std::endl;
+                }
 
-                                                d.stairs_side = (int)side_idx;
-                                        }
+                ASSERT(false);
+        }
+#endif  // NDEBUG
+
+        for (const auto& p : map::rect().positions())
+        {
+                if (blocked.at(p) || !mapgen::g_door_proposals.at(p))
+                {
+                        continue;
+                }
+
+                ChokePointData d;
+                const bool is_choke = mapgen::is_choke_point(p, blocked, &d);
+
+                // 'is_choke_point' called above may invalidate the map
+                if (!mapgen::g_is_map_valid)
+                {
+                        return false;
+                }
+
+                if (!is_choke)
+                {
+                        continue;
+                }
+
+                // Find player and stair side
+                for (size_t side_idx = 0; side_idx < 2; ++side_idx)
+                {
+                        for (const auto& side_p : d.sides[side_idx])
+                        {
+                                if (side_p == map::g_player->m_pos)
+                                {
+                                        ASSERT(d.player_side == -1);
+
+                                        d.player_side = (int)side_idx;
+                                }
+
+                                if (side_p == stairs_pos)
+                                {
+                                        ASSERT(d.stairs_side == -1);
+
+                                        d.stairs_side = (int)side_idx;
                                 }
                         }
+                }
 
-                        if ((d.player_side != 0 && d.player_side != 1) ||
-                            (d.stairs_side != 0 && d.stairs_side != 1))
-                        {
-                                TRACE
-                                        << "d.player_side: "
-                                        << d.player_side
-                                        << "    d.stairs_side: "
-                                        << d.stairs_side
-                                        << std::endl;
+                if ((d.player_side != 0 && d.player_side != 1) ||
+                    (d.stairs_side != 0 && d.stairs_side != 1))
+                {
+                        TRACE
+                                << "d.player_side: "
+                                << d.player_side
+                                << "    d.stairs_side: "
+                                << d.stairs_side
+                                << std::endl;
 
-                                ASSERT(false);
+                        ASSERT(false);
 
-                                // Invalidate the map
-                                mapgen::g_is_map_valid = false;
+                        // Invalidate the map
+                        mapgen::g_is_map_valid = false;
 
-                                return false;
-                        }
+                        return false;
+                }
 
-                        map::g_choke_point_data.emplace_back(d);
-                }  // y loop
-        }  // x loop
+                map::g_choke_point_data.emplace_back(d);
+
+        }  // Map position loop
 
         TRACE
                 << "Found " << map::g_choke_point_data.size()

@@ -396,7 +396,7 @@ void make_sub_rooms()
         {
                 auto* const outer_room = map::g_room_list[i];
 
-                // Put fewer sub rooms late game. If the outer room is not a
+                // Put fewer sub rooms late game; If the outer room is not a
                 // sub-room, and the outer room is not large, we might skip
                 // trying to place sub-rooms in this room. (If the outer room is
                 // a sub-room, then we can go ahead and place as many rooms as

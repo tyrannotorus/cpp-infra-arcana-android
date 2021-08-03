@@ -1587,6 +1587,9 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
         Array2<bool> blocked(map::dims());
 
+        map_parsers::BlocksWalking(ParseActors::no)
+                .run(blocked, blocked.rect());
+
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::door,
                 terrain::Id::liquid_deep,
@@ -1632,8 +1635,6 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
         rnd::shuffle(tree_pos_bucket);
 
-        int nr_trees_placed = 0;
-
         const int tree_one_in_n = rnd::range(3, 10);
 
         while (!tree_pos_bucket.empty())
@@ -1652,8 +1653,6 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                 if (map_parsers::is_map_connected(blocked))
                 {
                         map::put(new terrain::Tree(p));
-
-                        ++nr_trees_placed;
                 }
                 else
                 {
