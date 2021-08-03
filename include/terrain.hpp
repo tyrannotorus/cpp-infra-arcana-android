@@ -575,6 +575,8 @@ enum class WallType
 {
         common,
         common_alt,
+        pillar,
+        pillar_broken,
         cave,
         egypt,
         cliff,

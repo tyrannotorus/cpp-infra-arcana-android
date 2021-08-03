@@ -37,15 +37,63 @@
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
 
-namespace item
-{
-class Item;
-}  // namespace item
-
 #ifndef NDEBUG
 #include "io.hpp"
 #endif  // NDEBUG
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static bool allow_place_pillar_at(const P& pos)
+{
+        for (const auto& d : dir_utils::g_dir_list_w_center)
+        {
+                const auto check_p = pos + d;
+
+                const auto id = map::g_terrain.at(check_p)->id();
+
+                if ((id == terrain::Id::wall) ||
+                    (id == terrain::Id::rubble_high) ||
+                    (id == terrain::Id::grate))
+                {
+                        return false;
+                }
+        }
+
+        return true;
+}
+
+static void place_pillar_at(const P& pos)
+{
+        auto* const wall = new terrain::Wall(pos);
+
+        if (rnd::fraction(4, 5))
+        {
+                wall->m_type = terrain::WallType::pillar;
+        }
+        else
+        {
+                wall->m_type = terrain::WallType::pillar_broken;
+        }
+
+        map::put(wall);
+}
+
+static void place_wall_pillar_at(const P& pos)
+{
+        if (rnd::fraction(4, 5))
+        {
+                map::put(new terrain::Wall(pos));
+        }
+        else
+        {
+                map::put(new terrain::RubbleHigh(pos));
+        }
+}
+
+// -----------------------------------------------------------------------------
+// mapgen
+// -----------------------------------------------------------------------------
 namespace mapgen
 {
 bool g_is_map_valid = true;
@@ -246,32 +294,14 @@ void make_pillars_in_room(const Room& room)
         const P& room_p0(room.m_r.p0);
         const P& room_p1(room.m_r.p1);
 
-        auto allow_place_at = [](const P& p) {
-                for (const P& d : dir_utils::g_dir_list_w_center)
-                {
-                        const auto check_p = p + d;
+        Range step_range(1, 4);
 
-                        const auto id = map::g_terrain.at(check_p)->id();
-
-                        if ((id == terrain::Id::wall) ||
-                            (id == terrain::Id::rubble_high) ||
-                            (id == terrain::Id::grate))
-                        {
-                                return false;
-                        }
-                }
-
-                return true;
-        };
-
-        auto step_size = []() {
-                return rnd::range(1, 4);
-        };
-
-        const int dx = step_size();
-        const int dy = step_size();
+        const int dx = step_range.roll();
+        const int dy = step_range.roll();
 
         const int place_one_in_n = rnd::range(1, 4);
+
+        const bool use_pillar_wall_type = rnd::coin_toss();
 
         for (int y = room_p0.y + 1; y <= room_p1.y - 1; y += dy)
         {
@@ -279,20 +309,20 @@ void make_pillars_in_room(const Room& room)
                 {
                         const P p(x, y);
 
-                        if (!allow_place_at(p))
+                        if (!allow_place_pillar_at(p))
                         {
                                 continue;
                         }
 
                         if (rnd::one_in(place_one_in_n))
                         {
-                                if (rnd::fraction(4, 5))
+                                if (use_pillar_wall_type)
                                 {
-                                        map::put(new terrain::Wall(p));
+                                        place_pillar_at(p);
                                 }
                                 else
                                 {
-                                        map::put(new terrain::RubbleHigh(p));
+                                        place_wall_pillar_at(p);
                                 }
                         }
                         else if (rnd::coin_toss())

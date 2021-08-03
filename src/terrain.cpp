@@ -759,6 +759,14 @@ std::string Wall::name(const Article article) const
                 ret += "stone wall";
                 break;
 
+        case WallType::pillar:
+                ret += "pillar";
+                break;
+
+        case WallType::pillar_broken:
+                ret += "broken pillar";
+                break;
+
         case WallType::cave:
                 ret += "cavern wall";
                 break;
@@ -787,6 +795,10 @@ Color Wall::color_default() const
         case WallType::cave:
                 return colors::gray_brown();
 
+        case WallType::pillar:
+        case WallType::pillar_broken:
+                return colors::gray();
+
         case WallType::common:
         case WallType::common_alt:
                 // Return the wall color of the current map
@@ -810,6 +822,12 @@ gfx::TileId Wall::front_wall_tile() const
         case WallType::common_alt:
                 return gfx::TileId::wall_front_alt1;
 
+        case WallType::pillar:
+                return gfx::TileId::pillar;
+
+        case WallType::pillar_broken:
+                return gfx::TileId::pillar_broken;
+
         case WallType::cliff:
         case WallType::cave:
                 return gfx::TileId::cave_wall_front;
@@ -830,6 +848,12 @@ gfx::TileId Wall::top_wall_tile() const
         case WallType::common:
         case WallType::common_alt:
                 return gfx::TileId::wall_top;
+
+        case WallType::pillar:
+                return gfx::TileId::pillar;
+
+        case WallType::pillar_broken:
+                return gfx::TileId::pillar_broken;
 
         case WallType::cliff:
         case WallType::cave:
