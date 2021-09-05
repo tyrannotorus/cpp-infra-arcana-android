@@ -37,6 +37,7 @@ MINOR TWEAKS AND BALANCING
 * The Spectral Weapons spell always spawn an unlimited number of weapons (one for each carried melee weapon), but the duration of the spawned weapons is very limited (and depends on spell skill level)
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
 * Removed the Searching spell - instead this is a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
+* Clairvoyant Occultists also starts with the Premonition spell
 * The Summoning spell is no longer available to player characters (only to monsters)
 * The Vitality potion can no longer increase hit points above maximum, but instead it applies a status effect that increases hit point regeneration, and gives a small chance per turn to heal a wound
 * The Cursed status effect also causes 5% chance to fail spell casting

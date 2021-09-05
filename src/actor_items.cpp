@@ -145,6 +145,7 @@ static void make_for_player_occultist_transmut()
 
 static void make_for_player_occultist_clairv()
 {
+        learn_spell_player(SpellId::premonition);
         learn_spell_player(SpellId::identify);
 }
 
