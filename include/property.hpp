@@ -470,6 +470,15 @@ private:
         int m_countdown {-1};
 };
 
+class PropZealotStop : public Prop
+{
+public:
+        PropZealotStop() :
+                Prop(PropId::zealot_stop) {}
+
+        PropEnded affect_move_dir(Dir& dir) override;
+};
+
 class PropPoisoned : public Prop
 {
 public:

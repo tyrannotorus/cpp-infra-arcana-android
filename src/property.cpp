@@ -855,6 +855,35 @@ void PropShapeshifts::shapeshift(const Verbose verbose) const
         }
 }
 
+PropEnded PropZealotStop::affect_move_dir(Dir& dir)
+{
+        const int stop_pct_chance = 7;
+
+        if (!m_owner->is_alive() ||
+            !m_owner->m_properties.allow_act() ||
+            (dir == Dir::center) ||
+            m_owner->m_properties.has(PropId::swimming) ||
+            m_owner->m_properties.has(PropId::burning) ||
+            m_owner->m_properties.has(PropId::entangled) ||
+            m_owner->m_properties.has(PropId::terrified) ||
+            m_owner->m_properties.has(PropId::frenzied) ||
+            !rnd::percent(stop_pct_chance))
+        {
+                return PropEnded::no;
+        }
+
+        if (actor::can_player_see_actor(*m_owner))
+        {
+                msg_log::add(
+                        m_owner->name_the() +
+                        " stops and gropes about.");
+        }
+
+        dir = Dir::center;
+
+        return PropEnded::no;
+}
+
 PropEnded PropPoisoned::on_actor_turn()
 {
         if (!m_owner->is_alive())

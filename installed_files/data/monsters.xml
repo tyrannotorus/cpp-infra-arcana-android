@@ -953,8 +953,8 @@
     <!--************************************************************-->
     <monster id="zealot">
         <text>
-            <name_a>a Zealot</name_a>
-            <name_the>the Zealot</name_the>
+            <name_a>a Blinded Zealot</name_a>
+            <name_the>the Blinded Zealot</name_the>
             <corpse_name_a>a Zealot corpse</corpse_name_a>
             <corpse_name_the>the Zealot corpse</corpse_name_the>
             <description>Beckoned by The Thousand-Faced Moon into laying its mind bare for the occult, the psyche of this hierophant was ravaged by scores of entities from fiendish realities. They had it gouge out its eyes and tongue, and left it a husk of former humanity. Now it lumbers about aimlessly, brandishing a spiked mace with which it flays itself in mockery of physical anguish.</description>
@@ -1007,10 +1007,11 @@
 
         <properties>
             <property>r_blind</property>
+            <property>zealot_stop</property>
         </properties>
         
         <ai>
-            <erratic_move_percent>10</erratic_move_percent>
+            <erratic_move_percent>55</erratic_move_percent>
             <turns_aware>16</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>false</looks>

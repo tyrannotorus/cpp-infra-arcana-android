@@ -109,6 +109,7 @@ enum class PropId
         zuul_possess_priest,
         possessed_by_zuul,
         shapeshifts,  // For the Shapeshifter monster
+        zealot_stop,  // The Zealot pauses and "gropes about"
         major_clapham_summon,
         aiming,
         nailed,

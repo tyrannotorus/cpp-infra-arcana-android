@@ -167,6 +167,9 @@ Prop* make(const PropId id)
         case PropId::shapeshifts:
                 return new PropShapeshifts();
 
+        case PropId::zealot_stop:
+                return new PropZealotStop();
+
         case PropId::major_clapham_summon:
                 return new PropMajorClaphamSummon();
 

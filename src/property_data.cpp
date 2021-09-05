@@ -88,7 +88,8 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"vortex", PropId::vortex},
         {"weakened", PropId::weakened},
         {"zuul_possess_priest", PropId::zuul_possess_priest},
-        {"shapeshifts", PropId::shapeshifts}};
+        {"shapeshifts", PropId::shapeshifts},
+        {"zealot_stop", PropId::zealot_stop}};
 
 static void add(PropData& d)
 {
@@ -1004,6 +1005,9 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::shapeshifts;
+        add(d);
+
+        d.id = PropId::zealot_stop;
         add(d);
 
         d.id = PropId::major_clapham_summon;
