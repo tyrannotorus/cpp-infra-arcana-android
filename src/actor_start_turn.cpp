@@ -389,7 +389,7 @@ static void player_incr_passive_shock()
 {
         if (map::g_player->m_properties.allow_act())
         {
-                double passive_shock_taken = 0.1075;
+                double passive_shock_taken = 0.095;
 
                 if (player_bon::bg() == Bg::rogue)
                 {

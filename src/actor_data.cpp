@@ -119,12 +119,14 @@ static const std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
         {"high_priest_guard_rogue", actor::Id::high_priest_guard_rogue},
         {"high_priest_guard_ghoul", actor::Id::high_priest_guard_ghoul}};
 
-static const std::unordered_map<std::string, ShockLvl> str_to_shock_lvl_map = {
-        {"none", ShockLvl::none},
-        {"unsettling", ShockLvl::unsettling},
-        {"frightening", ShockLvl::frightening},
-        {"terrifying", ShockLvl::terrifying},
-        {"mind_shattering", ShockLvl::mind_shattering}};
+using StrToMonShockLvlMap = std::unordered_map<std::string, MonShockLvl>;
+
+static const StrToMonShockLvlMap str_to_shock_lvl_map = {
+        {"none", MonShockLvl::none},
+        {"unsettling", MonShockLvl::unsettling},
+        {"frightening", MonShockLvl::frightening},
+        {"terrifying", MonShockLvl::terrifying},
+        {"mind_shattering", MonShockLvl::mind_shattering}};
 
 static const std::unordered_map<std::string, actor::Speed> str_to_speed_map = {
         {"slow", actor::Speed::slow},
@@ -894,7 +896,7 @@ void ActorData::reset()
         aware_sfx_mon_hidden = audio::SfxId::END;
         spell_msg = "";
         erratic_move_pct = 0;
-        mon_shock_lvl = ShockLvl::none;
+        mon_shock_lvl = MonShockLvl::none;
         is_humanoid = false;
         is_rat = false;
         is_canine = false;

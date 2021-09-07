@@ -1480,7 +1480,7 @@ void Stairs::player_use_fake_stairs()
 
         map::g_player->m_properties.apply(prop);
 
-        map::g_player->incr_shock(ShockLvl::unsettling, ShockSrc::misc);
+        map::g_player->incr_shock(2.0, ShockSrc::misc);
 }
 
 std::string Stairs::name(const Article article) const
@@ -5177,9 +5177,7 @@ DidTriggerTrap Cocoon::trigger_trap(actor::Actor* const actor)
                         msg_log::add(
                                 "There is a half-dissolved human body inside!");
 
-                        map::g_player->incr_shock(
-                                ShockLvl::terrifying,
-                                ShockSrc::misc);
+                        map::g_player->incr_shock(12.0, ShockSrc::misc);
 
                         m_is_trapped = false;
 
@@ -5204,7 +5202,7 @@ DidTriggerTrap Cocoon::trigger_trap(actor::Actor* const actor)
                                 }
                         }
 
-                        const int nr_candidates = spawn_bucket.size();
+                        const int nr_candidates = (int)spawn_bucket.size();
 
                         if (nr_candidates > 0)
                         {
@@ -5213,12 +5211,13 @@ DidTriggerTrap Cocoon::trigger_trap(actor::Actor* const actor)
 
                                 msg_log::add("There are spiders inside!");
 
-                                const size_t nr_spiders = rnd::range(2, 5);
+                                const auto nr_spiders =
+                                        (size_t)rnd::range(2, 5);
 
-                                const int idx =
+                                const auto idx =
                                         rnd::range(0, nr_candidates - 1);
 
-                                const actor::Id actor_id_to_summon =
+                                const auto actor_id_to_summon =
                                         spawn_bucket[idx];
 
                                 actor::spawn(

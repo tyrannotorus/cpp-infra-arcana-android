@@ -1438,7 +1438,7 @@ PropHallucinating::get_allowed_fake_mon_data() const
                         continue;
                 }
 
-                const bool gives_xp = (d.mon_shock_lvl > ShockLvl::none);
+                const bool gives_xp = (d.mon_shock_lvl > MonShockLvl::none);
 
                 if (gives_xp && !d.has_player_seen)
                 {
@@ -2623,9 +2623,7 @@ PropActResult PropCorpseRises::on_act()
                         colors::text(),
                         MsgInterruptPlayer::yes);
 
-                map::g_player->incr_shock(
-                        ShockLvl::frightening,
-                        ShockSrc::see_mon);
+                map::g_player->incr_shock(4.0, ShockSrc::see_mon);
         }
 
         static_cast<actor::Mon*>(m_owner)
@@ -2748,9 +2746,7 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
 
                 msg_log::add(spawn_msg);
 
-                map::g_player->incr_shock(
-                        ShockLvl::frightening,
-                        ShockSrc::see_mon);
+                map::g_player->incr_shock(4.0, ShockSrc::see_mon);
         }
 
         ASSERT(id_to_spawn != actor::Id::END);
@@ -3199,7 +3195,7 @@ PropActResult PropMajorClaphamSummon::on_act()
                                 .is_player_feeling_msg_allowed = false;
                 });
 
-        map::g_player->incr_shock(ShockLvl::terrifying, ShockSrc::misc);
+        map::g_player->incr_shock(12.0, ShockSrc::misc);
 
         m_owner->m_properties.end_prop(id());
 

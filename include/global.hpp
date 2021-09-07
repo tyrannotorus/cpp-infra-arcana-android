@@ -271,7 +271,7 @@ enum class AllowWound
         yes
 };
 
-enum class ShockLvl
+enum class MonShockLvl
 {
         none,
         unsettling,

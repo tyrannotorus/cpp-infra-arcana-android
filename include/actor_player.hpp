@@ -80,15 +80,9 @@ public:
                 Dir dir_to_origin,
                 int percent_audible_distance);
 
-        void incr_shock(ShockLvl shock_lvl, ShockSrc shock_src);
-
         void incr_shock(double shock, ShockSrc shock_src);
 
-        double shock_lvl_to_value(ShockLvl shock_lvl) const;
-
-        void restore_shock(
-                int amount_restored,
-                bool is_temp_shock_restored);
+        void restore_shock(int amount_restored, bool is_temp_shock_restored);
 
         int shock_tot() const;
 

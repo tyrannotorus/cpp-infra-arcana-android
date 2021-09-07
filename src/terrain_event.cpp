@@ -237,7 +237,7 @@ void EventWallCrumble::on_new_turn()
                 mon->become_aware_player(actor::AwareSource::other);
         }
 
-        map::g_player->incr_shock(ShockLvl::terrifying, ShockSrc::see_mon);
+        map::g_player->incr_shock(12.0, ShockSrc::see_mon);
 
         game_time::erase_mob(this, true);
 }
@@ -438,14 +438,12 @@ void EventSnakeEmerge::on_new_turn()
 
                 io::draw_blast_at_cells(seen_tgt_positions, colors::magenta());
 
-                ShockLvl shock_lvl = ShockLvl::unsettling;
+                const double shock_value =
+                        insanity::has_sympt(InsSymptId::phobia_reptile_and_amph)
+                        ? 12.0
+                        : 4.0;
 
-                if (insanity::has_sympt(InsSymptId::phobia_reptile_and_amph))
-                {
-                        shock_lvl = ShockLvl::terrifying;
-                }
-
-                map::g_player->incr_shock(shock_lvl, ShockSrc::see_mon);
+                map::g_player->incr_shock(shock_value, ShockSrc::see_mon);
         }
 
         for (int i = 0; i < nr_summoned; ++i)
@@ -498,9 +496,7 @@ void EventRatsInTheWallsDiscovery::on_new_turn()
                         .set_msg(msg)
                         .run();
 
-                map::g_player->incr_shock(
-                        ShockLvl::mind_shattering,
-                        ShockSrc::misc);
+                map::g_player->incr_shock(50.0, ShockSrc::misc);
 
                 for (auto* const actor : game_time::g_actors)
                 {

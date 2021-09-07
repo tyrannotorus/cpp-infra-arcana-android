@@ -285,29 +285,33 @@ void player_discover_monster(actor::Actor& actor)
 
         d.has_player_seen = true;
 
-        // Give XP based on monster shock rating
         int xp_gained = 0;
+        double shock_value = 0.0;
 
         switch (d.mon_shock_lvl)
         {
-        case ShockLvl::unsettling:
+        case MonShockLvl::unsettling:
                 xp_gained = 3;
+                shock_value = 2.0;
                 break;
 
-        case ShockLvl::frightening:
+        case MonShockLvl::frightening:
                 xp_gained = 5;
+                shock_value = 4.0;
                 break;
 
-        case ShockLvl::terrifying:
+        case MonShockLvl::terrifying:
                 xp_gained = 10;
+                shock_value = 10.0;
                 break;
 
-        case ShockLvl::mind_shattering:
+        case MonShockLvl::mind_shattering:
                 xp_gained = 20;
+                shock_value = 33.0;
                 break;
 
-        case ShockLvl::none:
-        case ShockLvl::END:
+        case MonShockLvl::none:
+        case MonShockLvl::END:
                 break;
         }
 
@@ -325,14 +329,6 @@ void player_discover_monster(actor::Actor& actor)
         msg_log::more_prompt();
 
         add_history_event("Discovered " + name);
-
-        // We also cause some shock the first time
-        double shock_value =
-                map::g_player->shock_lvl_to_value(
-                        d.mon_shock_lvl);
-
-        // Dampen the progression a bit
-        shock_value = pow(shock_value, 0.9);
 
         map::g_player->incr_shock(shock_value, ShockSrc::see_mon);
 }
@@ -428,7 +424,7 @@ void GameState::on_start()
                                 .set_msg(intro_msg)
                                 .run();
                 }
-        }
+        }  // namespace game
 
         if (config::is_intro_lvl_skipped() ||
             (m_entry_mode == GameEntryMode::load_game))

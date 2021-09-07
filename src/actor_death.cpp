@@ -105,9 +105,7 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
 
         game::add_history_event("Was brought back from the dead");
 
-        map::g_player->incr_shock(
-                ShockLvl::mind_shattering,
-                ShockSrc::misc);
+        map::g_player->incr_shock(50.0, ShockSrc::misc);
 
         return true;
 }

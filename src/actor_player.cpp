@@ -303,36 +303,6 @@ double Player::shock_taken_after_mods(
         return (base_shock * (100.0 - shock_res_db)) / 100.0;
 }
 
-double Player::shock_lvl_to_value(const ShockLvl shock_lvl) const
-{
-        double shock_value = 0.0;
-
-        switch (shock_lvl)
-        {
-        case ShockLvl::unsettling:
-                shock_value = 2.0;
-                break;
-
-        case ShockLvl::frightening:
-                shock_value = 4.0;
-                break;
-
-        case ShockLvl::terrifying:
-                shock_value = 12.0;
-                break;
-
-        case ShockLvl::mind_shattering:
-                shock_value = 50.0;
-                break;
-
-        case ShockLvl::none:
-        case ShockLvl::END:
-                break;
-        }
-
-        return shock_value;
-}
-
 void Player::incr_shock(double shock, ShockSrc shock_src)
 {
         if (m_properties.has(PropId::r_shock))
@@ -346,16 +316,6 @@ void Player::incr_shock(double shock, ShockSrc shock_src)
         m_shock += shock;
 
         m_shock = std::max(0.0, m_shock);
-}
-
-void Player::incr_shock(const ShockLvl shock_lvl, ShockSrc shock_src)
-{
-        double shock_value = shock_lvl_to_value(shock_lvl);
-
-        if (shock_value > 0.0)
-        {
-                incr_shock(shock_value, shock_src);
-        }
 }
 
 void Player::restore_shock(
@@ -586,7 +546,7 @@ void Player::add_shock_from_seen_monsters()
                         continue;
                 }
 
-                ShockLvl shock_lvl = ShockLvl::none;
+                auto shock_lvl = MonShockLvl::none;
 
                 if (can_player_see_actor(*actor))
                 {
@@ -598,30 +558,30 @@ void Player::add_shock_from_seen_monsters()
                         if (map::g_seen.at(actor->m_pos))
                         {
                                 // There is an invisible monster here!
-                                shock_lvl = ShockLvl::terrifying;
+                                shock_lvl = MonShockLvl::terrifying;
                         }
                 }
 
                 switch (shock_lvl)
                 {
-                case ShockLvl::unsettling:
+                case MonShockLvl::unsettling:
                         val += 0.05;
                         break;
 
-                case ShockLvl::frightening:
+                case MonShockLvl::frightening:
                         val += 0.3;
                         break;
 
-                case ShockLvl::terrifying:
+                case MonShockLvl::terrifying:
                         val += 0.6;
                         break;
 
-                case ShockLvl::mind_shattering:
+                case MonShockLvl::mind_shattering:
                         val += 1.75;
                         break;
 
-                case ShockLvl::none:
-                case ShockLvl::END:
+                case MonShockLvl::none:
+                case MonShockLvl::END:
                         break;
                 }
         }

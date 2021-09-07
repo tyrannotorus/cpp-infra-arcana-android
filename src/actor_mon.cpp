@@ -880,7 +880,7 @@ DidAction Khephren::on_act()
 
         msg_log::add("Khephren calls a plague of Locusts!");
 
-        map::g_player->incr_shock(ShockLvl::terrifying, ShockSrc::misc);
+        map::g_player->incr_shock(12.0, ShockSrc::misc);
 
         Actor* const leader_of_spawned_mon = m_leader ? m_leader : this;
 

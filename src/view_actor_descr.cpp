@@ -212,38 +212,38 @@ static std::string get_mon_speed_descr(
         }
 }
 
-static MonShockStrings mon_shock_lvl_to_strings(const ShockLvl shock_lvl)
+static MonShockStrings mon_shock_lvl_to_strings(const MonShockLvl shock_lvl)
 {
         MonShockStrings result;
 
         switch (shock_lvl)
         {
-        case ShockLvl::unsettling:
+        case MonShockLvl::unsettling:
                 result.color_fmt_str = "{dark_brown}";
                 result.shock_str = "unsettling";
                 result.punct_str = ".";
                 break;
 
-        case ShockLvl::frightening:
+        case MonShockLvl::frightening:
                 result.color_fmt_str = "{gray}";
                 result.shock_str = "frightening";
                 result.punct_str = ".";
                 break;
 
-        case ShockLvl::terrifying:
+        case MonShockLvl::terrifying:
                 result.color_fmt_str = "{red}";
                 result.shock_str = "terrifying";
                 result.punct_str = "!";
                 break;
 
-        case ShockLvl::mind_shattering:
+        case MonShockLvl::mind_shattering:
                 result.color_fmt_str = "{light_red}";
                 result.shock_str = "mind shattering";
                 result.punct_str = "!";
                 break;
 
-        case ShockLvl::none:
-        case ShockLvl::END:
+        case MonShockLvl::none:
+        case MonShockLvl::END:
                 break;
         }
 

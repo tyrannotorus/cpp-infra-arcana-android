@@ -263,7 +263,7 @@ struct ActorData
         std::string spell_msg;
         std::string death_msg_override;
         int erratic_move_pct;
-        ShockLvl mon_shock_lvl;
+        MonShockLvl mon_shock_lvl;
         bool is_humanoid;
         bool is_rat;
         bool is_canine;

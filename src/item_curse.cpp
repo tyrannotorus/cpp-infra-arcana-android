@@ -243,7 +243,7 @@ void Curse::on_new_turn(const item::Item& item)
                         print_trigger_msg(item);
 
                         map::g_player->incr_shock(
-                                ShockLvl::frightening,
+                                4.0,
                                 ShockSrc::use_strange_item);
 
                         m_warning_dlvl_countdown = -1;
@@ -264,7 +264,7 @@ void Curse::on_new_turn(const item::Item& item)
                         print_warning_msg(item);
 
                         map::g_player->incr_shock(
-                                ShockLvl::unsettling,
+                                2.0,
                                 ShockSrc::use_strange_item);
                 }
 
@@ -639,7 +639,7 @@ void Shriek::shriek(const item::Item& item) const
 
         snd_emit::run(snd);
 
-        map::g_player->incr_shock(ShockLvl::unsettling, ShockSrc::misc);
+        map::g_player->incr_shock(2.0, ShockSrc::misc);
 
         msg_log::more_prompt();
 }

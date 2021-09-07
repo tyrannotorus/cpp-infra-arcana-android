@@ -407,9 +407,7 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
 
                 msg_log::add("This feels useless!");
 
-                map::g_player->incr_shock(
-                        ShockLvl::frightening,
-                        ShockSrc::misc);
+                map::g_player->incr_shock(4.0, ShockSrc::misc);
 
                 game_time::tick();
 
@@ -555,9 +553,7 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
 
         msg_log::add("I wind up the clockwork.");
 
-        map::g_player->incr_shock(
-                ShockLvl::terrifying,
-                ShockSrc::use_strange_item);
+        map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
         if (!map::g_player->is_alive())
         {

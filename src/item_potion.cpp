@@ -276,9 +276,7 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
                                 "I drink an unknown " + potion_name + "...");
                 }
 
-                map::g_player->incr_shock(
-                        ShockLvl::terrifying,
-                        ShockSrc::use_strange_item);
+                map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
                 if (!map::g_player->is_alive())
                 {

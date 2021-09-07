@@ -258,9 +258,7 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
                 }
         }
 
-        map::g_player->incr_shock(
-                ShockLvl::terrifying,
-                ShockSrc::use_strange_item);
+        map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
         game_time::tick();
 
@@ -337,9 +335,7 @@ ConsumeItem Rejuvenator::run_effect()
 
         map::g_player->restore_hp(999);
 
-        map::g_player->incr_shock(
-                ShockLvl::mind_shattering,
-                ShockSrc::use_strange_item);
+        map::g_player->incr_shock(50.0, ShockSrc::use_strange_item);
 
         return ConsumeItem::no;
 }

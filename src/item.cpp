@@ -870,9 +870,7 @@ void ArmorMiGo::on_equip_hook(const Verbose verbose)
                         MsgInterruptPlayer::no,
                         MorePromptOnMsg::yes);
 
-                map::g_player->incr_shock(
-                        ShockLvl::terrifying,
-                        ShockSrc::use_strange_item);
+                map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
         }
 }
 

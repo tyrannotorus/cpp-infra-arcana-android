@@ -130,9 +130,7 @@ void Monolith::activate()
 
         m_is_activated = true;
 
-        map::g_player->incr_shock(
-                ShockLvl::terrifying,
-                ShockSrc::misc);
+        map::g_player->incr_shock(12.0, ShockSrc::misc);
 }
 
 }  // namespace terrain

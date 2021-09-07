@@ -60,9 +60,7 @@ ConsumeItem WitchesEye::activate(actor::Actor* actor)
 
         map::g_player->m_properties.apply(search);
 
-        map::g_player->incr_shock(
-                ShockLvl::terrifying,
-                ShockSrc::use_strange_item);
+        map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
         if (rnd::one_in(3))
         {
@@ -122,9 +120,7 @@ ConsumeItem FluctuatingMaterial::activate(actor::Actor* actor)
 
         states::push(std::make_unique<RemoveTraitState>());
 
-        map::g_player->incr_shock(
-                ShockLvl::terrifying,
-                ShockSrc::use_strange_item);
+        map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
         // TODO: Print a message that the item disappears
 
