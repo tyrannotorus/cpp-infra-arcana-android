@@ -1344,7 +1344,7 @@ void init()
 
         reset_data(d, ItemType::melee_wpn_intr);
         d.id = Id::intr_spores;
-        d.melee.att_msgs = {"", "releases spores"};
+        d.melee.att_msgs = {"", "releases spores on"};
         d.melee.dmg_type = DmgType::blunt;
         g_data[(size_t)d.id] = d;
 
