@@ -1150,7 +1150,7 @@ void PropWound::on_more(const Prop& new_prop)
         {
                 if (m_owner == map::g_player)
                 {
-                        msg_log::add("I die from my wounds!");
+                        msg_log::add("I succumb to my wounds!");
                 }
 
                 actor::kill(
