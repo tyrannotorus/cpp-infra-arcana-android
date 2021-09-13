@@ -239,24 +239,32 @@ static void copy_seen_cells_to_player_memory()
         }
 }
 
-static void set_light()
+static void set_light_level()
 {
         const size_t nr_positions = map::nr_positions();
         for (size_t i = 0; i < nr_positions; ++i)
         {
                 const auto* const t = map::g_terrain.at(i);
 
-                if (map::g_seen.at(i) &&
-                    map::g_light.at(i) &&
-                    t->is_los_passable() &&
-                    (t->id() != terrain::Id::chasm))
+                if (!map::g_seen.at(i) ||
+                    !t->is_los_passable() ||
+                    (t->id() == terrain::Id::chasm))
                 {
-                        auto& color = s_render_array.at(i).color;
+                        continue;
+                }
 
+                auto& color = s_render_array.at(i).color;
+
+                if (map::g_light.at(i))
+                {
                         color.set_rgb(
                                 std::min(255, color.r() + 60),
                                 std::min(255, color.g() + 60),
                                 color.b());
+                }
+                else if (map::g_dark.at(i))
+                {
+                        color = color.shaded(30);
                 }
         }
 }
@@ -584,8 +592,8 @@ static void draw_player_character()
                 return;
         }
 
-        const Color color = map::g_player->color();
-        Color color_bg = colors::black();
+        const auto color = map::g_player->color();
+        const auto color_bg = colors::black();
 
         gfx::TileId tile;
 
@@ -673,7 +681,7 @@ void run()
 
         copy_seen_cells_to_player_memory();
 
-        set_light();
+        set_light_level();
 
         set_mobiles();
 
