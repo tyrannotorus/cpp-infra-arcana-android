@@ -25,6 +25,7 @@
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"
@@ -124,7 +125,8 @@ void Smoke::on_new_turn()
                                 msg_log::add("I am getting smoke in my eyes.");
                         }
 
-                        auto* prop = new PropBlind();
+                        auto* const prop =
+                                property_factory::make(PropId::blind);
 
                         prop->set_duration(rnd::range(1, 3));
 

@@ -130,7 +130,7 @@ void save()
         saving::put_int(s_start_time.minute);
         saving::put_int(s_start_time.second);
 
-        saving::put_int(s_history_events.size());
+        saving::put_int((int)s_history_events.size());
 
         for (const HistoryEvent& event : s_history_events)
         {

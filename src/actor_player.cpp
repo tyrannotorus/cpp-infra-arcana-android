@@ -46,8 +46,8 @@
 #include "player_spells.hpp"
 #include "popup.hpp"
 #include "pos.hpp"
-#include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
 #include "random.hpp"
@@ -83,6 +83,37 @@ static int nr_wounds(const PropHandler& properties)
         {
                 return 0;
         }
+}
+
+static double shock_taken_for_mon_shock_lvl(const MonShockLvl shock_lvl)
+{
+        switch (shock_lvl)
+        {
+        case MonShockLvl::unsettling:
+                return 0.04;
+                break;
+
+        case MonShockLvl::frightening:
+                return 0.25;
+                break;
+
+        case MonShockLvl::terrifying:
+                return 0.5;
+                break;
+
+        case MonShockLvl::mind_shattering:
+                return 1.5;
+                break;
+
+        case MonShockLvl::none:
+        case MonShockLvl::END:
+                return 0.0;
+                break;
+        }
+
+        ASSERT(false);
+
+        return 0.0;
 }
 
 // -----------------------------------------------------------------------------
@@ -171,7 +202,7 @@ void Player::on_hit(
 {
         if (!insanity::has_sympt(InsSymptId::masoch))
         {
-                incr_shock(1, ShockSrc::misc);
+                incr_shock(1.0, ShockSrc::misc);
         }
 
         const bool is_enough_dmg_for_wound = (dmg >= s_min_dmg_to_wound);
@@ -189,7 +220,7 @@ void Player::on_hit(
             !is_ghoul_resist_wound &&
             !config::is_bot_playing())
         {
-                auto* const prop = new PropWound();
+                auto* const prop = property_factory::make(PropId::wound);
 
                 prop->set_indefinite();
 
@@ -552,38 +583,14 @@ void Player::add_shock_from_seen_monsters()
                 {
                         shock_lvl = actor->m_data->mon_shock_lvl;
                 }
-                else
+                else if (map::g_seen.at(actor->m_pos))
                 {
-                        // Monster cannot be seen
-                        if (map::g_seen.at(actor->m_pos))
-                        {
-                                // There is an invisible monster here!
-                                shock_lvl = MonShockLvl::terrifying;
-                        }
+                        // Player is aware of the monster, and the map position
+                        // is seen - this is an invisible monster, how spooky!
+                        shock_lvl = MonShockLvl::terrifying;
                 }
 
-                switch (shock_lvl)
-                {
-                case MonShockLvl::unsettling:
-                        val += 0.05;
-                        break;
-
-                case MonShockLvl::frightening:
-                        val += 0.3;
-                        break;
-
-                case MonShockLvl::terrifying:
-                        val += 0.6;
-                        break;
-
-                case MonShockLvl::mind_shattering:
-                        val += 1.75;
-                        break;
-
-                case MonShockLvl::none:
-                case MonShockLvl::END:
-                        break;
-                }
+                val += shock_taken_for_mon_shock_lvl(shock_lvl);
         }
 
         // Dampen the progression (it doesn't seem right that e.g. 8 monsters

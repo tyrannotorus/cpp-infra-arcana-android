@@ -816,7 +816,7 @@ static void update_trait_data()
         // --- Vicious ---
         d.id = Trait::vicious;
         d.title = "Vicious";
-        d.descr = "+150% backstab damage (in addition to the normal +50%)";
+        d.descr = "+100% backstab damage (in addition to the normal +50%)";
         d.trait_prereqs = {Trait::stealthy, Trait::dexterous};
         d.bg_prereq = Bg::rogue;
         set_trait_data(d);
@@ -824,7 +824,7 @@ static void update_trait_data()
         // --- Ruthless ---
         d.id = Trait::ruthless;
         d.title = "Ruthless";
-        d.descr = "+150% backstab damage";
+        d.descr = "+100% backstab damage";
         d.trait_prereqs = {Trait::vicious};
         d.bg_prereq = Bg::rogue;
         set_trait_data(d);
@@ -916,7 +916,7 @@ void save()
                 saving::put_bool(s_traits_picked[i]);
         }
 
-        saving::put_int(s_trait_log.size());
+        saving::put_int((int)s_trait_log.size());
 
         for (const auto& e : s_trait_log)
         {
@@ -1121,8 +1121,6 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 put("Can dispel magic traps, doing so grants spirit points");
                 put("");
                 put("+3 spirit points (in addition to \"Stout Spirit\")");
-                put("");
-                put("-2 hit points");
                 put("");
                 put_trait(Trait::stout_spirit);
                 break;
@@ -1510,8 +1508,6 @@ void pick_bg(const Bg bg)
                 pick_trait(Trait::stout_spirit);
 
                 map::g_player->change_max_sp(3, Verbose::no);
-
-                map::g_player->change_max_hp(-2, Verbose::no);
         }
         break;
 

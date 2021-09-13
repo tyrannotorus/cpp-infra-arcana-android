@@ -296,7 +296,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::light_sensitive;
-        d.std_rnd_turns = Range(50, 100);
+        d.std_rnd_turns = Range(30, 60);
         d.name = "Light Sensitive";
         d.name_short = "Light Sensitive";
         d.descr = "Is vulnerable to light.";
@@ -309,7 +309,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::blind;
-        d.std_rnd_turns = Range(20, 30);
+        d.std_rnd_turns = Range(6, 12);
         d.name = "Blind";
         d.name_short = "Blind";
         d.descr = "Cannot see, -20% hit chance, -50% chance to evade attacks.";
@@ -325,7 +325,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::deaf;
-        d.std_rnd_turns = Range(200, 300);
+        d.std_rnd_turns = Range(50, 100);
         d.name = "Deaf";
         d.name_short = "Deaf";
         d.msg_start_player = "I am deaf!";
@@ -338,7 +338,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::fainted;
-        d.std_rnd_turns = Range(100, 200);
+        d.std_rnd_turns = Range(30, 60);
         d.name = "Fainted";
         d.name_short = "Fainted";
         d.descr =
@@ -428,7 +428,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::confused;
-        d.std_rnd_turns = Range(80, 120);
+        d.std_rnd_turns = Range(30, 60);
         d.name = "Confused";
         d.name_short = "Confused";
         d.descr =
@@ -640,7 +640,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::diseased;
-        d.std_rnd_turns = Range(50, 100);
+        d.std_rnd_turns = Range(30, 60);
         d.name = "Diseased";
         d.name_short = "Diseased";
         d.descr = "-50% maximum hit points.";
@@ -669,7 +669,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::weakened;
-        d.std_rnd_turns = Range(50, 100);
+        d.std_rnd_turns = Range(30, 60);
         d.name = "Weakened";
         d.name_short = "Weakened";
         d.descr =
@@ -687,7 +687,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::frenzied;
-        d.std_rnd_turns = Range(50, 100);
+        d.std_rnd_turns = Range(30, 60);
         d.name = "Frenzied";
         d.name_short = "Frenzied";
         d.descr =
@@ -719,7 +719,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::cursed;
-        d.std_rnd_turns = Range(50, 100);
+        d.std_rnd_turns = Range(30, 60);
         d.name = "Cursed";
         d.name_short = "Cursed";
         d.descr =
@@ -738,7 +738,7 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::doomed;
-        d.std_rnd_turns = Range(50, 100);
+        d.std_rnd_turns = Range(30, 60);
         d.name = "Doomed";
         d.name_short = "Doomed";
         d.descr =

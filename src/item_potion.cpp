@@ -534,7 +534,8 @@ void Spirit::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Blindness::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(new PropBlind());
+        actor.m_properties.apply(
+                property_factory::make(PropId::blind));
 
         if (actor::can_player_see_actor(actor))
         {

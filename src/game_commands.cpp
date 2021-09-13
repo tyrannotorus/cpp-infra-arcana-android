@@ -1070,7 +1070,7 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f5:
         {
-                map::g_player->incr_shock(50, ShockSrc::misc);
+                map::g_player->incr_shock(50.0, ShockSrc::misc);
         }
         break;
 
@@ -1148,7 +1148,7 @@ void handle(const GameCmd cmd)
                         const auto mon_id = (actor::Id)idx;
 
                         actor::spawn(
-                                map::g_player->m_pos,
+                                map::g_player->m_pos.with_x_offset(2),
                                 {mon_id},
                                 map::rect());
                 }

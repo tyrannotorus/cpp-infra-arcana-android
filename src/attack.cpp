@@ -898,31 +898,32 @@ static std::unique_ptr<Snd> ranged_fire_snd(
 {
         std::unique_ptr<Snd> snd;
 
-        const std::string snd_msg = wpn.data().ranged.snd_msg;
+        const auto snd_msg = wpn.data().ranged.snd_msg;
 
-        if (!snd_msg.empty())
+        if (snd_msg.empty())
         {
-                const audio::SfxId sfx = wpn.data().ranged.att_sfx;
-
-                const SndVol vol = wpn.data().ranged.snd_vol;
-
-                std::string snd_msg_used = snd_msg;
-
-                if (att_data.attacker == map::g_player)
-                {
-                        snd_msg_used = "";
-                }
-
-                snd =
-                        std::make_unique<Snd>(
-                                snd_msg_used,
-                                sfx,
-                                IgnoreMsgIfOriginSeen::yes,
-                                origin,
-                                att_data.attacker,
-                                vol,
-                                AlertsMon::yes);
+                return snd;
         }
+
+        const auto sfx = wpn.data().ranged.att_sfx;
+        const auto vol = wpn.data().ranged.snd_vol;
+
+        auto snd_msg_used = snd_msg;
+
+        if (att_data.attacker == map::g_player)
+        {
+                snd_msg_used = "";
+        }
+
+        snd =
+                std::make_unique<Snd>(
+                        snd_msg_used,
+                        sfx,
+                        IgnoreMsgIfOriginSeen::yes,
+                        origin,
+                        att_data.attacker,
+                        vol,
+                        AlertsMon::yes);
 
         return snd;
 }
@@ -1950,7 +1951,7 @@ DidAction ranged(
 
         const bool has_inf_ammo = wpn.data().ranged.has_infinite_ammo;
 
-        const int nr_projectiles = nr_projectiles_for_ranged_weapon(wpn);
+        const int nr_projectiles = (int)nr_projectiles_for_ranged_weapon(wpn);
 
         ProjectileFireData projectile_data;
 

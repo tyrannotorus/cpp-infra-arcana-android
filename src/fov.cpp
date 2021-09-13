@@ -90,7 +90,7 @@ LosResult check_cell(
 
                 if (i > 1)
                 {
-                        // Check if we are blocked
+                        // Check if we are blocked by darkness
 
                         pre_p.set(p0 + path_deltas[i - 1]);
 

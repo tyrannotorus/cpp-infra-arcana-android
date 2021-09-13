@@ -870,7 +870,7 @@ void init()
                 "dagger.",
 
                 "Melee attacks performed with a dagger against an unaware "
-                "opponent does +300% damage (in addition to the normal +50% "
+                "opponent does +200% damage (in addition to the normal +50% "
                 "damage from stealth attacks).",
 
                 "Melee attacks with daggers are silent."};
@@ -1978,7 +1978,7 @@ void init()
                 "This damage dealt by this weapon is based on the current "
                 "number of of spirit points of the wielder.",
 
-                "Attacking an unaware opponent with a dagger does +300% damage "
+                "Attacking an unaware opponent with a dagger does +200% damage "
                 "(in addition to the normal +50% damage from stealth attacks).",
         };
         d.weight = Weight::light;

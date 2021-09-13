@@ -1144,7 +1144,7 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
         if (rnd::coin_toss())
         {
-                auto* const prop = new PropBlind();
+                auto* const prop = property_factory::make(PropId::blind);
 
                 prop->set_duration(2);
 
@@ -1246,7 +1246,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
-        Prop* const prop = new PropBlind();
+        auto* const prop = property_factory::make(PropId::blind);
 
         actor_hit.m_properties.apply(prop);
 }
@@ -1271,7 +1271,7 @@ void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
                 return;
         }
 
-        auto* prop = new PropBlind();
+        auto* const prop = property_factory::make(PropId::blind);
 
         prop->set_duration(7);
 

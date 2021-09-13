@@ -48,6 +48,12 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+struct PlayerDetectMonState
+{
+        actor::Actor* seen_mon_to_warn_about {nullptr};
+        bool is_any_mon_already_seen {false};
+};
+
 static bool is_hostile_living_mon(const actor::Actor& actor)
 {
         if (actor.is_player())
@@ -255,12 +261,78 @@ static void warn_player_about_mon(const actor::Actor& actor)
                 MorePromptOnMsg::yes);
 }
 
-static void player_discover_monsters()
+static void update_player_seen_monster(
+        actor::Mon& mon,
+        PlayerDetectMonState& state)
+{
+        if (mon.m_mon_aware_state.is_msg_mon_in_view_printed)
+        {
+                state.is_any_mon_already_seen = true;
+        }
+
+        mon.m_mon_aware_state.is_msg_mon_in_view_printed = true;
+
+        const bool should_warn =
+                map::g_player->is_busy() ||
+                (config::always_warn_new_mon() &&
+                 !state.is_any_mon_already_seen);
+
+        if (should_warn)
+        {
+                state.seen_mon_to_warn_about = &mon;
+        }
+        else
+        {
+                // If we should not warn about this seen monster, it means we
+                // should not warn about any seen monster.
+                state.seen_mon_to_warn_about = nullptr;
+        }
+
+        mon.m_mon_aware_state.is_player_feeling_msg_allowed = false;
+}
+
+static void update_player_unseen_monster(
+        actor::Mon& mon,
+        PlayerDetectMonState& state,
+        const Array2<int>& vigilant_flood)
+{
+        if (!mon.is_player_aware_of_me())
+        {
+                mon.m_mon_aware_state.is_msg_mon_in_view_printed = false;
+        }
+
+        const bool is_vigilant_detect_unseeable =
+                should_vigilant_make_aware_of_unseeable_mon(
+                        mon,
+                        vigilant_flood);
+
+        if (is_vigilant_detect_unseeable)
+        {
+                make_aware_of_unseeable_mon_by_vigilant(mon);
+        }
+        else
+        {
+                // Monster is seeable (in a seen cell and not invisible), or not
+                // detectable due to Vigilant.
+                const bool is_spotting_sneaking =
+                        mon.is_sneaking() &&
+                        player_try_spot_sneaking_mon(mon, vigilant_flood);
+
+                if (is_spotting_sneaking)
+                {
+                        on_player_spot_sneaking_mon(mon);
+
+                        state.seen_mon_to_warn_about = nullptr;
+                        state.is_any_mon_already_seen = true;
+                }
+        }
+}
+
+static void update_player_monster_detection()
 {
         const auto vigilant_flood = calc_player_vigilant_flood();
 
-        actor::Actor* seen_mon_to_warn_about = nullptr;
-        bool is_any_mon_already_seen = false;
+        PlayerDetectMonState state;
 
         for (auto* const actor : game_time::g_actors)
         {
@@ -273,76 +345,27 @@ static void player_discover_monsters()
 
                 if (can_player_see_actor(*actor))
                 {
-                        if (mon.m_mon_aware_state
-                                    .is_msg_mon_in_view_printed)
-                        {
-                                is_any_mon_already_seen = true;
-                        }
-
-                        mon.m_mon_aware_state
-                                .is_msg_mon_in_view_printed = true;
-
-                        const bool should_warn =
-                                map::g_player->is_busy() ||
-                                (config::always_warn_new_mon() &&
-                                 !is_any_mon_already_seen);
-
-                        if (should_warn)
-                        {
-                                seen_mon_to_warn_about = &mon;
-                        }
-                        else
-                        {
-                                // If we should not warn about this seen
-                                // monster, it means we should not warn about
-                                // any seen monster
-                                seen_mon_to_warn_about = nullptr;
-                        }
-
-                        mon.m_mon_aware_state
-                                .is_player_feeling_msg_allowed = false;
+                        update_player_seen_monster(
+                                mon,
+                                state);
                 }
                 else
                 {
-                        if (!mon.is_player_aware_of_me())
-                        {
-                                mon.m_mon_aware_state
-                                        .is_msg_mon_in_view_printed = false;
-                        }
+                        update_player_unseen_monster(
+                                mon,
+                                state,
+                                vigilant_flood);
+                }
 
-                        const bool is_vigilant_detect_unseeable =
-                                should_vigilant_make_aware_of_unseeable_mon(
-                                        mon,
-                                        vigilant_flood);
-
-                        if (is_vigilant_detect_unseeable)
-                        {
-                                make_aware_of_unseeable_mon_by_vigilant(mon);
-                        }
-                        else
-                        {
-                                // Monster is seeable (in a seen cell and not
-                                // invisible), or not detectable due to Vigilant
-                                const bool is_spotting_sneaking =
-                                        mon.is_sneaking() &&
-                                        player_try_spot_sneaking_mon(
-                                                mon,
-                                                vigilant_flood);
-
-                                if (is_spotting_sneaking)
-                                {
-                                        on_player_spot_sneaking_mon(mon);
-
-                                        seen_mon_to_warn_about = nullptr;
-                                        is_any_mon_already_seen = true;
-                                }
-                        }
+                if (mon.is_player_aware_of_me())
+                {
+                        mon.m_give_hit_chance_penalty_vs_player = false;
                 }
         }
 
-        if (seen_mon_to_warn_about)
+        if (state.seen_mon_to_warn_about)
         {
-                warn_player_about_mon(*seen_mon_to_warn_about);
+                warn_player_about_mon(*state.seen_mon_to_warn_about);
         }
 }
 
@@ -492,7 +515,7 @@ static void player_start_turn()
         smell::on_player_turn_start();
 
         // Handle monsters coming into vision, detect sneaking monsters, ...
-        player_discover_monsters();
+        update_player_monster_detection();
 
         player.mon_feeling();
 

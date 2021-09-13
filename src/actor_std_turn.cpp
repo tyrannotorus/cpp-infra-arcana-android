@@ -39,6 +39,89 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static int calc_player_turns_per_hp_regen_rate()
+{
+        auto& player = *map::g_player;
+
+        int nr_turns_per_hp = 0;
+
+        // Rapid Recoverer trait affects hp regen?
+        if (player_bon::has_trait(Trait::rapid_recoverer))
+        {
+                nr_turns_per_hp = 2;
+        }
+        else
+        {
+                nr_turns_per_hp = 20;
+        }
+
+        // Wounds affect hp regen?
+        int nr_wounds = 0;
+
+        if (player.m_properties.has(PropId::wound))
+        {
+                auto* const wound =
+                        static_cast<PropWound*>(
+                                player.m_properties.prop(PropId::wound));
+
+                nr_wounds = wound->nr_wounds();
+        }
+
+        int wound_turns_penalty = nr_wounds * 4;
+
+        if (player_bon::has_trait(Trait::survivalist))
+        {
+                wound_turns_penalty /= 2;
+        }
+
+        nr_turns_per_hp += wound_turns_penalty;
+
+        // Items affect hp regen?
+        for (const auto& slot : player.m_inv.m_slots)
+        {
+                if (slot.item)
+                {
+                        nr_turns_per_hp +=
+                                slot.item->hp_regen_change(
+                                        InvType::slots);
+                }
+        }
+
+        for (const auto* const item : player.m_inv.m_backpack)
+        {
+                nr_turns_per_hp +=
+                        item->hp_regen_change(InvType::backpack);
+        }
+
+        nr_turns_per_hp = std::max(1, nr_turns_per_hp);
+
+        return nr_turns_per_hp;
+}
+
+static void player_regen_hp()
+{
+        auto& player = *map::g_player;
+
+        if ((player.m_hp >= actor::max_hp(player)) ||
+            (game_time::turn_nr() <= 1) ||
+            player.m_properties.has(PropId::poisoned) ||
+            player.m_properties.has(PropId::disabled_hp_regen) ||
+            (player_bon::bg() == Bg::ghoul))
+        {
+                return;
+        }
+
+        const int nr_turns_per_hp = calc_player_turns_per_hp_regen_rate();
+        const int turn = game_time::turn_nr();
+
+        if ((turn % nr_turns_per_hp) != 0)
+        {
+                return;
+        }
+
+        ++player.m_hp;
+}
+
 static void player_std_turn()
 {
         auto& player = *map::g_player;
@@ -117,73 +200,7 @@ static void player_std_turn()
                 player.m_active_explosive->on_std_turn_player_hold_ignited();
         }
 
-        // Regenerate Hit Points
-        if (!player.m_properties.has(PropId::poisoned) &&
-            !player.m_properties.has(PropId::disabled_hp_regen) &&
-            (player_bon::bg() != Bg::ghoul))
-        {
-                int nr_turns_per_hp = 0;
-
-                // Rapid Recoverer trait affects hp regen?
-                if (player_bon::has_trait(Trait::rapid_recoverer))
-                {
-                        nr_turns_per_hp = 2;
-                }
-                else
-                {
-                        nr_turns_per_hp = 20;
-                }
-
-                // Wounds affect hp regen?
-                int nr_wounds = 0;
-
-                if (player.m_properties.has(PropId::wound))
-                {
-                        auto* const prop =
-                                player.m_properties.prop(PropId::wound);
-
-                        auto* const wound =
-                                static_cast<PropWound*>(prop);
-
-                        nr_wounds = wound->nr_wounds();
-                }
-
-                const bool is_survivalist =
-                        player_bon::has_trait(Trait::survivalist);
-
-                const int wound_effect_div = is_survivalist ? 2 : 1;
-
-                nr_turns_per_hp += ((nr_wounds * 4) / wound_effect_div);
-
-                // Items affect hp regen?
-                for (const auto& slot : player.m_inv.m_slots)
-                {
-                        if (slot.item)
-                        {
-                                nr_turns_per_hp +=
-                                        slot.item->hp_regen_change(
-                                                InvType::slots);
-                        }
-                }
-
-                for (const auto* const item : player.m_inv.m_backpack)
-                {
-                        nr_turns_per_hp +=
-                                item->hp_regen_change(InvType::backpack);
-                }
-
-                nr_turns_per_hp = std::max(1, nr_turns_per_hp);
-
-                const int turn = game_time::turn_nr();
-                const int max_hp = actor::max_hp(player);
-
-                if ((player.m_hp < max_hp) &&
-                    ((turn % nr_turns_per_hp) == 0) &&
-                    turn > 1)
-                {
-                        ++player.m_hp;
-                }
-        }
+        player_regen_hp();
 
         // Try to spot hidden traps and doors
 

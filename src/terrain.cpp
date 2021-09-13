@@ -4274,7 +4274,7 @@ void Fountain::bump(actor::Actor& actor_bumping)
         case FountainEffect::xp:
         {
                 msg_log::add("I feel more powerful!");
-                game::incr_player_xp(1);
+                game::incr_player_xp(2);
         }
         break;
 

@@ -52,7 +52,7 @@ inline constexpr int g_expl_dmg_max = 40;
 inline constexpr int g_shock_from_obsession = 30;
 
 // How many "units" of weight the player can carry, without trait modifiers etc
-inline constexpr int g_player_carry_weight_base = 500;
+inline constexpr int g_player_carry_weight_base = 600;
 
 // Value used for limiting spawning over time and "breeder" monsters. The actual
 // number of actors may sometimes go a bit above this number, e.g. due to a

@@ -31,7 +31,7 @@
         </audio>
 
         <attributes>
-            <hit_points>14</hit_points>
+            <hit_points>10</hit_points>
             <spirit>3</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -95,7 +95,7 @@
         </audio>
 
         <attributes>
-            <hit_points>14</hit_points>
+            <hit_points>10</hit_points>
             <spirit>14</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -198,7 +198,7 @@
         </audio>
 
         <attributes>
-            <hit_points>30</hit_points>
+            <hit_points>22</hit_points>
             <spirit>30</spirit>
             <speed>slow</speed>
             <shock_level>frightening</shock_level>
@@ -301,7 +301,7 @@
         </audio>
 
         <attributes>
-            <hit_points>26</hit_points>
+            <hit_points>20</hit_points>
             <spirit>0</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -398,7 +398,7 @@
         </audio>
 
         <attributes>
-            <hit_points>26</hit_points>
+            <hit_points>20</hit_points>
             <spirit>0</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -494,7 +494,7 @@
         </audio>
 
         <attributes>
-            <hit_points>8</hit_points>
+            <hit_points>6</hit_points>
             <spirit>8</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -587,7 +587,7 @@
         </audio>
 
         <attributes>
-            <hit_points>3</hit_points>
+            <hit_points>2</hit_points>
             <spirit>8</spirit>
             <speed>fast</speed>
             <shock_level>frightening</shock_level>
@@ -680,7 +680,7 @@
         </audio>
 
         <attributes>
-            <hit_points>28</hit_points>
+            <hit_points>22</hit_points>
             <spirit>25</spirit>
             <speed>very_fast</speed>
             <shock_level>terrifying</shock_level>
@@ -778,7 +778,7 @@
         </audio>
 
         <attributes>
-            <hit_points>6</hit_points>
+            <hit_points>4</hit_points>
             <spirit>16</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -980,7 +980,7 @@
         </audio>
 
         <attributes>
-            <hit_points>40</hit_points>
+            <hit_points>22</hit_points>
             <spirit>30</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
@@ -1072,7 +1072,7 @@
         </audio>
 
         <attributes>
-            <hit_points>6</hit_points>
+            <hit_points>4</hit_points>
             <spirit>12</spirit>
             <speed>fast</speed>
             <shock_level>unsettling</shock_level>
@@ -1160,7 +1160,7 @@
         </audio>
 
         <attributes>
-            <hit_points>24</hit_points>
+            <hit_points>18</hit_points>
             <spirit>60</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -1268,7 +1268,7 @@
         </audio>
 
         <attributes>
-            <hit_points>10</hit_points>
+            <hit_points>7</hit_points>
             <spirit>25</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -1362,7 +1362,7 @@
         </audio>
 
         <attributes>
-            <hit_points>40</hit_points>
+            <hit_points>30</hit_points>
             <spirit>30</spirit>
             <speed>fast</speed>
             <shock_level>frightening</shock_level>
@@ -1459,7 +1459,7 @@
         </audio>
 
         <attributes>
-            <hit_points>40</hit_points>
+            <hit_points>30</hit_points>
             <spirit>30</spirit>
             <speed>fast</speed>
             <shock_level>frightening</shock_level>
@@ -1555,7 +1555,7 @@
         </audio>
 
         <attributes>
-            <hit_points>60</hit_points>
+            <hit_points>45</hit_points>
             <spirit>40</spirit>
             <speed>fast</speed>
             <shock_level>terrifying</shock_level>
@@ -1656,7 +1656,7 @@
         </audio>
 
         <attributes>
-            <hit_points>14</hit_points>
+            <hit_points>12</hit_points>
             <spirit>30</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -1758,7 +1758,7 @@
         </audio>
 
         <attributes>
-            <hit_points>30</hit_points>
+            <hit_points>22</hit_points>
             <spirit>40</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -1860,7 +1860,7 @@
         </audio>
 
         <attributes>
-            <hit_points>60</hit_points>
+            <hit_points>45</hit_points>
             <spirit>50</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -1962,7 +1962,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>12</hit_points>
             <spirit>0</spirit>
             <speed>fast</speed>
             <shock_level>unsettling</shock_level>
@@ -2055,7 +2055,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>12</hit_points>
             <spirit>0</spirit>
             <speed>fast</speed>
             <shock_level>unsettling</shock_level>
@@ -2148,7 +2148,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>12</hit_points>
             <spirit>0</spirit>
             <speed>fast</speed>
             <shock_level>unsettling</shock_level>
@@ -2241,7 +2241,7 @@
         </audio>
 
         <attributes>
-            <hit_points>6</hit_points>
+            <hit_points>4</hit_points>
             <spirit>0</spirit>
             <speed>fast</speed>
             <shock_level>frightening</shock_level>
@@ -2336,7 +2336,7 @@
         </audio>
 
         <attributes>
-            <hit_points>2</hit_points>
+            <hit_points>1</hit_points>
             <spirit>1</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -2384,9 +2384,9 @@
 
         <spawning>
             <min_dungeon_level>1</min_dungeon_level>
-            <max_dungeon_level>6</max_dungeon_level>
-            <spawn_weight>100</spawn_weight>
-            <auto_spawn>false</auto_spawn>
+            <max_dungeon_level>1</max_dungeon_level>
+            <spawn_weight>25</spawn_weight>
+            <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
@@ -2428,7 +2428,7 @@
         </audio>
 
         <attributes>
-            <hit_points>6</hit_points>
+            <hit_points>4</hit_points>
             <spirit>20</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -2522,7 +2522,7 @@
         </audio>
 
         <attributes>
-            <hit_points>4</hit_points>
+            <hit_points>3</hit_points>
             <spirit>8</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
@@ -2617,7 +2617,7 @@
         </audio>
 
         <attributes>
-            <hit_points>4</hit_points>
+            <hit_points>3</hit_points>
             <spirit>0</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -2713,7 +2713,7 @@
         </audio>
 
         <attributes>
-            <hit_points>4</hit_points>
+            <hit_points>3</hit_points>
             <spirit>0</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -2812,7 +2812,7 @@
         </audio>
 
         <attributes>
-            <hit_points>4</hit_points>
+            <hit_points>3</hit_points>
             <spirit>0</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -2908,7 +2908,7 @@
         </audio>
 
         <attributes>
-            <hit_points>22</hit_points>
+            <hit_points>16</hit_points>
             <spirit>0</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -3007,7 +3007,7 @@
         </audio>
 
         <attributes>
-            <hit_points>32</hit_points>
+            <hit_points>24</hit_points>
             <spirit>0</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -3107,7 +3107,7 @@
         </audio>
 
         <attributes>
-            <hit_points>80</hit_points>
+            <hit_points>60</hit_points>
             <spirit>40</spirit>
             <speed>normal</speed>
             <shock_level>mind_shattering</shock_level>
@@ -3203,7 +3203,7 @@
         </audio>
 
         <attributes>
-            <hit_points>10</hit_points>
+            <hit_points>7</hit_points>
             <spirit>20</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -3305,7 +3305,7 @@
         </audio>
 
         <attributes>
-            <hit_points>24</hit_points>
+            <hit_points>18</hit_points>
             <spirit>20</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -3407,7 +3407,7 @@
         </audio>
 
         <attributes>
-            <hit_points>12</hit_points>
+            <hit_points>9</hit_points>
             <spirit>20</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -3509,7 +3509,7 @@
         </audio>
 
         <attributes>
-            <hit_points>70</hit_points>
+            <hit_points>50</hit_points>
             <spirit>30</spirit>
             <speed>normal</speed>
             <shock_level>mind_shattering</shock_level>
@@ -3611,7 +3611,7 @@
         </audio>
 
         <attributes>
-            <hit_points>22</hit_points>
+            <hit_points>16</hit_points>
             <spirit>40</spirit>
             <speed>fast</speed>
             <shock_level>terrifying</shock_level>
@@ -3704,7 +3704,7 @@
         </audio>
 
         <attributes>
-            <hit_points>30</hit_points>
+            <hit_points>22</hit_points>
             <spirit>20</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -3803,7 +3803,7 @@
         </audio>
 
         <attributes>
-            <hit_points>4</hit_points>
+            <hit_points>6</hit_points>
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -3897,7 +3897,7 @@
         </audio>
 
         <attributes>
-            <hit_points>18</hit_points>
+            <hit_points>12</hit_points>
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -3992,7 +3992,7 @@
         </audio>
 
         <attributes>
-            <hit_points>6</hit_points>
+            <hit_points>5</hit_points>
             <spirit>2</spirit>
             <speed>fast</speed>
             <shock_level>none</shock_level>
@@ -4182,7 +4182,7 @@
         </audio>
 
         <attributes>
-            <hit_points>15</hit_points>
+            <hit_points>12</hit_points>
             <spirit>30</spirit>
             <speed>fast</speed>
             <shock_level>terrifying</shock_level>
@@ -4283,7 +4283,7 @@
         </audio>
 
         <attributes>
-            <hit_points>50</hit_points>
+            <hit_points>40</hit_points>
             <spirit>30</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -4375,7 +4375,7 @@
         </audio>
 
         <attributes>
-            <hit_points>70</hit_points>
+            <hit_points>50</hit_points>
             <spirit>30</spirit>
             <speed>normal</speed>
             <shock_level>mind_shattering</shock_level>
@@ -4474,7 +4474,7 @@
         </audio>
 
         <attributes>
-            <hit_points>2</hit_points>
+            <hit_points>1</hit_points>
             <spirit>6</spirit>
             <speed>very_fast</speed>
             <shock_level>none</shock_level>
@@ -4565,7 +4565,7 @@
         </audio>
 
         <attributes>
-            <hit_points>8</hit_points>
+            <hit_points>6</hit_points>
             <spirit>6</spirit>
             <speed>very_fast</speed>
             <shock_level>unsettling</shock_level>
@@ -4658,7 +4658,7 @@
         </audio>
 
         <attributes>
-            <hit_points>12</hit_points>
+            <hit_points>9</hit_points>
             <spirit>8</spirit>
             <speed>very_fast</speed>
             <shock_level>unsettling</shock_level>
@@ -4750,7 +4750,7 @@
         </audio>
 
         <attributes>
-            <hit_points>120</hit_points>
+            <hit_points>90</hit_points>
             <spirit>36</spirit>
             <speed>very_fast</speed>
             <shock_level>mind_shattering</shock_level>
@@ -4844,7 +4844,7 @@
         </audio>
 
         <attributes>
-            <hit_points>32</hit_points>
+            <hit_points>24</hit_points>
             <spirit>20</spirit>
             <speed>fast</speed>
             <shock_level>terrifying</shock_level>
@@ -4938,7 +4938,7 @@
         </audio>
 
         <attributes>
-            <hit_points>60</hit_points>
+            <hit_points>30</hit_points>
             <spirit>20</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -5036,7 +5036,7 @@
         </audio>
 
         <attributes>
-            <hit_points>25</hit_points>
+            <hit_points>18</hit_points>
             <spirit>20</spirit>
             <speed>very_fast</speed>
             <shock_level>unsettling</shock_level>
@@ -5125,7 +5125,7 @@
         </audio>
 
         <attributes>
-            <hit_points>3</hit_points>
+            <hit_points>2</hit_points>
             <spirit>2</spirit>
             <speed>fast</speed>
             <shock_level>none</shock_level>
@@ -5215,7 +5215,7 @@
         </audio>
 
         <attributes>
-            <hit_points>36</hit_points>
+            <hit_points>26</hit_points>
             <spirit>30</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -5314,7 +5314,7 @@
         </audio>
 
         <attributes>
-            <hit_points>36</hit_points>
+            <hit_points>26</hit_points>
             <spirit>30</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -5404,7 +5404,7 @@
         </audio>
 
         <attributes>
-            <hit_points>80</hit_points>
+            <hit_points>60</hit_points>
             <spirit>60</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -5509,7 +5509,7 @@
         </audio>
 
         <attributes>
-            <hit_points>80</hit_points>
+            <hit_points>60</hit_points>
             <spirit>60</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -5616,7 +5616,7 @@
         </audio>
 
         <attributes>
-            <hit_points>30</hit_points>
+            <hit_points>22</hit_points>
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -5709,7 +5709,7 @@
         </audio>
 
         <attributes>
-            <hit_points>60</hit_points>
+            <hit_points>45</hit_points>
             <spirit>24</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -5800,7 +5800,7 @@
         </audio>
 
         <attributes>
-            <hit_points>22</hit_points>
+            <hit_points>16</hit_points>
             <spirit>6</spirit>
             <speed>fast</speed>
             <shock_level>unsettling</shock_level>
@@ -5892,7 +5892,7 @@
         </audio>
 
         <attributes>
-            <hit_points>10</hit_points>
+            <hit_points>7</hit_points>
             <spirit>1</spirit>
             <speed>slow</speed>
             <shock_level>unsettling</shock_level>
@@ -5990,7 +5990,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>12</hit_points>
             <spirit>2</spirit>
             <speed>slow</speed>
             <shock_level>unsettling</shock_level>
@@ -6089,7 +6089,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>12</hit_points>
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
@@ -6187,7 +6187,7 @@
         </audio>
 
         <attributes>
-            <hit_points>20</hit_points>
+            <hit_points>15</hit_points>
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
@@ -6287,7 +6287,7 @@
         </audio>
 
         <attributes>
-            <hit_points>30</hit_points>
+            <hit_points>22</hit_points>
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
@@ -6388,7 +6388,7 @@
         </audio>
 
         <attributes>
-            <hit_points>12</hit_points>
+            <hit_points>9</hit_points>
             <spirit>12</spirit>
             <speed>slow</speed>
             <shock_level>unsettling</shock_level>
@@ -6489,7 +6489,7 @@
         </audio>
 
         <attributes>
-            <hit_points>8</hit_points>
+            <hit_points>6</hit_points>
             <spirit>12</spirit>
             <speed>slow</speed>
             <shock_level>frightening</shock_level>
@@ -6589,7 +6589,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>12</hit_points>
             <spirit>12</spirit>
             <speed>slow</speed>
             <shock_level>frightening</shock_level>
@@ -6689,7 +6689,7 @@
         </audio>
 
         <attributes>
-            <hit_points>40</hit_points>
+            <hit_points>26</hit_points>
             <spirit>40</spirit>
             <speed>slow</speed>
             <shock_level>terrifying</shock_level>
@@ -6781,7 +6781,7 @@
         </audio>
 
         <attributes>
-            <hit_points>35</hit_points>
+            <hit_points>26</hit_points>
             <spirit>40</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -6887,7 +6887,7 @@
         </audio>
 
         <attributes>
-            <hit_points>8</hit_points>
+            <hit_points>6</hit_points>
             <spirit>40</spirit>
             <speed>very_fast</speed>
             <shock_level>frightening</shock_level>
@@ -6988,7 +6988,7 @@
         </audio>
 
         <attributes>
-            <hit_points>300</hit_points>
+            <hit_points>225</hit_points>
             <spirit>40</spirit>
             <speed>slow</speed>
             <shock_level>terrifying</shock_level>
@@ -7080,7 +7080,7 @@
         </audio>
 
         <attributes>
-            <hit_points>100</hit_points>
+            <hit_points>70</hit_points>
             <spirit>40</spirit>
             <speed>fast</speed>
             <shock_level>mind_shattering</shock_level>
@@ -7174,7 +7174,7 @@
         </audio>
 
         <attributes>
-            <hit_points>22</hit_points>
+            <hit_points>16</hit_points>
             <spirit>20</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -7284,7 +7284,7 @@
         </audio>
 
         <attributes>
-            <hit_points>85</hit_points>
+            <hit_points>60</hit_points>
             <spirit>30</spirit>
             <speed>normal</speed>
             <shock_level>terrifying</shock_level>
@@ -7392,7 +7392,7 @@
         </audio>
 
         <attributes>
-            <hit_points>18</hit_points>
+            <hit_points>12</hit_points>
             <spirit>40</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
@@ -7784,7 +7784,7 @@
         </audio>
 
         <attributes>
-            <hit_points>14</hit_points>
+            <hit_points>10</hit_points>
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
@@ -7973,7 +7973,7 @@
         </audio>
 
         <attributes>
-            <hit_points>100</hit_points>
+            <hit_points>70</hit_points>
             <spirit>40</spirit>
             <speed>normal</speed>
             <shock_level>mind_shattering</shock_level>
@@ -8077,7 +8077,7 @@
         </audio>
 
         <attributes>
-            <hit_points>12</hit_points>
+            <hit_points>8</hit_points>
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>

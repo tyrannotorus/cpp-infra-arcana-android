@@ -414,7 +414,7 @@ void act()
         // Occasionally cause shock spikes (code exercise)
         if (rnd::one_in(100))
         {
-                map::g_player->incr_shock(200, ShockSrc::misc);
+                map::g_player->incr_shock(200.0, ShockSrc::misc);
                 return;
         }
 

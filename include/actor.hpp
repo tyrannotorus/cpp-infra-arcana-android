@@ -186,6 +186,7 @@ public:
         // Monster specific data
         AiState m_ai_state {};
         AwareState m_mon_aware_state {};
+        bool m_give_hit_chance_penalty_vs_player {true};
         Actor* m_leader {nullptr};
         std::vector<MonSpell> m_mon_spells {};
         const ActorData* m_mimic_data {nullptr};  // Hallucination

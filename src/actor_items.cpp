@@ -172,8 +172,6 @@ static void make_for_player_rogue()
 
         auto* const dagger = item::make(item::Id::dagger);
 
-        dagger->set_melee_plus(1);
-
         inv.put_in_slot(
                 SlotId::wpn,
                 dagger,
@@ -624,10 +622,7 @@ static void make_item_set_priest_dagger(actor::Actor& actor)
 {
         auto* item = item::make(item::Id::dagger);
 
-        const std::vector<int> weights = {
-                6,
-                3,
-                1};
+        const std::vector<int> weights = {6, 3, 1};
 
         item->set_melee_plus(rnd::weighted_choice(weights) + 1);
 

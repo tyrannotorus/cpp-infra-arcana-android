@@ -71,6 +71,18 @@ static bool is_defender_aware_of_attack(
         }
 }
 
+static bool is_mon_hit_chance_penalty(
+        const actor::Actor* const attacker,
+        const actor::Actor* const defender)
+{
+        return (
+                attacker &&
+                !attacker->is_player() &&
+                defender &&
+                defender->is_player() &&
+                attacker->m_give_hit_chance_penalty_vs_player);
+}
+
 // -----------------------------------------------------------------------------
 // Attack data
 // -----------------------------------------------------------------------------
@@ -216,6 +228,13 @@ MeleeAttData::MeleeAttData(
                 dodging_mod +
                 state_mod;
 
+        if (is_mon_hit_chance_penalty(attacker, defender))
+        {
+                hit_chance_tot = 0;
+        }
+
+        hit_chance_tot = std::clamp(hit_chance_tot, 5, 99);
+
         dmg_range = wpn.melee_dmg(attacker);
 
         if (apply_undead_bane_bon)
@@ -241,22 +260,22 @@ MeleeAttData::MeleeAttData(
                 {
                         if (player_bon::has_trait(Trait::vicious))
                         {
-                                dmg_pct += 150;
+                                dmg_pct += 100;
                         }
 
                         if (player_bon::has_trait(Trait::ruthless))
                         {
-                                dmg_pct += 150;
+                                dmg_pct += 100;
                         }
                 }
 
-                // +300% damage if attacking with a dagger
+                // +200% damage if attacking with a dagger
                 const auto id = wpn.data().id;
 
                 if ((id == item::Id::dagger) ||
                     (id == item::Id::spirit_dagger))
                 {
-                        dmg_pct += 300;
+                        dmg_pct += 200;
                 }
 
                 dmg_range = dmg_range.scaled_pct(dmg_pct);
@@ -458,6 +477,11 @@ RangedAttData::RangedAttData(
                 dist_mod +
                 state_mod;
 
+        if (is_mon_hit_chance_penalty(attacker, defender))
+        {
+                hit_chance_tot = 0;
+        }
+
         hit_chance_tot = std::clamp(hit_chance_tot, 5, 99);
 
         dmg_range = wpn.ranged_dmg(attacker);
@@ -637,6 +661,11 @@ ThrowAttData::ThrowAttData(
                 dodging_mod +
                 dist_mod +
                 state_mod;
+
+        if (is_mon_hit_chance_penalty(attacker, defender))
+        {
+                hit_chance_tot = 0;
+        }
 
         hit_chance_tot = std::clamp(hit_chance_tot, 5, 99);
 
