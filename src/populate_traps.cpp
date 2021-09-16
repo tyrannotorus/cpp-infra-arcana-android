@@ -34,15 +34,15 @@ static Fraction chance_for_trapped_room(const RoomType type)
         switch (type)
         {
         case RoomType::plain:
-                chance = {1, 17};
+                chance = {1, 30};
                 break;
 
         case RoomType::human:
-                chance = {1, 8};
+                chance = {1, 12};
                 break;
 
         case RoomType::ritual:
-                chance = {1, 8};
+                chance = {1, 12};
                 break;
 
         case RoomType::spider:
@@ -54,23 +54,23 @@ static Fraction chance_for_trapped_room(const RoomType type)
                 break;
 
         case RoomType::monster:
-                chance = {1, 12};
+                chance = {1, 30};
                 break;
 
         case RoomType::chasm:
-                chance = {1, 8};
+                chance = {1, 30};
                 break;
 
         case RoomType::damp:
-                chance = {1, 17};
+                chance = {1, 30};
                 break;
 
         case RoomType::pool:
-                chance = {1, 17};
+                chance = {1, 30};
                 break;
 
         case RoomType::jail:
-                chance = {1, 12};
+                chance = {1, 30};
                 break;
 
         case RoomType::corr_link:
@@ -162,7 +162,7 @@ void populate_std_lvl()
 
         for (Room* const room : map::g_room_list)
         {
-                const Fraction chance_trapped =
+                const auto chance_trapped =
                         chance_for_trapped_room(room->m_type);
 
                 if ((chance_trapped.num == -1) || !chance_trapped.roll())
