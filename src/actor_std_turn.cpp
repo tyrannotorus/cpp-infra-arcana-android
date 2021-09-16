@@ -35,6 +35,7 @@
 #include "random.hpp"
 #include "smell.hpp"
 #include "terrain.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -122,6 +123,90 @@ static void player_regen_hp()
         ++player.m_hp;
 }
 
+static int calc_player_spot_terrain_tot_skill(
+        const P& p,
+        const int player_search_skill)
+{
+        const auto& player = *map::g_player;
+
+        const int lit_mod = map::g_light.at(p) ? 10 : 0;
+        const int dist = king_dist(player.m_pos, p);
+        const int dist_mod = -((dist - 1) * 5);
+
+        return player_search_skill + lit_mod + dist_mod;
+}
+
+static void player_try_spot_hidden_terrain()
+{
+        auto& player = *map::g_player;
+
+        if (player.m_properties.has(PropId::confused) ||
+            !player.m_properties.allow_see())
+        {
+                return;
+        }
+
+        // NOTE: Skill value retrieved here is always at least 1
+        const int player_search_skill =
+                map::g_player->ability(
+                        AbilityId::searching,
+                        true);
+
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
+        {
+                if (!map::g_seen.at(i))
+                {
+                        continue;
+                }
+
+                auto* t = map::g_terrain.at(i);
+
+                if (!t->is_hidden())
+                {
+                        continue;
+                }
+
+                const auto& p = t->pos();
+
+                bool is_spotted = false;
+
+                if (p.is_adjacent(player.m_pos) &&
+                    t->id() == terrain::Id::door)
+                {
+                        // Player is adjacent to a hidden door - detection is
+                        // guaranteed.
+                        is_spotted = true;
+                }
+                else
+                {
+                        // Not adjacent to hidden door, roll for success.
+                        int skill_tot =
+                                calc_player_spot_terrain_tot_skill(
+                                        p,
+                                        player_search_skill);
+
+                        if (skill_tot <= 0)
+                        {
+                                continue;
+                        }
+
+                        const auto result = ability_roll::roll(skill_tot);
+
+                        is_spotted = result >= ActionResult::success;
+                }
+
+                if (is_spotted)
+                {
+                        t->reveal(Verbose::yes);
+
+                        t->on_revealed_from_searching();
+
+                        msg_log::more_prompt();
+                }
+        }
+}
+
 static void player_std_turn()
 {
         auto& player = *map::g_player;
@@ -202,58 +287,7 @@ static void player_std_turn()
 
         player_regen_hp();
 
-        // Try to spot hidden traps and doors
-
-        // NOTE: Skill value retrieved here is always at least 1
-        const int player_search_skill =
-                map::g_player->ability(AbilityId::searching, true);
-
-        if (!player.m_properties.has(PropId::confused) &&
-            player.m_properties.allow_see())
-        {
-                const size_t nr_positions = map::nr_positions();
-                for (size_t i = 0; i < nr_positions; ++i)
-                {
-                        if (!map::g_seen.at(i))
-                        {
-                                continue;
-                        }
-
-                        auto* t = map::g_terrain.at(i);
-
-                        if (!t->is_hidden())
-                        {
-                                continue;
-                        }
-
-                        const int lit_mod = map::g_light.at(i) ? 5 : 0;
-
-                        const int dist = king_dist(player.m_pos, t->pos());
-
-                        const int dist_mod = -((dist - 1) * 5);
-
-                        int skill_tot =
-                                player_search_skill +
-                                lit_mod +
-                                dist_mod;
-
-                        if (skill_tot > 0)
-                        {
-                                const bool is_spotted =
-                                        ability_roll::roll(skill_tot) >=
-                                        ActionResult::success;
-
-                                if (is_spotted)
-                                {
-                                        t->reveal(Verbose::yes);
-
-                                        t->on_revealed_from_searching();
-
-                                        msg_log::more_prompt();
-                                }
-                        }
-                }
-        }
+        player_try_spot_hidden_terrain();
 }
 
 static void mon_std_turn(actor::Mon& mon)

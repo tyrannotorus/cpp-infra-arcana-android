@@ -50,6 +50,7 @@ MINOR TWEAKS AND BALANCING
 * The Ghoul trait "Toxic" has 75% chance to apply poison, instead of 25%
 * A lot more terrain objects can be destroyed or lit on fire (for example altars or monoliths are destroyed by explosions, and wooden chests or bookshelves can be lit on fire)
 * The stairs position is always lit, to make it less tedious to discover in huge dark rooms
+* Hidden doors are always detected from adjacent positions (except if blind or confused), but the map generator no longer tries to reveal doors on the path to the stairs (i.e. the stairs may be behind hidden doors)
 * Winning characters show up as statues inside the church building on the intro level, instead of graves outside the church
 * Players can melee attack monsters while nailed by a Spike Gun (but still not while entangled)
 * Statues no longer block line of sight, making them much easier to kick into monsters.

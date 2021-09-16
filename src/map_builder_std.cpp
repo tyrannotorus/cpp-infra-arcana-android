@@ -635,11 +635,6 @@ bool MapBuilderStd::build_specific()
         // }
 
         // ---------------------------------------------------------------------
-        // Reveal all doors on the path to the stairs
-        // ---------------------------------------------------------------------
-        mapgen::reveal_doors_on_path_to_stairs(stairs_pos);
-
-        // ---------------------------------------------------------------------
         // Populate the map with monsters
         // ---------------------------------------------------------------------
         for (const auto* const room : map::g_room_list)
