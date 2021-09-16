@@ -114,15 +114,13 @@ ActorDied hit(
                 }
                 else if (actor.is_player())
                 {
+                        map::g_player->interrupt_actions(
+                                ForceInterruptActions::no);
+
                         msg_log::add(
                                 "I am wracked by light!",
                                 colors::msg_bad());
                 }
-        }
-
-        if (actor.is_player())
-        {
-                map::g_player->interrupt_actions();
         }
 
         const int hp_pct_before = (actor.m_hp * 100) / max_hp(actor);
@@ -218,10 +216,7 @@ ActorDied hit(
         }
 
         // Property resists damage?
-        const auto verbose =
-                actor.is_alive()
-                ? Verbose::yes
-                : Verbose::no;
+        const auto verbose = actor.is_alive() ? Verbose::yes : Verbose::no;
 
         const bool is_dmg_resisted =
                 actor.m_properties.is_resisting_dmg(dmg_type, verbose);
@@ -237,15 +232,6 @@ ActorDied hit(
         if (is_physical_dmg_type(dmg_type))
         {
                 dmg = hit_armor(actor, dmg);
-        }
-
-        // Fire/electricity damage reduction from the Resistant trait?
-        if (((dmg_type == DmgType::fire) ||
-             (dmg_type == DmgType::electric)) &&
-            actor.is_player() &&
-            player_bon::has_trait(Trait::resistant))
-        {
-                dmg /= 2;
         }
 
         dmg = std::max(1, dmg);
@@ -270,6 +256,9 @@ ActorDied hit(
 
                         if (dmg <= 0)
                         {
+                                map::g_player->interrupt_actions(
+                                        ForceInterruptActions::no);
+
                                 return ActorDied::no;
                         }
                 }
@@ -380,6 +369,12 @@ ActorDied hit_sp(
 
         if (actor.m_sp > 0)
         {
+                if (actor.is_player())
+                {
+                        map::g_player->interrupt_actions(
+                                ForceInterruptActions::no);
+                }
+
                 return ActorDied::no;
         }
 

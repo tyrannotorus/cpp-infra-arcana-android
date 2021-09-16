@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <memory>
 #include <ostream>
+#include <string>
 
 #include "actor.hpp"
 #include "actor_data.hpp"
@@ -842,9 +843,9 @@ void ArmorAsbSuit::on_equip_hook(const Verbose verbose)
 {
         (void)verbose;
 
-        auto* prop_r_fire = new PropRFire();
-        auto* prop_r_acid = new PropRAcid();
-        auto* prop_r_elec = new PropRElec();
+        auto* prop_r_fire = property_factory::make(PropId::r_fire);
+        auto* prop_r_acid = property_factory::make(PropId::r_acid);
+        auto* prop_r_elec = property_factory::make(PropId::r_elec);
 
         prop_r_fire->set_indefinite();
         prop_r_acid->set_indefinite();
@@ -1359,35 +1360,6 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
 
                 return ConsumeItem::no;
         }
-        else if (map::g_player->m_properties.has(PropId::poisoned))
-        {
-                msg_log::add("Not while poisoned.");
-
-                m_current_action = MedBagAction::END;
-
-                return ConsumeItem::no;
-        }
-        else if (actor::is_player_seeing_burning_terrain())
-        {
-                msg_log::add(common_text::g_fire_prevent_cmd);
-
-                m_current_action = MedBagAction::END;
-
-                return ConsumeItem::no;
-        }
-        else if (!actor::seen_foes(*map::g_player).empty())
-        {
-                msg_log::add(
-                        common_text::g_mon_prevent_cmd,
-                        colors::text(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
-
-                m_current_action = MedBagAction::END;
-
-                return ConsumeItem::no;
-        }
 
         // OK, we are allowed to use the medical bag
 
@@ -1418,7 +1390,7 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
         // Action can be done
         map::g_player->m_active_medical_bag = this;
 
-        m_nr_turns_left_action = tot_turns_for_action(m_current_action);
+        m_nr_turns_left_action = tot_turns_for_action();
 
         std::string start_msg;
 
@@ -1526,15 +1498,57 @@ void MedicalBag::finish_current_action()
         }
 }
 
-void MedicalBag::interrupted()
+void MedicalBag::interrupted(const ForceInterruptActions is_forced)
 {
-        msg_log::add("My healing is disrupted.");
+        bool should_continue = true;
 
-        m_current_action = MedBagAction::END;
+        if (is_forced == ForceInterruptActions::no)
+        {
+                // Query interruption.
+                const std::string item_name =
+                        name(
+                                ItemRefType::plain,
+                                ItemRefInf::none);
 
-        m_nr_turns_left_action = -1;
+                const std::string msg =
+                        "Continue using " +
+                        item_name +
+                        " (" +
+                        std::to_string(m_nr_turns_left_action) +
+                        " turns left)? " +
+                        common_text::g_yes_or_no_hint;
 
-        map::g_player->m_active_medical_bag = nullptr;
+                msg_log::add(
+                        msg,
+                        colors::light_white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+
+                should_continue =
+                        (query::yes_or_no(
+                                 std::nullopt,
+                                 AllowSpaceCancel::no) ==
+                         BinaryAnswer::yes);
+
+                msg_log::clear();
+        }
+        else
+        {
+                // Forced interruption.
+                msg_log::add("My healing is disrupted.");
+
+                should_continue = false;
+        }
+
+        if (!should_continue)
+        {
+                m_current_action = MedBagAction::END;
+
+                m_nr_turns_left_action = -1;
+
+                map::g_player->m_active_medical_bag = nullptr;
+        }
 }
 
 int MedicalBag::tot_suppl_for_action(const MedBagAction action) const
@@ -1560,27 +1574,16 @@ int MedicalBag::tot_suppl_for_action(const MedBagAction action) const
         return 0;
 }
 
-int MedicalBag::tot_turns_for_action(const MedBagAction action) const
+int MedicalBag::tot_turns_for_action() const
 {
-        const bool is_healer = player_bon::has_trait(Trait::healer);
+        int nr_turns = 10;
 
-        const int div = is_healer ? 2 : 1;
-
-        switch (action)
+        if (player_bon::has_trait(Trait::healer))
         {
-        case MedBagAction::treat_wound:
-                return 80 / div;
-
-        case MedBagAction::sanitize_infection:
-                return 20 / div;
-
-        case MedBagAction::END:
-                break;
+                nr_turns /= 2;
         }
 
-        ASSERT(false);
-
-        return 0;
+        return nr_turns;
 }
 
 // -----------------------------------------------------------------------------

@@ -12,6 +12,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_death.hpp"
+#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
@@ -59,9 +60,13 @@ void run(
                 return;
         }
 
-        const P d = (defender.m_pos - attacked_from_pos).signs();
+        if (is_defender_player)
+        {
+                map::g_player->interrupt_actions(ForceInterruptActions::yes);
+        }
 
-        const P new_pos = defender.m_pos + d;
+        const auto d = (defender.m_pos - attacked_from_pos).signs();
+        const auto new_pos = defender.m_pos + d;
 
         if (map::first_actor_at_pos(new_pos, ActorState::alive))
         {

@@ -508,12 +508,9 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
                 ? colors::msg_bad()
                 : colors::text();
 
-        const auto interrupt =
-                att_data.defender->is_player()
-                ? MsgInterruptPlayer::yes
-                : MsgInterruptPlayer::no;
-
-        msg_log::add(msg, color, interrupt);
+        // NOTE: Interruption is not needed here since the player will be
+        // interrupted by getting hit.
+        msg_log::add(msg, color);
 }
 
 static void print_no_attacker_hit_player_melee_msg(
@@ -526,10 +523,9 @@ static void print_no_attacker_hit_player_melee_msg(
                                 dmg,
                                 att_data));
 
-        msg_log::add(
-                "I am hit" + dmg_punct,
-                colors::msg_bad(),
-                MsgInterruptPlayer::yes);
+        // NOTE: Interruption is not needed here since the player will be
+        // interrupted by getting hit.
+        msg_log::add("I am hit" + dmg_punct, colors::msg_bad());
 }
 
 static void print_no_attacker_hit_mon_melee_msg(
@@ -841,10 +837,9 @@ static void print_projectile_hit_player_msg(const Projectile& projectile)
                                 projectile.dmg,
                                 *projectile.att_data));
 
-        msg_log::add(
-                "I am hit" + dmg_punct,
-                colors::msg_bad(),
-                MsgInterruptPlayer::yes);
+        // NOTE: Interruption is not needed here since the player will be
+        // interrupted by getting hit.
+        msg_log::add("I am hit" + dmg_punct, colors::msg_bad());
 }
 
 static void print_projectile_hit_mon_msg(const Projectile& projectile)

@@ -207,6 +207,12 @@ enum class DmgType
         END
 };
 
+enum class ForceInterruptActions
+{
+        no,
+        yes
+};
+
 constexpr bool is_physical_dmg_type(const DmgType type)
 {
         switch (type)

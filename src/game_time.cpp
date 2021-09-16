@@ -133,6 +133,8 @@ static void run_std_turn_events()
 {
         if (game_time::g_is_magic_descend_nxt_std_turn)
         {
+                map::g_player->interrupt_actions(ForceInterruptActions::yes);
+
                 const PropEndConfig prop_end_config(
                         PropEndAllowCallEndHook::no,
                         PropEndAllowMsg::no,

@@ -116,6 +116,188 @@ static double shock_taken_for_mon_shock_lvl(const MonShockLvl shock_lvl)
         return 0.0;
 }
 
+static std::string make_continue_remove_armor_query_msg()
+{
+        const auto& player = *map::g_player;
+
+        auto* const item = player.m_inv.item_in_slot(SlotId::body);
+
+        ASSERT(item);
+
+        const auto turns_left_str =
+                std::to_string(
+                        player.m_remove_armor_countdown);
+
+        const auto armor_name =
+                item->name(
+                        ItemRefType::a,
+                        ItemRefInf::yes);
+
+        return (
+                "Continue taking off " +
+                armor_name +
+                " (" +
+                turns_left_str +
+                " turns left)? " +
+                common_text::g_yes_or_no_hint);
+}
+
+static std::string make_continue_equip_armor_query_msg()
+{
+        const auto& player = *map::g_player;
+
+        const auto turns_left_str =
+                std::to_string(
+                        player.m_equip_armor_countdown);
+
+        const auto armor_name =
+                player.m_item_equipping->name(
+                        ItemRefType::a,
+                        ItemRefInf::yes);
+
+        return (
+                "Continue putting on " +
+                armor_name +
+                " (" +
+                turns_left_str +
+                " turns left)? " +
+                common_text::g_yes_or_no_hint);
+}
+
+static BinaryAnswer query_continue_equip_armor()
+{
+        const auto& player = *map::g_player;
+
+        ASSERT((player.m_remove_armor_countdown > 0) ||
+               (player.m_equip_armor_countdown > 0));
+
+        std::string msg;
+
+        if (player.m_remove_armor_countdown > 0)
+        {
+                msg = make_continue_remove_armor_query_msg();
+        }
+        else
+        {
+                msg = make_continue_equip_armor_query_msg();
+        }
+
+        msg_log::add(
+                msg,
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+
+        const auto answer =
+                query::yes_or_no(
+                        std::nullopt,
+                        AllowSpaceCancel::no);
+
+        return answer;
+}
+
+static void interrupt_equip_armor(ForceInterruptActions is_forced)
+{
+        bool should_continue_handling_armor = true;
+
+        auto& player = *map::g_player;
+
+        if (player.m_properties.has(PropId::burning))
+        {
+                is_forced = ForceInterruptActions::yes;
+        }
+
+        if (is_forced == ForceInterruptActions::no)
+        {
+                const auto answer = query_continue_equip_armor();
+
+                should_continue_handling_armor = (answer == BinaryAnswer::yes);
+
+                msg_log::clear();
+        }
+        else
+        {
+                // TODO: Print message here (see MedicalBag)
+
+                should_continue_handling_armor = false;
+        }
+
+        if (!should_continue_handling_armor)
+        {
+                player.m_remove_armor_countdown = 0;
+                player.m_equip_armor_countdown = 0;
+                player.m_item_equipping = nullptr;
+                player.m_is_dropping_armor_from_body_slot = false;
+        }
+}
+
+static void interrupt_equip_other_item(const ForceInterruptActions is_forced)
+{
+        bool should_continue = true;
+
+        auto& player = *map::g_player;
+
+        if (is_forced == ForceInterruptActions::no)
+        {
+                // Query interruption.
+
+                const auto wpn_name =
+                        player.m_item_equipping->name(
+                                ItemRefType::a,
+                                ItemRefInf::yes);
+
+                const std::string msg =
+                        "Continue equipping " +
+                        wpn_name +
+                        "? " +
+                        common_text::g_yes_or_no_hint;
+
+                msg_log::add(
+                        msg,
+                        colors::light_white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+
+                should_continue =
+                        (query::yes_or_no(
+                                 std::nullopt,
+                                 AllowSpaceCancel::no) ==
+                         BinaryAnswer::yes);
+
+                msg_log::clear();
+        }
+        else
+        {
+                // Forced interruption.
+
+                // TODO: Print message here (see MedicalBag)
+
+                should_continue = false;
+        }
+
+        if (!should_continue)
+        {
+                player.m_item_equipping = nullptr;
+        }
+}
+
+static void interrupt_equip(const ForceInterruptActions is_forced)
+{
+        auto& player = *map::g_player;
+
+        if ((player.m_remove_armor_countdown > 0) ||
+            (player.m_equip_armor_countdown > 0))
+        {
+                interrupt_equip_armor(is_forced);
+        }
+        else if (player.m_item_equipping)
+        {
+                interrupt_equip_other_item(is_forced);
+        }
+}
+
 // -----------------------------------------------------------------------------
 // actor
 // -----------------------------------------------------------------------------
@@ -124,9 +306,7 @@ namespace actor
 // -----------------------------------------------------------------------------
 // Player
 // -----------------------------------------------------------------------------
-Player::Player()
-
-        = default;
+Player::Player() = default;
 
 Player::~Player()
 {
@@ -200,6 +380,8 @@ void Player::on_hit(
         const DmgType dmg_type,
         const AllowWound allow_wound)
 {
+        map::g_player->interrupt_actions(ForceInterruptActions::yes);
+
         if (!insanity::has_sympt(InsSymptId::masoch))
         {
                 incr_shock(1.0, ShockSrc::misc);
@@ -213,12 +395,15 @@ void Player::on_hit(
                 player_bon::has_trait(Trait::indomitable_fury) &&
                 m_properties.has(PropId::frenzied);
 
-        if ((allow_wound == AllowWound::yes) &&
-            (m_hp - dmg) > 0 &&
-            is_enough_dmg_for_wound &&
-            is_physical &&
-            !is_ghoul_resist_wound &&
-            !config::is_bot_playing())
+        const bool is_wounded =
+                (allow_wound == AllowWound::yes) &&
+                (m_hp - dmg) > 0 &&
+                is_enough_dmg_for_wound &&
+                is_physical &&
+                !is_ghoul_resist_wound &&
+                !config::is_bot_playing();
+
+        if (is_wounded)
         {
                 auto* const prop = property_factory::make(PropId::wound);
 
@@ -546,12 +731,19 @@ void Player::set_auto_move(const Dir dir)
 
 bool Player::is_busy() const
 {
-        return m_active_medical_bag ||
+        return (
+                is_busy_queryable_action() ||
+                (m_wait_turns_left > 0) ||
+                (m_auto_move_dir != Dir::END));
+}
+
+bool Player::is_busy_queryable_action() const
+{
+        return (
+                m_active_medical_bag ||
                 (m_remove_armor_countdown > 0) ||
                 (m_equip_armor_countdown > 0) ||
-                m_item_equipping ||
-                (m_wait_turns_left > 0) ||
-                (m_auto_move_dir != Dir::END);
+                m_item_equipping);
 }
 
 void Player::add_shock_from_seen_monsters()
@@ -718,131 +910,17 @@ void Player::on_log_msg_printed()
         m_auto_move_dir = Dir::END;
 }
 
-void Player::interrupt_actions()
+void Player::interrupt_actions(const ForceInterruptActions is_forced)
 {
-        // Abort healing
         if (m_active_medical_bag)
         {
-                m_active_medical_bag->interrupted();
-                m_active_medical_bag = nullptr;
+                m_active_medical_bag->interrupted(is_forced);
         }
 
-        // Abort taking off/wearing armor?
-        if ((m_remove_armor_countdown > 0) ||
-            (m_equip_armor_countdown > 0))
-        {
-                bool should_continue_handling_armor =
-                        !m_properties.has(PropId::burning);
+        interrupt_equip(is_forced);
 
-                if (should_continue_handling_armor)
-                {
-                        std::string msg;
-
-                        if (m_remove_armor_countdown > 0)
-                        {
-                                auto* const item =
-                                        m_inv.item_in_slot(SlotId::body);
-
-                                ASSERT(item);
-
-                                const auto turns_left_str =
-                                        std::to_string(
-                                                m_remove_armor_countdown);
-
-                                const auto armor_name =
-                                        item->name(
-                                                ItemRefType::a,
-                                                ItemRefInf::yes);
-
-                                msg =
-                                        "Continue taking off " +
-                                        armor_name +
-                                        " (" +
-                                        turns_left_str +
-                                        " turns left)?";
-                        }
-                        else if (m_equip_armor_countdown > 0)
-                        {
-                                const auto turns_left_str =
-                                        std::to_string(
-                                                m_equip_armor_countdown);
-
-                                const auto armor_name =
-                                        m_item_equipping->name(
-                                                ItemRefType::a,
-                                                ItemRefInf::yes);
-
-                                msg =
-                                        "Continue putting on " +
-                                        armor_name +
-                                        " (" +
-                                        turns_left_str +
-                                        " turns left)?";
-                        }
-
-                        msg_log::add(
-                                msg + " " + common_text::g_yes_or_no_hint,
-                                colors::light_white(),
-                                MsgInterruptPlayer::no,
-                                MorePromptOnMsg::no,
-                                CopyToMsgHistory::no);
-
-                        should_continue_handling_armor =
-                                (query::yes_or_no(
-                                         std::nullopt,
-                                         AllowSpaceCancel::no) ==
-                                 BinaryAnswer::yes);
-
-                        msg_log::clear();
-                }
-
-                if (!should_continue_handling_armor)
-                {
-                        m_remove_armor_countdown = 0;
-                        m_equip_armor_countdown = 0;
-                        m_item_equipping = nullptr;
-                        m_is_dropping_armor_from_body_slot = false;
-                }
-        }
-        // Abort equipping other item than armor?
-        else if (m_item_equipping)
-        {
-                const auto wpn_name =
-                        m_item_equipping->name(
-                                ItemRefType::a,
-                                ItemRefInf::yes);
-
-                const std::string msg =
-                        "Continue equipping " +
-                        wpn_name +
-                        "? " +
-                        common_text::g_yes_or_no_hint;
-
-                msg_log::add(
-                        msg,
-                        colors::light_white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
-
-                const bool should_continue =
-                        (query::yes_or_no(
-                                 std::nullopt,
-                                 AllowSpaceCancel::no) ==
-                         BinaryAnswer::yes);
-
-                msg_log::clear();
-
-                if (!should_continue)
-                {
-                        m_item_equipping = nullptr;
-                }
-        }
-
-        // Abort waiting
         m_wait_turns_left = -1;
 
-        // Abort quick move
         m_auto_move_dir = Dir::END;
 }
 
@@ -859,13 +937,18 @@ void Player::hear_sound(
                 return;
         }
 
-        const audio::SfxId sfx = snd.sfx();
+        const auto sfx = snd.sfx();
         const std::string& msg = snd.msg();
         const bool has_snd_msg = !msg.empty() && msg != " ";
 
         if (has_snd_msg)
         {
-                msg_log::add(msg, colors::text(), MsgInterruptPlayer::no);
+                const auto should_interrupt =
+                        (is_origin_seen_by_player)
+                        ? MsgInterruptPlayer::no
+                        : MsgInterruptPlayer::yes;
+
+                msg_log::add(msg, colors::text(), should_interrupt);
         }
 
         // Play audio after message to ensure sync between audio and animation.
@@ -873,7 +956,7 @@ void Player::hear_sound(
 
         if (has_snd_msg)
         {
-                Actor* const actor_who_made_snd = snd.actor_who_made_sound();
+                auto* const actor_who_made_snd = snd.actor_who_made_sound();
 
                 if (actor_who_made_snd && (actor_who_made_snd != this))
                 {

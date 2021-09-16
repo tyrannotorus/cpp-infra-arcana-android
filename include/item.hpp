@@ -566,7 +566,7 @@ public:
 
         void continue_action();
 
-        void interrupted();
+        void interrupted(ForceInterruptActions is_forced);
 
         void finish_current_action();
 
@@ -577,7 +577,7 @@ protected:
 
         int tot_suppl_for_action(MedBagAction action) const;
 
-        int tot_turns_for_action(MedBagAction action) const;
+        int tot_turns_for_action() const;
 
         int m_nr_turns_left_action;
 

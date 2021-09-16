@@ -164,7 +164,7 @@ This represents minor wounds like bruises and sprains, and also general combat m
    (2) Wounds
 This represents more serious long-term damage. Wounds are received when you take a high amount of damage in one hit. Each Wound reduces your fighting abilities, maximum HP, and HP regeneration rate. Five concurrent wounds results in death.
 
-There is an item called a "Medical Bag", which has a certain number of "supplies". When activated, it will either sanitize an infection or treat a Wound. When bitten or clawed by certain monsters, you can become Infected. You should treat the infection before it becomes a disease! It only takes a few turns and supplies. Treating a Wound requires many uninterrupted turns, and uses up lots of supplies.
+There is an item called a "Medical Bag", which has a certain number of "supplies". When activated, it will either sanitize an infection or treat a Wound. When bitten or clawed by certain monsters, you can become Infected; This should be treated before the infection turns into a disease! Treating infections only requires a few supplies, while treating wounds require more.
 
 --------------------------------------------------------------------------------
 Spirit and spell casting

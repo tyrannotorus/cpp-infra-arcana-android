@@ -1717,11 +1717,12 @@ void SpellBolt::run_effect(
                         }
                 }
 
-                msg_log::add(
+                const std::string hit_msg =
                         str_begin +
-                                " " +
-                                m_impl->hit_msg_ending(),
-                        msg_clr);
+                        " " +
+                        m_impl->hit_msg_ending();
+
+                msg_log::add(hit_msg, msg_clr);
         }
 
         const auto dmg_range = m_impl->damage(skill, *caster);

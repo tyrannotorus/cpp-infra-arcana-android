@@ -254,11 +254,16 @@ static void warn_player_about_mon(const actor::Actor& actor)
 {
         const auto name_a = text_format::first_to_upper(actor.name_a());
 
+        const auto should_print_more_prompt =
+                map::g_player->is_busy_queryable_action()
+                ? MorePromptOnMsg::no
+                : MorePromptOnMsg::yes;
+
         msg_log::add(
                 name_a + " is in my view.",
                 colors::text(),
                 MsgInterruptPlayer::yes,
-                MorePromptOnMsg::yes);
+                should_print_more_prompt);
 }
 
 static void update_player_seen_monster(

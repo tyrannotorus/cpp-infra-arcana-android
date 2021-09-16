@@ -351,6 +351,7 @@ static void init_data_list()
         d.msg_res_player = "I resist fainting.";
         d.msg_res_mon = "resists fainting.";
         d.allow_display_turns = true;
+        d.force_interrupt_player_on_start = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::bad;
         add(d);
@@ -369,6 +370,7 @@ static void init_data_list()
         d.msg_res_player = "I resist burning.";
         d.msg_res_mon = "resists burning.";
         d.allow_display_turns = true;
+        d.force_interrupt_player_on_start = true;
         d.update_vision_on_toggled = true;
         d.is_preventable_by_player_trait = true;
         d.allow_test_on_bot = true;
@@ -404,6 +406,7 @@ static void init_data_list()
         d.msg_res_player = "I resist paralyzation.";
         d.msg_res_mon = "resists paralyzation.";
         d.allow_display_turns = true;
+        d.force_interrupt_player_on_start = true;
         d.is_preventable_by_player_trait = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::bad;
@@ -700,6 +703,7 @@ static void init_data_list()
         d.msg_end_player = "I calm down.";
         d.msg_end_mon = "Calms down a little.";
         d.allow_display_turns = true;
+        d.force_interrupt_player_on_start = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::neutral;
         add(d);
@@ -802,6 +806,7 @@ static void init_data_list()
         d.msg_end_player = "I tear free!";
         d.msg_end_mon = "tears free!";
         d.allow_display_turns = false;
+        d.force_interrupt_player_on_start = true;
         d.alignment = PropAlignment::bad;
         add(d);
 

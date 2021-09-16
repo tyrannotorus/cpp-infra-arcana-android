@@ -56,26 +56,51 @@ static size_t find_current_line_nr()
         }
 
         size_t line_nr = 1;
+
         while (true)
         {
                 if (s_lines[line_nr].messages.empty())
                 {
-                        // Empty line found, return previous line number
-                        --line_nr;
-
-                        break;
+                        // Empty line found, return previous line number.
+                        return line_nr - 1;
                 }
 
                 if (line_nr == (msg_log::g_nr_log_lines - 1))
                 {
-                        // This is the last line, return this line number
-                        break;
+                        // This is the last line, return this line number.
+                        return line_nr;
                 }
 
                 ++line_nr;
         }
 
-        return line_nr;
+        ASSERT(false);
+        return 0;
+}
+
+static size_t find_next_empty_line_nr()
+{
+        size_t next_empty_line_nr = 0;
+
+        while (true)
+        {
+                if (s_lines[next_empty_line_nr].messages.empty())
+                {
+                        // Empty line found, return this line number.
+                        return next_empty_line_nr;
+                }
+
+                if (next_empty_line_nr == (msg_log::g_nr_log_lines - 1))
+                {
+                        // All lines have content, wrap around.
+                        return 0;
+                }
+
+                ++next_empty_line_nr;
+        }
+
+        ASSERT(false);
+        return 0;
 }
 
 static int x_after_msg(const Msg* const msg)
@@ -219,6 +244,82 @@ static void draw_more_prompt()
                 io::DrawBg::no);
 }
 
+static void on_msg_not_fit_on_line(
+        const std::string& str,
+        Color color,
+        const MsgInterruptPlayer interrupt_player,
+        const MorePromptOnMsg add_more_prompt_on_msg,
+        const CopyToMsgHistory copy_to_history,
+        const size_t next_empty_line_nr)
+{
+        const bool is_next_empty_last_line =
+                (next_empty_line_nr == (msg_log::g_nr_log_lines - 1));
+
+        if (is_next_empty_last_line)
+        {
+                // The next empty line is the last message log line, Run
+                // a more prompt to clear the log before running this
+                // message (it's annoying to have to confirm a more
+                // prompt in the middle of a message).
+                msg_log::more_prompt();
+
+                msg_log::add(
+                        str,
+                        color,
+                        interrupt_player,
+                        add_more_prompt_on_msg,
+                        copy_to_history);
+
+                return;
+        }
+
+        int w_avail = msg_area_w_avail_for_text_part();
+
+        // Since we split the message, we do not have to reserve space
+        // for the repeat string (e.g. "x4").
+        //
+        // NOTE: In theory, it's actually possible that the last message
+        // will be repeated - this would happen if another message equal
+        // to the last sub-message is added subsequently, e.g.:
+        //
+        // Message 1  : "a long message foo bar", which is split into ->
+        // Message 1a : "a long message"
+        // Message 1b : "foo bar"
+        // Message 2: : "foo bar"
+        //
+        // But this seems extremely unlikely in practice...
+        //
+        w_avail -= s_repeat_str_len;
+
+        const auto lines = text_format::split(str, w_avail);
+
+        for (size_t i = 0; i < lines.size(); ++i)
+        {
+                const bool is_last_msg = (i == (lines.size() - 1));
+
+                // If the message is interrupting, only allow this for
+                // the last line of the split message
+                const auto interrupt_actions_current_line =
+                        is_last_msg
+                        ? interrupt_player
+                        : MsgInterruptPlayer::no;
+
+                // If a more prompt was requested through the parameter,
+                // only allow this on the last message
+                const auto add_more_prompt_current_line =
+                        is_last_msg
+                        ? add_more_prompt_on_msg
+                        : MorePromptOnMsg::no;
+
+                msg_log::add(
+                        lines[i],
+                        color,
+                        interrupt_actions_current_line,
+                        add_more_prompt_current_line,
+                        copy_to_history);
+        }
+}
+
 // -----------------------------------------------------------------------------
 // msg_log
 // -----------------------------------------------------------------------------
@@ -339,7 +440,7 @@ void add(
             (copy_to_history == CopyToMsgHistory::yes) &&
             allow_convert_to_frenzied_str(str))
         {
-                const std::string frenzied_str = convert_to_frenzied_str(str);
+                const auto frenzied_str = convert_to_frenzied_str(str);
 
                 add(
                         frenzied_str,
@@ -355,82 +456,27 @@ void add(
         // case (i.e. with space reserved for a repetition string, and also for
         // a "more" prompt if the next empty line is the last line), split the
         // message into multiple sub-messages through recursive calls.
-        size_t next_empty_line_nr = 0;
-        while (true)
-        {
-                if (s_lines[next_empty_line_nr].messages.empty())
-                {
-                        break;
-                }
+        const size_t next_empty_line_nr = find_next_empty_line_nr();
 
-                if (next_empty_line_nr == (g_nr_log_lines - 1))
-                {
-                        // The last line has content - the next empty is the
-                        // first line
-                        next_empty_line_nr = 0;
-                        break;
-                }
-
-                ++next_empty_line_nr;
-        }
-
-        const bool should_split =
-                worst_case_msg_w_for_line_nr(next_empty_line_nr, str) >
+        const bool is_msg_fit_on_line =
+                worst_case_msg_w_for_line_nr((int)next_empty_line_nr, str) <=
                 panels::w(Panel::log);
 
-        if (should_split)
+        if (!is_msg_fit_on_line)
         {
-                int w_avail = msg_area_w_avail_for_text_part();
-
-                // Since we split the message, we do not have to reserve space
-                // for the repeat string (e.g. "x4").
-                //
-                // NOTE: In theory, it's actually possible that the last message
-                // will be repeated - this would happen if another message equal
-                // to the last sub-message is added subsequently, e.g.:
-                //
-                // Message 1  : "a long message foo bar", which is split into ->
-                // Message 1a : "a long message"
-                // Message 1b : "foo bar"
-                // Message 2: : "foo bar"
-                //
-                // But this seems extremely unlikely in practice...
-                //
-                w_avail -= s_repeat_str_len;
-
-                const auto lines = text_format::split(str, w_avail);
-
-                for (size_t i = 0; i < lines.size(); ++i)
-                {
-                        const bool is_last_msg = (i == (lines.size() - 1));
-
-                        // If the message is interrupting, only allow this for
-                        // the last line of the split message
-                        const auto interrupt_actions_current_line =
-                                is_last_msg
-                                ? interrupt_player
-                                : MsgInterruptPlayer::no;
-
-                        // If a more prompt was requested through the parameter,
-                        // only allow this on the last message
-                        const auto add_more_prompt_current_line =
-                                is_last_msg
-                                ? add_more_prompt_on_msg
-                                : MorePromptOnMsg::no;
-
-                        add(
-                                lines[i],
-                                color,
-                                interrupt_actions_current_line,
-                                add_more_prompt_current_line,
-                                copy_to_history);
-                }
+                on_msg_not_fit_on_line(
+                        str,
+                        color,
+                        interrupt_player,
+                        add_more_prompt_on_msg,
+                        copy_to_history,
+                        next_empty_line_nr);
 
                 return;
         }
 
         // Find the line number to add the message to
-        size_t current_line_nr = find_current_line_nr();
+        auto current_line_nr = find_current_line_nr();
 
         // Handle forced line break
         if (s_lines[current_line_nr].has_forced_line_break)
@@ -449,7 +495,7 @@ void add(
         {
                 // Does the new message fit?
                 const int worst_case_w =
-                        worst_case_msg_w_for_line_nr(current_line_nr, str);
+                        worst_case_msg_w_for_line_nr((int)current_line_nr, str);
 
                 const int new_x =
                         x_after_msg(&s_lines[current_line_nr].messages.back());
@@ -490,7 +536,7 @@ void add(
 
                 const int worst_case_msg_w =
                         worst_case_msg_w_for_line_nr(
-                                current_line_nr,
+                                (int)current_line_nr,
                                 str);
 
                 const int worst_case_msg_x1 = msg_x0 + worst_case_msg_w - 1;
@@ -529,14 +575,14 @@ void add(
                 more_prompt();
         }
 
-        // Messages may stop long actions like first aid and quick walk
+        // Messages may stop long actions like first aid and waiting.
         if (interrupt_player == MsgInterruptPlayer::yes)
         {
-                map::g_player->interrupt_actions();
+                map::g_player->interrupt_actions(ForceInterruptActions::no);
         }
 
         // Some actions are always interrupted by messages, regardless of the
-        // "interrupt_all_player_actions" parameter
+        // "interrupt_all_player_actions" parameter.
         map::g_player->on_log_msg_printed();
 }
 
@@ -623,9 +669,9 @@ StateId MsgHistoryState::id() const
 
 void MsgHistoryState::init_top_btm_line_numbers()
 {
-        const int history_size = m_history.size();
+        const auto history_size = (int)m_history.size();
 
-        const int panel_h = panels::h(Panel::info_screen_content);
+        const auto panel_h = panels::h(Panel::info_screen_content);
 
         m_top_line_nr = history_size - panel_h;
         m_top_line_nr = std::max(0, m_top_line_nr);
@@ -698,7 +744,7 @@ void MsgHistoryState::update()
 {
         const int line_jump = 3;
 
-        const int history_size = m_history.size();
+        const int history_size = (int)m_history.size();
 
         const auto input = io::get();
 

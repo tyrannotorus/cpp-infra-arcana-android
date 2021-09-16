@@ -102,8 +102,14 @@ public:
 
         void add_light_hook(Array2<bool>& light_map) const override;
 
-        void on_log_msg_printed();  // Aborts e.g. searching and quick move
-        void interrupt_actions();  // Aborts e.g. healing
+        // Only interrupts repeated commands like waiting.
+        void on_log_msg_printed();
+
+        // Aborts e.g. healing. "is_forced" controlls if querying is allowed
+        // (for example if the player is seeing a monster, the game shall query
+        // the player to continue, but if the player is knocked back the healing
+        // should just be aborted).
+        void interrupt_actions(ForceInterruptActions is_forced);
 
         int enc_percent() const;
 
@@ -123,6 +129,10 @@ public:
         void incr_insanity();
 
         bool is_busy() const;
+
+        // Is the player busy with something that would result in a query on
+        // interruption? ("Do you want to continue?")
+        bool is_busy_queryable_action() const;
 
         // Randomly prints a message such as "I sense an object of great power
         // here" if there is a major treasure on the map (on the floor or in a

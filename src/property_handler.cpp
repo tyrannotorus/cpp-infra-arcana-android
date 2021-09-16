@@ -214,6 +214,12 @@ void PropHandler::apply(
 
                 if (did_apply_more)
                 {
+                        if (prop->m_data.force_interrupt_player_on_start)
+                        {
+                                map::g_player->interrupt_actions(
+                                        ForceInterruptActions::yes);
+                        }
+
                         return;
                 }
         }
@@ -246,6 +252,11 @@ void PropHandler::apply(
         }
 
         prop->on_applied();
+
+        if (prop->m_data.force_interrupt_player_on_start)
+        {
+                map::g_player->interrupt_actions(ForceInterruptActions::yes);
+        }
 }
 
 void PropHandler::print_resist_msg(const Prop& prop)
@@ -289,6 +300,8 @@ void PropHandler::print_start_msg(const Prop& prop)
 
                 if (!msg.empty())
                 {
+                        // TODO: We should also force interrupt if the player
+                        // cannot act (but maybe not here).
                         const auto is_interrupting =
                                 (prop.alignment() != PropAlignment::good)
                                 ? MsgInterruptPlayer::yes
