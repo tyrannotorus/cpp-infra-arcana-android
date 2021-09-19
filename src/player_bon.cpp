@@ -730,26 +730,6 @@ static void update_trait_data()
         d.bg_prereq = Bg::exorcist;
         set_trait_data(d);
 
-        // --- Cast Purge ---
-        d.id = Trait::cast_purge;
-        d.title = "Cast Purge";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::purge,
-                        SpellSkill::basic);
-        d.on_picked = []() {
-                player_spells::learn_spell(
-                        SpellId::purge,
-                        Verbose::no);
-        };
-        d.on_removed = []() {
-                player_spells::unlearn_spell(
-                        SpellId::purge,
-                        Verbose::no);
-        };
-        d.bg_prereq = Bg::exorcist;
-        set_trait_data(d);
-
         // --- Prolonged Life ---
         d.id = Trait::prolonged_life;
         d.title = "Prolonged Life";

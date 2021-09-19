@@ -66,7 +66,6 @@ enum class Trait
         cast_sanctuary_ii,
         cast_see_invisible_i,
         cast_see_invisible_ii,
-        cast_purge,
         prolonged_life,
 
         // Unique for Ghoul

@@ -2858,12 +2858,12 @@ std::vector<std::string> SpellSanctuary::descr_specific(
 // -----------------------------------------------------------------------------
 Range SpellPurge::dmg_range() const
 {
-        return {3, 6};
+        return {5, 10};
 }
 
 Range SpellPurge::fear_duration_range() const
 {
-        return {2, 4};
+        return {3, 6};
 }
 
 void SpellPurge::run_effect(
@@ -2909,40 +2909,41 @@ void SpellPurge::run_effect(
 
         for (auto* const actor : game_time::g_actors)
         {
-                if ((actor != caster) &&
-                    actor->m_pos.is_adjacent(caster->m_pos) &&
-                    actor->m_data->is_undead)
+                if ((actor == caster) ||
+                    !actor->m_pos.is_adjacent(caster->m_pos) ||
+                    !actor->m_data->is_undead)
                 {
-                        // Is adjacent undead creature
+                        continue;
+                }
 
-                        if (actor::can_player_see_actor(*actor))
-                        {
-                                const auto name =
-                                        text_format::first_to_upper(
-                                                actor->name_the());
+                // Is adjacent undead creature
 
-                                msg_log::add(
-                                        name + " is struck.",
-                                        colors::msg_good());
+                if (actor::can_player_see_actor(*actor))
+                {
+                        const auto name =
+                                text_format::first_to_upper(
+                                        actor->name_the());
 
-                                io::draw_blast_at_cells(
-                                        {actor->m_pos},
-                                        colors::light_white());
-                        }
+                        msg_log::add(
+                                name + " is struck.",
+                                colors::msg_good());
 
-                        actor::hit(*actor, dmg_range().roll(), DmgType::pure);
+                        io::draw_blast_at_cells(
+                                {actor->m_pos},
+                                colors::light_white());
+                }
 
-                        if (actor->is_alive())
-                        {
-                                auto* const fear =
-                                        property_factory::make(
-                                                PropId::terrified);
+                actor::hit(*actor, dmg_range().roll(), DmgType::pure);
 
-                                fear->set_duration(
-                                        fear_duration_range().roll());
+                if (actor->is_alive())
+                {
+                        auto* const fear =
+                                property_factory::make(
+                                        PropId::terrified);
 
-                                actor->m_properties.apply(fear);
-                        }
+                        fear->set_duration(fear_duration_range().roll());
+
+                        actor->m_properties.apply(fear);
                 }
         }
 }

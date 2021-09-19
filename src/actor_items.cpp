@@ -36,22 +36,25 @@ static void learn_spell_player(const SpellId spell)
 {
         player_spells::learn_spell(spell, Verbose::no);
 
-        // Also identify and "find" the corresponding scroll
+        // Also identify and "find" the corresponding scroll (if one exists)
         for (auto& d : item::g_data)
         {
-                if (d.spell_cast_from_scroll == spell)
+                if (d.spell_cast_from_scroll != spell)
                 {
-                        std::unique_ptr<item::Item> temp_scroll(
-                                item::make(d.id));
-
-                        temp_scroll->identify(Verbose::no);
-
-                        game::incr_player_xp(
-                                temp_scroll->data().xp_on_found,
-                                Verbose::no);
-
-                        temp_scroll->data().is_found = true;
+                        continue;
                 }
+
+                std::unique_ptr<item::Item> temp_scroll(item::make(d.id));
+
+                temp_scroll->identify(Verbose::no);
+
+                game::incr_player_xp(
+                        temp_scroll->data().xp_on_found,
+                        Verbose::no);
+
+                temp_scroll->data().is_found = true;
+
+                break;
         }
 }
 
@@ -83,11 +86,13 @@ static void make_for_player_exorcist()
                 static_cast<item::Wpn*>(
                         item::make(item::Id::player_punch)));
 
-        inv.put_in_backpack(item::make(item::Id::dynamite, 4));
-        inv.put_in_backpack(item::make(item::Id::molotov, 2));
+        inv.put_in_backpack(item::make(item::Id::dynamite, 1));
+        inv.put_in_backpack(item::make(item::Id::molotov, 1));
         inv.put_in_backpack(item::make(item::Id::medical_bag));
         inv.put_in_backpack(item::make(item::Id::lantern));
         inv.put_in_backpack(item::make(item::Id::holy_symbol));
+
+        learn_spell_player(SpellId::purge);
 }
 
 static void make_for_player_occultist_common()
