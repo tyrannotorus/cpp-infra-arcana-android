@@ -158,7 +158,8 @@ public:
         int m_nr_turns_until_ins {-1};
         Dir m_auto_move_dir {Dir::END};
         bool m_has_taken_auto_move_step {false};
-        int m_nr_turns_until_rspell {-1};
+        int m_nr_turns_until_r_spell {-1};
+        int m_nr_turns_until_meditative_focused {-1};
         item::Wpn* m_unarmed_wpn {nullptr};
 
 private:

@@ -44,6 +44,7 @@ enum class Trait
         stout_spirit,
         strong_spirit,
         mighty_spirit,
+        meditative,
         absorb,
         tough,
         rugged,

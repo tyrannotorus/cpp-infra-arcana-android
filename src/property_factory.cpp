@@ -317,6 +317,9 @@ Prop* make(const PropId id)
         case PropId::sanctuary:
                 return new Prop(id);
 
+        case PropId::meditative_focused:
+                return new Prop(id);
+
         case PropId::END:
                 break;
         }

@@ -207,6 +207,143 @@ static void player_try_spot_hidden_terrain()
         }
 }
 
+static Range calc_nr_turns_range_to_recharge_spell_shield()
+{
+        Range range;
+
+        if (player_bon::has_trait(Trait::mighty_spirit))
+        {
+                range = {25, 50};
+        }
+        else if (player_bon::has_trait(Trait::strong_spirit))
+        {
+                range = {75, 100};
+        }
+        else
+        {
+                range = {125, 150};
+        }
+
+        // Halved number of turns due to the Talisman of Reflection?
+        if (map::g_player->m_inv.has_item_in_backpack(item::Id::refl_talisman))
+        {
+                range.min /= 2;
+                range.max /= 2;
+        }
+
+        return range;
+}
+
+static void player_regen_spell_shield()
+{
+        auto& player = *map::g_player;
+
+        if (player.m_properties.has(PropId::r_spell))
+        {
+                // Player already has spell resistance. Keep resetting the
+                // countdown to "uninitialized" while in this state, and do
+                // nothing else. This will trigger a reroll of the duration when
+                // the countdown can begin again.
+                player.m_nr_turns_until_r_spell = -1;
+
+                return;
+        }
+
+        // Spell shield not currently active.
+
+        if (!player_bon::has_trait(Trait::stout_spirit))
+        {
+                return;
+        }
+
+        // Player has at least stout spirit.
+
+        if (player.m_nr_turns_until_r_spell <= 0)
+        {
+                // Cooldown has finished, OR countdown not initialized.
+
+                if (player.m_nr_turns_until_r_spell == 0)
+                {
+                        // Cooldown has finished
+                        auto* prop = property_factory::make(PropId::r_spell);
+
+                        prop->set_indefinite();
+
+                        player.m_properties.apply(prop);
+
+                        msg_log::more_prompt();
+                }
+
+                player.m_nr_turns_until_r_spell =
+                        calc_nr_turns_range_to_recharge_spell_shield()
+                                .roll();
+        }
+
+        if (!player.m_properties.has(PropId::r_spell) &&
+            (player.m_nr_turns_until_r_spell > 0))
+        {
+                // Spell resistance is in cooldown state, decrement number of
+                // remaining turns.
+                --player.m_nr_turns_until_r_spell;
+        }
+}
+
+static void player_regen_meditative_focused()
+{
+        auto& player = *map::g_player;
+
+        if (player.m_properties.has(PropId::meditative_focused) ||
+            player.m_properties.has(PropId::frenzied))
+        {
+                // Player is already focused, or is frenzied. Keep resetting the
+                // countdown to "uninitialized" while in this state, and do
+                // nothing else. This will trigger a reroll of the duration when
+                // the countdown can begin again.
+                player.m_nr_turns_until_meditative_focused = -1;
+
+                return;
+        }
+
+        // Meditative focused not currently active.
+
+        if (!player_bon::has_trait(Trait::meditative))
+        {
+                return;
+        }
+
+        // Player has meditative trait.
+
+        if (player.m_nr_turns_until_meditative_focused <= 0)
+        {
+                // Cooldown has finished, OR countdown not initialized.
+
+                if (player.m_nr_turns_until_meditative_focused == 0)
+                {
+                        // Cooldown has finished
+                        auto* prop =
+                                property_factory::make(
+                                        PropId::meditative_focused);
+
+                        prop->set_indefinite();
+
+                        player.m_properties.apply(prop);
+
+                        msg_log::more_prompt();
+                }
+
+                player.m_nr_turns_until_meditative_focused =
+                        rnd::range(125, 150);
+        }
+
+        if (!player.m_properties.has(PropId::meditative_focused) &&
+            (player.m_nr_turns_until_meditative_focused > 0))
+        {
+                // Meditative focused is in cooldown state, decrement number of
+                // remaining turns.
+                --player.m_nr_turns_until_meditative_focused;
+        }
+}
+
 static void player_std_turn()
 {
         auto& player = *map::g_player;
@@ -222,67 +359,18 @@ static void player_std_turn()
                 return;
         }
 
-        // Spell resistance
-        const int spell_shield_turns_base = 125 + rnd::range(0, 25);
+        player_regen_spell_shield();
 
-        const int spell_shield_turns_bon =
-                player_bon::has_trait(Trait::mighty_spirit)
-                ? 100
-                : (player_bon::has_trait(Trait::strong_spirit) ? 50 : 0);
-
-        int nr_turns_to_recharge_spell_shield = std::max(
-                1,
-                spell_shield_turns_base - spell_shield_turns_bon);
-
-        // Halved number of turns due to the Talisman of Reflection?
-        if (player.m_inv.has_item_in_backpack(item::Id::refl_talisman))
-        {
-                nr_turns_to_recharge_spell_shield /= 2;
-        }
-
-        if (player.m_properties.has(PropId::r_spell))
-        {
-                // We already have spell resistance (e.g. from casting the Spell
-                // Shield spell), (re)set the cooldown to max number of turns
-                player.m_nr_turns_until_rspell =
-                        nr_turns_to_recharge_spell_shield;
-        }
-        else if (player_bon::has_trait(Trait::stout_spirit))
-        {
-                // Spell shield not active, and we have at least stout spirit
-                if (player.m_nr_turns_until_rspell <= 0)
-                {
-                        // Cooldown has finished, OR countdown not initialized
-
-                        if (player.m_nr_turns_until_rspell == 0)
-                        {
-                                // Cooldown has finished
-                                auto* prop =
-                                        property_factory::make(PropId::r_spell);
-
-                                prop->set_indefinite();
-
-                                player.m_properties.apply(prop);
-
-                                msg_log::more_prompt();
-                        }
-
-                        player.m_nr_turns_until_rspell =
-                                nr_turns_to_recharge_spell_shield;
-                }
-
-                if (!player.m_properties.has(PropId::r_spell) &&
-                    (player.m_nr_turns_until_rspell > 0))
-                {
-                        // Spell resistance is in cooldown state, decrement
-                        // number of remaining turns
-                        --player.m_nr_turns_until_rspell;
-                }
-        }
+        player_regen_meditative_focused();
 
         if (player.m_active_explosive)
         {
                 player.m_active_explosive->on_std_turn_player_hold_ignited();
+
+                if (!map::g_player->is_alive())
+                {
+                        return;
+                }
         }
 
         player_regen_hp();

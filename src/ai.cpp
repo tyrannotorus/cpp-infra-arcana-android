@@ -143,7 +143,8 @@ DidAction try_cast_random_spell(actor::Mon& mon)
                 }
 
                 const int spell_max_spi =
-                        spell.spell->spi_cost_range(spell.skill).max;
+                        spell.spell->spi_cost_range(spell.skill, &mon)
+                                .max;
 
                 const int max_hp = actor::max_hp(mon);
 
@@ -157,7 +158,7 @@ DidAction try_cast_random_spell(actor::Mon& mon)
 
                 // Only cast the spell if monster has enough spirit - or
                 // sometimes try anyway if the monster has low HP and is
-                // hostile to the player
+                // hostile to the player.
                 if (has_spi ||
                     (is_hostile_player &&
                      is_low_hp &&

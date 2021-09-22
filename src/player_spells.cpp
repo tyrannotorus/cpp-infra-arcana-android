@@ -67,7 +67,11 @@ static void try_cast(Spell* const spell)
         msg_log::clear();
 
         const auto skill = map::g_player->spell_skill(spell->id());
-        const auto spi_cost_range = spell->spi_cost_range(skill);
+
+        const auto spi_cost_range =
+                spell->spi_cost_range(
+                        skill,
+                        map::g_player);
 
         if (spi_cost_range.max >= map::g_player->m_sp)
         {
@@ -365,7 +369,7 @@ void BrowseSpell::on_start()
                 return;
         }
 
-        m_browser.reset(s_learned_spells.size());
+        m_browser.reset((int)s_learned_spells.size());
 
         m_browser.disable_selection_audio();
 }
@@ -434,8 +438,13 @@ void BrowseSpell::draw()
                 }
 
                 const auto id = spell->id();
+
                 const auto skill = player_spells::spell_skill(id);
-                const auto spi_cost = spell->spi_cost_range(skill);
+
+                const auto spi_cost =
+                        spell->spi_cost_range(
+                                skill,
+                                map::g_player);
 
                 if (spi_cost.min > 0)
                 {
@@ -457,7 +466,7 @@ void BrowseSpell::draw()
                                 p,
                                 colors::dark_gray());
 
-                        p.x += str.size();
+                        p.x += (int)str.size();
 
                         io::draw_text(
                                 spi_cost.str(),

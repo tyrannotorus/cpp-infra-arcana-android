@@ -15,7 +15,8 @@ NEW
 * Monster descriptions display more information, such as resistances, if it has the ability to see in darkness, or the chance to stay hidden from the monster
 * Standing next to a door will reveal if it's stuck - if so it will change name and appearance
 * Reworked the "Resistant trait", it now gives +25% chance to resist paralysis, burning, and poison, and the duration of those effects is halved (also Tough and Rugged each give +10% chance to resist)
-* Added trait "Crippling Strikes", melee attacks have 60% chance to Weaken the target for 2-3 turns
+* Added trait "Crippling Strikes" - melee attacks have 60% chance to Weaken the target for 2-3 turns
+* Added trait "Meditative" - applies a status effect which allows the next spell to be cast without spending a turn, and with the cost reduced by 1 spirit point - after casting a spell this state is reapplied again after some time has passed
 * The standard map generator can also split rooms, for more map variety
 * Added more room templates
 * Casting spells can occasionally trigger random chaotic side effects, typically affecting the surrounding area (for example walls may appear or disappear, statues knocked over, etc)

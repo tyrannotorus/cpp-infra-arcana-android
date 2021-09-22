@@ -127,6 +127,7 @@ enum class PropId
         disabled_hp_regen,
         sanctuary,
         astral_opium_addiction,
+        meditative_focused,  // From Meditative trait
 
         END
 };

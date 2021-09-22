@@ -1685,10 +1685,10 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
 bool PropFrenzied::is_resisting_other_prop(const PropId prop_id) const
 {
         return (
-                prop_id == PropId::confused ||
-                prop_id == PropId::fainted ||
-                prop_id == PropId::terrified ||
-                prop_id == PropId::weakened);
+                (prop_id == PropId::confused) ||
+                (prop_id == PropId::fainted) ||
+                (prop_id == PropId::terrified) ||
+                (prop_id == PropId::weakened));
 }
 
 void PropFrenzied::on_applied()
@@ -1698,10 +1698,17 @@ void PropFrenzied::on_applied()
                 PropEndAllowMsg::no,
                 PropEndAllowHistoricMsg::yes);
 
-        m_owner->m_properties.end_prop(PropId::confused, prop_end_config);
-        m_owner->m_properties.end_prop(PropId::fainted, prop_end_config);
-        m_owner->m_properties.end_prop(PropId::terrified, prop_end_config);
-        m_owner->m_properties.end_prop(PropId::weakened, prop_end_config);
+        const auto props_ended = {
+                PropId::confused,
+                PropId::fainted,
+                PropId::terrified,
+                PropId::weakened,
+                PropId::meditative_focused};
+
+        for (auto prop : props_ended)
+        {
+                m_owner->m_properties.end_prop(prop, prop_end_config);
+        }
 }
 
 void PropFrenzied::on_end()

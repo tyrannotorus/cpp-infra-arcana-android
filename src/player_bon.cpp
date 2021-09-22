@@ -401,6 +401,29 @@ static void update_trait_data()
         d.trait_prereqs = {Trait::strong_spirit};
         set_trait_data(d);
 
+        // --- Meditative ---
+        d.id = Trait::meditative;
+        d.title = "Meditative";
+        d.descr =
+                "Applies a focused state which allows the next spell to be "
+                "cast without spending a turn, and with the cost reduced by "
+                "1 spirit point - it takes 125-150 turns to regain this "
+                "state after a spell is cast";
+        d.on_picked = []() {
+                auto* prop = property_factory::make(PropId::meditative_focused);
+
+                prop->set_indefinite();
+
+                map::g_player->m_properties.apply(
+                        prop,
+                        PropSrc::intr,
+                        true,
+                        Verbose::no);
+        };
+        d.trait_prereqs = {Trait::stout_spirit, Trait::cool_headed};
+        d.blocked_for_bgs = {Bg::ghoul, Bg::war_vet, Bg::rogue};
+        set_trait_data(d);
+
         // --- Absorption ---
         d.id = Trait::absorb;
         d.title = "Absorption";

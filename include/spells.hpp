@@ -172,7 +172,9 @@ public:
         virtual std::vector<std::string> descr_specific(
                 SpellSkill skill) const = 0;
 
-        Range spi_cost_range(SpellSkill skill) const;
+        Range spi_cost_range(
+                SpellSkill skill,
+                const actor::Actor* caster = nullptr) const;
 
         int shock_value() const;
 

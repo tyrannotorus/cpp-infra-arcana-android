@@ -326,7 +326,8 @@ void Player::save() const
         saving::put_int(m_base_max_sp);
         saving::put_int(m_pos.x);
         saving::put_int(m_pos.y);
-        saving::put_int(m_nr_turns_until_rspell);
+        saving::put_int(m_nr_turns_until_r_spell);
+        saving::put_int(m_nr_turns_until_meditative_focused);
 
         ASSERT(m_unarmed_wpn);
 
@@ -352,7 +353,8 @@ void Player::load()
         m_base_max_sp = saving::get_int();
         m_pos.x = saving::get_int();
         m_pos.y = saving::get_int();
-        m_nr_turns_until_rspell = saving::get_int();
+        m_nr_turns_until_r_spell = saving::get_int();
+        m_nr_turns_until_meditative_focused = saving::get_int();
 
         const auto unarmed_wpn_id = (item::Id)saving::get_int();
 

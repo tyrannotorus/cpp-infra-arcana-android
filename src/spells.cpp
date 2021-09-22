@@ -838,11 +838,13 @@ static void end_properties_for_casting_spell(
         actor::Actor& caster,
         const SpellId spell_id)
 {
-        // Casting spells ends cloaking
+        // End cloaking
         caster.m_properties.end_prop(PropId::cloaked);
 
-        // Casting spells ends erudition (but do not end erudition if that is
-        // the spell that was cast now).
+        // End focused
+        caster.m_properties.end_prop(PropId::meditative_focused);
+
+        // End erudition (unless that was the spell that was cast now).
         if (spell_id != SpellId::erudition)
         {
                 const auto* const prop =
@@ -1108,12 +1110,27 @@ StateId BrowseSpell::id() const
 // -----------------------------------------------------------------------------
 // Spell
 // -----------------------------------------------------------------------------
-Range Spell::spi_cost_range(const SpellSkill skill) const
+Range Spell::spi_cost_range(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         const int cost_max = base_max_spi_cost(skill);
         const int cost_min = (cost_max + 1) / 2;
 
-        return {cost_min, cost_max};
+        Range range(cost_min, cost_max);
+
+        if (caster &&
+            caster->is_player() &&
+            caster->m_properties.has(PropId::meditative_focused))
+        {
+                --range.min;
+                --range.max;
+        }
+
+        range.min = std::max(1, range.min);
+        range.max = std::max(1, range.max);
+
+        return range;
 }
 
 void Spell::cast(
@@ -1231,7 +1248,7 @@ void Spell::cast(
 
         if (spell_src == SpellSrc::learned)
         {
-                const auto cost_range = spi_cost_range(skill);
+                const auto cost_range = spi_cost_range(skill, caster);
 
                 if (cost_range.min > 0)
                 {
@@ -1243,6 +1260,10 @@ void Spell::cast(
                         properties.allow_cast_intr_spell_chance(
                                 Verbose::yes);
         }
+
+        const bool is_focused_player =
+                caster->is_player() &&
+                caster->m_properties.has(PropId::meditative_focused);
 
         if (allow_cast && caster->is_alive())
         {
@@ -1279,7 +1300,10 @@ void Spell::cast(
                 side_effect({*caster, nearby_positions});
         }
 
-        game_time::tick();
+        if (!is_focused_player)
+        {
+                game_time::tick();
+        }
 
         TRACE_FUNC_END;
 }
