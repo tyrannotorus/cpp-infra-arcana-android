@@ -259,7 +259,7 @@ static void set_default_variables()
         s_display_hints = true;
         s_always_warn_new_mon = true;
         s_warn_on_throw_valuable = true;
-        s_warn_on_light_explosive = false;
+        s_warn_on_light_explosive = true;
         s_warn_on_drink_malign_potion = true;
         s_warn_on_ranged_wpn_melee = true;
         s_is_ranged_wpn_auto_reload = false;
