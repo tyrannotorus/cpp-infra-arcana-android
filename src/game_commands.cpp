@@ -73,12 +73,12 @@ static void query_quit()
                 .set_title("Quit the current game?")
                 .set_msg("Save and highscore are not kept.")
                 .set_menu(
-                        {"(Y)es", "(N)o"},
-                        {'y', 'n'},
+                        {"(N)o", "(Y)es"},
+                        {'n', 'y'},
                         &choice)
                 .run();
 
-        if (choice == 0)
+        if (choice == 1)
         {
                 // Choosing to quit the game deletes the save
                 saving::erase_save();
@@ -203,6 +203,41 @@ static void handle_toggle_lantern_command()
                                 ItemRefAttInf::none);
 
                 msg_log::add("I am not carrying " + name + ".");
+        }
+}
+
+static void handle_game_menu_command()
+{
+        const auto choices = std::vector<std::string> {
+                "(T)ome of Wisdom",
+                "(O)ptions",
+                "(Q)uit",
+                "(C)ancel",
+        };
+
+        int choice = 0;
+
+        popup::Popup(popup::AddToMsgHistory::no)
+                .set_menu(
+                        choices,
+                        {'t', 'o', 'q', 'c'},
+                        &choice)
+                .run();
+
+        if (choice == 0)
+        {
+                // Manual
+                states::push(std::make_unique<BrowseManual>());
+        }
+        else if (choice == 1)
+        {
+                // Options
+                states::push(std::make_unique<ConfigState>());
+        }
+        else if (choice == 2)
+        {
+                // Quit
+                query_quit();
         }
 }
 
@@ -1034,37 +1069,7 @@ void handle(const GameCmd cmd)
 
         case GameCmd::game_menu:
         {
-                const auto choices = std::vector<std::string> {
-                        "(T)ome of Wisdom",
-                        "(O)ptions",
-                        "(Q)uit",
-                        "(C)ancel",
-                };
-
-                int choice = 0;
-
-                popup::Popup(popup::AddToMsgHistory::no)
-                        .set_menu(
-                                choices,
-                                {'t', 'o', 'q', 'c'},
-                                &choice)
-                        .run();
-
-                if (choice == 0)
-                {
-                        // Manual
-                        states::push(std::make_unique<BrowseManual>());
-                }
-                else if (choice == 1)
-                {
-                        // Options
-                        states::push(std::make_unique<ConfigState>());
-                }
-                else if ((choice == 2) || (choice == -1))
-                {
-                        // Quit
-                        query_quit();
-                }
+                handle_game_menu_command();
         }
         break;
 

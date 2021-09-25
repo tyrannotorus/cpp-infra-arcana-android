@@ -611,7 +611,7 @@ void WinGameState::draw()
                         io::draw_text(
                                 line,
                                 Panel::screen,
-                                P(x0, y),
+                                {x0, y},
                                 colors::white(),
                                 io::DrawBg::no,
                                 colors::black());
@@ -629,7 +629,7 @@ void WinGameState::draw()
         io::draw_text_center(
                 common_text::g_confirm_hint,
                 Panel::screen,
-                P((screen_w - 1) / 2, screen_h - 2),
+                {(screen_w - 1) / 2, screen_h - 2},
                 colors::menu_dark(),
                 io::DrawBg::no,
                 colors::black(),
