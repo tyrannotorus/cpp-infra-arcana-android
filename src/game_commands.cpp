@@ -173,6 +173,155 @@ static void handle_fire_command()
                         *wpn));
 }
 
+static void handle_toggle_lantern_command()
+{
+        item::Item* lantern = nullptr;
+
+        for (auto* const item : map::g_player->m_inv.m_backpack)
+        {
+                if (item->id() == item::Id::lantern)
+                {
+                        lantern = item;
+
+                        break;
+                }
+        }
+
+        if (lantern)
+        {
+                lantern->activate(map::g_player);
+        }
+        else
+        {
+                std::unique_ptr<item::Item> tmp_lantern(
+                        item::make(item::Id::lantern));
+
+                const std::string name =
+                        tmp_lantern->name(
+                                ItemRefType::a,
+                                ItemRefInf::none,
+                                ItemRefAttInf::none);
+
+                msg_log::add("I am not carrying " + name + ".");
+        }
+}
+
+static void handle_swap_weapon_command()
+{
+        auto* const wielded = map::g_player->m_inv.item_in_slot(SlotId::wpn);
+        auto* const alt = map::g_player->m_inv.item_in_slot(SlotId::wpn_alt);
+
+        if (!wielded && !alt)
+        {
+                // No wielded weapon and no alt weapon
+                msg_log::add("I have neither a wielded nor a prepared weapon.");
+
+                return;
+        }
+
+        // Player is wielding a weapon and/or have an alt weapon.
+
+        const std::string alt_name_a =
+                alt
+                ? alt->name(ItemRefType::a)
+                : "";
+
+        // War veteran swaps instantly
+        const bool is_instant = player_bon::bg() == Bg::war_vet;
+
+        const std::string swift_str = is_instant ? "swiftly " : "";
+
+        if (wielded && alt)
+        {
+                msg_log::add(
+                        "I " +
+                        swift_str +
+                        "swap to " +
+                        alt_name_a +
+                        ".");
+        }
+        else if (wielded && !alt)
+        {
+                const std::string name = wielded->name(ItemRefType::plain);
+
+                msg_log::add(
+                        "I " +
+                        swift_str +
+                        "put away my " +
+                        name +
+                        ".");
+        }
+        else
+        {
+                // No weapon wielded.
+                msg_log::add(
+                        "I " +
+                        swift_str +
+                        "wield " +
+                        alt_name_a +
+                        ".");
+        }
+
+        map::g_player->m_inv.swap_wielded_and_prepared();
+
+        if (!is_instant)
+        {
+                game_time::tick();
+        }
+}
+
+static void handle_auto_move_command(const Dir dir)
+{
+        bool is_allowed = true;
+
+        std::string prevent_msg;
+
+        if (actor::is_player_seeing_burning_terrain())
+        {
+                is_allowed = false;
+                prevent_msg = common_text::g_fire_prevent_cmd;
+        }
+        else if (!actor::seen_foes(*map::g_player).empty())
+        {
+                is_allowed = false;
+                prevent_msg = common_text::g_mon_prevent_cmd;
+        }
+        else if (!map::g_player->m_properties.allow_see())
+        {
+                is_allowed = false;
+                prevent_msg = "Not while blind.";
+        }
+        else if (map::g_player->m_properties.has(PropId::poisoned))
+        {
+                is_allowed = false;
+                prevent_msg = "Not while poisoned.";
+        }
+        else if (map::g_player->m_properties.has(PropId::confused))
+        {
+                is_allowed = false;
+                prevent_msg = "Not while confused.";
+        }
+        else if (map::g_player->m_properties.has(PropId::infected))
+        {
+                is_allowed = false;
+                prevent_msg = "Not while infected.";
+        }
+
+        if (!is_allowed)
+        {
+                msg_log::add(
+                        prevent_msg,
+                        colors::text(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+
+                return;
+        }
+
+        map::g_player->set_auto_move(dir);
+}
+
 static GameCmd to_cmd_default(const InputData& input)
 {
         // When running on windows, with numlock enabled, each numpad key press
@@ -349,6 +498,10 @@ static GameCmd to_cmd_default(const InputData& input)
 
         case 't':
                 return GameCmd::throw_item;
+
+        case 'l':
+        case 'e':
+                return GameCmd::toggle_lantern;
 
         case 'v':
                 return GameCmd::look;
@@ -718,169 +871,55 @@ void handle(const GameCmd cmd)
 
         case GameCmd::swap_weapon:
         {
-                auto* const wielded = map::g_player->m_inv.item_in_slot(SlotId::wpn);
-
-                auto* const alt = map::g_player->m_inv.item_in_slot(SlotId::wpn_alt);
-
-                if (wielded || alt)
-                {
-                        const std::string alt_name_a =
-                                alt
-                                ? alt->name(ItemRefType::a)
-                                : "";
-
-                        // War veteran swaps instantly
-                        const bool is_instant = player_bon::bg() == Bg::war_vet;
-
-                        const std::string swift_str =
-                                is_instant
-                                ? "swiftly "
-                                : "";
-
-                        if (wielded)
-                        {
-                                if (alt)
-                                {
-                                        msg_log::add(
-                                                "I " +
-                                                swift_str +
-                                                "swap to " +
-                                                alt_name_a +
-                                                ".");
-                                }
-                                else
-                                {
-                                        // No current alt weapon
-                                        const std::string name =
-                                                wielded->name(ItemRefType::plain);
-
-                                        msg_log::add(
-                                                "I " +
-                                                swift_str +
-                                                "put away my " +
-                                                name +
-                                                ".");
-                                }
-                        }
-                        else
-                        {
-                                // No current wielded item
-                                msg_log::add("I " + swift_str + "wield " + alt_name_a + ".");
-                        }
-
-                        map::g_player->m_inv.swap_wielded_and_prepared();
-
-                        if (!is_instant)
-                        {
-                                game_time::tick();
-                        }
-                }
-                else
-                {
-                        // No wielded weapon and no alt weapon
-                        msg_log::add("I have neither a wielded nor a prepared weapon.");
-                }
+                handle_swap_weapon_command();
         }
         break;
 
         case GameCmd::auto_move_right:
+        {
+                handle_auto_move_command(Dir::right);
+        }
+        break;
+
         case GameCmd::auto_move_down:
+        {
+                handle_auto_move_command(Dir::down);
+        }
+        break;
+
         case GameCmd::auto_move_left:
+        {
+                handle_auto_move_command(Dir::left);
+        }
+        break;
+
         case GameCmd::auto_move_up:
+        {
+                handle_auto_move_command(Dir::up);
+        }
+        break;
+
         case GameCmd::auto_move_up_right:
+        {
+                handle_auto_move_command(Dir::up_right);
+        }
+        break;
+
         case GameCmd::auto_move_down_right:
+        {
+                handle_auto_move_command(Dir::down_right);
+        }
+        break;
+
         case GameCmd::auto_move_down_left:
+        {
+                handle_auto_move_command(Dir::down_left);
+        }
+        break;
+
         case GameCmd::auto_move_up_left:
         {
-                bool is_allowed = true;
-                std::string prevent_msg;
-                if (actor::is_player_seeing_burning_terrain())
-                {
-                        is_allowed = false;
-                        prevent_msg = common_text::g_fire_prevent_cmd;
-                }
-                else if (!actor::seen_foes(*map::g_player).empty())
-                {
-                        is_allowed = false;
-                        prevent_msg = common_text::g_mon_prevent_cmd;
-                }
-                else if (!map::g_player->m_properties.allow_see())
-                {
-                        is_allowed = false;
-                        prevent_msg = "Not while blind.";
-                }
-                else if (map::g_player->m_properties.has(PropId::poisoned))
-                {
-                        is_allowed = false;
-                        prevent_msg = "Not while poisoned.";
-                }
-                else if (map::g_player->m_properties.has(PropId::confused))
-                {
-                        is_allowed = false;
-                        prevent_msg = "Not while confused.";
-                }
-                else if (map::g_player->m_properties.has(PropId::infected))
-                {
-                        is_allowed = false;
-                        prevent_msg = "Not while infected.";
-                }
-
-                if (is_allowed)
-                {
-                        auto dir = (Dir)0;
-
-                        switch (cmd)
-                        {
-                        case GameCmd::auto_move_right:
-                                dir = Dir::right;
-                                break;
-
-                        case GameCmd::auto_move_down:
-                                dir = Dir::down;
-                                break;
-
-                        case GameCmd::auto_move_left:
-                                dir = Dir::left;
-                                break;
-
-                        case GameCmd::auto_move_up:
-                                dir = Dir::up;
-                                break;
-
-                        case GameCmd::auto_move_up_right:
-                                dir = Dir::up_right;
-                                break;
-
-                        case GameCmd::auto_move_down_right:
-                                dir = Dir::down_right;
-                                break;
-
-                        case GameCmd::auto_move_down_left:
-                                dir = Dir::down_left;
-                                break;
-
-                        case GameCmd::auto_move_up_left:
-                                dir = Dir::up_left;
-                                break;
-
-                        default:
-                                ASSERT(false);
-                                dir = Dir::right;
-                                break;
-                        }
-
-                        map::g_player->set_auto_move(dir);
-                }
-                else
-                {
-                        // Not allowed to use auto-move
-                        msg_log::add(
-                                prevent_msg,
-                                colors::text(),
-                                MsgInterruptPlayer::no,
-                                MorePromptOnMsg::no,
-                                CopyToMsgHistory::no);
-                }
+                handle_auto_move_command(Dir::up_left);
         }
         break;
 
@@ -906,6 +945,12 @@ void handle(const GameCmd cmd)
                                 states::push(std::make_unique<SelectThrow>());
                         }
                 }
+        }
+        break;
+
+        case GameCmd::toggle_lantern:
+        {
+                handle_toggle_lantern_command();
         }
         break;
 

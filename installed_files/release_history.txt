@@ -73,6 +73,7 @@ USER INTERFACE UPDATES
 * Added a master volume percent option
 * Added a warning when the player attempts to fire/throw outside the effective range, informing the player that the attack will do 50% damage
 * Added an option to warn when throwing "valuable" items - i.e. potions or equipped items (enabled by default)
+* Added 'l' or 'e' as a shortcut command for toggling the Electric Lantern
 * Added ',' (comma) as an alternative pick up command
 * 'C' is the standard key for the character info screen, with '@' as alternative key
 * Using coloring more for the player stats to convey information (such as drawing the current hit points paler the closer to zero they are, or drawing the weapon info as yellow if ammo is depleted)

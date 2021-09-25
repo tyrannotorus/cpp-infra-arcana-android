@@ -921,7 +921,7 @@ void Apply::on_start()
         }
 
         m_browser.reset(
-                m_filtered_backpack_indexes.size(),
+                (int)m_filtered_backpack_indexes.size(),
                 panels::h(Panel::item_menu));
 
         m_browser.disable_selection_audio();

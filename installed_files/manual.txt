@@ -11,6 +11,7 @@ Gameplay commands:
    h (M)     MESSAGE history
    i         INVENTORY (wield, equip, remove, consume, or activate items)
    k (w)     KICK or strike objects, or DESTROY CORPSES
+   l (e)     Toggle LANTERN
    m         MINIMAP
    n (o)     Make NOISE
    p         DISARM trap

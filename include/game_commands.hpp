@@ -44,6 +44,7 @@ enum class GameCmd
         drop_item,
         swap_weapon,
         throw_item,
+        toggle_lantern,
         look,
         auto_melee,
         cast_spell,
