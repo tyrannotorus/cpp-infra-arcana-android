@@ -31,7 +31,7 @@
         </audio>
 
         <attributes>
-            <hit_points>10</hit_points>
+            <hit_points>14</hit_points>
             <spirit>3</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -4478,7 +4478,7 @@
             <spirit>6</spirit>
             <speed>very_fast</speed>
             <shock_level>none</shock_level>
-            <melee>30</melee>
+            <melee>25</melee>
             <ranged>0</ranged>
             <dodging>50</dodging>
             <stealth>0</stealth>
