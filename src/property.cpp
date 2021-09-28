@@ -2486,6 +2486,7 @@ void PropAltersEnv::on_std_turn()
                 .run(blocked, blocked.rect());
 
         const std::vector<terrain::Id> free_terrains = {
+                terrain::Id::stairs,
                 terrain::Id::door,
                 terrain::Id::liquid_deep,
         };

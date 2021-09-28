@@ -1591,6 +1591,7 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                 .run(blocked, blocked.rect());
 
         const std::vector<terrain::Id> free_terrains = {
+                terrain::Id::stairs,
                 terrain::Id::door,
                 terrain::Id::liquid_deep,
         };
