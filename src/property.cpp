@@ -2559,7 +2559,7 @@ void PropAltersEnv::on_std_turn()
 
                         if (map_parsers::is_map_connected(blocked))
                         {
-                                map::put(new terrain::RubbleHigh(p));
+                                map::put(new terrain::Wall(p));
                         }
                         else
                         {
