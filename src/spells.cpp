@@ -3016,7 +3016,7 @@ std::vector<std::string> SpellFrenzy::descr_specific(
         (void)skill;
 
         return {
-                "Incites a great rage in the caster, which will charge their "
+                "Incites a great rage in the caster, who will charge their "
                 "enemies with a terrible, uncontrollable fury."};
 }
 
