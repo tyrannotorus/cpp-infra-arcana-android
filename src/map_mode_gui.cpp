@@ -563,8 +563,18 @@ static void draw_med_suppl(const int y, const Panel panel)
 
 static void draw_properties(int y, const Panel panel)
 {
-        const auto property_names =
-                map::g_player->m_properties.property_names_short();
+        const auto& properties = map::g_player->m_properties;
+
+        auto property_names = properties.property_names_short();
+
+        if (map::g_dark.at(map::g_player->m_pos))
+        {
+                const ColoredString dark = {
+                        "Total darkness",
+                        colors::gray()};
+
+                property_names.push_back(dark);
+        }
 
         for (const auto& name : property_names)
         {

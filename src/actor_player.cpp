@@ -24,6 +24,7 @@
 #include "attack.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
+#include "colors.hpp"
 #include "common_text.hpp"
 #include "config.hpp"
 #include "debug.hpp"
@@ -989,7 +990,8 @@ Color Player::color() const
                 return tmp_color;
         }
 
-        const auto* const lantern_item = m_inv.item_in_backpack(item::Id::lantern);
+        const auto* const lantern_item =
+                m_inv.item_in_backpack(item::Id::lantern);
 
         if (lantern_item)
         {
@@ -1011,6 +1013,20 @@ Color Player::color() const
             m_properties.has(PropId::cloaked))
         {
                 return colors::gray();
+        }
+
+        if (map::g_dark.at(m_pos))
+        {
+                tmp_color = m_data->color;
+
+                tmp_color = tmp_color.shaded(40);
+
+                tmp_color.set_rgb(
+                        tmp_color.r(),
+                        tmp_color.g(),
+                        std::min(255, tmp_color.b() + 20));
+
+                return tmp_color;
         }
 
         return m_data->color;
@@ -1126,6 +1142,12 @@ void Player::add_light_hook(Array2<bool>& light_map) const
 
         switch (lgt_size)
         {
+        case LgtSize::single:
+        {
+                light_map.at(m_pos) = true;
+        }
+        break;
+
         case LgtSize::small:
         {
                 for (const auto d : dir_utils::g_dir_list_w_center)
@@ -1139,7 +1161,7 @@ void Player::add_light_hook(Array2<bool>& light_map) const
         {
                 Array2<bool> hard_blocked(map::dims());
 
-                const R fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
+                const auto fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
 
                 map_parsers::BlocksLos()
                         .run(hard_blocked,
@@ -1296,10 +1318,15 @@ void Player::update_fov()
                                 map_parsers::BlocksWalking(ParseActors::no)
                                         .run(p);
 
+                        const bool is_door =
+                                map::g_terrain.at(p)->id() ==
+                                terrain::Id::door;
+
                         const bool allow_explore =
                                 !is_dark ||
                                 blocks_los ||
                                 blocks_walking ||
+                                is_door ||
                                 has_darkvision;
 
                         if (allow_explore)

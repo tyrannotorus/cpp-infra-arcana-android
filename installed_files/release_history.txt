@@ -80,6 +80,7 @@ USER INTERFACE UPDATES
 * The infection status effect is drawn with orange color instead of the usual red, to make it more noticeable and to hint that it will get worse and not better over time - also added a warning message when infection nearly triggers DISEASE
 * Added a tile for unarmed player
 * Removed the options to draw the walls as filled rectangles in tiles mode
+* When standing in a dark position "total darkness" is displayed in the status lines
 
 FIXES
 * Fixed a bug that prevented messages for Rogues sensing artifacts on the dungeon floor (there were only messages for sensing artifacts in item containers, such as tombs)

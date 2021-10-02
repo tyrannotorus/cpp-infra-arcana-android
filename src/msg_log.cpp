@@ -340,9 +340,7 @@ void init()
 
 void draw()
 {
-        io::cover_panel(
-                Panel::log_border,
-                colors::extra_dark_gray());
+        io::cover_panel(Panel::log_border, colors::extra_dark_gray());
 
         draw_box(panels::area(Panel::log_border));
 

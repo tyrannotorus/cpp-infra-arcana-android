@@ -66,6 +66,7 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"r_slow", PropId::r_slow},
         {"r_spell", PropId::r_spell},
         {"r_shock", PropId::r_shock},
+        {"radiant_self", PropId::radiant_self},
         {"radiant_adjacent", PropId::radiant_adjacent},
         {"radiant_fov", PropId::radiant_fov},
         {"recloaks", PropId::recloaks},
@@ -820,6 +821,14 @@ static void init_data_list()
         d.allow_display_turns = false;
         d.force_interrupt_player_on_start = true;
         d.alignment = PropAlignment::bad;
+        add(d);
+
+        d.id = PropId::radiant_self;
+        d.std_rnd_turns = Range(50, 100);
+        d.allow_display_turns = true;
+        d.update_vision_on_toggled = true;
+        d.allow_test_on_bot = true;
+        d.alignment = PropAlignment::neutral;
         add(d);
 
         d.id = PropId::radiant_adjacent;

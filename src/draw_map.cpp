@@ -93,8 +93,7 @@ static void set_terrains()
 
                 if (terrain_color_bg != colors::black())
                 {
-                        render_data.color_bg =
-                                terrain_color_bg;
+                        render_data.color_bg = terrain_color_bg;
                 }
 
                 // TODO: Do in post_process_wall_tiles instead (but it needs
@@ -109,6 +108,8 @@ static void set_terrains()
 
 static void post_process_wall_tiles()
 {
+        // TODO: Refactor
+
         for (int x = 0; x < map::w(); ++x)
         {
                 for (int y = 0; y < (map::h() - 1); ++y)
@@ -239,6 +240,24 @@ static void copy_seen_cells_to_player_memory()
         }
 }
 
+static void adapt_color_for_lit_pos(Color& color)
+{
+        color.set_rgb(
+                std::min(255, color.r() + 80),
+                std::min(255, color.g() + 80),
+                color.b());
+}
+
+static void adapt_color_for_dark_pos(Color& color)
+{
+        color = color.shaded(40);
+
+        color.set_rgb(
+                color.r(),
+                color.g(),
+                std::min(255, color.b() + 20));
+}
+
 static void set_light_level()
 {
         const size_t nr_positions = map::nr_positions();
@@ -257,14 +276,11 @@ static void set_light_level()
 
                 if (map::g_light.at(i))
                 {
-                        color.set_rgb(
-                                std::min(255, color.r() + 60),
-                                std::min(255, color.g() + 60),
-                                color.b());
+                        adapt_color_for_lit_pos(color);
                 }
                 else if (map::g_dark.at(i))
                 {
-                        color = color.shaded(30);
+                        adapt_color_for_dark_pos(color);
                 }
         }
 }
@@ -533,9 +549,7 @@ static void draw_life_bar(const actor::Actor& actor)
 
         const P view_pos = viewport::to_view_pos(map_pos);
 
-        P px_pos = io::map_to_px_coords(
-                Panel::map,
-                view_pos);
+        P px_pos = io::map_to_px_coords(Panel::map, view_pos);
 
         px_pos.y -= 2;
 
@@ -681,11 +695,11 @@ void run()
 
         copy_seen_cells_to_player_memory();
 
-        set_light_level();
-
         set_mobiles();
 
         set_living_monsters();
+
+        set_light_level();
 
         draw_render_array();
 

@@ -99,11 +99,10 @@ Door::Door(
 {
         // Gates should never be secret
         ASSERT(!((m_type == DoorType::gate) && m_mimic_terrain));
-
         ASSERT(
-                !(m_type == DoorType::gate &&
-                  (spawn_state == DoorSpawnState::secret ||
-                   spawn_state == DoorSpawnState::secret_and_stuck)));
+                !((m_type == DoorType::gate) &&
+                  ((spawn_state == DoorSpawnState::secret) ||
+                   (spawn_state == DoorSpawnState::secret_and_stuck))));
 
         if (spawn_state == DoorSpawnState::any)
         {
@@ -986,9 +985,10 @@ void Door::actor_try_close(actor::Actor& actor_trying)
         if (m_actor_currently_opening &&
             (m_actor_currently_opening != &actor_trying))
         {
-                TRACE << "Door marked as currently being opened, checking if "
-                         "opening actor still exists and is alive"
-                      << std::endl;
+                TRACE
+                        << "Door marked as currently being opened, checking if "
+                           "opening actor still exists and is alive"
+                        << std::endl;
 
                 bool is_opening_actor_alive = false;
 
@@ -1003,8 +1003,9 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
                 if (is_opening_actor_alive)
                 {
-                        TRACE << "Opening actor exists and is alive"
-                              << std::endl;
+                        TRACE
+                                << "Opening actor exists and is alive"
+                                << std::endl;
 
                         if (is_player)
                         {
@@ -1017,8 +1018,9 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 }
                 else
                 {
-                        TRACE << "Opening actor no longer exists, or is dead"
-                              << std::endl;
+                        TRACE
+                                << "Opening actor no longer exists, or is dead"
+                                << std::endl;
 
                         m_actor_currently_opening = nullptr;
                 }

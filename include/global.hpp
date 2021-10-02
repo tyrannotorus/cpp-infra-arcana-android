@@ -350,6 +350,7 @@ enum class IsSubRoom
 enum class LgtSize
 {
         none,
+        single,  // Single position
         small,  // 3x3
         fov
 };

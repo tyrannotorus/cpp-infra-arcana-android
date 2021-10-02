@@ -33,6 +33,7 @@
 #include "item_data.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
+#include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
@@ -448,6 +449,90 @@ static void player_items_start_turn()
         }
 }
 
+static int calc_player_spot_terrain_tot_skill(
+        const P& p,
+        const int player_search_skill)
+{
+        const auto& player = *map::g_player;
+
+        const int lit_mod = map::g_light.at(p) ? 10 : 0;
+        const int dist = king_dist(player.m_pos, p);
+        const int dist_mod = -((dist - 1) * 5);
+
+        return player_search_skill + lit_mod + dist_mod;
+}
+
+static void player_try_spot_hidden_terrain()
+{
+        auto& player = *map::g_player;
+
+        if (player.m_properties.has(PropId::confused) ||
+            !player.m_properties.allow_see())
+        {
+                return;
+        }
+
+        // NOTE: Skill value retrieved here is always at least 1
+        const int player_search_skill =
+                map::g_player->ability(
+                        AbilityId::searching,
+                        true);
+
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i)
+        {
+                if (!map::g_seen.at(i))
+                {
+                        continue;
+                }
+
+                auto* t = map::g_terrain.at(i);
+
+                if (!t->is_hidden())
+                {
+                        continue;
+                }
+
+                const auto& p = t->pos();
+
+                bool is_spotted = false;
+
+                if (p.is_adjacent(player.m_pos) &&
+                    t->id() == terrain::Id::door)
+                {
+                        // Player is adjacent to a hidden door - detection is
+                        // guaranteed.
+                        is_spotted = true;
+                }
+                else
+                {
+                        // Not adjacent to hidden door, roll for success.
+                        int skill_tot =
+                                calc_player_spot_terrain_tot_skill(
+                                        p,
+                                        player_search_skill);
+
+                        if (skill_tot <= 0)
+                        {
+                                continue;
+                        }
+
+                        const auto result = ability_roll::roll(skill_tot);
+
+                        is_spotted = result >= ActionResult::success;
+                }
+
+                if (is_spotted)
+                {
+                        t->reveal(Verbose::yes);
+
+                        t->on_revealed_from_searching();
+
+                        msg_log::more_prompt();
+                }
+        }
+}
+
 static void player_detect_stuck_doors()
 {
         for (const auto& d : dir_utils::g_dir_list)
@@ -505,9 +590,7 @@ static void player_start_turn()
 {
         auto& player = *map::g_player;
 
-        player.update_fov();
-
-        player.update_mon_awareness();
+        map::update_vision();
 
         // Set current temporary shock from darkness etc
         map::g_player->update_tmp_shock();
@@ -538,6 +621,8 @@ static void player_start_turn()
         player.add_shock_from_seen_monsters();
 
         player_incr_passive_shock();
+
+        player_try_spot_hidden_terrain();
 
         player_detect_stuck_doors();
 

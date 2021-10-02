@@ -2943,7 +2943,7 @@
             <property>r_poison</property>
             <property>r_disease</property>
             <property>darkvision</property>
-            <property>radiant_adjacent</property>
+            <property>radiant_self</property>
         </properties>
 
         <ai>
@@ -6224,7 +6224,7 @@
             <property>r_blind</property>
             <property>r_para</property>
             <property>flying</property>
-            <property>radiant_adjacent</property>
+            <property>radiant_self</property>
         </properties>
 
         <ai>
@@ -6923,7 +6923,7 @@
             <property>r_para</property>
             <property>darkvision</property>
             <property>ethereal</property>
-            <property>radiant_adjacent</property>
+            <property>radiant_self</property>
         </properties>
 
         <ai>

@@ -38,6 +38,7 @@ enum class PropId
         deaf,
         fainted,
         burning,
+        radiant_self,
         radiant_adjacent,
         radiant_fov,
         invis,

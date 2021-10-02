@@ -652,32 +652,43 @@ void Actor::on_feed()
 
 void Actor::add_light(Array2<bool>& light_map) const
 {
-        const bool is_alive = (m_state == ActorState::alive);
+        bool do_radiant_self = false;
+        bool do_radiant_adj = false;
+        bool do_radiant_fov = false;
 
-        const bool is_alive_radiant_adj =
-                is_alive &&
-                m_properties.has(PropId::radiant_adjacent);
-
-        const bool is_alive_radiant_fov =
-                is_alive &&
-                m_properties.has(PropId::radiant_fov);
+        if (is_alive())
+        {
+                do_radiant_self = m_properties.has(PropId::radiant_self);
+                do_radiant_adj = m_properties.has(PropId::radiant_adjacent);
+                do_radiant_fov = m_properties.has(PropId::radiant_fov);
+        }
 
         const bool is_burning = m_properties.has(PropId::burning);
 
         auto lgt_size = LgtSize::none;
 
-        if (is_alive_radiant_fov)
+        if (do_radiant_fov)
         {
                 lgt_size = LgtSize::fov;
         }
-        else if (is_burning || is_alive_radiant_adj)
+        else if (do_radiant_adj)
         {
                 lgt_size = LgtSize::small;
+        }
+        else if (is_burning || do_radiant_self)
+        {
+                lgt_size = LgtSize::single;
         }
 
         // TODO: This is exactly the same code as in actor_player.cpp
         switch (lgt_size)
         {
+        case LgtSize::single:
+        {
+                light_map.at(m_pos) = true;
+        }
+        break;
+
         case LgtSize::small:
         {
                 for (const auto d : dir_utils::g_dir_list_w_center)
@@ -691,7 +702,7 @@ void Actor::add_light(Array2<bool>& light_map) const
         {
                 Array2<bool> hard_blocked(map::dims());
 
-                const R fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
+                const auto fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
 
                 map_parsers::BlocksLos()
                         .run(hard_blocked,

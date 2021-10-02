@@ -148,9 +148,12 @@ public:
         static bool is_tile_any_door(const gfx::TileId tile)
         {
                 return (
-                        tile == gfx::TileId::door_closed ||
-                        tile == gfx::TileId::door_open ||
-                        tile == gfx::TileId::door_stuck);
+                        (tile == gfx::TileId::door_closed) ||
+                        (tile == gfx::TileId::door_open) ||
+                        (tile == gfx::TileId::door_stuck) ||
+                        (tile == gfx::TileId::gate_closed) ||
+                        (tile == gfx::TileId::gate_open) ||
+                        (tile == gfx::TileId::gate_stuck));
         }
 
         const Wall* mimic() const
