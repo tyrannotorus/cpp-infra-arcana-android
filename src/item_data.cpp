@@ -256,7 +256,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.is_stackable = false;
                 d.land_on_hard_snd_msg = "I hear a clanking sound.";
                 d.land_on_hard_sfx = audio::SfxId::metal_clank;
-                d.chance_to_incl_in_spawn_list = 10;
+                d.chance_to_incl_in_spawn_list = 7;
                 d.native_containers.push_back(terrain::Id::chest);
                 d.native_containers.push_back(terrain::Id::cocoon);
                 break;
@@ -278,7 +278,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.is_stackable = false;
                 d.land_on_hard_snd_msg = "I hear a clanking sound.";
                 d.land_on_hard_sfx = audio::SfxId::metal_clank;
-                d.chance_to_incl_in_spawn_list = 10;
+                d.chance_to_incl_in_spawn_list = 7;
                 d.native_containers.push_back(terrain::Id::chest);
                 d.native_containers.push_back(terrain::Id::cocoon);
                 break;

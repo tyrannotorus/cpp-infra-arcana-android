@@ -2468,16 +2468,16 @@ Range SpellSpectralWeapons::duration_range(const SpellSkill skill) const
         switch (skill)
         {
         case SpellSkill::basic:
-                return {5, 10};
+                return {3, 4};
 
         case SpellSkill::expert:
         case SpellSkill::transcendent:
                 // NOTE: For balancing reasons, the transcendent level uses the
                 // same duration as the expert level.
-                return {10, 15};
+                return {4, 6};
 
         case SpellSkill::master:
-                return {15, 20};
+                return {6, 8};
         }
 
         ASSERT(false);

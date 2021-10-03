@@ -31,7 +31,7 @@
         </audio>
 
         <attributes>
-            <hit_points>14</hit_points>
+            <hit_points>12</hit_points>
             <spirit>3</spirit>
             <speed>normal</speed>
             <shock_level>none</shock_level>
@@ -95,7 +95,7 @@
         </audio>
 
         <attributes>
-            <hit_points>10</hit_points>
+            <hit_points>12</hit_points>
             <spirit>14</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -1011,7 +1011,7 @@
         </properties>
         
         <ai>
-            <erratic_move_percent>55</erratic_move_percent>
+            <erratic_move_percent>35</erratic_move_percent>
             <turns_aware>16</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>false</looks>
