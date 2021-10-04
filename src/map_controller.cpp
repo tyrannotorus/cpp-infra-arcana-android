@@ -46,7 +46,7 @@ void MapControllerStd::on_std_turn()
         const int spawn_n_turns =
                 has_necronomicon
                 ? 200
-                : 275;
+                : 300;
 
         if (game_time::turn_nr() % spawn_n_turns == 0)
         {

@@ -827,10 +827,15 @@ void Door::bump(actor::Actor& actor_bumping)
 
         if (!m_is_open)
         {
-                actor_try_open(actor_bumping);
-        }
+                map::memorize_terrain_at(m_pos);
+                map::update_vision();
 
-}  // bump
+                actor_try_open(actor_bumping);
+
+                map::memorize_terrain_at(m_pos);
+                map::update_vision();
+        }
+}
 
 void Door::reveal(const Verbose verbose)
 {
@@ -1346,7 +1351,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                         msg_log::add(
                                                 "I fumble with a " +
                                                 base_name_short() +
-                                                ", but finally manage to open it.");
+                                                ", but manage to open it.");
                                 }
                                 else
                                 {

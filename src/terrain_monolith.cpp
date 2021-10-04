@@ -92,6 +92,9 @@ void Monolith::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         if (!map::g_player->m_properties.allow_see())
         {
                 msg_log::add("There is a carved rock here.");

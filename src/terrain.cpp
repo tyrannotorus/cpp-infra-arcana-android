@@ -1400,6 +1400,8 @@ void Stairs::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        map::memorize_terrain_at(m_pos);
+
         int choice = 0;
 
         popup::Popup(popup::AddToMsgHistory::no)
@@ -1505,9 +1507,10 @@ void Stairs::add_light_hook(Array2<bool>& light) const
 // -----------------------------------------------------------------------------
 gfx::TileId Bridge::tile() const
 {
-        return (m_axis == Axis::hor)
-                ? gfx::TileId::hangbridge_hor
-                : gfx::TileId::hangbridge_ver;
+        return (
+                (m_axis == Axis::hor)
+                        ? gfx::TileId::hangbridge_hor
+                        : gfx::TileId::hangbridge_ver);
 }
 
 void Bridge::on_hit(
@@ -2044,6 +2047,9 @@ void Lever::bump(actor::Actor& actor_bumping)
 
         TRACE_FUNC_BEGIN;
 
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         // If player is blind, ask it they really want to pull the lever
         if (!map::g_seen.at(m_pos))
         {
@@ -2086,6 +2092,9 @@ void Lever::bump(actor::Actor& actor_bumping)
         snd.run();
 
         toggle();
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
 
         game_time::tick();
 
@@ -2173,6 +2182,9 @@ void Altar::bump(actor::Actor& actor_bumping)
         {
                 return;
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
 
         if (player_bon::is_bg(Bg::exorcist) &&
             map::is_pos_seen_by_player(m_pos))
@@ -3356,95 +3368,111 @@ Color Tomb::color_default() const
 
 void Tomb::bump(actor::Actor& actor_bumping)
 {
-        if (actor_bumping.is_player())
+        if (!actor_bumping.is_player())
         {
-                if (m_item_container.is_empty() && m_is_open)
-                {
-                        msg_log::add("The tomb is empty.");
-                }
-                else if (!map::g_seen.at(m_pos))
-                {
-                        msg_log::add("There is a stone box here.");
-                }
-                else
-                {
-                        // Player can see
-                        if (m_is_open)
-                        {
-                                player_loot();
-                        }
-                        else
-                        {
-                                // Not open
-                                msg_log::add("I attempt to push the lid.");
-
-                                if (actor_bumping.m_properties.has(PropId::weakened))
-                                {
-                                        msg_log::add("It seems futile.");
-                                }
-                                else
-                                {
-                                        // Not weakened
-                                        int bon = 0;
-
-                                        if (player_bon::has_trait(Trait::rugged))
-                                        {
-                                                bon = 8;
-                                        }
-                                        else if (player_bon::has_trait(Trait::tough))
-                                        {
-                                                bon = 4;
-                                        }
-                                        else
-                                        {
-                                                bon = 0;
-                                        }
-
-                                        TRACE << "Base chance to push lid is: 1 in "
-                                              << m_push_lid_one_in_n << std::endl;
-
-                                        TRACE << "Bonus to roll: "
-                                              << bon << std::endl;
-
-                                        const int roll_tot =
-                                                rnd::range(1, m_push_lid_one_in_n) + bon;
-
-                                        TRACE << "Roll + bonus = " << roll_tot << std::endl;
-
-                                        bool is_success = false;
-
-                                        if (roll_tot < (m_push_lid_one_in_n - 9))
-                                        {
-                                                msg_log::add("It does not yield at all.");
-                                        }
-                                        else if (roll_tot < (m_push_lid_one_in_n - 2))
-                                        {
-                                                msg_log::add("It resists.");
-                                        }
-                                        else if (roll_tot == (m_push_lid_one_in_n - 2))
-                                        {
-                                                msg_log::add("It moves a little!");
-                                                --m_push_lid_one_in_n;
-                                        }
-                                        else
-                                        {
-                                                is_success = true;
-                                        }
-
-                                        if (is_success)
-                                        {
-                                                open(map::g_player);
-                                        }
-                                        else
-                                        {
-                                                wham::try_sprain_player();
-                                        }
-                                }
-                        }
-
-                        game_time::tick();
-                }
+                return;
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
+        if (m_item_container.is_empty() && m_is_open)
+        {
+                msg_log::add("The tomb is empty.");
+
+                return;
+        }
+
+        if (!map::g_seen.at(m_pos))
+        {
+                msg_log::add("There is a stone box here.");
+
+                return;
+        }
+
+        if (m_is_open)
+        {
+                player_loot();
+
+                map::memorize_terrain_at(m_pos);
+                map::update_vision();
+
+                game_time::tick();
+
+                return;
+        }
+
+        msg_log::add("I attempt to push the lid.");
+
+        if (actor_bumping.m_properties.has(PropId::weakened))
+        {
+                msg_log::add("It seems futile.");
+
+                game_time::tick();
+
+                return;
+        }
+
+        int bon = 0;
+
+        if (player_bon::has_trait(Trait::rugged))
+        {
+                bon = 8;
+        }
+        else if (player_bon::has_trait(Trait::tough))
+        {
+                bon = 4;
+        }
+        else
+        {
+                bon = 0;
+        }
+
+        TRACE
+                << "Base chance to push lid is: 1 in "
+                << m_push_lid_one_in_n << std::endl;
+
+        TRACE
+                << "Bonus to roll: "
+                << bon << std::endl;
+
+        const int roll_tot = rnd::range(1, m_push_lid_one_in_n) + bon;
+
+        TRACE << "Roll + bonus = " << roll_tot << std::endl;
+
+        bool is_success = false;
+
+        if (roll_tot < (m_push_lid_one_in_n - 9))
+        {
+                msg_log::add("It does not yield at all.");
+        }
+        else if (roll_tot < (m_push_lid_one_in_n - 2))
+        {
+                msg_log::add("It resists.");
+        }
+        else if (roll_tot == (m_push_lid_one_in_n - 2))
+        {
+                msg_log::add("It moves a little!");
+                --m_push_lid_one_in_n;
+        }
+        else
+        {
+                is_success = true;
+        }
+
+        if (is_success)
+        {
+                open(map::g_player);
+        }
+        else
+        {
+                wham::try_sprain_player();
+        }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
+        game_time::tick();
 }
 
 void Tomb::player_loot()
@@ -3472,7 +3500,8 @@ DidOpen Tomb::open(actor::Actor* const actor_opening)
                 // Was not already open
                 m_is_open = true;
 
-                Snd snd("I hear heavy stone sliding.",
+                Snd snd(
+                        "I hear heavy stone sliding.",
                         audio::SfxId::tomb_open,
                         IgnoreMsgIfOriginSeen::yes,
                         m_pos,
@@ -3742,6 +3771,9 @@ void Chest::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a chest here.");
@@ -3779,6 +3811,9 @@ void Chest::bump(actor::Actor& actor_bumping)
         {
                 open(map::g_player);
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
 
         game_time::tick();
 }
@@ -4193,14 +4228,26 @@ void Fountain::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        const bool is_seen = map::g_seen.at(m_pos);
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         if (!m_has_drinks_left)
         {
-                msg_log::add("The fountain is dried-up.");
+                if (is_seen)
+                {
+                        msg_log::add("The fountain is dried-up.");
+                }
+                else
+                {
+                        msg_log::add(
+                                "There is a fountain here, "
+                                "but it's dried-up.");
+                }
 
                 return;
         }
-
-        const bool is_seen = map::g_seen.at(m_pos);
 
         const auto is_bad =
                 m_fountain_effect >
@@ -4339,6 +4386,9 @@ void Fountain::bump(actor::Actor& actor_bumping)
 
                 msg_log::add("The fountain dries up.");
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
 
         game_time::tick();
 }
@@ -4610,6 +4660,9 @@ void Cabinet::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a cabinet here.");
@@ -4639,6 +4692,11 @@ void Cabinet::bump(actor::Actor& actor_bumping)
         {
                 open(map::g_player);
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
+        game_time::tick();
 }
 
 void Cabinet::player_loot()
@@ -4792,6 +4850,9 @@ void Bookshelf::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a bookshelf here.");
@@ -4817,6 +4878,11 @@ void Bookshelf::bump(actor::Actor& actor_bumping)
         {
                 player_loot();
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
+        game_time::tick();
 }
 
 void Bookshelf::player_loot()
@@ -4954,9 +5020,12 @@ void AlchemistBench::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         if (!map::g_seen.at(m_pos))
         {
-                msg_log::add("There is a wooden bench here.");
+                msg_log::add("There is an alchemist's workbench here.");
 
                 return;
         }
@@ -4979,6 +5048,11 @@ void AlchemistBench::bump(actor::Actor& actor_bumping)
         {
                 player_loot();
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
+        game_time::tick();
 }
 
 void AlchemistBench::player_loot()
@@ -5126,6 +5200,9 @@ void Cocoon::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         if (!map::g_seen.at(m_pos))
         {
                 msg_log::add("There is a cocoon here.");
@@ -5161,6 +5238,11 @@ void Cocoon::bump(actor::Actor& actor_bumping)
         {
                 open(map::g_player);
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
+        game_time::tick();
 }
 
 DidTriggerTrap Cocoon::trigger_trap(actor::Actor* const actor)

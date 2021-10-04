@@ -911,7 +911,7 @@ void ThrowingExplosive::on_draw()
 
                         if (!viewport::is_in_view(p) ||
                             !map::is_pos_inside_map(p) ||
-                            !map::g_explored.at(p))
+                            !map::g_seen.at(p))
                         {
                                 continue;
                         }
@@ -924,32 +924,34 @@ void ThrowingExplosive::on_draw()
                                 m_marker_render_data.at(view_pos);
 
                         // Draw overlay if the cell contains either a map
-                        // symbol, or a marker symbol
-                        if ((render_d.character != 0) ||
-                            (marker_render_d.character != 0))
+                        // symbol or a marker symbol.
+                        if ((render_d.character == 0) &&
+                            (marker_render_d.character == 0))
                         {
-                                const bool has_marker =
-                                        marker_render_d.character != 0;
-
-                                const auto& d =
-                                        has_marker
-                                        ? marker_render_d
-                                        : render_d;
-
-                                const Color color_fg =
-                                        has_marker
-                                        ? d.color
-                                        : colors::orange();
-
-                                io::draw_symbol(
-                                        d.tile,
-                                        d.character,
-                                        Panel::map,
-                                        view_pos,
-                                        color_fg,
-                                        io::DrawBg::yes,
-                                        color_bg);
+                                continue;
                         }
+
+                        const bool has_marker =
+                                marker_render_d.character != 0;
+
+                        const auto& d =
+                                has_marker
+                                ? marker_render_d
+                                : render_d;
+
+                        const Color color_fg =
+                                has_marker
+                                ? d.color
+                                : colors::orange();
+
+                        io::draw_symbol(
+                                d.tile,
+                                d.character,
+                                Panel::map,
+                                view_pos,
+                                color_fg,
+                                io::DrawBg::yes,
+                                color_bg);
                 }
         }
 }

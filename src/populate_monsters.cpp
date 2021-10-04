@@ -447,7 +447,7 @@ void spawn_for_repopulate_over_time()
                 return;
         }
 
-        const P origin = rnd::element(free_cells_vector);
+        const auto origin = rnd::element(free_cells_vector);
 
         free_cells_vector = make_sorted_free_cells(origin, blocked);
 
@@ -458,17 +458,14 @@ void spawn_for_repopulate_over_time()
                 return;
         }
 
-        if (map::g_explored.at(origin))
-        {
-                const int nr_ood = random_out_of_depth();
+        const int nr_ood = random_out_of_depth();
 
-                make_random_group_at(
-                        free_cells_vector,
-                        blocked,
-                        nr_ood,
-                        MonRoamingAllowed::yes,
-                        AllowSpawnUniqueMon::no);
-        }
+        make_random_group_at(
+                free_cells_vector,
+                blocked,
+                nr_ood,
+                MonRoamingAllowed::yes,
+                AllowSpawnUniqueMon::no);
 
         TRACE_FUNC_END;
 }  // spawn_for_repopulate_over_time

@@ -1099,11 +1099,11 @@ void handle(const GameCmd cmd)
         {
                 if (init::g_is_cheat_vision_enabled)
                 {
-                        const size_t nr_positions = map::nr_positions();
-                        for (size_t i = 0; i < nr_positions; ++i)
+                        for (const auto& p : map::rect().positions())
                         {
-                                map::g_seen.at(i) = false;
-                                map::g_explored.at(i) = false;
+                                map::g_seen.at(p) = false;
+
+                                map::clear_player_memory_at(p);
                         }
 
                         init::g_is_cheat_vision_enabled = false;
@@ -1169,7 +1169,7 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                auto* const prop = property_factory::make(PropId::frenzied);
+                auto* const prop = property_factory::make(PropId::blind);
                 prop->set_duration(100);
                 map::g_player->m_properties.apply(prop);
         }

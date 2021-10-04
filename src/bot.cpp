@@ -58,9 +58,10 @@ static void show_map_and_freeze(const std::string& msg)
         const size_t nr_positions = map::nr_positions();
         for (size_t i = 0; i < nr_positions; ++i)
         {
-                map::g_explored.at(i) = true;
                 map::g_seen.at(i) = true;
         }
+
+        map::update_player_memory();
 
         for (auto* const actor : game_time::g_actors)
         {

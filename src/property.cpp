@@ -3260,7 +3260,9 @@ PropEnded PropMagicSearching::on_actor_turn()
         {
                 for (int x = x0; x <= x1; ++x)
                 {
-                        auto* const t = map::g_terrain.at(x, y);
+                        const P p(x, y);
+
+                        auto* const t = map::g_terrain.at(p);
 
                         const auto id = t->id();
 
@@ -3269,8 +3271,9 @@ PropEnded PropMagicSearching::on_actor_turn()
                             (id == terrain::Id::monolith) ||
                             (id == terrain::Id::stairs))
                         {
-                                map::g_seen.at(x, y) = true;
-                                map::g_explored.at(x, y) = true;
+                                map::g_seen.at(p) = true;
+
+                                map::memorize_terrain_at(p);
 
                                 if (t->is_hidden())
                                 {
@@ -3282,10 +3285,11 @@ PropEnded PropMagicSearching::on_actor_turn()
                                 }
                         }
 
-                        if (m_allow_reveal_items && map::g_items.at(x, y))
+                        if (m_allow_reveal_items && map::g_items.at(p))
                         {
-                                map::g_seen.at(x, y) = true;
-                                map::g_explored.at(x, y) = true;
+                                map::g_seen.at(p) = true;
+
+                                map::memorize_item_at(p);
                         }
                 }
         }

@@ -6,6 +6,7 @@
 
 #include "view.hpp"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -27,6 +28,50 @@
 // -----------------------------------------------------------------------------
 // private
 // -----------------------------------------------------------------------------
+static void print_player_memory_at(const P& p)
+{
+        if (!map::is_pos_inside_map(p))
+        {
+                return;
+        }
+
+        std::vector<PlayerMapMemoryData> memory_list = {
+                map::g_terrain_memory.at(p),
+                map::g_items_memory.at(p)};
+
+        const bool has_any_memory =
+                std::any_of(
+                        std::begin(memory_list),
+                        std::end(memory_list),
+                        [](const auto& m) { return m.has_memory(); });
+
+        if (!has_any_memory)
+        {
+                return;
+        }
+
+        msg_log::add(
+                "I remember here:",
+                colors::text(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+
+        for (const auto& m : memory_list)
+        {
+                if (!m.has_memory())
+                {
+                        continue;
+                }
+
+                msg_log::add(
+                        m.name + ".",
+                        colors::text(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+        }
+}
 
 // -----------------------------------------------------------------------------
 // View
@@ -131,12 +176,7 @@ void print_location_info_msgs(const P& pos)
 
         if (!is_cell_seen)
         {
-                msg_log::add(
-                        "I have no vision here.",
-                        colors::text(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
+                print_player_memory_at(pos);
         }
 }
 

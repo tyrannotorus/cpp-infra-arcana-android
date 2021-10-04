@@ -1259,9 +1259,7 @@ void Player::update_fov()
                 fov_hack();
         }
 
-        // The player's current cell is always seen - mostly to update item info
-        // while blind (i.e. when you pick up an item you should see it
-        // disappear)
+        // The player's current cell is always seen.
         map::g_seen.at(m_pos) = true;
 
         // Cheat vision
@@ -1292,46 +1290,6 @@ void Player::update_fov()
                         if (reveal_expanded.at(i))
                         {
                                 map::g_seen.at(i) = true;
-                        }
-                }
-        }
-
-        // Explore
-        for (int x = 0; x < map::w(); ++x)
-        {
-                for (int y = 0; y < map::h(); ++y)
-                {
-                        const P p(x, y);
-
-                        if (!map::g_seen.at(p))
-                        {
-                                continue;
-                        }
-
-                        const bool is_dark =
-                                map::g_dark.at(p);
-
-                        const bool blocks_los =
-                                map_parsers::BlocksLos().run(p);
-
-                        const bool blocks_walking =
-                                map_parsers::BlocksWalking(ParseActors::no)
-                                        .run(p);
-
-                        const bool is_door =
-                                map::g_terrain.at(p)->id() ==
-                                terrain::Id::door;
-
-                        const bool allow_explore =
-                                !is_dark ||
-                                blocks_los ||
-                                blocks_walking ||
-                                is_door ||
-                                has_darkvision;
-
-                        if (allow_explore)
-                        {
-                                map::g_explored.at(p) = true;
                         }
                 }
         }

@@ -18,9 +18,11 @@
 #include "fov.hpp"
 #include "game_time.hpp"
 #include "gfx.hpp"
+#include "global.hpp"
 #include "init.hpp"
 #include "io.hpp"
 #include "item.hpp"
+#include "map_parsing.hpp"
 #include "misc.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
@@ -31,6 +33,7 @@
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "text_format.hpp"
 
 #ifndef NDEBUG
 #include "viewport.hpp"
@@ -50,7 +53,6 @@ static void init_layers_data()
         const size_t nr_positions = map::nr_positions();
         for (size_t i = 0; i < nr_positions; ++i)
         {
-                map::g_explored.at(i) = false;
                 map::g_seen.at(i) = false;
                 map::g_los.at(i) = default_los;
                 map::g_light.at(i) = false;
@@ -58,13 +60,14 @@ static void init_layers_data()
                 map::g_smell.at(i) = {};
                 map::g_smell_spread.at(i) = {};
                 map::g_items.at(i) = nullptr;
+                map::g_items_memory.at(i) = {};
                 map::g_terrain.at(i) = nullptr;
+                map::g_terrain_memory.at(i) = {};
         }
 }
 
 static void resize_layers()
 {
-        map::g_explored.resize_no_init(s_dims);
         map::g_seen.resize_no_init(s_dims);
         map::g_los.resize_no_init(s_dims);
         map::g_light.resize_no_init(s_dims);
@@ -72,7 +75,9 @@ static void resize_layers()
         map::g_smell.resize_no_init(s_dims);
         map::g_smell_spread.resize_no_init(s_dims);
         map::g_items.resize_no_init(s_dims);
+        map::g_items_memory.resize_no_init(s_dims);
         map::g_terrain.resize_no_init(s_dims);
+        map::g_terrain_memory.resize_no_init(s_dims);
 }
 
 static void free_layers_owned_memory()
@@ -135,7 +140,9 @@ Array2<bool> g_dark(0, 0);
 Array2<smell::Smell> g_smell(0, 0);
 Array2<smell::Smell> g_smell_spread(0, 0);
 Array2<item::Item*> g_items(0, 0);
+Array2<PlayerMapMemoryData> g_items_memory(0, 0);
 Array2<terrain::Terrain*> g_terrain(0, 0);
+Array2<PlayerMapMemoryData> g_terrain_memory(0, 0);
 
 actor::Player* g_player = nullptr;
 
@@ -309,11 +316,108 @@ void update_vision()
 {
         game_time::update_light_map();
 
-        map::g_player->update_fov();
+        g_player->update_fov();
 
-        map::g_player->update_mon_awareness();
+        g_player->update_mon_awareness();
+
+        update_player_memory();
 
         states::draw();
+}
+
+void update_player_memory()
+{
+        for (int x = 0; x < w(); ++x)
+        {
+                for (int y = 0; y < h(); ++y)
+                {
+                        const P p(x, y);
+
+                        if (!g_seen.at(p))
+                        {
+                                continue;
+                        }
+
+                        clear_player_memory_at(p);
+
+                        const bool is_dark = g_dark.at(p);
+
+                        const bool blocks_los =
+                                map_parsers::BlocksLos().run(p);
+
+                        const bool blocks_walking =
+                                map_parsers::BlocksWalking(ParseActors::no)
+                                        .run(p);
+
+                        const bool is_door =
+                                g_terrain.at(p)->id() ==
+                                terrain::Id::door;
+
+                        const bool allow_memorize_terrain =
+                                !is_dark ||
+                                blocks_los ||
+                                blocks_walking ||
+                                is_door;
+
+                        if (allow_memorize_terrain)
+                        {
+                                memorize_terrain_at(p);
+                        }
+
+                        memorize_item_at(p);
+                }
+        }
+}
+
+void memorize_terrain_at(const P& p)
+{
+        const auto* const terrain = g_terrain.at(p);
+
+        auto& memory = g_terrain_memory.at(p);
+
+        memory.tile = terrain->tile();
+
+        memory.character = terrain->character();
+
+        memory.name = terrain->name(Article::a);
+
+        memory.name = text_format::first_to_upper(memory.name);
+
+        memory.color = terrain->color();
+}
+
+void memorize_item_at(const P& p)
+{
+        const auto* const item = g_items.at(p);
+
+        auto& memory = g_items_memory.at(p);
+
+        if (!item)
+        {
+                memory = {};
+
+                return;
+        }
+
+        memory.tile = item->tile();
+
+        memory.character = item->character();
+
+        memory.name =
+                item->name(
+                        ItemRefType::plural,
+                        ItemRefInf::yes,
+                        ItemRefAttInf::wpn_main_att_mode);
+
+        memory.name = text_format::first_to_upper(memory.name);
+
+        memory.color = item->color();
+}
+
+void clear_player_memory_at(const P& p)
+{
+        map::g_terrain_memory.at(p) = {};
+        map::g_items_memory.at(p) = {};
 }
 
 void make_blood(const P& origin)

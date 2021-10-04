@@ -320,6 +320,9 @@ void Gong::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
         if (!map::g_seen.at(m_pos))
         {
                 msg_log::clear();
@@ -378,6 +381,9 @@ void Gong::bump(actor::Actor& actor_bumping)
 
                 m_is_used = true;
         }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
 
         game_time::tick();
 }

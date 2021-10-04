@@ -17,6 +17,7 @@
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "draw_box.hpp"
+#include "gfx.hpp"
 #include "global.hpp"
 #include "io.hpp"
 #include "item.hpp"
@@ -117,24 +118,37 @@ static R get_map_area_explored()
         {
                 for (int y = 0; y < map_dims.y; ++y)
                 {
-                        if (map::g_explored.at(x, y))
+                        const bool has_vision = map::g_seen.at(x, y);
+
+                        const auto terrain_memory =
+                                map::g_terrain_memory.at(x, y);
+
+                        const auto item_memory =
+                                map::g_items_memory.at(x, y);
+
+                        if (!has_vision &&
+                            (terrain_memory.tile == gfx::TileId::END) &&
+                            (item_memory.tile == gfx::TileId::END))
                         {
-                                area_explored.p0.x = std::min(
-                                        area_explored.p0.x,
-                                        x);
-
-                                area_explored.p0.y = std::min(
-                                        area_explored.p0.y,
-                                        y);
-
-                                area_explored.p1.x = std::max(
-                                        area_explored.p1.x,
-                                        x);
-
-                                area_explored.p1.y = std::max(
-                                        area_explored.p1.y,
-                                        y);
+                                // Nothing seen or remembered here.
+                                continue;
                         }
+
+                        area_explored.p0.x = std::min(
+                                area_explored.p0.x,
+                                x);
+
+                        area_explored.p0.y = std::min(
+                                area_explored.p0.y,
+                                y);
+
+                        area_explored.p1.x = std::max(
+                                area_explored.p1.x,
+                                x);
+
+                        area_explored.p1.y = std::max(
+                                area_explored.p1.y,
+                                y);
                 }
         }
 

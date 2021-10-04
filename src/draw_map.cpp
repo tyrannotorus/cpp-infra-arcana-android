@@ -39,7 +39,6 @@
 // Private
 // -----------------------------------------------------------------------------
 static Array2<CellRenderData> s_render_array(0, 0);
-static Array2<CellRenderData> s_render_array_player_memory(0, 0);
 
 static char s_filled_rect_char = 1;
 
@@ -106,80 +105,97 @@ static void set_terrains()
         }
 }
 
+// Returns wall or wall mimicked by a door at given position, if any.
+static const terrain::Wall* wall_at(const P& p)
+{
+        const terrain::Wall* wall = nullptr;
+
+        const auto* const t = map::g_terrain.at(p);
+
+        const auto id = t->id();
+
+        if (id == terrain::Id::wall)
+        {
+                wall = static_cast<const terrain::Wall*>(t);
+        }
+        else if (id == terrain::Id::door)
+        {
+                const auto* door = static_cast<const terrain::Door*>(t);
+
+                if (door->is_hidden())
+                {
+                        wall = door->mimic();
+                }
+        }
+
+        return wall;
+}
+
+static void post_process_wall_tile_at(const P& p)
+{
+        auto& render_data = s_render_array.at(p);
+
+        const bool is_wall_top_tile =
+                terrain::Wall::is_wall_top_tile(
+                        render_data.tile);
+
+        if (!is_wall_top_tile)
+        {
+                return;
+        }
+
+        const auto* const wall = wall_at(p);
+
+        if (!wall)
+        {
+                return;
+        }
+
+        const auto p_below = p.with_y_offset(1);
+        const auto render_data_below = s_render_array.at(p_below);
+
+        if (render_data_below.tile == gfx::TileId::END)
+        {
+                // No terrain remembered here, use front wall tile for the
+                // current wall.
+                render_data.tile = wall->front_wall_tile();
+
+                return;
+        }
+
+        // Player remembers terrain below this wall.
+
+        const auto tile_below = s_render_array.at(p_below).tile;
+
+        if (terrain::Wall::is_wall_front_tile(tile_below) ||
+            terrain::Wall::is_wall_top_tile(tile_below) ||
+            terrain::Door::is_tile_any_door(tile_below))
+        {
+                // Tile below is a wall or door tile, use top wall tile.
+                render_data.tile = wall->top_wall_tile();
+        }
+        else
+        {
+                // Other tile below (e.g. floor), use front wall tile.
+                render_data.tile = wall->front_wall_tile();
+        }
+}
+
 static void post_process_wall_tiles()
 {
-        // TODO: Refactor
-
-        for (int x = 0; x < map::w(); ++x)
+        if (!config::is_tiles_mode())
         {
-                for (int y = 0; y < (map::h() - 1); ++y)
+                return;
+        }
+
+        const int x1 = map::w() - 1;
+        const int y1 = map::h() - 2;
+
+        for (int x = 0; x <= x1; ++x)
+        {
+                for (int y = 0; y <= y1; ++y)
                 {
-                        auto& render_data = s_render_array.at(x, y);
-
-                        const auto tile = render_data.tile;
-
-                        const bool is_wall_top_tile =
-                                terrain::Wall::is_wall_top_tile(tile);
-
-                        if (!is_wall_top_tile)
-                        {
-                                continue;
-                        }
-
-                        const terrain::Wall* wall = nullptr;
-
-                        {
-                                const auto* const t = map::g_terrain.at(x, y);
-
-                                const auto id = t->id();
-
-                                if (id == terrain::Id::wall)
-                                {
-                                        wall = static_cast<const terrain::Wall*>(t);
-                                }
-                                else if (id == terrain::Id::door)
-                                {
-                                        const auto* door = static_cast<const terrain::Door*>(t);
-
-                                        if (door->is_hidden())
-                                        {
-                                                wall = door->mimic();
-                                        }
-                                }
-
-                                if (!wall)
-                                {
-                                        continue;
-                                }
-                        }
-
-                        if (map::g_explored.at(x, y + 1))
-                        {
-                                const auto tile_below =
-                                        s_render_array.at(x, y + 1).tile;
-
-                                if (terrain::Wall::is_wall_front_tile(tile_below) ||
-                                    terrain::Wall::is_wall_top_tile(tile_below) ||
-                                    terrain::Door::is_tile_any_door(tile_below))
-                                {
-                                        render_data.tile =
-                                                wall->top_wall_tile();
-                                }
-                                else if (wall)
-                                {
-                                        render_data.tile =
-                                                wall->front_wall_tile();
-                                }
-                        }
-                        else
-                        {
-                                // Cell below is not explored
-                                if (wall)
-                                {
-                                        render_data.tile =
-                                                wall->front_wall_tile();
-                                }
-                        }
+                        post_process_wall_tile_at({x, y});
                 }
         }
 }
@@ -224,19 +240,6 @@ static void set_items()
                 render_data.color = item->color();
                 render_data.tile = item->tile();
                 render_data.character = item->character();
-        }
-}
-
-static void copy_seen_cells_to_player_memory()
-{
-        const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
-                if (map::g_seen.at(i))
-                {
-                        s_render_array_player_memory.at(i) =
-                                s_render_array.at(i);
-                }
         }
 }
 
@@ -397,6 +400,19 @@ static void set_living_monsters()
         }
 }
 
+static CellRenderData player_memory_to_render_data(
+        const PlayerMapMemoryData& d)
+{
+        CellRenderData result;
+
+        result.tile = d.tile;
+        result.color = d.color;
+        result.color_bg = colors::black();  // TODO: Is background ever needed?
+        result.character = d.character;
+
+        return result;
+}
+
 static void set_unseen_cells_from_player_memory()
 {
         const size_t nr_positions = map::nr_positions();
@@ -404,22 +420,29 @@ static void set_unseen_cells_from_player_memory()
         {
                 auto& render_data = s_render_array.at(i);
 
-                if (map::g_seen.at(i) || !map::g_explored.at(i))
+                if (map::g_seen.at(i))
                 {
                         continue;
                 }
 
-                render_data = s_render_array_player_memory.at(i);
+                const auto& terrain_memory = map::g_terrain_memory.at(i);
+                const auto& item_memory = map::g_items_memory.at(i);
+
+                if (terrain_memory.has_memory())
+                {
+                        render_data =
+                                player_memory_to_render_data(terrain_memory);
+                }
+
+                if (item_memory.has_memory())
+                {
+                        render_data =
+                                player_memory_to_render_data(item_memory);
+                }
 
                 const double div = 3.0;
 
                 render_data.color = render_data.color.fraction(div);
-
-                if (render_data.color_bg != colors::black())
-                {
-                        render_data.color_bg =
-                                render_data.color_bg.fraction(div);
-                }
         }
 }
 
@@ -662,11 +685,6 @@ namespace draw_map
 void clear()
 {
         clear_render_array();
-
-        std::fill(
-                std::begin(s_render_array_player_memory),
-                std::end(s_render_array_player_memory),
-                CellRenderData());
 }
 
 void run()
@@ -674,8 +692,6 @@ void run()
         if (s_render_array.dims() != map::dims())
         {
                 s_render_array.resize(map::dims());
-
-                s_render_array_player_memory.resize(map::dims());
         }
 
         clear_render_array();
@@ -684,16 +700,11 @@ void run()
 
         set_terrains();
 
-        if (config::is_tiles_mode())
-        {
-                post_process_wall_tiles();
-        }
+        post_process_wall_tiles();
 
         set_dead_actors();
 
         set_items();
-
-        copy_seen_cells_to_player_memory();
 
         set_mobiles();
 
@@ -711,11 +722,6 @@ void run()
 const CellRenderData& get_drawn_cell(int x, int y)
 {
         return s_render_array.at(x, y);
-}
-
-const CellRenderData& get_drawn_cell_player_memory(int x, int y)
-{
-        return s_render_array_player_memory.at(x, y);
 }
 
 }  // namespace draw_map

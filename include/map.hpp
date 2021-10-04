@@ -12,9 +12,11 @@
 
 #include "array2.hpp"
 #include "colors.hpp"
+#include "gfx.hpp"
 #include "global.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
+#include "room.hpp"
 
 namespace smell
 {
@@ -40,6 +42,19 @@ class Terrain;
 
 class Room;
 
+struct PlayerMapMemoryData
+{
+        bool has_memory() const
+        {
+                return tile != gfx::TileId::END;
+        }
+
+        gfx::TileId tile {gfx::TileId::END};
+        char character {0};
+        std::string name;
+        Color color {};
+};
+
 struct ChokePointData
 {
         ChokePointData() = default;
@@ -57,7 +72,6 @@ struct ChokePointData
 
 namespace map
 {
-extern Array2<bool> g_explored;
 extern Array2<bool> g_seen;
 extern Array2<LosResult> g_los;
 extern Array2<bool> g_light;
@@ -65,7 +79,9 @@ extern Array2<bool> g_dark;
 extern Array2<smell::Smell> g_smell;
 extern Array2<smell::Smell> g_smell_spread;
 extern Array2<item::Item*> g_items;
+extern Array2<PlayerMapMemoryData> g_items_memory;
 extern Array2<terrain::Terrain*> g_terrain;
+extern Array2<PlayerMapMemoryData> g_terrain_memory;
 
 extern actor::Player* g_player;
 
@@ -100,6 +116,13 @@ terrain::Terrain* put(terrain::Terrain* terrain);
 // Updates light map, player fov (etc). This should be called when e.g. a door
 // is closed, or a wall is destoyed.
 void update_vision();
+
+void update_player_memory();
+
+void memorize_terrain_at(const P& p);
+void memorize_item_at(const P& p);
+
+void clear_player_memory_at(const P& p);
 
 void make_blood(const P& origin);
 void make_gore(const P& origin);
