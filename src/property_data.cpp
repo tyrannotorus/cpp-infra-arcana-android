@@ -303,7 +303,7 @@ static void init_data_list()
         d.id = PropId::light_sensitive;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Light Sensitive";
-        d.name_short = "Light Sensitive";
+        d.name_short = "Lgt Sensitive";
         d.descr = "Is vulnerable to light.";
         d.msg_start_player = "I feel vulnerable to light!";
         d.msg_start_mon = "is vulnerable to light.";
@@ -797,7 +797,7 @@ static void init_data_list()
         d.id = PropId::magic_searching;
         d.std_rnd_turns = Range(20, 60);
         d.name = "Magic Searching";
-        d.name_short = "Magic Searching";
+        d.name_short = "Magic Search";
         d.descr =
                 "Magically detects objects and creatures in the surrounding "
                 "area.";
@@ -911,7 +911,7 @@ static void init_data_list()
         d.id = PropId::tele_ctrl;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Teleport control";
-        d.name_short = "Teleport control";
+        d.name_short = "Teleport Ctrl";
         d.descr = "Can control teleport destination.";
         d.msg_start_player = "I feel in control.";
         d.msg_end_player = "I feel less in control.";

@@ -20,6 +20,12 @@ struct SDL_Renderer;
 struct SDL_Texture;
 struct SDL_Surface;
 
+enum class IsFullscreen
+{
+        no,
+        yes
+};
+
 namespace io
 {
 class TextBlock;
@@ -43,6 +49,8 @@ void put_px_on_surface(
         SDL_Surface& surface,
         const P& px_pos,
         const Color& color);
+
+void init_window();
 
 void try_set_window_gui_cells(P new_gui_dims);
 

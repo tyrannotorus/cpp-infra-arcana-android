@@ -25,7 +25,7 @@ std::string fonts_dir()
 
 std::string tiles_dir()
 {
-        return gfx_dir() + "/tiles/24x24/";
+        return gfx_dir() + "/tiles/20x20/";
 }
 
 std::string images_dir()
@@ -38,9 +38,9 @@ std::string logo_img_path()
         return images_dir() + "/main_menu_logo.png";
 }
 
-std::string skull_img_path()
+std::string logo_small_img_path()
 {
-        return images_dir() + "/skull.png";
+        return images_dir() + "/main_menu_logo_small.png";
 }
 
 std::string audio_dir()

@@ -65,12 +65,12 @@ void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
 {
         TRACE_FUNC_BEGIN;
 
-        if (!panels::is_valid())
-        {
-                TRACE_FUNC_END;
+        // if (!panels::is_valid())
+        // {
+        //         TRACE_FUNC_END;
 
-                return;
-        }
+        //         return;
+        // }
 
         states::draw();
 
@@ -119,10 +119,10 @@ void draw_blast_at_seen_cells(
         const std::vector<P>& positions,
         const Color& color)
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
+        // if (!panels::is_valid())
+        // {
+        //         return;
+        // }
 
         std::vector<P> positions_with_vision;
 
@@ -144,10 +144,10 @@ void draw_blast_at_seen_actors(
         const std::vector<actor::Actor*>& actors,
         const Color& color)
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
+        // if (!panels::is_valid())
+        // {
+        //         return;
+        // }
 
         std::vector<P> positions;
 

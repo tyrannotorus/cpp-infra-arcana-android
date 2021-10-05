@@ -228,15 +228,6 @@ static SDL_Texture* load_texture(const std::string& path)
         return texture;
 }
 
-static P sdl_window_px_dims()
-{
-        P px_dims;
-
-        SDL_GetWindowSize(io::g_sdl_window, &px_dims.x, &px_dims.y);
-
-        return px_dims;
-}
-
 static SDL_Renderer* create_renderer()
 {
         TRACE_FUNC_BEGIN;
@@ -342,70 +333,6 @@ static void init_sdl()
         TRACE_FUNC_END;
 }
 
-static void init_window(const P& px_dims)
-{
-        TRACE_FUNC_BEGIN;
-
-        TRACE
-                << "Attempting to create window with size: "
-                << px_dims.x
-                << ", "
-                << px_dims.y
-                << std::endl;
-
-        std::string title = "Infra Arcana ";
-
-        const auto git_sha1_result =
-                version_info::read_git_sha1_str_from_file();
-
-        title += version_info::g_version_str;
-
-        if (git_sha1_result)
-        {
-                title += " (" + git_sha1_result.value() + ")";
-        }
-
-        if (io::g_sdl_window)
-        {
-                SDL_DestroyWindow(io::g_sdl_window);
-        }
-
-        uint32_t sdl_window_flags = 0;
-
-        if (config::is_fullscreen())
-        {
-                TRACE << "Fullscreen mode" << std::endl;
-
-                sdl_window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
-        }
-        else
-        {
-                TRACE << "Windowed mode" << std::endl;
-
-                sdl_window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-        }
-
-        io::g_sdl_window =
-                SDL_CreateWindow(
-                        title.c_str(),
-                        SDL_WINDOWPOS_CENTERED,
-                        SDL_WINDOWPOS_CENTERED,
-                        px_dims.x,
-                        px_dims.y,
-                        sdl_window_flags);
-
-        if (!io::g_sdl_window)
-        {
-                TRACE
-                        << "Failed to create window: "
-                        << std::endl
-                        << SDL_GetError()
-                        << std::endl;
-        }
-
-        TRACE_FUNC_END;
-}
-
 static void init_renderer()
 {
         TRACE_FUNC_BEGIN;
@@ -420,59 +347,18 @@ static void init_renderer()
         TRACE_FUNC_END;
 }
 
-static P native_resolution_from_sdl()
-{
-        SDL_DisplayMode display_mode;
-
-        const auto result = SDL_GetDesktopDisplayMode(0, &display_mode);
-
-        if (result != 0)
-        {
-                TRACE_ERROR_RELEASE
-                        << "Failed to read native resolution"
-                        << std::endl
-                        << SDL_GetError()
-                        << std::endl;
-
-                PANIC;
-        }
-
-        return {display_mode.w, display_mode.h};
-}
-
-static void update_rendering_offsets()
-{
-        const auto screen_panel_dims = io::panel_px_dims(Panel::screen);
-
-        // TODO: Is centering needed in fullscreen?
-        const bool is_centering_allowed =
-                panels::is_valid() &&
-                !config::is_fullscreen();
-
-        if (is_centering_allowed)
-        {
-                P window_dims;
-
-                SDL_GetWindowSize(
-                        io::g_sdl_window,
-                        &window_dims.x,
-                        &window_dims.y);
-
-                const P extra_space(window_dims - screen_panel_dims);
-
-                io::g_rendering_px_offset = extra_space.scaled_down(2);
-        }
-        else
-        {
-                io::g_rendering_px_offset.set(0, 0);
-        }
-}
-
 static void load_logo()
 {
         TRACE_FUNC_BEGIN;
 
-        io::g_logo_texture = load_texture(paths::logo_img_path());
+        // Use a smaller image if graphics are scaled, otherwise the logo looks
+        // gigantic.
+        const std::string img_path =
+                config::is_2x_scale_enabled()
+                ? paths::logo_small_img_path()
+                : paths::logo_img_path();
+
+        io::g_logo_texture = load_texture(img_path);
 
         TRACE_FUNC_END;
 }
@@ -555,8 +441,6 @@ static void load_tiles()
 // -----------------------------------------------------------------------------
 namespace io
 {
-SDL_Window* g_sdl_window = nullptr;
-SDL_Renderer* g_sdl_renderer = nullptr;
 SDL_Texture* g_font_texture_with_contours = nullptr;
 SDL_Texture* g_font_texture = nullptr;
 SDL_Texture* g_tile_textures[(size_t)gfx::TileId::END] = {};
@@ -572,144 +456,7 @@ void init()
         cleanup();
 
         init_sdl();
-
-        if (config::is_fullscreen())
-        {
-                TRACE << "Initializing with fullscreen" << std::endl;
-
-                const auto native_resolution = native_resolution_from_sdl();
-
-                TRACE
-                        << "Native resolution: "
-                        << native_resolution.x
-                        << ", "
-                        << native_resolution.y
-                        << std::endl;
-
-                auto window_resolution = native_resolution;
-
-                if (config::is_2x_scale_fullscreen_enabled())
-                {
-                        window_resolution = window_resolution.scaled_down(2);
-                }
-
-                TRACE
-                        << "Attempting fullscreen with window resolution: "
-                        << window_resolution.x
-                        << ", "
-                        << window_resolution.y
-                        << std::endl;
-
-                panels::init(io::px_to_gui_coords(window_resolution));
-
-                if (!panels::is_valid() &&
-                    config::is_2x_scale_fullscreen_enabled())
-                {
-                        TRACE
-                                << "2x scaled fullscreen not possible, "
-                                   "disabling 2x scaling"
-                                << std::endl;
-
-                        // Disable the actual scaling setting (but keep the user
-                        // option to request 2x scaling enabled)
-                        config::set_2x_scale_fullscreen_enabled(false);
-
-                        window_resolution = native_resolution;
-
-                        panels::init(
-                                io::px_to_gui_coords(
-                                        window_resolution));
-                }
-
-                if (panels::is_valid())
-                {
-                        // The panels think we're OK - try creating the window
-                        init_window(window_resolution);
-                }
-
-                if (!g_sdl_window)
-                {
-                        // Fullscreen failed, fall back on windowed mode instead
-                        config::set_fullscreen(false);
-                }
-        }
-
-        // NOTE: Fullscreen may have been disabled while attempting to set up a
-        // fullscreen "window" (see above), so we check again here if fullscreen
-        // is enabled
-        if (!config::is_fullscreen())
-        {
-                const auto min_gui_dims = io::min_screen_gui_dims();
-
-                const auto config_res =
-                        P(config::screen_px_w(),
-                          config::screen_px_h());
-
-                const auto config_gui_dims = px_to_gui_coords(config_res);
-
-                const auto native_res = native_resolution_from_sdl();
-
-                TRACE << "Minimum required GUI dimensions: "
-                      << min_gui_dims.x
-                      << ","
-                      << min_gui_dims.y
-                      << std::endl;
-
-                TRACE << "Config GUI dimensions: "
-                      << config_gui_dims.x
-                      << ","
-                      << config_gui_dims.y
-                      << std::endl;
-
-                TRACE << "Config resolution: "
-                      << config_res.x
-                      << ","
-                      << config_res.y
-                      << std::endl;
-
-                TRACE << "Native resolution: "
-                      << native_res.x
-                      << ","
-                      << native_res.y
-                      << std::endl;
-
-                const auto screen_gui_dims_used =
-                        ((config_res.x <= native_res.x) &&
-                         (config_res.y <= native_res.y))
-                        ? config_gui_dims
-                        : min_gui_dims;
-
-                TRACE << "Max number of GUI cells used (based on desired and "
-                      << "native resolution): "
-                      << std::endl
-                      << screen_gui_dims_used.x
-                      << ","
-                      << screen_gui_dims_used.y
-                      << std::endl;
-
-                panels::init(screen_gui_dims_used);
-
-                const auto screen_panel_px_dims =
-                        panel_px_dims(Panel::screen);
-
-                const P window_px_dims(
-                        std::max(screen_panel_px_dims.x, config_res.x),
-                        std::max(screen_panel_px_dims.y, config_res.y));
-
-                init_window(window_px_dims);
-        }
-
-        if (!g_sdl_window)
-        {
-                TRACE_ERROR_RELEASE
-                        << "Failed to set up window"
-                        << std::endl
-                        << SDL_GetError()
-                        << std::endl;
-
-                PANIC;
-        }
-
+        init_window();
         init_renderer();
 
         load_font();
@@ -720,8 +467,6 @@ void init()
 
                 load_logo();
         }
-
-        update_rendering_offsets();
 
         init_input();
 
@@ -749,74 +494,28 @@ void cleanup()
         TRACE_FUNC_END;
 }
 
-void update_screen()
+void on_user_toggle_fullscreen()
 {
-        const auto screen_panel_dims = panel_px_dims(Panel::screen);
+        TRACE_FUNC_BEGIN;
 
-        if (!panels::is_valid() &&
-            (screen_panel_dims.x > config::gui_cell_px_w()) &&
-            (screen_panel_dims.y > config::gui_cell_px_h()))
-        {
-                draw_text_at_px(
-                        "Window too small",
-                        {0, 0},
-                        colors::light_white(),
-                        DrawBg::no,
-                        colors::black());
-        }
-
-        SDL_RenderPresent(g_sdl_renderer);
-}
-
-void clear_screen()
-{
-        SDL_SetRenderDrawColor(g_sdl_renderer, 0U, 0U, 0U, 0xFFU);
-
-        SDL_RenderClear(g_sdl_renderer);
-}
-
-P min_screen_gui_dims()
-{
-        // Use the maximum of:
-        // * The hard minimum required number of gui cells
-        // * The minimum required resolution, converted to gui cells, rounded up
-
-        P gui_cell_px_dims(
-                config::gui_cell_px_w(),
-                config::gui_cell_px_h());
-
-        if (config::is_fullscreen() &&
-            config::is_2x_scale_fullscreen_enabled())
-        {
-                gui_cell_px_dims = gui_cell_px_dims.scaled_up(2);
-        }
-
-        P min_nr_gui_cells(
-                (g_min_res_w + gui_cell_px_dims.x - 1) / gui_cell_px_dims.x,
-                (g_min_res_h + gui_cell_px_dims.y - 1) / gui_cell_px_dims.y);
-
-        min_nr_gui_cells.set(
-                std::max(min_nr_gui_cells.x, g_min_nr_gui_cells_x),
-                std::max(min_nr_gui_cells.y, g_min_nr_gui_cells_y));
-
-        return min_nr_gui_cells;
-}
-
-void on_fullscreen_toggled()
-{
-        clear_screen();
-
-        update_screen();
-
-        // TODO: This should not be necessary - but without this call there is
-        // some strange behavior with the window losing focus, and becoming
-        // hidden behind other windows when toggling fullscreen (until you
-        // alt-tab back to the window)
         init();
 
         states::draw();
-
         update_screen();
+
+        TRACE_FUNC_END;
+}
+
+void on_user_toggle_scaling()
+{
+        TRACE_FUNC_BEGIN;
+
+        init();
+
+        states::draw();
+        update_screen();
+
+        TRACE_FUNC_END;
 }
 
 void draw_character_at_px(
@@ -847,8 +546,8 @@ void draw_character_at_px(
         // NOTE: We expect one pixel separator between each glyph
         auto char_px_pos = gfx::character_pos(character);
 
-        char_px_pos.x *= gui_cell_px_dims.x + 1;
-        char_px_pos.y *= gui_cell_px_dims.y;
+        char_px_pos.x *= (gui_cell_px_dims.x + 1);
+        char_px_pos.y *= (gui_cell_px_dims.y);
 
         SDL_Rect clip_rect;
 
@@ -860,11 +559,8 @@ void draw_character_at_px(
         // * Now apply offset and scaling, if needed *
 
         // Scaling
-        if (config::is_fullscreen() &&
-            config::is_2x_scale_fullscreen_enabled())
+        if (config::is_2x_scale_enabled())
         {
-                // We are running fullscreen 2x scale - scale up the position
-                // and rendering size
                 px_pos = px_pos.scaled_up(2);
                 gui_cell_px_dims = gui_cell_px_dims.scaled_up(2);
         }
@@ -906,11 +602,6 @@ void draw_tile(
         const DrawBg draw_bg,
         const Color& bg_color)
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
-
         P px_pos = map_to_px_coords(panel, pos);
 
         P map_cell_px_dims(config::map_cell_px_w(), config::map_cell_px_h());
@@ -927,8 +618,7 @@ void draw_tile(
         // * Now apply offset and scaling, if needed *
 
         // Scaling
-        if (config::is_fullscreen() &&
-            config::is_2x_scale_fullscreen_enabled())
+        if (config::is_2x_scale_enabled())
         {
                 // We are running fullscreen 2x scale - scale up the position
                 // and rendering size
@@ -970,11 +660,6 @@ void draw_tile(
 
 void cover_panel(const Panel panel, const Color& color)
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
-
         const auto px_area = gui_to_px_rect(panels::area(panel));
 
         draw_rectangle_filled(px_area, color);
@@ -1014,11 +699,6 @@ void cover_cell(const Panel panel, const P& offset)
 
 void draw_logo()
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
-
         // Set pixel position *before* applying rendering offset and scaling
         const int screen_px_w = panel_px_w(Panel::screen);
 
@@ -1036,8 +716,7 @@ void draw_logo()
         // * Now apply offset and scaling, if needed *
 
         // Scaling
-        if (config::is_fullscreen() &&
-            config::is_2x_scale_fullscreen_enabled())
+        if (config::is_2x_scale_enabled())
         {
                 // We are running fullscreen 2x scale - scale up the position
                 // and rendering size
@@ -1060,59 +739,6 @@ void draw_logo()
                 g_logo_texture,
                 nullptr,  // No clipping needed, drawing whole texture
                 &render_rect);
-}
-
-void try_set_window_gui_cells(P new_gui_dims)
-{
-        const P min_gui_dims = io::min_screen_gui_dims();
-
-        new_gui_dims.x = std::max(new_gui_dims.x, min_gui_dims.x);
-        new_gui_dims.y = std::max(new_gui_dims.y, min_gui_dims.y);
-
-        const P new_px_dims = io::gui_to_px_coords(new_gui_dims);
-
-        SDL_SetWindowSize(g_sdl_window, new_px_dims.x, new_px_dims.y);
-}
-
-void on_window_resized()
-{
-        const auto new_px_dims = sdl_window_px_dims();
-
-        config::set_screen_px_w(new_px_dims.x);
-        config::set_screen_px_h(new_px_dims.y);
-
-        TRACE << "New window size: "
-              << new_px_dims.x
-              << ", "
-              << new_px_dims.y
-              << std::endl;
-
-        panels::init(io::px_to_gui_coords(new_px_dims));
-
-        update_rendering_offsets();
-
-        states::on_window_resized();
-}
-
-bool is_window_maximized()
-{
-        // TODO: This does not seem to work very well:
-        // * The flag is sometimes not set when maximizing the window
-        // * The flag sometimes gets "stuck" after the window is restored from
-        //   being maximized. The flag is only cleared again after tabbing to
-        //   another window and back again, or after minimizing and restoring
-        //   the window
-        //
-        // Is this an SDL bug?
-        //
-        return SDL_GetWindowFlags(g_sdl_window) & SDL_WINDOW_MAXIMIZED;
-}
-
-P sdl_window_gui_dims()
-{
-        const P px_dims = sdl_window_px_dims();
-
-        return io::px_to_gui_coords(px_dims);
 }
 
 std::string sdl_pref_dir()

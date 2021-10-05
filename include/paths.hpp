@@ -18,7 +18,7 @@ std::string tiles_dir();
 std::string images_dir();
 
 std::string logo_img_path();
-std::string skull_img_path();
+std::string logo_small_img_path();
 
 std::string audio_dir();
 

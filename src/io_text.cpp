@@ -34,10 +34,10 @@ void draw_character(
         const DrawBg draw_bg,
         const Color& bg_color)
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
+        // if (!panels::is_valid())
+        // {
+        //         return;
+        // }
 
         const auto px_pos = gui_to_px_coords(panel, pos);
 
@@ -65,7 +65,7 @@ void draw_text_at_px(
         }
 
         const int cell_px_w = config::gui_cell_px_w();
-        const int msg_w = str.size();
+        const int msg_w = (int)str.size();
         const int msg_px_w = msg_w * cell_px_w;
 
         const auto sdl_color = color.sdl_color();
@@ -128,10 +128,10 @@ void draw_text(
         const DrawBg draw_bg,
         const Color& bg_color)
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
+        // if (!panels::is_valid())
+        // {
+        //         return;
+        // }
 
         text.set_color(color);
 
@@ -152,7 +152,7 @@ void draw_text(
                                 draw_bg,
                                 bg_color);
 
-                        pos.x += action.str.length();
+                        pos.x += (int)action.str.length();
                 }
                 break;
 
@@ -187,12 +187,12 @@ void draw_text_center(
         const Color& bg_color,
         const bool is_pixel_pos_adj_allowed)
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
+        // if (!panels::is_valid())
+        // {
+        //         return;
+        // }
 
-        const int len = str.size();
+        const int len = (int)str.size();
         const int len_half = len / 2;
         const int x_pos_left = pos.x - len_half;
 
@@ -222,10 +222,10 @@ void draw_text_right(
         const DrawBg draw_bg,
         const Color& bg_color)
 {
-        if (!panels::is_valid())
-        {
-                return;
-        }
+        // if (!panels::is_valid())
+        // {
+        //         return;
+        // }
 
         const int x_pos_left = pos.x - (int)str.size() + 1;
 

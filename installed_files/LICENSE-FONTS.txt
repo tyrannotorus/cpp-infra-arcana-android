@@ -11,6 +11,12 @@ All fonts included with Infra Arcana have been converted from TTF
 
 FONT IMAGES INCLUDED WITH INFRA ARCANA
 
+File(s):             7x13_uushi.png
+Source:              https://github.com/cmvnd/fonts
+Original name:       uushi.bdf
+License:             GNU General Public License v3.0
+Changes made:        TBD
+
 File(s):             8x17_terminus.png
 Source:              https://files.ax86.net/terminus-ttf/
 Original name:       Terminus TTF

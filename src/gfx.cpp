@@ -438,7 +438,7 @@ namespace gfx
 {
 P character_pos(const char character)
 {
-        return {character - '!' + 1, 0};
+        return {character - ' ', 0};
 }
 
 TileId str_to_tile_id(const std::string& str)

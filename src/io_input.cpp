@@ -258,9 +258,7 @@ static void handle_keydown_enter_event()
 
                 config::set_fullscreen(!config::is_fullscreen());
 
-                io::on_fullscreen_toggled();
-
-                // SDL_SetWindowSize(sdl_window_,
+                io::on_user_toggle_fullscreen();
 
                 // TODO: For some reason, the alt key gets "stuck" after
                 // toggling fullscreen, and must be cleared here
@@ -473,7 +471,7 @@ void init_input()
                         break;
 
                 case GraphicsCycle::very_slow:
-                        delay = 1800;
+                        delay = 1400;
                         break;
 
                 case GraphicsCycle::END:

@@ -77,7 +77,7 @@ static bool run_drop_query(
 
                 io::draw_text(
                         drop_str,
-                        Panel::screen,
+                        Panel::map,
                         {0, 0},
                         colors::light_white());
 

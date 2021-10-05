@@ -24,12 +24,16 @@ namespace io
 {
 void draw_rectangle(R px_rect, const Color& color)
 {
+        // if (!panels::is_valid())
+        // {
+        //         return;
+        // }
+
         // NOTE: To handle graphics scaling, we draw an extra inner rectangle -
         // this is somewhat hacky, but it fulfills the purpose...
         int nr_rects = 1;
 
-        if (config::is_fullscreen() &&
-            config::is_2x_scale_fullscreen_enabled())
+        if (config::is_2x_scale_enabled())
         {
                 px_rect = px_rect.scaled_up(2);
 
@@ -63,8 +67,12 @@ void draw_rectangle(R px_rect, const Color& color)
 
 void draw_rectangle_filled(R px_rect, const Color& color)
 {
-        if (config::is_fullscreen() &&
-            config::is_2x_scale_fullscreen_enabled())
+        // if (!panels::is_valid())
+        // {
+        //         return;
+        // }
+
+        if (config::is_2x_scale_enabled())
         {
                 px_rect = px_rect.scaled_up(2);
         }

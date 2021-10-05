@@ -298,14 +298,7 @@ void MainMenuState::draw()
 
         const P screen_dims = panels::dims(Panel::screen);
 
-        // NOTE: The main menu logo is 311 pixels high, we place the main meny
-        // at least at this height, plus a little more
-        // TODO: Read the logo height programmatically instead of hard coding it
-        const P menu_pos(
-                (screen_dims.x * 13) / 20,
-                std::max(
-                        (320 / config::gui_cell_px_h()),
-                        ((screen_dims.y * 4) / 10)));
+        P menu_pos((screen_dims.x * 13) / 20, screen_dims.y / 2);
 
         P pos = menu_pos;
 
@@ -313,7 +306,7 @@ void MainMenuState::draw()
         {
                 const std::string label = labels[i];
 
-                const bool is_marked = m_browser.is_at_idx(i);
+                const bool is_marked = m_browser.is_at_idx((int)i);
 
                 auto str = label.substr(0, 3);
 
@@ -388,6 +381,11 @@ void MainMenuState::draw()
                 pos.set(
                         std::max((quote_w / 2) + 2, (screen_dims.x * 3) / 10),
                         quote_y);
+
+                pos.y =
+                        std::min(
+                                screen_dims.y - (int)quote_lines.size() - 1,
+                                pos.y);
 
                 for (const std::string& line : quote_lines)
                 {

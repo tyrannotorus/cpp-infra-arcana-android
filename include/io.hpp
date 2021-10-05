@@ -49,12 +49,9 @@ struct InputData
 
 namespace io
 {
-// The minimum window size is defined by whichever gives the largest window
-// width or height: the minimum number of gui cells, or the minimum resolution.
+// Minimum required window size in gui cells
 inline constexpr int g_min_nr_gui_cells_x = 80;
-inline constexpr int g_min_nr_gui_cells_y = 26;
-inline constexpr int g_min_res_w = 800;
-inline constexpr int g_min_res_h = 600;
+inline constexpr int g_min_nr_gui_cells_y = 27;
 
 enum class GraphicsCycle
 {
@@ -74,16 +71,16 @@ enum class DrawBg
 void init();
 void cleanup();
 
+// Updates the sceen with what is currently drawn
 void update_screen();
 
 void clear_screen();
 
-void on_fullscreen_toggled();
+void on_user_toggle_fullscreen();
+void on_user_toggle_scaling();
 
 void enable_graphics_cycling();
 void disable_graphics_cycling();
-
-P min_screen_gui_dims();
 
 R gui_to_px_rect(R rect);
 
@@ -194,6 +191,10 @@ void draw_blast_at_seen_actors(
         const Color& color);
 
 void draw_logo();
+
+// Draws a description "box" for items, spells, etc. The parameter lines may be
+// empty, in which case an empty area is drawn.
+void draw_descr_box(const std::vector<ColoredString>& lines);
 
 std::string sdl_pref_dir();
 

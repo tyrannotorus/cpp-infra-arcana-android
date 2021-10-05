@@ -301,6 +301,7 @@ SET(SRC
         src/io_primitives.cpp
         src/io_px_manip.cpp
         src/io_text.cpp
+        src/io_window.cpp
 
         src/main.cpp
         )

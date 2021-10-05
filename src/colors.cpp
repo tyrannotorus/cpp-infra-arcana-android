@@ -125,9 +125,6 @@ static Color s_mon_unaware;
 static Color s_mon_allied;
 static Color s_mon_temp_property;
 
-// -----------------------------------------------------------------------------
-// Private
-// -----------------------------------------------------------------------------
 static std::vector<std::pair<std::string, Color>> s_str_color_pairs;
 
 static SDL_Color rgb_hex_str_to_sdl_color(const std::string& str)

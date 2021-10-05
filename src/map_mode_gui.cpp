@@ -12,6 +12,7 @@
 
 #include "actor.hpp"
 #include "actor_player.hpp"
+#include "actor_see.hpp"
 #include "colors.hpp"
 #include "config.hpp"
 #include "draw_box.hpp"
@@ -664,6 +665,61 @@ void draw()
                         io::DrawBg::yes,
                         colors::gold());
         }
+
+        // TODO: Testing "seen" panel.
+        // TODO: Split the words with a max width.
+        // io::cover_panel(
+        //         Panel::map_gui_descr_border,
+        //         colors::extra_dark_gray().shaded(25));
+
+        // draw_box(panels::area(Panel::map_gui_descr_border));
+
+        // y = 0;
+
+        // const auto foes = actor::seen_foes(*map::g_player);
+
+        // for (const auto* const a : foes)
+        // {
+        //         const auto name = text_format::first_to_upper(a->name_a());
+
+        //         io::draw_text(
+        //                 name,
+        //                 Panel::map_gui_descr,
+        //                 {0, y},
+        //                 colors::text());
+
+        //         ++y;
+        // }
+
+        // for (size_t i = 0; i < map::nr_positions(); ++i)
+        // {
+        //         if (!map::g_seen.at(i))
+        //         {
+        //                 continue;
+        //         }
+
+        //         auto* const item = map::g_items.at(i);
+
+        //         if (!item)
+        //         {
+        //                 continue;
+        //         }
+
+        //         const auto name =
+        //                 text_format::first_to_upper(
+        //                         item->name(
+        //                                 ItemRefType::plural,
+        //                                 ItemRefInf::yes,
+        //                                 ItemRefAttInf::wpn_main_att_mode));
+
+        //         io::draw_text(
+        //                 name,
+        //                 Panel::map_gui_descr,
+        //                 {0, y},
+        //                 colors::text());
+
+        //         ++y;
+        // }
 }
 
 }  // namespace map_mode_gui

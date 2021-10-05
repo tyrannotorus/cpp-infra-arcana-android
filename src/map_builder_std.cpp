@@ -124,7 +124,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         const int river_one_in_n = 12;
 
-        if (map::g_dlvl >= g_dlvl_first_mid_game &&
+        if ((map::g_dlvl >= g_dlvl_first_mid_game) &&
             rnd::one_in(river_one_in_n))
         {
                 mapgen::reserve_river(regions);

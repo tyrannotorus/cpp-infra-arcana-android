@@ -28,9 +28,7 @@ enum class Panel
 
 namespace panels
 {
-void init(P max_gui_dims);
-
-bool is_valid();
+void init(const P& max_gui_dims);
 
 R area(Panel panel);
 

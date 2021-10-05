@@ -42,6 +42,7 @@ enum class OptionToggleDirecton
 };
 
 static const std::vector<std::string> font_image_names = {
+        "7x13_uushi.png",
         "8x17_terminus.png",
         "10x24_dejavu_sans_mono_book.png",
         "12x22_monospace_medium.png",
@@ -57,8 +58,8 @@ static std::string s_font_name;
 static bool s_always_center_view_on_player = false;
 static bool s_is_tiles_mode = false;
 static bool s_is_fullscreen = false;
-static bool s_is_2x_scale_fullscreen_requested = false;
-static bool s_is_2x_scale_fullscreen_enabled = false;
+static bool s_is_2x_scale_requested = false;
+static bool s_is_2x_scale_enabled = false;
 static bool s_text_mode_filled_walls = true;
 static bool s_warn_on_throw_valuable = false;
 static bool s_warn_on_light_explosive = false;
@@ -81,8 +82,8 @@ static int s_master_volume_pct_option = 100;
 static int s_master_volume_pct_adjusted = 100;
 static bool s_is_ambient_audio_enabled = false;
 static bool s_is_ambient_audio_preloaded = false;
-static int s_screen_px_w = -1;
-static int s_screen_px_h = -1;
+static int s_window_px_w = -1;
+static int s_window_px_h = -1;
 static int s_gui_cell_px_w = -1;
 static int s_gui_cell_px_h = -1;
 static int s_map_cell_px_w = -1;
@@ -157,8 +158,8 @@ static void update_render_dims()
 
                 s_gui_cell_px_w = font_dims.x;
                 s_gui_cell_px_h = font_dims.y;
-                s_map_cell_px_w = 24;
-                s_map_cell_px_h = 24;
+                s_map_cell_px_w = 20;
+                s_map_cell_px_h = 20;
         }
         else
         {
@@ -169,15 +170,11 @@ static void update_render_dims()
         }
 
         TRACE << "GUI cell size: "
-              << s_gui_cell_px_w
-              << ", "
-              << s_gui_cell_px_h
+              << s_gui_cell_px_w << "x" << s_gui_cell_px_h
               << std::endl;
 
-        TRACE << "Map cell size: "
-              << s_map_cell_px_w
-              << ", "
-              << s_map_cell_px_h
+        TRACE << "Tile size: "
+              << s_map_cell_px_w << "x" << s_map_cell_px_h
               << std::endl;
 
         TRACE_FUNC_END;
@@ -189,7 +186,8 @@ static void set_default_variables()
 
         s_input_mode = InputMode::standard;
 
-        s_font_name = "12x22_monospace_medium.png";
+        // Use the smallest font
+        s_font_name = font_image_names[0];
 
         s_always_center_view_on_player = true;
 
@@ -203,44 +201,8 @@ static void set_default_variables()
         static_assert(default_nr_gui_cells_x >= io::g_min_nr_gui_cells_x);
         static_assert(default_nr_gui_cells_y >= io::g_min_nr_gui_cells_y);
 
-#ifndef NDEBUG
-        TRACE
-                << "Default number of gui cells: "
-                << default_nr_gui_cells_x
-                << "x"
-                << default_nr_gui_cells_y
-                << std::endl;
-
-        const int default_res_w = default_nr_gui_cells_x * s_gui_cell_px_w;
-        const int default_res_h = default_nr_gui_cells_y * s_gui_cell_px_h;
-
-        TRACE
-                << "Default resolution: "
-                << default_res_w
-                << "x"
-                << default_res_h
-                << std::endl;
-
-        TRACE
-                << "Minimum required resolution: "
-                << io::g_min_res_w
-                << "x"
-                << io::g_min_res_h
-                << std::endl;
-
-        // Minimum resolution cannot be statically asserted since it depends on
-        // the font dimensions
-        ASSERT(
-                (default_nr_gui_cells_x * s_gui_cell_px_w) >=
-                io::g_min_res_w);
-
-        ASSERT(
-                (default_nr_gui_cells_y * s_gui_cell_px_h) >=
-                io::g_min_res_h);
-#endif  // NDEBUG
-
-        s_screen_px_w = s_gui_cell_px_w * default_nr_gui_cells_x;
-        s_screen_px_h = s_gui_cell_px_h * default_nr_gui_cells_y;
+        s_window_px_w = s_gui_cell_px_w * default_nr_gui_cells_x;
+        s_window_px_h = s_gui_cell_px_h * default_nr_gui_cells_y;
 
 #ifdef NDEBUG
         s_master_volume_pct_option = s_master_volume_pct_adjusted = 100;
@@ -251,9 +213,9 @@ static void set_default_variables()
 
         s_is_ambient_audio_enabled = true;
         s_is_ambient_audio_preloaded = false;
-        s_is_fullscreen = false;
-        s_is_2x_scale_fullscreen_requested = true;
-        s_is_2x_scale_fullscreen_enabled = true;
+        s_is_fullscreen = true;
+        s_is_2x_scale_requested = true;
+        s_is_2x_scale_enabled = true;
         s_text_mode_filled_walls = true;
         s_is_intro_lvl_skipped = false;
         s_is_intro_popup_skipped = false;
@@ -402,8 +364,7 @@ static void player_sets_option(
                 s_is_tiles_mode = !s_is_tiles_mode;
 
                 // Attempt to use 2x scaling if requested
-                s_is_2x_scale_fullscreen_enabled =
-                        s_is_2x_scale_fullscreen_requested;
+                s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
                 update_render_dims();
                 io::init();
@@ -456,8 +417,7 @@ static void player_sets_option(
                 s_font_name = font_image_names[font_idx];
 
                 // Attempt to use 2x scaling if requested
-                s_is_2x_scale_fullscreen_enabled =
-                        s_is_2x_scale_fullscreen_requested;
+                s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
                 update_render_dims();
                 io::init();
@@ -470,27 +430,21 @@ static void player_sets_option(
                 config::set_fullscreen(!s_is_fullscreen);
 
                 // Attempt to use 2x scaling if requested
-                s_is_2x_scale_fullscreen_enabled =
-                        s_is_2x_scale_fullscreen_requested;
+                s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
-                io::on_fullscreen_toggled();
+                io::on_user_toggle_fullscreen();
         }
         break;
 
         case 8:
         {
-                // Use 2x scaling in fullscreen
-                s_is_2x_scale_fullscreen_requested =
-                        !s_is_2x_scale_fullscreen_requested;
+                // Scaling
+                s_is_2x_scale_requested = !s_is_2x_scale_requested;
 
                 // Attempt to use 2x scaling if requested
-                s_is_2x_scale_fullscreen_enabled =
-                        s_is_2x_scale_fullscreen_requested;
+                s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
-                if (s_is_fullscreen)
-                {
-                        io::on_fullscreen_toggled();
-                }
+                io::on_user_toggle_scaling();
         }
         break;
 
@@ -717,6 +671,8 @@ static void player_sets_option(
                         update_render_dims();
                         io::init();
                         audio::init();
+                        states::draw();
+                        io::update_screen();
                 }
         }
         break;
@@ -766,10 +722,10 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_input_mode = (InputMode)to_int(lines.front());
         lines.erase(std::begin(lines));
 
-        s_screen_px_w = to_int(lines.front());
+        s_window_px_w = to_int(lines.front());
         lines.erase(std::begin(lines));
 
-        s_screen_px_h = to_int(lines.front());
+        s_window_px_h = to_int(lines.front());
         lines.erase(std::begin(lines));
 
         s_always_center_view_on_player = lines.front() == "1";
@@ -786,10 +742,10 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_is_fullscreen = lines.front() == "1";
         lines.erase(std::begin(lines));
 
-        s_is_2x_scale_fullscreen_requested = lines.front() == "1";
+        s_is_2x_scale_requested = lines.front() == "1";
         lines.erase(std::begin(lines));
 
-        s_is_2x_scale_fullscreen_enabled = lines.front() == "1";
+        s_is_2x_scale_enabled = lines.front() == "1";
         lines.erase(std::begin(lines));
 
         s_text_mode_filled_walls = lines.front() == "1";
@@ -888,14 +844,14 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(s_is_ambient_audio_enabled ? "1" : "0");
         lines.emplace_back(s_is_ambient_audio_preloaded ? "1" : "0");
         lines.push_back(std::to_string((int)s_input_mode));
-        lines.push_back(std::to_string(s_screen_px_w));
-        lines.push_back(std::to_string(s_screen_px_h));
+        lines.push_back(std::to_string(s_window_px_w));
+        lines.push_back(std::to_string(s_window_px_h));
         lines.emplace_back(s_always_center_view_on_player ? "1" : "0");
         lines.emplace_back(s_is_tiles_mode ? "1" : "0");
         lines.push_back(s_font_name);
         lines.emplace_back(s_is_fullscreen ? "1" : "0");
-        lines.emplace_back(s_is_2x_scale_fullscreen_requested ? "1" : "0");
-        lines.emplace_back(s_is_2x_scale_fullscreen_enabled ? "1" : "0");
+        lines.emplace_back(s_is_2x_scale_requested ? "1" : "0");
+        lines.emplace_back(s_is_2x_scale_enabled ? "1" : "0");
         lines.emplace_back(s_text_mode_filled_walls ? "1" : "0");
         lines.emplace_back(s_is_intro_lvl_skipped ? "1" : "0");
         lines.emplace_back(s_is_intro_popup_skipped ? "1" : "0");
@@ -947,6 +903,8 @@ void init()
         set_default_variables();
 
         std::vector<std::string> lines;
+
+        // Load config file, if it exists
         read_file(lines);
 
         if (lines.empty())
@@ -990,40 +948,42 @@ bool is_fullscreen()
         return s_is_fullscreen;
 }
 
-bool is_2x_scale_fullscreen_requested()
+bool is_2x_scale_requested()
 {
-        return s_is_2x_scale_fullscreen_requested;
+        return s_is_2x_scale_requested;
 }
 
-bool is_2x_scale_fullscreen_enabled()
+bool is_2x_scale_enabled()
 {
-        return s_is_2x_scale_fullscreen_enabled;
+        return s_is_2x_scale_enabled;
 }
 
-void set_screen_px_w(const int w)
+void set_window_px_w(const int w)
 {
-        s_screen_px_w = w;
+        s_window_px_w = w;
 
         const auto lines = lines_from_variables();
+
         write_lines_to_file(lines);
 }
 
-void set_screen_px_h(const int h)
+void set_window_px_h(const int h)
 {
-        s_screen_px_h = h;
+        s_window_px_h = h;
 
         const auto lines = lines_from_variables();
+
         write_lines_to_file(lines);
 }
 
-int screen_px_w()
+int window_px_w()
 {
-        return s_screen_px_w;
+        return s_window_px_w;
 }
 
-int screen_px_h()
+int window_px_h()
 {
-        return s_screen_px_h;
+        return s_window_px_h;
 }
 
 int gui_cell_px_w()
@@ -1180,6 +1140,7 @@ void set_default_player_name(const std::string& name)
         s_default_player_name = name;
 
         const auto lines = lines_from_variables();
+
         write_lines_to_file(lines);
 }
 
@@ -1193,14 +1154,16 @@ void set_fullscreen(const bool value)
         s_is_fullscreen = value;
 
         const auto lines = lines_from_variables();
+
         write_lines_to_file(lines);
 }
 
-void set_2x_scale_fullscreen_enabled(const bool value)
+void set_2x_scale_enabled(const bool value)
 {
-        s_is_2x_scale_fullscreen_enabled = value;
+        s_is_2x_scale_enabled = value;
 
         const auto lines = lines_from_variables();
+
         write_lines_to_file(lines);
 }
 
@@ -1284,6 +1247,7 @@ void ConfigState::update()
         if (did_set_option)
         {
                 const auto lines = lines_from_variables();
+
                 write_lines_to_file(lines);
 
                 io::flush_input();
@@ -1393,9 +1357,9 @@ void ConfigState::draw()
                          ? "Yes"
                          : "No"},
 
-                {"Scale graphics 2x in fullscreen",
-                 s_is_2x_scale_fullscreen_requested
-                         ? "Yes (if possible)"
+                {"Scale graphics 2x",
+                 s_is_2x_scale_requested
+                         ? "Yes"
                          : "No"},
 
                 {"Text mode wall symbol",
