@@ -392,6 +392,7 @@ static void update_trait_data()
         set_trait_data(d);
 
         // --- Mighty Spirit ---
+        d = trait_data(Trait::stout_spirit);
         d.id = Trait::mighty_spirit;
         d.title = "Mighty Spirit";
         d.descr =
