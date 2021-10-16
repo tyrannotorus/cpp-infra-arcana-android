@@ -1937,6 +1937,38 @@ void PropParalyzed::on_applied()
         }
 }
 
+PropEnded PropFainted::on_actor_turn()
+{
+        // Handle drowning
+
+        if (!m_owner->is_alive())
+        {
+                return PropEnded::no;
+        }
+
+        if (!m_owner->m_properties.has(PropId::swimming))
+        {
+                return PropEnded::no;
+        }
+
+        if (m_owner->is_player())
+        {
+                msg_log::add("I am drowning!", colors::msg_bad());
+        }
+        else if (actor::can_player_see_actor(*m_owner))
+        {
+                const auto name_the =
+                        text_format::first_to_upper(
+                                m_owner->name_the());
+
+                msg_log::add(name_the + " is drowning.", colors::msg_good());
+        }
+
+        actor::hit(*m_owner, 1, DmgType::pure);
+
+        return PropEnded::no;
+}
+
 bool PropFainted::should_update_vision_on_toggled() const
 {
         return m_owner->is_player();

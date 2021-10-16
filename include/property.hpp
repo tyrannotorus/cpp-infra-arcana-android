@@ -1073,6 +1073,8 @@ public:
         PropFainted() :
                 Prop(PropId::fainted) {}
 
+        PropEnded on_actor_turn() override;
+
         bool should_update_vision_on_toggled() const override;
 
         int ability_mod(const AbilityId ability) const override
