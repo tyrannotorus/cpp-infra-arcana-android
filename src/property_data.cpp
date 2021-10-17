@@ -745,8 +745,9 @@ static void init_data_list()
         d.msg_start_player = "I feel misfortunate.";
         d.msg_start_mon = "is cursed.";
         d.msg_end_player = "I feel more fortunate.";
-        d.msg_end_player = "is no longer cursed.";
+        d.msg_end_mon = "is no longer cursed.";
         d.msg_res_player = "I resist misfortune.";
+        d.msg_res_mon = "resists misfortune.";
         d.historic_msg_start_permanent = "A perpetual curse was put upon me";
         d.historic_msg_end_permanent = "A terrible curse was lifted from me";
         d.allow_display_turns = true;
