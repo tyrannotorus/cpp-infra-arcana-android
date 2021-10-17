@@ -206,11 +206,7 @@ static void set_dead_actors()
         {
                 const P& p(actor->m_pos);
 
-                if (!map::g_seen.at(p) ||
-                    !actor->is_corpse() ||
-                    (actor->m_data->character == 0) ||
-                    (actor->m_data->character == ' ') ||
-                    (actor->m_data->tile == gfx::TileId::END))
+                if (!map::g_seen.at(p) || !actor->is_corpse())
                 {
                         continue;
                 }
