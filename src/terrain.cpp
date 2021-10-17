@@ -287,7 +287,7 @@ void Terrain::try_start_burning(const Verbose verbose)
                 {
                         std::string str = name(Article::the) + " catches fire.";
 
-                        str[0] = toupper(str[0]);
+                        str[0] = (char)std::toupper(str[0]);
 
                         msg_log::add(str);
                 }
@@ -3154,9 +3154,9 @@ void ItemContainer::destroy_single_fragile()
 {
         // TODO: Generalize this (something like "is_fragile" item data)
 
-        for (size_t i = 0; i < m_items.size(); ++i)
+        for (auto it = std::begin(m_items); it != std::end(m_items); ++it)
         {
-                auto* const item = m_items[i];
+                auto* const item = *it;
 
                 const auto& d = item->data();
 
@@ -3164,7 +3164,7 @@ void ItemContainer::destroy_single_fragile()
                     (d.id == item::Id::molotov))
                 {
                         delete item;
-                        m_items.erase(m_items.begin() + i);
+                        m_items.erase(it);
                         msg_log::add("I hear a muffled shatter.");
                         break;
                 }
@@ -4749,9 +4749,14 @@ std::string Cabinet::name(const Article article) const
 
 gfx::TileId Cabinet::tile() const
 {
-        return m_is_open
-                ? gfx::TileId::cabinet_open
-                : gfx::TileId::cabinet_closed;
+        if (m_is_open)
+        {
+                return gfx::TileId::cabinet_open;
+        }
+        else
+        {
+                return gfx::TileId::cabinet_closed;
+        }
 }
 
 Color Cabinet::color_default() const

@@ -6812,7 +6812,6 @@
             <property>regenerates</property>
             <property>r_phys</property>
             <property>r_poison</property>
-            <property>r_fire</property>
             <property>r_fear</property>
             <property>r_conf</property>
             <property>r_sleep</property>
