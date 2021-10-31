@@ -1878,7 +1878,7 @@ void init()
                 "an effect again, however it can be attempted before this "
                 "time has passed (with 25% chance to succeed). If an early "
                 "attempt fails, faith in the symbol is temporarily lost, and "
-                "it will take a long before the symbol can be used again."};
+                "much time must pass before the symbol can be used again."};
         d.color = colors::gold();
         d.weight = Weight::extra_light;
         d.tile = gfx::TileId::holy_symbol;
