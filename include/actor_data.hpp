@@ -244,7 +244,6 @@ struct ActorData
         bool has_player_seen;
         bool can_open_doors;
         bool can_bash_doors;
-        bool can_swim;
         // NOTE: Knockback may also be prevented by other soucres, e.g. if the
         // monster is ethereal
         bool prevent_knockback;

@@ -259,7 +259,7 @@ static void update_trait_data()
         d.descr =
                 "All your melee attacks are silent (regardless of the weapon), "
                 "and creatures are not alerted when you open or close doors, "
-                "wade, or swim";
+                "or wade through water";
         d.trait_prereqs = {Trait::stealthy};
         set_trait_data(d);
 

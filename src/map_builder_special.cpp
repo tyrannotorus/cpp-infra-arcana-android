@@ -200,19 +200,9 @@ void MapBuilderDeepOneLair::handle_template_pos(const P& p, const char c)
         }
         break;
 
-        case '*':
-        {
-                auto* water = new terrain::LiquidShallow(p);
-
-                water->m_type = LiquidType::water;
-
-                map::put(water);
-        }
-        break;
-
         case '~':
         {
-                auto* water = new terrain::LiquidDeep(p);
+                auto* water = new terrain::Liquid(p);
 
                 water->m_type = LiquidType::water;
 
@@ -321,7 +311,7 @@ void MapBuilderMagicPool::handle_template_pos(const P& p, const char c)
 
         case '~':
         {
-                auto* water = new terrain::LiquidShallow(p);
+                auto* water = new terrain::Liquid(p);
 
                 water->m_type = LiquidType::magic_water;
 
@@ -482,17 +472,7 @@ void MapBuilderIntroForest::handle_template_pos(const P& p, const char c)
 
         case '~':
         {
-                auto* liquid = new terrain::LiquidDeep(p);
-
-                liquid->m_type = LiquidType::water;
-
-                map::put(liquid);
-        }
-        break;
-
-        case '%':
-        {
-                auto* liquid = new terrain::LiquidShallow(p);
+                auto* liquid = new terrain::Liquid(p);
 
                 liquid->m_type = LiquidType::water;
 
@@ -704,7 +684,7 @@ void MapBuilderEgypt::handle_template_pos(const P& p, const char c)
 
         case '~':
         {
-                auto* liquid = new terrain::LiquidShallow(p);
+                auto* liquid = new terrain::Liquid(p);
 
                 liquid->m_type = LiquidType::water;
 

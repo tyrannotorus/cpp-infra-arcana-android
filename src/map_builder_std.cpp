@@ -433,7 +433,6 @@ bool MapBuilderStd::build_specific()
         // connectedness, since the stairs could block other positions.
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::door,
-                terrain::Id::liquid_deep,
                 terrain::Id::stairs};
 
         const auto is_free_terrain_parser =

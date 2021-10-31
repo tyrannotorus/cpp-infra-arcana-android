@@ -117,7 +117,6 @@ enum class PropId
         flared,
         wound,
         summoned,
-        swimming,
         hp_sap,
         spi_sap,
         mind_sap,

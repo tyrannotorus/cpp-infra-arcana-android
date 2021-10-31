@@ -87,7 +87,7 @@ static Color map_cell_color(
                 return colors::teal();
         }
 
-        if (terrain_id == terrain::Id::liquid_deep)
+        if (terrain_id == terrain::Id::liquid)
         {
                 return colors::blue();
         }

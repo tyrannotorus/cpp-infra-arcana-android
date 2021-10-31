@@ -1583,13 +1583,6 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
                 return ConsumeItem::no;
         }
 
-        if (map::g_player->m_properties.has(PropId::swimming))
-        {
-                msg_log::add("Not while swimming.");
-
-                return ConsumeItem::no;
-        }
-
         const Explosive* const held_explosive =
                 map::g_player->m_active_explosive;
 
@@ -1710,8 +1703,7 @@ void Dynamite::on_player_paralyzed()
 
         const auto t_id = map::g_terrain.at(p)->id();
 
-        if (t_id != terrain::Id::chasm &&
-            t_id != terrain::Id::liquid_deep)
+        if (t_id != terrain::Id::chasm)
         {
                 game_time::add_mob(new terrain::LitDynamite(p, m_fuse_turns));
         }
@@ -1873,8 +1865,7 @@ void Flare::on_player_paralyzed()
 
         const auto t_id = map::g_terrain.at(p)->id();
 
-        if (t_id != terrain::Id::chasm &&
-            t_id != terrain::Id::liquid_deep)
+        if (t_id != terrain::Id::chasm)
         {
                 game_time::add_mob(new terrain::LitFlare(p, m_fuse_turns));
         }
@@ -1926,8 +1917,7 @@ void SmokeGrenade::on_player_paralyzed()
 
         const auto t_id = map::g_terrain.at(p)->id();
 
-        if (t_id != terrain::Id::chasm &&
-            t_id != terrain::Id::liquid_deep)
+        if (t_id != terrain::Id::chasm)
         {
                 explosion::run_smoke_explosion_at(map::g_player->m_pos);
         }

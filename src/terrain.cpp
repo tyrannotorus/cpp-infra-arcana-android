@@ -322,8 +322,7 @@ void Terrain::hit(
                 {
                         const bool is_blocking =
                                 !is_walkable() &&
-                                (id() != terrain::Id::stairs) &&
-                                (id() != terrain::Id::liquid_deep);
+                                (id() != terrain::Id::stairs);
 
                         if (is_blocking)
                         {
@@ -1560,11 +1559,11 @@ Color Bridge::color_default() const
 // -----------------------------------------------------------------------------
 // Shallow liquid
 // -----------------------------------------------------------------------------
-LiquidShallow::LiquidShallow(const P& p) :
+Liquid::Liquid(const P& p) :
         Terrain(p),
         m_type(LiquidType::water) {}
 
-void LiquidShallow::on_hit(
+void Liquid::on_hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1576,7 +1575,7 @@ void LiquidShallow::on_hit(
         (void)dmg;
 }
 
-void LiquidShallow::bump(actor::Actor& actor_bumping)
+void Liquid::bump(actor::Actor& actor_bumping)
 {
         if (actor_bumping.m_properties.has(PropId::ethereal) ||
             actor_bumping.m_properties.has(PropId::flying) ||
@@ -1643,7 +1642,7 @@ void LiquidShallow::bump(actor::Actor& actor_bumping)
         }
 }
 
-void LiquidShallow::run_magic_pool_effects_on_player()
+void Liquid::run_magic_pool_effects_on_player()
 {
         std::vector<item::Item*> cursed_items;
 
@@ -1682,7 +1681,7 @@ void LiquidShallow::run_magic_pool_effects_on_player()
         }
 }
 
-std::string LiquidShallow::name(const Article article) const
+std::string Liquid::name(const Article article) const
 {
         std::string ret;
 
@@ -1694,7 +1693,7 @@ std::string LiquidShallow::name(const Article article) const
         switch (m_type)
         {
         case LiquidType::water:
-                ret += "shallow water";
+                ret += "water";
                 break;
 
         case LiquidType::mud:
@@ -1709,7 +1708,7 @@ std::string LiquidShallow::name(const Article article) const
         return ret;
 }
 
-Color LiquidShallow::color_default() const
+Color Liquid::color_default() const
 {
         switch (m_type)
         {
@@ -1730,7 +1729,7 @@ Color LiquidShallow::color_default() const
         return colors::yellow();
 }
 
-Color LiquidShallow::color_bg_default() const
+Color Liquid::color_bg_default() const
 {
         const auto* const item = map::g_items.at(m_pos);
 
@@ -1748,220 +1747,6 @@ Color LiquidShallow::color_bg_default() const
                 // Nothing is "over" the liquid
                 return colors::black();
         }
-}
-
-// -----------------------------------------------------------------------------
-// Deep liquid
-// -----------------------------------------------------------------------------
-LiquidDeep::LiquidDeep(const P& p) :
-        Terrain(p),
-        m_type(LiquidType::water) {}
-
-void LiquidDeep::on_hit(
-        const DmgType dmg_type,
-        actor::Actor* const actor,
-        const P& from_pos,
-        int dmg)
-{
-        (void)dmg_type;
-        (void)actor;
-        (void)from_pos;
-        (void)dmg;
-}
-
-bool LiquidDeep::must_swim_on_enter(const actor::Actor& actor) const
-{
-        return !actor.m_properties.has(PropId::ethereal) &&
-                !actor.m_properties.has(PropId::flying);
-}
-
-AllowAction LiquidDeep::pre_bump(actor::Actor& actor_bumping)
-{
-        if (!actor_bumping.is_player() ||
-            actor_bumping.m_properties.has(PropId::confused))
-        {
-                return AllowAction::yes;
-        }
-
-        if (map::g_player->m_active_explosive)
-        {
-                const std::string explosive_name =
-                        map::g_player->m_active_explosive->name(
-                                ItemNameType::plain);
-
-                const std::string liquid_name_the = name(Article::the);
-
-                const std::string msg =
-                        "Swim through " +
-                        liquid_name_the +
-                        "? (The " +
-                        explosive_name +
-                        " will be extinguished) " +
-                        common_text::g_yes_or_no_hint;
-
-                msg_log::add(
-                        msg,
-                        colors::light_white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
-
-                const auto result = query::yes_or_no();
-
-                msg_log::clear();
-
-                return (result == BinaryAnswer::no)
-                        ? AllowAction::no
-                        : AllowAction::yes;
-        }
-
-        return AllowAction::yes;
-}
-
-void LiquidDeep::bump(actor::Actor& actor_bumping)
-{
-        const bool must_swim = must_swim_on_enter(actor_bumping);
-
-        const bool is_amphibian = actor_bumping.m_data->is_amphibian;
-
-        if (must_swim && !is_amphibian)
-        {
-                auto* const waiting = new PropWaiting();
-
-                waiting->set_duration(1);
-
-                actor_bumping.m_properties.apply(waiting);
-        }
-
-        if (!must_swim)
-        {
-                return;
-        }
-
-        if (actor_bumping.is_player())
-        {
-                const std::string liquid_name_the =
-                        name(Article::the);
-
-                msg_log::add(
-                        "I swim through " +
-                        liquid_name_the +
-                        ".");
-        }
-
-        // Make a sound, unless player with Silent trait
-        if (!player_bon::has_trait(Trait::silent) ||
-            !actor_bumping.is_player())
-        {
-                const std::string msg =
-                        actor_bumping.is_player()
-                        ? ""
-                        : "I hear a splash.";
-
-                const auto alerts_mon =
-                        actor_bumping.is_player()
-                        ? AlertsMon::yes
-                        : AlertsMon::no;
-
-                Snd snd(
-                        msg,
-                        audio::SfxId::swim,
-                        IgnoreMsgIfOriginSeen::yes,
-                        actor_bumping.m_pos,
-                        &actor_bumping,
-                        SndVol::low,
-                        alerts_mon);
-
-                snd_emit::run(snd);
-        }
-
-        if (actor_bumping.is_player() &&
-            map::g_player->m_active_explosive)
-        {
-                const std::string expl_name =
-                        map::g_player->m_active_explosive->name(
-                                ItemNameType::plain);
-
-                msg_log::add("The " + expl_name + " is extinguished.");
-
-                map::g_player->m_active_explosive = nullptr;
-        }
-
-        if (!actor_bumping.m_properties.has(PropId::swimming))
-        {
-                auto* const swimming =
-                        property_factory::make(PropId::swimming);
-
-                swimming->set_indefinite();
-
-                actor_bumping.m_properties.apply(swimming);
-        }
-}
-
-void LiquidDeep::on_leave(actor::Actor& actor_leaving)
-{
-        actor_leaving.m_properties.end_prop(PropId::swimming);
-}
-
-std::string LiquidDeep::name(const Article article) const
-{
-        std::string ret;
-
-        if (article == Article::the)
-        {
-                ret += "the ";
-        }
-
-        ret += "deep ";
-
-        switch (m_type)
-        {
-        case LiquidType::water:
-                ret += "water";
-                break;
-
-        case LiquidType::mud:
-                ret += "mud";
-                break;
-
-        case LiquidType::magic_water:
-                // Should not happen
-                ASSERT(false);
-
-                ret += "water";
-                break;
-        }
-
-        return ret;
-}
-
-Color LiquidDeep::color_default() const
-{
-        switch (m_type)
-        {
-        case LiquidType::water:
-                return colors::blue();
-
-        case LiquidType::mud:
-                return colors::dark_brown();
-
-        case LiquidType::magic_water:
-                // Should not happen
-                ASSERT(false);
-
-                return colors::blue();
-        }
-
-        ASSERT(false);
-
-        return colors::blue();
-}
-
-bool LiquidDeep::can_move(const actor::Actor& actor) const
-{
-        return actor.m_data->can_swim ||
-                actor.m_properties.has(PropId::flying) ||
-                actor.m_properties.has(PropId::ethereal);
 }
 
 // -----------------------------------------------------------------------------
@@ -2857,8 +2642,7 @@ void Brazier::on_hit(
 
                 const auto* const tgt_f = map::g_terrain.at(dst_pos);
 
-                if (tgt_f->id() != terrain::Id::chasm &&
-                    tgt_f->id() != terrain::Id::liquid_deep)
+                if (tgt_f->id() != terrain::Id::chasm)
                 {
                         P expl_pos;
 

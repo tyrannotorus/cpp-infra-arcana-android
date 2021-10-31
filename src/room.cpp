@@ -1338,7 +1338,7 @@ void DampRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                             rnd::one_in(liquid_one_in_n))
                         {
                                 auto* const liquid =
-                                        new terrain::LiquidShallow(P(x, y));
+                                        new terrain::Liquid({x, y});
 
                                 liquid->m_type = liquid_type;
 
@@ -1506,19 +1506,9 @@ void PoolRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                         if (!is_natural_pool ||
                             (flood.at(p) < (flood_travel_limit / 2)) ||
-                            rnd::coin_toss())
+                            rnd::fraction(2, 3))
                         {
-                                auto* const liquid =
-                                        new terrain::LiquidDeep(p);
-
-                                liquid->m_type = LiquidType::water;
-
-                                map::put(liquid);
-                        }
-                        else if (rnd::fraction(2, 3))
-                        {
-                                auto* const liquid =
-                                        new terrain::LiquidShallow(p);
+                                auto* const liquid = new terrain::Liquid(p);
 
                                 liquid->m_type = LiquidType::water;
 
@@ -1593,7 +1583,6 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::stairs,
                 terrain::Id::door,
-                terrain::Id::liquid_deep,
         };
 
         for (const auto& p : blocked.rect().positions())

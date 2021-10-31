@@ -139,8 +139,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
         // If target cell is bottomless, just destroy the item
         const auto* const tgt_f = map::g_terrain.at(intended_pos);
 
-        if (tgt_f->id() == terrain::Id::chasm ||
-            tgt_f->id() == terrain::Id::liquid_deep)
+        if (tgt_f->id() == terrain::Id::chasm)
         {
                 delete &item;
 

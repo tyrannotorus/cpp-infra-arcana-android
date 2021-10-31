@@ -683,8 +683,6 @@ public:
         PropEntangled() :
                 Prop(PropId::entangled) {}
 
-        PropEnded on_actor_turn() override;
-
         void on_applied() override;
 
         PropEnded affect_move_dir(Dir& dir) override;
@@ -1035,8 +1033,6 @@ public:
         PropParalyzed() :
                 Prop(PropId::paralyzed) {}
 
-        PropEnded on_actor_turn() override;
-
         void on_applied() override;
 
         int ability_mod(const AbilityId ability) const override
@@ -1074,8 +1070,6 @@ class PropFainted : public Prop
 public:
         PropFainted() :
                 Prop(PropId::fainted) {}
-
-        PropEnded on_actor_turn() override;
 
         bool should_update_vision_on_toggled() const override;
 
@@ -1558,39 +1552,6 @@ public:
                 Prop(PropId::major_clapham_summon) {}
 
         PropActResult on_act() override;
-};
-
-class PropSwimming : public Prop
-{
-public:
-        PropSwimming() :
-                Prop(PropId::swimming) {}
-
-        bool allow_read_absolute(Verbose verbose) const override;
-
-        bool affect_actor_color(Color& color) const override
-        {
-                color = colors::light_blue();
-
-                return true;
-        }
-
-        bool allow_attack_ranged(Verbose verbose) const override;
-
-        int ability_mod(const AbilityId ability) const override
-        {
-                switch (ability)
-                {
-                case AbilityId::melee:
-                        return -10;
-
-                case AbilityId::dodging:
-                        return -10;
-
-                default:
-                        return 0;
-                }
-        }
 };
 
 class PropHitChancePenaltyCurse : public Prop

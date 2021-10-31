@@ -1,7 +1,7 @@
 --------------------------------------------------------------
 v21.0 *** WORK IN PROGRESS ***
 --------------------------------------------------------------
-NEW
+MAJOR CHANGES
 * Added a new background (class) "Exorcist"
 * Added weapons "S&W Revolver" and "Winchester Rifle"
 * Added miscellaneous rare items and artifacts
@@ -26,6 +26,7 @@ NEW
 * Changed the Azathoth's Wrath spell to Azathoth's Gaze, which causes small damage and fainting (instead of acting like a "mass Darkbolt")
 * Added Curse as a spell available to monsters (Floating Skulls cast this now instead of applying the property directly, and mummies cast Curse instead of applying it on melee attacks, for example) - also added a stronger version of Cursed called "Doomed" which is applied instead when Curse is cast at master level
 * Removed the concept of "plus" damage modifiers for weapons, instead they now simply have a damage range and a hit chance modifier (the damage range is still randomized for weapons found on the map, so there are still "higher quality" versions of weapons)
+* Removed deep liquid and swimming
 
 MINOR TWEAKS AND BALANCING
 * The Electric Gun also disables passive hit point regeneration for a number of turns

@@ -46,7 +46,7 @@ static void put_templ_symbol_at(const P& p, const char c)
 
         case '~':
         {
-                auto* liquid = new terrain::LiquidShallow(p);
+                auto* liquid = new terrain::Liquid(p);
 
                 liquid->m_type = LiquidType::water;
 

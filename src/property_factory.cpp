@@ -299,9 +299,6 @@ Prop* make(const PropId id)
         case PropId::mind_sap:
                 return new PropMindSap();
 
-        case PropId::swimming:
-                return new PropSwimming();
-
         case PropId::hit_chance_penalty_curse:
                 return new PropHitChancePenaltyCurse();
 

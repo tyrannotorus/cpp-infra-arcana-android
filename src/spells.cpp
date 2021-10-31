@@ -206,7 +206,6 @@ static void swap_wall_floor(const Context& context)
 
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::door,
-                terrain::Id::liquid_deep,
         };
 
         for (const P& p : blocked.rect().positions())
@@ -460,7 +459,7 @@ static void create_water(const Context& context)
                         printed_msg = true;
                 }
 
-                auto* const liquid = new terrain::LiquidShallow(p);
+                auto* const liquid = new terrain::Liquid(p);
 
                 liquid->m_type = LiquidType::water;
 
@@ -483,7 +482,6 @@ static void create_trees(const Context& context)
 
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::door,
-                terrain::Id::liquid_deep,
         };
 
         for (const P& p : blocked.rect().positions())
@@ -632,7 +630,6 @@ static void create_dark_void(const Context& context)
 
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::door,
-                terrain::Id::liquid_deep,
         };
 
         for (const P& p : blocked.rect().positions())
@@ -1355,7 +1352,7 @@ std::vector<std::string> Spell::descr(
                 lines.push_back(get_noise_descr(is_noisy(skill)));
         }
 
-        std::string str = "";
+        std::string str;
 
         if (can_be_improved_with_skill())
         {
@@ -2459,13 +2456,9 @@ std::vector<std::string> SpellPestilence::descr_specific(
 
 bool SpellPestilence::allow_mon_cast_now(actor::Mon& mon) const
 {
-        const auto terrain_id = map::g_terrain.at(mon.m_pos)->id();
-        const bool is_deep_liquid = (terrain_id == terrain::Id::liquid_deep);
-
         return (
                 mon.m_ai_state.target &&
-                (mon.m_ai_state.is_target_seen || rnd::one_in(30)) &&
-                !is_deep_liquid);
+                (mon.m_ai_state.is_target_seen || rnd::one_in(30)));
 }
 
 // -----------------------------------------------------------------------------
@@ -4625,13 +4618,9 @@ void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
 
 bool SpellSummonMon::allow_mon_cast_now(actor::Mon& mon) const
 {
-        const auto terrain_id = map::g_terrain.at(mon.m_pos)->id();
-        const bool is_deep_liquid = (terrain_id == terrain::Id::liquid_deep);
-
         return (
                 mon.m_ai_state.target &&
-                (mon.m_ai_state.is_target_seen || rnd::one_in(30)) &&
-                !is_deep_liquid);
+                (mon.m_ai_state.is_target_seen || rnd::one_in(30)));
 }
 
 // -----------------------------------------------------------------------------
@@ -4697,13 +4686,9 @@ void SpellSummonTentacles::run_effect(
 
 bool SpellSummonTentacles::allow_mon_cast_now(actor::Mon& mon) const
 {
-        const auto terrain_id = map::g_terrain.at(mon.m_pos)->id();
-        const bool is_deep_liquid = (terrain_id == terrain::Id::liquid_deep);
-
         return (
                 mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen &&
-                !is_deep_liquid);
+                mon.m_ai_state.is_target_seen);
 }
 
 // -----------------------------------------------------------------------------

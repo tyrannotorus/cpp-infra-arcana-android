@@ -8,8 +8,7 @@
 '   &   Graves, or random grass and bushes
 '   W   Winning player statue, or floor
 '   ,   Random grass and bushes
-'   ~   Deep water
-'   %   Shallow water
+'   ~   Water
 '   t   Tree
 '   v   Brazier
 '   [   Church bench
@@ -21,15 +20,15 @@
 
 
 ttttttttttttttttttttttttttttttttttttttttttttttttttt
-ttttttttt~~~~~~~ttttttttttttttttttttttttttttttttttt
-ttttttt~~~%~%%~~~tttttttttttttttttttttttttttttttttt
-ttttttt%~~%.".%~~~ttttttttttttttttttttttttttttttttt
-tttttt%~~~~.t"%~~~%ttt,tttttttttttttttttttttttttttt
-ttttt%%~~~%"..~~~~%%,,,ttttttt,,ttttttttttttttttttt
-tttttt%~~~%~%%%~~~%,,t,ttttt,,,,,,t,,ttt,,ttttttttt
-ttttt%~~~~~~~~~~~~~%,,,tt,tttt,,,________,,,ttttttt
-ttt,,%~~~~~~~~~~~~%,,,tt,,,t,,,___________,,,,,,ttt
-ttt,,,,%%%%%%%%%%%,,,,t,,,,,,_____######____,,ttttt
+ttttttttttttttttttttttttttttttttttttttttttttttttttt
+ttttttttttttttttttttttttttttttttttttttttttttttttttt
+tttttttttt,,,,,,,,ttttttttttttttttttttttttttttttttt
+ttttttt,,,,,,,,,,,,ttt,tttttttttttttttttttttttttttt
+ttttt,,,,,~~.,,,~,,,,,,ttttttt,,ttttttttttttttttttt
+tttttt,,~.,,,,,,~..,,t,ttttt,,,,,,t,,ttt,,ttttttttt
+ttttt,,,.~~,,,,,,,~,,,,tt,tttt,,,________,,,ttttttt
+ttt,,,,,,,,,~~.~,,,,,,tt,,,t,,,___________,,,,,,ttt
+ttt,,,,,,,,~.~,,,,,,,,t,,,,,,_____######____,,ttttt
 ttt,,,,,,,,,,,,,,,,,______________#....#_____,,,,tt
 tttt,,,,,,t,,,,t,,,_____________###....###____,,,tt
 ttttt,,t,,,,,,#,,#,__#####_#__#_###....###______,,t

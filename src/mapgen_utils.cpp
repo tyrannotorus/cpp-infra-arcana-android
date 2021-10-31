@@ -1278,7 +1278,7 @@ P make_stairs_at_random_pos()
 
         auto pos_bucket = to_vec(allowed_cells, true, allowed_cells.rect());
 
-        const int nr_ok_cells = pos_bucket.size();
+        const auto nr_ok_cells = (int)pos_bucket.size();
 
         const int min_nr_ok_cells_req = 3;
 
@@ -1317,7 +1317,6 @@ P make_stairs_at_random_pos()
 
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::door,
-                terrain::Id::liquid_deep,
         };
 
         for (int x = 0; x < blocks_player.w(); ++x)

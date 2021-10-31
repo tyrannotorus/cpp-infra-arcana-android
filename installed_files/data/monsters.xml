@@ -42,7 +42,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -106,7 +105,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -209,7 +207,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -312,7 +309,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -409,7 +405,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -505,7 +500,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <undead/>
@@ -598,7 +592,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <undead/>
@@ -691,7 +684,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <undead/>
@@ -789,7 +781,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <undead/>
@@ -888,7 +879,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -991,7 +981,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -1083,7 +1072,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -1171,7 +1159,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -1279,7 +1266,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <rat/>
@@ -1373,7 +1359,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>giant</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <spider/>
@@ -1470,7 +1455,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>giant</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <spider/>
@@ -1566,7 +1550,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>giant</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <spider/>
@@ -1667,7 +1650,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -1769,7 +1751,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -1871,7 +1852,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -1973,7 +1953,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <spider/>
@@ -2066,7 +2045,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <spider/>
@@ -2159,7 +2137,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <spider/>
@@ -2252,7 +2229,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <spider/>
@@ -2347,7 +2323,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <rat/>
@@ -2439,7 +2414,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <rat/>
@@ -2533,7 +2507,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <rat/>
@@ -2628,7 +2601,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <snake/>
@@ -2724,7 +2696,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <snake/>
@@ -2823,7 +2794,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <snake/>
@@ -2919,7 +2889,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <canine/>
@@ -3018,7 +2987,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <canine/>
@@ -3118,7 +3086,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <canine/>
@@ -3214,7 +3181,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -3316,7 +3282,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -3418,7 +3383,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -3520,7 +3484,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -3622,7 +3585,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -3715,7 +3677,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -3814,7 +3775,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <humanoid/>
@@ -3908,7 +3868,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -4003,7 +3962,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <canine/>
@@ -4095,7 +4053,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <undead/>
@@ -4193,7 +4150,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <undead/>
@@ -4294,7 +4250,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -4386,7 +4341,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -4485,7 +4439,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -4576,7 +4529,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -4669,7 +4621,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -4761,7 +4712,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>giant</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -4855,7 +4805,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -4949,7 +4898,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -5047,7 +4995,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -5136,7 +5083,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -5226,7 +5172,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -5325,7 +5270,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -5415,7 +5359,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -5520,7 +5463,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -5627,7 +5569,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -5720,7 +5661,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -5811,7 +5751,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <humanoid/>
@@ -5903,7 +5842,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -6001,7 +5939,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -6100,7 +6037,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -6198,7 +6134,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -6298,7 +6233,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -6399,7 +6333,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -6500,7 +6433,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -6600,7 +6532,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>floor</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -6700,7 +6631,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -6792,7 +6722,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -6897,7 +6826,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -6998,7 +6926,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>giant</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -7090,7 +7017,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>giant</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -7184,7 +7110,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -7294,7 +7219,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>giant</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -7402,7 +7326,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -7501,7 +7424,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -7592,7 +7514,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -7693,7 +7614,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>floor</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -7794,7 +7714,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -7888,7 +7807,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>false</can_bleed>
@@ -7983,7 +7901,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <humanoid/>
@@ -8087,7 +8004,6 @@
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
             <can_bash_doors>false</can_bash_doors>
-            <can_swim>false</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <can_bleed>true</can_bleed>
@@ -8182,7 +8098,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <humanoid/>
@@ -8290,7 +8205,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <humanoid/>
@@ -8379,7 +8293,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <humanoid/>
@@ -8468,7 +8381,6 @@
             <searching>0</searching>
             <can_open_doors>true</can_open_doors>
             <can_bash_doors>true</can_bash_doors>
-            <can_swim>true</can_swim>
             <size>humanoid</size>
             <always_prevent_knockback>true</always_prevent_knockback>
             <humanoid/>

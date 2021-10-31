@@ -431,7 +431,6 @@ ConsumeItem ForceField::run_effect()
                 map_parsers::BlocksWalking(ParseActors::yes);
 
         const std::vector<terrain::Id> specific_allowed_terrains = {
-                terrain::Id::liquid_deep,
                 terrain::Id::chasm};
 
         const auto specific_allowed_terrains_parser =

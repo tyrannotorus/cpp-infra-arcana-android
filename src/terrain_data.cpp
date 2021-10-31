@@ -246,25 +246,13 @@ static void init_data_list()
         d.auto_spawn_placement = terrain::TerrainPlacement::away_from_walls;
         add_to_list_and_reset(d);
 
-        d.id = terrain::Id::liquid_shallow;
+        d.id = terrain::Id::liquid;
         d.make_obj = [](const P& p) {
-                return new terrain::LiquidShallow(p);
+                return new terrain::Liquid(p);
         };
         d.character = '~';
         d.tile = gfx::TileId::water;
         d.move_rules.is_walkable = true;
-        d.can_have_blood = false;
-        d.can_have_gore = false;
-        d.matl_type = Matl::fluid;
-        add_to_list_and_reset(d);
-
-        d.id = terrain::Id::liquid_deep;
-        d.make_obj = [](const P& p) {
-                return new terrain::LiquidDeep(p);
-        };
-        d.character = '~';
-        d.tile = gfx::TileId::water;
-        d.can_have_item = false;
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.matl_type = Matl::fluid;

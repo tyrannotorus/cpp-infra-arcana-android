@@ -35,8 +35,7 @@ static void try_make_door(const P& p)
         // Do not allow placing doors adjacent to these terrains
         std::vector<terrain::Id> forbidden_adj_terrains = {
                 terrain::Id::door,
-                terrain::Id::liquid_shallow,
-                terrain::Id::liquid_deep};
+                terrain::Id::liquid};
 
         const auto parser =
                 map_parsers::AnyAdjIsAnyOfTerrains(
@@ -198,8 +197,7 @@ void make_metal_doors_and_levers()
                         .run(blocks_player, blocks_player.rect());
 
                 const std::vector<terrain::Id> free_terrains = {
-                        terrain::Id::door,
-                        terrain::Id::liquid_deep};
+                        terrain::Id::door};
 
                 for (int x = 0; x < blocks_player.w(); ++x)
                 {
@@ -244,10 +242,6 @@ void make_metal_doors_and_levers()
                                         terrain::DoorType::metal;
 
                                 blocks_reaching_levers.at(cell_idx) = is_metal;
-                        }
-                        else if (r->id() == terrain::Id::liquid_deep)
-                        {
-                                blocks_reaching_levers.at(cell_idx) = false;
                         }
                 }
 

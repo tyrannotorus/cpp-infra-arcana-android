@@ -328,8 +328,7 @@ static bool should_player_stagger(const P& target)
 
         const auto terrain_id = map::g_terrain.at(target)->id();
 
-        if (terrain_id == terrain::Id::liquid_shallow ||
-            terrain_id == terrain::Id::liquid_deep)
+        if (terrain_id == terrain::Id::liquid)
         {
                 return false;
         }
@@ -491,7 +490,7 @@ static void move_mon(actor::Mon& mon, Dir dir)
 
         if ((dir != Dir::center) && map::is_pos_inside_outer_walls(target_p))
         {
-                // Leave current cell (e.g. stop swimming)
+                // Leave current cell
                 map::g_terrain.at(mon.m_pos)->on_leave(mon);
 
                 mon.m_pos = target_p;

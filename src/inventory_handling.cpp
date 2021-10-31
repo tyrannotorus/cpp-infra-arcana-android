@@ -916,13 +916,6 @@ void BrowseInv::on_body_slot_item_selected() const
                 return;
         }
 
-        if (map::g_player->m_properties.has(PropId::swimming))
-        {
-                msg_log::add("Not while swimming.");
-
-                return;
-        }
-
         map::g_player->m_remove_armor_countdown = s_nr_turns_to_handle_armor;
 }
 
@@ -971,13 +964,6 @@ void BrowseInv::on_equipable_backpack_item_selected(
                 if (map::g_player->m_properties.has(PropId::burning))
                 {
                         msg_log::add("Not while burning.");
-
-                        return;
-                }
-
-                if (map::g_player->m_properties.has(PropId::swimming))
-                {
-                        msg_log::add("Not while swimming.");
 
                         return;
                 }
@@ -1566,13 +1552,6 @@ void Equip::update()
                         if (map::g_player->m_properties.has(PropId::burning))
                         {
                                 msg_log::add("Not while burning.");
-
-                                return;
-                        }
-
-                        if (map::g_player->m_properties.has(PropId::swimming))
-                        {
-                                msg_log::add("Not while swimming.");
 
                                 return;
                         }

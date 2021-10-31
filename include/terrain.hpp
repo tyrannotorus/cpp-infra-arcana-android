@@ -911,15 +911,15 @@ private:
         Axis m_axis;
 };
 
-class LiquidShallow : public Terrain
+class Liquid : public Terrain
 {
 public:
-        LiquidShallow(const P& p);
-        LiquidShallow() = delete;
+        Liquid(const P& p);
+        Liquid() = delete;
 
         Id id() const override
         {
-                return Id::liquid_shallow;
+                return Id::liquid;
         }
 
         std::string name(Article article) const override;
@@ -940,41 +940,6 @@ private:
                 int dmg) override;
 
         void run_magic_pool_effects_on_player();
-};
-
-class LiquidDeep : public Terrain
-{
-public:
-        LiquidDeep(const P& p);
-        LiquidDeep() = delete;
-
-        Id id() const override
-        {
-                return Id::liquid_deep;
-        }
-
-        std::string name(Article article) const override;
-
-        AllowAction pre_bump(actor::Actor& actor_bumping) override;
-
-        void bump(actor::Actor& actor_bumping) override;
-
-        void on_leave(actor::Actor& actor_leaving) override;
-
-        bool can_move(const actor::Actor& actor) const override;
-
-        LiquidType m_type;
-
-private:
-        Color color_default() const override;
-
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
-
-        bool must_swim_on_enter(const actor::Actor& actor) const;
 };
 
 class Chasm : public Terrain

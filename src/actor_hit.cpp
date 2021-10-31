@@ -280,9 +280,7 @@ ActorDied hit(
         {
                 const auto f_id = map::g_terrain.at(actor.m_pos)->id();
 
-                const bool is_on_bottomless =
-                        (f_id == terrain::Id::chasm) ||
-                        (f_id == terrain::Id::liquid_deep);
+                const bool is_on_bottomless = (f_id == terrain::Id::chasm);
 
                 // Destroy the corpse if the killing blow damage is either:
                 //
@@ -397,9 +395,7 @@ ActorDied hit_sp(
 
         const auto terrain_id = map::g_terrain.at(actor.m_pos)->id();
 
-        const bool is_on_bottomless =
-                (terrain_id == terrain::Id::chasm) ||
-                (terrain_id == terrain::Id::liquid_deep);
+        const bool is_on_bottomless = (terrain_id == terrain::Id::chasm);
 
         const auto is_destroyed =
                 (!actor.m_data->can_leave_corpse ||

@@ -273,7 +273,7 @@ static void player_act()
                                 should_abort =
                                         is_target_known_trap ||
                                         (target_terrain_id == terrain::Id::chains) ||
-                                        (target_terrain_id == terrain::Id::liquid_shallow) ||
+                                        (target_terrain_id == terrain::Id::liquid) ||
                                         (target_terrain_id == terrain::Id::vines) ||
                                         (target_terrain->is_burning());
                         }

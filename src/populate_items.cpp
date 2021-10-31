@@ -67,9 +67,9 @@ static Array2<bool> make_blocked_map()
         map_parsers::BlocksItems()
                 .run(result, result.rect());
 
-        // Shallow liquid doesn't block items, but let's not spawn there...
+        // Liquid doesn't block items, but let's not spawn there...
         map_parsers::IsAnyOfTerrains(
-                terrain::Id::liquid_shallow)
+                terrain::Id::liquid)
                 .run(result,
                      result.rect(),
                      MapParseMode::append);

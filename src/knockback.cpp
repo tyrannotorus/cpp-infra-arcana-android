@@ -79,8 +79,7 @@ void run(
                          .run(new_pos);
 
         const std::vector<terrain::Id> deep_terrains = {
-                terrain::Id::chasm,
-                terrain::Id::liquid_deep};
+                terrain::Id::chasm};
 
         const bool is_tgt_pos_deep =
                 map_parsers::IsAnyOfTerrains(deep_terrains)

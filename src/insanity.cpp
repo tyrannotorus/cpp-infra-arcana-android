@@ -410,8 +410,7 @@ void InsPhobiaDeep::on_new_player_turn(
         }
 
         const std::vector<terrain::Id> deep_terrains = {
-                terrain::Id::chasm,
-                terrain::Id::liquid_deep};
+                terrain::Id::chasm};
 
         const auto parser =
                 map_parsers::AnyAdjIsAnyOfTerrains(

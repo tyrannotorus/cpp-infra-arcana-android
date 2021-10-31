@@ -430,7 +430,6 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                 confuse_player();
         }
 
-        // Bump the target terrain, so that we for example start swimming if
-        // teleporting into water
+        // Bump the target terrain.
         map::g_terrain.at(p)->bump(actor);
 }

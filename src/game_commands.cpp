@@ -1090,8 +1090,6 @@ void handle(const GameCmd cmd)
 #ifndef NDEBUG
         case GameCmd::debug_f2:
         {
-                map::g_player->m_properties.end_prop(PropId::swimming);
-
                 map_travel::go_to_nxt();
         }
         break;

@@ -446,8 +446,7 @@ void Potion::on_collide(const P& pos, actor::Actor* const actor)
         else if (is_seen)
         {
                 const std::vector<terrain::Id> deep_terrains = {
-                        terrain::Id::chasm,
-                        terrain::Id::liquid_deep};
+                        terrain::Id::chasm};
 
                 if (!map_parsers::IsAnyOfTerrains(deep_terrains).run(pos))
                 {

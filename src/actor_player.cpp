@@ -1308,7 +1308,6 @@ void Player::fov_hack()
                 .run(blocked, blocked.rect());
 
         const std::vector<terrain::Id> free_terrains = {
-                terrain::Id::liquid_deep,
                 terrain::Id::chasm};
 
         for (int x = 0; x < blocked.w(); ++x)

@@ -116,8 +116,7 @@ void player_throw_lit_explosive(const P& aim_cell)
 
         const auto f_id = map::g_terrain.at(end_pos)->id();
 
-        if (f_id != terrain::Id::chasm &&
-            f_id != terrain::Id::liquid_deep)
+        if (f_id != terrain::Id::chasm)
         {
                 explosive->on_thrown_ignited_landing(end_pos);
         }

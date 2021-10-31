@@ -148,10 +148,6 @@ static void run_std_turn_events()
                         PropId::entangled,
                         prop_end_config);
 
-                map::g_player->m_properties.end_prop(
-                        PropId::swimming,
-                        prop_end_config);
-
                 msg_log::add(
                         "I sink downwards!",
                         colors::white(),

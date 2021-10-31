@@ -366,38 +366,6 @@ int PropDoomed::ability_mod(const AbilityId ability) const
         return 0;
 }
 
-PropEnded PropEntangled::on_actor_turn()
-{
-        // Handle drowning
-
-        if (!m_owner->is_alive())
-        {
-                return PropEnded::no;
-        }
-
-        if (!m_owner->m_properties.has(PropId::swimming))
-        {
-                return PropEnded::no;
-        }
-
-        if (m_owner->is_player())
-        {
-                msg_log::add("I am drowning!", colors::msg_bad());
-        }
-        else if (actor::can_player_see_actor(*m_owner))
-        {
-                const auto name_the =
-                        text_format::first_to_upper(
-                                m_owner->name_the());
-
-                msg_log::add(name_the + " is drowning.", colors::msg_good());
-        }
-
-        actor::hit(*m_owner, 1, DmgType::pure);
-
-        return PropEnded::no;
-}
-
 void PropEntangled::on_applied()
 {
         // TODO: Rather than doing this on the "on_applied" hook (which should
@@ -862,7 +830,6 @@ PropEnded PropZealotStop::affect_move_dir(Dir& dir)
         if (!m_owner->is_alive() ||
             !m_owner->m_properties.allow_act() ||
             (dir == Dir::center) ||
-            m_owner->m_properties.has(PropId::swimming) ||
             m_owner->m_properties.has(PropId::burning) ||
             m_owner->m_properties.has(PropId::entangled) ||
             m_owner->m_properties.has(PropId::terrified) ||
@@ -1890,38 +1857,6 @@ bool PropBlind::should_update_vision_on_toggled() const
         return m_owner->is_player();
 }
 
-PropEnded PropParalyzed::on_actor_turn()
-{
-        // Handle drowning
-
-        if (!m_owner->is_alive())
-        {
-                return PropEnded::no;
-        }
-
-        if (!m_owner->m_properties.has(PropId::swimming))
-        {
-                return PropEnded::no;
-        }
-
-        if (m_owner->is_player())
-        {
-                msg_log::add("I am drowning!", colors::msg_bad());
-        }
-        else if (actor::can_player_see_actor(*m_owner))
-        {
-                const auto name_the =
-                        text_format::first_to_upper(
-                                m_owner->name_the());
-
-                msg_log::add(name_the + " is drowning.", colors::msg_good());
-        }
-
-        actor::hit(*m_owner, 1, DmgType::pure);
-
-        return PropEnded::no;
-}
-
 void PropParalyzed::on_applied()
 {
         auto* const player = map::g_player;
@@ -1935,38 +1870,6 @@ void PropParalyzed::on_applied()
                         active_explosive->on_player_paralyzed();
                 }
         }
-}
-
-PropEnded PropFainted::on_actor_turn()
-{
-        // Handle drowning
-
-        if (!m_owner->is_alive())
-        {
-                return PropEnded::no;
-        }
-
-        if (!m_owner->m_properties.has(PropId::swimming))
-        {
-                return PropEnded::no;
-        }
-
-        if (m_owner->is_player())
-        {
-                msg_log::add("I am drowning!", colors::msg_bad());
-        }
-        else if (actor::can_player_see_actor(*m_owner))
-        {
-                const auto name_the =
-                        text_format::first_to_upper(
-                                m_owner->name_the());
-
-                msg_log::add(name_the + " is drowning.", colors::msg_good());
-        }
-
-        actor::hit(*m_owner, 1, DmgType::pure);
-
-        return PropEnded::no;
 }
 
 bool PropFainted::should_update_vision_on_toggled() const
@@ -2366,7 +2269,6 @@ void PropSplitsOnDeath::on_death()
         if (is_very_destroyed ||
             m_owner->m_properties.has(PropId::burning) ||
             (f_id == terrain::Id::chasm) ||
-            (f_id == terrain::Id::liquid_deep) ||
             (game_time::g_actors.size() >= g_max_nr_actors_on_map))
         {
                 if (is_player_seeing_owner)
@@ -2537,7 +2439,6 @@ void PropAltersEnv::on_std_turn()
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::stairs,
                 terrain::Id::door,
-                terrain::Id::liquid_deep,
         };
 
         const int blocked_w = blocked.w();
@@ -2631,11 +2532,8 @@ void PropRegenerates::on_std_turn()
 
 PropActResult PropCorpseRises::on_act()
 {
-        const auto pos = m_owner->m_pos;
-
         if (!m_owner->is_corpse() ||
-            map::first_actor_at_pos(m_owner->m_pos) ||
-            (map::g_terrain.at(pos)->id() == terrain::Id::liquid_deep))
+            map::first_actor_at_pos(m_owner->m_pos))
         {
                 return {};
         }
@@ -2847,9 +2745,7 @@ bool PropSpawnsZombiePartsOnDestroyed::is_allowed_to_spawn_parts_here() const
 
         const auto t_id = map::g_terrain.at(pos)->id();
 
-        return (
-                (t_id != terrain::Id::chasm) &&
-                (t_id != terrain::Id::liquid_deep));
+        return (t_id != terrain::Id::chasm);
 }
 
 void PropBreeds::on_std_turn()
@@ -3370,26 +3266,6 @@ PropEnded PropMagicSearching::on_actor_turn()
         states::draw();
 
         return PropEnded::no;
-}
-
-bool PropSwimming::allow_read_absolute(const Verbose verbose) const
-{
-        if (m_owner->is_player() && verbose == Verbose::yes)
-        {
-                msg_log::add("I cannot read this while swimming.");
-        }
-
-        return false;
-}
-
-bool PropSwimming::allow_attack_ranged(const Verbose verbose) const
-{
-        if (m_owner->is_player() && (verbose == Verbose::yes))
-        {
-                msg_log::add("Not while swimming.");
-        }
-
-        return false;
 }
 
 bool PropCannotReadCurse::allow_read_absolute(const Verbose verbose) const

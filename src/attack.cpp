@@ -1477,8 +1477,7 @@ static void update_projectile_states(ProjectileFireData& fire_data)
 
                         const auto terrain_id = projectile.terrain_hit->id();
 
-                        if ((terrain_id == terrain::Id::liquid_shallow) ||
-                            (terrain_id == terrain::Id::liquid_deep))
+                        if (terrain_id == terrain::Id::liquid)
                         {
                                 projectile.color =
                                         projectile.terrain_hit->color();
