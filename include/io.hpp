@@ -52,6 +52,15 @@ inline constexpr int g_min_nr_gui_cells_y = 26;
 inline constexpr int g_min_res_w = 800;
 inline constexpr int g_min_res_h = 600;
 
+enum class GraphicsCycle
+{
+        fast,
+        slow,
+        very_slow,
+
+        END
+};
+
 enum class DrawBg
 {
         no,
@@ -178,10 +187,6 @@ void draw_blast_at_seen_actors(
         const Color& color);
 
 void draw_logo();
-
-// Draws a description "box" for items, spells, etc. The parameter lines may be
-// empty, in which case an empty area is drawn.
-void draw_descr_box(const std::vector<ColoredString>& lines);
 
 std::string sdl_pref_dir();
 

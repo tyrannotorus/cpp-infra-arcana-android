@@ -590,7 +590,7 @@ void GainItem::run_effect()
 
         item::set_item_randomized_properties(*item);
 
-        const std::string name_a = item->name(ItemRefType::a);
+        const std::string name_a = item->name(ItemNameType::a);
 
         msg_log::add("I have received " + name_a + ".");
 
@@ -691,8 +691,8 @@ void Blessed::run_effect()
         {
                 const auto name =
                         cursed_item->name(
-                                ItemRefType::plain,
-                                ItemRefInf::none);
+                                ItemNameType::plain,
+                                ItemNameInfo::none);
 
                 msg_log::add("The " + name + " seems cleansed!");
 

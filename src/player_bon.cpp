@@ -1045,7 +1045,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
         std::vector<ColoredString> descr;
 
         auto put = [&descr](const std::string& str) {
-                descr.emplace_back(str, colors::white());
+                descr.emplace_back(str, colors::text());
         };
 
         auto put_trait = [&descr](const Trait trait_id) {

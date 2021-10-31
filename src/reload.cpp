@@ -37,7 +37,7 @@ static void msg_reload_fumble(
         const actor::Actor& actor,
         const item::Item& ammo)
 {
-        const std::string ammo_name = ammo.name(ItemRefType::a);
+        const std::string ammo_name = ammo.name(ItemNameType::a);
 
         if (actor.is_player())
         {
@@ -85,7 +85,9 @@ static void msg_reloaded(
                 if (ammo.data().type == ItemType::ammo_mag)
                 {
                         const std::string wpn_name =
-                                wpn.name(ItemRefType::plain, ItemRefInf::none);
+                                wpn.name(
+                                        ItemNameType::plain,
+                                        ItemNameInfo::none);
 
                         msg_log::add(
                                 "I reload my " +
@@ -99,7 +101,8 @@ static void msg_reloaded(
                 else
                 {
                         // Not a magazine
-                        const std::string ammo_name = ammo.name(ItemRefType::a);
+                        const std::string ammo_name =
+                                ammo.name(ItemNameType::a);
 
                         msg_log::add(
                                 "I load " +
@@ -158,7 +161,9 @@ void try_reload(actor::Actor& actor, item::Item* const item_to_reload)
         if (ammo_loaded_before >= wpn_max_ammo)
         {
                 const std::string item_name =
-                        wpn->name(ItemRefType::plain, ItemRefInf::none);
+                        wpn->name(
+                                ItemNameType::plain,
+                                ItemNameInfo::none);
 
                 msg_log::add("My " + item_name + " is already loaded.");
                 return;
@@ -227,8 +232,10 @@ void try_reload(actor::Actor& actor, item::Item* const item_to_reload)
                     max_mag_ammo > 0 &&
                     max_mag_ammo <= ammo_loaded_before)
                 {
+                        const auto idx = (size_t)ItemNameType::plain;
+
                         const std::string mag_name =
-                                ammo_data.base_name.names[(size_t)ItemRefType::plain];
+                                ammo_data.base_name.names[idx];
 
                         msg_log::add(
                                 "I carry no " +
@@ -381,8 +388,8 @@ void player_arrange_pistol_mags()
 
                 const std::string name =
                         wielded_pistol->name(
-                                ItemRefType::plain,
-                                ItemRefInf::yes);
+                                ItemNameType::plain,
+                                ItemNameInfo::yes);
 
                 msg_log::add(
                         "I move a round from a magazine to my " +

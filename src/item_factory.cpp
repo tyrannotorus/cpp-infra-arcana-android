@@ -27,6 +27,97 @@
 #include "item_scroll.hpp"
 #include "random.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static bool should_randomize_weapon_dmg(const item::Item& item)
+{
+        // Randomize the extra damage if the item is a common melee weapon, and
+        // extra damage is not already specified.
+        const auto& d = item.data();
+
+        return (
+                d.melee.is_melee_wpn &&
+                !d.ranged.is_ranged_wpn &&
+                !d.is_unique &&
+                (item.base_melee_dmg() == d.melee.dmg));
+}
+
+static void randomize_wpn_dmg(item::Item& item)
+{
+        // Element corresponds to damage bonus (+0, +1, +2, etc)
+        const std::vector<int> weights = {
+                100,  // +0
+                100,  // +1
+                50,  // +2
+                25,  // +3
+                4,  // +4
+                2,  // +5
+                1  // +6
+        };
+
+        const int extra_dmg = rnd::weighted_choice(weights);
+
+        item.incr_base_melee_damage(extra_dmg);
+}
+
+static void randomize_firearm_loaded_ammo(item::Wpn& wpn)
+{
+        const auto& d = wpn.data();
+
+        if (wpn.data().ranged.max_ammo == 1)
+        {
+                wpn.m_ammo_loaded = rnd::coin_toss() ? 1 : 0;
+        }
+        else
+        {
+                // Weapon ammo capacity > 1
+                const int ammo_cap = wpn.data().ranged.max_ammo;
+
+                if (d.ranged.is_machine_gun)
+                {
+                        // Number of machine gun bullets loaded needs to
+                        // be a multiple of the number of projectiles
+                        // fired in each burst
+
+                        const int cap_scaled =
+                                ammo_cap / g_nr_mg_projectiles;
+
+                        const int min_scaled =
+                                cap_scaled / 4;
+
+                        wpn.m_ammo_loaded =
+                                rnd::range(min_scaled, cap_scaled) *
+                                g_nr_mg_projectiles;
+                }
+                else
+                {
+                        // Not machinegun
+                        wpn.m_ammo_loaded = rnd::range(ammo_cap / 4, ammo_cap);
+                }
+        }
+}
+
+static void randomize_medical_supplies(item::MedicalBag& medbag)
+{
+        const int nr_supplies_max = medbag.m_nr_supplies;
+        const int nr_supplies_min = nr_supplies_max - (nr_supplies_max / 3);
+
+        medbag.m_nr_supplies = rnd::range(nr_supplies_min, nr_supplies_max);
+}
+
+static void randomize_lantern_duration(device::Lantern& lantern)
+{
+        const int duration_max = lantern.nr_turns_left;
+
+        const int duration_min = duration_max / 2;
+
+        lantern.nr_turns_left = rnd::range(duration_min, duration_max);
+}
+
+// -----------------------------------------------------------------------------
+// item
+// -----------------------------------------------------------------------------
 namespace item
 {
 Item* make(const Id item_id, const int nr_items)
@@ -393,7 +484,7 @@ Item* make(const Id item_id, const int nr_items)
                       << ") != 1 for "
                       << "non-stackable item: "
                       << (int)d->id << ", "
-                      << r->name(ItemRefType::plain)
+                      << r->name(ItemNameType::plain)
                       << std::endl;
 
                 ASSERT(false);
@@ -417,53 +508,15 @@ void set_item_randomized_properties(Item& item)
                 (d.type != ItemType::melee_wpn_intr) &&
                 (d.type != ItemType::ranged_wpn_intr));
 
-        // If it is a pure, common melee weapon, and "plus" damage is not
-        // already specified, randomize the extra damage
-        if (d.melee.is_melee_wpn &&
-            !d.ranged.is_ranged_wpn &&
-            !d.is_unique &&
-            (item.melee_base_dmg().plus() == 0))
+        if (should_randomize_weapon_dmg(item))
         {
-                static_cast<Wpn&>(item).set_random_melee_plus();
+                randomize_wpn_dmg(item);
         }
 
-        // If firearm, spawn with random amount of ammo
         if (d.ranged.is_ranged_wpn && !d.ranged.has_infinite_ammo)
         {
                 auto& wpn = static_cast<Wpn&>(item);
-
-                if (wpn.data().ranged.max_ammo == 1)
-                {
-                        wpn.m_ammo_loaded = rnd::coin_toss() ? 1 : 0;
-                }
-                else
-                {
-                        // Weapon ammo capacity > 1
-                        const int ammo_cap = wpn.data().ranged.max_ammo;
-
-                        if (d.ranged.is_machine_gun)
-                        {
-                                // Number of machine gun bullets loaded needs to
-                                // be a multiple of the number of projectiles
-                                // fired in each burst
-
-                                const int cap_scaled =
-                                        ammo_cap / g_nr_mg_projectiles;
-
-                                const int min_scaled =
-                                        cap_scaled / 4;
-
-                                wpn.m_ammo_loaded =
-                                        rnd::range(min_scaled, cap_scaled) *
-                                        g_nr_mg_projectiles;
-                        }
-                        else
-                        {
-                                // Not machinegun
-                                wpn.m_ammo_loaded =
-                                        rnd::range(ammo_cap / 4, ammo_cap);
-                        }
-                }
+                randomize_firearm_loaded_ammo(wpn);
         }
 
         if (d.is_stackable)
@@ -471,33 +524,18 @@ void set_item_randomized_properties(Item& item)
                 item.m_nr_items = rnd::range(1, d.max_stack_at_spawn);
         }
 
-        // Vary number of Medical supplies
         if (d.id == Id::medical_bag)
         {
                 auto& medbag = static_cast<MedicalBag&>(item);
-
-                const int nr_supplies_max = medbag.m_nr_supplies;
-
-                const int nr_supplies_min =
-                        nr_supplies_max - (nr_supplies_max / 3);
-
-                medbag.m_nr_supplies =
-                        rnd::range(nr_supplies_min, nr_supplies_max);
+                randomize_medical_supplies(medbag);
         }
 
-        // Vary Lantern duration
         if (d.id == Id::lantern)
         {
                 auto& lantern = static_cast<device::Lantern&>(item);
-
-                const int duration_max = lantern.nr_turns_left;
-
-                const int duration_min = duration_max / 2;
-
-                lantern.nr_turns_left = rnd::range(duration_min, duration_max);
+                randomize_lantern_duration(lantern);
         }
 
-        // Item curse
         const int cursed_one_in_n = 3;
 
         if (d.allow_cursed && rnd::one_in(cursed_one_in_n))

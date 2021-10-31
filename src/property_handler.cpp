@@ -18,6 +18,7 @@
 #include "actor_see.hpp"
 #include "debug.hpp"
 #include "game.hpp"
+#include "io.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
@@ -1279,6 +1280,17 @@ int PropHandler::ability_mod(const AbilityId ability) const
         }
 
         return modifier;
+}
+
+void PropHandler::cycle_graphics(io::GraphicsCycle cycle) const
+{
+        if (cycle == io::GraphicsCycle::fast)
+        {
+                for (auto& prop : m_props)
+                {
+                        prop->cycle_graphics();
+                }
+        }
 }
 
 bool PropHandler::affect_actor_color(Color& color) const

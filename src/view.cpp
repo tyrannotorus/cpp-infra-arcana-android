@@ -138,9 +138,9 @@ void print_location_info_msgs(const P& pos)
                 {
                         str =
                                 item->name(
-                                        ItemRefType::plural,
-                                        ItemRefInf::yes,
-                                        ItemRefAttInf::wpn_main_att_mode);
+                                        ItemNameType::plural,
+                                        ItemNameInfo::yes,
+                                        ItemNameAttackInfo::main_attack_mode);
 
                         str = text_format::first_to_upper(str);
 

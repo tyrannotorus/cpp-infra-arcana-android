@@ -52,7 +52,7 @@ public:
                 return colors::magenta();
         }
 
-        std::string name_inf_str() const override;
+        std::string name_info_str() const override;
 
         ConsumeItem activate(actor::Actor* actor) override;
 

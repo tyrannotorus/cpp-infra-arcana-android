@@ -212,28 +212,34 @@ void init(const P max_gui_dims)
                 create_char_menu_x0,
                 2,
                 create_char_menu_x1,
-                y1(Panel::screen) - 1);
+                max_gui_dims.y - 2);
 
         set_panel_area(
                 Panel::create_char_descr,
                 create_char_descr_x0,
                 2,
                 create_char_descr_x1,
-                y1(Panel::screen) - 1);
+                max_gui_dims.y - 2);
+
+        const int inventory_descr_w = 26;
+
+        const int inventory_descr_x0 = max_gui_dims.x - inventory_descr_w - 1;
+
+        const int inventory_menu_x1 = inventory_descr_x0 - 2;
 
         set_panel_area(
-                Panel::item_menu,
+                Panel::inventory_menu,
                 1,
                 1,
-                x1(Panel::screen) - 36,
-                y1(Panel::screen) - 1);
+                inventory_menu_x1,
+                max_gui_dims.y - 2);
 
         set_panel_area(
-                Panel::item_descr,
-                x1(Panel::item_menu) + 2,
+                Panel::inventory_descr,
+                inventory_descr_x0,
                 1,
-                x1(Panel::screen) - 1,
-                y1(Panel::screen) - 1);
+                max_gui_dims.x - 2,
+                max_gui_dims.y - 2);
 
         constexpr int info_screen_w = io::g_min_nr_gui_cells_x - 2;
 
@@ -248,7 +254,7 @@ void init(const P max_gui_dims)
                 info_screen_x0,
                 1,
                 info_screen_x1,
-                y1(Panel::screen) - 1);
+                max_gui_dims.y - 2);
 
         validate_panels(max_gui_dims);
 

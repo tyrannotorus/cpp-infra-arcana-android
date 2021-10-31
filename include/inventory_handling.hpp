@@ -8,10 +8,12 @@
 #define INVENTORY_HANDLING_HPP
 
 #include <cstddef>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include "browser.hpp"
+#include "colors.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
 #include "state.hpp"
@@ -41,9 +43,13 @@ struct FilteredInvEntry
 class InvState : public State
 {
 public:
-        InvState();
+        InvState() = default;
 
         virtual ~InvState() = default;
+
+        void cycle_graphics(io::GraphicsCycle cycle) override;
+
+        void on_window_resized() override;
 
         StateId id() const override;
 
@@ -53,18 +59,16 @@ protected:
                 int y,
                 char key,
                 bool is_marked,
-                ItemRefAttInf att_info) const;
+                ItemNameAttackInfo attack_info);
 
         void draw_backpack_item(
                 size_t backpack_idx,
                 int y,
                 char key,
                 bool is_marked,
-                ItemRefAttInf att_info) const;
+                ItemNameAttackInfo attack_info);
 
         void activate(size_t backpack_idx);
-
-        MenuBrowser m_browser;
 
         void draw_weight_pct_and_dots(
                 P item_pos,
@@ -75,9 +79,20 @@ protected:
 
         // void draw_item_symbol(const item::Item& item, const P& p) const;
 
-        void draw_detailed_item_descr(
+        void set_viewed_item(
                 const item::Item* item,
-                ItemRefAttInf att_inf) const;
+                ItemNameAttackInfo attack_info);
+
+        void draw_item_descr() const;
+
+        MenuBrowser m_browser;
+
+private:
+        std::vector<std::string> make_detailed_descr_lines() const;
+
+        const item::Item* m_viewed_item {nullptr};
+        ItemNameAttackInfo m_viewed_item_attack_info {(ItemNameAttackInfo)0};
+        int m_descr_idx {0};
 };
 
 class BrowseInv : public InvState

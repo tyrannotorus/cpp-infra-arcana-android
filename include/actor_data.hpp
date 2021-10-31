@@ -161,7 +161,7 @@ struct IntrAttData
 
         item::Id item_id {item::Id::END};
         int dmg {0};
-        ItemAttProp prop_applied {};
+        ItemAttackProp prop_applied {};
 };
 
 struct ActorSpellData

@@ -117,13 +117,13 @@ void init()
 
                         RodLook& look = s_rod_looks[idx];
 
-                        d.base_name_un_id.names[(size_t)ItemRefType::plain] =
+                        d.base_name_un_id.names[(size_t)ItemNameType::plain] =
                                 look.name_plain + " Rod";
 
-                        d.base_name_un_id.names[(size_t)ItemRefType::plural] =
+                        d.base_name_un_id.names[(size_t)ItemNameType::plural] =
                                 look.name_plain + " Rods";
 
-                        d.base_name_un_id.names[(size_t)ItemRefType::a] =
+                        d.base_name_un_id.names[(size_t)ItemNameType::a] =
                                 look.name_a + " Rod";
 
                         d.color = look.color;
@@ -148,13 +148,13 @@ void init()
                         const std::string real_name_a =
                                 "a Rod of " + real_type_name;
 
-                        d.base_name.names[(size_t)ItemRefType::plain] =
+                        d.base_name.names[(size_t)ItemNameType::plain] =
                                 real_name;
 
-                        d.base_name.names[(size_t)ItemRefType::plural] =
+                        d.base_name.names[(size_t)ItemNameType::plural] =
                                 real_name_plural;
 
-                        d.base_name.names[(size_t)ItemRefType::a] =
+                        d.base_name.names[(size_t)ItemNameType::a] =
                                 real_name_a;
                 }
         }
@@ -172,15 +172,15 @@ void save()
                 {
                         saving::put_str(
                                 d.base_name_un_id
-                                        .names[(size_t)ItemRefType::plain]);
+                                        .names[(size_t)ItemNameType::plain]);
 
                         saving::put_str(
                                 d.base_name_un_id
-                                        .names[(size_t)ItemRefType::plural]);
+                                        .names[(size_t)ItemNameType::plural]);
 
                         saving::put_str(
                                 d.base_name_un_id
-                                        .names[(size_t)ItemRefType::a]);
+                                        .names[(size_t)ItemNameType::a]);
 
                         saving::put_str(colors::color_to_name(d.color));
                 }
@@ -195,13 +195,13 @@ void load()
 
                 if (d.type == ItemType::rod)
                 {
-                        d.base_name_un_id.names[(size_t)ItemRefType::plain] =
+                        d.base_name_un_id.names[(size_t)ItemNameType::plain] =
                                 saving::get_str();
 
-                        d.base_name_un_id.names[(size_t)ItemRefType::plural] =
+                        d.base_name_un_id.names[(size_t)ItemNameType::plural] =
                                 saving::get_str();
 
-                        d.base_name_un_id.names[(size_t)ItemRefType::a] =
+                        d.base_name_un_id.names[(size_t)ItemNameType::a] =
                                 saving::get_str();
 
                         d.color =
@@ -240,7 +240,9 @@ ConsumeItem Rod::activate(actor::Actor* const actor)
         if ((m_nr_charge_turns_left > 0) && m_data->is_identified)
         {
                 const std::string rod_name =
-                        name(ItemRefType::plain, ItemRefInf::none);
+                        name(
+                                ItemNameType::plain,
+                                ItemNameInfo::none);
 
                 msg_log::add("The " + rod_name + " is still charging.");
 
@@ -252,7 +254,9 @@ ConsumeItem Rod::activate(actor::Actor* const actor)
         // TODO: Sfx
 
         const std::string rod_name_a =
-                name(ItemRefType::a, ItemRefInf::none);
+                name(
+                        ItemNameType::a,
+                        ItemNameInfo::none);
 
         msg_log::add("I activate " + rod_name_a + "...");
 
@@ -302,8 +306,8 @@ void Rod::on_std_turn_in_inv_hook(const InvType inv_type)
         {
                 const std::string my_name =
                         name(
-                                ItemRefType::plain,
-                                ItemRefInf::none);
+                                ItemNameType::plain,
+                                ItemNameInfo::none);
 
                 msg_log::add("The " + my_name + " has finished charging.");
         }
@@ -334,8 +338,9 @@ void Rod::identify(const Verbose verbose)
         if (verbose == Verbose::yes)
         {
                 const std::string name_after =
-                        name(ItemRefType::a,
-                             ItemRefInf::none);
+                        name(
+                                ItemNameType::a,
+                                ItemNameInfo::none);
 
                 msg_log::add("I have identified " + name_after + ".");
 
@@ -343,7 +348,7 @@ void Rod::identify(const Verbose verbose)
         }
 }
 
-std::string Rod::name_inf_str() const
+std::string Rod::name_info_str() const
 {
         if (m_data->is_identified)
         {
@@ -352,7 +357,7 @@ std::string Rod::name_inf_str() const
                         const auto turns_left_str =
                                 std::to_string(m_nr_charge_turns_left);
 
-                        return "{" + turns_left_str + "}";
+                        return "(" + turns_left_str + " turns)";
                 }
                 else
                 {
@@ -362,7 +367,7 @@ std::string Rod::name_inf_str() const
         else
         {
                 // Not identified
-                return m_data->is_tried ? "{Tried}" : "";
+                return m_data->is_tried ? "(Tried)" : "";
         }
 }
 

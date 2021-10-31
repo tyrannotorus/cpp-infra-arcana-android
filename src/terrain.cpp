@@ -36,6 +36,7 @@
 #include "hints.hpp"
 #include "insanity.hpp"
 #include "inventory.hpp"
+#include "io.hpp"
 #include "item.hpp"
 #include "item_curse.hpp"
 #include "item_data.hpp"
@@ -496,6 +497,22 @@ bool Terrain::is_corrupted_color() const
         return (m_nr_turns_color_corrupted > 0);
 }
 
+void Terrain::cycle_graphics(const io::GraphicsCycle cycle)
+{
+        if (cycle == io::GraphicsCycle::fast)
+        {
+                m_burn_color_bg.set_rgb(
+                        (uint8_t)rnd::range(80, 255),
+                        0,
+                        0);
+
+                m_corrupt_color.set_rgb(
+                        rnd::range(40, 255),
+                        rnd::range(40, 255),
+                        rnd::range(40, 255));
+        }
+}
+
 Color Terrain::color() const
 {
         if (m_burn_state == BurnState::burning)
@@ -507,14 +524,7 @@ Color Terrain::color() const
                 // Not burning
                 if (is_corrupted_color())
                 {
-                        Color color = colors::light_magenta();
-
-                        color.set_rgb(
-                                rnd::range(40, 255),
-                                rnd::range(40, 255),
-                                rnd::range(40, 255));
-
-                        return color;
+                        return m_corrupt_color;
                 }
                 else if (m_is_bloody)
                 {
@@ -522,9 +532,14 @@ Color Terrain::color() const
                 }
                 else
                 {
-                        return (m_burn_state == BurnState::not_burned)
-                                ? color_default()
-                                : colors::dark_gray();
+                        if (m_burn_state == BurnState::not_burned)
+                        {
+                                return color_default();
+                        }
+                        else
+                        {
+                                return colors::dark_gray();
+                        }
                 }
         }
 }
@@ -538,9 +553,7 @@ Color Terrain::color_bg() const
                 return color_bg_default();
 
         case BurnState::burning:
-                auto color = Color((uint8_t)rnd::range(32, 255), 0, 0);
-
-                return color;
+                return m_burn_color_bg;
         }
 
         ASSERT(false && "Failed to set color");
@@ -1658,8 +1671,8 @@ void LiquidShallow::run_magic_pool_effects_on_player()
         {
                 const auto name =
                         item->name(
-                                ItemRefType::plain,
-                                ItemRefInf::none);
+                                ItemNameType::plain,
+                                ItemNameInfo::none);
 
                 msg_log::add("The " + name + " seems cleansed!");
 
@@ -1774,7 +1787,7 @@ AllowAction LiquidDeep::pre_bump(actor::Actor& actor_bumping)
         {
                 const std::string explosive_name =
                         map::g_player->m_active_explosive->name(
-                                ItemRefType::plain);
+                                ItemNameType::plain);
 
                 const std::string liquid_name_the = name(Article::the);
 
@@ -1867,7 +1880,7 @@ void LiquidDeep::bump(actor::Actor& actor_bumping)
         {
                 const std::string expl_name =
                         map::g_player->m_active_explosive->name(
-                                ItemRefType::plain);
+                                ItemNameType::plain);
 
                 msg_log::add("The " + expl_name + " is extinguished.");
 
@@ -3039,9 +3052,9 @@ void ItemContainer::on_item_found(
 
         const std::string name =
                 item->name(
-                        ItemRefType::plural,
-                        ItemRefInf::yes,
-                        ItemRefAttInf::wpn_main_att_mode);
+                        ItemNameType::plural,
+                        ItemNameInfo::yes,
+                        ItemNameAttackInfo::main_attack_mode);
 
         const std::string msg =
                 "Pick up " +

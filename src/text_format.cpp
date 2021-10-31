@@ -238,4 +238,16 @@ void append_with_space(
         base_str += addition;
 }
 
+void append_as_comma_list(
+        std::string& base_str,
+        const std::string& addition)
+{
+        if (!base_str.empty() && !addition.empty())
+        {
+                base_str += ", ";
+        }
+
+        base_str += addition;
+}
+
 }  // namespace text_format

@@ -161,7 +161,7 @@ void throw_item(
 
         const auto& item_thrown_data = item_thrown.data();
 
-        const std::string item_name_a = item_thrown.name(ItemRefType::a);
+        const std::string item_name_a = item_thrown.name(ItemNameType::a);
 
         if (&actor_throwing == map::g_player)
         {
@@ -239,8 +239,7 @@ void throw_item(
                         const auto att_result =
                                 ability_roll::roll(att_data.hit_chance_tot);
 
-                        const int dmg =
-                                att_data.dmg_range.total_range().roll();
+                        const int dmg = att_data.dmg_range.roll();
 
                         if (att_result >= ActionResult::success)
                         {

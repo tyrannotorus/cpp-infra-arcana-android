@@ -140,7 +140,7 @@ static void add_potion_descr(std::vector<ColoredString>& lines)
 
                 auto* item = item::make(d.id);
 
-                const auto name = item->name(ItemRefType::plain);
+                const auto name = item->name(ItemNameType::plain);
 
                 potion_list.emplace_back(name, d.color);
 
@@ -192,8 +192,7 @@ static void add_scroll_descr(std::vector<ColoredString>& lines)
 
                 auto* item = item::make(d.id);
 
-                const std::string name =
-                        item->name(ItemRefType::plain);
+                const std::string name = item->name(ItemNameType::plain);
 
                 manuscript_list.emplace_back(
                         name,

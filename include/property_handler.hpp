@@ -19,6 +19,11 @@
 #include "property.hpp"
 #include "property_data.hpp"
 
+namespace io
+{
+enum class GraphicsCycle;
+}  // namespace io
+
 namespace item
 {
 class Item;
@@ -169,6 +174,8 @@ public:
         void on_destroyed_corpse();
 
         int ability_mod(AbilityId ability) const;
+
+        void cycle_graphics(io::GraphicsCycle cycle) const;
 
         bool affect_actor_color(Color& color) const;
 

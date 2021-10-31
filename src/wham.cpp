@@ -49,7 +49,7 @@ static bool is_allowed_use_wpn_on_terrain(
         const item::Item& wpn,
         const terrain::Terrain& terrain)
 {
-        bool allow_wpn_att_terrain = wpn.data().melee.att_terrain;
+        bool allow_wpn_att_terrain = wpn.data().melee.attack_terrain;
 
         if (!allow_wpn_att_terrain)
         {
@@ -152,12 +152,12 @@ static void player_attack_corpse(
 
         // Decide if we should kick or use wielded weapon
         const auto& wpn_used_att_corpse =
-                wpn.data().melee.att_corpse
+                wpn.data().melee.attack_corpse
                 ? wpn
                 : kick_wpn;
 
         const auto melee_att_msg =
-                wpn_used_att_corpse.data().melee.att_msgs.player;
+                wpn_used_att_corpse.data().melee.attack_msgs.player;
 
         const std::string msg =
                 "I " +
@@ -168,7 +168,7 @@ static void player_attack_corpse(
 
         const auto dmg_range = wpn_used_att_corpse.melee_dmg(map::g_player);
 
-        const int dmg = dmg_range.total_range().roll();
+        const int dmg = dmg_range.roll();
 
         actor::hit(mon, dmg, wpn_used_att_corpse.data().melee.dmg_type);
 
@@ -227,7 +227,7 @@ static void player_attack_terrain(
 
         const auto dmg_range = wpn_used_att_terrain->melee_dmg(map::g_player);
 
-        const int dmg = dmg_range.total_range().roll();
+        const int dmg = dmg_range.roll();
 
         terrain->hit(
                 wpn_used_att_terrain->data().melee.dmg_type,

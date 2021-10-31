@@ -46,9 +46,6 @@ static actor::Actor* make_actor_from_id(const actor::Id id)
         case actor::Id::ape:
                 return new actor::Ape();
 
-        case actor::Id::strange_color:
-                return new actor::StrangeColor();
-
         case actor::Id::spectral_wpn:
                 return new actor::SpectralWpn();
 
@@ -197,8 +194,6 @@ MonSpawnResult spawn(
         const std::vector<Id>& monster_ids,
         const R& area_allowed)
 {
-        TRACE_FUNC_BEGIN;
-
         auto free_positions = free_spawn_positions(area_allowed);
 
         if (free_positions.empty())
@@ -210,8 +205,6 @@ MonSpawnResult spawn(
                 std::begin(free_positions),
                 std::end(free_positions),
                 IsCloserToPos(origin));
-
-        TRACE_FUNC_END;
 
         return spawn_at_positions(free_positions, monster_ids);
 }

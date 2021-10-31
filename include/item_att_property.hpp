@@ -11,17 +11,17 @@
 
 #include "property.hpp"
 
-struct ItemAttProp
+struct ItemAttackProp
 {
-        ItemAttProp() :
+        ItemAttackProp() :
                 prop(nullptr),
                 pct_chance_to_apply(100) {}
 
-        ItemAttProp(Prop* const property) :
+        ItemAttackProp(Prop* const property) :
                 prop(property),
                 pct_chance_to_apply(100) {}
 
-        ~ItemAttProp() = default;
+        ~ItemAttackProp() = default;
 
         std::shared_ptr<Prop> prop;
 

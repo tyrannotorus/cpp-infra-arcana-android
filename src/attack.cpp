@@ -207,7 +207,7 @@ static size_t nr_projectiles_for_ranged_weapon(const item::Wpn& wpn)
 // TODO: It would be better to use absolute numbers, rather than relative to
 // the weapon's max damage (if a weapon does 100 maximum damage, it would still
 // be pretty catastrophic if it did 50 damage - but currently this would only
-// count as a "small" hit). Perhaps use values relative to 'min_dng_to_wound'
+// count as a "small" hit). Perhaps use values relative to 'g_min_dmg_to_wound'
 // (in global.hpp) as thresholds instead.
 static HitSize relative_hit_size(const int dmg, const int wpn_max_dmg)
 {
@@ -230,14 +230,14 @@ static HitSize relative_hit_size(const int dmg, const int wpn_max_dmg)
 
 static HitSize relative_hit_size_melee(const int dmg, const AttData& att_data)
 {
-        const int max_dmg = att_data.dmg_range.total_range().max;
+        const int max_dmg = att_data.dmg_range.range().max;
 
         return relative_hit_size(dmg, max_dmg);
 }
 
 static HitSize relative_hit_size_ranged(const int dmg, const AttData& att_data)
 {
-        const int max_dmg = att_data.dmg_range.total_range().max;
+        const int max_dmg = att_data.dmg_range.range().max;
 
         return relative_hit_size(dmg, max_dmg);
 }
@@ -340,7 +340,7 @@ static void print_player_melee_hit_msg(
         const MeleeAttData& att_data)
 {
         const std::string wpn_verb =
-                att_data.att_item->data().melee.att_msgs.player;
+                att_data.att_item->data().melee.attack_msgs.player;
 
         std::string other_name;
 
@@ -398,8 +398,8 @@ static void print_player_melee_hit_msg(
 
                 const std::string wpn_name_a =
                         att_data.att_item->name(
-                                ItemRefType::a,
-                                ItemRefInf::none);
+                                ItemNameType::a,
+                                ItemNameInfo::none);
 
                 msg_log::add(
                         std::string(
@@ -455,7 +455,8 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
                 attacker_name = "It";
         }
 
-        std::string wpn_verb = att_data.att_item->data().melee.att_msgs.other;
+        std::string wpn_verb =
+                att_data.att_item->data().melee.attack_msgs.other;
 
         std::string defender_name;
 
@@ -487,9 +488,9 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
         {
                 const std::string wpn_name_a =
                         att_data.att_item->name(
-                                ItemRefType::a,
-                                ItemRefInf::none,
-                                ItemRefAttInf::none);
+                                ItemNameType::a,
+                                ItemNameInfo::none,
+                                ItemNameAttackInfo::none);
 
                 used_wpn_str = " with " + wpn_name_a;
         }
@@ -762,7 +763,7 @@ static void emit_melee_snd(
 
 static void print_player_fire_ranged_msg(const item::Wpn& wpn)
 {
-        const std::string attack_verb = wpn.data().ranged.att_msgs.player;
+        const std::string attack_verb = wpn.data().ranged.attack_msgs.player;
 
         msg_log::add("I " + attack_verb + ".");
 }
@@ -779,7 +780,7 @@ static void print_mon_fire_ranged_msg(const RangedAttData& att_data)
                         att_data.attacker->name_the());
 
         const std::string attack_verb =
-                att_data.att_item->data().ranged.att_msgs.other;
+                att_data.att_item->data().ranged.attack_msgs.other;
 
         std::string wpn_used_str;
 
@@ -787,9 +788,9 @@ static void print_mon_fire_ranged_msg(const RangedAttData& att_data)
         {
                 const std::string wpn_name_a =
                         att_data.att_item->name(
-                                ItemRefType::a,
-                                ItemRefInf::none,
-                                ItemRefAttInf::none);
+                                ItemNameType::a,
+                                ItemNameInfo::none,
+                                ItemNameAttackInfo::none);
 
                 wpn_used_str = " " + wpn_name_a;
         }
@@ -900,7 +901,7 @@ static std::unique_ptr<Snd> ranged_fire_snd(
                 return snd;
         }
 
-        const auto sfx = wpn.data().ranged.att_sfx;
+        const auto sfx = wpn.data().ranged.attack_sfx;
         const auto vol = wpn.data().ranged.snd_vol;
 
         auto snd_msg_used = snd_msg;
@@ -1028,7 +1029,7 @@ static terrain::Terrain* get_ground_blocking_projectile(
 }
 
 static void try_apply_attack_property_on_actor(
-        const ItemAttProp& att_prop,
+        const ItemAttackProp& att_prop,
         actor::Actor& actor,
         const DmgType& dmg_type)
 {
@@ -1224,7 +1225,7 @@ static void init_projectiles_gfx(ProjectileFireData& fire_data)
 
 static void init_projectiles_animation_delay(ProjectileFireData& fire_data)
 {
-        const int denom = fire_data.projectiles.size();
+        const auto denom = (int)fire_data.projectiles.size();
 
         fire_data.animation_delay = (config::delay_projectile_draw() / denom);
 }
@@ -1428,8 +1429,7 @@ static void update_projectile_states(ProjectileFireData& fire_data)
                         ability_roll::roll(
                                 projectile.att_data->hit_chance_tot);
 
-                projectile.dmg =
-                        projectile.att_data->dmg_range.total_range().roll();
+                projectile.dmg = projectile.att_data->dmg_range.range().roll();
 
                 projectile.is_seen_by_player = map::g_seen.at(projectile_pos);
 
@@ -1864,7 +1864,7 @@ void melee(
 
         const auto att_result = ability_roll::roll(att_data.hit_chance_tot);
 
-        const int dmg = att_data.dmg_range.total_range().roll();
+        const int dmg = att_data.dmg_range.range().roll();
 
         print_melee_msg(att_result, dmg, att_data);
 
@@ -1895,8 +1895,8 @@ void melee(
                 {
                         const std::string item_name =
                                 item->name(
-                                        ItemRefType::plain,
-                                        ItemRefInf::none);
+                                        ItemNameType::plain,
+                                        ItemNameInfo::none);
 
                         msg_log::add(
                                 "My " + item_name + " breaks!",

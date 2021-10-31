@@ -47,6 +47,7 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "saving.hpp"
+#include "terrain.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
 
@@ -475,6 +476,19 @@ void GameState::on_start()
         }
 
         s_start_time = current_time();
+}
+
+void GameState::cycle_graphics(const io::GraphicsCycle cycle)
+{
+        for (auto* const t : map::g_terrain)
+        {
+                t->cycle_graphics(cycle);
+        }
+
+        for (auto* const a : game_time::g_actors)
+        {
+                a->m_properties.cycle_graphics(cycle);
+        }
 }
 
 void GameState::draw()

@@ -239,7 +239,7 @@ MeleeAttData::MeleeAttData(
 
         if (apply_undead_bane_bon)
         {
-                dmg_range.set_plus(dmg_range.plus() + 2);
+                dmg_range.incr_dmg(2);
         }
 
         if (attacker && attacker->m_properties.has(PropId::weakened))
@@ -489,7 +489,7 @@ RangedAttData::RangedAttData(
         if ((attacker == map::g_player) &&
             player_bon::gets_undead_bane_bon(*defender->m_data))
         {
-                dmg_range.set_plus(dmg_range.plus() + 2);
+                dmg_range.incr_dmg(2);
         }
 
         const bool is_player_with_aiming_prop =
@@ -499,7 +499,7 @@ RangedAttData::RangedAttData(
 
         if (is_player_with_aiming_prop)
         {
-                dmg_range.set_base_min(dmg_range.base_max());
+                dmg_range.set_min(dmg_range.max());
         }
 
         // Positions further than max range have halved damage
@@ -673,7 +673,7 @@ ThrowAttData::ThrowAttData(
 
         if (apply_undead_bane_bon)
         {
-                dmg_range.set_plus(dmg_range.plus() + 2);
+                dmg_range.incr_dmg(2);
         }
 
         const bool is_player_with_aiming_prop =
@@ -682,7 +682,7 @@ ThrowAttData::ThrowAttData(
 
         if (is_player_with_aiming_prop)
         {
-                dmg_range.set_base_min(dmg_range.base_max());
+                dmg_range.set_min(dmg_range.max());
         }
 
         // Positions further than max range have halved damage

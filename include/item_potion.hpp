@@ -53,7 +53,7 @@ public:
                 return colors::light_blue();
         }
 
-        std::string name_inf_str() const final;
+        std::string name_info_str() const final;
 
         ConsumeItem activate(actor::Actor* actor) final;
 

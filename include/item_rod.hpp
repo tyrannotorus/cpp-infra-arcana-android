@@ -58,7 +58,7 @@ public:
                 return colors::violet();
         }
 
-        std::string name_inf_str() const final;
+        std::string name_info_str() const final;
 
         void on_std_turn_in_inv_hook(InvType inv_type) final;
 

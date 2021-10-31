@@ -35,6 +35,8 @@ extern SDL_Texture* g_logo_texture;
 // Used for centering the rendering area on the screen
 extern P g_rendering_px_offset;
 
+void init_input();
+
 Color read_px_on_surface(const SDL_Surface& surface, const P& px_pos);
 
 void put_px_on_surface(

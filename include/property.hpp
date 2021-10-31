@@ -135,6 +135,8 @@ public:
                 return m_data.alignment;
         }
 
+        virtual void cycle_graphics() {}
+
         virtual std::optional<Color> color_override() const
         {
                 return {};
@@ -1410,7 +1412,14 @@ public:
         PropCorruptsEnvColor() :
                 Prop(PropId::corrupts_env_color) {}
 
+        void cycle_graphics() override;
+
+        bool affect_actor_color(Color& color) const override;
+
         PropActResult on_act() override;
+
+private:
+        Color m_color {255, 255, 255};
 };
 
 class PropAltersEnv : public Prop

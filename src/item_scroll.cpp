@@ -150,13 +150,13 @@ void init()
 
                 const auto& title = s_false_names[idx];
 
-                d->base_name_un_id.names[(size_t)ItemRefType::plain] =
+                d->base_name_un_id.names[(size_t)ItemNameType::plain] =
                         "Manuscript titled " + title;
 
-                d->base_name_un_id.names[(size_t)ItemRefType::plural] =
+                d->base_name_un_id.names[(size_t)ItemNameType::plural] =
                         "Manuscripts titled " + title;
 
-                d->base_name_un_id.names[(size_t)ItemRefType::a] =
+                d->base_name_un_id.names[(size_t)ItemNameType::a] =
                         "a Manuscript titled " + title;
 
                 s_false_names.erase(s_false_names.begin() + idx);
@@ -177,13 +177,13 @@ void init()
                 const auto real_name_a =
                         "a Manuscript of " + real_type_name;
 
-                d->base_name.names[(size_t)ItemRefType::plain] =
+                d->base_name.names[(size_t)ItemNameType::plain] =
                         real_name;
 
-                d->base_name.names[(size_t)ItemRefType::plural] =
+                d->base_name.names[(size_t)ItemNameType::plural] =
                         real_name_plural;
 
-                d->base_name.names[(size_t)ItemRefType::a] =
+                d->base_name.names[(size_t)ItemNameType::a] =
                         real_name_a;
         }
 
@@ -217,9 +217,9 @@ void save()
 
                 auto& names = item::g_data[i].base_name_un_id.names;
 
-                saving::put_str(names[(size_t)ItemRefType::plain]);
-                saving::put_str(names[(size_t)ItemRefType::plural]);
-                saving::put_str(names[(size_t)ItemRefType::a]);
+                saving::put_str(names[(size_t)ItemNameType::plain]);
+                saving::put_str(names[(size_t)ItemNameType::plural]);
+                saving::put_str(names[(size_t)ItemNameType::a]);
         }
 }
 
@@ -234,9 +234,9 @@ void load()
 
                 auto& names = item::g_data[i].base_name_un_id.names;
 
-                names[(size_t)ItemRefType::plain] = saving::get_str();
-                names[(size_t)ItemRefType::plural] = saving::get_str();
-                names[(size_t)ItemRefType::a] = saving::get_str();
+                names[(size_t)ItemNameType::plain] = saving::get_str();
+                names[(size_t)ItemNameType::plural] = saving::get_str();
+                names[(size_t)ItemNameType::a] = saving::get_str();
         }
 }
 
@@ -343,7 +343,7 @@ void Scroll::on_actor_turn_in_inv_hook(const InvType inv_type)
                 TRACE << "Scroll domain discovered" << std::endl;
 
                 const std::string name_plural =
-                        d.base_name_un_id.names[(size_t)ItemRefType::plural];
+                        d.base_name_un_id.names[(size_t)ItemNameType::plural];
 
                 const std::unique_ptr<const Spell> spell(make_spell());
 
@@ -423,7 +423,9 @@ ConsumeItem Scroll::activate(actor::Actor* const actor)
         if (is_identified_before)
         {
                 const std::string scroll_name =
-                        name(ItemRefType::a, ItemRefInf::none);
+                        name(
+                                ItemNameType::a,
+                                ItemNameInfo::none);
 
                 msg_log::add("I read " + scroll_name + "...");
         }
@@ -492,7 +494,9 @@ void Scroll::identify(const Verbose verbose)
         if (verbose == Verbose::yes)
         {
                 const std::string name_after =
-                        name(ItemRefType::a, ItemRefInf::none);
+                        name(
+                                ItemNameType::a,
+                                ItemNameInfo::none);
 
                 msg_log::add("I have identified " + name_after + ".");
 
@@ -500,7 +504,7 @@ void Scroll::identify(const Verbose verbose)
         }
 }
 
-std::string Scroll::name_inf_str() const
+std::string Scroll::name_info_str() const
 {
         if (m_data->is_spell_domain_known && !m_data->is_identified)
         {
@@ -514,7 +518,7 @@ std::string Scroll::name_inf_str() const
                                 player_bon::spell_domain_title(
                                         spell->domain());
 
-                        return "{" + domain_title + "}";
+                        return "(" + domain_title + ")";
                 }
         }
 

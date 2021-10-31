@@ -731,6 +731,8 @@ void init()
 
         update_rendering_offsets();
 
+        init_input();
+
         TRACE_FUNC_END;
 }
 

@@ -61,8 +61,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static const int s_min_dmg_to_wound = 5;
-
 static const std::vector<std::string> m_item_feeling_messages = {
         "I feel like I should examine this place thoroughly.",
         "I feel like there is something of great interest here.",
@@ -131,8 +129,8 @@ static std::string make_continue_remove_armor_query_msg()
 
         const auto armor_name =
                 item->name(
-                        ItemRefType::a,
-                        ItemRefInf::yes);
+                        ItemNameType::a,
+                        ItemNameInfo::yes);
 
         return (
                 "Continue taking off " +
@@ -153,8 +151,8 @@ static std::string make_continue_equip_armor_query_msg()
 
         const auto armor_name =
                 player.m_item_equipping->name(
-                        ItemRefType::a,
-                        ItemRefInf::yes);
+                        ItemNameType::a,
+                        ItemNameInfo::yes);
 
         return (
                 "Continue putting on " +
@@ -245,8 +243,8 @@ static void interrupt_equip_other_item(const ForceInterruptActions is_forced)
 
                 const auto wpn_name =
                         player.m_item_equipping->name(
-                                ItemRefType::a,
-                                ItemRefInf::yes);
+                                ItemNameType::a,
+                                ItemNameInfo::yes);
 
                 const std::string msg =
                         "Continue equipping " +
@@ -390,7 +388,7 @@ void Player::on_hit(
                 incr_shock(1.0, ShockSrc::misc);
         }
 
-        const bool is_enough_dmg_for_wound = (dmg >= s_min_dmg_to_wound);
+        const bool is_enough_dmg_for_wound = (dmg >= g_min_dmg_to_wound);
         const bool is_physical = is_physical_dmg_type(dmg_type);
 
         // Ghoul trait Indomitable Fury grants immunity to wounds while frenzied

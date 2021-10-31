@@ -24,11 +24,458 @@
 // -----------------------------------------------------------------------------
 static SDL_Event s_sdl_event;
 
+static InputData s_input;
+
+static bool s_is_done_reading_input = false;
+static bool s_is_window_resized = false;
+
+static const uint32_t s_window_resize_draw_delay_ms = 400;
+static uint32_t s_last_window_resize_ms = 0;
+
+static const size_t nr_graphics_cycle_types = (size_t)io::GraphicsCycle::END;
+static std::uint32_t s_graphics_cycle_delay_ms[nr_graphics_cycle_types];
+static uint32_t s_last_graphics_cycle_ms[nr_graphics_cycle_types];
+
+static void update_input_mod_key_status()
+{
+        const auto mod = SDL_GetModState();
+
+        s_input.is_shift_held = mod & KMOD_SHIFT;
+        s_input.is_ctrl_held = mod & KMOD_CTRL;
+        s_input.is_alt_held = mod & KMOD_ALT;
+}
+
+static void on_window_resized_signalled()
+{
+        io::on_window_resized();
+        io::clear_screen();
+        io::update_screen();
+        io::clear_events();
+
+        s_is_window_resized = false;
+        s_last_window_resize_ms = SDL_GetTicks();
+}
+
+static void window_resized_delayed_draw()
+{
+        // If the window has been resized recently, redraw the window after a
+        // certain delay.
+
+        if (s_last_window_resize_ms == 0)
+        {
+                return;
+        }
+
+        const auto d = SDL_GetTicks() - s_last_window_resize_ms;
+
+        if (d > s_window_resize_draw_delay_ms)
+        {
+                states::draw();
+                io::update_screen();
+                s_last_window_resize_ms = 0;
+        }
+}
+
+static void run_graphics_cycling()
+{
+        // Do not cycle graphics if window has been resized recently.
+        if (s_last_window_resize_ms != 0)
+        {
+                return;
+        }
+
+        const auto current_time_ms = SDL_GetTicks();
+
+        bool is_any_cycled = false;
+
+        for (size_t i = 0; i < (size_t)io::GraphicsCycle::END; ++i)
+        {
+                const auto d = current_time_ms - s_last_graphics_cycle_ms[i];
+
+                if (d > s_graphics_cycle_delay_ms[i])
+                {
+                        s_last_graphics_cycle_ms[i] = current_time_ms;
+
+                        const auto cycle = (io::GraphicsCycle)i;
+
+                        states::cycle_graphics(cycle);
+
+                        is_any_cycled = true;
+                }
+        }
+
+        if (is_any_cycled)
+        {
+                states::draw();
+                io::update_screen();
+        }
+}
+
+static P calc_gui_dims_offset_for_window_resize_cmd(const char c)
+{
+        if (c == '+')
+        {
+                if (s_input.is_ctrl_held)
+                {
+                        return {0, 1};
+                }
+                else
+                {
+                        return {1, 0};
+                }
+        }
+        else if (c == '-')
+        {
+                if (s_input.is_ctrl_held)
+                {
+                        return {0, -1};
+                }
+                else
+                {
+                        return {-1, 0};
+                }
+        }
+        else
+        {
+                return {0, 0};
+        }
+}
+
+static bool is_printable_ascii_char(const char c)
+{
+        // '!' = 33
+        // '~' = 126
+
+        return (c >= 33) && (c < 126);
+}
+
+static void on_shift_released()
+{
+        // On Windows, when the user presses shift + a numpad key, a shift
+        // release event can be received before the numpad key event, which
+        // breaks shift + numpad combinations.  As a workaround, we check for
+        // "future" numpad events here.
+        SDL_Event sdl_event_tmp;
+
+        while (SDL_PollEvent(&sdl_event_tmp))
+        {
+                if (sdl_event_tmp.type != SDL_KEYDOWN)
+                {
+                        continue;
+                }
+
+                switch (sdl_event_tmp.key.keysym.sym)
+                {
+                case SDLK_KP_0:
+                case SDLK_KP_1:
+                case SDLK_KP_2:
+                case SDLK_KP_3:
+                case SDLK_KP_4:
+                case SDLK_KP_5:
+                case SDLK_KP_6:
+                case SDLK_KP_7:
+                case SDLK_KP_8:
+                case SDLK_KP_9:
+                {
+                        s_input.key = sdl_event_tmp.key.keysym.sym;
+                        s_is_done_reading_input = true;
+                }
+                break;
+
+                default:
+                {
+                }
+                break;
+                }  // Key down switch
+        }  // while polling event
+}
+
+static void handle_window_event()
+{
+        switch (s_sdl_event.window.event)
+        {
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+        {
+                TRACE << "Window resized" << std::endl;
+
+                if (!config::is_fullscreen())
+                {
+                        s_is_window_resized = true;
+                }
+        }
+        break;
+
+        case SDL_WINDOWEVENT_RESTORED:
+        {
+                TRACE << "Window restored" << std::endl;
+        }
+        // Fallthrough
+        case SDL_WINDOWEVENT_FOCUS_GAINED:
+        {
+                TRACE << "Window gained focus" << std::endl;
+
+                io::clear_events();
+
+                io::sleep(100);
+        }
+        // Fallthrough
+        case SDL_WINDOWEVENT_EXPOSED:
+        {
+                TRACE << "Window exposed" << std::endl;
+
+                states::draw();
+
+                io::update_screen();
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+}
+
+static void handle_quit_event()
+{
+        s_input.key = SDLK_ESCAPE;
+
+        s_is_done_reading_input = true;
+}
+
+static void handle_keydown_enter_event()
+{
+        if (s_input.is_alt_held)
+        {
+                TRACE << "Alt-Enter pressed" << std::endl;
+
+                config::set_fullscreen(!config::is_fullscreen());
+
+                io::on_fullscreen_toggled();
+
+                // SDL_SetWindowSize(sdl_window_,
+
+                // TODO: For some reason, the alt key gets "stuck" after
+                // toggling fullscreen, and must be cleared here
+                // manually. Don't know if this is an issue in the IA
+                // code, or an SDL bug.
+                SDL_SetModState(KMOD_NONE);
+
+                io::clear_events();
+
+                io::flush_input();
+        }
+        else
+        {
+                // Alt is not held
+                s_input.key = SDLK_RETURN;
+
+                s_is_done_reading_input = true;
+        }
+}
+
+static void handle_keydown_event()
+{
+        s_input.key = s_sdl_event.key.keysym.sym;
+
+        switch (s_input.key)
+        {
+        case SDLK_RETURN:
+        case SDLK_RETURN2:
+        case SDLK_KP_ENTER:
+        {
+                handle_keydown_enter_event();
+        }
+        break;
+
+        case SDLK_KP_6:
+        case SDLK_KP_1:
+        case SDLK_KP_2:
+        case SDLK_KP_3:
+        case SDLK_KP_4:
+        case SDLK_KP_5:
+        case SDLK_KP_7:
+        case SDLK_KP_8:
+        case SDLK_KP_9:
+        case SDLK_KP_0:
+        case SDLK_SPACE:
+        case SDLK_BACKSPACE:
+        case SDLK_TAB:
+        case SDLK_PAGEUP:
+        case SDLK_PAGEDOWN:
+        case SDLK_END:
+        case SDLK_HOME:
+        case SDLK_INSERT:
+        case SDLK_DELETE:
+        case SDLK_LEFT:
+        case SDLK_RIGHT:
+        case SDLK_UP:
+        case SDLK_DOWN:
+        case SDLK_ESCAPE:
+        case SDLK_F1:
+        case SDLK_F2:
+        case SDLK_F3:
+        case SDLK_F4:
+        case SDLK_F5:
+        case SDLK_F6:
+        case SDLK_F7:
+        case SDLK_F8:
+        case SDLK_F9:
+        case SDLK_F10:
+        {
+                s_is_done_reading_input = true;
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+}
+
+static void handle_keyup_event()
+{
+        const auto sdl_keysym = s_sdl_event.key.keysym.sym;
+
+        switch (sdl_keysym)
+        {
+        case SDLK_LSHIFT:
+        case SDLK_RSHIFT:
+        {
+                on_shift_released();
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+}
+
+static void handle_textinput_event()
+{
+        const auto c = s_sdl_event.text.text[0];
+
+        if (c == '+' || c == '-')
+        {
+                if (config::is_fullscreen() || io::is_window_maximized())
+                {
+                        return;
+                }
+
+                P gui_dims = io::sdl_window_gui_dims();
+
+                gui_dims += calc_gui_dims_offset_for_window_resize_cmd(c);
+
+                io::try_set_window_gui_cells(gui_dims);
+
+                s_is_window_resized = true;
+
+                return;
+        }
+
+        if (is_printable_ascii_char(c))
+        {
+                io::clear_events();
+
+                s_input.key = (unsigned char)c;
+
+                s_is_done_reading_input = true;
+        }
+        else
+        {
+                return;
+        }
+}
+
+static void run_handle_event_cycle()
+{
+        update_input_mod_key_status();
+
+        const bool did_poll_event = SDL_PollEvent(&s_sdl_event);
+
+        if (!did_poll_event)
+        {
+                return;
+        }
+
+        switch (s_sdl_event.type)
+        {
+        case SDL_WINDOWEVENT:
+        {
+                handle_window_event();
+        }
+        break;
+
+        case SDL_QUIT:
+        {
+                handle_quit_event();
+        }
+        break;
+
+        case SDL_KEYDOWN:
+        {
+                handle_keydown_event();
+        }
+        break;
+
+        case SDL_KEYUP:
+        {
+                handle_keyup_event();
+        }
+        break;
+
+        case SDL_TEXTINPUT:
+        {
+                handle_textinput_event();
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
+}
+
 // -----------------------------------------------------------------------------
 // io
 // -----------------------------------------------------------------------------
 namespace io
 {
+void init_input()
+{
+        for (size_t i = 0; i < (size_t)GraphicsCycle::END; ++i)
+        {
+                auto& delay = s_graphics_cycle_delay_ms[i];
+
+                const auto cycle = (GraphicsCycle)i;
+
+                switch (cycle)
+                {
+                case GraphicsCycle::fast:
+                        delay = 350;
+                        break;
+
+                case GraphicsCycle::slow:
+                        delay = 800;
+                        break;
+
+                case GraphicsCycle::very_slow:
+                        delay = 1800;
+                        break;
+
+                case GraphicsCycle::END:
+                        ASSERT(false);
+                        break;
+                }
+
+                s_last_graphics_cycle_ms[i] = 0;
+        }
+}
+
 void flush_input()
 {
         SDL_PumpEvents();
@@ -43,358 +490,37 @@ void clear_events()
 
 InputData get()
 {
-        InputData input;
-
         SDL_StartTextInput();
 
-        bool is_done = false;
+        s_input = {};
+        s_is_done_reading_input = false;
+        s_is_window_resized = false;
+        s_last_window_resize_ms = 0;
 
-        bool is_window_resized = false;
-
-        uint32_t ms_at_last_window_resize = 0;
-
-        while (!is_done)
+        while (!s_is_done_reading_input)
         {
                 io::sleep(1);
 
-                const auto mod = SDL_GetModState();
-
-                input.is_shift_held = mod & KMOD_SHIFT;
-                input.is_ctrl_held = mod & KMOD_CTRL;
-                input.is_alt_held = mod & KMOD_ALT;
-
-                const bool did_poll_event = SDL_PollEvent(&s_sdl_event);
-
-                // Handle window resizing
                 if (!config::is_fullscreen())
                 {
-                        if (is_window_resized)
+                        if (s_is_window_resized)
                         {
-                                on_window_resized();
-
-                                clear_screen();
-
-                                io::update_screen();
-
-                                clear_events();
-
-                                is_window_resized = false;
-
-                                ms_at_last_window_resize = SDL_GetTicks();
+                                on_window_resized_signalled();
 
                                 continue;
                         }
 
-                        if (ms_at_last_window_resize != 0)
-                        {
-                                const auto d =
-                                        SDL_GetTicks() -
-                                        ms_at_last_window_resize;
-
-                                if (d > 400)
-                                {
-                                        states::draw();
-
-                                        io::update_screen();
-
-                                        ms_at_last_window_resize = 0;
-                                }
-                        }
+                        window_resized_delayed_draw();
                 }
 
-                if (!did_poll_event)
-                {
-                        continue;
-                }
+                run_graphics_cycling();
 
-                switch (s_sdl_event.type)
-                {
-                case SDL_WINDOWEVENT:
-                {
-                        switch (s_sdl_event.window.event)
-                        {
-                        case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        {
-                                TRACE << "Window resized" << std::endl;
-
-                                if (!config::is_fullscreen())
-                                {
-                                        is_window_resized = true;
-                                }
-                        }
-                        break;
-
-                        case SDL_WINDOWEVENT_RESTORED:
-                        {
-                                TRACE << "Window restored" << std::endl;
-                        }
-                        // Fallthrough
-                        case SDL_WINDOWEVENT_FOCUS_GAINED:
-                        {
-                                TRACE << "Window gained focus" << std::endl;
-
-                                clear_events();
-
-                                io::sleep(100);
-                        }
-                        // Fallthrough
-                        case SDL_WINDOWEVENT_EXPOSED:
-                        {
-                                TRACE << "Window exposed" << std::endl;
-
-                                states::draw();
-
-                                io::update_screen();
-                        }
-                        break;
-
-                        default:
-                        {
-                        }
-                        break;
-                        }  // window event switch
-                }
-                break;  // case SDL_WINDOWEVENT
-
-                case SDL_QUIT:
-                {
-                        input.key = SDLK_ESCAPE;
-
-                        is_done = true;
-                }
-                break;
-
-                case SDL_KEYDOWN:
-                {
-                        input.key = s_sdl_event.key.keysym.sym;
-
-                        switch (input.key)
-                        {
-                        case SDLK_RETURN:
-                        case SDLK_RETURN2:
-                        case SDLK_KP_ENTER:
-                        {
-                                if (input.is_alt_held)
-                                {
-                                        TRACE << "Alt-Enter pressed"
-                                              << std::endl;
-
-                                        config::set_fullscreen(
-                                                !config::is_fullscreen());
-
-                                        on_fullscreen_toggled();
-
-                                        // SDL_SetWindowSize(sdl_window_,
-
-                                        // TODO: For some reason, the alt key
-                                        // gets "stuck" after toggling
-                                        // fullscreen, and must be cleared here
-                                        // manually. Don't know if this is an
-                                        // issue in the IA code, or an SDL bug.
-                                        SDL_SetModState(KMOD_NONE);
-
-                                        clear_events();
-
-                                        flush_input();
-
-                                        continue;
-                                }
-                                else
-                                {
-                                        // Alt is not held
-                                        input.key = SDLK_RETURN;
-
-                                        is_done = true;
-                                }
-                        }
-                        break;  // case SDLK_KP_ENTER
-
-                        case SDLK_KP_6:
-                        case SDLK_KP_1:
-                        case SDLK_KP_2:
-                        case SDLK_KP_3:
-                        case SDLK_KP_4:
-                        case SDLK_KP_5:
-                        case SDLK_KP_7:
-                        case SDLK_KP_8:
-                        case SDLK_KP_9:
-                        case SDLK_KP_0:
-                        case SDLK_SPACE:
-                        case SDLK_BACKSPACE:
-                        case SDLK_TAB:
-                        case SDLK_PAGEUP:
-                        case SDLK_PAGEDOWN:
-                        case SDLK_END:
-                        case SDLK_HOME:
-                        case SDLK_INSERT:
-                        case SDLK_DELETE:
-                        case SDLK_LEFT:
-                        case SDLK_RIGHT:
-                        case SDLK_UP:
-                        case SDLK_DOWN:
-                        case SDLK_ESCAPE:
-                        case SDLK_F1:
-                        case SDLK_F2:
-                        case SDLK_F3:
-                        case SDLK_F4:
-                        case SDLK_F5:
-                        case SDLK_F6:
-                        case SDLK_F7:
-                        case SDLK_F8:
-                        case SDLK_F9:
-                        case SDLK_F10:
-                        {
-                                is_done = true;
-                        }
-                        break;
-
-                        default:
-                        {
-                        }
-                        break;
-                        }  // Key down switch
-                }
-                break;  // case SDL_KEYDOWN
-
-                case SDL_KEYUP:
-                {
-                        const auto sdl_keysym = s_sdl_event.key.keysym.sym;
-
-                        switch (sdl_keysym)
-                        {
-                        case SDLK_LSHIFT:
-                        case SDLK_RSHIFT:
-                        {
-                                // Shift released
-
-                                // On Windows, when the user presses
-                                // shift + a numpad key, a shift release event
-                                // can be received before the numpad key event,
-                                // which breaks shift + numpad combinations.
-                                // As a workaround, we check for "future"
-                                // numpad events here.
-                                SDL_Event sdl_event_tmp;
-
-                                while (SDL_PollEvent(&sdl_event_tmp))
-                                {
-                                        if (sdl_event_tmp.type != SDL_KEYDOWN)
-                                        {
-                                                continue;
-                                        }
-
-                                        switch (sdl_event_tmp.key.keysym.sym)
-                                        {
-                                        case SDLK_KP_0:
-                                        case SDLK_KP_1:
-                                        case SDLK_KP_2:
-                                        case SDLK_KP_3:
-                                        case SDLK_KP_4:
-                                        case SDLK_KP_5:
-                                        case SDLK_KP_6:
-                                        case SDLK_KP_7:
-                                        case SDLK_KP_8:
-                                        case SDLK_KP_9:
-                                        {
-                                                input.key =
-                                                        sdl_event_tmp.key.keysym
-                                                                .sym;
-
-                                                is_done = true;
-                                        }
-                                        break;
-
-                                        default:
-                                        {
-                                        }
-                                        break;
-                                        }  // Key down switch
-                                }  // while polling event
-                        }
-                        break;
-
-                        default:
-                        {
-                        }
-                        break;
-                        }  // Key released switch
-                }
-                break;  // case SDL_KEYUP
-
-                case SDL_TEXTINPUT:
-                {
-                        const auto c =
-                                (unsigned char)s_sdl_event.text.text[0];
-
-                        if (c == '+' || c == '-')
-                        {
-                                if (config::is_fullscreen() ||
-                                    is_window_maximized())
-                                {
-                                        continue;
-                                }
-
-                                P gui_dims = sdl_window_gui_dims();
-
-                                if (c == '+')
-                                {
-                                        if (input.is_ctrl_held)
-                                        {
-                                                ++gui_dims.y;
-                                        }
-                                        else
-                                        {
-                                                ++gui_dims.x;
-                                        }
-                                }
-                                else if (c == '-')
-                                {
-                                        if (input.is_ctrl_held)
-                                        {
-                                                --gui_dims.y;
-                                        }
-                                        else
-                                        {
-                                                --gui_dims.x;
-                                        }
-                                }
-
-                                try_set_window_gui_cells(gui_dims);
-
-                                is_window_resized = true;
-
-                                continue;
-                        }
-
-                        if (c >= 33 && c < 126)
-                        {
-                                // ASCII char entered
-                                // (Decimal unicode '!' = 33, '~' = 126)
-
-                                clear_events();
-
-                                input.key = c;
-
-                                is_done = true;
-                        }
-                        else
-                        {
-                                continue;
-                        }
-                }
-                break;  // case SDL_TEXT_INPUT
-
-                default:
-                {
-                }
-                break;
-
-                }  // event switch
-
-        }  // while
+                run_handle_event_cycle();
+        }
 
         SDL_StopTextInput();
 
-        return input;
+        return s_input;
 }
 
 }  // namespace io

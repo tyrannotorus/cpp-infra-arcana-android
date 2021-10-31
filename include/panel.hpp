@@ -20,8 +20,8 @@ enum class Panel
         log_border,
         create_char_menu,
         create_char_descr,
-        item_menu,
-        item_descr,
+        inventory_menu,
+        inventory_descr,
         info_screen_content,
         END
 };

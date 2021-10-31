@@ -6,27 +6,27 @@
 
 #include <stddef.h>
 
-#include "catch.hpp"
+#include "ability_values.hpp"
+#include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "attack_data.hpp"
+#include "catch.hpp"
 #include "dmg_range.hpp"
 #include "global.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"
-#include "property_factory.hpp"
-#include "terrain.hpp"
-#include "test_utils.hpp"
-#include "ability_values.hpp"
-#include "actor.hpp"
-#include "item.hpp"
-#include "item_data.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "terrain.hpp"
+#include "test_utils.hpp"
 
 TEST_CASE("Melee attack data")
 {
@@ -65,10 +65,10 @@ TEST_CASE("Melee attack data")
 
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::axe));
 
-        wpn.set_melee_plus(2);
+        wpn.incr_base_melee_damage(2);
 
-        int expected_hit_chance_vs_mon_1;
-        int expected_hit_chance_vs_mon_2;
+        int expected_hit_chance_vs_mon_1 = 0;
+        int expected_hit_chance_vs_mon_2 = 0;
 
         {
                 const auto& player_data =
@@ -104,7 +104,7 @@ TEST_CASE("Melee attack data")
         auto expected_dmg_range = wpn.data().melee.dmg;
 
         // +1 from melee trait and +2 from weapon
-        expected_dmg_range.set_plus(3);
+        expected_dmg_range.incr_dmg(3);
 
         const MeleeAttData att_data_1(map::g_player, mon_1, wpn);
         const MeleeAttData att_data_2(map::g_player, mon_2, wpn);
@@ -147,12 +147,11 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
 
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::axe));
 
-        wpn.set_melee_base_dmg({20, 60});
-        wpn.set_melee_plus(2);
+        wpn.set_base_melee_dmg({20, 60});
+        wpn.incr_base_melee_damage(2);
 
-        // Halved damage range due to Weakened property
-        // Plus before weakening is +1 from melee trait and +2 from weapon
-        const auto expected_dmg_range = DmgRange(10, 30, 1);
+        // Halved damage range due to Weakened property.
+        const auto expected_dmg_range = DmgRange(11, 31);
 
         const MeleeAttData att_data(map::g_player, mon, wpn);
 
@@ -188,12 +187,11 @@ TEST_CASE("Melee attack data has reduced damage against pierce resistance")
         // Use pointy weapon
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::dagger));
 
-        wpn.set_melee_base_dmg({20, 60});
-        wpn.set_melee_plus(8);
+        wpn.set_base_melee_dmg({20, 60});
+        wpn.incr_base_melee_damage(8);
 
-        // Halved damage range due to Weakened property
-        // Plus before weakening is +1 from melee trait and +8 from weapon
-        const auto expected_dmg_range = DmgRange(5, 15, 2);
+        // 25% damage range due to reduced pierce damage.
+        const auto expected_dmg_range = DmgRange(7, 17);
 
         const MeleeAttData att_data(map::g_player, mon, wpn);
 

@@ -32,6 +32,11 @@ struct Range
                 max = max_val;
         }
 
+        bool operator==(const Range& other) const
+        {
+                return (min == other.min) && (max == other.max);
+        }
+
         Range& operator/=(const int v)
         {
                 min /= v;

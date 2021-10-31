@@ -48,7 +48,7 @@ void try_pick()
         {
                 audio::play(audio::SfxId::pickup);
 
-                const std::string item_name = item->name(ItemRefType::plural);
+                const std::string item_name = item->name(ItemNameType::plural);
 
                 msg_log::add("I pick up " + item_name + ".");
 
@@ -131,7 +131,9 @@ void try_unload_or_pick()
                         audio::play(audio::SfxId::pickup);
 
                         const std::string name_a =
-                                item->name(ItemRefType::a, ItemRefInf::yes);
+                                item->name(
+                                        ItemNameType::a,
+                                        ItemNameInfo::yes);
 
                         msg_log::add("I unload " + name_a + ".");
 

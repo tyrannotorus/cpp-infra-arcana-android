@@ -56,7 +56,7 @@ public:
 
         ConsumeItem activate(actor::Actor* actor) override;
 
-        std::string name_inf_str() const override;
+        std::string name_info_str() const override;
 
         void save_hook() const override;
         void load_hook() override;
@@ -189,7 +189,7 @@ public:
 
         ~Lantern() override = default;
 
-        std::string name_inf_str() const override;
+        std::string name_info_str() const override;
 
         ConsumeItem activate(actor::Actor* actor) override;
 

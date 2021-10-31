@@ -6,7 +6,6 @@
 
 #include "inventory_handling.hpp"
 
-#include <algorithm>
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -45,6 +44,10 @@
 // Private
 // -----------------------------------------------------------------------------
 static const int s_nr_turns_to_handle_armor = 7;
+
+// Number of description lines to scroll past the item description (up or down),
+// when the item description must be scrolled due to lack of window space.
+static const int nr_descr_lines_scroll_past = 6;
 
 // Index can mean Slot index or Backpack Index (both start from zero)
 static bool run_drop_query(
@@ -146,7 +149,7 @@ static void cap_str_to_menu_x1(
         std::string& str,
         const int str_x0)
 {
-        const int name_max_len = panels::x1(Panel::item_menu) - str_x0;
+        const int name_max_len = panels::x1(Panel::inventory_menu) - str_x0;
 
         if ((int)str.length() > name_max_len)
         {
@@ -157,13 +160,61 @@ static void cap_str_to_menu_x1(
 // -----------------------------------------------------------------------------
 // Abstract inventory screen state
 // -----------------------------------------------------------------------------
-InvState::InvState()
-
-        = default;
-
 StateId InvState::id() const
 {
         return StateId::inventory;
+}
+
+void InvState::cycle_graphics(const io::GraphicsCycle cycle)
+{
+        if (cycle != io::GraphicsCycle::very_slow)
+        {
+                return;
+        }
+
+        const size_t nr_lines_can_be_displayed =
+                panels::h(Panel::inventory_descr);
+
+        const size_t nr_lines = make_detailed_descr_lines().size();
+
+        if ((nr_lines > nr_lines_can_be_displayed) && (nr_lines != 0))
+        {
+                const size_t last_idx_shown =
+                        std::max(0, m_descr_idx) +
+                        nr_lines_can_be_displayed - 1;
+
+                const size_t last_line_idx = nr_lines - 1;
+
+                const size_t reset_idx =
+                        (last_line_idx + nr_descr_lines_scroll_past);
+
+                if (last_idx_shown >= reset_idx)
+                {
+                        m_descr_idx = -nr_descr_lines_scroll_past;
+                }
+                else
+                {
+                        m_descr_idx += 1;
+                }
+        }
+}
+
+void InvState::on_window_resized()
+{
+        m_descr_idx = -nr_descr_lines_scroll_past;
+}
+
+void InvState::set_viewed_item(
+        const item::Item* item,
+        const ItemNameAttackInfo attack_info)
+{
+        if (item != m_viewed_item)
+        {
+                m_descr_idx = -nr_descr_lines_scroll_past;
+        }
+
+        m_viewed_item = item;
+        m_viewed_item_attack_info = attack_info;
 }
 
 void InvState::draw_slot(
@@ -171,7 +222,7 @@ void InvState::draw_slot(
         const int y,
         const char key,
         const bool is_marked,
-        const ItemRefAttInf att_inf) const
+        const ItemNameAttackInfo attack_info)
 {
         // Draw key
         auto color =
@@ -187,16 +238,16 @@ void InvState::draw_slot(
 
         io::draw_text(
                 key_str,
-                Panel::item_menu,
+                Panel::inventory_menu,
                 p,
                 color);
 
         p.x += (int)key_str.length() + 1;
 
         // Draw slot label
-        const InvSlot& slot = map::g_player->m_inv.m_slots[(size_t)id];
+        const auto& slot = map::g_player->m_inv.m_slots[(size_t)id];
 
-        const std::string slot_name = slot.name;
+        const auto slot_name = slot.name;
 
         color =
                 is_marked
@@ -205,11 +256,11 @@ void InvState::draw_slot(
 
         io::draw_text(
                 slot_name,
-                Panel::item_menu,
+                Panel::inventory_menu,
                 p,
                 color);
 
-        p.x += 9;  // Offset to leave room for slot label
+        p.x += 7;  // Offset to leave room for slot label
 
         // Draw item
         const auto* const item = slot.item;
@@ -223,9 +274,9 @@ void InvState::draw_slot(
 
                 std::string item_name =
                         item->name(
-                                ItemRefType::plural,
-                                ItemRefInf::yes,
-                                att_inf);
+                                ItemNameType::plural,
+                                ItemNameInfo::yes,
+                                attack_info);
 
                 ASSERT(!item_name.empty());
 
@@ -240,7 +291,7 @@ void InvState::draw_slot(
 
                 io::draw_text(
                         item_name,
-                        Panel::item_menu,
+                        Panel::inventory_menu,
                         p,
                         color_item);
 
@@ -258,14 +309,15 @@ void InvState::draw_slot(
 
                 io::draw_text(
                         "<empty>",
-                        Panel::item_menu,
+                        Panel::inventory_menu,
                         p,
                         color);
         }
 
         if (is_marked)
         {
-                draw_detailed_item_descr(item, att_inf);
+                set_viewed_item(item, attack_info);
+                draw_item_descr();
         }
 }
 
@@ -274,7 +326,7 @@ void InvState::draw_backpack_item(
         const int y,
         const char key,
         const bool is_marked,
-        const ItemRefAttInf att_info) const
+        const ItemNameAttackInfo attack_info)
 {
         // Draw key
         const auto color =
@@ -290,7 +342,7 @@ void InvState::draw_backpack_item(
 
         io::draw_text(
                 key_str,
-                Panel::item_menu,
+                Panel::inventory_menu,
                 p,
                 color);
 
@@ -303,10 +355,11 @@ void InvState::draw_backpack_item(
 
         // p.x += 2;
 
-        std::string item_name = item->name(
-                ItemRefType::plural,
-                ItemRefInf::yes,
-                att_info);
+        std::string item_name =
+                item->name(
+                        ItemNameType::plural,
+                        ItemNameInfo::yes,
+                        attack_info);
 
         item_name = text_format::first_to_upper(item_name);
 
@@ -319,7 +372,7 @@ void InvState::draw_backpack_item(
 
         io::draw_text(
                 item_name,
-                Panel::item_menu,
+                Panel::inventory_menu,
                 p,
                 color_item);
 
@@ -332,9 +385,8 @@ void InvState::draw_backpack_item(
 
         if (is_marked)
         {
-                draw_detailed_item_descr(
-                        item,
-                        att_info);
+                set_viewed_item(item, attack_info);
+                draw_item_descr();
         }
 }
 
@@ -362,7 +414,10 @@ void InvState::draw_weight_pct_and_dots(
         if (item_weight_pct > 0 && item_weight_pct < 100)
         {
                 weight_str = std::to_string(item_weight_pct) + "%";
-                weight_x = panels::w(Panel::item_menu) - (int)weight_str.size();
+
+                weight_x =
+                        panels::w(Panel::inventory_menu) -
+                        (int)weight_str.size();
 
                 const P weight_pos(weight_x, item_pos.y);
 
@@ -373,7 +428,7 @@ void InvState::draw_weight_pct_and_dots(
 
                 io::draw_text(
                         weight_str,
-                        Panel::item_menu,
+                        Panel::inventory_menu,
                         weight_pos,
                         weight_color);
         }
@@ -383,7 +438,7 @@ void InvState::draw_weight_pct_and_dots(
 
                 // No weight percent is displayed
                 weight_str = "";
-                weight_x = panels::w(Panel::item_menu);
+                weight_x = panels::w(Panel::inventory_menu);
         }
 
         int dots_x = item_pos.x + (int)item_name_len;
@@ -401,13 +456,13 @@ void InvState::draw_weight_pct_and_dots(
                 dots_color =
                         is_marked
                         ? colors::white()
-                        : item_name_color.fraction(2.0);
+                        : item_name_color.shaded(85);
         }
         else
         {
                 // Item name does not fit
                 dots_str = " (...) ";
-                dots_w = dots_str.size();
+                dots_w = (int)dots_str.size();
                 dots_x = weight_x - dots_w;
 
                 dots_color = colors::gray();
@@ -415,161 +470,226 @@ void InvState::draw_weight_pct_and_dots(
 
         io::draw_text(
                 dots_str,
-                Panel::item_menu,
+                Panel::inventory_menu,
                 P(dots_x, item_pos.y),
                 dots_color);
 }
 
-void InvState::draw_detailed_item_descr(
-        const item::Item* const item,
-        const ItemRefAttInf att_inf) const
+std::vector<std::string> InvState::make_detailed_descr_lines() const
 {
-        std::vector<ColoredString> lines;
-
-        if (item)
+        if (!m_viewed_item)
         {
-                // -------------------------------------------------------------
-                // Base description
-                // -------------------------------------------------------------
-                const auto base_descr = item->descr();
-
-                if (!base_descr.empty())
-                {
-                        for (const std::string& paragraph : base_descr)
-                        {
-                                lines.emplace_back(
-                                        paragraph,
-                                        colors::light_white());
-                        }
-                }
-
-                const bool is_plural =
-                        item->m_nr_items > 1 &&
-                        item->data().is_stackable;
-
-                const std::string ref_str =
-                        is_plural
-                        ? "They are "
-                        : "It is ";
-
-                const auto& d = item->data();
-
-                // -------------------------------------------------------------
-                // Damage dice
-                // -------------------------------------------------------------
-                if (d.allow_display_dmg)
-                {
-                        const std::string dmg_str =
-                                item->dmg_str(
-                                        att_inf,
-                                        ItemRefDmg::range);
-
-                        const std::string dmg_str_avg =
-                                item->dmg_str(
-                                        att_inf,
-                                        ItemRefDmg::average);
-
-                        if (!dmg_str.empty() && !dmg_str_avg.empty())
-                        {
-                                lines.emplace_back(
-                                        "Damage: " +
-                                                dmg_str +
-                                                " (average " +
-                                                dmg_str_avg +
-                                                ")",
-                                        colors::light_white());
-                        }
-
-                        const std::string hit_mod_str =
-                                item->hit_mod_str(att_inf);
-
-                        if (!hit_mod_str.empty())
-                        {
-                                lines.emplace_back(
-                                        "Hit chance modifier: " +
-                                                hit_mod_str,
-                                        colors::light_white());
-                        }
-                }
-
-                // -------------------------------------------------------------
-                // Can be used for breaking doors or destroying corpses?
-                // -------------------------------------------------------------
-                const bool can_att_terrain = d.melee.att_terrain;
-                const bool can_att_corpse = d.melee.att_corpse;
-
-                std::string att_obj_str;
-
-                if (can_att_terrain || can_att_corpse)
-                {
-                        att_obj_str = "Can be used for ";
-                }
-
-                if (can_att_terrain)
-                {
-                        att_obj_str += "breaching doors";
-                }
-
-                if (can_att_corpse)
-                {
-                        if (can_att_terrain)
-                        {
-                                att_obj_str += " and ";
-                        }
-
-                        att_obj_str += "destroying corpses";
-                }
-
-                if (can_att_terrain || can_att_corpse)
-                {
-                        att_obj_str +=
-                                " more effectively (while the weapon is "
-                                "wielded, its attack damage is automatically "
-                                "used instead of the kick damage).";
-
-                        lines.emplace_back(
-                                att_obj_str,
-                                colors::light_white());
-                }
-
-                // -------------------------------------------------------------
-                // Weight
-                // -------------------------------------------------------------
-                std::string weight_str =
-                        ref_str +
-                        item->weight_str() +
-                        " to carry";
-
-                const int weight_carried_tot =
-                        map::g_player->m_inv.total_item_weight();
-
-                int weight_pct = 0;
-
-                if (weight_carried_tot > 0)
-                {
-                        weight_pct =
-                                (item->weight() * 100) /
-                                weight_carried_tot;
-                }
-
-                ASSERT(weight_pct >= 0 && weight_pct <= 100);
-
-                if ((weight_pct > 0) && (weight_pct < 100))
-                {
-                        weight_str +=
-                                " (" +
-                                std::to_string(weight_pct) +
-                                "% of total carried weight)";
-                }
-
-                weight_str += ".";
-
-                lines.emplace_back(weight_str, colors::green());
+                return {};
         }
 
-        // We draw the description box regardless of whether the lines are
-        // empty or not, just to clear this area on the screen.
-        io::draw_descr_box(lines);
+        std::vector<std::string> lines;
+
+        // -------------------------------------------------------------
+        // Base description
+        // -------------------------------------------------------------
+        const auto base_descr = m_viewed_item->descr();
+
+        if (!base_descr.empty())
+        {
+                for (const std::string& paragraph : base_descr)
+                {
+                        lines.emplace_back(paragraph);
+                }
+        }
+
+        const bool is_plural =
+                m_viewed_item->m_nr_items > 1 &&
+                m_viewed_item->data().is_stackable;
+
+        const std::string ref_str =
+                is_plural
+                ? "They are "
+                : "It is ";
+
+        const auto& d = m_viewed_item->data();
+
+        // -------------------------------------------------------------
+        // Damage and hit chance
+        // -------------------------------------------------------------
+        // TODO: Show damage and hit chance?
+        // if (d.allow_display_dmg)
+        // {
+        //         const auto dmg_str = m_viewed_item->dmg_str(att_inf);
+
+        //         if (!dmg_str.empty())
+        //         {
+        //                 lines.emplace_back(
+        //                         "Damage: " +
+        //                                 dmg_str +
+        //                                 " (average " +
+        //                                 dmg_str +
+        //                                 ")",
+        //                         colors::text());
+        //         }
+
+        //         const std::string hit_mod_str =
+        //                 m_viewed_item->hit_mod_str(att_inf);
+
+        //         if (!hit_mod_str.empty())
+        //         {
+        //                 lines.emplace_back(
+        //                         "Hit chance modifier: " +
+        //                                 hit_mod_str,
+        //                         colors::text());
+        //         }
+        // }
+
+        // -------------------------------------------------------------
+        // Can be used for breaking doors or destroying corpses?
+        // -------------------------------------------------------------
+        const bool can_att_terrain = d.melee.attack_terrain;
+        const bool can_att_corpse = d.melee.attack_corpse;
+
+        std::string att_obj_str;
+
+        if (can_att_terrain || can_att_corpse)
+        {
+                att_obj_str = "This weapon can be used for ";
+        }
+
+        if (can_att_terrain)
+        {
+                att_obj_str += "breaching doors";
+        }
+
+        if (can_att_corpse)
+        {
+                if (can_att_terrain)
+                {
+                        att_obj_str += " and ";
+                }
+
+                att_obj_str += "destroying corpses";
+        }
+
+        if (can_att_terrain || can_att_corpse)
+        {
+                att_obj_str +=
+                        " more effectively (while the weapon is "
+                        "wielded, its attack damage is automatically "
+                        "used instead of the kick damage).";
+
+                lines.emplace_back(att_obj_str);
+        }
+
+        // -------------------------------------------------------------
+        // Weight
+        // -------------------------------------------------------------
+        // TODO: This can be removed if weight is converted to weight units
+        // instead of percentage of carried weight.
+        std::string weight_str =
+                ref_str +
+                m_viewed_item->weight_str() +
+                " to carry";
+
+        const int weight_carried_tot =
+                map::g_player->m_inv.total_item_weight();
+
+        int weight_pct = 0;
+
+        if (weight_carried_tot > 0)
+        {
+                weight_pct =
+                        (m_viewed_item->weight() * 100) /
+                        weight_carried_tot;
+        }
+
+        ASSERT(weight_pct >= 0 && weight_pct <= 100);
+
+        if ((weight_pct > 0) && (weight_pct < 100))
+        {
+                weight_str +=
+                        " (" +
+                        std::to_string(weight_pct) +
+                        "% of carried weight)";
+        }
+
+        weight_str += ".";
+
+        lines.emplace_back(weight_str);
+
+        std::vector<std::string> formatted_lines;
+
+        const size_t w = panels::w(Panel::inventory_descr);
+
+        for (const auto& line : lines)
+        {
+                const auto new_formatted_lines = text_format::split(line, w);
+
+                if (!formatted_lines.empty())
+                {
+                        formatted_lines.emplace_back("");
+                }
+
+                formatted_lines.insert(
+                        std::end(formatted_lines),
+                        std::begin(new_formatted_lines),
+                        std::end(new_formatted_lines));
+        }
+
+        return formatted_lines;
+}
+
+void InvState::draw_item_descr() const
+{
+        // NOTE: We clear this area of the screen regardless of whether there is
+        // a description to draw or not.
+        io::cover_panel(Panel::inventory_descr);
+
+        if (!m_viewed_item)
+        {
+                return;
+        }
+
+        const auto lines = make_detailed_descr_lines();
+
+        if (m_descr_idx >= (int)lines.size())
+        {
+                ASSERT(false);
+                return;
+        }
+
+        P pos(0, 0);
+
+        const auto nr_lines = (int)lines.size();
+        const auto max_nr_lines_shown = panels::h(Panel::inventory_descr);
+        const auto y1 = max_nr_lines_shown - 1;
+        const auto descr_idx =
+                std::clamp(m_descr_idx, 0, nr_lines - max_nr_lines_shown);
+        const auto last_idx_can_show = descr_idx + max_nr_lines_shown - 1;
+        const auto y_to_fade_from = (y1 * 3) / 4;
+        const auto last_idx = (size_t)std::min(last_idx_can_show, nr_lines - 1);
+        const bool should_fade = last_idx_can_show < (nr_lines - 1);
+
+        for (size_t i = descr_idx; i <= last_idx; ++i)
+        {
+                const auto& line = lines[i];
+
+                auto color = colors::text();
+
+                if (should_fade && (pos.y >= y_to_fade_from))
+                {
+                        const int y_rel = pos.y - y_to_fade_from;
+                        const int y1_rel = y1 - y_to_fade_from;
+
+                        const int pct_shaded = (y_rel * 99) / y1_rel;
+
+                        color = color.shaded(pct_shaded);
+                }
+
+                io::draw_text(
+                        line,
+                        Panel::inventory_descr,
+                        pos,
+                        color);
+
+                ++pos.y;
+        }
 }
 
 void InvState::activate(const size_t backpack_idx)
@@ -597,7 +717,7 @@ void BrowseInv::on_start()
 
         m_browser.reset(
                 list_size,
-                panels::h(Panel::item_menu));
+                panels::h(Panel::inventory_menu));
 
         m_browser.disable_selection_audio();
 
@@ -623,7 +743,7 @@ void BrowseInv::draw()
         io::draw_text_center(
                 " Browsing inventory " + common_text::g_screen_exit_hint + " ",
                 Panel::screen,
-                P(panels::center_x(Panel::screen), 0),
+                {panels::center_x(Panel::screen), 0},
                 colors::title());
 
         const Range idx_range_shown = m_browser.range_shown();
@@ -645,7 +765,7 @@ void BrowseInv::draw()
                                 y,
                                 key,
                                 is_marked,
-                                ItemRefAttInf::wpn_main_att_mode);
+                                ItemNameAttackInfo::main_attack_mode);
                 }
                 else
                 {
@@ -657,7 +777,7 @@ void BrowseInv::draw()
                                 y,
                                 key,
                                 is_marked,
-                                ItemRefAttInf::wpn_main_att_mode);
+                                ItemNameAttackInfo::main_attack_mode);
                 }
 
                 ++y;
@@ -668,8 +788,8 @@ void BrowseInv::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_up_hint,
-                        Panel::item_menu,
-                        P(0, -1),
+                        Panel::inventory_menu,
+                        {0, -1},
                         colors::light_white());
         }
 
@@ -677,8 +797,8 @@ void BrowseInv::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_down_hint,
-                        Panel::item_menu,
-                        P(0, panels::h(Panel::item_menu)),
+                        Panel::inventory_menu,
+                        {0, panels::h(Panel::inventory_menu)},
                         colors::light_white());
         }
 }
@@ -922,7 +1042,7 @@ void Apply::on_start()
 
         m_browser.reset(
                 (int)m_filtered_backpack_indexes.size(),
-                panels::h(Panel::item_menu));
+                panels::h(Panel::inventory_menu));
 
         m_browser.disable_selection_audio();
 
@@ -947,7 +1067,7 @@ void Apply::draw()
         io::draw_text_center(
                 " Apply which item? " + common_text::g_screen_exit_hint + " ",
                 Panel::screen,
-                P(panels::center_x(Panel::screen), 0),
+                {panels::center_x(Panel::screen), 0},
                 colors::title());
 
         const Range idx_range_shown = m_browser.range_shown();
@@ -967,7 +1087,7 @@ void Apply::draw()
                         y,
                         key,
                         is_marked,
-                        ItemRefAttInf::wpn_main_att_mode);
+                        ItemNameAttackInfo::main_attack_mode);
 
                 ++y;
         }
@@ -977,8 +1097,8 @@ void Apply::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_up_hint,
-                        Panel::item_menu,
-                        P(0, -1),
+                        Panel::inventory_menu,
+                        {0, -1},
                         colors::light_white());
         }
 
@@ -986,8 +1106,8 @@ void Apply::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_down_hint,
-                        Panel::item_menu,
-                        P(0, panels::h(Panel::item_menu)),
+                        Panel::inventory_menu,
+                        {0, panels::h(Panel::inventory_menu)},
                         colors::light_white());
         }
 }
@@ -1045,7 +1165,7 @@ void Drop::on_start()
 
         m_browser.reset(
                 list_size,
-                panels::h(Panel::item_menu));
+                panels::h(Panel::inventory_menu));
 
         m_browser.disable_selection_audio();
 
@@ -1065,7 +1185,7 @@ void Drop::draw()
         io::draw_text_center(
                 " Drop which item? " + common_text::g_screen_exit_hint + " ",
                 Panel::screen,
-                P(panels::center_x(Panel::screen), 0),
+                {panels::center_x(Panel::screen), 0},
                 colors::title());
 
         const int browser_y = m_browser.y();
@@ -1089,7 +1209,7 @@ void Drop::draw()
                                 y,
                                 key,
                                 is_marked,
-                                ItemRefAttInf::wpn_main_att_mode);
+                                ItemNameAttackInfo::main_attack_mode);
                 }
                 else
                 {
@@ -1102,7 +1222,7 @@ void Drop::draw()
                                 y,
                                 key,
                                 is_marked,
-                                ItemRefAttInf::wpn_main_att_mode);
+                                ItemNameAttackInfo::main_attack_mode);
                 }
 
                 ++y;
@@ -1113,8 +1233,8 @@ void Drop::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_up_hint,
-                        Panel::item_menu,
-                        P(0, -1),
+                        Panel::inventory_menu,
+                        {0, -1},
                         colors::light_white());
         }
 
@@ -1122,8 +1242,8 @@ void Drop::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_down_hint,
-                        Panel::item_menu,
-                        P(0, panels::h(Panel::item_menu)),
+                        Panel::inventory_menu,
+                        {0, panels::h(Panel::inventory_menu)},
                         colors::light_white());
         }
 }
@@ -1176,9 +1296,9 @@ void Drop::update()
                 {
                         const auto name =
                                 item->name(
-                                        ItemRefType::plain,
-                                        ItemRefInf::none,
-                                        ItemRefAttInf::none);
+                                        ItemNameType::plain,
+                                        ItemNameInfo::none,
+                                        ItemNameAttackInfo::none);
 
                         msg_log::add("I refuse to drop the " + name + "!");
 
@@ -1283,8 +1403,8 @@ void Equip::on_start()
         }
 
         m_browser.reset(
-                m_filtered_backpack_indexes.size(),
-                panels::h(Panel::item_menu));
+                (int)m_filtered_backpack_indexes.size(),
+                panels::h(Panel::inventory_menu));
 
         m_browser.disable_selection_audio();
 
@@ -1338,7 +1458,7 @@ void Equip::draw()
                 io::draw_text(
                         " " + heading + " " + common_text::g_any_key_hint + " ",
                         Panel::screen,
-                        P(0, 0),
+                        {0, 0},
                         colors::light_white());
 
                 return;
@@ -1349,7 +1469,7 @@ void Equip::draw()
         io::draw_text_center(
                 " " + heading + " " + common_text::g_screen_exit_hint + " ",
                 Panel::screen,
-                P(panels::center_x(Panel::screen), 0),
+                {panels::center_x(Panel::screen), 0},
                 colors::title());
 
         const int browser_y = m_browser.y();
@@ -1372,16 +1492,16 @@ void Equip::draw()
 
                 const auto& d = item->data();
 
-                ItemRefAttInf att_inf = ItemRefAttInf::none;
+                auto att_inf = ItemNameAttackInfo::none;
 
                 if ((m_slot_to_equip.id == SlotId::wpn) ||
                     (m_slot_to_equip.id == SlotId::wpn_alt))
                 {
                         // Thrown weapons are forced to show melee info instead
                         att_inf =
-                                (d.main_att_mode == AttMode::thrown)
-                                ? ItemRefAttInf::melee
-                                : ItemRefAttInf::wpn_main_att_mode;
+                                (d.main_attack_mode == AttackMode::thrown)
+                                ? ItemNameAttackInfo::melee
+                                : ItemNameAttackInfo::main_attack_mode;
                 }
 
                 draw_backpack_item(
@@ -1399,8 +1519,8 @@ void Equip::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_up_hint,
-                        Panel::item_menu,
-                        P(0, -1),
+                        Panel::inventory_menu,
+                        {0, -1},
                         colors::light_white());
         }
 
@@ -1408,8 +1528,8 @@ void Equip::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_down_hint,
-                        Panel::item_menu,
-                        P(0, panels::h(Panel::item_menu)),
+                        Panel::inventory_menu,
+                        {0, panels::h(Panel::inventory_menu)},
                         colors::light_white());
         }
 }
@@ -1551,8 +1671,8 @@ void SelectThrow::on_start()
         }
 
         m_browser.reset(
-                list_size,
-                panels::h(Panel::item_menu));
+                (int)list_size,
+                panels::h(Panel::inventory_menu));
 
         m_browser.disable_selection_audio();
 
@@ -1586,7 +1706,7 @@ void SelectThrow::draw()
                         common_text::g_screen_exit_hint) +
                         " ",
                 Panel::screen,
-                P(panels::center_x(Panel::screen), 0),
+                {panels::center_x(Panel::screen), 0},
                 colors::title());
 
         const int browser_y = m_browser.y();
@@ -1612,7 +1732,7 @@ void SelectThrow::draw()
                                 y,
                                 key,
                                 is_marked,
-                                ItemRefAttInf::thrown);
+                                ItemNameAttackInfo::thrown);
                 }
                 else
                 {
@@ -1624,7 +1744,7 @@ void SelectThrow::draw()
                                 y,
                                 key,
                                 is_marked,
-                                ItemRefAttInf::thrown);
+                                ItemNameAttackInfo::thrown);
                 }
 
                 ++y;
@@ -1635,8 +1755,8 @@ void SelectThrow::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_up_hint,
-                        Panel::item_menu,
-                        P(0, -1),
+                        Panel::inventory_menu,
+                        {0, -1},
                         colors::light_white());
         }
 
@@ -1644,8 +1764,8 @@ void SelectThrow::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_down_hint,
-                        Panel::item_menu,
-                        P(0, panels::h(Panel::item_menu)),
+                        Panel::inventory_menu,
+                        {0, panels::h(Panel::inventory_menu)},
                         colors::light_white());
         }
 }
@@ -1683,9 +1803,9 @@ void SelectThrow::update()
 
                 const auto name =
                         item->name(
-                                ItemRefType::plain,
-                                ItemRefInf::none,
-                                ItemRefAttInf::none);
+                                ItemNameType::plain,
+                                ItemNameInfo::none,
+                                ItemNameAttackInfo::none);
 
                 if (item->current_curse().is_active())
                 {
@@ -1829,8 +1949,8 @@ void SelectIdentify::on_start()
         }
 
         m_browser.reset(
-                list_size,
-                panels::h(Panel::item_menu));
+                (int)list_size,
+                panels::h(Panel::inventory_menu));
 
         m_browser.disable_selection_audio();
 
@@ -1848,7 +1968,7 @@ void SelectIdentify::draw()
         io::draw_text_center(
                 " Identify which item? ",
                 Panel::screen,
-                P(panels::center_x(Panel::screen), 0),
+                {panels::center_x(Panel::screen), 0},
                 colors::title());
 
         const Range idx_range_shown = m_browser.range_shown();
@@ -1872,7 +1992,7 @@ void SelectIdentify::draw()
                                 y,
                                 key,
                                 is_marked,
-                                ItemRefAttInf::wpn_main_att_mode);
+                                ItemNameAttackInfo::main_attack_mode);
                 }
                 else
                 {
@@ -1884,7 +2004,7 @@ void SelectIdentify::draw()
                                 y,
                                 key,
                                 is_marked,
-                                ItemRefAttInf::wpn_main_att_mode);
+                                ItemNameAttackInfo::main_attack_mode);
                 }
 
                 ++y;
@@ -1895,8 +2015,8 @@ void SelectIdentify::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_up_hint,
-                        Panel::item_menu,
-                        P(0, -1),
+                        Panel::inventory_menu,
+                        {0, -1},
                         colors::light_white());
         }
 
@@ -1904,8 +2024,8 @@ void SelectIdentify::draw()
         {
                 io::draw_text(
                         common_text::g_next_page_down_hint,
-                        Panel::item_menu,
-                        P(0, panels::h(Panel::item_menu)),
+                        Panel::inventory_menu,
+                        {0, panels::h(Panel::inventory_menu)},
                         colors::light_white());
         }
 }

@@ -405,9 +405,9 @@ void memorize_item_at(const P& p)
 
         memory.name =
                 item->name(
-                        ItemRefType::plural,
-                        ItemRefInf::yes,
-                        ItemRefAttInf::wpn_main_att_mode);
+                        ItemNameType::plural,
+                        ItemNameInfo::yes,
+                        ItemNameAttackInfo::main_attack_mode);
 
         memory.name = text_format::first_to_upper(memory.name);
 

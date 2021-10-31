@@ -46,11 +46,15 @@
 #include "terrain_data.hpp"
 #include "text_format.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// terrain
+// -----------------------------------------------------------------------------
 namespace terrain
 {
-// -----------------------------------------------------------------------------
-// Trap
-// -----------------------------------------------------------------------------
 Trap::Trap(const P& pos, Terrain* const mimic_terrain, TrapId id) :
         Terrain(pos),
         m_mimic_terrain(mimic_terrain)
@@ -94,8 +98,9 @@ Trap::Trap(const P& pos, Terrain* const mimic_terrain, TrapId id) :
                 // Attempt to set a trap implementation until succeeding
                 while (true)
                 {
-                        const auto random_id =
-                                (TrapId)rnd::range(0, (int)TrapId::END - 1);
+                        const int last = (int)TrapId::END - 1;
+
+                        const auto random_id = (TrapId)rnd::range(0, last);
 
                         try_place_trap_or_discard(random_id);
 
@@ -189,12 +194,15 @@ TrapImpl* Trap::make_trap_impl_from_id(const TrapId trap_id)
 
         case TrapId::slow:
                 return new TrapSlow(m_pos, this);
+                break;
 
         case TrapId::curse:
                 return new TrapCurse(m_pos, this);
+                break;
 
         case TrapId::unlearn_spell:
                 return new TrapUnlearnSpell(m_pos, this);
+                break;
 
         case TrapId::END:
         case TrapId::any:

@@ -245,27 +245,27 @@ struct ItemName
                 const std::string& name_pl,
                 const std::string& name_a)
         {
-                names[(size_t)ItemRefType::plain] = name;
-                names[(size_t)ItemRefType::plural] = name_pl;
-                names[(size_t)ItemRefType::a] = name_a;
+                names[(size_t)ItemNameType::plain] = name;
+                names[(size_t)ItemNameType::plural] = name_pl;
+                names[(size_t)ItemNameType::a] = name_a;
         }
 
         ItemName()
         {
-                for (size_t i = 0; i < (size_t)ItemRefType::END; ++i)
+                for (size_t i = 0; i < (size_t)ItemNameType::END; ++i)
                 {
                         names[i] = "";
                 }
         }
 
-        std::string names[(size_t)ItemRefType::END];
+        std::string names[(size_t)ItemNameType::END];
 };
 
-struct ItemAttMsgs
+struct ItemAttackMsgs
 {
-        ItemAttMsgs() = default;
+        ItemAttackMsgs() = default;
 
-        ItemAttMsgs(std::string player_, std::string other_) :
+        ItemAttackMsgs(std::string player_, std::string other_) :
                 player(std::move(player_)),
                 other(std::move(other_)) {}
 
@@ -295,12 +295,12 @@ struct MeleeData
         DmgRange dmg;
         int hit_chance_mod;
         bool is_noisy;
-        ItemAttMsgs att_msgs;
-        ItemAttProp prop_applied;
+        ItemAttackMsgs attack_msgs;
+        ItemAttackProp prop_applied;
         DmgType dmg_type;
         bool knocks_back;
-        bool att_corpse;
-        bool att_terrain;
+        bool attack_corpse;
+        bool attack_terrain;
         audio::SfxId hit_small_sfx;
         audio::SfxId hit_medium_sfx;
         audio::SfxId hit_hard_sfx;
@@ -333,13 +333,13 @@ struct RangedData
         gfx::TileId projectile_tile;
         Color projectile_color;
         bool projectile_leaves_trail;
-        ItemAttMsgs att_msgs;
+        ItemAttackMsgs attack_msgs;
         std::string snd_msg;
         SndVol snd_vol;
         bool makes_ricochet_snd;
-        audio::SfxId att_sfx;
+        audio::SfxId attack_sfx;
         audio::SfxId reload_sfx;
-        ItemAttProp prop_applied;
+        ItemAttackProp prop_applied;
 };
 
 struct ArmorData
@@ -381,7 +381,7 @@ public:
         char character;
         Color color;
         gfx::TileId tile;
-        AttMode main_att_mode;
+        AttackMode main_attack_mode;
         SpellId spell_cast_from_scroll;
         std::string land_on_hard_snd_msg;
         audio::SfxId land_on_hard_sfx;

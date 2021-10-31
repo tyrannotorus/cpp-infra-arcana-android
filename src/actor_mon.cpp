@@ -936,22 +936,6 @@ DidAction Ape::on_act()
         return DidAction::no;
 }
 
-// TODO: This should be a property (should probably be merged with
-// 'corrupts_env_color')
-Color StrangeColor::color() const
-{
-        Color color = colors::light_magenta();
-
-        const Range range(40, 255);
-
-        color.set_rgb(
-                range.roll(),
-                range.roll(),
-                range.roll());
-
-        return color;
-}
-
 void SpectralWpn::on_death()
 {
         // Remove the item from the inventory to avoid dropping it on the floor
@@ -973,9 +957,9 @@ std::string SpectralWpn::name_the() const
 
         const std::string name =
                 item->name(
-                        ItemRefType::plain,
-                        ItemRefInf::yes,
-                        ItemRefAttInf::none);
+                        ItemNameType::plain,
+                        ItemNameInfo::yes,
+                        ItemNameAttackInfo::none);
 
         return "The Spectral " + name;
 }
@@ -988,9 +972,9 @@ std::string SpectralWpn::name_a() const
 
         const std::string name =
                 item->name(
-                        ItemRefType::plain,
-                        ItemRefInf::yes,
-                        ItemRefAttInf::none);
+                        ItemNameType::plain,
+                        ItemNameInfo::yes,
+                        ItemNameAttackInfo::none);
 
         return "A Spectral " + name;
 }
@@ -1021,9 +1005,9 @@ std::string SpectralWpn::descr() const
 
         std::string str =
                 item->name(
-                        ItemRefType::a,
-                        ItemRefInf::yes,
-                        ItemRefAttInf::none);
+                        ItemNameType::a,
+                        ItemNameInfo::yes,
+                        ItemNameAttackInfo::none);
 
         str = text_format::first_to_upper(str);
 

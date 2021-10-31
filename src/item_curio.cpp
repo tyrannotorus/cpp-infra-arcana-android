@@ -43,7 +43,7 @@ ConsumeItem WitchesEye::activate(actor::Actor* actor)
 {
         (void)actor;
 
-        const auto item_name = name(ItemRefType::plain);
+        const auto item_name = name(ItemNameType::plain);
 
         msg_log::add("I clutch the " + item_name + "...");
 
@@ -105,7 +105,7 @@ ConsumeItem FluctuatingMaterial::activate(actor::Actor* actor)
 {
         (void)actor;
 
-        const auto item_name = name(ItemRefType::plain);
+        const auto item_name = name(ItemNameType::plain);
 
         msg_log::add(
                 "I stare into the " +
@@ -146,7 +146,7 @@ ConsumeItem AstralOpium::activate(actor::Actor* actor)
 {
         (void)actor;
 
-        const auto item_name = name(ItemRefType::plain);
+        const auto item_name = name(ItemNameType::plain);
 
         msg_log::add("I use the " + item_name + "...");
 

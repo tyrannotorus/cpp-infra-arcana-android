@@ -2501,6 +2501,23 @@ void PropAlwaysAware::on_std_turn()
         m_owner->m_mon_aware_state.aware_counter = 10;
 }
 
+void PropCorruptsEnvColor::cycle_graphics()
+{
+        const Range range(40, 255);
+
+        m_color.set_rgb(
+                range.roll(),
+                range.roll(),
+                range.roll());
+}
+
+bool PropCorruptsEnvColor::affect_actor_color(Color& color) const
+{
+        color = m_color;
+
+        return true;
+}
+
 PropActResult PropCorruptsEnvColor::on_act()
 {
         auto* const terrain = map::g_terrain.at(m_owner->m_pos);
@@ -2998,7 +3015,7 @@ void PropConfusesAdjacent::on_std_turn()
                 msg_log::add(msg);
         }
 
-        auto* prop_confusd = new PropConfused();
+        auto* prop_confusd = property_factory::make(PropId::confused);
 
         prop_confusd->set_duration(rnd::range(8, 12));
 

@@ -77,7 +77,7 @@ void drop_item_from_inv(
 
         if (is_whole_stack_dropped)
         {
-                item_ref = item_to_drop->name(ItemRefType::plural);
+                item_ref = item_to_drop->name(ItemNameType::plural);
 
                 item_to_drop = actor.m_inv.remove_item(item_to_drop, false);
         }
@@ -94,7 +94,7 @@ void drop_item_from_inv(
 
                 item_to_drop->on_removed_from_inv();
 
-                item_ref = item_to_drop->name(ItemRefType::plural);
+                item_ref = item_to_drop->name(ItemNameType::plural);
 
                 item_to_keep->m_nr_items =
                         nr_items_before_drop - nr_items_to_drop;

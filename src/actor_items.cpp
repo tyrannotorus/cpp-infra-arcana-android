@@ -595,7 +595,7 @@ static void make_item_set_zealot_spiked_mace(actor::Actor& actor)
 {
         auto* item = item::make(item::Id::spiked_mace);
 
-        item->set_melee_plus(0);
+        item->reset_base_melee_dmg();
 
         actor.m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 }
@@ -629,7 +629,7 @@ static void make_item_set_priest_dagger(actor::Actor& actor)
 
         const std::vector<int> weights = {6, 3, 1};
 
-        item->set_melee_plus(rnd::weighted_choice(weights) + 1);
+        item->incr_base_melee_damage(rnd::weighted_choice(weights) + 1);
 
         actor.m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 }
@@ -662,7 +662,7 @@ static void make_item_set_high_priest_guard_rogue(actor::Actor& actor)
 {
         auto* const item = item::make(item::Id::machete);
 
-        item->set_melee_plus(1);
+        item->incr_base_melee_damage(1);
 
         actor.m_inv.put_in_slot(
                 SlotId::wpn,
@@ -753,8 +753,8 @@ static void make_monster_intr_attacks(actor::Actor& actor)
                 // the other will have no effect)
                 const DmgRange range(1, intr_attack->dmg);
 
-                item->set_melee_base_dmg(range);
-                item->set_ranged_base_dmg(range);
+                item->set_base_melee_dmg(range);
+                item->set_base_ranged_dmg(range);
 
                 actor.m_inv.put_in_intrinsics(item);
         }

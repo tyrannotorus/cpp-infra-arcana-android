@@ -94,54 +94,56 @@ void init()
 
         for (auto& d : item::g_data)
         {
-                if (d.type == ItemType::potion)
+                if (d.type != ItemType::potion)
                 {
-                        // Color and false name
-                        const size_t idx =
-                                rnd::range(0, (int)s_potion_looks.size() - 1);
-
-                        PotionLook& look = s_potion_looks[idx];
-
-                        d.base_name_un_id.names[(size_t)ItemRefType::plain] =
-                                look.name_plain + " Potion";
-
-                        d.base_name_un_id.names[(size_t)ItemRefType::plural] =
-                                look.name_plain + " Potions";
-
-                        d.base_name_un_id.names[(size_t)ItemRefType::a] =
-                                look.name_a + " Potion";
-
-                        d.color = look.color;
-
-                        s_potion_looks.erase(std::begin(s_potion_looks) + idx);
-
-                        // True name
-                        const auto* const potion =
-                                static_cast<const Potion*>(
-                                        item::make(d.id, 1));
-
-                        const std::string real_type_name = potion->real_name();
-
-                        delete potion;
-
-                        const std::string real_name =
-                                "Potion of " + real_type_name;
-
-                        const std::string real_name_plural =
-                                "Potions of " + real_type_name;
-
-                        const std::string real_name_a =
-                                "a Potion of " + real_type_name;
-
-                        d.base_name.names[(size_t)ItemRefType::plain] =
-                                real_name;
-
-                        d.base_name.names[(size_t)ItemRefType::plural] =
-                                real_name_plural;
-
-                        d.base_name.names[(size_t)ItemRefType::a] =
-                                real_name_a;
+                        continue;
                 }
+
+                // Color and false name
+                const size_t idx =
+                        rnd::range(0, (int)s_potion_looks.size() - 1);
+
+                PotionLook& look = s_potion_looks[idx];
+
+                d.base_name_un_id.names[(size_t)ItemNameType::plain] =
+                        look.name_plain + " Potion";
+
+                d.base_name_un_id.names[(size_t)ItemNameType::plural] =
+                        look.name_plain + " Potions";
+
+                d.base_name_un_id.names[(size_t)ItemNameType::a] =
+                        look.name_a + " Potion";
+
+                d.color = look.color;
+
+                s_potion_looks.erase(std::begin(s_potion_looks) + idx);
+
+                // True name
+                const auto* const potion =
+                        static_cast<const Potion*>(
+                                item::make(d.id, 1));
+
+                const std::string real_type_name = potion->real_name();
+
+                delete potion;
+
+                const std::string real_name =
+                        "Potion of " + real_type_name;
+
+                const std::string real_name_plural =
+                        "Potions of " + real_type_name;
+
+                const std::string real_name_a =
+                        "a Potion of " + real_type_name;
+
+                d.base_name.names[(size_t)ItemNameType::plain] =
+                        real_name;
+
+                d.base_name.names[(size_t)ItemNameType::plural] =
+                        real_name_plural;
+
+                d.base_name.names[(size_t)ItemNameType::a] =
+                        real_name_a;
         }
 
         TRACE_FUNC_END;
@@ -159,13 +161,13 @@ void save()
                 }
 
                 saving::put_str(
-                        d.base_name_un_id.names[(size_t)ItemRefType::plain]);
+                        d.base_name_un_id.names[(size_t)ItemNameType::plain]);
 
                 saving::put_str(
-                        d.base_name_un_id.names[(size_t)ItemRefType::plural]);
+                        d.base_name_un_id.names[(size_t)ItemNameType::plural]);
 
                 saving::put_str(
-                        d.base_name_un_id.names[(size_t)ItemRefType::a]);
+                        d.base_name_un_id.names[(size_t)ItemNameType::a]);
 
                 saving::put_str(colors::color_to_name(d.color));
         }
@@ -177,21 +179,22 @@ void load()
         {
                 auto& d = item::g_data[i];
 
-                if (d.type == ItemType::potion)
+                if (d.type != ItemType::potion)
                 {
-                        d.base_name_un_id.names[(size_t)ItemRefType::plain] =
-                                saving::get_str();
-
-                        d.base_name_un_id.names[(size_t)ItemRefType::plural] =
-                                saving::get_str();
-
-                        d.base_name_un_id.names[(size_t)ItemRefType::a] =
-                                saving::get_str();
-
-                        d.color =
-                                colors::name_to_color(saving::get_str())
-                                        .value();
+                        continue;
                 }
+
+                d.base_name_un_id.names[(size_t)ItemNameType::plain] =
+                        saving::get_str();
+
+                d.base_name_un_id.names[(size_t)ItemNameType::plural] =
+                        saving::get_str();
+
+                d.base_name_un_id.names[(size_t)ItemNameType::a] =
+                        saving::get_str();
+
+                d.color =
+                        colors::name_to_color(saving::get_str()).value();
         }
 }
 
@@ -230,7 +233,7 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
                     m_data->is_alignment_known &&
                     config::warn_on_drink_malign_potion())
                 {
-                        const std::string name = this->name(ItemRefType::a);
+                        const std::string name = this->name(ItemNameType::a);
 
                         const std::string msg =
                                 "Drink " +
@@ -262,7 +265,7 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
                 if (m_data->is_identified)
                 {
                         const std::string potion_name =
-                                name(ItemRefType::a, ItemRefInf::none);
+                                name(ItemNameType::a, ItemNameInfo::none);
 
                         msg_log::add("I drink " + potion_name + "...");
                 }
@@ -270,7 +273,7 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
                 {
                         // Not identified
                         const std::string potion_name =
-                                name(ItemRefType::plain, ItemRefInf::none);
+                                name(ItemNameType::plain, ItemNameInfo::none);
 
                         msg_log::add(
                                 "I drink an unknown " + potion_name + "...");
@@ -308,7 +311,7 @@ void Potion::identify(const Verbose verbose)
         if (verbose == Verbose::yes)
         {
                 const std::string name_after =
-                        name(ItemRefType::a, ItemRefInf::none);
+                        name(ItemNameType::a, ItemNameInfo::none);
 
                 msg_log::add("I have identified " + name_after + ".");
 
@@ -393,7 +396,7 @@ void Potion::on_actor_turn_in_inv_hook(const InvType inv_type)
                 TRACE << "Potion alignment discovered" << std::endl;
 
                 const std::string name_plural =
-                        d.base_name_un_id.names[(size_t)ItemRefType::plural];
+                        d.base_name_un_id.names[(size_t)ItemNameType::plural];
 
                 const std::string align_str =
                         text_format::first_to_lower(alignment_str());
@@ -456,13 +459,13 @@ void Potion::on_collide(const P& pos, actor::Actor* const actor)
         }
 }
 
-std::string Potion::name_inf_str() const
+std::string Potion::name_info_str() const
 {
         std::string str;
 
         if (data().is_alignment_known && !data().is_identified)
         {
-                str = "{" + alignment_str() + "}";
+                str = "(" + alignment_str() + ")";
         }
 
         return str;

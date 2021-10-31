@@ -277,7 +277,10 @@ void Curse::on_new_turn(const item::Item& item)
 
 void Curse::print_trigger_msg(const item::Item& item) const
 {
-        const auto item_name = item.name(ItemRefType::plain, ItemRefInf::none);
+        const auto item_name =
+                item.name(
+                        ItemNameType::plain,
+                        ItemNameInfo::none);
 
         msg_log::add(
                 "A curse lies upon the " + item_name + "!",
@@ -295,7 +298,10 @@ void Curse::print_trigger_msg(const item::Item& item) const
 
 void Curse::print_warning_msg(const item::Item& item) const
 {
-        const auto item_name = item.name(ItemRefType::plain, ItemRefInf::none);
+        const auto item_name =
+                item.name(
+                        ItemNameType::plain,
+                        ItemNameInfo::none);
 
         const std::vector<std::string> msg_bucket = {
                 {"I am growing very attached to the " +
@@ -496,7 +502,7 @@ std::string Heavy::descr() const
 
 std::string Heavy::curse_msg(const item::Item& item) const
 {
-        const auto name = item.name(ItemRefType::plain, ItemRefInf::none);
+        const auto name = item.name(ItemNameType::plain, ItemNameInfo::none);
 
         return "The " + name + " suddenly feels much heavier to carry.";
 }
@@ -603,8 +609,8 @@ void Shriek::shriek(const item::Item& item) const
 {
         const std::string name =
                 item.name(
-                        ItemRefType::plain,
-                        ItemRefInf::none);
+                        ItemNameType::plain,
+                        ItemNameInfo::none);
 
         msg_log::add(
                 "The " + name + " shrieks...",
@@ -668,7 +674,7 @@ void Teleport::on_new_turn_active(const item::Item& item)
 
 void Teleport::teleport(const item::Item& item) const
 {
-        const auto name = item.name(ItemRefType::plain, ItemRefInf::none);
+        const auto name = item.name(ItemNameType::plain, ItemNameInfo::none);
 
         msg_log::add(
                 "I somehow sense that a burst of energy is discharged "

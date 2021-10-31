@@ -295,9 +295,9 @@ static std::string get_mon_wielded_wpn_str(
 
         const std::string wpn_name_a =
                 wpn->name(
-                        ItemRefType::a,
-                        ItemRefInf::none,
-                        ItemRefAttInf::none);
+                        ItemNameType::a,
+                        ItemNameInfo::none,
+                        ItemNameAttackInfo::none);
 
         return pronoun_str + " is wielding " + wpn_name_a + ".";
 }

@@ -61,34 +61,6 @@ void draw_symbol(
         }
 }
 
-void draw_descr_box(const std::vector<ColoredString>& lines)
-{
-        cover_panel(Panel::item_descr);
-
-        P pos(0, 0);
-
-        for (const auto& line : lines)
-        {
-                const auto formatted =
-                        text_format::split(
-                                line.str,
-                                panels::w(Panel::item_descr));
-
-                for (const auto& formatted_line : formatted)
-                {
-                        draw_text(
-                                formatted_line,
-                                Panel::item_descr,
-                                pos,
-                                line.color);
-
-                        ++pos.y;
-                }
-
-                ++pos.y;
-        }
-}
-
 void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
 {
         TRACE_FUNC_BEGIN;

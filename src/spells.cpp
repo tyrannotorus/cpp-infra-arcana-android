@@ -786,9 +786,10 @@ static std::string get_skill_descr(
         const SpellSkill skill,
         const SpellSrc source)
 {
-        std::string str = "Skill level: ";
-
-        str += text_format::first_to_upper(spells::skill_to_str(skill));
+        std::string str =
+                "The spell can be cast at " +
+                spells::skill_to_str(skill) +
+                " level";
 
         std::vector<std::string> bon_words;
 
@@ -830,6 +831,8 @@ static std::string get_skill_descr(
                         str += ")";
                 }
         }
+
+        str += ".";
 
         return str;
 }
@@ -1009,7 +1012,7 @@ std::string skill_to_str(const SpellSkill skill)
                 return "master";
 
         case SpellSkill::transcendent:
-                return "Transcendent";
+                return "transcendent";
         }
 
         ASSERT(false);
@@ -1352,21 +1355,21 @@ std::vector<std::string> Spell::descr(
                 lines.push_back(get_noise_descr(is_noisy(skill)));
         }
 
-        if (!player_bon::is_bg(Bg::exorcist))
-        {
-                const std::string domain_str = domain_descr();
-
-                if (!domain_str.empty())
-                {
-                        lines.push_back(domain_str);
-                }
-        }
+        std::string str = "";
 
         if (can_be_improved_with_skill())
         {
-                const auto level_descr = get_skill_descr(skill, spell_src);
+                str = get_skill_descr(skill, spell_src);
+        }
 
-                lines.push_back(level_descr);
+        if (!player_bon::is_bg(Bg::exorcist))
+        {
+                text_format::append_with_space(str, domain_descr());
+        }
+
+        if (!str.empty())
+        {
+                lines.push_back(str);
         }
 
         return lines;
@@ -1380,13 +1383,12 @@ std::string Spell::domain_descr() const
         {
                 return "";
         }
-        else
-        {
-                const std::string domain_title =
-                        player_bon::spell_domain_title(domain());
 
-                return "Spell domain: " + domain_title;
-        }
+        const std::string domain_title =
+                text_format::first_to_upper(
+                        player_bon::spell_domain_title(domain()));
+
+        return "It belongs to the \"" + domain_title + "\" domain.";
 }
 
 int Spell::shock_value() const
@@ -1565,32 +1567,38 @@ std::vector<std::string> Darkbolt::descr_specific(const SpellSkill skill) const
         std::vector<std::string> descr;
 
         descr.emplace_back(
-                "Siphons mysterious other-dimensional energy, which is focused "
-                "into a bolt hurled towards a target with great force. The "
-                "conjured bolt has some will on its own - once released it "
-                "launches itself towards any creature sensed as a threat "
-                "by the caster, precise control is therefore not possible.");
+                "A bolt of siphoned energy is hurled towards a target "
+                "with great force. "
+                "The conjured bolt has some will on its own - "
+                "once released it launches itself towards any creature "
+                "sensed as a threat, "
+                "precise control is therefore not possible.");
 
         const auto dmg_range = damage(skill, *map::g_player);
 
-        descr.push_back("The impact does " + dmg_range.str() + " damage.");
+        std::string effect_str =
+                "The impact does " +
+                dmg_range.str() +
+                " damage.";
 
         if (skill >= SpellSkill::master)
         {
-                descr.emplace_back("The target is paralyzed and set aflame.");
+                effect_str += " The target is paralyzed and set aflame.";
 
                 if (skill == SpellSkill::transcendent)
                 {
-                        descr.emplace_back(
-                                "If the target is sufficiently far away from "
-                                "the caster, the bolt explodes on impact.");
+                        effect_str +=
+                                " If the target is sufficiently far away from "
+                                "the caster, the bolt explodes on impact.";
                 }
         }
         else
         {
                 // <= Expert
-                descr.emplace_back("The target is paralyzed.");
+                effect_str += " The target is paralyzed.";
         }
+
+        descr.push_back(effect_str);
 
         return descr;
 }
@@ -2578,7 +2586,7 @@ void SpellSpectralWeapons::run_effect(
         {
                 auto* new_item = item::make(item->id());
 
-                new_item->set_melee_base_dmg(new_item->melee_base_dmg());
+                new_item->set_base_melee_dmg(new_item->base_melee_dmg());
 
                 const auto summoned =
                         actor::spawn(
@@ -5043,13 +5051,9 @@ int SpellTransmut::chance_potion(const SpellSkill skill) const
         return skill_bon(skill) + 40;
 }
 
-int SpellTransmut::chance_weapon(
-        const SpellSkill skill,
-        int plus) const
+int SpellTransmut::chance_weapon(const SpellSkill skill) const
 {
-        plus = std::min(5, plus);
-
-        return skill_bon(skill) + (plus * 10);
+        return skill_bon(skill) + 10;
 }
 
 void SpellTransmut::run_effect(
@@ -5081,20 +5085,18 @@ void SpellTransmut::run_effect(
 
         const auto item_type_before = item_before->data().type;
 
-        const int melee_plus = item_before->melee_base_dmg().plus();
-
         const auto id_before = item_before->id();
 
         std::string item_name_before = "The ";
 
         if (nr_items_before > 1)
         {
-                item_name_before += item_before->name(ItemRefType::plural);
+                item_name_before += item_before->name(ItemNameType::plural);
         }
         else
         {
                 // Single item
-                item_name_before += item_before->name(ItemRefType::plain);
+                item_name_before += item_before->name(ItemNameType::plain);
         }
 
         // Remove the existing item(s)
@@ -5165,10 +5167,10 @@ void SpellTransmut::run_effect(
                         }
                 }
         }
-        // Converting a melee weapon (with at least one "plus")?
-        else if ((item_type_before == ItemType::melee_wpn) && (melee_plus >= 1))
+        // Converting a melee weapon?
+        else if (item_type_before == ItemType::melee_wpn)
         {
-                pct_chance_per_item = chance_weapon(skill, melee_plus);
+                pct_chance_per_item = chance_weapon(skill);
 
                 for (size_t item_id = 0;
                      (item::Id)item_id != item::Id::END;
@@ -5240,7 +5242,7 @@ void SpellTransmut::run_effect(
         {
                 const std::string item_name_new =
                         text_format::first_to_upper(
-                                item_new->name(ItemRefType::plural));
+                                item_new->name(ItemNameType::plural));
 
                 std::string appear_str =
                         (nr_items_new == 1)
@@ -5260,26 +5262,22 @@ std::vector<std::string> SpellTransmut::descr_specific(
                 "Attempts to convert items (stand over an item when casting). "
                 "On failure, the item is destroyed.");
 
-        descr.push_back(
+        std::string convert_info =
                 "Converts Potions with " +
                 std::to_string(chance_potion(skill)) +
-                "% chance.");
+                "% chance. ";
 
-        descr.push_back(
+        convert_info +=
                 "Converts Manuscripts with " +
                 std::to_string(chance_scroll(skill)) +
-                "% chance.");
+                "% chance. ";
 
-        descr.push_back(
-                "Melee weapons with at least +1 damage (not counting any "
-                "damage bonus from skills) are converted to a Potion or "
-                "Manuscript, with " +
-                std::to_string(chance_weapon(skill, 1)) +
-                "% chance for a +1 weapon, " +
-                std::to_string(chance_weapon(skill, 2)) +
-                "% chance for a +2 weapon, " +
-                std::to_string(chance_weapon(skill, 3)) +
-                "% chance for a +3 weapon, etc.");
+        convert_info +=
+                "Converts Melee Weapons to a Potion or Manuscript, with " +
+                std::to_string(chance_weapon(skill)) +
+                "% chance.";
+
+        descr.push_back(convert_info);
 
         return descr;
 }

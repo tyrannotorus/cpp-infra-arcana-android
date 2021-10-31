@@ -7,7 +7,6 @@
 #ifndef DMG_RANGE_HPP
 #define DMG_RANGE_HPP
 
-#include <algorithm>
 #include <string>
 
 #include "random.hpp"
@@ -17,75 +16,59 @@ class DmgRange
 public:
         DmgRange() = default;
 
-        DmgRange(const int min, const int max, const int plus = 0) :
-                m_min(min),
-                m_max(max),
-                m_plus(plus)
+        DmgRange(const int min, const int max) :
+                m_range(min, max)
         {
         }
+
+        DmgRange& operator=(const DmgRange& other) = default;
 
         bool operator==(const DmgRange& other) const
         {
-                const bool min_eq = (m_min == other.m_min);
-                const bool max_eq = (m_max == other.m_max);
-                const bool plus_eq = (m_plus == other.m_plus);
-
-                return min_eq && max_eq && plus_eq;
+                return m_range == other.m_range;
         }
 
-        Range total_range() const
+        int min() const
         {
-                return Range(m_min + m_plus, m_max + m_plus);
+                return m_range.min;
         }
 
-        int base_min() const
+        int max() const
         {
-                return m_min;
+                return m_range.max;
         }
 
-        int base_max() const
+        void set_min(const int value)
         {
-                return m_max;
+                m_range.min = value;
         }
 
-        void set_base_min(const int v)
+        void set_max(const int value)
         {
-                m_min = v;
+                m_range.max = value;
         }
 
-        void set_base_max(const int v)
+        int roll() const;
+
+        std::string str() const;
+
+        Range range() const
         {
-                m_max = v;
+                return m_range;
         }
 
-        int plus() const
+        void incr_dmg(const int value)
         {
-                return m_plus;
+                m_range.min += value;
+                m_range.max += value;
         }
 
-        void set_plus(const int v)
-        {
-                m_plus = v;
-        }
+        DmgRange scaled(int k) const;
 
-        DmgRange scaled_pct(const int pct) const
-        {
-                int new_min = (m_min * pct) / 100;
-                int new_max = (m_max * pct) / 100;
-                int new_plus = (m_plus * pct) / 100;
-
-                new_min = std::max(new_min, 1);
-                new_max = std::max(new_max, 1);
-
-                return {new_min, new_max, new_plus};
-        }
-
-        std::string str_plus() const;
+        DmgRange scaled_pct(int pct) const;
 
 private:
-        int m_min {0};
-        int m_max {0};
-        int m_plus {0};
+        Range m_range {0, 0};
 };
 
 #endif  // DMG_RANGE_HPP

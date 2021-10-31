@@ -18,6 +18,11 @@
 #include "pos.hpp"
 #include "terrain_data.hpp"
 
+namespace io
+{
+enum class GraphicsCycle;
+}  // namespace io
+
 namespace actor
 {
 class Actor;
@@ -155,6 +160,8 @@ public:
         bool is_corrupted_color() const;
 
         int shock_when_adj() const;
+
+        void cycle_graphics(io::GraphicsCycle cycle);
 
         virtual Color color() const;
 
@@ -344,6 +351,9 @@ private:
 
         // Corrupted by a Strange Color monster
         int m_nr_turns_color_corrupted {-1};
+
+        Color m_burn_color_bg {};
+        Color m_corrupt_color {};
 };
 
 enum class FloorType

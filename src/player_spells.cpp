@@ -36,6 +36,7 @@
 #include "saving.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -43,6 +44,34 @@
 static std::vector<Spell*> s_learned_spells;
 
 static SpellSkill s_spell_skills[(size_t)SpellId::END];
+
+static void draw_descr_box(const std::vector<ColoredString>& lines)
+{
+        io::cover_panel(Panel::inventory_descr);
+
+        P pos(0, 0);
+
+        for (const auto& line : lines)
+        {
+                const auto formatted =
+                        text_format::split(
+                                line.str,
+                                panels::w(Panel::inventory_descr));
+
+                for (const auto& formatted_line : formatted)
+                {
+                        io::draw_text(
+                                formatted_line,
+                                Panel::inventory_descr,
+                                pos,
+                                line.color);
+
+                        ++pos.y;
+                }
+
+                ++pos.y;
+        }
+}
 
 static void try_cast(Spell* const spell)
 {
@@ -411,7 +440,7 @@ void BrowseSpell::draw()
 
                 io::draw_text(
                         key_str,
-                        Panel::item_menu,
+                        Panel::inventory_menu,
                         p,
                         color);
 
@@ -424,7 +453,7 @@ void BrowseSpell::draw()
 
                 io::draw_text(
                         name,
-                        Panel::item_menu,
+                        Panel::inventory_menu,
                         p,
                         color);
 
@@ -452,7 +481,7 @@ void BrowseSpell::draw()
 
                         io::draw_text(
                                 fill_str,
-                                Panel::item_menu,
+                                Panel::inventory_menu,
                                 P(p.x + (int)name.size(), p.y),
                                 fill_color);
 
@@ -462,7 +491,7 @@ void BrowseSpell::draw()
 
                         io::draw_text(
                                 str,
-                                Panel::item_menu,
+                                Panel::inventory_menu,
                                 p,
                                 colors::dark_gray());
 
@@ -470,7 +499,7 @@ void BrowseSpell::draw()
 
                         io::draw_text(
                                 spi_cost.str(),
-                                Panel::item_menu,
+                                Panel::inventory_menu,
                                 p,
                                 colors::white());
                 }
@@ -483,7 +512,7 @@ void BrowseSpell::draw()
 
                         io::draw_text(
                                 str,
-                                Panel::item_menu,
+                                Panel::inventory_menu,
                                 p,
                                 colors::dark_gray());
 
@@ -510,7 +539,7 @@ void BrowseSpell::draw()
 
                         io::draw_text(
                                 str,
-                                Panel::item_menu,
+                                Panel::inventory_menu,
                                 p,
                                 colors::white());
                 }
@@ -532,7 +561,7 @@ void BrowseSpell::draw()
 
                         if (!lines.empty())
                         {
-                                io::draw_descr_box(lines);
+                                draw_descr_box(lines);
                         }
                 }
 

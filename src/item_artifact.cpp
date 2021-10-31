@@ -218,9 +218,9 @@ HornOfMalice::HornOfMalice(ItemData* const item_data) :
 {
 }
 
-std::string HornOfMalice::name_inf_str() const
+std::string HornOfMalice::name_info_str() const
 {
-        return "{" + std::to_string(m_charges) + "}";
+        return "(" + std::to_string(m_charges) + " uses)";
 }
 
 void HornOfMalice::save_hook() const
@@ -244,8 +244,9 @@ ConsumeItem HornOfMalice::activate(actor::Actor* const actor)
                 return ConsumeItem::no;
         }
 
-        auto effect = std::shared_ptr<SndHeardEffect>(
-                new HornOfMaliceHeard);
+        auto effect =
+                std::shared_ptr<SndHeardEffect>(
+                        new HornOfMaliceHeard);
 
         Snd snd(
                 "The Horn of Malice resounds!",
@@ -295,9 +296,9 @@ HornOfBanishment::HornOfBanishment(ItemData* const item_data) :
 {
 }
 
-std::string HornOfBanishment::name_inf_str() const
+std::string HornOfBanishment::name_info_str() const
 {
-        return "{" + std::to_string(m_charges) + "}";
+        return "(" + std::to_string(m_charges) + " uses)";
 }
 
 void HornOfBanishment::save_hook() const
@@ -373,8 +374,8 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
 
         const std::string my_name =
                 name(
-                        ItemRefType::plain,
-                        ItemRefInf::none);
+                        ItemNameType::plain,
+                        ItemNameInfo::none);
 
         std::string pray_msg;
 
@@ -445,8 +446,8 @@ void HolySymbol::on_std_turn_in_inv_hook(InvType inv_type)
 
                 const std::string my_name =
                         name(
-                                ItemRefType::plain,
-                                ItemRefInf::none);
+                                ItemNameType::plain,
+                                ItemNameInfo::none);
 
                 msg_log::add(
                         "I feel like praying over the " +
@@ -455,7 +456,7 @@ void HolySymbol::on_std_turn_in_inv_hook(InvType inv_type)
         }
 }
 
-std::string HolySymbol::name_inf_str() const
+std::string HolySymbol::name_info_str() const
 {
         if (m_nr_charge_turns_left <= 0)
         {
@@ -464,14 +465,14 @@ std::string HolySymbol::name_inf_str() const
 
         const auto turns_left_str = std::to_string(m_nr_charge_turns_left);
 
-        std::string str = "{" + turns_left_str;
+        std::string str = "(" + turns_left_str + " turns";
 
         if (m_has_failed_attempt)
         {
                 str += ", failed";
         }
 
-        str += "}";
+        str += ")";
 
         return str;
 }
@@ -518,9 +519,9 @@ Clockwork::Clockwork(ItemData* const item_data) :
 {
 }
 
-std::string Clockwork::name_inf_str() const
+std::string Clockwork::name_info_str() const
 {
-        return "{" + std::to_string(m_charges) + "}";
+        return "(" + std::to_string(m_charges) + " uses)";
 }
 
 void Clockwork::save_hook() const
@@ -592,9 +593,9 @@ void SpiritDagger::specific_dmg_mod(
 
         const double exp = 0.5;
 
-        const auto dmg_plus_db = std::pow(sp_db, exp);
+        const int dmg_bon = (int)std::pow(sp_db, exp);
 
-        range.set_plus((int)dmg_plus_db);
+        range.incr_dmg(dmg_bon);
 }
 
 // -----------------------------------------------------------------------------
@@ -609,16 +610,12 @@ void OrbOfLife::on_pickup_hook()
 {
         map::g_player->change_max_hp(4, Verbose::yes);
 
-        auto* prop_r_poison = new PropRPoison();
-
+        auto* prop_r_poison = property_factory::make(PropId::r_poison);
         prop_r_poison->set_indefinite();
-
         add_carrier_prop(prop_r_poison, Verbose::yes);
 
-        auto* prop_r_disease = new PropRDisease();
-
+        auto* prop_r_disease = property_factory::make(PropId::r_disease);
         prop_r_disease->set_indefinite();
-
         add_carrier_prop(prop_r_disease, Verbose::yes);
 }
 

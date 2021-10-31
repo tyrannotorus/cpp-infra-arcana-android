@@ -65,7 +65,9 @@ void Device::identify(const Verbose verbose)
         if (verbose == Verbose::yes)
         {
                 const std::string name_after =
-                        name(ItemRefType::a, ItemRefInf::none);
+                        name(
+                                ItemNameType::a,
+                                ItemNameInfo::none);
 
                 msg_log::add("I have identified " + name_after + ".");
 
@@ -203,10 +205,14 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
         }
 
         const std::string item_name =
-                name(ItemRefType::plain, ItemRefInf::none);
+                name(
+                        ItemNameType::plain,
+                        ItemNameInfo::none);
 
         const std::string item_name_a =
-                name(ItemRefType::a, ItemRefInf::none);
+                name(
+                        ItemNameType::a,
+                        ItemNameInfo::none);
 
         msg_log::add("I activate " + item_name_a + "...");
 
@@ -265,20 +271,20 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
         return consumed;
 }
 
-std::string StrangeDevice::name_inf_str() const
+std::string StrangeDevice::name_info_str() const
 {
         if (m_data->is_identified)
         {
                 switch (condition)
                 {
                 case Condition::breaking:
-                        return "{breaking}";
+                        return "(breaking)";
 
                 case Condition::shoddy:
-                        return "{shoddy}";
+                        return "(shoddy)";
 
                 case Condition::fine:
-                        return "{fine}";
+                        return "(fine)";
                 }
         }
 
@@ -469,16 +475,16 @@ Lantern::Lantern(item::ItemData* const item_data) :
         nr_turns_left(150),
         is_activated(false) {}
 
-std::string Lantern::name_inf_str() const
+std::string Lantern::name_info_str() const
 {
-        std::string inf = "{" + std::to_string(nr_turns_left);
+        std::string inf = "(" + std::to_string(nr_turns_left) + " turns";
 
         if (is_activated)
         {
                 inf += ", Lit";
         }
 
-        return inf + "}";
+        return inf + ")";
 }
 
 ConsumeItem Lantern::activate(actor::Actor* const actor)

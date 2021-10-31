@@ -45,6 +45,8 @@ inline constexpr int g_mi_go_gun_hp_drained = 3;
 inline constexpr int g_mi_go_gun_regen_disabled_min_turns = 7;
 inline constexpr int g_mi_go_gun_regen_disabled_max_turns = 12;
 
+inline constexpr int g_min_dmg_to_wound = 5;
+
 // NOTE: Damage is reduced with higher distance from the center
 inline constexpr int g_expl_dmg_min = 15;
 inline constexpr int g_expl_dmg_max = 40;
@@ -128,7 +130,7 @@ enum class ConsumeItem
         yes
 };
 
-enum class ItemRefType
+enum class ItemNameType
 {
         plain,
         a,
@@ -136,26 +138,25 @@ enum class ItemRefType
         END
 };
 
-enum class ItemRefInf
+enum class ItemNameInfo
 {
         none,
         yes
 };
 
-enum class ItemRefAttInf
+enum class ItemNameAttackInfo
 {
         none,
-        wpn_main_att_mode,
+        main_attack_mode,
         melee,
         ranged,
         thrown
 };
 
-enum class ItemRefDmg
+enum class AbbrevItemAttackInfo
 {
-        average,
-        average_and_melee_plus,
-        range,
+        no,
+        yes
 };
 
 enum class Article
@@ -263,7 +264,7 @@ constexpr bool is_physical_dmg_type(const DmgType type)
         return false;
 }
 
-enum class AttMode
+enum class AttackMode
 {
         none,
         melee,

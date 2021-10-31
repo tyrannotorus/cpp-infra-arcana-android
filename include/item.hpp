@@ -19,7 +19,7 @@
 #include "item_curse_ids.hpp"
 
 class Inventory;
-struct ItemAttProp;
+struct ItemAttackProp;
 struct P;
 
 namespace actor
@@ -71,20 +71,23 @@ public:
         }
 
         std::string name(
-                ItemRefType ref_type,
-                ItemRefInf inf = ItemRefInf::yes,
-                ItemRefAttInf att_inf = ItemRefAttInf::none) const;
+                ItemNameType name_type,
+                ItemNameInfo info = ItemNameInfo::yes,
+                ItemNameAttackInfo attack_info =
+                        ItemNameAttackInfo::none) const;
 
         std::vector<std::string> descr() const;
 
-        std::string hit_mod_str(ItemRefAttInf att_inf) const;
+        std::string hit_mod_str(
+                ItemNameAttackInfo attack_info,
+                AbbrevItemAttackInfo abbrev = AbbrevItemAttackInfo::no) const;
 
         std::string dmg_str(
-                ItemRefAttInf att_inf,
-                ItemRefDmg dmg_value) const;
+                ItemNameAttackInfo attack_info,
+                AbbrevItemAttackInfo abbrev = AbbrevItemAttackInfo::no) const;
 
-        // E.g. "{Off}" for Lanterns, or "4/7" for Pistols
-        virtual std::string name_inf_str() const
+        // E.g. "(Off)" for Lanterns, or "(4/7)" for Pistols
+        virtual std::string name_info_str() const
         {
                 return "";
         }
@@ -149,36 +152,34 @@ public:
         {
         }
 
-        void set_melee_base_dmg(const DmgRange& range)
+        void set_base_melee_dmg(const DmgRange& range)
         {
-                m_melee_base_dmg = range;
+                m_base_melee_dmg = range;
         }
 
-        void set_ranged_base_dmg(const DmgRange& range)
+        void set_base_ranged_dmg(const DmgRange& range)
         {
-                m_ranged_base_dmg = range;
+                m_base_ranged_dmg = range;
         }
 
-        void set_melee_plus(const int plus)
+        DmgRange base_melee_dmg() const
         {
-                m_melee_base_dmg.set_plus(plus);
+                return m_base_melee_dmg;
         }
 
-        void set_random_melee_plus();
+        void reset_base_melee_dmg();
 
-        DmgRange melee_base_dmg() const
-        {
-                return m_melee_base_dmg;
-        }
+        void incr_base_melee_damage(int value);
 
+        // Calculated damage taking into account things like player traits.
         DmgRange melee_dmg(const actor::Actor* attacker) const;
         DmgRange ranged_dmg(const actor::Actor* attacker) const;
         DmgRange thrown_dmg(const actor::Actor* attacker) const;
 
-        ItemAttProp& prop_applied_on_melee(
+        ItemAttackProp& prop_applied_on_melee(
                 const actor::Actor* attacker) const;
 
-        ItemAttProp& prop_applied_on_ranged(
+        ItemAttackProp& prop_applied_on_ranged(
                 const actor::Actor* attacker) const;
 
         virtual void on_melee_kill(actor::Actor& actor_killed)
@@ -283,7 +284,7 @@ protected:
                 (void)actor;
         }
 
-        ItemAttProp* prop_applied_intr_attack(
+        ItemAttackProp* prop_applied_intr_attack(
                 const actor::Actor* attacker) const;
 
         ItemData* m_data;
@@ -291,8 +292,8 @@ protected:
         actor::Actor* m_actor_carrying {nullptr};
 
         // Base damage (not including actor properties, player traits, etc)
-        DmgRange m_melee_base_dmg;
-        DmgRange m_ranged_base_dmg;
+        DmgRange m_base_melee_dmg;
+        DmgRange m_base_ranged_dmg;
 
 private:
         // Properties to apply on owning actor (when e.g. wearing the item, or
@@ -325,7 +326,7 @@ public:
                 return colors::gray();
         }
 
-        std::string name_inf_str() const override;
+        std::string name_info_str() const override;
 
         int armor_points() const;
 
@@ -394,7 +395,7 @@ public:
                 return colors::gray();
         }
 
-        std::string name_inf_str() const override;
+        std::string name_info_str() const override;
 
         const ItemData& ammo_data()
         {
@@ -518,10 +519,7 @@ public:
 
         ~AmmoMag() = default;
 
-        std::string name_inf_str() const override
-        {
-                return "{" + std::to_string(m_ammo) + "}";
-        }
+        std::string name_info_str() const override;
 
         void set_full_ammo();
 
@@ -555,10 +553,7 @@ public:
                 return colors::green();
         }
 
-        std::string name_inf_str() const override
-        {
-                return "{" + std::to_string(m_nr_supplies) + "}";
-        }
+        std::string name_info_str() const override;
 
         void on_pickup_hook() override;
 
@@ -603,10 +598,7 @@ public:
                 Headwear(item_data),
                 m_nr_turns_left(60) {}
 
-        std::string name_inf_str() const override
-        {
-                return "{" + std::to_string(m_nr_turns_left) + "}";
-        }
+        std::string name_info_str() const override;
 
         void on_equip_hook(Verbose verbose) override;
 

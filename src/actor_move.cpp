@@ -48,7 +48,7 @@ static BinaryAnswer query_player_attack_mon_with_ranged_wpn(
         const item::Wpn& wpn,
         const actor::Mon& mon)
 {
-        const std::string wpn_name = wpn.name(ItemRefType::a);
+        const std::string wpn_name = wpn.name(ItemNameType::a);
 
         const bool can_see_mon = can_player_see_actor(mon);
 
@@ -154,9 +154,9 @@ static void player_walk_on_item(item::Item* const item)
         {
                 std::string item_name =
                         item->name(
-                                ItemRefType::plural,
-                                ItemRefInf::yes,
-                                ItemRefAttInf::wpn_main_att_mode);
+                                ItemNameType::plural,
+                                ItemNameInfo::yes,
+                                ItemNameAttackInfo::main_attack_mode);
 
                 item_name = text_format::first_to_upper(item_name);
 

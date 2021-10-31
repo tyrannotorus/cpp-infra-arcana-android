@@ -31,8 +31,8 @@ Inventory::Inventory(actor::Actor* const owning_actor) :
                 m_slots[(size_t)id] = {id, name};
         };
 
-        set_slot(SlotId::wpn, "Wielded");
-        set_slot(SlotId::wpn_alt, "Prepared");
+        set_slot(SlotId::wpn, "Weapon");
+        set_slot(SlotId::wpn_alt, "Ready");
         set_slot(SlotId::body, "Body");
         set_slot(SlotId::head, "Head");
 }
@@ -77,7 +77,7 @@ void Inventory::save() const
                 }
         }
 
-        saving::put_int(m_backpack.size());
+        saving::put_int((int)m_backpack.size());
 
         for (size_t i = 0; i < m_backpack.size(); ++i)
         {
@@ -751,7 +751,7 @@ void Inventory::print_equip_message(
         const SlotId slot_id,
         const item::Item& item)
 {
-        const std::string name = item.name(ItemRefType::plural);
+        const std::string name = item.name(ItemNameType::plural);
 
         std::string msg;
 
@@ -798,8 +798,8 @@ void Inventory::print_unequip_message(
         // for stacks, and plain form for single items.
         const auto item_ref_type =
                 (item.m_nr_items > 1)
-                ? ItemRefType::plural
-                : ItemRefType::plain;
+                ? ItemNameType::plural
+                : ItemNameType::plain;
 
         const std::string name = item.name(item_ref_type);
 
@@ -861,8 +861,11 @@ struct LexicograhicalCompareItems
                 const item::Item* const item1,
                 const item::Item* const item2)
         {
-                const std::string& item_name1 = item1->name(ItemRefType::plain);
-                const std::string& item_name2 = item2->name(ItemRefType::plain);
+                const std::string& item_name1 =
+                        item1->name(ItemNameType::plain);
+
+                const std::string& item_name2 =
+                        item2->name(ItemNameType::plain);
 
                 return lexicographical_compare(
                         item_name1.begin(),

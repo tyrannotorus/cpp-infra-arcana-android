@@ -9,6 +9,11 @@
 
 #include <memory>
 
+namespace io
+{
+enum class GraphicsCycle;
+}  // namespace io
+
 enum class StateId
 {
         browse_highscore_entry,
@@ -55,6 +60,13 @@ public:
         // This should only be used for cleanup, do not push or pop other states
         // from this call (this is not supported).
         virtual void on_popped() {}
+
+        // This is called continuously, and can be used for cycling what to draw
+        // (e.g. animating the color of a monster, or scrolling text, etc).
+        virtual void cycle_graphics(const io::GraphicsCycle cycle)
+        {
+                (void)cycle;
+        }
 
         virtual void draw() {}
 
@@ -103,6 +115,8 @@ void run();
 void run_until_state_done(std::unique_ptr<State> state);
 
 void start();
+
+void cycle_graphics(io::GraphicsCycle cycle);
 
 void draw();
 

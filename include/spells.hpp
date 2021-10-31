@@ -1316,7 +1316,7 @@ private:
 
         int chance_potion(SpellSkill skill) const;
 
-        int chance_weapon(SpellSkill skill, int plus) const;
+        int chance_weapon(SpellSkill skill) const;
 
         int base_max_spi_cost(const SpellSkill skill) const override
         {

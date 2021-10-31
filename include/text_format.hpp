@@ -49,6 +49,10 @@ void append_with_space(
         std::string& base_str,
         const std::string& addition);
 
+void append_as_comma_list(
+        std::string& base_str,
+        const std::string& addition);
+
 }  // namespace text_format
 
 #endif  // TEXT_FORMAT_HPP

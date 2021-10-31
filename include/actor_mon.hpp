@@ -141,17 +141,6 @@ private:
         bool m_has_summoned_locusts {false};
 };
 
-class StrangeColor : public Mon
-{
-public:
-        StrangeColor() = default;
-
-        ~StrangeColor() = default;
-
-        // TODO: This should be a property
-        Color color() const override;
-};
-
 class SpectralWpn : public Mon
 {
 public:

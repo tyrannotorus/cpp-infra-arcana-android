@@ -30,6 +30,7 @@
 #include "disarm.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "gfx.hpp"
 #include "global.hpp"
 #include "init.hpp"
 #include "inventory.hpp"
@@ -198,9 +199,9 @@ static void handle_toggle_lantern_command()
 
                 const std::string name =
                         tmp_lantern->name(
-                                ItemRefType::a,
-                                ItemRefInf::none,
-                                ItemRefAttInf::none);
+                                ItemNameType::a,
+                                ItemNameInfo::none,
+                                ItemNameAttackInfo::none);
 
                 msg_log::add("I am not carrying " + name + ".");
         }
@@ -256,10 +257,16 @@ static void handle_swap_weapon_command()
 
         // Player is wielding a weapon and/or have an alt weapon.
 
-        const std::string alt_name_a =
-                alt
-                ? alt->name(ItemRefType::a)
-                : "";
+        std::string alt_name;
+
+        if (alt)
+        {
+                alt_name =
+                        alt->name(
+                                ItemNameType::a,
+                                ItemNameInfo::yes,
+                                ItemNameAttackInfo::none);
+        }
 
         // War veteran swaps instantly
         const bool is_instant = player_bon::bg() == Bg::war_vet;
@@ -272,12 +279,12 @@ static void handle_swap_weapon_command()
                         "I " +
                         swift_str +
                         "swap to " +
-                        alt_name_a +
+                        alt_name +
                         ".");
         }
         else if (wielded && !alt)
         {
-                const std::string name = wielded->name(ItemRefType::plain);
+                const std::string name = wielded->name(ItemNameType::plain);
 
                 msg_log::add(
                         "I " +
@@ -293,7 +300,7 @@ static void handle_swap_weapon_command()
                         "I " +
                         swift_str +
                         "wield " +
-                        alt_name_a +
+                        alt_name +
                         ".");
         }
 
@@ -1126,28 +1133,12 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f6:
         {
-                item::make_item_on_floor(
-                        item::Id::gas_mask,
-                        map::g_player->m_pos);
-
-                item::make_item_on_floor(
-                        item::Id::incinerator,
-                        map::g_player->m_pos);
-
-                item::make_item_on_floor(
-                        item::Id::mi_go_gun,
-                        map::g_player->m_pos);
-
-                item::make_item_on_floor(
-                        item::Id::machine_gun,
-                        map::g_player->m_pos);
-
                 for (size_t i = 0; i < (size_t)item::Id::END; ++i)
                 {
                         const auto& item_data = item::g_data[i];
 
-                        if ((item_data.value != item::Value::normal) &&
-                            !item_data.is_intr)
+                        if (!item_data.is_intr &&
+                            (item_data.tile != gfx::TileId::END))
                         {
                                 item::make_item_on_floor(
                                         (item::Id)i,

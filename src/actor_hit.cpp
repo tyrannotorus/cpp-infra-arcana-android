@@ -64,8 +64,8 @@ static int hit_armor(actor::Actor& actor, int dmg)
                                 {
                                         const std::string armor_name =
                                                 armor->name(
-                                                        ItemRefType::plain,
-                                                        ItemRefInf::none);
+                                                        ItemNameType::plain,
+                                                        ItemNameInfo::none);
 
                                         msg_log::add(
                                                 ("My " +

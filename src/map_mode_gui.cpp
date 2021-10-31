@@ -75,21 +75,24 @@ static Color info_color()
 //                 color);
 // }
 
-static std::string make_wpn_dmg_str(const item::Item& wpn)
+static std::string make_wpn_stats_str(const item::Item& wpn)
 {
-        const ItemRefAttInf att_inf =
-                (wpn.data().main_att_mode == AttMode::thrown)
-                ? ItemRefAttInf::melee
-                : ItemRefAttInf::wpn_main_att_mode;
+        const auto att_inf =
+                (wpn.data().main_attack_mode == AttackMode::thrown)
+                ? ItemNameAttackInfo::melee
+                : ItemNameAttackInfo::main_attack_mode;
 
         const auto wpn_dmg_str =
                 wpn.dmg_str(
                         att_inf,
-                        ItemRefDmg::average_and_melee_plus);
+                        AbbrevItemAttackInfo::yes);
 
-        const auto wpn_hit_mod_str = wpn.hit_mod_str(att_inf);
+        const auto wpn_hit_mod_str =
+                wpn.hit_mod_str(
+                        att_inf,
+                        AbbrevItemAttackInfo::yes);
 
-        const auto wpn_inf_str = wpn.name_inf_str();
+        const auto wpn_inf_str = wpn.name_info_str();
 
         std::string wpn_str;
 
@@ -118,7 +121,7 @@ static void draw_wielded_wpn(const int y, const Panel panel)
                 item = &map::g_player->unarmed_wpn();
         }
 
-        const auto wpn_str = make_wpn_dmg_str(*item);
+        const auto wpn_str = make_wpn_stats_str(*item);
 
         auto color = info_color();
 
@@ -160,7 +163,7 @@ static void draw_alt_wpn(const int y, const Panel panel)
                 item = &map::g_player->unarmed_wpn();
         }
 
-        const auto wpn_str = make_wpn_dmg_str(*item);
+        const auto wpn_str = make_wpn_stats_str(*item);
 
         auto color = info_color();
 
