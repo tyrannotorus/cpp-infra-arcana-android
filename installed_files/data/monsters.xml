@@ -5870,7 +5870,7 @@
             <turns_aware>8</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>false</looks>
-            <avoids_blocking_friend>false</avoids_blocking_friend>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
             <attacks>true</attacks>
             <paths_to_target_when_aware>false</paths_to_target_when_aware>
             <moves_to_target_when_los>true</moves_to_target_when_los>
@@ -5898,13 +5898,13 @@
     <!--************************************************************-->
     <!-- mind_worms -->
     <!--************************************************************-->
-    <monster id="mind_worms">
+    <monster id="mind_worm">
         <text>
-            <name_a>Mind Worms</name_a>
-            <name_the>the Mind Worms</name_the>
+            <name_a>Mind Worm</name_a>
+            <name_the>the Mind Worm</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
-            <description>A slithering conglomeration of carnivorous worms. Their bite causes heavy disorientation.</description>
+            <description>A predacious worm about the size of an adult human's arm. Its bite causes heavy disorientation in the victim.</description>
             <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
@@ -5916,7 +5916,7 @@
         </text>
 
         <graphics>
-            <tile>mass_of_worms</tile>
+            <tile>worm</tile>
             <character>w</character>
             <color>violet</color>
         </graphics>
@@ -5928,12 +5928,12 @@
 
         <attributes>
             <hit_points>12</hit_points>
-            <spirit>2</spirit>
+            <spirit>4</spirit>
             <speed>slow</speed>
             <shock_level>unsettling</shock_level>
-            <melee>50</melee>
+            <melee>60</melee>
             <ranged>0</ranged>
-            <dodging>-30</dodging>
+            <dodging>-10</dodging>
             <stealth>0</stealth>
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
@@ -5947,14 +5947,13 @@
 
         <attacks>
             <attack id="bite">
-                <damage>3</damage>
+                <damage>4</damage>
                 <property_applied duration="9">confused</property_applied>
             </attack>
         </attacks>
 
         <properties>
             <property>small_crawling</property>
-            <property>splits_on_death</property>
             <property>r_blind</property>
             <property>r_poison</property>
             <property>r_disease</property>
@@ -5967,7 +5966,7 @@
             <turns_aware>10</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>false</looks>
-            <avoids_blocking_friend>false</avoids_blocking_friend>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
             <attacks>true</attacks>
             <paths_to_target_when_aware>false</paths_to_target_when_aware>
             <moves_to_target_when_los>true</moves_to_target_when_los>
@@ -5984,7 +5983,9 @@
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size>few</group_size>
+            <group_size weight="4">few</group_size>
+            <group_size weight="12">pack</group_size>
+            <group_size weight="1">swarm</group_size>
             <native_room>plain</native_room>
             <native_room>monster</native_room>
             <native_room>cave</native_room>
@@ -7980,7 +7981,7 @@
         </text>
 
         <graphics>
-            <tile>shapeshifter</tile>
+            <tile>worm</tile>
             <character>W</character>
             <color>yellow</color>
         </graphics>

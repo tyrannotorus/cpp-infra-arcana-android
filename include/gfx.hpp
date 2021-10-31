@@ -170,7 +170,7 @@ enum class TileId
         scorched_ground,
         scroll,
         shadow,
-        shapeshifter,
+        worm,
         shotgun,
         sledge_hammer,
         smoke,

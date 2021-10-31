@@ -1105,7 +1105,7 @@ void SnakePitRoom::populate_monsters() const
 
         if (map::g_dlvl >= 3)
         {
-                actor_id_bucket.push_back(actor::Id::mind_worms);
+                actor_id_bucket.push_back(actor::Id::mind_worm);
         }
 
         const auto actor_id = rnd::element(actor_id_bucket);

@@ -89,7 +89,7 @@ enum class Id
         niduza,
         ape,
         worm_mass,
-        mind_worms,
+        mind_worm,
         dust_vortex,
         fire_vortex,
         energy_vortex,

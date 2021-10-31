@@ -1071,16 +1071,15 @@ void Player::kick_mon(Actor& defender)
 
         const ActorData& d = *defender.m_data;
 
-        // TODO: This is REALLY hacky, it should be done another way. Why even
-        // have a "stomp" attack?? Why not just kick them as well?
-        // TODO: For a slightly better way, check for the "small crawling"
-        // property instead.
+        // TODO: This is REALLY hacky, it should be done another way. Perhaps
+        // for a slightly better way, check for the "small crawling" property
+        // instead?
         if ((d.actor_size == Size::floor) &&
             (d.is_spider ||
              d.is_rat ||
              d.is_snake ||
              (d.id == Id::worm_mass) ||
-             (d.id == Id::mind_worms) ||
+             (d.id == Id::mind_worm) ||
              (d.id == Id::crawling_intestines) ||
              (d.id == Id::crawling_hand) ||
              (d.id == Id::thing)))
