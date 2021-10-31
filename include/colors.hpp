@@ -30,11 +30,33 @@ public:
 
         ~Color() = default;
 
-        Color& operator=(const Color& other);
+        Color& operator=(const Color& other)
+        {
+                if (&other == this)
+                {
+                        return *this;
+                }
 
-        bool operator==(const Color& other) const;
+                m_sdl_color = other.m_sdl_color;
 
-        bool operator!=(const Color& other) const;
+                return *this;
+        }
+
+        bool operator==(const Color& other) const
+        {
+                return (
+                        m_sdl_color.r == other.m_sdl_color.r &&
+                        m_sdl_color.g == other.m_sdl_color.g &&
+                        m_sdl_color.b == other.m_sdl_color.b);
+        }
+
+        bool operator!=(const Color& other) const
+        {
+                return (
+                        m_sdl_color.r != other.m_sdl_color.r ||
+                        m_sdl_color.g != other.m_sdl_color.g ||
+                        m_sdl_color.b != other.m_sdl_color.b);
+        }
 
         Color fraction(double div) const;
 
@@ -44,11 +66,25 @@ public:
 
         void clear();
 
-        SDL_Color sdl_color() const;
+        SDL_Color sdl_color() const
+        {
+                return m_sdl_color;
+        }
 
-        uint8_t r() const;
-        uint8_t g() const;
-        uint8_t b() const;
+        uint8_t r() const
+        {
+                return m_sdl_color.r;
+        }
+
+        uint8_t g() const
+        {
+                return m_sdl_color.g;
+        }
+
+        uint8_t b() const
+        {
+                return m_sdl_color.b;
+        }
 
         void set_rgb(uint8_t r, uint8_t g, uint8_t b);
 
@@ -70,55 +106,55 @@ std::optional<Color> name_to_color(const std::string& name);
 std::string color_to_name(const Color& color);
 
 // Available colors
-Color black();
-Color extra_dark_gray();
-Color dark_gray();
-Color gray();
-Color white();
-Color light_white();
-Color red();
-Color light_red();
-Color dark_green();
-Color green();
-Color light_green();
-Color dark_yellow();
-Color yellow();
-Color blue();
-Color light_blue();
-Color magenta();
-Color light_magenta();
-Color cyan();
-Color light_cyan();
-Color brown();
-Color dark_brown();
-Color gray_brown();
-Color dark_gray_brown();
-Color violet();
-Color dark_violet();
-Color orange();
-Color gold();
-Color sepia();
-Color light_sepia();
-Color dark_sepia();
-Color teal();
-Color light_teal();
-Color dark_teal();
+const Color& black();
+const Color& extra_dark_gray();
+const Color& dark_gray();
+const Color& gray();
+const Color& white();
+const Color& light_white();
+const Color& red();
+const Color& light_red();
+const Color& dark_green();
+const Color& green();
+const Color& light_green();
+const Color& dark_yellow();
+const Color& yellow();
+const Color& blue();
+const Color& light_blue();
+const Color& magenta();
+const Color& light_magenta();
+const Color& cyan();
+const Color& light_cyan();
+const Color& brown();
+const Color& dark_brown();
+const Color& gray_brown();
+const Color& dark_gray_brown();
+const Color& violet();
+const Color& dark_violet();
+const Color& orange();
+const Color& gold();
+const Color& sepia();
+const Color& light_sepia();
+const Color& dark_sepia();
+const Color& teal();
+const Color& light_teal();
+const Color& dark_teal();
 
 // GUI colors (using the colors above)
-Color text();
-Color passive_text();
-Color menu_highlight();
-Color menu_dark();
-Color menu_key_highlight();
-Color menu_key_dark();
-Color title();
-Color msg_good();
-Color msg_bad();
-Color msg_note();
-Color msg_more();
-Color mon_unaware_bg();
-Color mon_allied_bg();
-Color mon_temp_property_bg();
+const Color& text();
+const Color& passive_text();
+const Color& menu_highlight();
+const Color& menu_dark();
+const Color& menu_key_highlight();
+const Color& menu_key_dark();
+const Color& title();
+const Color& msg_good();
+const Color& msg_bad();
+const Color& msg_note();
+const Color& msg_more();
+const Color& mon_unaware();
+const Color& mon_allied();
+const Color& mon_temp_property();
 
 }  // namespace colors
 

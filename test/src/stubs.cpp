@@ -204,8 +204,6 @@ void draw_blast_at_seen_actors(
 
 void draw_logo() {}
 
-void draw_descr_box(const std::vector<ColoredString>&) {}
-
 void flush_input() {}
 
 void clear_events() {}

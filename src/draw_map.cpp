@@ -95,8 +95,7 @@ static void set_terrains()
                         render_data.color_bg = terrain_color_bg;
                 }
 
-                // TODO: Do in post_process_wall_tiles instead (but it needs
-                // refactoring first)
+                // TODO: Do in post_process_wall_tiles instead
                 if ((map::g_terrain.at(i)->id() == terrain::Id::wall) &&
                     config::text_mode_filled_walls())
                 {
@@ -326,7 +325,7 @@ static void set_living_seen_monster(
         if (map::g_player->is_leader_of(&mon))
         {
                 // The monster is player-friendly
-                render_data.color_bg = colors::mon_allied_bg();
+                render_data.color_bg = colors::mon_allied();
         }
         else
         {
@@ -341,13 +340,13 @@ static void set_living_seen_monster(
                         if (has_temporary_negative_prop)
                         {
                                 render_data.color_bg =
-                                        colors::mon_temp_property_bg();
+                                        colors::mon_temp_property();
                         }
                 }
                 else
                 {
                         // Monster is not aware of the player
-                        render_data.color_bg = colors::mon_unaware_bg();
+                        render_data.color_bg = colors::mon_unaware();
                 }
         }
 }
@@ -363,7 +362,7 @@ static void set_living_hidden_monster(
 
         const auto color_bg =
                 map::g_player->is_leader_of(&mon)
-                ? colors::mon_allied_bg()
+                ? colors::mon_allied()
                 : colors::dark_gray();
 
         render_data.tile = gfx::TileId::excl_mark;

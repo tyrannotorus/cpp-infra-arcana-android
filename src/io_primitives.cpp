@@ -71,12 +71,11 @@ void draw_rectangle_filled(R px_rect, const Color& color)
 
         px_rect = px_rect.with_offset(g_rendering_px_offset);
 
-        SDL_Rect rect;
-
-        rect.x = px_rect.p0.x;
-        rect.y = px_rect.p0.y;
-        rect.w = px_rect.w();
-        rect.h = px_rect.h();
+        const SDL_Rect rect {
+                px_rect.p0.x,
+                px_rect.p0.y,
+                px_rect.w(),
+                px_rect.h()};
 
         SDL_SetRenderDrawColor(
                 g_sdl_renderer,
