@@ -5858,7 +5858,6 @@
         <properties>
             <property>small_crawling</property>
             <property>splits_on_death</property>
-            <property>darkvision</property>
             <property>r_blind</property>
             <property>r_poison</property>
             <property>r_disease</property>
@@ -5956,7 +5955,6 @@
         <properties>
             <property>small_crawling</property>
             <property>splits_on_death</property>
-            <property>darkvision</property>
             <property>r_blind</property>
             <property>r_poison</property>
             <property>r_disease</property>
