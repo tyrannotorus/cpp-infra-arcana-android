@@ -64,22 +64,20 @@ static std::vector<HistoryEvent> s_history_events;
 static const std::string s_intro_msg_default =
         "I stand at the end of a cobbled forest path, before me lies a shunned "
         "and decrepit old church building. This is the access point to the "
-        "domains of the abhorred "
-        "\"Cult of Starry Wisdom\". "
+        "domains of the abhorred \"Cult of Starry Wisdom\". "
         "I am determined to enter these sprawling catacombs and rob them of "
         "treasures and knowledge. At the depths of the abyss lies my true "
-        "destiny, an artifact of non-human origin called "
+        "destiny, an artifact of non-human origin referred to as "
         "{light_white}\"The shining Trapezohedron\"{reset_color} "
         "- a window to all the secrets of the universe!";
 
 static const std::string s_intro_msg_exorcist =
         "I stand at the end of a cobbled forest path, before me lies a shunned "
         "and decrepit old church building. This is the access point to the "
-        "domains of the abhorred "
-        "\"Cult of Starry Wisdom\". "
+        "domains of the abhorred \"Cult of Starry Wisdom\". "
         "I am determined to enter these sprawling catacombs and purge them of "
-        "the corruption that dwells within. At the depths of the abyss lies, "
-        "an artifact of non-human origin called "
+        "the corruption that dwells within. At the depths of the abyss lies "
+        "an artifact of non-human origin referred to as "
         "{light_white}\"The shining Trapezohedron\"{reset_color} "
         "- rumored to be a window to all the secrets of the universe. "
         "This must be destroyed, so that none more may be tempted by "
@@ -607,7 +605,6 @@ void WinGameState::draw()
 
         std::vector<std::string> win_msg;
 
-        // TODO: Different win message for Exorcist?
         switch (player_bon::bg())
         {
         default:

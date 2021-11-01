@@ -197,7 +197,7 @@ void PopupState::on_start()
 
         if (!m_menu_choices.empty())
         {
-                m_browser.reset(m_menu_choices.size());
+                m_browser.reset((int)m_menu_choices.size());
 
                 m_browser.set_custom_menu_keys(m_menu_keys);
         }
@@ -266,12 +266,17 @@ void PopupState::draw_msg_popup() const
 
         const bool show_msg_centered = msg_lines.size() == 1;
 
-        for (const std::string& line : msg_lines)
+        if (show_msg_centered)
         {
-                ++y;
+                // Centered one-liner message.
 
-                if (show_msg_centered)
+                // NOTE: draw_text_center just takes a plain std::string -
+                // *FORMATTING NOT SUPPORTED!*
+
+                for (const std::string& line : msg_lines)
                 {
+                        ++y;
+
                         io::draw_text_center(
                                 line,
                                 Panel::screen,
@@ -281,20 +286,31 @@ void PopupState::draw_msg_popup() const
                                 colors::black(),
                                 true);  // Allow pixel-level adjustmet
                 }
-                else
-                {
-                        const auto text_x0 = get_x0(text_max_w);
 
-                        io::draw_text(
-                                line,
-                                Panel::screen,
-                                {text_x0, y},
-                                colors::text(),
-                                io::DrawBg::no);
-                }
+                y += 2;
         }
+        else
+        {
+                // Multiline message, formatting supported here (draw_text takes
+                // a Text object).
 
-        y += 2;
+                ++y;
+
+                const auto text_x0 = get_x0(text_max_w);
+
+                Text text(m_msg);
+
+                text.set_w(text_max_w);
+
+                io::draw_text(
+                        text,
+                        Panel::screen,
+                        {text_x0, y},
+                        colors::text(),
+                        io::DrawBg::no);
+
+                y += text.nr_lines() + 1;
+        }
 
         draw_horizontal_line(horizontal_line_w, y);
 
@@ -444,7 +460,7 @@ void PopupState::draw_menu_popup() const
                         const auto key_str = choice_str.substr(0, key_str_len);
 
                         const auto key_color =
-                                m_browser.is_at_idx(i)
+                                m_browser.is_at_idx((int)i)
                                 ? colors::menu_key_highlight()
                                 : colors::menu_key_dark();
 
@@ -466,7 +482,7 @@ void PopupState::draw_menu_popup() const
                                 std::string::npos);
 
                 const auto color =
-                        m_browser.is_at_idx(i)
+                        m_browser.is_at_idx((int)i)
                         ? colors::menu_highlight()
                         : colors::menu_dark();
 

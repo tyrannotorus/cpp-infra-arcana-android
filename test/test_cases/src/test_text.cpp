@@ -50,6 +50,72 @@ TEST_CASE("Text with color codes, no split")
         REQUIRE(actions[idx].str == "cc");
 }
 
+TEST_CASE("Text with color codes, split")
+{
+        std::string str =
+                "aaa {light_magenta}b {light_cyan}cc "
+                "ddd eee f";
+
+        Text text(str);
+
+        text.set_w(9);
+        text.set_color(colors::white());
+
+        const auto actions = text.actions();
+
+        size_t idx = 0;
+
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == "aaa");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == " ");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::change_color);
+        REQUIRE(actions[idx].color == colors::light_magenta());
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == "b");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == " ");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::change_color);
+        REQUIRE(actions[idx].color == colors::light_cyan());
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == "cc");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::newline);
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == "ddd");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == " ");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == "eee");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == " ");
+
+        ++idx;
+        REQUIRE(actions[idx].id == TextActionId::write_str);
+        REQUIRE(actions[idx].str == "f");
+}
+
 TEST_CASE("Split before space")
 {
         std::string str = "aaa {light_magenta}bbbbb{color_reset} cc";

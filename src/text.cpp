@@ -48,7 +48,7 @@ int Text::nr_lines()
 
         ++n;
 
-        return n;
+        return (int)n;
 }
 
 std::vector<TextAction> Text::actions()
