@@ -134,16 +134,9 @@ enum class MonGroupSize
 // example usually spawn alone, but on some rare occasions spawn in big groups).
 struct MonGroupSpawnRule
 {
-        MonGroupSpawnRule() :
-                group_size(MonGroupSize::alone),
-                weight(1) {}
-
-        MonGroupSpawnRule(MonGroupSize group_size_type, int spawn_weight) :
-                group_size(group_size_type),
-                weight(spawn_weight) {}
-
-        MonGroupSize group_size;
-        int weight;
+        MonGroupSize group_size {MonGroupSize::alone};
+        int weight {1};
+        int required_dlvl {0};
 };
 
 struct ActorItemSetData

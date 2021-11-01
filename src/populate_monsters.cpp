@@ -240,17 +240,28 @@ void make_group_at(
 
         int max_nr_in_group = 1;
 
+        std::vector<actor::MonGroupSpawnRule> group_sizes;
+
+        for (const auto& group_size : d.group_sizes)
+        {
+                if (map::g_dlvl >= group_size.required_dlvl)
+                {
+                        group_sizes.push_back(group_size);
+                }
+        }
+
         // First, determine the type of group by a weighted choice
         std::vector<int> weights;
+        weights.reserve(group_sizes.size());
 
-        for (const auto& rule : d.group_sizes)
+        for (const auto& rule : group_sizes)
         {
                 weights.push_back(rule.weight);
         }
 
-        const int rnd_choice = rnd::weighted_choice(weights);
+        const auto rnd_choice = rnd::weighted_choice(weights);
 
-        const auto group_size = d.group_sizes[rnd_choice].group_size;
+        const auto group_size = group_sizes[rnd_choice].group_size;
 
         // Determine the number of monsters to spawn based on the group type
         switch (group_size)
@@ -273,9 +284,10 @@ void make_group_at(
 
         actor::Actor* origin_actor = nullptr;
 
-        const int nr_free_cells = sorted_free_cells.size();
+        const auto nr_free_cells = (int)sorted_free_cells.size();
 
-        const int nr_can_be_spawned = std::min(nr_free_cells, max_nr_in_group);
+        const auto nr_can_be_spawned =
+                std::min(nr_free_cells, max_nr_in_group);
 
         for (int i = 0; i < nr_can_be_spawned; ++i)
         {

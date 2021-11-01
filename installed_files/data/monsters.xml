@@ -154,9 +154,9 @@
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="20">alone</group_size>
-            <group_size weight="70">few</group_size>
-            <group_size weight="10">pack</group_size>
-            <group_size weight="1">swarm</group_size>
+            <group_size weight="60" required_dungeon_level="2">few</group_size>
+            <group_size weight="20" required_dungeon_level="3">pack</group_size>
+            <group_size weight="1"  required_dungeon_level="3">swarm</group_size>
             <native_room>plain</native_room>
             <native_room>monster</native_room>
             <native_room>crypt</native_room>
@@ -258,7 +258,7 @@
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="3">alone</group_size>
-            <group_size weight="1">few</group_size>
+            <group_size weight="1" required_dungeon_level="2">few</group_size>
             <native_room>plain</native_room>
             <native_room>monster</native_room>
             <native_room>crypt</native_room>
@@ -4002,7 +4002,8 @@
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size>pack</group_size>
+            <group_size weight="1">few</group_size>
+            <group_size weight="3" required_dungeon_level="2">pack</group_size>
             <native_room>plain</native_room>
             <native_room>forest</native_room>
             <native_room>monster</native_room>

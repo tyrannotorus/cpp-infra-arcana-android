@@ -640,15 +640,23 @@ static void dump_ai(xml::Element* ai_e, actor::ActorData& data)
 
 static void dump_group_size(xml::Element* group_e, actor::ActorData& data)
 {
-        const auto group_size =
+        actor::MonGroupSpawnRule rule;
+
+        rule.group_size =
                 s_str_to_group_size_map.at(
                         xml::get_text_str(group_e));
 
-        int weight = 1;
+        xml::try_get_attribute_int(
+                group_e,
+                "weight",
+                rule.weight);
 
-        xml::try_get_attribute_int(group_e, "weight", weight);
+        xml::try_get_attribute_int(
+                group_e,
+                "required_dungeon_level",
+                rule.required_dlvl);
 
-        data.group_sizes.emplace_back(group_size, weight);
+        data.group_sizes.push_back(rule);
 }
 
 static void dump_native_room(
@@ -842,9 +850,7 @@ void ActorData::reset()
         character = 'X';
         color = colors::yellow();
 
-        // Default spawn group size is "alone"
-        group_sizes.assign(
-                {MonGroupSpawnRule(MonGroupSize::alone, 1)});
+        group_sizes.assign({});
 
         hp = 0;
         item_sets.clear();
