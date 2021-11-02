@@ -37,7 +37,6 @@ MINOR TWEAKS AND BALANCING
 * Added completely new descriptions for all Ooze monsters, removed Black Ooze, changed Putrid Ooze to be weaker and spawn earlier, renamed Clear Ooze to Lurking Ooze
 * A generated description is printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters
 * Forcing a metal door open (e.g. with a Rod of Opening or the Control Object spell) also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
-* The Spectral Weapons spell always spawn an unlimited number of weapons (one for each carried melee weapon), but the duration of the spawned weapons is very limited (and depends on spell skill level)
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
 * Removed the Searching spell - instead this is a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)
 * Clairvoyant Occultists also starts with the Premonition spell

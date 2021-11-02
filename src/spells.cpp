@@ -2464,21 +2464,26 @@ bool SpellPestilence::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 // Spectral Weapons
 // -----------------------------------------------------------------------------
+int SpellSpectralWeapons::max_nr_weapons(const SpellSkill skill) const
+{
+        return 2 + (int)skill;
+}
+
 Range SpellSpectralWeapons::duration_range(const SpellSkill skill) const
 {
         switch (skill)
         {
         case SpellSkill::basic:
-                return {3, 4};
+                return {5, 10};
 
         case SpellSkill::expert:
         case SpellSkill::transcendent:
                 // NOTE: For balancing reasons, the transcendent level uses the
                 // same duration as the expert level.
-                return {4, 6};
+                return {10, 15};
 
         case SpellSkill::master:
-                return {6, 8};
+                return {15, 20};
         }
 
         ASSERT(false);
@@ -2572,7 +2577,15 @@ void SpellSpectralWeapons::run_effect(
                 }
         }
 
+        // Cap the number of weapons spawned
         rnd::shuffle(weapons);
+
+        const auto nr_max = (size_t)max_nr_weapons(skill);
+
+        if (nr_max < weapons.size())
+        {
+                weapons.resize(nr_max);
+        }
 
         // Spawn weapon monsters
         for (const auto* const item : weapons)
@@ -2611,10 +2624,30 @@ std::vector<std::string> SpellSpectralWeapons::descr_specific(
                 "\"modern\" mechanisms such as pistols or machine guns are "
                 "far too complex.");
 
-        descr.emplace_back(
-                "The weapons exist for " +
+        const auto nr_max = (size_t)max_nr_weapons(skill);
+
+        std::string nr_and_duration_str =
+                "A maximum of " +
+                std::to_string(nr_max) +
+                " ";
+
+        if (nr_max == 1)
+        {
+                nr_and_duration_str += "weapon";
+        }
+        else
+        {
+                nr_and_duration_str += "weapons";
+        }
+
+        nr_and_duration_str += " may be spawned on casting the spell.";
+
+        nr_and_duration_str +=
+                " The weapons exist for " +
                 duration_range(skill).str() +
-                " turns");
+                " turns.";
+
+        descr.push_back(nr_and_duration_str);
 
         if (skill >= SpellSkill::master)
         {

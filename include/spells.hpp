@@ -927,6 +927,8 @@ private:
                 item::Item* item,
                 actor::Actor* mon,
                 SpellSkill skill) const;
+
+        int max_nr_weapons(SpellSkill skill) const;
 };
 
 class SpellControlObject : public Spell

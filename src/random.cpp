@@ -161,7 +161,11 @@ int weighted_choice(const std::vector<int>& weights)
         }
 #endif  // NDEBUG
 
-        const int sum = std::accumulate(begin(weights), end(weights), 0);
+        const int sum =
+                std::accumulate(
+                        std::begin(weights),
+                        std::end(weights),
+                        0);
 
         int rnd = rnd::range(0, sum - 1);
 
@@ -171,7 +175,7 @@ int weighted_choice(const std::vector<int>& weights)
 
                 if (rnd < weight)
                 {
-                        return i;
+                        return (int)i;
                 }
 
                 rnd -= weight;
