@@ -23,6 +23,7 @@
 #include "debug.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
 #include "item_curse.hpp"
@@ -420,7 +421,7 @@ void Gong::on_hit(
 
                         game::incr_player_xp(10);
 
-                        map::g_player->restore_sp(999, false);
+                        map::g_player->restore_sp(999, false, Verbose::no);
                         map::g_player->restore_sp(10, true);
                 }
                 break;

@@ -13,6 +13,7 @@
 #include "common_text.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
@@ -59,7 +60,7 @@ void Monolith::on_hit(
 
                         game::incr_player_xp(15);
 
-                        map::g_player->restore_sp(999, false);
+                        map::g_player->restore_sp(999, false, Verbose::no);
                         map::g_player->restore_sp(10, true);
                 }
                 break;

@@ -17,6 +17,7 @@
 #include "array2.hpp"
 #include "debug.hpp"
 #include "game.hpp"
+#include "global.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
@@ -388,7 +389,7 @@ ItemPrePickResult Scroll::pre_pickup_hook()
 
         game::incr_player_xp(5);
 
-        map::g_player->restore_sp(999, false);
+        map::g_player->restore_sp(999, false, Verbose::no);
         map::g_player->restore_sp(7, true);
 
         return ItemPrePickResult::destroy_item;

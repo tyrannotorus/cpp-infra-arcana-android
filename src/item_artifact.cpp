@@ -666,7 +666,7 @@ ItemPrePickResult Necronomicon::pre_pickup_hook()
 
         game::incr_player_xp(10);
 
-        map::g_player->restore_sp(999, false);
+        map::g_player->restore_sp(999, false, Verbose::no);
         map::g_player->restore_sp(11, true);
 
         return ItemPrePickResult::destroy_item;
