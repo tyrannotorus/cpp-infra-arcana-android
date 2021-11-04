@@ -1872,6 +1872,11 @@ void PropParalyzed::on_applied()
         }
 }
 
+void PropFainted::on_hit()
+{
+        m_owner->m_properties.end_prop(id());
+}
+
 bool PropFainted::should_update_vision_on_toggled() const
 {
         return m_owner->is_player();

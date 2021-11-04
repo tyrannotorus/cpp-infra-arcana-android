@@ -1107,10 +1107,7 @@ public:
                 return false;
         }
 
-        void on_hit() override
-        {
-                m_nr_turns_left = 0;
-        }
+        void on_hit() override;
 };
 
 class PropSlowed : public Prop
