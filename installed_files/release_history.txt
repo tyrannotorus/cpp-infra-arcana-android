@@ -36,7 +36,8 @@ Minor tweaks and balancing
 * Updated Worm Masses and Mind Worms - they are now blind, slow (instead of normal speed), have much more hit points, are unsettling (causes shock to see), take much less damage from piercing attacks (such as pistol shots or dagger strikes), and have a very limited hearing range
 * Worm Masses and Mind Worms can no longer split while burning
 * Added completely new descriptions for all Ooze monsters, removed Black Ooze, changed Putrid Ooze to be weaker and spawn earlier, renamed Clear Ooze to Lurking Ooze
-* A generated description is printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled - now it is only the spawn level description that is disabled for these monsters
+* Removed the spawn level part of monster descriptions ("they usually dwell beneath level...")
+* A generated description is now printed for all monsters - previously some monsters (such as Crawling Intestines) used to have the generated part of their description completely disabled
 * Forcing a metal door open (e.g. with a Rod of Opening or the Control Object spell) also toggles all connected switches (this would previously leave the switches "inverted", so that it was hard to know if pulling the switch would open or close a door)
 * The Teleport spell has a distance limit, which is increased with higher skill levels - also reduced the spirit cost of the spell
 * Removed the Searching spell - instead this is a permanent ability for the Clairvoyant Occultist (upgraded at levels 4 and 8)

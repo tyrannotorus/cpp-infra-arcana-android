@@ -238,12 +238,6 @@ static void dump_text(xml::Element* text_e, actor::ActorData& data)
                                 text_e,
                                 "description"));
 
-        data.allow_spawn_dlvl_descr =
-                xml::get_text_bool(
-                        xml::first_child(
-                                text_e,
-                                "allow_spawn_dlvl_description"));
-
         data.allow_wielded_wpn_descr =
                 xml::get_text_bool(
                         xml::first_child(
@@ -879,7 +873,6 @@ void ActorData::reset()
         spawn_max_dlvl = -1;
         spawn_weight = 100;
         actor_size = Size::humanoid;
-        allow_spawn_dlvl_descr = true;
         nr_kills = 0;
         has_player_seen = false;
         can_open_doors = can_bash_doors = false;

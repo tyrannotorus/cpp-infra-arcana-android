@@ -129,37 +129,6 @@ static std::string get_mon_memory_turns_descr(
         }
 }
 
-static std::string get_mon_dlvl_descr(
-        const actor::ActorData& actor_data,
-        const actor::Actor& actor)
-{
-        const int dlvl = actor_data.spawn_min_dlvl;
-
-        if ((dlvl <= 1) || (dlvl >= g_dlvl_last))
-        {
-                return "";
-        }
-
-        const std::string dlvl_str = std::to_string(dlvl);
-
-        if (actor_data.is_unique)
-        {
-                return (
-                        actor.name_the() +
-                        " usually dwells beneath level{_}" +
-                        dlvl_str +
-                        ".");
-        }
-        else
-        {
-                // Not unique
-                return (
-                        "They usually dwell beneath level{_}" +
-                        dlvl_str +
-                        ".");
-        }
-}
-
 static std::string mon_speed_type_to_str(const actor::Speed speed)
 {
         switch (speed)
@@ -539,13 +508,6 @@ static std::string auto_description_str(actor::Actor& actor)
                 text_format::append_with_space(
                         str,
                         get_sneak_chance_descr(actor));
-        }
-
-        if (actor_data.allow_spawn_dlvl_descr)
-        {
-                text_format::append_with_space(
-                        str,
-                        get_mon_dlvl_descr(actor_data, actor));
         }
 
         if (actor_data.allow_speed_descr)

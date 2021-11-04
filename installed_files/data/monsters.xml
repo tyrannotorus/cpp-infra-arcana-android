@@ -9,7 +9,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description></description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message></wary_message>
@@ -72,7 +71,6 @@
             <corpse_name_a>a lifeless gruesome corpse</corpse_name_a>
             <corpse_name_the>the lifeless gruesome corpse</corpse_name_the>
             <description>This rotting thing appears to have been brought back to life through some abominable process. It has grown sharp claws to attack with.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -174,7 +172,6 @@
             <corpse_name_a>a huge gruesome corpse</corpse_name_a>
             <corpse_name_the>the huge gruesome corpse</corpse_name_the>
             <description>A walking cadaver of towering proportions, it seems to have had the skin of countless other bodies poorly sewn over that of its own. Festering wounds on its hulk continually disgorge an acidic liquid which has bleached it beyond belief.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -276,7 +273,6 @@
             <corpse_name_a>the corpse of Major Clapham-Lee</corpse_name_a>
             <corpse_name_the>the corpse of Major Clapham-Lee</corpse_name_the>
             <description>Major Sir Eric Moreland Clapham-Lee was once a commanding officer during the Great War. Shortly after his plane was shot down, his body was stolen. Now he roams these halls as a resurrected warrior in service of the cult, commanding a squad of undead.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -372,7 +368,6 @@
             <corpse_name_a>the corpse of Dean Halsey</corpse_name_a>
             <corpse_name_the>the corpse of Dean Halsey</corpse_name_the>
             <description>Once an influential figure at the forefront of a prestigious institution, this fetid carcass now prowls among an army of the dead.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -467,7 +462,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A writhing mass of crawling intestines.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>starts groping and feeling around.</wary_message>
@@ -559,7 +553,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A disembodied hand, crawling around frantically on its fingertips like a spider.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -651,7 +644,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A particularly nasty disembodied hand, crawling around frantically on its fingertips like a spider. Beware of the Thing.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -748,7 +740,6 @@
             <corpse_name_a>a Skull</corpse_name_a>
             <corpse_name_the>the Skull</corpse_name_the>
             <description>A severed head floating through the air.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -846,7 +837,6 @@
             <corpse_name_a>a Cultist corpse</corpse_name_a>
             <corpse_name_the>the Cultist corpse</corpse_name_the>
             <description>A fanatic cultist of the lowest rank, madly gibbering in some half-lost language. They may occasionally have learned to cast a spell or two, although never with any great skill. Therefore they tend to rely on mundane firearms to handle threats.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>true</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -948,7 +938,6 @@
             <corpse_name_a>a Zealot corpse</corpse_name_a>
             <corpse_name_the>the Zealot corpse</corpse_name_the>
             <description>Beckoned by The Thousand-Faced Moon into laying its mind bare for the occult, the psyche of this hierophant was ravaged by scores of entities from fiendish realities. They had it gouge out its eyes and tongue, and left it a husk of former humanity. Now it lumbers about aimlessly, brandishing a spiked mace with which it flays itself in mockery of physical anguish.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -1039,7 +1028,6 @@
             <corpse_name_a>a Bog Tcher corpse</corpse_name_a>
             <corpse_name_the>the Bog Tcher corpse</corpse_name_the>
             <description>A vile dwarfish creature, clad in coarse brown robes. It has a cruel grin on its pale face, and its eyes are gleaming with hatred. The Bog Tcher are mechanically inclined, which they put to use by crafting sadistic weapons and traps. Their favored weapon is their "spike gun", which can pin the target against solid objects for prolonged suffering.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -1126,7 +1114,6 @@
             <corpse_name_a>the corpse of Keziah Mason</corpse_name_a>
             <corpse_name_the>the corpse of Keziah Mason</corpse_name_the>
             <description>A shrivelled hag who croaks of deviltry and possesses knowledge beyond the ken of a sane mind. She reigns over the myriad man-rat hybrids crawling within the dungeon, humoring her most cherished like a child: not once does she deny it the black blood that flows inside her veins.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -1233,7 +1220,6 @@
             <corpse_name_a>the corpse of Brown Jenkin</corpse_name_a>
             <corpse_name_the>the corpse of Brown Jenkin</corpse_name_the>
             <description>This man-rodent beast slinks through cracks in the church's walls and pounces on its victims, raking at their flesh with its undeveloped limbs. Being the black matron's mongrel of choice, it titters senselessly whenever it feasts on her blood.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -1326,7 +1312,6 @@
             <corpse_name_a>a Leng Spider corpse</corpse_name_a>
             <corpse_name_the>the Leng Spider corpse</corpse_name_the>
             <description>Marred by a mass of purplish cysts, the hide of this beast has been distended to absurdity, rendering it the size of a cow. It weaves webs as quickly as it strides, and its jaws are thick with rank lather.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -1422,7 +1407,6 @@
             <corpse_name_a>a Leng Doomweaver corpse</corpse_name_a>
             <corpse_name_the>the Leng Doomweaver corpse</corpse_name_the>
             <description>The webs spun by this transcendental creature are not of any mundane kind - weaving, plucking, gnawing, it taps directly into the fabric of fate, making baleful arrangements according to its ulterior whims.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -1517,7 +1501,6 @@
             <corpse_name_a>a Leng Matriarch corpse</corpse_name_a>
             <corpse_name_the>the Leng Matriarch corpse</corpse_name_the>
             <description>Ever watchful with leery eyes of insidious cunning, she fends for her brood as they stride between worlds through space and time.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -1617,7 +1600,6 @@
             <corpse_name_a>a Cultist Priest corpse</corpse_name_a>
             <corpse_name_the>the Cultist Priest corpse</corpse_name_the>
             <description>A fanatic cultist of the Priest rank, madly gibbering in some half-lost language.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -1718,7 +1700,6 @@
             <corpse_name_a>a Wizard corpse</corpse_name_a>
             <corpse_name_the>the Wizard corpse</corpse_name_the>
             <description>A fanatic cultist of the Wizard rank, madly gibbering in some half-lost language.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -1819,7 +1800,6 @@
             <corpse_name_a>an Arch Wizard corpse</corpse_name_a>
             <corpse_name_the>the Arch Wizard corpse</corpse_name_the>
             <description>A fanatic cultist of the Arch Wizard rank, madly gibbering in some half-lost language.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -1920,7 +1900,6 @@
             <corpse_name_a>a Green Spider corpse</corpse_name_a>
             <corpse_name_the>the Green Spider corpse</corpse_name_the>
             <description>An enormous green spider.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -2012,7 +1991,6 @@
             <corpse_name_a>a White Spider corpse</corpse_name_a>
             <corpse_name_the>the White Spider corpse</corpse_name_the>
             <description>An enormous white spider.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -2104,7 +2082,6 @@
             <corpse_name_a>a Red Spider corpse</corpse_name_a>
             <corpse_name_the>the Red Spider corpse</corpse_name_the>
             <description>An enormous red spider.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -2196,7 +2173,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A faint shadow of a huge spider, lurking in the periphery.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -2290,7 +2266,6 @@
             <corpse_name_a>a Rat corpse</corpse_name_a>
             <corpse_name_the>the Rat corpse</corpse_name_the>
             <description>A large aggressive rodent.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -2381,7 +2356,6 @@
             <corpse_name_a>a Rat corpse</corpse_name_a>
             <corpse_name_the>the Rat corpse</corpse_name_the>
             <description>A large aggressive rodent.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -2474,7 +2448,6 @@
             <corpse_name_a>a Rat-thing corpse</corpse_name_a>
             <corpse_name_the>the Rat-thing corpse</corpse_name_the>
             <description>A malformed cross of rat and man, birthed from witchcraft. It has a warped human face and vestigial hands for forepaws.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -2568,7 +2541,6 @@
             <corpse_name_a>a Pit Viper corpse</corpse_name_a>
             <corpse_name_the>the Pit Viper corpse</corpse_name_the>
             <description>A fierce predator. It hisses menacingly, and venom drips from its fangs.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -2663,7 +2635,6 @@
             <corpse_name_a>a Spitting Cobra corpse</corpse_name_a>
             <corpse_name_the>the Spitting Cobra corpse</corpse_name_the>
             <description>A fierce predator. It hisses menacingly, and venom drips from its fangs.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -2761,7 +2732,6 @@
             <corpse_name_a>a Black Mamba corpse</corpse_name_a>
             <corpse_name_the>the Black Mamba corpse</corpse_name_the>
             <description>A fierce predator. It hisses menacingly, and venom drips from its fangs.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -2856,7 +2826,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>This extremely aggressive canine seems to be part corporeal and part fire. It breathes searing flames.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -2954,7 +2923,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>This extremely aggressive canine seems to be part corporeal and part energy. It breathes lightning.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -3053,7 +3021,6 @@
             <corpse_name_the>the corpse of Zuul the Gatekeeper</corpse_name_the>
             <death_message>vanishes...</death_message>
             <description>Zuul the Gatekeeper of Gozer is a demigod and minion of Gozer. It was worshiped by the Sumerians and Hittites in 6000 BC, along with Gozer.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -3148,7 +3115,6 @@
             <corpse_name_a>a Mi-go corpse</corpse_name_a>
             <corpse_name_the>the Mi-go corpse</corpse_name_the>
             <description>An amalgam of crustacean, insect and fungi whose droning voice resembles a swarm of maddened hornets. It employs an irregular set of appendages as limbs and is capable of making use of advanced technology.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -3249,7 +3215,6 @@
             <corpse_name_a>a Mi-go corpse</corpse_name_a>
             <corpse_name_the>the Mi-go corpse</corpse_name_the>
             <description>Part of a higher echelon of the Mi-Go, the buzz of this creature's commanding tone dims that of its insectoid wings. A protective bio-mechanical suit is fused to its carapace.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -3350,7 +3315,6 @@
             <corpse_name_a>a dead Polyp</corpse_name_a>
             <corpse_name_the>the dead Polyp</corpse_name_the>
             <description>Flying polyps are a horrible elder race of half polypous, utterly alien entities. They are only partly material and have the power of aerial motion, despite the absence of wings. Their senses does not include sight, but what senses they have can penetrate all material obstructions. They are invulnerable to normal means of damage, though they can be destroyed by certain forms of electrical energy.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -3451,7 +3415,6 @@
             <corpse_name_a>a dead Polyp</corpse_name_a>
             <corpse_name_the>the dead Polyp</corpse_name_the>
             <description>Flying polyps are a horrible elder race of half polypous, utterly alien entities. They are only partly material and have the power of aerial motion, despite the absence of wings. Their senses does not include sight, but what senses they have can penetrate all material obstructions. They are invulnerable to normal means of damage, though they can be destroyed by certain forms of electrical energy.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -3552,7 +3515,6 @@
             <corpse_name_a>a Mind Leech corpse</corpse_name_a>
             <corpse_name_the>the Mind Leech corpse</corpse_name_the>
             <description>A tentacled alien creature, mysteriously floating through the air in a ghostly manner. They somehow sustain themselves on the brain activity of other beings. This will usually not kill the victim, but the experience is horrific beyond words. They only feed on sound minds however - a strange or chaotic mind will cause them great distress.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -3644,7 +3606,6 @@
             <corpse_name_a>a Ghoul corpse</corpse_name_a>
             <corpse_name_the>the Ghoul corpse</corpse_name_the>
             <description>A gaunt, bipedal predator bearing canine features. Dried blood mottles its snout and its claws are filthy with sodden earth and chunks of flesh.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -3741,7 +3702,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A living shadow.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -3835,7 +3795,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A mysterious humanoid figure stalking for prey. It is invisible to normal eyes.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -3929,7 +3888,6 @@
             <corpse_name_a>a Wolf carcass</corpse_name_a>
             <corpse_name_the>the Wolf carcass</corpse_name_the>
             <description>A large wolf with eyes full of cunning.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -4020,7 +3978,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A restless spirit.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks disturbed.</wary_message>
@@ -4117,7 +4074,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A powerful spirit.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks disturbed.</wary_message>
@@ -4218,7 +4174,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A nightmarish creature of humanoid shape. It has a hideous gangly physique and sickly pale skin. Its arms are as long as its body is tall, and it attacks with ripping claws. It can appear anywhere it desires at any time, and can also snatch teleporting creatures from their voyage and draw them to it.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -4309,7 +4264,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A nightmarish creature of humanoid shape. It has a hideous gangly physique and sickly pale skin. Its arms are as long as its body is tall, and it attacks with ripping claws. It can appear anywhere it desires at any time, and can also snatch teleporting creatures from their voyage and draw them to it. This ancient individual has learned the art of spellcasting.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -4407,7 +4361,6 @@
             <corpse_name_a>a Raven carcass</corpse_name_a>
             <corpse_name_the>the Raven carcass</corpse_name_the>
             <description>A vicious black bird.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -4497,7 +4450,6 @@
             <corpse_name_a>a Giant Bat corpse</corpse_name_a>
             <corpse_name_the>the Giant Bat corpse</corpse_name_the>
             <description>An unknown species, perhaps stemming from some hidden bowels of the earth. It is about as tall as a full-grown human.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -4589,7 +4541,6 @@
             <corpse_name_a>a Vampire Bat corpse</corpse_name_a>
             <corpse_name_the>the Vampire Bat corpse</corpse_name_the>
             <description>An unknown species, perhaps stemming from some hidden bowels of the earth. It is about as tall as a full-grown human. Its attack drains health from the victim.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -4680,7 +4631,6 @@
             <corpse_name_a>the corpse of Abaxu</corpse_name_a>
             <corpse_name_the>the corpse of Abaxu</corpse_name_the>
             <description>A colossal white bat, spoken of in ancient traditions as "Abaxu the Destroyer" (or a variation thereof). It has eternal life, which it sustains by feeding on other creatures - allegedly including human sacrifice. This has surely given rise to certain vampire myths over the years.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -4773,7 +4723,6 @@
             <corpse_name_a>a Byakhee corpse</corpse_name_a>
             <corpse_name_the>the Byakhee corpse</corpse_name_the>
             <description>"There flapped rhythmically a horde of tame, trained, hybrid winged things... not altogether crows, nor moles, nor buzzards, nor ants, nor decomposed human beings, but something I cannot and must not recall."-H.P. Lovecraft, "The Festival".</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -4865,7 +4814,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>An otherworldly life form, akin to a macroscopic amoeba. It disrupts physical space around it, likely an effect of its dissonance with any other cosmos than its own.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -4963,7 +4911,6 @@
             <corpse_name_a>a Giant Mantis corpse</corpse_name_a>
             <corpse_name_the>the Giant Mantis corpse</corpse_name_the>
             <description>A huge predatory insect.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -5051,7 +4998,6 @@
             <corpse_name_a>a Giant Locust corpse</corpse_name_a>
             <corpse_name_the>the Giant Locust corpse</corpse_name_the>
             <description>A huge swarming insect.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -5140,7 +5086,6 @@
             <corpse_name_a>a lifeless Mummy</corpse_name_a>
             <corpse_name_the>the lifeless Mummy</corpse_name_the>
             <description>A mummified human being, possibly dating back millennia.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -5238,7 +5183,6 @@
             <corpse_name_a>a lifeless Mummy</corpse_name_a>
             <corpse_name_the>the lifeless Mummy</corpse_name_the>
             <description>A grotesque mummified hybrid creature, with the body of a human and the head of a crocodile. It is wielding a spear.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -5327,7 +5271,6 @@
             <corpse_name_a>the lifeless Mummy of Khephren</corpse_name_a>
             <corpse_name_the>the lifeless Mummy of Khephren</corpse_name_the>
             <description>The mummified fourth dynasty Egyptian pharaoh Khephren. How he came to dwell here is beyond anyone's guess.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -5431,7 +5374,6 @@
             <corpse_name_a>the lifeless Mummy of Nitokris</corpse_name_a>
             <corpse_name_the>the lifeless Mummy of Nitokris</corpse_name_the>
             <description>The mummified sixth dynasty Egyptian pharaoh Nitokris. How she came to dwell here is beyond anyone's guess. Her name is found in the histories of Herodotus and writings of Manetho. According to the writings of the former, she took the throne by inviting her brother's murderers to a banquet. Then killed them by flooding the sealed room with the Nile.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -5537,7 +5479,6 @@
             <corpse_name_a>a corpse of a Deep One</corpse_name_a>
             <corpse_name_the>the corpse of a Deep One</corpse_name_the>
             <description>A shambling thing which could be taken for a man were it not for its briny whiff and scaly skin. Slits on its neck emit a labored inflection, marking its struggle to gulp at breathable air. It hoists a rust-eaten spear and a net through which the thrashing remains of its last feast can be seen.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -5629,7 +5570,6 @@
             <corpse_name_a>the corpse of Niduza</corpse_name_a>
             <corpse_name_the>the corpse of Niduza</corpse_name_the>
             <description>A deacon for the deep-sea folk, this damnable shaman commands sorcery that backs its kin and wracks its foes. It is coated in copper scales which boast of majesty, and disdain is innate to its cold glare.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -5719,7 +5659,6 @@
             <corpse_name_a>an Ape corpse</corpse_name_a>
             <corpse_name_the>the Ape corpse</corpse_name_the>
             <description>An extremely aggressive species of great ape. Their pale skin and excellent night vision indicates that they adapted to subterranean life a very long time ago.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -5810,7 +5749,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A slithering conglomeration of carnivorous worms.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -5906,7 +5844,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A predacious worm about the size of an adult human's arm. Its bite causes heavy disorientation in the victim.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6004,7 +5941,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A spinning force of destruction.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6101,7 +6037,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A spinning force of fire and destruction.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6200,7 +6135,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A spinning force of pure energy.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6299,7 +6233,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. A malodorous broth of purulence bubbles about its nucleus, indicating it is ridden with disease.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6399,7 +6332,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. This species has developed a trait that allows it to mimic the colors of its surroundings, rendering it nearly invisible to its prey.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6498,7 +6430,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. The alarmingly green hue of this particular specimen indicates its utter venomousness.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6598,7 +6529,6 @@
             <corpse_name_a>a Gla'Suu corpse</corpse_name_a>
             <corpse_name_the>the Gla'Suu corpse</corpse_name_the>
             <description>A loathsome beast hauling around a great sagging body on strained legs. Through its translucent, stretched skin the vile content of the creature's husk is clearly visible: carrion, human remains in various states of decomposition, trash, and sewage - along with other less recognizable things. Its head droops to the ground, where a tentacled mouth devours whatever filth it happens upon. It occasionally spews forth half-solid chunks of ooze, which after fermenting in the remarkable conditions of the creature's bowels, takes on a form of life of it's own - hunting for biological matter to decompose in order to feed its creator.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6688,7 +6618,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A peculiar floating speck of strange shifting colors. It is very confusing to look at. Wherever they pass, they corrupt the environment around them. They are invulnerable to attacks from common materials like iron or steel, but can be destroyed by other forms of damage, such as fire or electricity.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6792,7 +6721,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>The freezing radiance emanating from this dancing flame provides no sense of comfort whatsoever - gazing upon it is disturbing to the very soul, and fills one with bitter hatred.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>false</allow_speed_description>
             <wary_message></wary_message>
@@ -6893,7 +6821,6 @@
             <corpse_name_a>a Chthonian corpse</corpse_name_a>
             <corpse_name_the>the Chthonian corpse</corpse_name_the>
             <description>It resembles an immense squid, with reaching, groping tentacles, and a pulpy, elongated sack of a body. Chthonians are powerful burrowers, and live for more than a thousand years.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -6984,7 +6911,6 @@
             <corpse_name_a>a Hunting Horror corpse</corpse_name_a>
             <corpse_name_the>the Hunting Horror corpse</corpse_name_the>
             <description>A ropy, winged worm of vast size and vaporous composition. Brought forth from another plane of existence it drifts in endless search of sustenance, its maw hanging so agape it could swallow an ox whole.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -7077,7 +7003,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>Shifting in and out of sight, this creature resembles a piece of cloth sailing through the aether, seemingly folding time-space along with its dreamy soar. Atop its craned neck rests an oblong orb with which it conjures deadly bolts to heave onto any threat.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -7186,7 +7111,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A vast, fully matured Khaga, the flight of this cryptic being conceals it from ordinary eyesight. It wails a disarmingly beautiful mantra which dissonates with the roar of the bolts it summons from its orb-like head.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -7293,7 +7217,6 @@
             <corpse_name_a>a broken Sentry Drone</corpse_name_a>
             <corpse_name_the>the broken Sentry Drone</corpse_name_the>
             <description>An infernal piece of technology, seemingly designed to serve as a sort of guard. It hovers around, searching the area for interlopers to blast on sight. It appears to have some organic parts, and may even be a conscious living being.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -7390,7 +7313,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description></description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message></wary_message>
@@ -7480,7 +7402,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A sickly growth thriving in damp areas. It produces toxic spores which it stores in its slimy heads.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>false</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -7580,7 +7501,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A sickly growth thriving in damp areas. The toxic spores of this particular species are strongly hallucinogenic.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>false</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -7680,7 +7600,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>An array of writhing tentacles sprouting up from the ground.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seem disturbed.</wary_message>
@@ -7774,7 +7693,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A vaguely intelligent floating fungus-based organism. It contains a highly explosive gas and will detonate very easily, which it seems to desire.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -7868,7 +7786,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>A living incarnation of death. With its goat-like features, it is eerily similar to the imagery of Devils and Demons seen in medieval woodcuts.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -7971,7 +7888,6 @@
             <corpse_name_a>a Shapeshifter corpse</corpse_name_a>
             <corpse_name_the>the Shapeshifter corpse</corpse_name_the>
             <description>A gelatinous worm which contorts and mutates itself into different beings. Destroying the mutated form will revert the creature back to its original shape.</description>
-            <allow_spawn_dlvl_description>true</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -8065,7 +7981,6 @@
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>The Supreme Wizard of the Cult of Starry Wisdom. He appears incredibly old, like a hideous ancient vampire or a grim reaper. Tattered crimson robes flow from his skeletal frame, his bony fingers extends into razor sharp claws, and he has a grim expression on his face.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -8172,7 +8087,6 @@
             <corpse_name_a>the corpse of Balastha</corpse_name_a>
             <corpse_name_the>the corpse of Balastha</corpse_name_the>
             <description>Balastha is an undead master of arms and warfare, bound to guard the High Priest for all eternity. He is wielding a Tommy Gun.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -8260,7 +8174,6 @@
             <corpse_name_a>the corpse of Uraga</corpse_name_a>
             <corpse_name_the>the corpse of Uraga</corpse_name_the>
             <description>Uraga is an undead master of deception and assassination, bound to guard the High Priest for all eternity.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -8348,7 +8261,6 @@
             <corpse_name_a>the corpse of Vrka</corpse_name_a>
             <corpse_name_the>the corpse of Vrka</corpse_name_the>
             <description>Vrka is a monstrous wolf-like creature dwelling in the High Priest's chambers, serving as a guardian.</description>
-            <allow_spawn_dlvl_description>false</allow_spawn_dlvl_description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
