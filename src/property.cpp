@@ -3233,6 +3233,8 @@ PropEnded PropMagicSearching::on_actor_turn()
 
                                         msg_log::more_prompt();
                                 }
+
+                                map::memorize_terrain_at(p);
                         }
 
                         if (m_allow_reveal_items && map::g_items.at(p))
