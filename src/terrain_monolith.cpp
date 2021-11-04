@@ -12,6 +12,7 @@
 #include "audio_data.hpp"
 #include "common_text.hpp"
 #include "game.hpp"
+#include "game_time.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
@@ -120,6 +121,11 @@ void Monolith::bump(actor::Actor& actor_bumping)
         else
         {
                 activate();
+
+                map::memorize_terrain_at(m_pos);
+                map::update_vision();
+
+                game_time::tick();
         }
 }
 

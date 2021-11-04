@@ -376,13 +376,9 @@ void memorize_terrain_at(const P& p)
         auto& memory = g_terrain_memory.at(p);
 
         memory.tile = terrain->tile();
-
         memory.character = terrain->character();
-
         memory.name = terrain->name(Article::a);
-
         memory.name = text_format::first_to_upper(memory.name);
-
         memory.color = terrain->color();
 }
 
