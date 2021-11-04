@@ -141,7 +141,6 @@ Item* make(const Id item_id, const int nr_items)
         case Id::pistol:
         case Id::revolver:
         case Id::rifle:
-        case Id::flare_gun:
         case Id::spike_gun:
         case Id::rock:
         case Id::thr_knife:

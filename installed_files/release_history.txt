@@ -1,9 +1,10 @@
 --------------------------------------------------------------
 v21.0 *** WORK IN PROGRESS ***
 --------------------------------------------------------------
-MAJOR CHANGES
+Gameplay changes
 * Added a new background (class) "Exorcist"
 * Added weapons "S&W Revolver" and "Winchester Rifle"
+* Removed the Flare Gun
 * Added miscellaneous rare items and artifacts
 * Added more sound effects, removed the generic spell sound effect
 * Added more monsters
@@ -28,7 +29,7 @@ MAJOR CHANGES
 * Removed the concept of "plus" damage modifiers for weapons, instead they now simply have a damage range and a hit chance modifier (the damage range is still randomized for weapons found on the map, so there are still "higher quality" versions of weapons)
 * Removed deep liquid and swimming
 
-MINOR TWEAKS AND BALANCING
+Minor tweaks and balancing
 * The Electric Gun also disables passive hit point regeneration for a number of turns
 * The Talisman of Resurrection also teleports the player when activated, to avoid leaving the player in the same situation that killed them to begin with
 * The stealth penalty in lit positions is much higher than before (see also bug fixes below concerning stealth and darkness)
@@ -57,7 +58,7 @@ MINOR TWEAKS AND BALANCING
 * Players can melee attack monsters while nailed by a Spike Gun (but still not while entangled)
 * Statues no longer block line of sight, making them much easier to kick into monsters.
 
-USER INTERFACE UPDATES
+User interface updates
 * All fonts have been replaced with new ones (the reason for this is that the origins and license information of the previous ones was unknown - now this information is clearly listed in a font license text file distributed with the game)
 * Added the ability for displaying idle animations while the game is waiting for input, currently this is used for "animating" burning tiles or tiles corrupted by Strange Colors, and also for auto-scrolling item descriptions in the (rare) case that they do not fit in the window
 * Improved the player character memory of explored map positions - it is now possible to view the names of terrain and items on previously explored positions, items seen on the floor in dark rooms are remembered on the map, and bumping terrain like fountains and doors while blind instantly updates their visual status
@@ -85,7 +86,7 @@ USER INTERFACE UPDATES
 * Removed the options to draw the walls as filled rectangles in tiles mode
 * When standing in a dark position "total darkness" is displayed in the status lines
 
-FIXES
+Fixes
 * Fixed a bug that prevented messages for Rogues sensing artifacts on the dungeon floor (there were only messages for sensing artifacts in item containers, such as tombs)
 * Darkness did not give a stealth bonus
 * The effect of the Silent trait was inverted for melee attacks  - i.e. attacks were noisy with the Silent trait picked, and vice versa
@@ -356,7 +357,6 @@ Bug fixes
 * The descriptions of "fast" monsters said that they appear to move "slowly"
 * Fixed some typos
 
-
 --------------------------------------------------------------
 v19.0 (July 20, 2017)
 --------------------------------------------------------------
@@ -437,7 +437,6 @@ Bug fixes
 * Fixed a bug where dropping the Staff of the Pharaohs would cause the spell to be permanently lost, even if the staff was picked up again
 * Fixed a bug that prevented hit chance bonus against unaware targets for ranged attacks
 
-
 --------------------------------------------------------------
 v18.2 (July 2, 2016)
 --------------------------------------------------------------
@@ -468,7 +467,6 @@ Bug fixes
 * Fixed a bug that (in some rare specific cases) allowed monsters to move into the position already occupied by another monster
 * Fixed a bug were teleporting or being knocked back while held by a spider web, caused the web to be able to hold any creature that walked into it, regardless of monster type (e.g. ethereal monsters or spiders could then also be held)
 
-
 --------------------------------------------------------------
 v18.1 (Mars 17, 2016)
 --------------------------------------------------------------
@@ -494,7 +492,6 @@ Bug fixes
 * Fixed some bugs in the monster movement AI (it wasn't anything critical, but it made them act a bit weird in a few specific situations)
 * Fixed a faulty message when pressing "t" with no item selected for throwing (the message adviced to press "w" to wield a throwing weapon, but the actual key should be "i")
 * Property messages such as "...is paralyzed" is no longer allowed for dead monsters
-
 
 --------------------------------------------------------------
 v18.0 (January 28, 2016)
@@ -562,7 +559,6 @@ Bug fixes
 * If you ignited an explosive (Dynamite, Molotov, Flare, Smoke grenade) while already holding another, the first one would just be erased - now the game prevents you from igniting a new explosive instead
 * Fixed a bug that prevented Flare Guns from burning the target
 * Fixed a bug where bumping a hidden door would print a different message than bumping a wall (and thus indicating the presence of the door)
-
 
 --------------------------------------------------------------
 v17.0 (February 18, 2015)
@@ -640,7 +636,6 @@ Bug fixes
 * The Electric Lantern on/off state is now stored when saving the game
 * Flying monsters can no longer be killed by kicking them into chasms
 * The audio player now attempts to find a free channel, instead of just picking the next channel (this could stop other sounds, which frequently happened with long tracks like the ambient background noises)
-
 
 --------------------------------------------------------------
 v16.0 (April 17, 2014)
@@ -728,7 +723,6 @@ Bug fixes
 * Fixed a bug that prevented Ooze-type monsters from passing through closed doors (they should be able to do this)
 * Fixed a bug that prevented using Page Up/Page Down/Home/End for diagonal movement
 
-
 --------------------------------------------------------------
 v15.0 (November 26, 2013)
 --------------------------------------------------------------
@@ -772,7 +766,6 @@ v15.0 (November 26, 2013)
 * Fixed a typo that said "Press 'v'" when you tried to throw a missile with empty missile slot. Changed it to say "Press 'w'", which is the actual command to equip items.
 * Fixed a bug that prevented you from using melee attacks on a turn that you had a free move from the "Dextrous" bonus, and walked in liquid
 * Fixed a bug where carrying multiple electric lanterns prevented you from using any other than the top one
-
 
 --------------------------------------------------------------
 v14.1 (June 16, 2013)
@@ -819,7 +812,6 @@ Graphics
 Bug fixes
 * Corrected a spelling error in an ability description
 * Corrected a misplaced word in a monster description
-
 
 --------------------------------------------------------------
 v14.0 (April 23, 2013)
@@ -919,7 +911,6 @@ Bug fixes
 * Nuclear batteries occasionally spawned with the wrong weight (reported by Surrealistik)
 * Turn number is now stored in the save file
 
-
 --------------------------------------------------------------
 v13.1 (September 20, 2012)
 --------------------------------------------------------------
@@ -928,7 +919,6 @@ v13.1 (September 20, 2012)
 * Lowered starting hit points from 16 to 14
 * Fixed: There was a situation that put the game in an infinite loop (not responding)
 * Fixed: The player color updates immediately after healing (instead of the turn after)
-
 
 --------------------------------------------------------------
 v13.0 (September 15, 2012)
@@ -958,12 +948,10 @@ v13.0 (September 15, 2012)
 * Fixed: "High ceiling rooms" could spawn monsters outside the room
 * Fixed: Armor durability and clip ammo count were not stored in save files
 
-
 --------------------------------------------------------------
 v12.2 (June 10, 2012)
 --------------------------------------------------------------
 * Game crashed when loading a game while "blessed" or "cursed"
-
 
 --------------------------------------------------------------
 v12.1 (June 9, 2012)
@@ -972,7 +960,6 @@ v12.1 (June 9, 2012)
 * The game should use a lot less CPU power
 * Smoother rendering in certain cases (e.g. no flickering when blinded)
 * Blue colors are brighter for better visibility
-
 
 --------------------------------------------------------------
 v12.0 (May 27, 2012)
@@ -1001,7 +988,6 @@ v12.0 (May 27, 2012)
 * Fixed a bug that allowed explosion graphics to be rendered in unseen cells
 * The number of dungeon levels has been reduced from 30 to 25
 
-
 --------------------------------------------------------------
 v11.2 (December 19, 2011)
 --------------------------------------------------------------
@@ -1016,14 +1002,12 @@ v11.2 (December 19, 2011)
 * Chances for scrolls and potions spawning is a bit higher
 * Slightly reduced the damage from spear traps
 
-
 --------------------------------------------------------------
 v11.1 (December 14, 2011)
 --------------------------------------------------------------
 * Added a Flare Gun
 * There was some problems with the map in the postmortem screen
 * The 16x24 font is unfinished for ascii mode, removed that option from the config file
-
 
 --------------------------------------------------------------
 v11.0 (December 13, 2011)
@@ -1043,18 +1027,15 @@ v11.0 (December 13, 2011)
 * Fixed a bug that caused the 'get' command to crash the game after loading a save file
 * Decreased the HP of all monsters
 
-
 --------------------------------------------------------------
 v10.2 (November 20, 2011)
 --------------------------------------------------------------
 * The game crashed when dying from drinking a potion of scorching (changed it so you can't die from it)
 
-
 --------------------------------------------------------------
 v10.1 (November 19, 2011)
 --------------------------------------------------------------
 * Casting spells from manuscripts drained spirit points
-
 
 --------------------------------------------------------------
 v10.0 (November 19, 2011)
@@ -1090,7 +1071,6 @@ v10.0 (November 19, 2011)
 * Removed some stuff from the character info lines to make room for new things
 * Pools no longer slows you down (it didn't work very well)
 
-
 --------------------------------------------------------------
 v9.2 (October 16, 2011)
 --------------------------------------------------------------
@@ -1103,14 +1083,12 @@ Fixes & changes
 * Fixed some grammatical errors
 * Added a missing message (related to jamming doors)
 
-
 --------------------------------------------------------------
 v9.1 (October 13, 2011)
 --------------------------------------------------------------
 Fixes & changes
 * Fixed a faulty message when throwing potions on monsters ("it had no apparent effect..." even when the effect was obvious. Only the message was wrong though, not the actual identification)
 * You lost iron spikes if you tried to jam an open door
-
 
 --------------------------------------------------------------
 v9.0 (October 12, 2011)
@@ -1157,7 +1135,6 @@ Fixes & changes
 * Prevented chasms from making unreachable "islands"
 * Fixed some code that may have made the game less stable
 
-
 --------------------------------------------------------------
 v8.1 (September 24, 2011)
 --------------------------------------------------------------
@@ -1169,7 +1146,6 @@ Fixes & changes
 * The FoV is more permissive with walls (especially corridors and corners)
 * Default aim position is at last monster attacked
 * If there is only one adjacent door, the 'close' command does not ask for direction
-
 
 --------------------------------------------------------------
 v8.0 (September 20, 2011)
@@ -1205,7 +1181,6 @@ Fixes & changes
 * When reading a scroll of summoning, the scroll identity is always revealed
 * Fixed a typo when reading scrolls
 
-
 --------------------------------------------------------------
 v7.1 (August 29, 2011)
 --------------------------------------------------------------
@@ -1215,7 +1190,6 @@ Fixes
 * CPU usage % should be much lower
 * The inventory can store more items
 * Windowed mode is now the default
-
 
 --------------------------------------------------------------
 v7.0 (August 25, 2011)
@@ -1244,7 +1218,6 @@ Fixes
 * Toughness increases HP instead of decreasing damage taken
 * You can no longer use the throwing attack while "Terrified"
 
-
 --------------------------------------------------------------
 v6.0 (August 5, 2011)
 --------------------------------------------------------------
@@ -1270,7 +1243,6 @@ Fixes
 * Cancellation commands in some places where they were missing
 * Rewrote level up-bonus description text
 
-
 --------------------------------------------------------------
 v5.0 (July 24, 2011)
 --------------------------------------------------------------
@@ -1292,7 +1264,6 @@ Fixes:
 * The "Melee" and "Firearms" skills now only gives better chance to hit
 * Safeguard against accidental quitting
 
-
 --------------------------------------------------------------
 v4.0 (July 12, 2011)
 --------------------------------------------------------------
@@ -1313,7 +1284,6 @@ Fixes:
 * Fixed a minor problem with the field of view (too many wall cells were revealed in some circumstances)
 * Cultist anger phrases were too infrequent in the previous version
 * Reading scrolls now causes your turn to end
-
 
 --------------------------------------------------------------
 v3.0 (July 9, 2011)
@@ -1344,7 +1314,6 @@ Fixes:
 * Confusion is less random
 * Some small improvements to the interface
 
-
 --------------------------------------------------------------
 v2.0 (June 23, 2011)
 --------------------------------------------------------------
@@ -1368,7 +1337,6 @@ Fixes:
 * Message if an item drops where you stand
 * Removed bouncing of thrown items (it felt too unpredictable)
 * Fixed some grammatical errors
-
 
 --------------------------------------------------------------
 Old changelogs from before the game was named Infra Arcana

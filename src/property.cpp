@@ -1882,22 +1882,6 @@ bool PropFainted::should_update_vision_on_toggled() const
         return m_owner->is_player();
 }
 
-PropEnded PropFlared::on_actor_turn()
-{
-        actor::hit(*m_owner, 1, DmgType::fire);
-
-        if (m_nr_turns_left <= 1)
-        {
-                m_owner->m_properties.apply(new PropBurning());
-
-                m_owner->m_properties.end_prop(id());
-
-                return PropEnded::yes;
-        }
-
-        return PropEnded::no;
-}
-
 DmgResistData PropRAcid::is_resisting_dmg(const DmgType dmg_type) const
 {
         DmgResistData d;

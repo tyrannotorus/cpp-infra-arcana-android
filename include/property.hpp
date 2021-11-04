@@ -723,15 +723,6 @@ public:
         PropEnded on_actor_turn() override;
 };
 
-class PropFlared : public Prop
-{
-public:
-        PropFlared() :
-                Prop(PropId::flared) {}
-
-        PropEnded on_actor_turn() override;
-};
-
 class PropConfused : public Prop
 {
 public:

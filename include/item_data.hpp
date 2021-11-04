@@ -62,7 +62,6 @@ enum class Id
         pistol_mag,
         rifle,
         rifle_bullet,
-        flare_gun,
         mi_go_gun,
 
         // Trap weapons

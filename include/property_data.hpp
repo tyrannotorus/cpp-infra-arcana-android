@@ -114,7 +114,6 @@ enum class PropId
         major_clapham_summon,
         aiming,
         nailed,
-        flared,
         wound,
         summoned,
         hp_sap,

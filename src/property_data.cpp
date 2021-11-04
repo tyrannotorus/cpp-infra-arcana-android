@@ -568,14 +568,6 @@ static void init_data_list()
         d.alignment = PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::flared;
-        d.std_rnd_turns = Range(3, 4);
-        d.msg_start_mon = "is perforated by a flare!";
-        d.allow_display_turns = false;
-        d.update_vision_on_toggled = true;
-        d.alignment = PropAlignment::bad;
-        add(d);
-
         d.id = PropId::nailed;
         d.name = "Nailed";
         d.descr =

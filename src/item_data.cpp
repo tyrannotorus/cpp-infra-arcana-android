@@ -628,27 +628,6 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::ranged_wpn);
-        d.id = Id::flare_gun;
-        d.base_name = {"Flare Gun", "Flare Gun", "a Flare Gun"};
-        d.base_descr = {
-                "Launches flares. Not designed to function as a weapon."};
-        d.weight = (Weight::light + Weight::medium) / 2;
-        d.tile = gfx::TileId::flare_gun;
-        d.ranged.max_ammo = 1;
-        d.ranged.dmg = DmgRange(1, 3);
-        d.ranged.effective_range = {0, 3};
-        d.allow_display_dmg = false;
-        d.ranged.ammo_item_id = Id::flare;
-        d.melee.attack_msgs = {"strike", "strikes"};
-        d.ranged.attack_msgs = {"fire", "fires"};
-        d.ranged.snd_msg = "I hear a flare gun being fired.";
-        d.ranged.prop_applied = ItemAttackProp(new PropFlared());
-        d.native_containers.push_back(terrain::Id::chest);
-        d.native_containers.push_back(terrain::Id::cabinet);
-        d.native_containers.push_back(terrain::Id::cocoon);
-        g_data[(size_t)d.id] = d;
-
-        reset_data(d, ItemType::ranged_wpn);
         d.id = Id::spike_gun;
         d.base_name = {"Spike Gun", "Spike Guns", "a Spike Gun"};
         d.base_descr = {

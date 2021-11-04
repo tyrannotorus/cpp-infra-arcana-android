@@ -32,9 +32,6 @@ Prop* make(const PropId id)
         case PropId::burning:
                 return new PropBurning();
 
-        case PropId::flared:
-                return new PropFlared();
-
         case PropId::paralyzed:
                 return new PropParalyzed();
 
