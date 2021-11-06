@@ -32,6 +32,7 @@ set(COMMON_SRC
         include/attack_data.hpp
         include/audio.hpp
         include/audio_data.hpp
+        include/bash.hpp
         include/bot.hpp
         include/browser.hpp
         include/bsp.hpp
@@ -139,7 +140,6 @@ set(COMMON_SRC
         include/view.hpp
         include/view_actor_descr.hpp
         include/viewport.hpp
-        include/wham.hpp
         include/xml.hpp
 
         src/ability_values.cpp
@@ -161,6 +161,7 @@ set(COMMON_SRC
         src/attack.cpp
         src/attack_data.cpp
         src/audio_data.cpp
+        src/bash.cpp
         src/bot.cpp
         src/browser.cpp
         src/bsp.cpp
@@ -277,7 +278,6 @@ set(COMMON_SRC
         src/view.cpp
         src/view_actor_descr.cpp
         src/viewport.cpp
-        src/wham.cpp
         src/xml.cpp
 
         xml/tinyxml2/tinyxml2.h

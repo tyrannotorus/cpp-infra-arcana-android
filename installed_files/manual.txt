@@ -69,6 +69,7 @@ Many things in the game can be interacted with by moving into them (i.e. by "bum
    * Move into monsters to melee attack them
    * Move into closed doors, chests, cabinets, etc to attempt to open them
    * Move into opened chests, cabinets, etc to loot them
+   * Move into stuck doors to attempt to bash them open
    * Move into fountains to drink from them
 
 --------------------------------------------------------------------------------

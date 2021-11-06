@@ -25,6 +25,7 @@
 #include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
+#include "bash.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "debug.hpp"
@@ -60,7 +61,6 @@
 #include "terrain_dmg.hpp"
 #include "terrain_mob.hpp"
 #include "text_format.hpp"
-#include "wham.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -338,7 +338,7 @@ void Terrain::hit(
                                                 terrain_name +
                                                 "!");
 
-                                        wham::try_sprain_player();
+                                        bash::try_sprain_player();
                                 }
                                 else
                                 {
@@ -3263,7 +3263,7 @@ void Tomb::bump(actor::Actor& actor_bumping)
         }
         else
         {
-                wham::try_sprain_player();
+                bash::try_sprain_player();
         }
 
         map::memorize_terrain_at(m_pos);
@@ -3772,7 +3772,7 @@ void Chest::on_player_kick()
         if (map::g_player->m_properties.has(PropId::weakened) ||
             (m_matl == ChestMatl::iron))
         {
-                wham::try_sprain_player();
+                bash::try_sprain_player();
 
                 msg_log::add("It seems futile.");
 
@@ -3817,7 +3817,7 @@ void Chest::on_player_kick()
         {
                 msg_log::add("The lock resists.");
 
-                wham::try_sprain_player();
+                bash::try_sprain_player();
         }
 
         snd.run();

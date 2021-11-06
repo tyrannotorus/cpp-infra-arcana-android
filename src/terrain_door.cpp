@@ -16,6 +16,7 @@
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
+#include "bash.hpp"
 #include "debug.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
@@ -821,6 +822,13 @@ void Door::bump(actor::Actor& actor_bumping)
                                 terrain::data(terrain::Id::wall)
                                         .msg_on_player_blocked_blind);
                 }
+
+                return;
+        }
+
+        if (m_is_stuck && m_is_known_stuck)
+        {
+                bash::bash_terrain_at_pos(m_pos);
 
                 return;
         }

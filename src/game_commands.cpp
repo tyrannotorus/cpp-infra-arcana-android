@@ -20,6 +20,7 @@
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
+#include "bash.hpp"
 #include "character_descr.hpp"
 #include "close.hpp"
 #include "colors.hpp"
@@ -61,7 +62,6 @@
 #include "spells.hpp"
 #include "state.hpp"
 #include "teleport.hpp"
-#include "wham.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -865,7 +865,7 @@ void handle(const GameCmd cmd)
 
         case GameCmd::kick:
         {
-                wham::run();
+                bash::run();
         }
         break;
 
