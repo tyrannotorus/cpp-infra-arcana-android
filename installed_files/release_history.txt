@@ -61,7 +61,7 @@ Minor tweaks and balancing
 
 User interface updates
 * All fonts have been replaced with new ones (the reason for this is that the origins and license information of the previous ones was unknown - now this information is clearly listed in a font license text file distributed with the game)
-* Added the ability for displaying idle animations while the game is waiting for input, currently this is used for "animating" burning tiles or tiles corrupted by Strange Colors, and also for auto-scrolling item descriptions in the (rare) case that they do not fit in the window
+* Added the ability for displaying idle animations while the game is waiting for input, currently this is used for flickering the player color when holding an activated Electric Lantern, or randomizing the color of burning tiles or tiles corrupted by Strange Colors - and also for auto-scrolling item descriptions in the (rare) case that they do not fit in the window
 * Improved the player character memory of explored map positions - it is now possible to view the names of terrain and items on previously explored positions, items seen on the floor in dark rooms are remembered on the map, and bumping terrain like fountains and doors while blind instantly updates their visual status
 * Bumping a stuck door now automatically tries to bash it (no need to press "w" first)
 * Added an option to toggle if the view should always be centered on the player, only move when near the edge of the screen (default is to always center)

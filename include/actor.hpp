@@ -71,6 +71,18 @@ class Actor
 public:
         virtual ~Actor();
 
+        virtual Color color() const = 0;
+
+        virtual gfx::TileId tile() const;
+
+        virtual char character() const;
+
+        virtual std::string name_the() const;
+
+        virtual std::string name_a() const;
+
+        virtual std::string descr() const;
+
         int ability(
                 AbilityId id,
                 bool is_affected_by_props) const;
@@ -121,16 +133,6 @@ public:
 
         std::string death_msg() const;
 
-        virtual gfx::TileId tile() const;
-
-        virtual char character() const;
-
-        virtual std::string name_the() const;
-
-        virtual std::string name_a() const;
-
-        virtual std::string descr() const;
-
         virtual void add_light_hook(Array2<bool>& light) const
         {
                 (void)light;
@@ -147,8 +149,6 @@ public:
         }
 
         virtual void on_death() {};
-
-        virtual Color color() const = 0;
 
         virtual SpellSkill spell_skill(SpellId id) const = 0;
 

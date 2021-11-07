@@ -998,7 +998,7 @@ Color Player::color() const
 
                 if (lantern->is_activated)
                 {
-                        return colors::yellow();
+                        return m_lantern_color;
                 }
         }
 

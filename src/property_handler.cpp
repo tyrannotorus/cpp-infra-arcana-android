@@ -1286,7 +1286,7 @@ void PropHandler::cycle_graphics(io::GraphicsCycle cycle) const
 {
         if (cycle == io::GraphicsCycle::fast)
         {
-                for (auto& prop : m_props)
+                for (const auto& prop : m_props)
                 {
                         prop->cycle_graphics();
                 }

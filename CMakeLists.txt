@@ -14,6 +14,7 @@ set(COMMON_SRC
         include/ability_values.hpp
         include/actor.hpp
         include/actor_act.hpp
+        include/actor_cycle_graphics.hpp
         include/actor_data.hpp
         include/actor_death.hpp
         include/actor_factory.hpp
@@ -145,6 +146,7 @@ set(COMMON_SRC
         src/ability_values.cpp
         src/actor.cpp
         src/actor_act.cpp
+        src/actor_cycle_graphics.cpp
         src/actor_data.cpp
         src/actor_death.cpp
         src/actor_factory.cpp

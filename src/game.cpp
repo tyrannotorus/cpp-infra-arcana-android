@@ -15,6 +15,7 @@
 #include "ability_values.hpp"
 #include "actor.hpp"
 #include "actor_act.hpp"
+#include "actor_cycle_graphics.hpp"
 #include "actor_data.hpp"
 #include "actor_items.hpp"
 #include "actor_player.hpp"
@@ -485,7 +486,7 @@ void GameState::cycle_graphics(const io::GraphicsCycle cycle)
 
         for (auto* const a : game_time::g_actors)
         {
-                a->m_properties.cycle_graphics(cycle);
+                actor::cycle_graphics(*a, cycle);
         }
 }
 

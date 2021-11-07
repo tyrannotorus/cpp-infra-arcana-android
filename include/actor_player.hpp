@@ -161,6 +161,7 @@ public:
         int m_nr_turns_until_r_spell {-1};
         int m_nr_turns_until_meditative_focused {-1};
         item::Wpn* m_unarmed_wpn {nullptr};
+        Color m_lantern_color {};
 
 private:
         int shock_resistance(ShockSrc shock_src) const;
