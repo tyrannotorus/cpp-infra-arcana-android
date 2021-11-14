@@ -29,7 +29,6 @@ enum class InsSymptId
         phobia_dead,
         phobia_deep,
         phobia_dark,
-        masoch,
         sadism,
         shadows,
         paranoia,  // Invisible stalker spawned
@@ -773,68 +772,6 @@ protected:
         std::string history_msg_end() const override
         {
                 return "My phobia of darkness was cured";
-        }
-};
-
-class InsMasoch : public InsSympt
-{
-public:
-        InsMasoch() = default;
-
-        InsSymptId id() const override
-        {
-                return InsSymptId::masoch;
-        }
-
-        InsSymptType type() const override
-        {
-                return InsSymptType::misc;
-        }
-
-        bool is_permanent() const override
-        {
-                return true;
-        }
-
-        bool is_allowed() const override;
-
-        std::string char_descr_msg() const override
-        {
-                return "Masochistic obsession";
-        }
-
-        std::string postmortem_msg() const override
-        {
-                return "Had a masochistic obsession";
-        }
-
-protected:
-        std::string start_msg() const override
-        {
-                return "To my alarm, I find myself encouraged by the sensation "
-                       "of pain. Physical suffering does not bother me at "
-                       "all, and severe wounds even thrill me. However, my "
-                       "depraved mind will never find complete peace.";
-        }
-
-        std::string start_heading() const override
-        {
-                return "Masochistic obsession!";
-        }
-
-        std::string end_msg() const override
-        {
-                return "I am cured of my masochistic obsession.";
-        }
-
-        std::string history_msg() const override
-        {
-                return "Gained a masochistic obsession";
-        }
-
-        std::string history_msg_end() const override
-        {
-                return "My masochistic obsession was cured";
         }
 };
 

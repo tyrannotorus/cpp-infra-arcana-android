@@ -466,18 +466,9 @@ void InsPhobiaDark::on_permanent_rfear()
         insanity::end_sympt(id());
 }
 
-bool InsMasoch::is_allowed() const
-{
-        const bool is_sadist = insanity::has_sympt(InsSymptId::sadism);
-
-        return !is_sadist && rnd::one_in(10);
-}
-
 bool InsSadism::is_allowed() const
 {
-        const bool is_masoch = insanity::has_sympt(InsSymptId::masoch);
-
-        return !is_masoch && rnd::one_in(4);
+        return rnd::one_in(4);
 }
 
 void InsShadows::on_start_hook()
@@ -626,9 +617,6 @@ InsSympt* make_sympt(const InsSymptId id)
 
         case InsSymptId::phobia_dark:
                 return new InsPhobiaDark();
-
-        case InsSymptId::masoch:
-                return new InsMasoch();
 
         case InsSymptId::sadism:
                 return new InsSadism();

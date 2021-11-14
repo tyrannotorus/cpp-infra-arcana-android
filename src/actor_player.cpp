@@ -383,11 +383,6 @@ void Player::on_hit(
 {
         map::g_player->interrupt_actions(ForceInterruptActions::yes);
 
-        if (!insanity::has_sympt(InsSymptId::masoch))
-        {
-                incr_shock(1.0, ShockSrc::misc);
-        }
-
         const bool is_enough_dmg_for_wound = (dmg >= g_min_dmg_to_wound);
         const bool is_physical = is_physical_dmg_type(dmg_type);
 
@@ -418,25 +413,7 @@ void Player::on_hit(
 
                 if (nr_wounds_after > nr_wounds_before)
                 {
-                        if (insanity::has_sympt(InsSymptId::masoch))
-                        {
-                                game::add_history_event(
-                                        "Experienced a very pleasant wound");
-
-                                msg_log::add("Hehehe...");
-
-                                const double shock_restored = 10.0;
-
-                                m_shock = std::max(
-                                        0.0,
-                                        m_shock - shock_restored);
-                        }
-                        else
-                        {
-                                // Not masochistic
-                                game::add_history_event(
-                                        "Sustained a severe wound");
-                        }
+                        game::add_history_event("Sustained a severe wound");
                 }
         }
 }
@@ -803,9 +780,7 @@ void Player::update_tmp_shock()
         double increased_tmp_shock = 0.0;
         double reduced_tmp_shock = 0.0;
 
-        // "Obessions" raise temporary shock
-        if (insanity::has_sympt(InsSymptId::sadism) ||
-            insanity::has_sympt(InsSymptId::masoch))
+        if (insanity::has_sympt(InsSymptId::sadism))
         {
                 increased_tmp_shock += (double)g_shock_from_obsession;
         }

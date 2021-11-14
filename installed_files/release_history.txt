@@ -59,6 +59,7 @@ Minor tweaks and balancing
 * Winning characters show up as statues inside the church building on the intro level, instead of graves outside the church
 * Players can melee attack monsters while nailed by a Spike Gun (but still not while entangled)
 * Statues no longer block line of sight, making them much easier to kick into monsters.
+* Removed the "masochistic obsession" insanity effect
 
 User interface updates
 * All fonts have been replaced with new ones (the reason for this is that the origins and license information of the previous ones was unknown - now this information is clearly listed in a font license text file distributed with the game)
