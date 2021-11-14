@@ -25,10 +25,8 @@
 // -----------------------------------------------------------------------------
 static int roll_nr_pylons_to_make()
 {
-        // TODO: Set last weight value to 1 again
-
         // Weight for 0 pylons, 1 pylon, etc.
-        std::vector<int> nr_weights = {20, 5, 1999};
+        std::vector<int> nr_weights = {20, 5, 1};
 
         return rnd::weighted_choice(nr_weights);
 }
