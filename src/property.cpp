@@ -1145,6 +1145,8 @@ PropEnded PropWound::on_actor_turn()
                 else
                 {
                         // This was the last wound, end self
+                        m_owner->m_properties.end_prop(id());
+
                         return PropEnded::yes;
                 }
         }
