@@ -20,6 +20,41 @@
 #include "random.hpp"
 #include "terrain_pylon.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static int roll_nr_pylons_to_make()
+{
+        // TODO: Set last weight value to 1 again
+
+        // Weight for 0 pylons, 1 pylon, etc.
+        std::vector<int> nr_weights = {20, 5, 1999};
+
+        return rnd::weighted_choice(nr_weights);
+}
+
+static void set_area_blocked(
+        const P& pos,
+        const int dist,
+        Array2<bool>& blocked)
+{
+        const int x0 = std::max(0, pos.x - dist);
+        const int y0 = std::max(0, pos.y - dist);
+        const int x1 = std::min(map::w() - 1, pos.x + dist);
+        const int y1 = std::min(map::h() - 1, pos.y + dist);
+
+        for (int x = x0; x <= x1; ++x)
+        {
+                for (int y = y0; y <= y1; ++y)
+                {
+                        blocked.at(x, y) = true;
+                }
+        }
+}
+
+// -----------------------------------------------------------------------------
+// mapgen
+// -----------------------------------------------------------------------------
 namespace mapgen
 {
 void make_pylons()
@@ -30,19 +65,9 @@ void make_pylons()
                 return;
         }
 
-        // Determine number of Pylons to place, by a weighted choice
-        std::vector<int> nr_weights = {
-                20,  // 0 pylon(s)
-                5,  // 1 -
-                1,  // 2 -
-        };
-
-        const int nr_pylons = rnd::weighted_choice(nr_weights);
-
         Array2<bool> blocked(map::dims());
 
-        map_parsers::IsNotFloorLike()
-                .run(blocked, blocked.rect());
+        map_parsers::IsNotFloorLike().run(blocked, blocked.rect());
 
         // Block player cell before expanding the blocked cells
         blocked.at(map::g_player->m_pos) = true;
@@ -54,6 +79,8 @@ void make_pylons()
         {
                 blocked.at(actor->m_pos) = true;
         }
+
+        const int nr_pylons = roll_nr_pylons_to_make();
 
         for (int i = 0; i < nr_pylons; ++i)
         {
@@ -68,44 +95,15 @@ void make_pylons()
 
                 const auto pylon_p = rnd::element(p_bucket);
 
-                // Do not try this position again, regardless if we place this
-                // pylon or not
-                blocked.at(pylon_p) = true;
-
-                // OK, valid positions found - place Pylon
                 auto* const pylon = new terrain::Pylon(pylon_p);
 
                 map::put(pylon);
 
                 // Don't place other pylons too near
-                {
-                        const int min_dist_between = 8;
+                const int min_dist = 8;
 
-                        const int x0 = std::max(
-                                0,
-                                pylon_p.x - min_dist_between);
-
-                        const int y0 = std::max(
-                                0,
-                                pylon_p.y - min_dist_between);
-
-                        const int x1 = std::min(
-                                map::w() - 1,
-                                pylon_p.x + min_dist_between);
-
-                        const int y1 = std::min(
-                                map::h() - 1,
-                                pylon_p.y + min_dist_between);
-
-                        for (int x = x0; x <= x1; ++x)
-                        {
-                                for (int y = y0; y <= y1; ++y)
-                                {
-                                        blocked.at(x, y) = true;
-                                }
-                        }
-                }
-        }  // Pylons loop
-}  // make_pylons
+                set_area_blocked(pylon_p, min_dist, blocked);
+        }
+}
 
 }  // namespace mapgen

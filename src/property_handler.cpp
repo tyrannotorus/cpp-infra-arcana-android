@@ -227,6 +227,11 @@ void PropHandler::apply(
 
         // The property should be applied individually
 
+        if ((verbose == Verbose::yes) && m_owner->is_alive())
+        {
+                print_start_msg(*prop);
+        }
+
         m_props.push_back(std::move(prop_owned));
 
         incr_prop_count(prop->m_id);
@@ -237,8 +242,6 @@ void PropHandler::apply(
                 {
                         map::update_vision();
                 }
-
-                print_start_msg(*prop);
         }
 
         if ((prop->duration_mode() == PropDurationMode::indefinite) &&

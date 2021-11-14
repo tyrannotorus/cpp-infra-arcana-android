@@ -309,143 +309,6 @@ static void run_gong_effect()
 namespace terrain
 {
 // -----------------------------------------------------------------------------
-// Gong
-// -----------------------------------------------------------------------------
-Gong::Gong(const P& p) :
-        Terrain(p) {}
-
-void Gong::bump(actor::Actor& actor_bumping)
-{
-        if (!actor_bumping.is_player())
-        {
-                return;
-        }
-
-        map::memorize_terrain_at(m_pos);
-        map::update_vision();
-
-        if (!map::g_seen.at(m_pos))
-        {
-                msg_log::clear();
-
-                msg_log::add("There is a temple gong here.");
-
-                if (!player_bon::is_bg(Bg::exorcist))
-                {
-                        msg_log::add(
-                                "Strike it? " + common_text::g_yes_or_no_hint,
-                                colors::light_white(),
-                                MsgInterruptPlayer::no,
-                                MorePromptOnMsg::no,
-                                CopyToMsgHistory::no);
-
-                        const auto answer = query::yes_or_no();
-
-                        if (answer == BinaryAnswer::no)
-                        {
-                                msg_log::clear();
-
-                                return;
-                        }
-                }
-        }
-
-        if (player_bon::is_bg(Bg::exorcist))
-        {
-                msg_log::add("This unholy instrument must be destroyed!");
-
-                return;
-        }
-
-        msg_log::add("I strike the temple gong!");
-
-        Snd snd(
-                "The crash resonates through the air!",
-                audio::SfxId::gong,
-                IgnoreMsgIfOriginSeen::no,
-                m_pos,
-                map::g_player,
-                SndVol::high,
-                AlertsMon::yes);
-
-        snd.run();
-
-        if (m_is_used)
-        {
-                msg_log::add("Nothing happens.");
-        }
-        else
-        {
-                msg_log::more_prompt();
-
-                run_gong_effect();
-
-                m_is_used = true;
-        }
-
-        map::memorize_terrain_at(m_pos);
-        map::update_vision();
-
-        game_time::tick();
-}
-
-void Gong::on_hit(
-        DmgType dmg_type,
-        actor::Actor* actor,
-        const P& from_pos,
-        int dmg)
-{
-        (void)actor;
-        (void)from_pos;
-        (void)dmg;
-
-        switch (dmg_type)
-        {
-        case DmgType::explosion:
-        case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
-                {
-                        msg_log::add("The gong is destroyed.");
-                }
-
-                map::put(new RubbleLow(m_pos));
-                map::update_vision();
-
-                if (player_bon::is_bg(Bg::exorcist))
-                {
-                        const auto msg =
-                                rnd::element(
-                                        common_text::g_exorcist_purge_phrases);
-
-                        msg_log::add(msg);
-
-                        game::incr_player_xp(10);
-
-                        map::g_player->restore_sp(999, false, Verbose::no);
-                        map::g_player->restore_sp(10, true);
-                }
-                break;
-
-        default:
-                break;
-        }
-}
-
-std::string Gong::name(const Article article) const
-{
-        std::string a = (article == Article::a) ? "a " : "the ";
-
-        return a + "temple gong";
-}
-
-Color Gong::color_default() const
-{
-        return m_is_used
-                ? colors::gray()
-                : colors::brown();
-}
-
-// -----------------------------------------------------------------------------
 // gong
 // -----------------------------------------------------------------------------
 namespace gong
@@ -959,5 +822,142 @@ std::vector<SpellId> UnlearnSpell::make_spell_bucket() const
 }
 
 }  // namespace gong
+
+// -----------------------------------------------------------------------------
+// Gong
+// -----------------------------------------------------------------------------
+Gong::Gong(const P& p) :
+        Terrain(p) {}
+
+void Gong::bump(actor::Actor& actor_bumping)
+{
+        if (!actor_bumping.is_player())
+        {
+                return;
+        }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
+        if (!map::g_seen.at(m_pos))
+        {
+                msg_log::clear();
+
+                msg_log::add("There is a temple gong here.");
+
+                if (!player_bon::is_bg(Bg::exorcist))
+                {
+                        msg_log::add(
+                                "Strike it? " + common_text::g_yes_or_no_hint,
+                                colors::light_white(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::no,
+                                CopyToMsgHistory::no);
+
+                        const auto answer = query::yes_or_no();
+
+                        if (answer == BinaryAnswer::no)
+                        {
+                                msg_log::clear();
+
+                                return;
+                        }
+                }
+        }
+
+        if (player_bon::is_bg(Bg::exorcist))
+        {
+                msg_log::add("This unholy instrument must be destroyed!");
+
+                return;
+        }
+
+        msg_log::add("I strike the temple gong!");
+
+        Snd snd(
+                "The crash resonates through the air!",
+                audio::SfxId::gong,
+                IgnoreMsgIfOriginSeen::no,
+                m_pos,
+                map::g_player,
+                SndVol::high,
+                AlertsMon::yes);
+
+        snd.run();
+
+        if (m_is_used)
+        {
+                msg_log::add("Nothing happens.");
+        }
+        else
+        {
+                msg_log::more_prompt();
+
+                run_gong_effect();
+
+                m_is_used = true;
+        }
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+
+        game_time::tick();
+}
+
+void Gong::on_hit(
+        DmgType dmg_type,
+        actor::Actor* actor,
+        const P& from_pos,
+        int dmg)
+{
+        (void)actor;
+        (void)from_pos;
+        (void)dmg;
+
+        switch (dmg_type)
+        {
+        case DmgType::explosion:
+        case DmgType::pure:
+                if (map::is_pos_seen_by_player(m_pos))
+                {
+                        msg_log::add("The gong is destroyed.");
+                }
+
+                map::put(new RubbleLow(m_pos));
+                map::update_vision();
+
+                if (player_bon::is_bg(Bg::exorcist))
+                {
+                        const auto msg =
+                                rnd::element(
+                                        common_text::g_exorcist_purge_phrases);
+
+                        msg_log::add(msg);
+
+                        game::incr_player_xp(10);
+
+                        map::g_player->restore_sp(999, false, Verbose::no);
+                        map::g_player->restore_sp(10, true);
+                }
+                break;
+
+        default:
+                break;
+        }
+}
+
+std::string Gong::name(const Article article) const
+{
+        std::string a = (article == Article::a) ? "a " : "the ";
+
+        return a + "temple gong";
+}
+
+Color Gong::color_default() const
+{
+        return m_is_used
+                ? colors::gray()
+                : colors::brown();
+}
 
 }  // namespace terrain

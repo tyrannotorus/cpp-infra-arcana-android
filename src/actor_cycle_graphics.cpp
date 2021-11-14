@@ -21,19 +21,12 @@ void cycle_graphics(Actor& actor, const io::GraphicsCycle cycle)
 {
         if (actor.is_player() && (cycle == io::GraphicsCycle::fast))
         {
-                switch (rnd::range(0, 7))
+                switch (rnd::range(0, 1))
                 {
                 case 0:
-                case 1:
                         map::g_player->m_lantern_color =
                                 colors::yellow().shaded(
-                                        rnd::range(50, 75));
-                        break;
-
-                case 2:
-                        map::g_player->m_lantern_color =
-                                colors::yellow().tinted(
-                                        rnd::range(0, 40));
+                                        rnd::range(20, 40));
                         break;
 
                 default:

@@ -36,7 +36,7 @@ struct P;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<std::string> s_false_names;
+static std::vector<std::string> s_fake_names;
 
 static SpellSkill player_skill_for_scroll(const SpellId spell_id)
 {
@@ -69,30 +69,30 @@ void init()
         TRACE_FUNC_BEGIN;
 
         // Randomize scroll fake names
-        s_false_names.clear();
-        s_false_names.emplace_back("Cruensseasrjit");
-        s_false_names.emplace_back("Rudsceleratus");
-        s_false_names.emplace_back("Rudminuox");
-        s_false_names.emplace_back("Cruo stragara-na");
-        s_false_names.emplace_back("Praya navita");
-        s_false_names.emplace_back("Pretia Cruento");
-        s_false_names.emplace_back("Pestis Cruento");
-        s_false_names.emplace_back("Cruento Pestis");
-        s_false_names.emplace_back("Domus-bhaava");
-        s_false_names.emplace_back("Acerbus-shatruex");
-        s_false_names.emplace_back("Pretaanluxis");
-        s_false_names.emplace_back("Praansilenux");
-        s_false_names.emplace_back("Quodpipax");
-        s_false_names.emplace_back("Lokemundux");
-        s_false_names.emplace_back("Profanuxes");
-        s_false_names.emplace_back("Shaantitus");
-        s_false_names.emplace_back("Geropayati");
-        s_false_names.emplace_back("Vilomaxus");
-        s_false_names.emplace_back("Bhuudesco");
-        s_false_names.emplace_back("Durbentia");
-        s_false_names.emplace_back("Bhuuesco");
-        s_false_names.emplace_back("Maravita");
-        s_false_names.emplace_back("Infirmux");
+        s_fake_names.clear();
+        s_fake_names.emplace_back("Cruensseasrjit");
+        s_fake_names.emplace_back("Rudsceleratus");
+        s_fake_names.emplace_back("Rudminuox");
+        s_fake_names.emplace_back("Cruo stragara-na");
+        s_fake_names.emplace_back("Praya navita");
+        s_fake_names.emplace_back("Pretia Cruento");
+        s_fake_names.emplace_back("Pestis Cruento");
+        s_fake_names.emplace_back("Cruento Pestis");
+        s_fake_names.emplace_back("Domus-bhaava");
+        s_fake_names.emplace_back("Acerbus-shatruex");
+        s_fake_names.emplace_back("Pretaanluxis");
+        s_fake_names.emplace_back("Praansilenux");
+        s_fake_names.emplace_back("Quodpipax");
+        s_fake_names.emplace_back("Lokemundux");
+        s_fake_names.emplace_back("Profanuxes");
+        s_fake_names.emplace_back("Shaantitus");
+        s_fake_names.emplace_back("Geropayati");
+        s_fake_names.emplace_back("Vilomaxus");
+        s_fake_names.emplace_back("Bhuudesco");
+        s_fake_names.emplace_back("Durbentia");
+        s_fake_names.emplace_back("Bhuuesco");
+        s_fake_names.emplace_back("Maravita");
+        s_fake_names.emplace_back("Infirmux");
 
         std::vector<std::string> cmb;
         cmb.clear();
@@ -129,7 +129,7 @@ void init()
                 {
                         if (i != ii)
                         {
-                                s_false_names.push_back(cmb[i] + " " + cmb[ii]);
+                                s_fake_names.push_back(cmb[i] + " " + cmb[ii]);
                         }
                 }
         }
@@ -147,9 +147,9 @@ void init()
         for (auto& d : scroll_data)
         {
                 // False name
-                const size_t idx = rnd::idx(s_false_names);
+                const size_t idx = rnd::idx(s_fake_names);
 
-                const auto& title = s_false_names[idx];
+                const auto& title = s_fake_names[idx];
 
                 d->base_name_un_id.names[(size_t)ItemNameType::plain] =
                         "Manuscript titled " + title;
@@ -160,7 +160,7 @@ void init()
                 d->base_name_un_id.names[(size_t)ItemNameType::a] =
                         "a Manuscript titled " + title;
 
-                s_false_names.erase(s_false_names.begin() + idx);
+                s_fake_names.erase(s_fake_names.begin() + (int)idx);
 
                 // True name
                 const std::unique_ptr<const Scroll> scroll(

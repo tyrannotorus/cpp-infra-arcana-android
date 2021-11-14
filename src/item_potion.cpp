@@ -49,14 +49,14 @@ struct P;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-struct PotionLook
+struct PotionAppearance
 {
         std::string name_plain;
         std::string name_a;
         Color color;
 };
 
-static std::vector<PotionLook> s_potion_looks;
+static std::vector<PotionAppearance> s_potion_appearances;
 
 // -----------------------------------------------------------------------------
 // potion
@@ -68,7 +68,7 @@ void init()
         TRACE_FUNC_BEGIN;
 
         // Init possible potion colors and fake names
-        s_potion_looks.assign(
+        s_potion_appearances.assign(
                 {{"Golden", "a Golden", colors::yellow()},
                  {"Yellow", "a Yellow", colors::yellow()},
                  {"Dark", "a Dark", colors::gray()},
@@ -101,9 +101,9 @@ void init()
 
                 // Color and false name
                 const size_t idx =
-                        rnd::range(0, (int)s_potion_looks.size() - 1);
+                        rnd::range(0, (int)s_potion_appearances.size() - 1);
 
-                PotionLook& look = s_potion_looks[idx];
+                auto& look = s_potion_appearances[idx];
 
                 d.base_name_un_id.names[(size_t)ItemNameType::plain] =
                         look.name_plain + " Potion";
@@ -116,7 +116,8 @@ void init()
 
                 d.color = look.color;
 
-                s_potion_looks.erase(std::begin(s_potion_looks) + idx);
+                s_potion_appearances.erase(
+                        std::begin(s_potion_appearances) + (int)idx);
 
                 // True name
                 const auto* const potion =

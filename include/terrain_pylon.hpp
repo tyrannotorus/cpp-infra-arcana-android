@@ -26,8 +26,10 @@ class Array2;
 
 namespace terrain
 {
-class PylonImpl;
+class Pylon;
 
+namespace pylon
+{
 enum class PylonId
 {
         slow,
@@ -35,8 +37,134 @@ enum class PylonId
         terrify,
         invis,
         knockback,
+        teleport,
         END,
 };
+
+void init();
+
+void save();
+void load();
+
+// -----------------------------------------------------------------------------
+// Pylon implementation
+// -----------------------------------------------------------------------------
+class PylonImpl
+{
+public:
+        PylonImpl(const PylonId id, const P& p) :
+                m_id(id),
+                m_pos(p) {}
+
+        virtual ~PylonImpl() = default;
+
+        PylonId id() const
+        {
+                return m_id;
+        }
+
+        virtual std::string name(Article article) const = 0;
+
+        virtual void on_new_turn_activated() = 0;
+
+protected:
+        virtual std::string effect_descr() const = 0;
+
+        void reveal() const;
+
+        std::vector<actor::Actor*> living_actors_reached() const;
+
+        actor::Actor* rnd_reached_living_actor() const;
+
+        PylonId m_id {};
+        P m_pos;
+};
+
+class PylonTerrify : public PylonImpl
+{
+public:
+        PylonTerrify(const PylonId id, const P& p) :
+                PylonImpl(id, p) {}
+
+        void on_new_turn_activated() override;
+
+        std::string name(Article article) const override;
+
+protected:
+        std::string effect_descr() const override;
+};
+
+class PylonInvis : public PylonImpl
+{
+public:
+        PylonInvis(const PylonId id, const P& p) :
+                PylonImpl(id, p) {}
+
+        void on_new_turn_activated() override;
+
+        std::string name(Article article) const override;
+
+protected:
+        std::string effect_descr() const override;
+};
+
+class PylonSlow : public PylonImpl
+{
+public:
+        PylonSlow(const PylonId id, const P& p) :
+                PylonImpl(id, p) {}
+
+        void on_new_turn_activated() override;
+
+        std::string name(Article article) const override;
+
+protected:
+        std::string effect_descr() const override;
+};
+
+class PylonHaste : public PylonImpl
+{
+public:
+        PylonHaste(const PylonId id, const P& p) :
+                PylonImpl(id, p) {}
+
+        void on_new_turn_activated() override;
+
+        std::string name(Article article) const override;
+
+protected:
+        std::string effect_descr() const override;
+};
+
+class PylonKnockback : public PylonImpl
+{
+public:
+        PylonKnockback(const PylonId id, const P& p) :
+                PylonImpl(id, p) {}
+
+        void on_new_turn_activated() override;
+
+        std::string name(Article article) const override;
+
+protected:
+        std::string effect_descr() const override;
+};
+
+class PylonTeleport : public PylonImpl
+{
+public:
+        PylonTeleport(const PylonId id, const P& p) :
+                PylonImpl(id, p) {}
+
+        void on_new_turn_activated() override;
+
+        std::string name(Article article) const override;
+
+protected:
+        std::string effect_descr() const override;
+};
+
+}  // namespace pylon
 
 // -----------------------------------------------------------------------------
 // Pylon
@@ -55,6 +183,17 @@ public:
                 return Id::pylon;
         }
 
+        void activate();
+
+        bool is_activated() const
+        {
+                return m_is_active;
+        }
+
+        void bump(actor::Actor& actor_bumping) override;
+
+        gfx::TileId tile() const override;
+
         std::string name(Article article) const override;
 
         void add_light_hook(Array2<bool>& light) const override;
@@ -66,84 +205,15 @@ private:
                 const P& from_pos,
                 int dmg) override;
 
-        PylonImpl* make_pylon_impl_from_id(PylonId id);
+        pylon::PylonImpl* make_pylon_impl_from_id(pylon::PylonId id);
 
         void on_new_turn_hook() override;
 
         Color color_default() const override;
 
-        std::unique_ptr<PylonImpl> m_pylon_impl;
-};
+        std::unique_ptr<pylon::PylonImpl> m_pylon_impl;
 
-// -----------------------------------------------------------------------------
-// Pylon implementation
-// -----------------------------------------------------------------------------
-class PylonImpl
-{
-public:
-        PylonImpl(P p, Pylon* pylon) :
-                m_pos(p),
-                m_pylon(pylon) {}
-
-        virtual ~PylonImpl() = default;
-
-        virtual void on_new_turn_activated() = 0;
-
-protected:
-        // void emit_trigger_snd() const;
-
-        std::vector<actor::Actor*> living_actors_reached() const;
-
-        actor::Actor* rnd_reached_living_actor() const;
-
-        P m_pos;
-
-        Pylon* const m_pylon;
-};
-
-class PylonTerrify : public PylonImpl
-{
-public:
-        PylonTerrify(P p, Pylon* pylon) :
-                PylonImpl(p, pylon) {}
-
-        void on_new_turn_activated() override;
-};
-
-class PylonInvis : public PylonImpl
-{
-public:
-        PylonInvis(P p, Pylon* pylon) :
-                PylonImpl(p, pylon) {}
-
-        void on_new_turn_activated() override;
-};
-
-class PylonSlow : public PylonImpl
-{
-public:
-        PylonSlow(P p, Pylon* pylon) :
-                PylonImpl(p, pylon) {}
-
-        void on_new_turn_activated() override;
-};
-
-class PylonHaste : public PylonImpl
-{
-public:
-        PylonHaste(P p, Pylon* pylon) :
-                PylonImpl(p, pylon) {}
-
-        void on_new_turn_activated() override;
-};
-
-class PylonKnockback : public PylonImpl
-{
-public:
-        PylonKnockback(P p, Pylon* pylon) :
-                PylonImpl(p, pylon) {}
-
-        void on_new_turn_activated() override;
+        bool m_is_active {false};
 };
 
 }  // namespace terrain

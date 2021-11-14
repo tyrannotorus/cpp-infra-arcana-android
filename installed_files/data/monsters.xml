@@ -5839,7 +5839,7 @@
     <!--************************************************************-->
     <monster id="mind_worm">
         <text>
-            <name_a>Mind Worm</name_a>
+            <name_a>a Mind Worm</name_a>
             <name_the>the Mind Worm</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>

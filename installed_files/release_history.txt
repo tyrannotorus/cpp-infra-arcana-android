@@ -28,6 +28,7 @@ Gameplay changes
 * Added Curse as a spell available to monsters (Floating Skulls cast this now instead of applying the property directly, and mummies cast Curse instead of applying it on melee attacks, for example) - also added a stronger version of Cursed called "Doomed" which is applied instead when Curse is cast at master level
 * Removed the concept of "plus" damage modifiers for weapons, instead they now simply have a damage range and a hit chance modifier (the damage range is still randomized for weapons found on the map, so there are still "higher quality" versions of weapons)
 * Removed deep liquid and swimming
+* Pylons now have different appearances, and it's possible to permanently identify their effects - also Pylons are now activated by touching them
 
 Minor tweaks and balancing
 * The Electric Gun also disables passive hit point regeneration for a number of turns

@@ -40,6 +40,7 @@
 #include "saving.hpp"
 #include "smell.hpp"
 #include "terrain_data.hpp"
+#include "terrain_pylon.hpp"
 
 namespace init
 {
@@ -113,6 +114,7 @@ void init_session()
         potion::init();
         rod::init();
         item_curse::init();
+        terrain::pylon::init();
         game_time::init();
         map_travel::init();
         map::init();

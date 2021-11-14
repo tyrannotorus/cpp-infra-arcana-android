@@ -33,6 +33,7 @@
 #include "player_bon.hpp"
 #include "player_spells.hpp"
 #include "smell.hpp"
+#include "terrain_pylon.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -63,6 +64,7 @@ static void save_modules()
         rod::save();
         item::save();
         item_curse::save();
+        terrain::pylon::save();
         map::g_player->m_inv.save();
         map::g_player->save();
         insanity::save();
@@ -99,6 +101,7 @@ static void load_modules()
         rod::load();
         item::load();
         item_curse::load();
+        terrain::pylon::load();
         map::g_player->m_inv.load();
         map::g_player->load();
         insanity::load();

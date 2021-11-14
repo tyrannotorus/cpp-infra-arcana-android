@@ -34,34 +34,6 @@ enum class SpellId;
 
 namespace terrain
 {
-class Gong : public Terrain
-{
-public:
-        Gong(const P& p);
-
-        Gong() = delete;
-
-        Id id() const override
-        {
-                return Id::gong;
-        }
-
-        std::string name(Article article) const override;
-
-        void bump(actor::Actor& actor_bumping) override;
-
-private:
-        Color color_default() const override;
-
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
-
-        bool m_is_used {false};
-};
-
 namespace gong
 {
 enum class BonusId
@@ -369,6 +341,34 @@ private:
 };
 
 }  // namespace gong
+
+class Gong : public Terrain
+{
+public:
+        Gong(const P& p);
+
+        Gong() = delete;
+
+        Id id() const override
+        {
+                return Id::gong;
+        }
+
+        std::string name(Article article) const override;
+
+        void bump(actor::Actor& actor_bumping) override;
+
+private:
+        Color color_default() const override;
+
+        void on_hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
+
+        bool m_is_used {false};
+};
 
 }  // namespace terrain
 
