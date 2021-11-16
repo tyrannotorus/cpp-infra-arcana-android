@@ -382,7 +382,9 @@ PropEnded PropEntangled::affect_move_dir(Dir& dir)
                 return PropEnded::no;
         }
 
-        if (try_player_end_with_machete())
+        bool did_end_with_matchete = try_player_end_with_machete();
+
+        if (did_end_with_matchete)
         {
                 return PropEnded::yes;
         }
@@ -915,9 +917,11 @@ PropEnded PropPoisoned::on_actor_turn()
         return PropEnded::no;
 }
 
-void PropAiming::on_hit()
+PropEnded PropAiming::on_hit()
 {
         m_owner->m_properties.end_prop(id());
+
+        return PropEnded::yes;
 }
 
 bool PropTerrified::allow_attack_melee(const Verbose verbose) const
@@ -1874,9 +1878,11 @@ void PropParalyzed::on_applied()
         }
 }
 
-void PropFainted::on_hit()
+PropEnded PropFainted::on_hit()
 {
         m_owner->m_properties.end_prop(id());
+
+        return PropEnded::yes;
 }
 
 bool PropFainted::should_update_vision_on_toggled() const

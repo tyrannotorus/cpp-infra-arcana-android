@@ -1231,9 +1231,16 @@ bool PropHandler::allow_pray(const Verbose verbose) const
 
 void PropHandler::on_hit()
 {
-        for (auto& prop : m_props)
+        for (size_t i = 0; i < m_props.size();)
         {
-                prop->on_hit();
+                const auto& prop = m_props[i];
+
+                const auto prop_ended = prop->on_hit();
+
+                if (prop_ended == PropEnded::no)
+                {
+                        ++i;
+                }
         }
 }
 

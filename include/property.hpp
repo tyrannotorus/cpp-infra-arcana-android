@@ -187,7 +187,10 @@ public:
                 return true;
         }
 
-        virtual void on_hit() {}
+        virtual PropEnded on_hit()
+        {
+                return PropEnded::no;
+        }
 
         virtual void on_placed() {}
 
@@ -508,7 +511,7 @@ public:
                 }
         }
 
-        void on_hit() override;
+        PropEnded on_hit() override;
 };
 
 class PropBlind : public Prop
@@ -1098,7 +1101,7 @@ public:
                 return false;
         }
 
-        void on_hit() override;
+        PropEnded on_hit() override;
 };
 
 class PropSlowed : public Prop
