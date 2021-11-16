@@ -266,7 +266,7 @@ void Trap::trigger_start(const actor::Actor* actor)
                 // Reveal trap if triggered by player stepping on it
                 if (is_hidden())
                 {
-                        reveal(Verbose::no);
+                        reveal(PrintRevealMsg::no);
                 }
 
                 map::g_player->update_fov();
@@ -499,7 +499,7 @@ DidTriggerTrap Trap::trigger_trap(actor::Actor* const actor)
         return DidTriggerTrap::yes;
 }
 
-void Trap::reveal(const Verbose verbose)
+void Trap::reveal(const PrintRevealMsg print_reveal_msg)
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
@@ -509,9 +509,12 @@ void Trap::reveal(const Verbose verbose)
 
         clear_gore();
 
-        if (is_hidden_before &&
-            (verbose == Verbose::yes) &&
-            map::g_seen.at(m_pos))
+        const bool allow_print =
+                ((print_reveal_msg == PrintRevealMsg::if_seen) &&
+                 map::g_seen.at(m_pos)) ||
+                (print_reveal_msg == PrintRevealMsg::yes);
+
+        if (is_hidden_before && allow_print)
         {
                 states::draw();
 

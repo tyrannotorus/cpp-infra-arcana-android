@@ -856,7 +856,7 @@ public:
 
         void on_more(const Prop& new_prop) override;
 
-        PropEnded on_actor_turn();
+        PropEnded on_actor_turn() override;
 
         bool is_finished() const override
         {

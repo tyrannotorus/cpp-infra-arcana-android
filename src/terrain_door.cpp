@@ -243,7 +243,7 @@ void Door::on_hit(
         break;
 
         // Kicking, blunt (sledgehammers), slashing (axes), or the control
-        // object spell
+        // object spell.
         case DmgType::kicking:
         case DmgType::blunt:
         case DmgType::slashing:
@@ -260,7 +260,8 @@ void Door::on_hit(
                 if (matl() == Matl::wood)
                 {
                         try_start_burning(Verbose::yes);
-                        reveal(Verbose::yes);
+
+                        reveal(PrintRevealMsg::if_seen);
                 }
         }
         break;
@@ -845,15 +846,18 @@ void Door::bump(actor::Actor& actor_bumping)
         }
 }
 
-void Door::reveal(const Verbose verbose)
+void Door::reveal(const PrintRevealMsg print_reveal_msg)
 {
         const bool is_hidden_before = m_is_hidden;
 
         m_is_hidden = false;
 
-        if (is_hidden_before &&
-            (verbose == Verbose::yes) &&
-            map::g_seen.at(m_pos))
+        const bool allow_print =
+                ((print_reveal_msg == PrintRevealMsg::if_seen) &&
+                 map::g_seen.at(m_pos)) ||
+                (print_reveal_msg == PrintRevealMsg::yes);
+
+        if (is_hidden_before && allow_print)
         {
                 msg_log::add("A secret is revealed.");
         }
@@ -1464,7 +1468,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                 {
                         TRACE << "Was secret, now revealing" << std::endl;
 
-                        reveal(Verbose::yes);
+                        reveal(terrain::PrintRevealMsg::if_seen);
                 }
 
                 m_actor_currently_opening = &actor_trying;

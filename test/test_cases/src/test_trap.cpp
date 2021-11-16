@@ -4,25 +4,25 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_move.hpp"
 #include "actor_player.hpp"
+#include "catch.hpp"
+#include "direction.hpp"
+#include "global.hpp"
 #include "map.hpp"
+#include "player_bon.hpp"
 #include "player_spells.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
+#include "spells.hpp"
 #include "terrain.hpp"
 #include "terrain_trap.hpp"
 #include "test_utils.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "direction.hpp"
-#include "global.hpp"
-#include "player_bon.hpp"
-#include "spells.hpp"
 
 TEST_CASE("Spider web")
 {
@@ -52,7 +52,7 @@ TEST_CASE("Spider web")
 
                         map::put(web);
 
-                        web->reveal(Verbose::no);
+                        web->reveal(terrain::PrintRevealMsg::no);
                 }
 
                 auto* const actor = actor::make(actor::Id::zombie, pos_l);
@@ -118,7 +118,7 @@ TEST_CASE("Unlearn spells")
 
                 map::put(unlearn_trap);
 
-                unlearn_trap->reveal(Verbose::no);
+                unlearn_trap->reveal(terrain::PrintRevealMsg::no);
         }
 
         player_spells::learn_spell(SpellId::darkbolt, Verbose::no);
@@ -172,7 +172,7 @@ TEST_CASE("Do not unlearn frenzy")
 
                 map::put(unlearn_trap);
 
-                unlearn_trap->reveal(Verbose::no);
+                unlearn_trap->reveal(terrain::PrintRevealMsg::no);
         }
 
         player_bon::pick_bg(Bg::ghoul);

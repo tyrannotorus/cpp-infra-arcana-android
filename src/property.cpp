@@ -3207,13 +3207,11 @@ PropEnded PropMagicSearching::on_actor_turn()
                             (id == terrain::Id::monolith) ||
                             (id == terrain::Id::stairs))
                         {
-                                map::g_seen.at(p) = true;
-
-                                map::memorize_terrain_at(p);
-
                                 if (t->is_hidden())
                                 {
-                                        t->reveal(Verbose::yes);
+                                        map::update_vision();
+
+                                        t->reveal(terrain::PrintRevealMsg::yes);
 
                                         t->on_revealed_from_searching();
 
@@ -3225,8 +3223,6 @@ PropEnded PropMagicSearching::on_actor_turn()
 
                         if (m_allow_reveal_items && map::g_items.at(p))
                         {
-                                map::g_seen.at(p) = true;
-
                                 map::memorize_item_at(p);
                         }
                 }
@@ -3238,7 +3234,7 @@ PropEnded PropMagicSearching::on_actor_turn()
 
                 for (auto* actor : game_time::g_actors)
                 {
-                        const P& p = actor->m_pos;
+                        const auto& p = actor->m_pos;
 
                         if (actor->is_player() ||
                             !actor->is_alive() ||

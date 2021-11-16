@@ -35,15 +35,15 @@ static void print_player_memory_at(const P& p)
                 return;
         }
 
-        std::vector<PlayerMapMemoryData> memory_list = {
-                map::g_terrain_memory.at(p),
-                map::g_items_memory.at(p)};
+        std::vector<map::PlayerMemoryAppearance> memory_list = {
+                map::g_terrain_memory.at(p).appearance,
+                map::g_item_memory.at(p).appearance};
 
         const bool has_any_memory =
                 std::any_of(
                         std::begin(memory_list),
                         std::end(memory_list),
-                        [](const auto& m) { return m.has_memory(); });
+                        [](const auto& m) { return m.is_defined(); });
 
         if (!has_any_memory)
         {
@@ -59,7 +59,7 @@ static void print_player_memory_at(const P& p)
 
         for (const auto& m : memory_list)
         {
-                if (!m.has_memory())
+                if (!m.is_defined())
                 {
                         continue;
                 }

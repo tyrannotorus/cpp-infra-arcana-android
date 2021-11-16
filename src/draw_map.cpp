@@ -396,7 +396,7 @@ static void set_living_monsters()
 }
 
 static CellRenderData player_memory_to_render_data(
-        const PlayerMapMemoryData& d)
+        const map::PlayerMemoryAppearance& d)
 {
         CellRenderData result;
 
@@ -421,18 +421,20 @@ static void set_unseen_cells_from_player_memory()
                 }
 
                 const auto& terrain_memory = map::g_terrain_memory.at(i);
-                const auto& item_memory = map::g_items_memory.at(i);
+                const auto& item_memory = map::g_item_memory.at(i);
 
-                if (terrain_memory.has_memory())
+                if (terrain_memory.appearance.is_defined())
                 {
                         render_data =
-                                player_memory_to_render_data(terrain_memory);
+                                player_memory_to_render_data(
+                                        terrain_memory.appearance);
                 }
 
-                if (item_memory.has_memory())
+                if (item_memory.appearance.is_defined())
                 {
                         render_data =
-                                player_memory_to_render_data(item_memory);
+                                player_memory_to_render_data(
+                                        item_memory.appearance);
                 }
 
                 const double div = 3.0;

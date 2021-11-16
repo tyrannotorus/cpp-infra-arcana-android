@@ -498,7 +498,7 @@ static void player_try_spot_hidden_terrain()
                 bool is_spotted = false;
 
                 if (p.is_adjacent(player.m_pos) &&
-                    t->id() == terrain::Id::door)
+                    (t->id() == terrain::Id::door))
                 {
                         // Player is adjacent to a hidden door - detection is
                         // guaranteed.
@@ -524,9 +524,11 @@ static void player_try_spot_hidden_terrain()
 
                 if (is_spotted)
                 {
-                        t->reveal(Verbose::yes);
+                        t->reveal(terrain::PrintRevealMsg::if_seen);
 
                         t->on_revealed_from_searching();
+
+                        map::update_vision();
 
                         msg_log::more_prompt();
                 }

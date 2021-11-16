@@ -441,7 +441,7 @@ void act()
 
                         if (door->is_hidden())
                         {
-                                door->reveal(Verbose::no);
+                                door->reveal(terrain::PrintRevealMsg::no);
                         }
 
                         if (door->is_stuck())

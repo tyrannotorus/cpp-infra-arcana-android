@@ -13,6 +13,7 @@
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
+#include "colors.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
 #include "fov.hpp"
@@ -23,6 +24,7 @@
 #include "io.hpp"
 #include "item.hpp"
 #include "map_parsing.hpp"
+#include "minimap.hpp"
 #include "misc.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
@@ -33,6 +35,7 @@
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
 #include "text_format.hpp"
 
 #ifndef NDEBUG
@@ -60,7 +63,7 @@ static void init_layers_data()
                 map::g_smell.at(i) = {};
                 map::g_smell_spread.at(i) = {};
                 map::g_items.at(i) = nullptr;
-                map::g_items_memory.at(i) = {};
+                map::g_item_memory.at(i) = {};
                 map::g_terrain.at(i) = nullptr;
                 map::g_terrain_memory.at(i) = {};
         }
@@ -75,7 +78,7 @@ static void resize_layers()
         map::g_smell.resize_no_init(s_dims);
         map::g_smell_spread.resize_no_init(s_dims);
         map::g_items.resize_no_init(s_dims);
-        map::g_items_memory.resize_no_init(s_dims);
+        map::g_item_memory.resize_no_init(s_dims);
         map::g_terrain.resize_no_init(s_dims);
         map::g_terrain_memory.resize_no_init(s_dims);
 }
@@ -140,9 +143,9 @@ Array2<bool> g_dark(0, 0);
 Array2<smell::Smell> g_smell(0, 0);
 Array2<smell::Smell> g_smell_spread(0, 0);
 Array2<item::Item*> g_items(0, 0);
-Array2<PlayerMapMemoryData> g_items_memory(0, 0);
+Array2<PlayerMemoryItem> g_item_memory(0, 0);
 Array2<terrain::Terrain*> g_terrain(0, 0);
-Array2<PlayerMapMemoryData> g_terrain_memory(0, 0);
+Array2<PlayerMemoryTerrain> g_terrain_memory(0, 0);
 
 actor::Player* g_player = nullptr;
 
@@ -322,6 +325,8 @@ void update_vision()
 
         update_player_memory();
 
+        minimap::update();
+
         states::draw();
 }
 
@@ -375,18 +380,68 @@ void memorize_terrain_at(const P& p)
 
         auto& memory = g_terrain_memory.at(p);
 
-        memory.tile = terrain->tile();
-        memory.character = terrain->character();
-        memory.name = terrain->name(Article::a);
-        memory.name = text_format::first_to_upper(memory.name);
-        memory.color = terrain->color();
+        const auto id = terrain->id();
+
+        const bool blocks_walking = !terrain->is_walkable();
+
+        const std::string name =
+                text_format::first_to_upper(
+                        terrain->name(Article::a));
+
+        memory.id = terrain->id();
+        memory.blocks_walking = blocks_walking;
+
+        memory.appearance.tile = terrain->tile();
+        memory.appearance.character = terrain->character();
+        memory.appearance.name = name;
+        memory.appearance.color = terrain->color();
+
+        if (id == terrain::Id::stairs)
+        {
+                memory.appearance.minimap_color = colors::yellow();
+        }
+        else if (id == terrain::Id::door)
+        {
+                const auto* const door =
+                        static_cast<const terrain::Door*>(terrain);
+
+                if (!door->is_hidden())
+                {
+                        if (door->type() == terrain::DoorType::metal)
+                        {
+                                memory.appearance.minimap_color =
+                                        colors::light_teal();
+                        }
+                        else
+                        {
+                                memory.appearance.minimap_color =
+                                        colors::light_white();
+                        }
+                }
+        }
+        else if (id == terrain::Id::lever)
+        {
+                memory.appearance.minimap_color = colors::teal();
+        }
+        else if (id == terrain::Id::liquid)
+        {
+                memory.appearance.minimap_color = colors::blue();
+        }
+        else if (blocks_walking)
+        {
+                memory.appearance.minimap_color = colors::sepia();
+        }
+        else
+        {
+                memory.appearance.minimap_color = colors::dark_gray_brown();
+        }
 }
 
 void memorize_item_at(const P& p)
 {
         const auto* const item = g_items.at(p);
 
-        auto& memory = g_items_memory.at(p);
+        auto& memory = g_item_memory.at(p);
 
         if (!item)
         {
@@ -395,25 +450,38 @@ void memorize_item_at(const P& p)
                 return;
         }
 
-        memory.tile = item->tile();
+        const std::string name =
+                text_format::first_to_upper(
+                        item->name(
+                                ItemNameType::plural,
+                                ItemNameInfo::yes,
+                                ItemNameAttackInfo::main_attack_mode));
 
-        memory.character = item->character();
+        memory.id = item->id();
 
-        memory.name =
-                item->name(
-                        ItemNameType::plural,
-                        ItemNameInfo::yes,
-                        ItemNameAttackInfo::main_attack_mode);
+        memory.appearance.tile = item->tile();
+        memory.appearance.character = item->character();
+        memory.appearance.name = name;
+        memory.appearance.color = item->color();
 
-        memory.name = text_format::first_to_upper(memory.name);
+        memory.appearance.minimap_color = colors::light_magenta();
 
-        memory.color = item->color();
+        if ((item->data().type == ItemType::ranged_wpn) &&
+            !item->data().ranged.has_infinite_ammo)
+        {
+                const auto* wpn = static_cast<const item::Wpn*>(item);
+
+                if (wpn->m_ammo_loaded == 0)
+                {
+                        memory.appearance.minimap_color = colors::magenta();
+                }
+        }
 }
 
 void clear_player_memory_at(const P& p)
 {
         map::g_terrain_memory.at(p) = {};
-        map::g_items_memory.at(p) = {};
+        map::g_item_memory.at(p) = {};
 }
 
 void make_blood(const P& origin)
@@ -454,7 +522,7 @@ void delete_and_remove_room_from_list(Room* const room)
                 if (g_room_list[i] == room)
                 {
                         delete room;
-                        g_room_list.erase(g_room_list.begin() + i);
+                        g_room_list.erase(std::begin(g_room_list) + (int)i);
                         return;
                 }
         }

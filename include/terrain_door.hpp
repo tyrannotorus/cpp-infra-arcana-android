@@ -115,7 +115,7 @@ public:
 
         Matl matl() const override;
 
-        void reveal(Verbose verbose) override;
+        void reveal(PrintRevealMsg print_reveal_msg) override;
 
         void on_revealed_from_searching() override;
 

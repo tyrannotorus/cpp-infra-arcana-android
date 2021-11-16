@@ -71,6 +71,13 @@ enum class DidClose
         yes
 };
 
+enum class PrintRevealMsg
+{
+        no,
+        if_seen,
+        yes,
+};
+
 enum class Id;
 class Lever;
 
@@ -254,9 +261,9 @@ public:
                 std::optional<P> from_pos = std::nullopt,
                 std::optional<int> dmg = std::nullopt);
 
-        virtual void reveal(const Verbose verbose)
+        virtual void reveal(const PrintRevealMsg print_reveal_msg)
         {
-                (void)verbose;
+                (void)print_reveal_msg;
         }
 
         virtual void on_revealed_from_searching() {}

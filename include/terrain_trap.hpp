@@ -115,7 +115,7 @@ public:
 
         bool is_magical() const;
 
-        void reveal(Verbose verbose) override;
+        void reveal(PrintRevealMsg print_reveal_msg) override;
 
         void on_revealed_from_searching() override;
 

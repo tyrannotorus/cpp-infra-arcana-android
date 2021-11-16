@@ -36,70 +36,6 @@
 // -----------------------------------------------------------------------------
 Array2<Color> s_minimap(0, 0);
 
-static Color map_cell_color(
-        const terrain::Terrain* const terrain,
-        const item::Item* const item,
-        const bool is_blocked)
-{
-        const auto terrain_id = terrain->id();
-
-        if (item)
-        {
-                if ((item->data().type == ItemType::ranged_wpn) &&
-                    !item->data().ranged.has_infinite_ammo)
-                {
-                        const auto* wpn = static_cast<const item::Wpn*>(item);
-
-                        if (wpn->m_ammo_loaded == 0)
-                        {
-                                return colors::magenta();
-                        }
-                }
-
-                return colors::light_magenta();
-        }
-
-        if (terrain_id == terrain::Id::stairs)
-        {
-                return colors::yellow();
-        }
-
-        if (terrain_id == terrain::Id::door)
-        {
-                const auto* const door =
-                        static_cast<const terrain::Door*>(terrain);
-
-                if (!door->is_hidden())
-                {
-                        if (door->type() == terrain::DoorType::metal)
-                        {
-                                return colors::light_teal();
-                        }
-                        else
-                        {
-                                return colors::light_white();
-                        }
-                }
-        }
-
-        if (terrain_id == terrain::Id::lever)
-        {
-                return colors::teal();
-        }
-
-        if (terrain_id == terrain::Id::liquid)
-        {
-                return colors::blue();
-        }
-
-        if (is_blocked)
-        {
-                return colors::sepia();
-        }
-
-        return colors::dark_gray_brown();
-}
-
 static int get_px_w_per_cell()
 {
         // TODO: Make this dynamic, i.e. depend on number of map cells and/or
@@ -124,11 +60,11 @@ static R get_map_area_explored()
                                 map::g_terrain_memory.at(x, y);
 
                         const auto item_memory =
-                                map::g_items_memory.at(x, y);
+                                map::g_item_memory.at(x, y);
 
                         if (!has_vision &&
-                            (terrain_memory.tile == gfx::TileId::END) &&
-                            (item_memory.tile == gfx::TileId::END))
+                            !terrain_memory.appearance.is_defined() &&
+                            !item_memory.appearance.is_defined())
                         {
                                 // Nothing seen or remembered here.
                                 continue;
@@ -270,25 +206,21 @@ void update()
                 }
         }
 
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksWalking(ParseActors::no)
-                .run(blocked, blocked.rect());
-
         const size_t nr_positions = map::nr_positions();
         for (size_t i = 0; i < nr_positions; ++i)
         {
-                const auto* const terrain = map::g_terrain.at(i);
-                const auto* const item = map::g_items.at(i);
-                const bool is_seen = map::g_seen.at(i);
+                auto& minimap_color = s_minimap.at(i);
 
-                if (is_seen)
+                const auto& terrain_memory = map::g_terrain_memory.at(i);
+                const auto& item_memory = map::g_item_memory.at(i);
+
+                if (item_memory.appearance.is_defined())
                 {
-                        s_minimap.at(i) =
-                                map_cell_color(
-                                        terrain,
-                                        item,
-                                        blocked.at(i));
+                        minimap_color = item_memory.appearance.minimap_color;
+                }
+                else if (terrain_memory.appearance.is_defined())
+                {
+                        minimap_color = terrain_memory.appearance.minimap_color;
                 }
         }
 }

@@ -27,6 +27,7 @@ struct LosResult;
 namespace item
 {
 class Item;
+enum class Id;
 }  // namespace item
 
 namespace actor
@@ -38,22 +39,10 @@ class Player;
 namespace terrain
 {
 class Terrain;
+enum class Id;
 }  // namespace terrain
 
 class Room;
-
-struct PlayerMapMemoryData
-{
-        bool has_memory() const
-        {
-                return tile != gfx::TileId::END;
-        }
-
-        gfx::TileId tile {gfx::TileId::END};
-        char character {0};
-        std::string name;
-        Color color {};
-};
 
 struct ChokePointData
 {
@@ -72,6 +61,34 @@ struct ChokePointData
 
 namespace map
 {
+struct PlayerMemoryAppearance
+{
+        bool is_defined() const
+        {
+                return tile != gfx::TileId::END;
+        }
+
+        gfx::TileId tile {gfx::TileId::END};
+        char character {0};
+        std::string name;
+        Color color {};
+
+        Color minimap_color {};
+};
+
+struct PlayerMemoryTerrain
+{
+        PlayerMemoryAppearance appearance {};
+        terrain::Id id {(terrain::Id)0};
+        bool blocks_walking {false};
+};
+
+struct PlayerMemoryItem
+{
+        PlayerMemoryAppearance appearance {};
+        item::Id id {(item::Id)0};
+};
+
 extern Array2<bool> g_seen;
 extern Array2<LosResult> g_los;
 extern Array2<bool> g_light;
@@ -79,9 +96,9 @@ extern Array2<bool> g_dark;
 extern Array2<smell::Smell> g_smell;
 extern Array2<smell::Smell> g_smell_spread;
 extern Array2<item::Item*> g_items;
-extern Array2<PlayerMapMemoryData> g_items_memory;
+extern Array2<PlayerMemoryItem> g_item_memory;
 extern Array2<terrain::Terrain*> g_terrain;
-extern Array2<PlayerMapMemoryData> g_terrain_memory;
+extern Array2<PlayerMemoryTerrain> g_terrain_memory;
 
 extern actor::Player* g_player;
 
