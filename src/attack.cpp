@@ -273,20 +273,22 @@ static void print_mon_melee_miss_msg(const MeleeAttData& att_data)
                 return;
         }
 
+        const bool is_player_defender =
+                att_data.defender->is_player();
+
         const bool is_player_seeing_attacker =
                 can_player_see_actor(*att_data.attacker);
 
         const bool is_player_seeing_defender =
                 can_player_see_actor(*att_data.defender);
 
-        const bool is_attacker_pos_seen =
-                map::g_seen.at(att_data.attacker->m_pos);
+        const bool is_unseen_monsters_fighting =
+                !is_player_defender &&
+                !is_player_seeing_attacker &&
+                !is_player_seeing_defender;
 
-        if (!is_attacker_pos_seen ||
-            (!is_player_seeing_attacker && !is_player_seeing_defender))
+        if (is_unseen_monsters_fighting)
         {
-                // Attacker position not seen, or two unseen monsters fighting
-                // each other - a sound message will be printed
                 return;
         }
 
@@ -425,20 +427,22 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
                 return;
         }
 
+        const bool is_player_defender =
+                att_data.defender->is_player();
+
         const bool is_player_seeing_attacker =
                 can_player_see_actor(*att_data.attacker);
 
         const bool is_player_seeing_defender =
                 can_player_see_actor(*att_data.defender);
 
-        const bool is_attacker_pos_seen =
-                map::g_seen.at(att_data.attacker->m_pos);
+        const bool is_unseen_monsters_fighting =
+                !is_player_defender &&
+                !is_player_seeing_attacker &&
+                !is_player_seeing_defender;
 
-        if (!is_attacker_pos_seen ||
-            (!is_player_seeing_attacker && !is_player_seeing_defender))
+        if (is_unseen_monsters_fighting)
         {
-                // Attacker position not seen, or two unseen monsters fighting
-                // each other - a sound message will be printed
                 return;
         }
 
@@ -715,7 +719,7 @@ static void emit_melee_snd(
 
         const std::string snd_msg = melee_snd_msg(att_data);
 
-        audio::SfxId sfx = audio::SfxId::END;
+        auto sfx = audio::SfxId::END;
 
         if (att_result <= ActionResult::fail)
         {
@@ -735,16 +739,24 @@ static void emit_melee_snd(
 
         if (att_data.attacker)
         {
+                const bool is_player_defender =
+                        att_data.defender->is_player();
+
                 const bool is_player_seeing_defender =
                         can_player_see_actor(*att_data.defender);
 
                 const bool is_player_seeing_attacker =
                         can_player_see_actor(*att_data.attacker);
 
-                if (!is_player_seeing_attacker && !is_player_seeing_defender)
+                const bool is_unseen_monsters_fighting =
+                        !is_player_defender &&
+                        !is_player_seeing_attacker &&
+                        !is_player_seeing_defender;
+
+                if (is_unseen_monsters_fighting)
                 {
                         // Two unseen monsters fighting each other - always
-                        // include the sound message
+                        // include the sound message.
                         ignore_msg_if_origin_seeen = IgnoreMsgIfOriginSeen::no;
                 }
         }
