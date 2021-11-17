@@ -78,7 +78,7 @@ enum class PropId
         always_aware,
         corrupts_env_color,  // "Strange color" monster corrupting the area
         alters_env,
-        regenerates,
+        regenerating,
         corpse_rises,
         spawns_zombie_parts_on_destroyed,
         breeds,

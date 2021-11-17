@@ -1416,11 +1416,11 @@ public:
         void on_std_turn() override;
 };
 
-class PropRegenerates : public Prop
+class PropRegenerating : public Prop
 {
 public:
-        PropRegenerates() :
-                Prop(PropId::regenerates) {}
+        PropRegenerating() :
+                Prop(PropId::regenerating) {}
 
         void on_std_turn() override;
 };

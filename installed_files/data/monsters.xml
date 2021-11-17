@@ -6281,7 +6281,7 @@
         </attacks>
 
         <properties>
-            <property>regenerates</property>
+            <property>regenerating</property>
             <property>r_poison</property>
             <property>r_fear</property>
             <property>r_conf</property>
@@ -6379,7 +6379,7 @@
         </attacks>
 
         <properties>
-            <property>regenerates</property>
+            <property>regenerating</property>
             <property>r_poison</property>
             <property>r_fear</property>
             <property>r_conf</property>
@@ -6478,7 +6478,7 @@
         </attacks>
 
         <properties>
-            <property>regenerates</property>
+            <property>regenerating</property>
             <property>r_poison</property>
             <property>r_fear</property>
             <property>r_conf</property>
@@ -6667,7 +6667,7 @@
         <properties>
             <property>confuses_adjacent</property>
             <property>corrupts_environment_color</property>
-            <property>regenerates</property>
+            <property>regenerating</property>
             <property>r_phys</property>
             <property>r_poison</property>
             <property>r_fear</property>

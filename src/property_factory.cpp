@@ -245,8 +245,8 @@ Prop* make(const PropId id)
         case PropId::corrupts_env_color:
                 return new PropCorruptsEnvColor();
 
-        case PropId::regenerates:
-                return new PropRegenerates();
+        case PropId::regenerating:
+                return new PropRegenerating();
 
         case PropId::corpse_rises:
                 return new PropCorpseRises();

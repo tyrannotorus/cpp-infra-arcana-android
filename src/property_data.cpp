@@ -71,7 +71,7 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"radiant_fov", PropId::radiant_fov},
         {"recloaks", PropId::recloaks},
         {"reduced_pierce_dmg", PropId::reduced_pierce_dmg},
-        {"regenerates", PropId::regenerates},
+        {"regenerating", PropId::regenerating},
         {"see_invis", PropId::see_invis},
         {"short_hearing_range", PropId::short_hearing_range},
         {"slowed", PropId::slowed},
@@ -986,10 +986,10 @@ static void init_data_list()
         d.id = PropId::alters_env;
         add(d);
 
-        d.id = PropId::regenerates;
+        d.id = PropId::regenerating;
         d.std_rnd_turns = Range(50, 100);
-        d.name = "Regenerates";
-        d.name_short = "Regenerates";
+        d.name = "Regenerating";
+        d.name_short = "Regenerating";
         d.descr =
                 "+1 extra hit point regenerated per turn, and "
                 "10% chance per turn to heal one wound.";

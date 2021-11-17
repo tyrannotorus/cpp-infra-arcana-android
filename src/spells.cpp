@@ -4774,7 +4774,7 @@ void SpellHeal::run_effect(
         {
                 auto* const prop =
                         property_factory::make(
-                                PropId::regenerates);
+                                PropId::regenerating);
 
                 prop->set_duration(regen_duration().roll());
 

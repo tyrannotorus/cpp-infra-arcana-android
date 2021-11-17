@@ -1135,7 +1135,7 @@ void PropWound::on_more(const Prop& new_prop)
 PropEnded PropWound::on_actor_turn()
 {
         if (m_owner->is_player() &&
-            m_owner->m_properties.has(PropId::regenerates) &&
+            m_owner->m_properties.has(PropId::regenerating) &&
             rnd::percent(10))
         {
                 --m_nr_wounds;
@@ -2516,7 +2516,7 @@ void PropAltersEnv::on_std_turn()
         }
 }
 
-void PropRegenerates::on_std_turn()
+void PropRegenerating::on_std_turn()
 {
         if (!m_owner->is_alive() ||
             m_owner->m_properties.has(PropId::burning))

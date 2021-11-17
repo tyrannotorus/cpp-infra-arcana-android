@@ -490,7 +490,7 @@ void Vitality::quaff_impl(actor::Actor& actor)
 
         actor.restore_hp(999, false);
 
-        actor.m_properties.apply(property_factory::make(PropId::regenerates));
+        actor.m_properties.apply(property_factory::make(PropId::regenerating));
 
         if (actor::can_player_see_actor(actor))
         {
