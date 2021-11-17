@@ -31,6 +31,9 @@ static bool s_is_window_resized = false;
 static const uint32_t s_window_resize_draw_delay_ms = 400;
 static uint32_t s_last_window_resize_ms = 0;
 
+// TODO: Most of the graphics cycling code probably doesn't belong in this file,
+// move it somewhere else.
+static bool s_is_graphics_cycling_enabled = true;
 static const size_t nr_graphics_cycle_types = (size_t)io::GraphicsCycle::END;
 static std::uint32_t s_graphics_cycle_delay_ms[nr_graphics_cycle_types];
 static uint32_t s_last_graphics_cycle_ms[nr_graphics_cycle_types];
@@ -77,6 +80,11 @@ static void window_resized_delayed_draw()
 
 static void run_graphics_cycling()
 {
+        if (!s_is_graphics_cycling_enabled)
+        {
+                return;
+        }
+
         // Do not cycle graphics if window has been resized recently.
         if (s_last_window_resize_ms != 0)
         {
@@ -446,6 +454,8 @@ namespace io
 {
 void init_input()
 {
+        s_is_graphics_cycling_enabled = true;
+
         for (size_t i = 0; i < (size_t)GraphicsCycle::END; ++i)
         {
                 auto& delay = s_graphics_cycle_delay_ms[i];
@@ -473,6 +483,16 @@ void init_input()
 
                 s_last_graphics_cycle_ms[i] = 0;
         }
+}
+
+void enable_graphics_cycling()
+{
+        s_is_graphics_cycling_enabled = true;
+}
+
+void disable_graphics_cycling()
+{
+        s_is_graphics_cycling_enabled = false;
 }
 
 void flush_input()

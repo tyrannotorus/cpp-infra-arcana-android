@@ -76,6 +76,9 @@ void clear_screen();
 
 void on_fullscreen_toggled();
 
+void enable_graphics_cycling();
+void disable_graphics_cycling();
+
 P min_screen_gui_dims();
 
 R gui_to_px_rect(R rect);

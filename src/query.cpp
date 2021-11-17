@@ -189,6 +189,12 @@ int number(
                 return 0;
         }
 
+        // HACK: If graphics cycling is performed while entering a number, the
+        // text will flicker or get overdrawn, so it is disabled here. However
+        // the right solution is probably to make this into a state that is
+        // drawn overlayed.
+        io::disable_graphics_cycling();
+
         int ret_num =
                 std::clamp(
                         default_value,
@@ -289,11 +295,15 @@ int number(
                                         allowed_range.min,
                                         allowed_range.max);
 
+                        // HACK: See comment in the beginning of this function.
+                        io::enable_graphics_cycling();
                         return ret_num;
                 }
 
                 if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE))
                 {
+                        // HACK: See comment in the beginning of this function.
+                        io::enable_graphics_cycling();
                         return cancel_returns_default ? default_value : -1;
                 }
 
@@ -386,6 +396,8 @@ int number(
                 }
         }
 
+        // HACK: See comment in the beginning of this function.
+        io::enable_graphics_cycling();
         return -1;
 }
 
