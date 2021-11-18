@@ -310,7 +310,10 @@ static void on_player_waiting()
                 // Reorganize pistol magazines?
                 const auto seen_foes = actor::seen_foes(*map::g_player);
 
-                if (seen_foes.empty())
+                const bool is_burning =
+                        map::g_player->m_properties.has(PropId::burning);
+
+                if (seen_foes.empty() && !is_burning)
                 {
                         reload::player_arrange_pistol_mags();
                 }

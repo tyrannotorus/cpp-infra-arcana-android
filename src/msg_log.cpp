@@ -573,7 +573,7 @@ void add(
                 more_prompt();
         }
 
-        // Messages may stop long actions like first aid and waiting.
+        // Messages may stop long actions like first aid.
         if (interrupt_player == MsgInterruptPlayer::yes)
         {
                 map::g_player->interrupt_actions(ForceInterruptActions::no);
