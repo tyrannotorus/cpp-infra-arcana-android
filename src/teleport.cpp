@@ -321,12 +321,19 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                 actor.m_mon_aware_state.player_aware_of_me_counter = 0;
         }
 
-        actor.m_properties.end_prop(
+        const std::vector<PropId> props_ended = {
                 PropId::entangled,
-                PropEndConfig(
+                PropId::nailed};
+
+        for (const auto id : props_ended)
+        {
+                const PropEndConfig cfg(
                         PropEndAllowCallEndHook::no,
                         PropEndAllowMsg::no,
-                        PropEndAllowHistoricMsg::yes));
+                        PropEndAllowHistoricMsg::yes);
+
+                actor.m_properties.end_prop(id, cfg);
+        }
 
         // Hostile void travelers "intercepts" players teleporting, and calls
         // the player to them
