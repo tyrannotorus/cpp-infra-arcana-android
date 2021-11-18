@@ -273,7 +273,12 @@ static void run_atomic_turn_events()
         // Stop burning for any actor standing in liquid
         for (auto* const actor : game_time::g_actors)
         {
-                const P& p = actor->m_pos;
+                if (actor->m_properties.has(PropId::flying))
+                {
+                        continue;
+                }
+
+                const auto& p = actor->m_pos;
 
                 const auto* const terrain = map::g_terrain.at(p);
 
