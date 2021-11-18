@@ -573,7 +573,7 @@ static void draw_properties(int y, const Panel panel)
         if (map::g_dark.at(map::g_player->m_pos))
         {
                 const ColoredString dark = {
-                        "Total darkness",
+                        "DARK AREA",
                         colors::gray()};
 
                 property_names.push_back(dark);
