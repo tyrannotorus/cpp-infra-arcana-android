@@ -16,7 +16,10 @@ Gameplay commands:
    n (o)     Make NOISE
    p         DISARM trap
    r         RELOAD
-   s         WAIT five turns
+   5 (.)     WAIT one turn (numpad 5 or period)
+             (This also rearranges pistol magazines if possible, or feeds on a
+             corpse if playing as the Ghoul character)
+   s         WAIT five turns, or until something happens
    t         THROW item, throw lit EXPLOSIVE
    u (G)     UNLOAD firearm on the ground, or pick up item
    v         VIEW descriptions of things on the map
