@@ -503,7 +503,10 @@ static std::string auto_description_str(actor::Actor& actor)
                 str,
                 get_melee_hit_chance_descr(actor));
 
-        if (!actor.is_aware_of_player())
+        const auto& ai = actor_data.ai;
+        const auto looks = ai[(size_t)actor::AiId::looks];
+
+        if (!actor.is_aware_of_player() && looks)
         {
                 text_format::append_with_space(
                         str,
@@ -520,9 +523,6 @@ static std::string auto_description_str(actor::Actor& actor)
         text_format::append_with_space(
                 str,
                 get_mon_memory_turns_descr(actor_data, actor));
-
-        const auto& ai = actor_data.ai;
-        const auto looks = ai[(size_t)actor::AiId::looks];
 
         if (!looks)
         {

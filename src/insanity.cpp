@@ -28,6 +28,7 @@
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "saving.hpp"
@@ -184,7 +185,8 @@ bool InsFaint::is_allowed() const
 
 void InsFaint::on_start_hook()
 {
-        map::g_player->m_properties.apply(new PropFainted());
+        map::g_player->m_properties.apply(
+                property_factory::make(PropId::fainted));
 }
 
 void InsLaugh::on_start_hook()
@@ -222,7 +224,8 @@ void InsPhobiaRat::on_new_player_turn(
                 {
                         msg_log::add("I am plagued by my phobia of rats!");
 
-                        map::g_player->m_properties.apply(new PropTerrified());
+                        map::g_player->m_properties.apply(
+                                property_factory::make(PropId::terrified));
 
                         break;
                 }
@@ -256,7 +259,8 @@ void InsPhobiaSpider::on_new_player_turn(
                 {
                         msg_log::add("I am plagued by my phobia of spiders!");
 
-                        map::g_player->m_properties.apply(new PropTerrified());
+                        map::g_player->m_properties.apply(
+                                property_factory::make(PropId::terrified));
 
                         break;
                 }
@@ -313,7 +317,8 @@ void InsPhobiaReptileAndAmph::on_new_player_turn(
         {
                 msg_log::add("I am plagued by my phobia of " + animal_str + "!");
 
-                map::g_player->m_properties.apply(new PropTerrified());
+                map::g_player->m_properties.apply(
+                        property_factory::make(PropId::terrified));
         }
 }
 
@@ -344,7 +349,8 @@ void InsPhobiaCanine::on_new_player_turn(
                 {
                         msg_log::add("I am plagued by my phobia of canines!");
 
-                        map::g_player->m_properties.apply(new PropTerrified());
+                        map::g_player->m_properties.apply(
+                                property_factory::make(PropId::terrified));
 
                         break;
                 }
@@ -378,7 +384,8 @@ void InsPhobiaDead::on_new_player_turn(
                 {
                         msg_log::add("I am plagued by my phobia of the dead!");
 
-                        map::g_player->m_properties.apply(new PropTerrified());
+                        map::g_player->m_properties.apply(
+                                property_factory::make(PropId::terrified));
 
                         break;
                 }
@@ -420,7 +427,8 @@ void InsPhobiaDeep::on_new_player_turn(
         {
                 msg_log::add("I am plagued by my phobia of deep places!");
 
-                map::g_player->m_properties.apply(new PropTerrified());
+                map::g_player->m_properties.apply(
+                        property_factory::make(PropId::terrified));
         }
 }
 
@@ -456,7 +464,7 @@ void InsPhobiaDark::on_new_player_turn(
                         msg_log::add("I am plagued by my phobia of the dark!");
 
                         map::g_player->m_properties.apply(
-                                new PropTerrified());
+                                property_factory::make(PropId::terrified));
                 }
         }
 }
@@ -496,7 +504,7 @@ void InsShadows::on_start_hook()
                 std::begin(summoned.monsters),
                 std::end(summoned.monsters),
                 [](auto* const mon) {
-                        auto* prop = new PropWaiting();
+                        auto* prop = property_factory::make(PropId::waiting);
 
                         prop->set_duration(1);
 
@@ -541,7 +549,7 @@ void InsParanoia::on_start_hook()
                 std::begin(summoned.monsters),
                 std::end(summoned.monsters),
                 [](auto* const mon) {
-                        auto* prop = new PropWaiting();
+                        auto* prop = property_factory::make(PropId::waiting);
 
                         prop->set_duration(1);
 
@@ -556,7 +564,8 @@ bool InsConfusion::is_allowed() const
 
 void InsConfusion::on_start_hook()
 {
-        map::g_player->m_properties.apply(new PropConfused());
+        map::g_player->m_properties.apply(
+                property_factory::make(PropId::confused));
 }
 
 bool InsFrenzy::is_allowed() const
@@ -566,7 +575,8 @@ bool InsFrenzy::is_allowed() const
 
 void InsFrenzy::on_start_hook()
 {
-        map::g_player->m_properties.apply(new PropFrenzied());
+        map::g_player->m_properties.apply(
+                property_factory::make(PropId::frenzied));
 }
 
 // -----------------------------------------------------------------------------
@@ -576,7 +586,7 @@ namespace insanity
 {
 namespace
 {
-InsSympt* sympts_[(size_t)InsSymptId::END];
+InsSympt* s_sympts[(size_t)InsSymptId::END];
 
 InsSympt* make_sympt(const InsSymptId id)
 {
@@ -651,7 +661,7 @@ void init()
 {
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                sympts_[i] = nullptr;
+                s_sympts[i] = nullptr;
         }
 }
 
@@ -659,9 +669,9 @@ void cleanup()
 {
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                delete sympts_[i];
+                delete s_sympts[i];
 
-                sympts_[i] = nullptr;
+                s_sympts[i] = nullptr;
         }
 }
 
@@ -669,7 +679,7 @@ void save()
 {
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                const auto* const sympt = sympts_[i];
+                const auto* const sympt = s_sympts[i];
 
                 saving::put_bool(sympt != nullptr);
 
@@ -690,7 +700,7 @@ void load()
                 {
                         auto* const sympt = make_sympt((InsSymptId)i);
 
-                        sympts_[i] = sympt;
+                        s_sympts[i] = sympt;
 
                         sympt->load();
                 }
@@ -703,7 +713,7 @@ void run_sympt()
 
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                const InsSympt* const active_sympt = sympts_[i];
+                const InsSympt* const active_sympt = s_sympts[i];
 
                 // Symptoms are only allowed if not already active
                 if (!active_sympt)
@@ -749,9 +759,9 @@ void run_sympt()
         {
                 const auto sympt_idx = size_t(sympt->id());
 
-                ASSERT(!sympts_[sympt_idx]);
+                ASSERT(!s_sympts[sympt_idx]);
 
-                sympts_[sympt_idx] = sympt;
+                s_sympts[sympt_idx] = sympt;
         }
 
         sympt->on_start();
@@ -761,14 +771,14 @@ bool has_sympt(const InsSymptId id)
 {
         ASSERT(id != InsSymptId::END);
 
-        return sympts_[size_t(id)];
+        return s_sympts[size_t(id)];
 }
 
 bool has_sympt_type(const InsSymptType type)
 {
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                const InsSympt* const s = sympts_[i];
+                const InsSympt* const s = s_sympts[i];
 
                 if (s && s->type() == type)
                 {
@@ -785,7 +795,7 @@ std::vector<const InsSympt*> active_sympts()
 
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                const InsSympt* const sympt = sympts_[i];
+                const InsSympt* const sympt = s_sympts[i];
 
                 if (sympt)
                 {
@@ -800,7 +810,7 @@ void on_new_player_turn(const std::vector<actor::Actor*>& seen_foes)
 {
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                InsSympt* const sympt = sympts_[i];
+                InsSympt* const sympt = s_sympts[i];
 
                 if (sympt)
                 {
@@ -813,7 +823,7 @@ void on_permanent_rfear()
 {
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                InsSympt* const sympt = sympts_[i];
+                InsSympt* const sympt = s_sympts[i];
 
                 if (sympt)
                 {
@@ -827,12 +837,11 @@ void end_sympt(const InsSymptId id)
         ASSERT(id != InsSymptId::END);
 
         const auto idx = size_t(id);
-
-        InsSympt* const sympt = sympts_[idx];
+        auto* const sympt = s_sympts[idx];
 
         ASSERT(sympt);
 
-        sympts_[idx] = nullptr;
+        s_sympts[idx] = nullptr;
 
         sympt->on_end();
 
