@@ -1170,6 +1170,15 @@ public:
         }
 };
 
+class PropRShock : public Prop
+{
+public:
+        PropRShock() :
+                Prop(PropId::r_shock) {}
+
+        void on_applied() override;
+};
+
 class PropRAcid : public Prop
 {
 public:

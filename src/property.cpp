@@ -1865,10 +1865,10 @@ bool PropBlind::should_update_vision_on_toggled() const
 
 void PropParalyzed::on_applied()
 {
-        auto* const player = map::g_player;
-
         if (m_owner->is_player())
         {
+                auto* const player = map::g_player;
+
                 auto* const active_explosive = player->m_active_explosive;
 
                 if (active_explosive)
@@ -1888,6 +1888,14 @@ PropEnded PropFainted::on_hit()
 bool PropFainted::should_update_vision_on_toggled() const
 {
         return m_owner->is_player();
+}
+
+void PropRShock::on_applied()
+{
+        if (m_owner->is_player())
+        {
+                map::g_player->m_nr_turns_until_ins = -1;
+        }
 }
 
 DmgResistData PropRAcid::is_resisting_dmg(const DmgType dmg_type) const

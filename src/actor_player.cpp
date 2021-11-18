@@ -673,8 +673,7 @@ void Player::mon_feeling()
                 }
         }
 
-        if (print_unique_mon_feeling &&
-            rnd::percent(80))
+        if (print_unique_mon_feeling && rnd::percent(80))
         {
                 std::vector<std::string> msg_bucket {
                         "A chill runs down my spine.",

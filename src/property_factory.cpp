@@ -207,7 +207,7 @@ Prop* make(const PropId id)
                 return new PropRPara();
 
         case PropId::r_shock:
-                return new Prop(PropId::r_shock);
+                return new PropRShock();
 
         case PropId::tele_ctrl:
                 return new Prop(id);

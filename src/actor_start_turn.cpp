@@ -387,10 +387,14 @@ static void on_player_shock_over_limit()
 
         hints::display(hints::Id::high_shock);
 
-        player.m_nr_turns_until_ins =
-                (player.m_nr_turns_until_ins < 0)
-                ? 3
-                : (player.m_nr_turns_until_ins - 1);
+        if (player.m_nr_turns_until_ins < 0)
+        {
+                player.m_nr_turns_until_ins = 3;
+        }
+        else
+        {
+                --player.m_nr_turns_until_ins;
+        }
 
         if (player.m_nr_turns_until_ins > 0)
         {
