@@ -22,7 +22,7 @@ Gameplay commands:
    s         WAIT five turns, or until something happens
    t         THROW item, throw lit EXPLOSIVE
    u (G)     UNLOAD firearm on the ground, or pick up item
-   v         VIEW descriptions of things on the map
+   v         LOOK, VIEW descriptions of things on the map
    x         CAST spell
    z         SWAP to readied weapon
    Q         QUIT
