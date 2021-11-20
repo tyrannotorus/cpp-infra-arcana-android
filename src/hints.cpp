@@ -25,9 +25,6 @@ static bool s_hints_displayed[(size_t)hints::Id::END];
 
 static const std::string s_title_prefix = "Hint: ";
 
-static const std::string s_msg_end =
-        " (These hints can be disabled in the options menu.)";
-
 static std::pair<std::string, std::string> id_to_text(const hints::Id id)
 {
         switch (id)
@@ -100,6 +97,30 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
         }
 }
 
+static bool should_display_hint(const hints::Id id)
+{
+        const auto hints_mode = config::hints_mode();
+
+        switch (hints_mode)
+        {
+        case HintsMode::once_per_game:
+                return !s_hints_displayed[(size_t)id];
+
+        case HintsMode::once:
+                return !config::has_seen_hint_global(id);
+
+        case HintsMode::never:
+                return false;
+
+        case HintsMode::END:
+                break;
+        }
+
+        ASSERT(false);
+
+        return false;
+}
+
 // -----------------------------------------------------------------------------
 // hints
 // -----------------------------------------------------------------------------
@@ -128,12 +149,7 @@ void load()
 
 void display(const Id id)
 {
-        if (!config::should_display_hints())
-        {
-                return;
-        }
-
-        if (s_hints_displayed[(size_t)id])
+        if (!should_display_hint(id))
         {
                 return;
         }
@@ -157,10 +173,12 @@ void display(const Id id)
 
         popup::Popup(popup::AddToMsgHistory::yes)
                 .set_title(s_title_prefix + text.first)
-                .set_msg(text.second + s_msg_end)
+                .set_msg(text.second)
                 .run();
 
         s_hints_displayed[(size_t)id] = true;
+
+        config::set_hint_seen_global(id);
 }
 
 }  // namespace hints

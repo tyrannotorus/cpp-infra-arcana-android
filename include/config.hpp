@@ -12,10 +12,24 @@
 #include "browser.hpp"
 #include "state.hpp"
 
+namespace hints
+{
+enum class Id;
+}  // namespace hints
+
 enum class InputMode
 {
         standard,
         vi_keys,
+
+        END
+};
+
+enum class HintsMode
+{
+        once_per_game,
+        once,
+        never,
 
         END
 };
@@ -57,7 +71,9 @@ bool is_ranged_wpn_auto_reload();
 bool is_intro_lvl_skipped();
 bool is_intro_popup_skipped();
 bool is_any_key_confirm_more();
-bool should_display_hints();
+HintsMode hints_mode();
+bool has_seen_hint_global(hints::Id id);
+void set_hint_seen_global(hints::Id id);
 bool always_warn_new_mon();
 int delay_projectile_draw();
 int delay_shotgun();

@@ -68,7 +68,8 @@ static bool s_is_ranged_wpn_auto_reload = false;
 static bool s_is_intro_lvl_skipped = false;
 static bool s_is_intro_popup_skipped = false;
 static bool s_is_any_key_confirm_more = false;
-static bool s_display_hints = false;
+static HintsMode s_hints_mode = HintsMode::once;
+static bool s_has_seen_hint_global[(size_t)hints::Id::END];
 static bool s_always_warn_new_mon = false;
 static int s_delay_projectile_draw = -1;
 static int s_delay_shotgun = -1;
@@ -256,7 +257,7 @@ static void set_default_variables()
         s_is_intro_lvl_skipped = false;
         s_is_intro_popup_skipped = false;
         s_is_any_key_confirm_more = false;
-        s_display_hints = true;
+        s_hints_mode = HintsMode::once;
         s_always_warn_new_mon = true;
         s_warn_on_throw_valuable = true;
         s_warn_on_light_explosive = true;
@@ -267,6 +268,11 @@ static void set_default_variables()
         s_delay_shotgun = 75;
         s_delay_explosion = 300;
         s_default_player_name = "";
+
+        for (size_t i = 0; i < (size_t)hints::Id::END; ++i)
+        {
+                s_has_seen_hint_global[i] = false;
+        }
 
         TRACE_FUNC_END;
 }
@@ -500,7 +506,10 @@ static void player_sets_option(
         case 13:
         {
                 // Display hints
-                s_display_hints = !s_display_hints;
+                const auto current_idx = (int)s_hints_mode;
+                const auto nr_modes = (int)HintsMode::END;
+
+                s_hints_mode = (HintsMode)((current_idx + 1) % nr_modes);
 
                 hints::init();
         }
@@ -774,7 +783,7 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_is_any_key_confirm_more = lines.front() == "1";
         lines.erase(std::begin(lines));
 
-        s_display_hints = lines.front() == "1";
+        s_hints_mode = (HintsMode)to_int(lines.front());
         lines.erase(std::begin(lines));
 
         s_always_warn_new_mon = lines.front() == "1";
@@ -806,14 +815,23 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
 
         s_default_player_name = "";
 
-        if (lines.front() == "1")
-        {
-                lines.erase(std::begin(lines));
-
-                s_default_player_name = lines.front();
-        }
+        const bool has_default_name = lines.front() == "1";
 
         lines.erase(std::begin(lines));
+
+        if (has_default_name)
+        {
+                s_default_player_name = lines.front();
+
+                lines.erase(std::begin(lines));
+        }
+
+        for (size_t i = 0; i < (size_t)hints::Id::END; ++i)
+        {
+                s_has_seen_hint_global[i] = lines.front() == "1";
+
+                lines.erase(std::begin(lines));
+        }
 
         ASSERT(lines.empty());
 
@@ -860,7 +878,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(s_is_intro_lvl_skipped ? "1" : "0");
         lines.emplace_back(s_is_intro_popup_skipped ? "1" : "0");
         lines.emplace_back(s_is_any_key_confirm_more ? "1" : "0");
-        lines.emplace_back(s_display_hints ? "1" : "0");
+        lines.emplace_back(std::to_string((int)s_hints_mode));
         lines.emplace_back(s_always_warn_new_mon ? "1" : "0");
         lines.emplace_back(s_warn_on_throw_valuable ? "1" : "0");
         lines.emplace_back(s_warn_on_light_explosive ? "1" : "0");
@@ -883,6 +901,11 @@ static std::vector<std::string> lines_from_variables()
                 lines.push_back(s_default_player_name);
         }
 
+        for (size_t i = 0; i < (size_t)hints::Id::END; ++i)
+        {
+                lines.emplace_back(s_has_seen_hint_global[i] ? "1" : "0");
+        }
+
         TRACE_FUNC_END;
 
         return lines;
@@ -902,18 +925,23 @@ void init()
         set_default_variables();
 
         std::vector<std::string> lines;
-
-        // Load config file, if it exists
         read_file(lines);
 
-        if (!lines.empty())
+        if (lines.empty())
+        {
+                // No previous config file exists, create one.
+                lines = lines_from_variables();
+
+                write_lines_to_file(lines);
+        }
+        else
         {
                 // A config file exists, set values from parsed config lines
                 set_variables_from_lines(lines);
         }
 
         update_render_dims();
-}  // namespace configvoidinit()
+}
 
 InputMode input_mode()
 {
@@ -955,7 +983,6 @@ void set_screen_px_w(const int w)
         s_screen_px_w = w;
 
         const auto lines = lines_from_variables();
-
         write_lines_to_file(lines);
 }
 
@@ -964,7 +991,6 @@ void set_screen_px_h(const int h)
         s_screen_px_h = h;
 
         const auto lines = lines_from_variables();
-
         write_lines_to_file(lines);
 }
 
@@ -1078,9 +1104,34 @@ bool is_any_key_confirm_more()
         return s_is_any_key_confirm_more;
 }
 
-bool should_display_hints()
+HintsMode hints_mode()
 {
-        return s_display_hints;
+        return s_hints_mode;
+}
+
+bool has_seen_hint_global(const hints::Id id)
+{
+        if (id == hints::Id::END)
+        {
+                ASSERT(false);
+
+                return false;
+        }
+
+        return s_has_seen_hint_global[(size_t)id];
+}
+
+void set_hint_seen_global(const hints::Id id)
+{
+        if (id == hints::Id::END)
+        {
+                ASSERT(false);
+        }
+
+        s_has_seen_hint_global[(size_t)id] = true;
+
+        const auto lines = lines_from_variables();
+        write_lines_to_file(lines);
 }
 
 bool always_warn_new_mon()
@@ -1107,7 +1158,6 @@ void set_default_player_name(const std::string& name)
         s_default_player_name = name;
 
         const auto lines = lines_from_variables();
-
         write_lines_to_file(lines);
 }
 
@@ -1121,7 +1171,6 @@ void set_fullscreen(const bool value)
         s_is_fullscreen = value;
 
         const auto lines = lines_from_variables();
-
         write_lines_to_file(lines);
 }
 
@@ -1130,7 +1179,6 @@ void set_2x_scale_fullscreen_enabled(const bool value)
         s_is_2x_scale_fullscreen_enabled = value;
 
         const auto lines = lines_from_variables();
-
         write_lines_to_file(lines);
 }
 
@@ -1203,7 +1251,6 @@ void ConfigState::update()
         if (did_set_option)
         {
                 const auto lines = lines_from_variables();
-
                 write_lines_to_file(lines);
 
                 io::flush_input();
@@ -1259,6 +1306,21 @@ void ConfigState::draw()
         std::string master_volume_str(11, '-');
         master_volume_str[s_master_volume_pct / 10] = '|';
         master_volume_str += " " + std::to_string(s_master_volume_pct) + "%";
+
+        std::string hints_mode_str;
+
+        if (s_hints_mode == HintsMode::once_per_game)
+        {
+                hints_mode_str = "Once per game";
+        }
+        else if (s_hints_mode == HintsMode::once)
+        {
+                hints_mode_str = "Once";
+        }
+        else
+        {
+                hints_mode_str = "Never";
+        }
 
         const std::vector<std::pair<std::string, std::string>> labels = {
                 {"Audio volume level",
@@ -1320,9 +1382,7 @@ void ConfigState::draw()
                          : "No"},
 
                 {"Display hints",
-                 s_display_hints
-                         ? "Yes"
-                         : "No"},
+                 hints_mode_str},
 
                 {"Always warn when new monster is seen",
                  s_always_warn_new_mon

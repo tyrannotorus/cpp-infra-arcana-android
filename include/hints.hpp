@@ -9,7 +9,7 @@
 
 namespace hints
 {
-enum Id
+enum class Id
 {
         altars,
         fountains,

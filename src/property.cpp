@@ -547,7 +547,7 @@ void PropInfected::on_applied()
 {
         if (m_owner->is_player())
         {
-                hints::display(hints::infected);
+                hints::display(hints::Id::infected);
         }
 }
 
