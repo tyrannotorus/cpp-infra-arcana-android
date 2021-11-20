@@ -5800,6 +5800,7 @@
             <property>r_blind</property>
             <property>r_poison</property>
             <property>r_disease</property>
+            <property>r_para</property>
             <property>reduced_pierce_dmg</property>
             <property>short_hearing_range</property>
         </properties>
