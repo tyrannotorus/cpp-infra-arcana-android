@@ -1127,8 +1127,8 @@ Range Spell::spi_cost_range(
                 --range.max;
         }
 
-        range.min = std::max(1, range.min);
-        range.max = std::max(1, range.max);
+        range.min = std::max(0, range.min);
+        range.max = std::max(0, range.max);
 
         return range;
 }
