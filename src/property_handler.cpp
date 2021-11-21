@@ -858,6 +858,9 @@ std::vector<PropListEntry> PropHandler::property_names_and_descr() const
 {
         std::vector<PropListEntry> list;
 
+        const bool is_player = m_owner->is_player();
+        const bool is_self_aware = player_bon::has_trait(Trait::self_aware);
+
         for (const auto& prop : m_props)
         {
                 std::string name = prop->name();
@@ -875,18 +878,22 @@ std::vector<PropListEntry> PropHandler::property_names_and_descr() const
 
                 const bool is_intr = prop->src() == PropSrc::intr;
 
-                // Player can see number of turns left on own properties with
-                // Self-aware?
-                if ((is_indefinite || is_intr) &&
-                    m_owner->is_player() &&
-                    player_bon::has_trait(Trait::self_aware) &&
-                    prop->allow_display_turns())
-                {
-                        // See NOTE in 'props_line' above.
-                        const int turns_displayed =
-                                turns_left + 1;
+                const bool allow_display_turns = prop->allow_display_turns();
 
-                        name += ":" + std::to_string(turns_displayed);
+                if (is_player && is_intr)
+                {
+                        if (is_indefinite)
+                        {
+                                name += " (indefinite)";
+                        }
+                        else if (is_self_aware && allow_display_turns)
+                        {
+                                // See NOTE in 'props_line' above.
+                                const int turns_displayed =
+                                        turns_left + 1;
+
+                                name += ":" + std::to_string(turns_displayed);
+                        }
                 }
 
                 const PropAlignment alignment = prop->alignment();

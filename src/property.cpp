@@ -581,7 +581,7 @@ PropEnded PropDescend::on_actor_turn()
 {
         ASSERT(m_owner->is_player());
 
-        if (m_nr_turns_left <= 1)
+        if (m_nr_turns_left <= 0)
         {
                 game_time::g_is_magic_descend_nxt_std_turn = true;
         }

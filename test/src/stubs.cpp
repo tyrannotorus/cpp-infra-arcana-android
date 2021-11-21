@@ -224,6 +224,9 @@ std::string sdl_pref_dir()
 
 void sleep(const Uint32) {}
 
+void enable_graphics_cycling() {}
+void disable_graphics_cycling() {}
+
 }  // namespace io
 
 // -----------------------------------------------------------------------------
