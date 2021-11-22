@@ -329,6 +329,7 @@ static void init_data_list()
         d.std_rnd_turns = Range(50, 100);
         d.name = "Deaf";
         d.name_short = "Deaf";
+        d.descr = "Cannot hear sounds.";
         d.msg_start_player = "I am deaf!";
         d.msg_end_player = "I can hear again.";
         d.historic_msg_start_permanent = "I became permanently deaf";
