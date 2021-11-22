@@ -1241,7 +1241,7 @@
         </audio>
 
         <attributes>
-            <hit_points>7</hit_points>
+            <hit_points>10</hit_points>
             <spirit>25</spirit>
             <speed>normal</speed>
             <shock_level>frightening</shock_level>
@@ -2220,6 +2220,7 @@
         </attacks>
 
         <properties>
+            <property>r_sleep</property>
             <property>light_sensitive</property>
             <property>darkvision</property>
         </properties>
@@ -3750,8 +3751,6 @@
         </attacks>
 
         <properties>
-            <property>r_fear</property>
-            <property>r_conf</property>
             <property>r_sleep</property>
             <property>light_sensitive</property>
             <property>darkvision</property>
