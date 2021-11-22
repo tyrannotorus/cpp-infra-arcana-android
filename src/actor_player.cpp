@@ -381,7 +381,19 @@ void Player::on_hit(
         const DmgType dmg_type,
         const AllowWound allow_wound)
 {
-        map::g_player->interrupt_actions(ForceInterruptActions::yes);
+        // NOTE: Interrupt player multi-turn actions, unless the damage is a
+        // small number of "pure" damage (i.e. not physical, electrical,
+        // etc). The idea is that something like taking a pistol shot should
+        // realistically stop you from treating wounds or handling equipment
+        // etc, while taking a minor hit by something like poison ticking would
+        // not necessarily stop you.
+        const bool is_small_pure_damage =
+                ((dmg_type == DmgType::pure) && (dmg == 1));
+
+        if (!is_small_pure_damage)
+        {
+                map::g_player->interrupt_actions(ForceInterruptActions::yes);
+        }
 
         const bool is_enough_dmg_for_wound = (dmg >= g_min_dmg_to_wound);
         const bool is_physical = is_physical_dmg_type(dmg_type);
