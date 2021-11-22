@@ -998,17 +998,9 @@ void handle(const GameCmd cmd)
 
         case GameCmd::look:
         {
-                if (map::g_player->m_properties.allow_see())
-                {
-                        states::push(
-                                std::make_unique<Viewing>(
-                                        map::g_player->m_pos));
-                }
-                else
-                {
-                        // Cannot see
-                        msg_log::add("I cannot see.");
-                }
+                states::push(
+                        std::make_unique<Viewing>(
+                                map::g_player->m_pos));
         }
         break;
 
