@@ -347,7 +347,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX
 
         set(COMMON_COMPILE_FLAGS
                 -std=c++17
-                -fno-rtti
                 -Wpedantic
                 # Disabled for the same reason as -Werror, see comment below.
                 # -pedantic-errors
@@ -371,7 +370,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX
                 -Og
                 -g
                 # -fsanitize=undefined
-                # -fno-sanitize=vptr  # Requires RTTI
+                # -fno-sanitize-recover
                 #
                 # Uncomment to generate gmon.out for gprof (must also be done for linker
                 # flags, see below)
@@ -615,6 +614,8 @@ else()
 
         target_link_libraries(ia PUBLIC         ${SDL_LIBS})
         target_link_libraries(ia-debug PUBLIC   ${SDL_LIBS})
+
+        # target_link_libraries(ia-debug PUBLIC   -lubsan)
 
         # Uncomment to generate gmon.out for gprof (must also be done for compile
         # flags, see above)

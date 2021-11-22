@@ -42,6 +42,12 @@ static Msg s_history[s_history_cap];
 
 static const std::string s_more_str = "[space]";
 
+// We only allow grouping up to 9 identical messages into a repeated message
+// (e.g. "Bla. (x3)"), so that the repeat number is always a single digit (this
+// simplifies calculation of required space for messages).
+static const int s_max_nr_repeats = 9;
+
+// "(xN)" where N is guaranteed to be a single digit, see above.
 static const int s_repeat_str_len = 4;
 
 static const int s_space_reserved_for_more_prompt = (int)s_more_str.size() + 1;
@@ -211,7 +217,7 @@ static void draw_more_prompt()
 
         if (!line.messages.empty())
         {
-                const Msg& last_msg = line.messages.back();
+                const auto& last_msg = line.messages.back();
 
                 more_x0 = x_after_msg(&last_msg);
 
@@ -484,6 +490,8 @@ void add(
                 if (current_line_nr > (g_nr_log_lines - 1))
                 {
                         more_prompt();
+
+                        current_line_nr = 0;
                 }
         }
 
@@ -500,7 +508,7 @@ void add(
 
                 const int worst_case_x1 = new_x + worst_case_w - 1;
 
-                if (worst_case_x1 >= panels::x1(Panel::log))
+                if (worst_case_x1 >= panels::w(Panel::log))
                 {
                         ++current_line_nr;
                 }
@@ -520,7 +528,8 @@ void add(
         {
                 const std::string prev_text = prev_msg->text();
 
-                if (prev_text == str)
+                if ((prev_text == str) &&
+                    (prev_msg->nr_repeats() < s_max_nr_repeats))
                 {
                         prev_msg->incr_repeats();
 

@@ -219,7 +219,7 @@ void kill(
 
                 game::on_mon_killed(actor);
 
-                static_cast<Mon&>(actor).m_leader = nullptr;
+                actor.m_leader = nullptr;
         }
 
         TRACE_FUNC_END_VERBOSE;
@@ -235,15 +235,13 @@ void print_mon_death_msg(const actor::Actor& actor)
         }
 }
 
-void unset_actor_as_leader_for_all_mon(actor::Actor& actor)
+void unset_actor_as_leader_for_all_mon(const actor::Actor& actor)
 {
-        for (Actor* other : game_time::g_actors)
+        for (auto* const other : game_time::g_actors)
         {
-                if ((other != &actor) &&
-                    !other->is_player() &&
-                    actor.is_leader_of(other))
+                if (other->m_leader == &actor)
                 {
-                        static_cast<Mon*>(other)->m_leader = nullptr;
+                        other->m_leader = nullptr;
                 }
         }
 }

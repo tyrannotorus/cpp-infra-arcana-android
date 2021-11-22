@@ -313,7 +313,8 @@ static void mon_std_turn(actor::Mon& mon)
             mon.m_data->ai[(size_t)actor::AiId::looks] &&
             (mon.m_leader != map::g_player) &&
             !map::g_player->m_properties.has(PropId::sanctuary) &&
-            (!mon.m_ai_state.target || mon.m_ai_state.target->is_player()))
+            ((mon.m_ai_state.target == map::g_player) ||
+             !mon.m_ai_state.target))
         {
                 ai::info::look(mon);
         }

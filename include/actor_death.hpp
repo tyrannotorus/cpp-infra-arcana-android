@@ -37,7 +37,7 @@ void kill(
 
 void print_mon_death_msg(const actor::Actor& actor);
 
-void unset_actor_as_leader_for_all_mon(Actor& actor);
+void unset_actor_as_leader_for_all_mon(const Actor& actor);
 
 }  // namespace actor
 

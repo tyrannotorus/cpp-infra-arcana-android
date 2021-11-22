@@ -404,6 +404,15 @@ void act()
                 map::g_player->m_properties.apply(prop);
         }
 
+        // Occasionally end a random property (helps clearing out properties
+        // that cause spammy or interrupting effects like mind sapping)
+        if (rnd::one_in(100))
+        {
+                const auto id = (PropId)rnd::range(0, (int)PropId::END - 1);
+
+                map::g_player->m_properties.end_prop(id);
+        }
+
         // Occasionally swap weapon (just some code exercise)
         if (rnd::one_in(50))
         {

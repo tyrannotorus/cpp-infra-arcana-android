@@ -68,8 +68,6 @@ protected:
                 bool is_marked,
                 ItemNameAttackInfo attack_info);
 
-        void activate(size_t backpack_idx);
-
         void draw_weight_pct_and_dots(
                 P item_pos,
                 size_t item_name_len,

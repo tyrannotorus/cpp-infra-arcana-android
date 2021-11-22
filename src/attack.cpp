@@ -567,7 +567,10 @@ static void print_melee_miss_msg(const MeleeAttData& att_data)
 {
         if (!att_data.attacker)
         {
-                ASSERT(false);
+                // TODO: It can happen that there is no actor attacking due to
+                // traps (e.g. spear trap), but this should probably still print
+                // some message? See also "print_melee_hit_msg", that case is
+                // actually handling the lack of an attacker.
 
                 return;
         }

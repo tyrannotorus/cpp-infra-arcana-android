@@ -224,7 +224,7 @@ private:
         void incr_prop_count(PropId id);
         void decr_prop_count(PropId id);
 
-        std::vector<std::unique_ptr<Prop>> m_props;
+        std::vector<std::shared_ptr<Prop>> m_props;
 
         // This array is only used as an optimization when requesting which
         // properties are currently active (see the "has()" method above).

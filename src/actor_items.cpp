@@ -806,7 +806,6 @@ void make_for_actor(actor::Actor& actor)
         }
         else
         {
-                // Not player
                 make_for_monster(actor);
         }
 }

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <climits>
 
+#include "actor_data.hpp"
 #include "actor_items.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
@@ -740,7 +741,18 @@ void Actor::add_light(Array2<bool>& light_map) const
 
 bool Actor::is_player() const
 {
-        return this == map::g_player;
+        if (map::g_player)
+        {
+                // A global player object has been defined, check if "this" is
+                // the same object as the global player object.
+                return this == map::g_player;
+        }
+        else
+        {
+                // No global player object, check the actor ID instead.
+                // TODO: Perhaps this should be the only way?
+                return (m_data->id == Id::player);
+        }
 }
 
 }  // namespace actor

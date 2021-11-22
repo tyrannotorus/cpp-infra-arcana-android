@@ -7,13 +7,14 @@
 #include "test_utils.hpp"
 
 #include "actor_player.hpp"
+#include "config.hpp"
 #include "init.hpp"
 #include "map.hpp"
+#include "pos.hpp"
 #include "query.hpp"
 #include "random.hpp"
-#include "terrain.hpp"
-#include "pos.hpp"
 #include "rect.hpp"
+#include "terrain.hpp"
 
 static void put_floor_and_walls_on_map()
 {

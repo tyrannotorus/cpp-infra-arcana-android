@@ -65,6 +65,11 @@ public:
                 return m_text;
         }
 
+        int nr_repeats() const
+        {
+                return m_nr_repeats;
+        }
+
         void incr_repeats()
         {
                 ++m_nr_repeats;

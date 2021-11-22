@@ -157,6 +157,18 @@ static void cap_str_to_menu_x1(
         }
 }
 
+static void activate(const size_t backpack_idx)
+{
+        auto* item = map::g_player->m_inv.m_backpack[backpack_idx];
+
+        auto result = item->activate(map::g_player);
+
+        if (result == ConsumeItem::yes)
+        {
+                map::g_player->m_inv.decr_item_in_backpack(backpack_idx);
+        }
+}
+
 // -----------------------------------------------------------------------------
 // Abstract inventory screen state
 // -----------------------------------------------------------------------------
@@ -689,18 +701,6 @@ void InvState::draw_item_descr() const
                         color);
 
                 ++pos.y;
-        }
-}
-
-void InvState::activate(const size_t backpack_idx)
-{
-        auto* item = map::g_player->m_inv.m_backpack[backpack_idx];
-
-        auto result = item->activate(map::g_player);
-
-        if (result == ConsumeItem::yes)
-        {
-                map::g_player->m_inv.decr_item_in_backpack(backpack_idx);
         }
 }
 

@@ -82,9 +82,18 @@ void Smoke::on_new_turn()
                 // statue-monster or a very alien monster can't get blinded by
                 // smoke. Perhaps add something like "has_eyes"?
 
-                bool is_blind_prot = false;
+                bool allow_blind = true;
 
-                bool is_breath_prot = actor->m_properties.has(PropId::r_breath);
+                bool allow_cough = !actor->m_properties.has(PropId::r_breath);
+
+                if (actor->m_properties.has(PropId::fainted))
+                {
+                        // A fainted creature supposedly has their eyes closed.
+                        // Also, while a fainted creatures would still need to
+                        // breathe, they at least should not cough.
+                        allow_blind = false;
+                        allow_cough = false;
+                }
 
                 if (is_player)
                 {
@@ -101,8 +110,8 @@ void Smoke::on_new_turn()
                         if (head_item &&
                             (head_item->data().id == item::Id::gas_mask))
                         {
-                                is_blind_prot = true;
-                                is_breath_prot = true;
+                                allow_blind = false;
+                                allow_cough = false;
 
                                 // This may destroy the gasmask
                                 static_cast<item::GasMask*>(head_item)
@@ -112,13 +121,13 @@ void Smoke::on_new_turn()
                         if (body_item &&
                             (body_item->data().id == item::Id::armor_asb_suit))
                         {
-                                is_blind_prot = true;
-                                is_breath_prot = true;
+                                allow_blind = false;
+                                allow_cough = false;
                         }
                 }
 
                 // Blinded?
-                if (!is_blind_prot && rnd::one_in(4))
+                if (allow_blind && rnd::one_in(4))
                 {
                         if (is_player)
                         {
@@ -134,7 +143,7 @@ void Smoke::on_new_turn()
                 }
 
                 // Coughing?
-                if (!is_breath_prot && rnd::one_in(4))
+                if (allow_cough && rnd::one_in(4))
                 {
                         std::string snd_msg;
 

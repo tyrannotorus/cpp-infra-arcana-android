@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <utility>
@@ -175,7 +176,7 @@ void PropHandler::apply(
                 prop->m_nr_turns_left /= 2;
         }
 
-        std::unique_ptr<Prop> prop_owned(prop);
+        std::shared_ptr<Prop> prop_shared(prop);
 
         // Check if property is resisted
         if (!force_effect)
@@ -232,7 +233,9 @@ void PropHandler::apply(
                 print_start_msg(*prop);
         }
 
-        m_props.push_back(std::move(prop_owned));
+        std::weak_ptr<Prop> prop_weak = prop_shared;
+
+        m_props.push_back(std::move(prop_shared));
 
         incr_prop_count(prop->m_id);
 
@@ -256,6 +259,11 @@ void PropHandler::apply(
         }
 
         prop->on_applied();
+
+        if (prop_weak.expired())
+        {
+                return;
+        }
 
         if (prop->m_data.force_interrupt_player_on_start)
         {
@@ -630,26 +638,49 @@ void PropHandler::on_new_dlvl()
 
 void PropHandler::on_turn_begin()
 {
-        for (size_t i = 0; i < m_props.size();)
+        // TODO: This pattern could be applied on all places that iterates over
+        // properties, where the property list may change during iteration.
+        std::vector<std::weak_ptr<Prop>> props_weak;
+
+        props_weak.reserve(m_props.size());
+
+        for (const auto& prop : m_props)
         {
-                auto& prop = m_props[i];
+                props_weak.push_back(prop);
+        }
 
-                if ((prop->m_nr_dlvls_left <= 0) &&
-                    (prop->m_nr_turns_left > 0))
+        for (auto& prop_weak : props_weak)
+        {
                 {
-                        ASSERT(prop->m_src == PropSrc::intr);
+                        auto prop = prop_weak.lock();
 
-                        --prop->m_nr_turns_left;
+                        if (!prop)
+                        {
+                                continue;
+                        }
+
+                        if ((prop->m_nr_dlvls_left <= 0) &&
+                            (prop->m_nr_turns_left > 0))
+                        {
+                                ASSERT(prop->m_src == PropSrc::intr);
+
+                                --prop->m_nr_turns_left;
+                        }
+
+                        const auto prop_ended = prop->on_actor_turn();
+
+                        (void)prop_ended;
                 }
 
-                const auto prop_ended = prop->on_actor_turn();
-
-                if (prop_ended == PropEnded::no)
                 {
-                        ASSERT(prop.get());
+                        auto prop = prop_weak.lock();
+
+                        if (!prop)
+                        {
+                                continue;
+                        }
 
                         ++prop->m_nr_turns_active;
-                        ++i;
                 }
         }
 }

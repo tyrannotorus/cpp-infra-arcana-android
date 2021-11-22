@@ -697,7 +697,6 @@ static void player_sets_option(
                         set_default_variables();
                         update_render_dims();
                         io::init();
-                        io::init();
                         audio::init();
                 }
         }

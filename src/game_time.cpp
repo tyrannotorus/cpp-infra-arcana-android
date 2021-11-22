@@ -13,6 +13,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
+#include "actor_death.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "actor_start_turn.hpp"
@@ -129,6 +130,34 @@ static actor::Speed current_actor_speed(const actor::Actor& actor)
         return speed;
 }
 
+static void erase_destroyed_actor(
+        const actor::Actor* const actor,
+        const size_t actor_idx)
+{
+        if (actor == map::g_player)
+        {
+                return;
+        }
+
+        if (map::g_player->m_tgt == actor)
+        {
+                map::g_player->m_tgt = nullptr;
+        }
+
+        delete actor;
+
+        game_time::g_actors.erase(
+                std::begin(game_time::g_actors) +
+                (int)actor_idx);
+
+        actor::unset_actor_as_leader_for_all_mon(*actor);
+
+        if (s_current_actor_idx >= game_time::g_actors.size())
+        {
+                s_current_actor_idx = 0;
+        }
+}
+
 static void run_std_turn_events()
 {
         if (game_time::g_is_magic_descend_nxt_std_turn)
@@ -171,26 +200,7 @@ static void run_std_turn_events()
                 // Delete destroyed actors
                 if (actor->m_state == ActorState::destroyed)
                 {
-                        if (actor == map::g_player)
-                        {
-                                return;
-                        }
-
-                        if (map::g_player->m_tgt == actor)
-                        {
-                                map::g_player->m_tgt = nullptr;
-                        }
-
-                        delete actor;
-
-                        game_time::g_actors.erase(
-                                std::begin(game_time::g_actors) +
-                                (int)i);
-
-                        if (s_current_actor_idx >= game_time::g_actors.size())
-                        {
-                                s_current_actor_idx = 0;
-                        }
+                        erase_destroyed_actor(actor, i);
                 }
                 else
                 {
