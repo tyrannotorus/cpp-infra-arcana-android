@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright 2011-2020 Martin Törnqvist <m.tornq@gmail.com>
+// Copyright 2011-2021 Martin Törnqvist <m.tornq@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
@@ -21,7 +21,7 @@ namespace version_info
 const std::string g_version_str;
 
 const std::string g_copyright_str =
-        "(c) 2011-2020 Martin Tornqvist";
+        "(c) 2011-2021 Martin Tornqvist";
 
 const std::string g_license_str =
         "Infra Arcana is free software, see LICENSE.txt.";

@@ -3,7 +3,7 @@
 
 struct P;
 // =============================================================================
-// Copyright 2011-2020 Martin Törnqvist <m.tornq@gmail.com>
+// Copyright 2011-2021 Martin Törnqvist <m.tornq@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
