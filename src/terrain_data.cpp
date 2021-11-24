@@ -210,7 +210,7 @@ static void init_data_list()
         d.character = '|';
         d.tile = gfx::TileId::END;  // This is set elsewhere
         d.is_projectile_passable = false;
-        d.is_los_passable = false;
+        d.is_los_passable = true;
         d.can_have_blood = false;  // We don't want to mess with the color
         d.can_have_gore = false;
         d.can_have_corpse = false;
