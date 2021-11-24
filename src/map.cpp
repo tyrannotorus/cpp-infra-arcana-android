@@ -396,6 +396,8 @@ void memorize_terrain_at(const P& p)
         memory.appearance.name = name;
         memory.appearance.color = terrain->color();
 
+        const auto minimap_wall_color = colors::sepia();
+
         if (id == terrain::Id::stairs)
         {
                 memory.appearance.minimap_color = colors::yellow();
@@ -405,7 +407,11 @@ void memorize_terrain_at(const P& p)
                 const auto* const door =
                         static_cast<const terrain::Door*>(terrain);
 
-                if (!door->is_hidden())
+                if (door->is_hidden())
+                {
+                        memory.appearance.minimap_color = minimap_wall_color;
+                }
+                else
                 {
                         if (door->type() == terrain::DoorType::metal)
                         {
@@ -429,7 +435,7 @@ void memorize_terrain_at(const P& p)
         }
         else if (blocks_walking)
         {
-                memory.appearance.minimap_color = colors::sepia();
+                memory.appearance.minimap_color = minimap_wall_color;
         }
         else
         {
