@@ -905,6 +905,8 @@ void Door::reveal_stuck_status()
                 const auto door_name = base_name_short();
 
                 msg_log::add("The " + door_name + " seems to be stuck.");
+
+                msg_log::more_prompt();
         }
 }
 
