@@ -345,29 +345,7 @@ void update_player_memory()
 
                         clear_player_memory_at(p);
 
-                        const bool is_dark = g_dark.at(p);
-
-                        const bool blocks_los =
-                                map_parsers::BlocksLos().run(p);
-
-                        const bool blocks_walking =
-                                map_parsers::BlocksWalking(ParseActors::no)
-                                        .run(p);
-
-                        const bool is_door =
-                                g_terrain.at(p)->id() ==
-                                terrain::Id::door;
-
-                        const bool allow_memorize_terrain =
-                                !is_dark ||
-                                blocks_los ||
-                                blocks_walking ||
-                                is_door;
-
-                        if (allow_memorize_terrain)
-                        {
-                                memorize_terrain_at(p);
-                        }
+                        memorize_terrain_at(p);
 
                         memorize_item_at(p);
                 }
@@ -377,25 +355,9 @@ void update_player_memory()
 void memorize_terrain_at(const P& p)
 {
         const auto* const terrain = g_terrain.at(p);
-
         auto& memory = g_terrain_memory.at(p);
-
         const auto id = terrain->id();
-
         const bool blocks_walking = !terrain->is_walkable();
-
-        const std::string name =
-                text_format::first_to_upper(
-                        terrain->name(Article::a));
-
-        memory.id = terrain->id();
-        memory.blocks_walking = blocks_walking;
-
-        memory.appearance.tile = terrain->tile();
-        memory.appearance.character = terrain->character();
-        memory.appearance.name = name;
-        memory.appearance.color = terrain->color();
-
         const auto minimap_wall_color = colors::sepia();
 
         if (id == terrain::Id::stairs)
@@ -440,6 +402,32 @@ void memorize_terrain_at(const P& p)
         else
         {
                 memory.appearance.minimap_color = colors::dark_gray_brown();
+        }
+
+        const bool is_dark = g_dark.at(p);
+
+        const bool blocks_los =
+                map_parsers::BlocksLos().run(p);
+
+        const bool allow_memorize_terrain =
+                !is_dark ||
+                blocks_los ||
+                blocks_walking ||
+                (id == terrain::Id::door);
+
+        if (allow_memorize_terrain)
+        {
+                const std::string name =
+                        text_format::first_to_upper(
+                                terrain->name(Article::a));
+
+                memory.id = terrain->id();
+                memory.blocks_walking = blocks_walking;
+
+                memory.appearance.tile = terrain->tile();
+                memory.appearance.character = terrain->character();
+                memory.appearance.name = name;
+                memory.appearance.color = terrain->color();
         }
 }
 
@@ -487,6 +475,10 @@ void memorize_item_at(const P& p)
 void clear_player_memory_at(const P& p)
 {
         map::g_terrain_memory.at(p) = {};
+
+        map::g_terrain_memory.at(p).appearance.minimap_color =
+                colors::black();
+
         map::g_item_memory.at(p) = {};
 }
 

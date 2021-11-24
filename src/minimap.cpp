@@ -218,7 +218,7 @@ void update()
                 {
                         minimap_color = item_memory.appearance.minimap_color;
                 }
-                else if (terrain_memory.appearance.is_defined())
+                else
                 {
                         minimap_color = terrain_memory.appearance.minimap_color;
                 }
