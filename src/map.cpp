@@ -413,7 +413,8 @@ void memorize_terrain_at(const P& p)
                 !is_dark ||
                 blocks_los ||
                 blocks_walking ||
-                (id == terrain::Id::door);
+                (id == terrain::Id::door) ||
+                (id == terrain::Id::liquid);
 
         if (allow_memorize_terrain)
         {
