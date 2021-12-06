@@ -185,7 +185,7 @@ void print_living_actor_info_msg(const P& pos)
         auto* actor = map::first_actor_at_pos(pos);
 
         if (!actor ||
-            actor->is_player() ||
+            actor::is_player(actor) ||
             !actor->is_alive())
         {
                 return;

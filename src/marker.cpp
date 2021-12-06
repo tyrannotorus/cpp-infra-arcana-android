@@ -492,7 +492,7 @@ void Viewing::on_moved()
         const auto* const actor = map::first_actor_at_pos(m_pos);
 
         if (actor &&
-            !actor->is_player() &&
+            !actor::is_player(actor) &&
             actor::can_player_see_actor(*actor))
         {
                 // TODO: This should not be specified here
@@ -542,7 +542,7 @@ void Viewing::handle_input(const InputData& input)
                 auto* const actor = map::first_actor_at_pos(m_pos);
 
                 if (actor &&
-                    !actor->is_player() &&
+                    !actor::is_player(actor) &&
                     actor::can_player_see_actor(*actor))
                 {
                         msg_log::clear();
@@ -578,7 +578,7 @@ void Aiming::on_moved()
                 auto* const actor = map::first_actor_at_pos(m_pos);
 
                 if (actor &&
-                    !actor->is_player() &&
+                    !actor::is_player(actor) &&
                     actor::can_player_see_actor(*actor))
                 {
                         RangedAttData att_data(
@@ -742,7 +742,7 @@ void Throwing::on_moved()
                 auto* const actor = map::first_actor_at_pos(m_pos);
 
                 if (actor &&
-                    !actor->is_player() &&
+                    !actor::is_player(actor) &&
                     actor::can_player_see_actor(*actor))
                 {
                         ThrowAttData att_data(

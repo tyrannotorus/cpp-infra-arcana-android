@@ -17,8 +17,10 @@
 #include "actor_data.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
+#include "colors.hpp"
 #include "debug.hpp"
 #include "game.hpp"
+#include "gfx.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
@@ -167,7 +169,7 @@ void PropHandler::apply(
         prop->m_owner = m_owner;
         prop->m_src = src;
 
-        if (m_owner->is_player() &&
+        if (actor::is_player(m_owner) &&
             player_bon::has_trait(Trait::resistant) &&
             prop->m_data.is_preventable_by_player_trait &&
             (prop->m_duration_mode != PropDurationMode::indefinite) &&
@@ -184,7 +186,7 @@ void PropHandler::apply(
                 bool is_resisting = is_resisting_prop(prop->m_id);
 
                 if (!is_resisting &&
-                    m_owner->is_player() &&
+                    actor::is_player(m_owner) &&
                     prop->m_data.is_preventable_by_player_trait)
                 {
                         const int resist_chance =
@@ -248,7 +250,7 @@ void PropHandler::apply(
         }
 
         if ((prop->duration_mode() == PropDurationMode::indefinite) &&
-            (m_owner == map::g_player))
+            (actor::is_player(m_owner)))
         {
                 const auto& msg = prop->m_data.historic_msg_start_permanent;
 
@@ -273,7 +275,7 @@ void PropHandler::apply(
 
 void PropHandler::print_resist_msg(const Prop& prop)
 {
-        if (m_owner->is_player())
+        if (actor::is_player(m_owner))
         {
                 const auto msg = prop.m_data.msg_res_player;
 
@@ -306,7 +308,7 @@ void PropHandler::print_resist_msg(const Prop& prop)
 
 void PropHandler::print_start_msg(const Prop& prop)
 {
-        if (m_owner->is_player())
+        if (actor::is_player(m_owner))
         {
                 const auto msg = prop.m_data.msg_start_player;
 
@@ -411,7 +413,7 @@ bool PropHandler::try_apply_more_on_existing_intr_prop(
 
                 old_prop->on_more(new_prop);
 
-                if ((m_owner == map::g_player) &&
+                if (actor::is_player(m_owner) &&
                     !old_is_permanent &&
                     new_is_permanent)
                 {
@@ -539,7 +541,7 @@ void PropHandler::on_prop_end(
             (m_owner->m_state == ActorState::alive) &&
             m_prop_count_cache[(size_t)prop->m_id] == 0)
         {
-                if (m_owner->is_player())
+                if (actor::is_player(m_owner))
                 {
                         const auto msg = prop->msg_end_player();
 
@@ -571,7 +573,7 @@ void PropHandler::on_prop_end(
         }
 
         if ((end_config.allow_historic_msg == PropEndAllowHistoricMsg::yes) &&
-            (m_owner == map::g_player) &&
+            actor::is_player(m_owner) &&
             (prop->duration_mode() == PropDurationMode::indefinite))
         {
                 // A permanent property has ended, log a historic event
@@ -761,7 +763,7 @@ bool PropHandler::is_temporary_negative_prop(const Prop& prop) const
 
 std::vector<PropListEntry> PropHandler::temporary_negative_properties()
 {
-        ASSERT(m_owner != map::g_player);
+        ASSERT(!actor::is_player(m_owner));
 
         auto prop_list = property_names_and_descr();
 
@@ -788,7 +790,7 @@ std::vector<PropListEntry> PropHandler::temporary_negative_properties()
 
 bool PropHandler::has_temporary_negative_prop_mon() const
 {
-        ASSERT(m_owner != map::g_player);
+        ASSERT(!actor::is_player(m_owner));
 
         return (
                 std::any_of(
@@ -827,7 +829,7 @@ std::vector<ColoredString> PropHandler::property_names_short() const
 
                         // Player can see number of turns left on own properties
                         // with Self-aware?
-                        if (m_owner->is_player() &&
+                        if (actor::is_player(m_owner) &&
                             player_bon::has_trait(Trait::self_aware) &&
                             prop->allow_display_turns())
                         {
@@ -859,7 +861,7 @@ std::vector<ColoredString> PropHandler::property_names_short() const
 
                 Color color;
 
-                auto color_override = prop->color_override();
+                auto color_override = prop->override_property_color();
 
                 if (color_override)
                 {
@@ -889,7 +891,7 @@ std::vector<PropListEntry> PropHandler::property_names_and_descr() const
 {
         std::vector<PropListEntry> list;
 
-        const bool is_player = m_owner->is_player();
+        const bool is_player = actor::is_player(m_owner);
         const bool is_self_aware = player_bon::has_trait(Trait::self_aware);
 
         for (const auto& prop : m_props)
@@ -931,7 +933,7 @@ std::vector<PropListEntry> PropHandler::property_names_and_descr() const
 
                 Color color;
 
-                auto color_override = prop->color_override();
+                auto color_override = prop->override_property_color();
 
                 if (color_override)
                 {
@@ -1002,7 +1004,7 @@ bool PropHandler::is_resisting_dmg(
         if (res_data.is_resisted &&
             (verbose == Verbose::yes))
         {
-                if (m_owner->is_player())
+                if (actor::is_player(m_owner))
                 {
                         msg_log::add(res_data.msg_resist_player);
                 }
@@ -1068,16 +1070,16 @@ int PropHandler::affect_max_spi(const int spi_max) const
         return new_spi_max;
 }
 
-int PropHandler::affect_shock(const int shock) const
+int PropHandler::player_extra_min_shock() const
 {
-        int new_shock = shock;
+        int shock = 0;
 
         for (const auto& prop : m_props)
         {
-                new_shock = prop->affect_shock(new_shock);
+                shock += prop->player_extra_min_shock();
         }
 
-        return new_shock;
+        return shock;
 }
 
 void PropHandler::affect_move_dir(Dir& dir) const
@@ -1341,21 +1343,113 @@ void PropHandler::cycle_graphics(io::GraphicsCycle cycle) const
         }
 }
 
-bool PropHandler::affect_actor_color(Color& color) const
+std::optional<std::string> PropHandler::override_actor_name_the() const
 {
-        bool did_affect_color = false;
+        std::optional<std::string> name = {};
 
         for (const auto& prop : m_props)
         {
-                if (prop->affect_actor_color(color))
+                auto new_name = prop->override_actor_name_the();
+
+                if (new_name)
                 {
-                        did_affect_color = true;
+                        name = new_name;
+                        break;
+                }
+        }
+
+        return name;
+}
+
+std::optional<std::string> PropHandler::override_actor_name_a() const
+{
+        std::optional<std::string> name = {};
+
+        for (const auto& prop : m_props)
+        {
+                auto new_name = prop->override_actor_name_a();
+
+                if (new_name)
+                {
+                        name = new_name;
+                        break;
+                }
+        }
+
+        return name;
+}
+
+std::optional<gfx::TileId> PropHandler::override_actor_tile() const
+{
+        std::optional<gfx::TileId> tile = {};
+
+        for (const auto& prop : m_props)
+        {
+                auto new_tile = prop->override_actor_tile();
+
+                if (new_tile)
+                {
+                        tile = new_tile;
+                        break;
+                }
+        }
+
+        return tile;
+}
+
+std::optional<char> PropHandler::override_actor_character() const
+{
+        std::optional<char> c = {};
+
+        for (const auto& prop : m_props)
+        {
+                auto new_c = prop->override_actor_character();
+
+                if (new_c)
+                {
+                        c = new_c;
+                        break;
+                }
+        }
+
+        return c;
+}
+
+std::optional<std::string> PropHandler::override_actor_descr() const
+{
+        std::optional<std::string> descr = {};
+
+        for (const auto& prop : m_props)
+        {
+                auto new_name = prop->override_actor_descr();
+
+                if (new_name)
+                {
+                        descr = new_name;
+                        break;
+                }
+        }
+
+        return descr;
+}
+
+std::optional<Color> PropHandler::override_actor_color() const
+{
+        std::optional<Color> color = {};
+
+        for (const auto& prop : m_props)
+        {
+                auto new_color = prop->override_actor_color();
+
+                if (new_color)
+                {
+                        color = new_color;
 
                         // It's probably more likely that a color change due to
                         // a bad property is critical information (e.g.
-                        // burning), so then we stop searching and use this
-                        // color. If it's a good or neutral property that
-                        // affected the color, then we keep searching.
+                        // burning), so we stop searching and use this color. If
+                        // it's a good or neutral property that affected the
+                        // color, then we keep searching.
                         if (prop->alignment() == PropAlignment::bad)
                         {
                                 break;
@@ -1363,5 +1457,5 @@ bool PropHandler::affect_actor_color(Color& color) const
                 }
         }
 
-        return did_affect_color;
+        return color;
 }

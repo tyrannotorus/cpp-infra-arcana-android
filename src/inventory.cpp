@@ -205,7 +205,7 @@ bool Inventory::try_stack_in_backpack(item::Item* item)
 
                 m_backpack[i] = item;
 
-                if (m_owning_actor->is_player() &&
+                if (actor::is_player(m_owning_actor) &&
                     (map::g_player->m_last_thrown_item == other))
                 {
                         map::g_player->m_last_thrown_item = item;
@@ -355,13 +355,13 @@ item::Item* Inventory::remove_item_in_backpack_with_idx(
 
         auto* item = m_backpack[idx];
 
-        if (m_owning_actor->is_player() &&
+        if (actor::is_player(m_owning_actor) &&
             (item == map::g_player->m_last_thrown_item))
         {
                 map::g_player->m_last_thrown_item = nullptr;
         }
 
-        m_backpack.erase(std::begin(m_backpack) + idx);
+        m_backpack.erase(std::begin(m_backpack) + (int)idx);
 
         item->on_removed_from_inv();
 
@@ -582,7 +582,7 @@ size_t Inventory::unequip_slot(const SlotId id)
 
         const size_t item_backpack_idx = move_from_slot_to_backpack(slot.id);
 
-        if (m_owning_actor->is_player())
+        if (actor::is_player(m_owning_actor))
         {
                 print_unequip_message(slot.id, *item);
         }
@@ -729,7 +729,8 @@ void Inventory::equip(
 
         slot->item = item;
 
-        if (m_owning_actor->is_player() && (verbose == Verbose::yes))
+        if (actor::is_player(m_owning_actor) &&
+            (verbose == Verbose::yes))
         {
                 print_equip_message(id, *item);
         }

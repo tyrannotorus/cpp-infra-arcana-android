@@ -96,7 +96,7 @@ static std::vector<actor::Actor*> seen_actors_player()
 
         for (auto* const actor : game_time::g_actors)
         {
-                if (actor->is_player())
+                if (actor::is_player(actor))
                 {
                         continue;
                 }
@@ -192,7 +192,7 @@ static std::vector<actor::Actor*> seen_foes_mon(const actor::Actor& mon)
                         !mon.is_actor_my_leader(map::g_player);
 
                 const bool is_other_hostile_to_player =
-                        other_actor->is_player()
+                        actor::is_player(other_actor)
                         ? false
                         : !other_actor->is_actor_my_leader(map::g_player);
 
@@ -218,7 +218,7 @@ namespace actor
 {
 bool can_player_see_actor(const Actor& other)
 {
-        if (other.is_player())
+        if (is_player(&other))
         {
                 return true;
         }
@@ -298,7 +298,7 @@ bool can_mon_see_actor(
         {
                 // Monster is allied to player
 
-                if (other.is_player())
+                if (is_player(&other))
                 {
                         // Player-allied monster looking at the player
                         return true;
@@ -316,7 +316,7 @@ bool can_mon_see_actor(
 
 std::vector<Actor*> seen_actors(const Actor& actor)
 {
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 return seen_actors_player();
         }
@@ -328,7 +328,7 @@ std::vector<Actor*> seen_actors(const Actor& actor)
 
 std::vector<Actor*> seen_foes(const Actor& actor)
 {
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 return seen_foes_player();
         }
@@ -367,7 +367,7 @@ std::vector<Actor*> seeable_foes_for_mon(const Actor& mon)
                         !mon.is_actor_my_leader(map::g_player);
 
                 const bool is_other_hostile_to_player =
-                        other_actor->is_player()
+                        is_player(other_actor)
                         ? false
                         : !other_actor->is_actor_my_leader(map::g_player);
 

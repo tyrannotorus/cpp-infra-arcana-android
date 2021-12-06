@@ -762,9 +762,9 @@ static void make_monster_intr_attacks(actor::Actor& actor)
 
 static void make_monster_spells(actor::Actor& actor)
 {
-        ASSERT(!actor.is_player());
+        ASSERT(!actor::is_player(&actor));
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 return;
         }
@@ -800,7 +800,7 @@ namespace actor_items
 {
 void make_for_actor(actor::Actor& actor)
 {
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 make_for_player();
         }

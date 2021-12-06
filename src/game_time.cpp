@@ -134,7 +134,7 @@ static void erase_destroyed_actor(
         const actor::Actor* const actor,
         const size_t actor_idx)
 {
-        if (actor == map::g_player)
+        if (actor::is_player(actor))
         {
                 return;
         }
@@ -205,7 +205,7 @@ static void run_std_turn_events()
                 else
                 {
                         // Actor not destroyed
-                        if (!actor->is_player())
+                        if (!actor::is_player(actor))
                         {
                                 // Count down player awareness of the monster
                                 if (actor->is_player_aware_of_me() &&
@@ -464,7 +464,7 @@ void tick()
 
         auto* actor = current_actor();
 
-        if (actor == map::g_player)
+        if (actor::is_player(actor))
         {
                 msg_log::newline();
         }

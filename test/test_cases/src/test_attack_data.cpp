@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
-
 #include "ability_values.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
@@ -207,8 +205,8 @@ TEST_CASE("Ranged attack data")
         player_bon::pick_bg(Bg::war_vet);
 
         const P p1(20, 10);
-        const P p2(22, 11);  // Distance 2
-        const P p3(21, 13);  // Distance 3
+        const P p2(22, 11);  // Distance = 2
+        const P p3(21, 13);  // Distance = 3
 
         for (int x = 1; x < map::w() - 1; ++x)
         {
@@ -241,8 +239,8 @@ TEST_CASE("Ranged attack data")
 
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::pistol));
 
-        int expected_hit_chance_vs_mon_1;
-        int expected_hit_chance_vs_mon_2;
+        int expected_hit_chance_vs_mon_1 = 0;
+        int expected_hit_chance_vs_mon_2 = 0;
 
         {
                 const auto& player_data =
@@ -316,8 +314,8 @@ TEST_CASE("Throwing attack data")
         player_bon::pick_bg(Bg::war_vet);
 
         const P p1(20, 10);
-        const P p2(22, 11);  // Distance 2
-        const P p3(21, 13);  // Distance 3
+        const P p2(22, 11);  // Distance = 2
+        const P p3(21, 13);  // Distance = 3
 
         for (int x = 1; x < map::w() - 1; ++x)
         {
@@ -350,8 +348,8 @@ TEST_CASE("Throwing attack data")
 
         auto& item = *item::make(item::Id::thr_knife);
 
-        int expected_hit_chance_vs_mon_1;
-        int expected_hit_chance_vs_mon_2;
+        int expected_hit_chance_vs_mon_1 = 0;
+        int expected_hit_chance_vs_mon_2 = 0;
 
         {
                 const auto& player_data =

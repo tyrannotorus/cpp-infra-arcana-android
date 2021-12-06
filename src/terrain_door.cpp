@@ -276,7 +276,7 @@ void Door::on_hit(
 
 void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
 {
-        const bool is_player = actor.is_player();
+        const bool is_player = actor::is_player(&actor);
         const bool is_cell_seen = map::is_pos_seen_by_player(m_pos);
 
         if ((m_type == DoorType::metal) &&
@@ -793,7 +793,7 @@ Matl Door::matl() const
 
 void Door::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -925,7 +925,7 @@ bool Door::actor_try_jam(actor::Actor& actor_trying)
                 return false;
         }
 
-        const bool is_player = actor_trying.is_player();
+        const bool is_player = actor::is_player(&actor_trying);
         const bool tryer_is_blind = !actor_trying.m_properties.allow_see();
 
         // Door is in correct state for jamming (known, closed)
@@ -956,7 +956,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 {
         // TODO: Refactor this function
 
-        const bool is_player = actor_trying.is_player();
+        const bool is_player = actor::is_player(&actor_trying);
         const bool tryer_is_blind = !actor_trying.m_properties.allow_see();
 
         if (is_player && (m_type == DoorType::metal))
@@ -1236,7 +1236,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 {
         TRACE_FUNC_BEGIN;
 
-        const bool is_player = actor_trying.is_player();
+        const bool is_player = actor::is_player(&actor_trying);
         const bool player_see_door = map::g_seen.at(m_pos);
 
         const bool player_see_tryer =
@@ -1577,7 +1577,7 @@ void Door::jam(actor::Actor* const actor_jamming)
         ++m_jam_level;
         m_is_stuck = true;
 
-        if (actor_jamming && actor_jamming->is_player())
+        if (actor_jamming && actor::is_player(actor_jamming))
         {
                 m_is_known_stuck = true;
         }

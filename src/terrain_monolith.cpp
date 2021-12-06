@@ -89,7 +89,7 @@ Color Monolith::color_default() const
 
 void Monolith::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }

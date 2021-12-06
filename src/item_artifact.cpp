@@ -57,7 +57,7 @@ void PharaohStaff::on_std_turn_in_inv_hook(const InvType inv_type)
 {
         (void)inv_type;
 
-        if (actor_carrying() != map::g_player)
+        if (!actor::is_player(actor_carrying()))
         {
                 return;
         }
@@ -71,7 +71,7 @@ void PharaohStaff::on_std_turn_in_inv_hook(const InvType inv_type)
 
         for (auto* const actor : game_time::g_actors)
         {
-                if (actor->is_player() || !actor->is_alive())
+                if (actor::is_player(actor) || !actor->is_alive())
                 {
                         continue;
                 }
@@ -205,7 +205,7 @@ void TeleCtrlTalisman::on_removed_from_inv_hook()
 // -----------------------------------------------------------------------------
 void HornOfMaliceHeard::run(actor::Actor& actor) const
 {
-        if (!actor.is_player())
+        if (!actor::is_player(&actor))
         {
                 actor.m_properties.apply(
                         property_factory::make(PropId::conflict));

@@ -394,7 +394,7 @@ static void flay_human(const Context& context)
                 const auto& properties = actor->m_properties;
 
                 // NOTE: The target may be the caster, if caster is a monster
-                if (!actor->is_player() &&
+                if (!actor::is_player(actor) &&
                     actor->is_alive() &&
                     actor_data->is_humanoid &&
                     !actor_data->is_undead &&
@@ -1119,8 +1119,7 @@ Range Spell::spi_cost_range(
 
         Range range(cost_min, cost_max);
 
-        if (caster &&
-            caster->is_player() &&
+        if (actor::is_player(caster) &&
             caster->m_properties.has(PropId::meditative_focused))
         {
                 --range.min;
@@ -1158,7 +1157,7 @@ void Spell::cast(
 
         // OK, we can try to cast
 
-        if (caster->is_player())
+        if (actor::is_player(caster))
         {
                 TRACE << "Player casting spell" << std::endl;
 
@@ -1262,7 +1261,7 @@ void Spell::cast(
         }
 
         const bool is_focused_player =
-                caster->is_player() &&
+                actor::is_player(caster) &&
                 caster->m_properties.has(PropId::meditative_focused);
 
         if (allow_cast && caster->is_alive())
@@ -1272,7 +1271,7 @@ void Spell::cast(
                 end_properties_for_casting_spell(*caster, id());
         }
 
-        if (caster->is_player() &&
+        if (actor::is_player(caster) &&
             caster->is_alive() &&
             allow_cast &&
             (base_max_spi_cost(skill) > 0) &&
@@ -1310,7 +1309,7 @@ void Spell::cast(
 
 void Spell::on_resist(actor::Actor& target) const
 {
-        const bool is_player = target.is_player();
+        const bool is_player = actor::is_player(&target);
 
         const bool player_see_target = actor::can_player_see_actor(target);
 
@@ -1646,7 +1645,7 @@ void SpellBolt::run_effect(
 
         if (target_bucket.empty())
         {
-                if (caster->is_player())
+                if (actor::is_player(caster))
                 {
                         msg_log::add(
                                 "A dark sphere materializes, but quickly "
@@ -1725,7 +1724,7 @@ void SpellBolt::run_effect(
 
                 std::string str_begin = "I am";
 
-                if (target->is_player())
+                if (actor::is_player(target))
                 {
                         msg_clr = colors::msg_bad();
                 }
@@ -1764,7 +1763,7 @@ void SpellBolt::run_effect(
 
         m_impl->on_hit(*target, *caster, skill);
 
-        if (!target->is_player())
+        if (!actor::is_player(target))
         {
                 static_cast<actor::Mon*>(target)
                         ->become_aware_player(
@@ -1945,7 +1944,7 @@ void SpellAzaGaze::run_effect_on_target(
                 return;
         }
 
-        if (target.is_player())
+        if (actor::is_player(&target))
         {
                 Snd snd(
                         "I am assailed by a torrent of chaos!",
@@ -1961,7 +1960,7 @@ void SpellAzaGaze::run_effect_on_target(
 
         do_damage_on_target(target, skill);
 
-        if (!target.is_player())
+        if (!actor::is_player(&target))
         {
                 static_cast<actor::Mon&>(target)
                         .become_aware_player(
@@ -1988,7 +1987,7 @@ void SpellAzaGaze::run_effect(
 {
         const auto targets = actor::seen_foes(*caster);
 
-        if (caster->is_player())
+        if (actor::is_player(caster))
         {
                 std::string msg;
 
@@ -2116,7 +2115,7 @@ void SpellCataclysm::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
 {
-        const bool is_player = caster->is_player();
+        const bool is_player = actor::is_player(caster);
 
         if (actor::can_player_see_actor(*caster))
         {
@@ -2360,7 +2359,7 @@ void SpellPestilence::run_effect(
 
         actor::Actor* leader = nullptr;
 
-        if (caster->is_player())
+        if (actor::is_player(caster))
         {
                 leader = caster;
         }
@@ -2407,11 +2406,11 @@ void SpellPestilence::run_effect(
                 return;
         }
 
-        if (caster->is_player() || is_any_seen_by_player)
+        if (actor::is_player(caster) || is_any_seen_by_player)
         {
                 std::string caster_str = "me";
 
-                if (!caster->is_player())
+                if (!actor::is_player(caster))
                 {
                         if (actor::can_player_see_actor(*caster))
                         {
@@ -2500,14 +2499,24 @@ void SpellSpectralWeapons::on_mon_summoned(
 
         mon->m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 
-        auto* prop_summoned = property_factory::make(PropId::summoned);
-        const int duration = duration_range(skill).roll();
-        prop_summoned->set_duration(duration);
-        mon->m_properties.apply(prop_summoned);
+        {
+                auto* prop = property_factory::make(PropId::spectral_wpn);
+                prop->set_indefinite();
+                mon->m_properties.apply(prop);
+        }
 
-        auto* prop_waiting = property_factory::make(PropId::waiting);
-        prop_waiting->set_duration(1);
-        mon->m_properties.apply(prop_waiting);
+        {
+                auto* prop = property_factory::make(PropId::summoned);
+                const int duration = duration_range(skill).roll();
+                prop->set_duration(duration);
+                mon->m_properties.apply(prop);
+        }
+
+        {
+                auto* prop = property_factory::make(PropId::waiting);
+                prop->set_duration(1);
+                mon->m_properties.apply(prop);
+        }
 
         if (skill >= SpellSkill::master)
         {
@@ -2547,7 +2556,7 @@ void SpellSpectralWeapons::run_effect(
 {
         TRACE_FUNC_BEGIN;
 
-        if (!caster->is_player())
+        if (!actor::is_player(caster))
         {
                 TRACE_FUNC_END;
 
@@ -2592,7 +2601,7 @@ void SpellSpectralWeapons::run_effect(
         {
                 auto* new_item = item::make(item->id());
 
-                new_item->set_base_melee_dmg(new_item->base_melee_dmg());
+                new_item->set_base_melee_dmg(item->base_melee_dmg());
 
                 const auto summoned =
                         actor::spawn(
@@ -3818,7 +3827,7 @@ void SpellKnockBack::run_effect(
 {
         (void)skill;
 
-        ASSERT(!caster->is_player());
+        ASSERT(!actor::is_player(caster));
 
         auto msg_clr = colors::msg_good();
         std::string target_str = "me";
@@ -3855,7 +3864,7 @@ void SpellKnockBack::run_effect(
                 }
         }
 
-        if (target->is_player())
+        if (actor::is_player(target))
         {
                 msg_clr = colors::msg_bad();
         }
@@ -3877,7 +3886,7 @@ void SpellKnockBack::run_effect(
 
         knockback::run(*target, caster->m_pos, false);
 
-        if (!target->is_player())
+        if (!actor::is_player(target))
         {
                 static_cast<actor::Mon*>(target)
                         ->become_aware_player(
@@ -3975,7 +3984,7 @@ void SpellCurse::run_effect(
 
                 target->m_properties.apply(prop);
 
-                if (!target->is_player())
+                if (!actor::is_player(target))
                 {
                         static_cast<actor::Mon*>(target)
                                 ->become_aware_player(
@@ -4089,7 +4098,7 @@ void SpellEnfeeble::run_effect(
 
                 target->m_properties.apply(prop);
 
-                if (!target->is_player())
+                if (!actor::is_player(target))
                 {
                         static_cast<actor::Mon*>(target)
                                 ->become_aware_player(
@@ -4228,7 +4237,7 @@ void SpellSlow::run_effect(
 
                 target->m_properties.apply(prop);
 
-                if (!target->is_player())
+                if (!actor::is_player(target))
                 {
                         static_cast<actor::Mon*>(target)
                                 ->become_aware_player(
@@ -4373,7 +4382,7 @@ void SpellTerrify::run_effect(
 
                 target->m_properties.apply(prop);
 
-                if (!target->is_player())
+                if (!actor::is_player(target))
                 {
                         static_cast<actor::Mon*>(target)
                                 ->become_aware_player(
@@ -4428,7 +4437,7 @@ void SpellDisease::run_effect(
 {
         (void)skill;
 
-        ASSERT(!caster->is_player());
+        ASSERT(!actor::is_player(caster));
 
         auto* caster_used = caster;
 
@@ -4468,7 +4477,7 @@ void SpellDisease::run_effect(
 
         std::string actor_name = "me";
 
-        if (!target->is_player())
+        if (!actor::is_player(target))
         {
                 actor_name = target->name_the();
         }
@@ -4483,7 +4492,7 @@ void SpellDisease::run_effect(
 
         target->m_properties.apply(new PropDiseased());
 
-        if (!target->is_player())
+        if (!actor::is_player(target))
         {
                 static_cast<actor::Mon*>(target)
                         ->become_aware_player(
@@ -4667,7 +4676,7 @@ void SpellSummonTentacles::run_effect(
 
         actor::Actor* leader = nullptr;
 
-        if (caster->is_player())
+        if (actor::is_player(caster))
         {
                 leader = caster;
         }
@@ -4755,7 +4764,7 @@ void SpellHeal::run_effect(
                 caster->m_properties.end_prop(PropId::deaf);
                 caster->m_properties.end_prop(PropId::poisoned);
 
-                if (caster->is_player())
+                if (actor::is_player(caster))
                 {
                         Prop* const wound_prop =
                                 map::g_player->m_properties.prop(PropId::wound);
@@ -4835,7 +4844,7 @@ void SpellMiGoHypno::run_effect(
 {
         (void)skill;
 
-        ASSERT(!caster->is_player());
+        ASSERT(!actor::is_player(caster));
 
         auto* caster_used = caster;
 
@@ -4873,7 +4882,7 @@ void SpellMiGoHypno::run_effect(
                 }
         }
 
-        if (target->is_player())
+        if (actor::is_player(target))
         {
                 msg_log::add("There is a sharp droning in my head!");
         }
@@ -4891,7 +4900,7 @@ void SpellMiGoHypno::run_effect(
                 msg_log::add("I feel dizzy.");
         }
 
-        if (!target->is_player())
+        if (!actor::is_player(target))
         {
                 static_cast<actor::Mon*>(target)
                         ->become_aware_player(
@@ -4904,7 +4913,7 @@ bool SpellMiGoHypno::allow_mon_cast_now(actor::Mon& mon) const
         return (
                 mon.m_ai_state.target &&
                 mon.m_ai_state.is_target_seen &&
-                mon.m_ai_state.target->is_player());
+                actor::is_player(mon.m_ai_state.target));
 }
 
 // -----------------------------------------------------------------------------
@@ -4914,7 +4923,7 @@ void SpellBurn::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
 {
-        ASSERT(!caster->is_player());
+        ASSERT(!actor::is_player(caster));
 
         auto* caster_used = caster;
 
@@ -4954,7 +4963,7 @@ void SpellBurn::run_effect(
 
         std::string target_str = "me";
 
-        if (!target->is_player())
+        if (!actor::is_player(target))
         {
                 target_str = target->name_the();
         }
@@ -4970,7 +4979,7 @@ void SpellBurn::run_effect(
 
         target->m_properties.apply(prop);
 
-        if (!target->is_player())
+        if (!actor::is_player(target))
         {
                 static_cast<actor::Mon*>(target)
                         ->become_aware_player(
@@ -4992,7 +5001,7 @@ void SpellDeafen::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill) const
 {
-        ASSERT(!caster->is_player());
+        ASSERT(!actor::is_player(caster));
 
         auto* caster_used = caster;
 
@@ -5036,7 +5045,7 @@ void SpellDeafen::run_effect(
 
         target->m_properties.apply(prop);
 
-        if (!target->is_player())
+        if (!actor::is_player(target))
         {
                 static_cast<actor::Mon*>(target)
                         ->become_aware_player(

@@ -62,6 +62,8 @@ int max_hp(const Actor& actor);
 
 int max_sp(const Actor& actor);
 
+bool is_player(const Actor* actor);
+
 void init_actor(Actor& actor, const P& pos_, ActorData& data);
 
 void print_aware_invis_mon_msg(const Mon& mon);
@@ -71,17 +73,20 @@ class Actor
 public:
         virtual ~Actor();
 
+        Id id() const
+        {
+                return m_data->id;
+        }
+
         virtual Color color() const = 0;
+        gfx::TileId tile() const;
+        char character() const;
+        std::string name_the() const;
+        std::string name_a() const;
+        std::string descr() const;
 
-        virtual gfx::TileId tile() const;
-
-        virtual char character() const;
-
-        virtual std::string name_the() const;
-
-        virtual std::string name_a() const;
-
-        virtual std::string descr() const;
+        bool is_leader_of(const Actor* actor) const;
+        bool is_actor_my_leader(const Actor* actor) const;
 
         int ability(
                 AbilityId id,
@@ -105,19 +110,14 @@ public:
                 int change,
                 Verbose verbose = Verbose::yes);
 
-        // Used by Ghoul class and Ghoul monsters
-        DidAction try_eat_corpse();
-
-        void on_feed();
-
-        Id id() const
-        {
-                return m_data->id;
-        }
-
         int armor_points() const;
 
         void add_light(Array2<bool>& light_map) const;
+
+        virtual void add_light_hook(Array2<bool>& light) const
+        {
+                (void)light;
+        }
 
         bool is_alive() const
         {
@@ -129,14 +129,7 @@ public:
                 return m_state == ActorState::corpse;
         }
 
-        bool is_player() const;
-
         std::string death_msg() const;
-
-        virtual void add_light_hook(Array2<bool>& light) const
-        {
-                (void)light;
-        }
 
         virtual void on_hit(
                 const int dmg,
@@ -147,8 +140,6 @@ public:
                 (void)dmg_type;
                 (void)allow_wound;
         }
-
-        virtual void on_death() {};
 
         virtual SpellSkill spell_skill(SpellId id) const = 0;
 
@@ -166,10 +157,6 @@ public:
         {
                 return m_mon_aware_state.player_aware_of_me_counter > 0;
         }
-
-        virtual bool is_leader_of(const Actor* actor) const = 0;
-
-        virtual bool is_actor_my_leader(const Actor* actor) const = 0;
 
         P m_pos {};
         ActorState m_state {ActorState::alive};

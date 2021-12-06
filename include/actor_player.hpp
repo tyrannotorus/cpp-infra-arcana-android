@@ -74,12 +74,6 @@ public:
 
         SpellSkill spell_skill(SpellId id) const override;
 
-        void hear_sound(
-                const Snd& snd,
-                bool is_origin_seen_by_player,
-                Dir dir_to_origin,
-                int percent_audible_distance);
-
         void incr_shock(double shock, ShockSrc shock_src);
 
         void restore_shock(int amount_restored, bool is_temp_shock_restored);
@@ -116,9 +110,6 @@ public:
         int carry_weight_lmt() const;
 
         void set_auto_move(Dir dir);
-
-        bool is_leader_of(const Actor* actor) const override;
-        bool is_actor_my_leader(const Actor* actor) const override;
 
         void on_new_dlvl_reached();
 

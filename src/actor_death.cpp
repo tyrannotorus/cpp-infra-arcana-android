@@ -44,7 +44,7 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
         const auto artifact_id = item::Id::resurrect_talisman;
 
         // Player has the Talisman of Resurrection, and died of physical damage?
-        if (!actor.is_player() ||
+        if (!actor::is_player(&actor) ||
             !actor.m_inv.has_item_in_backpack(artifact_id) ||
             (map::g_player->ins() >= 100) ||
             (actor.m_sp <= 0))
@@ -71,7 +71,7 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
 
         for (auto* const a : game_time::g_actors)
         {
-                if (!a->is_player())
+                if (!actor::is_player(a))
                 {
                         auto* const mon = static_cast<actor::Mon*>(a);
 
@@ -156,7 +156,7 @@ void kill(
 
         unset_actor_as_leader_for_all_mon(actor);
 
-        if (!actor.is_player())
+        if (!actor::is_player(&actor))
         {
                 if (map::g_player->m_tgt == &actor)
                 {
@@ -169,7 +169,7 @@ void kill(
                 }
         }
 
-        if (!actor.is_player() && actor.m_data->is_humanoid)
+        if (!actor::is_player(&actor) && actor.m_data->is_humanoid)
         {
                 Snd snd(
                         "I hear agonized screaming.",
@@ -200,16 +200,15 @@ void kill(
                 // Not destroyed
                 actor.m_state = ActorState::corpse;
 
-                if (!actor.is_player())
+                if (!actor::is_player(&actor))
                 {
                         move_actor_to_pos_can_have_corpse(actor);
                 }
         }
 
-        actor.on_death();
         actor.m_properties.on_death();
 
-        if (!actor.is_player() &&
+        if (!actor::is_player(&actor) &&
             !actor.m_properties.has(PropId::shapeshifts))
         {
                 if (allow_drop_items == AllowDropItems::yes)

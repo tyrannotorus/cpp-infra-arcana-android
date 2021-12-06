@@ -53,7 +53,7 @@ int AbilityValues::val(
 {
         int ret = m_ability_list[(size_t)id];
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 ASSERT(ret == 0);
         }
@@ -63,9 +63,9 @@ int AbilityValues::val(
                 ret += actor.m_properties.ability_mod(id);
         }
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
-                for (const InvSlot& slot : actor.m_inv.m_slots)
+                for (const auto& slot : actor.m_inv.m_slots)
                 {
                         if (!slot.item)
                         {

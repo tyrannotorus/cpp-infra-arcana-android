@@ -500,7 +500,7 @@ void EventRatsInTheWallsDiscovery::on_new_turn()
 
                 for (auto* const actor : game_time::g_actors)
                 {
-                        if (actor->is_player())
+                        if (actor::is_player(actor))
                         {
                                 continue;
                         }

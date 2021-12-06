@@ -45,6 +45,7 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"light_sensitive", PropId::light_sensitive},
         {"magic_searching", PropId::magic_searching},
         {"major_clapham_summon", PropId::major_clapham_summon},
+        {"spectral_wpn", PropId::spectral_wpn},
         {"ooze", PropId::ooze},
         {"paralyzed", PropId::paralyzed},
         {"poisoned", PropId::poisoned},
@@ -74,6 +75,8 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"regenerating", PropId::regenerating},
         {"see_invis", PropId::see_invis},
         {"short_hearing_range", PropId::short_hearing_range},
+        {"frenzies_self", PropId::frenzies_self},
+        {"summons_locusts", PropId::summons_locusts},
         {"slowed", PropId::slowed},
         {"small_crawling", PropId::small_crawling},
         {"spawns_zombie_parts_on_destroyed",
@@ -1007,6 +1010,12 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::breeds;
+        add(d);
+
+        d.id = PropId::frenzies_self;
+        add(d);
+
+        d.id = PropId::summons_locusts;
         add(d);
 
         d.id = PropId::vomits_ooze;

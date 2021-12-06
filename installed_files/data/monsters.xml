@@ -5324,6 +5324,10 @@
             </attack>
         </attacks>
 
+        <properties>
+            <property>summons_locusts</property>
+        </properties>
+
         <spells>
             <spell skill="expert">darkbolt</spell>
             <spell skill="expert">disease</spell>
@@ -5706,6 +5710,7 @@
 
         <properties>
             <property>darkvision</property>
+            <property>frenzies_self</property>
         </properties>
 
         <ai>

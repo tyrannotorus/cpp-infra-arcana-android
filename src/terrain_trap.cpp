@@ -261,7 +261,7 @@ void Trap::trigger_start(const actor::Actor* actor)
 
         ASSERT(m_trap_impl);
 
-        if (actor == map::g_player)
+        if (actor::is_player(actor))
         {
                 // Reveal trap if triggered by player stepping on it
                 if (is_hidden())
@@ -285,7 +285,7 @@ void Trap::trigger_start(const actor::Actor* actor)
 
                 auto alerts = AlertsMon::no;
 
-                if (actor == map::g_player)
+                if (actor::is_player(actor))
                 {
                         alerts = AlertsMon::yes;
 
@@ -304,7 +304,7 @@ void Trap::trigger_start(const actor::Actor* actor)
 
                 snd.run();
 
-                if (actor == map::g_player)
+                if (actor::is_player(actor))
                 {
                         const bool is_deaf =
                                 map::g_player->m_properties.has(
@@ -348,7 +348,7 @@ void Trap::trigger_start(const actor::Actor* actor)
 
 AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player() ||
+        if (!actor::is_player(&actor_bumping) ||
             actor_bumping.m_properties.has(PropId::confused))
         {
                 return AllowAction::yes;
@@ -411,7 +411,7 @@ void Trap::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 // Put some extra restrictions on monsters triggering traps.
                 // This helps prevent stupid situations like a group of monsters
@@ -1024,7 +1024,7 @@ void TrapTeleport::trigger()
                 return;
         }
 
-        const auto is_player = actor_here->is_player();
+        const auto is_player = actor::is_player(actor_here);
         const auto can_see = actor_here->m_properties.allow_see();
         const auto player_sees_actor = actor::can_player_see_actor(*actor_here);
         const auto actor_name = actor_here->name_the();
@@ -1082,7 +1082,7 @@ void TrapSummonMon::trigger()
                 return;
         }
 
-        const bool is_player = actor_here->is_player();
+        const bool is_player = actor::is_player(actor_here);
         const bool is_hidden = m_base_trap->is_hidden();
 
         TRACE_VERBOSE << "Is player: " << is_player << std::endl;
@@ -1200,7 +1200,7 @@ void TrapHpSap::trigger()
                 return;
         }
 
-        const bool is_player = actor_here->is_player();
+        const bool is_player = actor::is_player(actor_here);
         const bool is_hidden = m_base_trap->is_hidden();
 
         TRACE_VERBOSE << "Is player: " << is_player << std::endl;
@@ -1264,7 +1264,7 @@ void TrapSpiSap::trigger()
                 return;
         }
 
-        const bool is_player = actor_here->is_player();
+        const bool is_player = actor::is_player(actor_here);
         const bool is_hidden = m_base_trap->is_hidden();
 
         TRACE_VERBOSE << "Is player: " << is_player << std::endl;
@@ -1403,7 +1403,7 @@ void TrapWeb::trigger()
                 return;
         }
 
-        if (actor_here->is_player())
+        if (actor::is_player(actor_here))
         {
                 if (actor_here->m_properties.allow_see())
                 {
@@ -1443,11 +1443,12 @@ void TrapWeb::trigger()
                 Verbose::no);
 
         // Players getting stuck in spider webs alerts all spiders
-        if (actor_here->is_player())
+        if (actor::is_player(actor_here))
         {
                 for (auto* const actor : game_time::g_actors)
                 {
-                        if (actor->is_player() || !actor->m_data->is_spider)
+                        if (actor::is_player(actor) ||
+                            !actor->m_data->is_spider)
                         {
                                 continue;
                         }
@@ -1518,7 +1519,7 @@ void TrapUnlearnSpell::trigger()
         }
 
         // TODO: Monsters could unlearn spells too
-        if (!actor_here->is_player())
+        if (!actor::is_player(actor_here))
         {
                 return;
         }

@@ -57,7 +57,7 @@ struct PlayerDetectMonState
 
 static bool is_hostile_living_mon(const actor::Actor& actor)
 {
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 return false;
         }
@@ -681,7 +681,7 @@ void start_turn(Actor& actor)
 {
         actor.m_properties.on_turn_begin();
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 player_start_turn();
         }

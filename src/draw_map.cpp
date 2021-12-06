@@ -375,7 +375,7 @@ static void set_living_monsters()
 {
         for (auto* actor : game_time::g_actors)
         {
-                if (actor->is_player() || !actor->is_alive())
+                if (actor::is_player(actor) || !actor->is_alive())
                 {
                         continue;
                 }
@@ -608,7 +608,7 @@ static void draw_monster_life_bars()
 {
         for (auto* actor : game_time::g_actors)
         {
-                if (!actor->is_player() &&
+                if (!actor::is_player(actor) &&
                     actor->is_alive() &&
                     can_player_see_actor(*actor))
                 {

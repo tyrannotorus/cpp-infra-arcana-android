@@ -152,7 +152,8 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
 
         int max = 8;
 
-        if (actor->is_player() && player_bon::has_trait(Trait::elec_incl))
+        if (actor::is_player(actor) &&
+            player_bon::has_trait(Trait::elec_incl))
         {
                 max += 2;
         }
@@ -403,7 +404,7 @@ ConsumeItem Deafening::run_effect()
 
         for (auto* const actor : game_time::g_actors)
         {
-                if (actor->is_player())
+                if (actor::is_player(actor))
                 {
                         continue;
                 }

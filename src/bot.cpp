@@ -65,7 +65,7 @@ static void show_map_and_freeze(const std::string& msg)
 
         for (auto* const actor : game_time::g_actors)
         {
-                if (actor->is_player())
+                if (actor::is_player(actor))
                 {
                         continue;
                 }
@@ -338,7 +338,7 @@ void act()
 
                 auto* const actor = game_time::g_actors[element];
 
-                if (actor != map::g_player)
+                if (!actor::is_player(actor))
                 {
                         actor->m_properties.apply(new PropBurning());
                 }

@@ -39,7 +39,7 @@ static void msg_reload_fumble(
 {
         const std::string ammo_name = ammo.name(ItemNameType::a);
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 msg_log::add("I fumble with " + ammo_name + ".");
         }
@@ -66,7 +66,7 @@ static void msg_reloaded(
         const item::Wpn& wpn,
         const item::Item& ammo)
 {
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 const auto ammo_loaded = wpn.m_ammo_loaded;
                 const auto ammo_max = wpn.data().ranged.max_ammo;

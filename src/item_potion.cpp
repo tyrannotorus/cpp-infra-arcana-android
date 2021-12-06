@@ -227,7 +227,7 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
                 return ConsumeItem::no;
         }
 
-        if (actor->is_player())
+        if (actor::is_player(actor))
         {
                 // Really quaff a known malign potion?
                 if ((alignment() == PotionAlignment::bad) &&
@@ -373,7 +373,7 @@ void Potion::on_actor_turn_in_inv_hook(const InvType inv_type)
 {
         (void)inv_type;
 
-        if (m_actor_carrying != map::g_player)
+        if (!actor::is_player(m_actor_carrying))
         {
                 return;
         }
@@ -627,7 +627,7 @@ void Fortitude::quaff_impl(actor::Actor& actor)
         actor.m_properties.end_prop(PropId::hallucinating);
         actor.m_properties.end_prop(PropId::mind_sap);
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 const std::vector<const InsSympt*> sympts =
                         insanity::active_sympts();
@@ -726,8 +726,7 @@ void Curing::quaff_impl(actor::Actor& actor)
                 is_noticable = true;
         }
 
-        if (!is_noticable &&
-            actor.is_player())
+        if (!is_noticable && actor::is_player(&actor))
         {
                 msg_log::add("I feel fine.");
 

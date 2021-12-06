@@ -80,7 +80,7 @@ static bool is_actor_gas_immune(const actor::Actor& actor)
                 return true;
         }
 
-        if (actor.is_player() && is_player_protected_from_gas())
+        if (actor::is_player(&actor) && is_player_protected_from_gas())
         {
                 return true;
         }
@@ -170,7 +170,7 @@ static void draw(
                         ? gfx::TileId::blast1
                         : gfx::TileId::blast2;
 
-                const int nr_outer = pos_lists.size();
+                const int nr_outer = (int)pos_lists.size();
 
                 for (int i_outer = 0; i_outer < nr_outer; i_outer++)
                 {
@@ -228,7 +228,7 @@ static void apply_explosion_on_pos(
         // Damage living actor
         if (living_actor)
         {
-                if (living_actor->is_player())
+                if (actor::is_player(living_actor))
                 {
                         msg_log::add(
                                 "I am hit by an explosion!",
@@ -237,7 +237,8 @@ static void apply_explosion_on_pos(
 
                 actor::hit(*living_actor, dmg, DmgType::explosion);
 
-                if (living_actor->is_alive() && living_actor->is_player())
+                if (living_actor->is_alive() &&
+                    actor::is_player(living_actor))
                 {
                         // Player survived being hit by an explosion, that's
                         // pretty cool!

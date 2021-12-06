@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -144,7 +145,8 @@ public:
 
         int affect_max_hp(int hp_max) const;
         int affect_max_spi(int spi_max) const;
-        int affect_shock(int shock) const;
+
+        int player_extra_min_shock() const;
 
         bool allow_attack(Verbose verbose) const;
         bool allow_attack_melee(Verbose verbose) const;
@@ -177,7 +179,13 @@ public:
 
         void cycle_graphics(io::GraphicsCycle cycle) const;
 
-        bool affect_actor_color(Color& color) const;
+        // TODO: Ensure all of these are used:
+        std::optional<std::string> override_actor_name_the() const;
+        std::optional<std::string> override_actor_name_a() const;
+        std::optional<gfx::TileId> override_actor_tile() const;
+        std::optional<char> override_actor_character() const;
+        std::optional<std::string> override_actor_descr() const;
+        std::optional<Color> override_actor_color() const;
 
         void on_placed();
 

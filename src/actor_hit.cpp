@@ -60,7 +60,7 @@ static int hit_armor(actor::Actor& actor, int dmg)
                         {
                                 TRACE << "Armor was destroyed" << std::endl;
 
-                                if (actor.is_player())
+                                if (actor::is_player(&actor))
                                 {
                                         const std::string armor_name =
                                                 armor->name(
@@ -112,7 +112,7 @@ ActorDied hit(
                 {
                         return ActorDied::no;
                 }
-                else if (actor.is_player())
+                else if (actor::is_player(&actor))
                 {
                         map::g_player->interrupt_actions(
                                 ForceInterruptActions::no);
@@ -126,7 +126,7 @@ ActorDied hit(
         const int hp_pct_before = (actor.m_hp * 100) / max_hp(actor);
 
         // Damage to corpses
-        if (actor.is_corpse() && !actor.is_player())
+        if (actor.is_corpse() && !actor::is_player(&actor))
         {
                 ASSERT(actor.m_data->can_leave_corpse);
 
@@ -237,7 +237,7 @@ ActorDied hit(
         dmg = std::max(1, dmg);
 
         // Soaking up damage with SP instead due ot Prolonged Life trait?
-        if (actor.is_player() &&
+        if (actor::is_player(&actor) &&
             player_bon::has_trait(Trait::prolonged_life))
         {
                 const int missing_hp = dmg - actor.m_hp + 1;
@@ -271,7 +271,7 @@ ActorDied hit(
         // TODO: Perhaps allow zero damage?
         dmg = std::max(1, dmg);
 
-        if (!(actor.is_player() && config::is_bot_playing()))
+        if (!(actor::is_player(&actor) && config::is_bot_playing()))
         {
                 actor.m_hp -= dmg;
         }
@@ -328,7 +328,7 @@ ActorDied hit(
 
                 const int hp_warn_lvl = 25;
 
-                if (actor.is_player() &&
+                if (actor::is_player(&actor) &&
                     (hp_pct_before > hp_warn_lvl) &&
                     (hp_pct_after <= hp_warn_lvl))
                 {
@@ -350,7 +350,7 @@ ActorDied hit_sp(
 {
         if (verbose == Verbose::yes)
         {
-                if (actor.is_player())
+                if (actor::is_player(&actor))
                 {
                         msg_log::add(
                                 "My spirit is drained!",
@@ -360,14 +360,14 @@ ActorDied hit_sp(
 
         actor.m_properties.on_hit();
 
-        if (!actor.is_player() || !config::is_bot_playing())
+        if (!actor::is_player(&actor) || !config::is_bot_playing())
         {
                 actor.m_sp = std::max(0, actor.m_sp - dmg);
         }
 
         if (actor.m_sp > 0)
         {
-                if (actor.is_player())
+                if (actor::is_player(&actor))
                 {
                         map::g_player->interrupt_actions(
                                 ForceInterruptActions::no);
@@ -378,7 +378,7 @@ ActorDied hit_sp(
 
         // Spirit is zero or lower
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 msg_log::add(
                         "All my spirit is depleted, I am devoid of life!",

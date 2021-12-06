@@ -32,30 +32,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static actor::Actor* make_actor_from_id(const actor::Id id)
-{
-        // TODO: Try to get rid of all these subclasses
-        switch (id)
-        {
-        case actor::Id::player:
-                return new actor::Player();
-
-        case actor::Id::khephren:
-                return new actor::Khephren();
-
-        case actor::Id::ape:
-                return new actor::Ape();
-
-        case actor::Id::spectral_wpn:
-                return new actor::SpectralWpn();
-
-        default:
-                break;
-        }
-
-        return new actor::Mon();
-}
-
 static std::vector<P> free_spawn_positions(const R& area)
 {
         Array2<bool> blocked(map::dims());
@@ -133,7 +109,16 @@ MonSpawnResult& MonSpawnResult::make_aware_of_player()
 
 Actor* make(const Id id, const P& pos)
 {
-        Actor* const actor = make_actor_from_id(id);
+        Actor* actor = nullptr;
+
+        if (id == Id::player)
+        {
+                actor = new Player();
+        }
+        else
+        {
+                actor = new Mon();
+        }
 
         init_actor(*actor, pos, g_data[(size_t)id]);
 
@@ -175,7 +160,7 @@ void delete_all_mon()
         {
                 Actor* const actor = *it;
 
-                if (actor->is_player())
+                if (actor::is_player(actor))
                 {
                         ++it;
                 }

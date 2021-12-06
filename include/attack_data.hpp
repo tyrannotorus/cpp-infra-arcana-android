@@ -52,6 +52,7 @@ public:
         bool is_weak_attack {false};
 };
 
+// TODO: This class should not have anything to do with aim level.
 struct RangedAttData : public AttData
 {
 public:
@@ -70,6 +71,7 @@ public:
         actor::Size defender_size {(actor::Size)0};
 };
 
+// TODO: This class should not have anything to do with aim level.
 struct ThrowAttData : public AttData
 {
 public:

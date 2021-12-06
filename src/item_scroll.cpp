@@ -320,7 +320,7 @@ void Scroll::on_actor_turn_in_inv_hook(const InvType inv_type)
 {
         (void)inv_type;
 
-        if (m_actor_carrying != map::g_player)
+        if (!actor::is_player(m_actor_carrying))
         {
                 return;
         }

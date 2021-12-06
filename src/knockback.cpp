@@ -44,7 +44,7 @@ void run(
 
         ASSERT(paralyze_extra_turns >= 0);
 
-        const bool is_defender_player = defender.is_player();
+        const bool is_defender_player = actor::is_player(&defender);
 
         if (defender.m_data->prevent_knockback ||
             (defender.m_data->actor_size >= actor::Size::giant) ||

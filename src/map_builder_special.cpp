@@ -827,7 +827,7 @@ void MapBuilderRatCave::on_template_built()
         // Set all actors to non-roaming (they will be set to roaming later)
         for (auto* const actor : game_time::g_actors)
         {
-                if (actor->is_player())
+                if (actor::is_player(actor))
                 {
                         continue;
                 }
@@ -924,7 +924,7 @@ void MapBuilderBoss::on_template_built()
 
         for (auto* const actor : game_time::g_actors)
         {
-                if (!actor->is_player() && (actor != high_priest))
+                if (!actor::is_player(actor) && (actor != high_priest))
                 {
                         static_cast<actor::Mon*>(actor)->m_leader = high_priest;
                 }

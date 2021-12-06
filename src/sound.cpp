@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "actor.hpp"
+#include "actor_hear_sound.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "array2.hpp"
@@ -30,6 +31,91 @@
 static const int s_snd_dist_normal = g_fov_radi_int;
 
 static const int s_snd_dist_loud = s_snd_dist_normal * 2;
+
+static int s_nr_snd_msg_printed_current_turn;
+
+static int get_max_dist(const Snd& snd)
+{
+        return snd.is_loud() ? s_snd_dist_loud : s_snd_dist_normal;
+}
+
+static bool is_snd_heard_at_range(const int range, const Snd& snd)
+{
+        return range <= get_max_dist(snd);
+}
+
+static Array2<int> calc_snd_flood(const Snd& snd, const int snd_max_dist)
+{
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksSound().run(blocked, blocked.rect());
+
+        const auto& origin = snd.origin();
+
+        // Never block the origin - we want to be able to run the sound from
+        // e.g. a closing door, after it was closed (and we don't want this to
+        // depend on the floodfill algorithm, so we explicitly set the origin to
+        // free here).
+        blocked.at(origin) = false;
+
+        auto flood = floodfill(origin, blocked, snd_max_dist, {-1, -1}, true);
+
+        flood.at(origin.x, origin.y) = 0;
+
+        return flood;
+}
+
+static void actor_hear_sound(
+        actor::Actor& actor,
+        Snd& snd,
+        const int flood_val_at_actor,
+        const int snd_max_dist)
+{
+        if (actor::is_player(&actor))
+        {
+                const auto origin = snd.origin();
+
+                const bool is_origin_seen_by_player = map::g_seen.at(origin);
+
+                if (is_origin_seen_by_player &&
+                    snd.is_msg_ignored_if_origin_seen())
+                {
+                        snd.clear_msg();
+                }
+
+                if (!snd.msg().empty())
+                {
+                        // Add a direction to the message (i.e. "(NW)")
+                        if (actor.m_pos != origin)
+                        {
+                                const std::string dir_str =
+                                        dir_utils::compass_dir_name(
+                                                actor.m_pos,
+                                                origin);
+
+                                snd.add_string("(" + dir_str + ")");
+                        }
+                }
+
+                const int pct_dist =
+                        (flood_val_at_actor * 100) / snd_max_dist;
+
+                const auto offset = (origin - actor.m_pos).signs();
+
+                const auto dir_to_origin = dir_utils::dir(offset);
+
+                actor::hear_sound_player(
+                        snd,
+                        is_origin_seen_by_player,
+                        dir_to_origin,
+                        pct_dist);
+        }
+        else
+        {
+                // Not player
+                actor::hear_sound_mon(actor, snd);
+        }
+}
 
 // -----------------------------------------------------------------------------
 // Sound
@@ -71,24 +157,7 @@ void Snd::on_heard(actor::Actor& actor) const
 }
 
 // -----------------------------------------------------------------------------
-// Private
-// -----------------------------------------------------------------------------
-static int s_nr_snd_msg_printed_current_turn;
-
-static int get_max_dist(const Snd& snd)
-{
-        return snd.is_loud()
-                ? s_snd_dist_loud
-                : s_snd_dist_normal;
-}
-
-static bool is_snd_heard_at_range(const int range, const Snd& snd)
-{
-        return range <= get_max_dist(snd);
-}
-
-// -----------------------------------------------------------------------------
-// Sound emitting
+// snd_emit
 // -----------------------------------------------------------------------------
 namespace snd_emit
 {
@@ -101,34 +170,15 @@ void run(Snd snd)
 {
         ASSERT(snd.msg() != " ");
 
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksSound()
-                .run(blocked, blocked.rect());
-
-        const P& origin = snd.origin();
-
-        // Never block the origin - we want to be able to run the sound from
-        // e.g. a closing door, after it was closed (and we don't want this to
-        // depend on the floodfill algorithm, so we explicitly set the origin to
-        // free here)
-        blocked.at(origin.x, origin.y) = false;
-
         const int snd_max_dist = get_max_dist(snd);
 
-        auto flood =
-                floodfill(
-                        origin,
-                        blocked,
-                        snd_max_dist,
-                        P(-1, -1),
-                        true);
+        auto flood = calc_snd_flood(snd, snd_max_dist);
 
-        flood.at(origin.x, origin.y) = 0;
+        const auto& origin = snd.origin();
 
         for (auto* actor : game_time::g_actors)
         {
-                const P& actor_pos = actor->m_pos;
+                const auto& actor_pos = actor->m_pos;
 
                 const int flood_val_at_actor = flood.at(actor_pos);
 
@@ -149,50 +199,11 @@ void run(Snd snd)
                         continue;
                 }
 
-                const bool is_origin_seen_by_player = map::g_seen.at(origin);
-
-                if (actor->is_player())
-                {
-                        if (is_origin_seen_by_player &&
-                            snd.is_msg_ignored_if_origin_seen())
-                        {
-                                snd.clear_msg();
-                        }
-
-                        if (!snd.msg().empty())
-                        {
-                                // Add a direction to the message (i.e. "(NW)")
-                                if (actor_pos != origin)
-                                {
-                                        const std::string dir_str =
-                                                dir_utils::compass_dir_name(
-                                                        actor_pos,
-                                                        origin);
-
-                                        snd.add_string("(" + dir_str + ")");
-                                }
-                        }
-
-                        const int pct_dist =
-                                (flood_val_at_actor * 100) / snd_max_dist;
-
-                        const P offset = (origin - actor_pos).signs();
-
-                        const Dir dir_to_origin = dir_utils::dir(offset);
-
-                        map::g_player->hear_sound(
-                                snd,
-                                is_origin_seen_by_player,
-                                dir_to_origin,
-                                pct_dist);
-                }
-                else
-                {
-                        // Not player
-                        auto* const mon = static_cast<actor::Mon*>(actor);
-
-                        mon->hear_sound(snd);
-                }
+                actor_hear_sound(
+                        *actor,
+                        snd,
+                        flood_val_at_actor,
+                        snd_max_dist);
         }
 }
 

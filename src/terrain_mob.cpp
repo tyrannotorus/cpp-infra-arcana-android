@@ -76,7 +76,7 @@ void Smoke::on_new_turn()
 
         if (actor && ((m_nr_turns_left > 0) || (m_nr_turns_left == -1)))
         {
-                const bool is_player = actor == map::g_player;
+                const bool is_player = actor::is_player(actor);
 
                 // TODO: There needs to be some criteria here, so that e.g. a
                 // statue-monster or a very alien monster can't get blinded by

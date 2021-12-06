@@ -664,7 +664,7 @@ void Player::mon_feeling()
 
         for (Actor* actor : game_time::g_actors)
         {
-                if (actor->is_player() ||
+                if (actor::is_player(actor) ||
                     map::g_player->is_leader_of(actor) ||
                     !actor->is_alive())
                 {
@@ -746,7 +746,7 @@ void Player::add_shock_from_seen_monsters()
 
         for (Actor* actor : game_time::g_actors)
         {
-                if (actor->is_player() ||
+                if (actor::is_player(actor) ||
                     !actor->is_alive() ||
                     (is_leader_of(actor)))
                 {
@@ -871,7 +871,7 @@ int Player::shock_tot() const
 
         int result = (int)shock_tot_db;
 
-        result = m_properties.affect_shock(result);
+        result += m_properties.player_extra_min_shock();
 
         return result;
 }
@@ -911,50 +911,6 @@ void Player::interrupt_actions(const ForceInterruptActions is_forced)
         m_auto_move_dir = Dir::END;
 }
 
-void Player::hear_sound(
-        const Snd& snd,
-        const bool is_origin_seen_by_player,
-        const Dir dir_to_origin,
-        const int percent_audible_distance)
-{
-        (void)is_origin_seen_by_player;
-
-        if (m_properties.has(PropId::deaf))
-        {
-                return;
-        }
-
-        const auto sfx = snd.sfx();
-        const std::string& msg = snd.msg();
-        const bool has_snd_msg = !msg.empty() && msg != " ";
-
-        if (has_snd_msg)
-        {
-                const auto should_interrupt =
-                        (is_origin_seen_by_player)
-                        ? MsgInterruptPlayer::no
-                        : MsgInterruptPlayer::yes;
-
-                msg_log::add(msg, colors::text(), should_interrupt);
-        }
-
-        // Play audio after message to ensure sync between audio and animation.
-        audio::play(sfx, dir_to_origin, percent_audible_distance);
-
-        if (has_snd_msg)
-        {
-                auto* const actor_who_made_snd = snd.actor_who_made_sound();
-
-                if (actor_who_made_snd && (actor_who_made_snd != this))
-                {
-                        static_cast<Mon*>(actor_who_made_snd)
-                                ->set_player_aware_of_me();
-                }
-        }
-
-        snd.on_heard(*this);
-}
-
 Color Player::color() const
 {
         if (!is_alive())
@@ -967,11 +923,11 @@ Color Player::color() const
                 return colors::yellow();
         }
 
-        Color tmp_color;
+        auto color_override = m_properties.override_actor_color();
 
-        if (m_properties.affect_actor_color(tmp_color))
+        if (color_override)
         {
-                return tmp_color;
+                return color_override.value();
         }
 
         const auto* const lantern_item =
@@ -1001,7 +957,7 @@ Color Player::color() const
 
         if (map::g_dark.at(m_pos))
         {
-                tmp_color = m_data->color;
+                Color tmp_color = m_data->color;
 
                 tmp_color = tmp_color.shaded(40);
 
@@ -1360,28 +1316,6 @@ void Player::update_mon_awareness()
         {
                 static_cast<Mon*>(actor)->set_player_aware_of_me();
         }
-}
-
-bool Player::is_leader_of(const Actor* const actor) const
-{
-        if (!actor || (actor == this))
-        {
-                return false;
-        }
-
-        // Actor is monster
-
-        return static_cast<const Mon*>(actor)->m_leader == this;
-}
-
-bool Player::is_actor_my_leader(const Actor* const actor) const
-{
-        (void)actor;
-
-        // Should never happen
-        ASSERT(false);
-
-        return false;
 }
 
 }  // namespace actor

@@ -162,7 +162,7 @@ void throw_item(
 
         const std::string item_name_a = item_thrown.name(ItemNameType::a);
 
-        if (&actor_throwing == map::g_player)
+        if (actor::is_player(&actor_throwing))
         {
                 msg_log::clear();
 
@@ -411,7 +411,7 @@ void throw_item(
 
         // Set a collision sound effect (this may not necessarily get executed)
         const AlertsMon alerts =
-                (&actor_throwing == map::g_player)
+                actor::is_player(&actor_throwing)
                 ? AlertsMon::yes
                 : AlertsMon::no;
 

@@ -831,7 +831,7 @@ Gong::Gong(const P& p) :
 
 void Gong::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }

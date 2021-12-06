@@ -164,6 +164,9 @@ Prop* make(const PropId id)
         case PropId::shapeshifts:
                 return new PropShapeshifts();
 
+        case PropId::spectral_wpn:
+                return new PropSpectralWpn();
+
         case PropId::zealot_stop:
                 return new PropZealotStop();
 
@@ -253,6 +256,12 @@ Prop* make(const PropId id)
 
         case PropId::breeds:
                 return new PropBreeds();
+
+        case PropId::frenzies_self:
+                return new PropFrenziesSelf();
+
+        case PropId::summons_locusts:
+                return new PropSummonsLocusts();
 
         case PropId::vomits_ooze:
                 return new PropVomitsOoze();

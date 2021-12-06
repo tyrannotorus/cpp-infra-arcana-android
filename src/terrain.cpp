@@ -67,7 +67,7 @@
 // -----------------------------------------------------------------------------
 static void scorch_actor(actor::Actor& actor)
 {
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 msg_log::add(
                         "I am scorched by flames.",
@@ -95,7 +95,8 @@ namespace terrain
 {
 void Terrain::bump(actor::Actor& actor_bumping)
 {
-        if (!can_move(actor_bumping) && actor_bumping.is_player())
+        if (!can_move(actor_bumping) &&
+            actor::is_player(&actor_bumping))
         {
                 if (map::is_pos_seen_by_player(m_pos))
                 {
@@ -110,7 +111,7 @@ void Terrain::bump(actor::Actor& actor_bumping)
 
 AllowAction Terrain::pre_bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player() ||
+        if (!actor::is_player(&actor_bumping) ||
             actor_bumping.m_properties.has(PropId::confused))
         {
                 return AllowAction::yes;
@@ -312,7 +313,7 @@ void Terrain::hit(
 {
         bool is_terrain_hit = true;
 
-        if (actor && actor->is_player())
+        if (actor::is_player(actor))
         {
                 switch (dmg_type)
                 {
@@ -1040,7 +1041,7 @@ void GraveStone::on_hit(
 
 void GraveStone::bump(actor::Actor& actor_bumping)
 {
-        if (actor_bumping.is_player())
+        if (actor::is_player(&actor_bumping))
         {
                 msg_log::add(m_inscr);
         }
@@ -1139,7 +1140,7 @@ void Statue::topple(
         actor::Actor* const actor_toppling)
 {
         const auto alerts_mon =
-                (actor_toppling == map::g_player)
+                actor::is_player(actor_toppling)
                 ? AlertsMon::yes
                 : AlertsMon::no;
 
@@ -1172,7 +1173,7 @@ void Statue::topple(
             actor_behind->is_alive() &&
             !actor_behind->m_properties.has(PropId::ethereal))
         {
-                if (actor_behind->is_player())
+                if (actor::is_player(actor_behind))
                 {
                         msg_log::add("It falls on me!");
                 }
@@ -1269,7 +1270,7 @@ void Statue::on_hit(
 
 void Statue::bump(actor::Actor& actor_bumping)
 {
-        if (!m_inscr.empty() && actor_bumping.is_player())
+        if (!m_inscr.empty() && actor::is_player(&actor_bumping))
         {
                 msg_log::add(m_inscr);
         }
@@ -1407,7 +1408,7 @@ void Stairs::on_new_turn_hook()
 
 void Stairs::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -1587,7 +1588,7 @@ void Liquid::bump(actor::Actor& actor_bumping)
         actor_bumping.m_properties.apply(
                 property_factory::make(PropId::waiting));
 
-        if (actor_bumping.is_player())
+        if (actor::is_player(&actor_bumping))
         {
                 std::string type_str;
 
@@ -1611,15 +1612,15 @@ void Liquid::bump(actor::Actor& actor_bumping)
 
         // Make a sound, unless player with Silent trait
         if (!player_bon::has_trait(Trait::silent) ||
-            !actor_bumping.is_player())
+            !actor::is_player(&actor_bumping))
         {
                 const std::string msg =
-                        actor_bumping.is_player()
+                        actor::is_player(&actor_bumping)
                         ? ""
                         : "I hear a splash.";
 
                 const auto alerts_mon =
-                        actor_bumping.is_player()
+                        actor::is_player(&actor_bumping)
                         ? AlertsMon::yes
                         : AlertsMon::no;
 
@@ -1635,7 +1636,7 @@ void Liquid::bump(actor::Actor& actor_bumping)
                 snd_emit::run(snd);
         }
 
-        if (actor_bumping.is_player() &&
+        if (actor::is_player(&actor_bumping) &&
             (m_type == LiquidType::magic_water))
         {
                 run_magic_pool_effects_on_player();
@@ -1976,7 +1977,7 @@ void Altar::on_new_turn()
 
 void Altar::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -2373,7 +2374,7 @@ void Chains::bump(actor::Actor& actor_bumping)
                 }
 
                 const auto alerts_mon =
-                        actor_bumping.is_player()
+                        actor::is_player(&actor_bumping)
                         ? AlertsMon::yes
                         : AlertsMon::no;
 
@@ -2612,7 +2613,7 @@ void Brazier::on_hit(
                 }
 
                 const auto alerts_mon =
-                        (actor == map::g_player)
+                        actor::is_player(actor)
                         ? AlertsMon::yes
                         : AlertsMon::no;
 
@@ -3165,7 +3166,7 @@ Color Tomb::color_default() const
 
 void Tomb::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -3563,7 +3564,7 @@ Chest::Chest(const P& p) :
 
 void Chest::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -4020,7 +4021,7 @@ std::string Fountain::name(const Article article) const
 
 void Fountain::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -4452,7 +4453,7 @@ WasDestroyed Cabinet::on_finished_burning()
 
 void Cabinet::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -4647,7 +4648,7 @@ WasDestroyed Bookshelf::on_finished_burning()
 
 void Bookshelf::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -4817,7 +4818,7 @@ WasDestroyed AlchemistBench::on_finished_burning()
 
 void AlchemistBench::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }
@@ -4997,7 +4998,7 @@ WasDestroyed Cocoon::on_finished_burning()
 
 void Cocoon::bump(actor::Actor& actor_bumping)
 {
-        if (!actor_bumping.is_player())
+        if (!actor::is_player(&actor_bumping))
         {
                 return;
         }

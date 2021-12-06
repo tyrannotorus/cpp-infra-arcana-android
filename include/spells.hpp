@@ -969,7 +969,7 @@ public:
                 SpellSkill skill) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override;
+        int base_max_spi_cost(SpellSkill skill) const override;
 
         int max_dist(SpellSkill skill) const;
 

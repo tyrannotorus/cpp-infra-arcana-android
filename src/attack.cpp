@@ -274,7 +274,7 @@ static void print_mon_melee_miss_msg(const MeleeAttData& att_data)
         }
 
         const bool is_player_defender =
-                att_data.defender->is_player();
+                actor::is_player(att_data.defender);
 
         const bool is_player_seeing_attacker =
                 can_player_see_actor(*att_data.attacker);
@@ -307,7 +307,7 @@ static void print_mon_melee_miss_msg(const MeleeAttData& att_data)
 
         std::string defender_name;
 
-        if (att_data.defender->is_player())
+        if (actor::is_player(att_data.defender))
         {
                 defender_name = "me";
         }
@@ -330,7 +330,7 @@ static void print_mon_melee_miss_msg(const MeleeAttData& att_data)
                 ".";
 
         const auto interrupt =
-                att_data.defender->is_player()
+                actor::is_player(att_data.defender)
                 ? MsgInterruptPlayer::yes
                 : MsgInterruptPlayer::no;
 
@@ -428,7 +428,7 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
         }
 
         const bool is_player_defender =
-                att_data.defender->is_player();
+                actor::is_player(att_data.defender);
 
         const bool is_player_seeing_attacker =
                 can_player_see_actor(*att_data.attacker);
@@ -464,7 +464,7 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
 
         std::string defender_name;
 
-        if (att_data.defender->is_player())
+        if (actor::is_player(att_data.defender))
         {
                 defender_name = "me";
         }
@@ -509,7 +509,7 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
                 dmg_punct;
 
         const auto color =
-                att_data.defender->is_player()
+                actor::is_player(att_data.defender)
                 ? colors::msg_bad()
                 : colors::text();
 
@@ -575,7 +575,7 @@ static void print_melee_miss_msg(const MeleeAttData& att_data)
                 return;
         }
 
-        if (att_data.attacker->is_player())
+        if (actor::is_player(att_data.attacker))
         {
                 print_player_melee_miss_msg();
         }
@@ -596,7 +596,7 @@ static void print_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
 
         if (att_data.attacker)
         {
-                if (att_data.attacker->is_player())
+                if (actor::is_player(att_data.attacker))
                 {
                         print_player_melee_hit_msg(dmg, att_data);
                 }
@@ -608,7 +608,7 @@ static void print_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
         else
         {
                 // No attacker (e.g. trap attack)
-                if (att_data.defender->is_player())
+                if (actor::is_player(att_data.defender))
                 {
                         print_no_attacker_hit_player_melee_msg(dmg, att_data);
                 }
@@ -644,26 +644,18 @@ static AlertsMon is_melee_snd_alerting_mon(
 {
         const bool is_wpn_noisy = wpn.data().melee.is_noisy;
 
-        if (is_wpn_noisy)
-        {
-                const bool is_player_silent =
-                        player_bon::has_trait(Trait::silent);
-
-                const bool is_player = (attacker == map::g_player);
-
-                if (is_player && is_player_silent)
-                {
-                        return AlertsMon::no;
-                }
-                else
-                {
-                        return AlertsMon::yes;
-                }
-        }
-        else
+        if (!is_wpn_noisy)
         {
                 return AlertsMon::no;
         }
+
+        if (actor::is_player(attacker) &&
+            player_bon::has_trait(Trait::silent))
+        {
+                return AlertsMon::no;
+        }
+
+        return AlertsMon::yes;
 }
 
 static void print_melee_msg(
@@ -693,8 +685,8 @@ static std::string melee_snd_msg(const MeleeAttData& att_data)
         std::string snd_msg;
 
         // Only print a message if player is not involved
-        if ((att_data.defender != map::g_player) &&
-            (att_data.attacker != map::g_player))
+        if (!actor::is_player(att_data.defender) &&
+            !actor::is_player(att_data.attacker))
         {
                 // TODO: This message is not appropriate for traps
                 snd_msg = "I hear fighting.";
@@ -743,7 +735,7 @@ static void emit_melee_snd(
         if (att_data.attacker)
         {
                 const bool is_player_defender =
-                        att_data.defender->is_player();
+                        actor::is_player(att_data.defender);
 
                 const bool is_player_seeing_defender =
                         can_player_see_actor(*att_data.defender);
@@ -818,7 +810,7 @@ static void print_mon_fire_ranged_msg(const RangedAttData& att_data)
                 ".";
 
         const auto interrupt =
-                (att_data.defender == map::g_player)
+                (actor::is_player(att_data.defender))
                 ? MsgInterruptPlayer::yes
                 : MsgInterruptPlayer::no;
 
@@ -835,7 +827,7 @@ static void print_ranged_fire_msg(
                 return;
         }
 
-        if (att_data.attacker == map::g_player)
+        if (actor::is_player(att_data.attacker))
         {
                 print_player_fire_ranged_msg(wpn);
         }
@@ -884,7 +876,7 @@ static void print_projectile_hit_actor_msg(const Projectile& projectile)
 {
         ASSERT(projectile.att_data->defender);
 
-        if (projectile.att_data->defender->is_player())
+        if (actor::is_player(projectile.att_data->defender))
         {
                 print_projectile_hit_player_msg(projectile);
         }
@@ -921,7 +913,7 @@ static std::unique_ptr<Snd> ranged_fire_snd(
 
         auto snd_msg_used = snd_msg;
 
-        if (att_data.attacker == map::g_player)
+        if (actor::is_player(att_data.attacker))
         {
                 snd_msg_used = "";
         }
@@ -1094,7 +1086,7 @@ static void hit_actor_with_projectile(
 
         const AttData& att_data = *projectile.att_data;
 
-        if (att_data.attacker == map::g_player)
+        if (actor::is_player(att_data.attacker))
         {
                 auto& mon = static_cast<actor::Mon&>(*att_data.defender);
                 mon.set_player_aware_of_me();
@@ -1784,13 +1776,13 @@ static void melee_hit_actor(
                 // NOTE: The 'can_bleed' flag is used as a condition here for
                 // which monsters can be weakened by crippling strikes - it
                 // should be a good enough rule so that crippling strikes can
-                // only be applied against monsters where it makes sense
-                if ((attacker == map::g_player) &&
+                // only be applied against monsters where it makes sense.
+                if (actor::is_player(attacker) &&
                     player_bon::has_trait(Trait::crippling_strikes) &&
                     defender.m_data->can_bleed &&
                     // TODO: This prevents applying on Worm Masses, but it's
                     // hacky, and only makes sense *right now*, there should be
-                    // some better attribute to control this
+                    // some better attribute to control this.
                     !defender.m_properties.has(PropId::splits_on_death) &&
                     rnd::percent(60))
                 {
@@ -1821,7 +1813,7 @@ static bool melee_should_break_wpn(
         const actor::Actor* attacker,
         const item::Item& wpn)
 {
-        if (attacker != map::g_player)
+        if (!actor::is_player(attacker))
         {
                 return false;
         }
@@ -1864,7 +1856,7 @@ void melee(
         actor::Actor& defender,
         item::Wpn& wpn)
 {
-        if (attacker && (attacker != map::g_player))
+        if (attacker && !actor::is_player(attacker))
         {
                 // A monster attacked, bump monster awareness
                 static_cast<actor::Mon*>(attacker)
@@ -1924,7 +1916,7 @@ void melee(
 
         if (attacker)
         {
-                if (defender.is_player())
+                if (actor::is_player(&defender))
                 {
                         // A monster attacked the player
                         auto* const mon =
@@ -1998,14 +1990,14 @@ DidAction ranged(
                 attacker->m_properties.end_prop(PropId::cloaked);
                 attacker->m_properties.end_prop(PropId::sanctuary);
 
-                if (attacker->is_player() ||
+                if (actor::is_player(attacker) ||
                     attacker->is_actor_my_leader(map::g_player))
                 {
                         // Attacker is player, or a monster allied to the
                         // player, alert all encountered monsters
                         for (auto* const actor : projectile_data.actors_seen)
                         {
-                                if (actor->is_player())
+                                if (actor::is_player(actor))
                                 {
                                         continue;
                                 }
@@ -2016,7 +2008,7 @@ DidAction ranged(
                         }
                 }
 
-                if (!attacker->is_player())
+                if (!actor::is_player(attacker))
                 {
                         // A monster attacked, bump its awareness
                         static_cast<actor::Mon*>(attacker)

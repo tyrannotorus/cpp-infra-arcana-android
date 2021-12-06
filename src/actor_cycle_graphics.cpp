@@ -19,7 +19,8 @@ class Actor;
 
 void cycle_graphics(Actor& actor, const io::GraphicsCycle cycle)
 {
-        if (actor.is_player() && (cycle == io::GraphicsCycle::fast))
+        if (actor::is_player(&actor) &&
+            (cycle == io::GraphicsCycle::fast))
         {
                 switch (rnd::range(0, 1))
                 {

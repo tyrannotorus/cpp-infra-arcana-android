@@ -7,12 +7,14 @@
 #ifndef PROPERTY_HPP
 #define PROPERTY_HPP
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include "ability_values.hpp"
 #include "colors.hpp"
+#include "gfx.hpp"
 #include "global.hpp"
 #include "property_data.hpp"
 
@@ -137,7 +139,7 @@ public:
 
         virtual void cycle_graphics() {}
 
-        virtual std::optional<Color> color_override() const
+        virtual std::optional<Color> override_property_color() const
         {
                 return {};
         }
@@ -235,15 +237,39 @@ public:
                 return spi_max;
         }
 
-        virtual int affect_shock(const int shock) const
+        virtual int player_extra_min_shock() const
         {
-                return shock;
+                return 0;
         }
 
-        virtual bool affect_actor_color(Color& color) const
+        virtual std::optional<std::string> override_actor_name_the() const
         {
-                (void)color;
-                return false;
+                return {};
+        }
+
+        virtual std::optional<std::string> override_actor_name_a() const
+        {
+                return {};
+        }
+
+        virtual std::optional<gfx::TileId> override_actor_tile() const
+        {
+                return {};
+        }
+
+        virtual std::optional<char> override_actor_character() const
+        {
+                return {};
+        }
+
+        virtual std::optional<std::string> override_actor_descr() const
+        {
+                return {};
+        }
+
+        virtual std::optional<Color> override_actor_color() const
+        {
+                return {};
         }
 
         virtual bool allow_attack_melee(const Verbose verbose) const
@@ -390,7 +416,7 @@ public:
         PropInfected() :
                 Prop(PropId::infected) {}
 
-        std::optional<Color> color_override() const override
+        std::optional<Color> override_property_color() const override
         {
                 return colors::orange();
         }
@@ -647,10 +673,7 @@ class PropMagicSearching : public Prop
 {
 public:
         PropMagicSearching() :
-                Prop(PropId::magic_searching),
-                m_range(1),
-                m_allow_reveal_items(false),
-                m_allow_reveal_creatures(false) {}
+                Prop(PropId::magic_searching) {}
 
         void save() const override;
 
@@ -674,10 +697,9 @@ public:
         }
 
 private:
-        int m_range;
-
-        bool m_allow_reveal_items;
-        bool m_allow_reveal_creatures;
+        int m_range {1};
+        bool m_allow_reveal_items {false};
+        bool m_allow_reveal_creatures {false};
 };
 
 class PropEntangled : public Prop
@@ -700,6 +722,8 @@ public:
         PropBurning() :
                 Prop(PropId::burning) {}
 
+        PropEnded on_actor_turn() override;
+
         bool allow_read_chance(
                 Verbose verbose) const override;
 
@@ -708,22 +732,15 @@ public:
 
         bool allow_pray(Verbose verbose) const override;
 
+        bool allow_attack_ranged(Verbose verbose) const override;
+
         int ability_mod(const AbilityId ability) const override
         {
                 (void)ability;
                 return -30;
         }
 
-        bool affect_actor_color(Color& color) const override
-        {
-                color = colors::light_red();
-
-                return true;
-        }
-
-        bool allow_attack_ranged(Verbose verbose) const override;
-
-        PropEnded on_actor_turn() override;
+        std::optional<Color> override_actor_color() const override;
 };
 
 class PropConfused : public Prop
@@ -785,7 +802,7 @@ public:
 
         void on_more(const Prop& new_prop) override;
 
-        int affect_shock(int shock) const override;
+        int player_extra_min_shock() const override;
 
 private:
         bool is_active() const;
@@ -801,8 +818,7 @@ class PropNailed : public Prop
 {
 public:
         PropNailed() :
-                Prop(PropId::nailed),
-                m_nr_spikes(1) {}
+                Prop(PropId::nailed) {}
 
         std::string name_short() const override
         {
@@ -826,15 +842,14 @@ public:
         }
 
 private:
-        int m_nr_spikes;
+        int m_nr_spikes {1};
 };
 
 class PropWound : public Prop
 {
 public:
         PropWound() :
-                Prop(PropId::wound),
-                m_nr_wounds(1) {}
+                Prop(PropId::wound) {}
 
         void save() const override;
 
@@ -878,7 +893,7 @@ public:
 private:
         void print_wound_healed_msg() const;
 
-        int m_nr_wounds;
+        int m_nr_wounds {1};
 };
 
 class PropHpSap : public Prop
@@ -941,7 +956,7 @@ public:
 
         void on_more(const Prop& new_prop) override;
 
-        int affect_shock(int shock) const override;
+        int player_extra_min_shock() const override;
 
 private:
         int m_nr_drained;
@@ -1329,13 +1344,12 @@ class PropVortex : public Prop
 {
 public:
         PropVortex() :
-                Prop(PropId::vortex),
-                pull_cooldown(0) {}
+                Prop(PropId::vortex) {}
 
         PropActResult on_act() override;
 
 private:
-        int pull_cooldown;
+        int m_cooldown {0};
 };
 
 class PropExplodesOnDeath : public Prop
@@ -1408,7 +1422,7 @@ public:
 
         void cycle_graphics() override;
 
-        bool affect_actor_color(Color& color) const override;
+        std::optional<Color> override_actor_color() const override;
 
         PropActResult on_act() override;
 
@@ -1580,9 +1594,9 @@ public:
         PropIncreasedShockCurse() :
                 Prop(PropId::increased_shock_curse) {}
 
-        int affect_shock(const int shock) const override
+        int player_extra_min_shock() const override
         {
-                return shock + 10;
+                return 10;
         }
 };
 
@@ -1613,6 +1627,51 @@ public:
 
 private:
         bool m_end_on_spell_cast {true};
+};
+
+class PropFrenziesSelf : public Prop
+{
+public:
+        PropFrenziesSelf() :
+                Prop(PropId::frenzies_self) {}
+
+        PropActResult on_act() override;
+
+private:
+        int m_cooldown {0};
+};
+
+class PropSummonsLocusts : public Prop
+{
+public:
+        PropSummonsLocusts() :
+                Prop(PropId::summons_locusts) {}
+
+        PropActResult on_act() override;
+
+private:
+        bool m_has_summoned {false};
+};
+
+class PropSpectralWpn : public Prop
+{
+public:
+        PropSpectralWpn();
+
+        void on_death() override;
+
+        std::optional<std::string> override_actor_name_the() const override;
+
+        std::optional<std::string> override_actor_name_a() const override;
+
+        std::optional<gfx::TileId> override_actor_tile() const override;
+
+        std::optional<char> override_actor_character() const override;
+
+        std::optional<std::string> override_actor_descr() const override;
+
+private:
+        std::unique_ptr<item::Item> m_discarded_item {};
 };
 
 #endif  // PROPERTY_HPP

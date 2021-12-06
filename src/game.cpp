@@ -543,7 +543,7 @@ void GameState::update()
                 {
                         // Actor cannot act
 
-                        if (actor->is_player())
+                        if (actor::is_player(actor))
                         {
                                 io::sleep(g_ms_delay_player_unable_act);
                         }
@@ -564,7 +564,7 @@ void GameState::update()
                 // Stop if the next actor is the player (to trigger rendering).
                 const auto* next_actor = game_time::current_actor();
 
-                if (next_actor->is_player())
+                if (actor::is_player(next_actor))
                 {
                         break;
                 }

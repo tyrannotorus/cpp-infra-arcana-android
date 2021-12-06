@@ -88,6 +88,8 @@ enum class PropId
         aura_of_decay,  // Damages adjacent hostile creatures
         reduced_pierce_dmg,  // E.g. worm masses
         short_hearing_range,
+        frenzies_self,  // E.g. Apes
+        summons_locusts,  // Khephren ability
 
         // Properties describing the actors body and/or method of moving around
         // (typically affects which terrain types the actor can move through,
@@ -112,6 +114,7 @@ enum class PropId
         shapeshifts,  // For the Shapeshifter monster
         zealot_stop,  // The Zealot pauses and "gropes about"
         major_clapham_summon,
+        spectral_wpn,
         aiming,
         nailed,
         wound,

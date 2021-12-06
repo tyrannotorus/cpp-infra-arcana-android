@@ -106,7 +106,7 @@ void drop_item_from_inv(
         }
 
         // Print message
-        if (&actor == map::g_player)
+        if (actor::is_player(&actor))
         {
                 msg_log::add(
                         "I drop " + item_ref + ".",

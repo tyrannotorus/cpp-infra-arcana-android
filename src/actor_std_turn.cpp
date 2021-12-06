@@ -311,9 +311,9 @@ static void mon_std_turn(actor::Mon& mon)
         // otherwise very fast monsters are much better at finding the player
         if (mon.is_alive() &&
             mon.m_data->ai[(size_t)actor::AiId::looks] &&
-            (mon.m_leader != map::g_player) &&
+            !actor::is_player(mon.m_leader) &&
             !map::g_player->m_properties.has(PropId::sanctuary) &&
-            ((mon.m_ai_state.target == map::g_player) ||
+            (actor::is_player(mon.m_ai_state.target) ||
              !mon.m_ai_state.target))
         {
                 ai::info::look(mon);
@@ -358,7 +358,7 @@ static void std_turn_common(actor::Actor& actor)
         // Regenerate spirit
         int regen_sp_n_turns = 18;
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 if (player_bon::has_trait(Trait::stout_spirit))
                 {
@@ -402,7 +402,7 @@ void std_turn(Actor& actor)
 {
         std_turn_common(actor);
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 player_std_turn();
         }

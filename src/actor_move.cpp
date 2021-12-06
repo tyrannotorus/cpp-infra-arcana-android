@@ -12,6 +12,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
+#include "actor_eat.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
@@ -170,15 +171,21 @@ static void print_corpses_at_player_msgs()
 {
         for (auto* const actor : game_time::g_actors)
         {
-                if ((actor->m_pos == map::g_player->m_pos) &&
-                    (actor->m_state == ActorState::corpse))
+                if (actor->m_pos != map::g_player->m_pos)
                 {
-                        const std::string name =
-                                text_format::first_to_upper(
-                                        actor->m_data->corpse_name_a);
-
-                        msg_log::add(name + ".");
+                        continue;
                 }
+
+                if (actor->m_state != ActorState::corpse)
+                {
+                        continue;
+                }
+
+                const std::string name =
+                        text_format::first_to_upper(
+                                actor->m_data->corpse_name_a);
+
+                msg_log::add(name + ".");
         }
 }
 
@@ -284,7 +291,7 @@ static void bump_terrains(actor::Actor& actor, const P& target)
 
         auto* const terrain = map::g_terrain.at(target);
 
-        if (!actor.is_player() &&
+        if (!actor::is_player(&actor) &&
             !terrain->is_walkable() &&
             (terrain->data().matl_type != Matl::fluid) &&
             can_player_see_actor(actor))
@@ -302,7 +309,7 @@ static void on_player_waiting()
         // Ghoul feed on corpses?
         if (player_bon::bg() == Bg::ghoul)
         {
-                did_action = map::g_player->try_eat_corpse();
+                actor::try_eat_corpse(*map::g_player);
         }
 
         if (did_action == DidAction::no)
@@ -511,7 +518,7 @@ namespace actor
 {
 void move(Actor& actor, const Dir dir)
 {
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 move_player(dir);
         }

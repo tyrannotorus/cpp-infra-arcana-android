@@ -17,7 +17,9 @@ set(COMMON_SRC
         include/actor_cycle_graphics.hpp
         include/actor_data.hpp
         include/actor_death.hpp
+        include/actor_eat.hpp
         include/actor_factory.hpp
+        include/actor_hear_sound.hpp
         include/actor_hit.hpp
         include/actor_items.hpp
         include/actor_mon.hpp
@@ -149,7 +151,9 @@ set(COMMON_SRC
         src/actor_cycle_graphics.cpp
         src/actor_data.cpp
         src/actor_death.cpp
+        src/actor_eat.cpp
         src/actor_factory.cpp
+        src/actor_hear_sound.cpp
         src/actor_hit.cpp
         src/actor_items.cpp
         src/actor_mon.cpp

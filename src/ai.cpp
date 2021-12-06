@@ -305,7 +305,7 @@ DidAction make_room_for_friend(actor::Mon& mon)
         {
                 if (other_actor == &mon ||
                     !other_actor->is_alive() ||
-                    other_actor->is_player() ||
+                    actor::is_player(other_actor) ||
                     map::g_player->is_leader_of(other_actor))
                 {
                         continue;
@@ -381,7 +381,7 @@ DidAction make_room_for_friend(actor::Mon& mon)
                                         // block that actor from the target position
                                         if (actor3 != &mon &&
                                             actor3->is_alive() &&
-                                            !actor3->is_player() &&
+                                            !actor::is_player(actor3) &&
                                             !map::g_player->is_leader_of(actor3))
                                         {
                                                 auto* const mon3 = static_cast<actor::Mon*>(actor3);
@@ -621,7 +621,7 @@ bool look(actor::Mon& mon)
 
         for (auto* actor : seeable_foes)
         {
-                if (actor->is_player())
+                if (actor::is_player(actor))
                 {
                         actor::SneakParameters p;
 

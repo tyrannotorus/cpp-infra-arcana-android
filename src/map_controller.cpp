@@ -60,7 +60,7 @@ void MapControllerBoss::on_start()
 
         for (auto* const actor : game_time::g_actors)
         {
-                if (actor->is_player())
+                if (actor::is_player(actor))
                 {
                         continue;
                 }

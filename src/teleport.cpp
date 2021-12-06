@@ -93,7 +93,7 @@ static void make_all_mon_not_seeing_player_unaware()
 
         for (auto* const mon : game_time::g_actors)
         {
-                if (mon == map::g_player)
+                if (actor::is_player(mon))
                 {
                         continue;
                 }
@@ -232,7 +232,7 @@ void teleport(
                 const auto* const door = static_cast<const terrain::Door*>(r);
 
                 if ((door->type() == terrain::DoorType::metal) &&
-                    actor.is_player())
+                    actor::is_player(&actor))
                 {
                         // Metal door, player teleporting - keep it blocked
                         continue;
@@ -283,7 +283,8 @@ void teleport(
         blocked.at(actor.m_pos) = false;
 
         // Teleport control?
-        if (actor.is_player() && should_player_ctrl_tele(ctrl_tele))
+        if (actor::is_player(&actor) &&
+            should_player_ctrl_tele(ctrl_tele))
         {
                 auto tele_ctrl_state =
                         std::make_unique<CtrlTele>(
@@ -316,7 +317,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         const bool player_can_see_actor_before =
                 actor::can_player_see_actor(actor);
 
-        if (!actor.is_player())
+        if (!actor::is_player(&actor))
         {
                 actor.m_mon_aware_state.player_aware_of_me_counter = 0;
         }
@@ -339,7 +340,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         // the player to them
         bool is_affected_by_void_traveler = false;
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 for (auto* const other_actor : game_time::g_actors)
                 {
@@ -386,7 +387,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         // Update actor position to new position
         actor.m_pos = p;
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 viewport::show(
                         map::g_player->m_pos,
@@ -395,7 +396,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         map::update_vision();
 
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 static_cast<actor::Player&>(actor).update_tmp_shock();
 
@@ -429,7 +430,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         const bool is_confused = actor.m_properties.has(PropId::confused);
 
-        if (actor.is_player() &&
+        if (actor::is_player(&actor) &&
             (!has_tele_ctrl ||
              is_confused ||
              is_affected_by_void_traveler))

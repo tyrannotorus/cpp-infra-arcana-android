@@ -188,8 +188,6 @@ void on_player_gained_lvl(int new_lvl);
 
 void set_all_traits_to_picked();
 
-bool gets_undead_bane_bon(const actor::ActorData& actor_data);
-
 }  // namespace player_bon
 
 #endif  // PLAYER_BON_HPP

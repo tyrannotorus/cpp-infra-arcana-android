@@ -1749,11 +1749,4 @@ std::vector<TraitLogEntry> trait_log()
         return s_trait_log;
 }
 
-bool gets_undead_bane_bon(const actor::ActorData& actor_data)
-{
-        return (
-                has_trait(Trait::undead_bane) &&
-                actor_data.is_undead);
-}
-
 }  // namespace player_bon

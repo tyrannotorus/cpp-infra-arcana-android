@@ -12,6 +12,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
+#include "actor_eat.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
 #include "actor_player.hpp"
@@ -164,7 +165,7 @@ DmgRange Item::melee_dmg(const actor::Actor* const attacker) const
                 return range;
         }
 
-        if (attacker == map::g_player)
+        if (actor::is_player(attacker))
         {
                 if (player_bon::has_trait(Trait::adept_melee))
                 {
@@ -326,7 +327,7 @@ void Item::on_std_turn_in_inv(const InvType inv_type)
 {
         ASSERT(m_actor_carrying);
 
-        if (m_actor_carrying == map::g_player)
+        if (actor::is_player(m_actor_carrying))
         {
                 m_curse.on_new_turn(*this);
         }
@@ -347,7 +348,7 @@ void Item::on_pickup(actor::Actor& actor)
 
         m_actor_carrying = &actor;
 
-        if (m_actor_carrying->is_player())
+        if (actor::is_player(m_actor_carrying))
         {
                 on_player_found();
         }
@@ -744,8 +745,8 @@ void Armor::hit(const int dmg)
 
         ASSERT(m_actor_carrying);
 
-        if ((m_actor_carrying == map::g_player) &&
-            (player_bon::bg() == Bg::war_vet))
+        if (actor::is_player(m_actor_carrying) &&
+            player_bon::is_bg(Bg::war_vet))
         {
                 war_vet_k = 0.5;
         }
@@ -951,7 +952,7 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
                 snd.run();
 
-                map::g_player->on_feed();
+                actor::heal_from_eating(*map::g_player);
         }
 
         if (actor_hit.is_alive())
@@ -1006,7 +1007,7 @@ void MiGoGun::specific_dmg_mod(
         DmgRange& range,
         const actor::Actor* const actor) const
 {
-        if ((actor == map::g_player) &&
+        if (actor::is_player(actor) &&
             player_bon::has_trait(Trait::elec_incl))
         {
                 range.incr_dmg(1);
@@ -1015,7 +1016,7 @@ void MiGoGun::specific_dmg_mod(
 
 void MiGoGun::pre_ranged_attack()
 {
-        if (!m_actor_carrying->is_player())
+        if (!actor::is_player(m_actor_carrying))
         {
                 return;
         }
@@ -1113,7 +1114,7 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         (void)dmg;
 
         if (!actor_hit.is_alive() ||
-            !actor_hit.is_player())
+            !actor::is_player(&actor_hit))
         {
                 return;
         }
@@ -1267,7 +1268,7 @@ void MedicalBag::on_pickup_hook()
 {
         ASSERT(m_actor_carrying);
 
-        if (!m_actor_carrying->is_player())
+        if (!actor::is_player(m_actor_carrying))
         {
                 return;
         }

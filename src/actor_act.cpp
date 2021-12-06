@@ -58,7 +58,7 @@ static void remove_player_with_sanctuary(std::vector<actor::Actor*>& actors)
         {
                 auto* const actor = *it;
 
-                if (actor->is_player())
+                if (actor::is_player(actor))
                 {
                         actors.erase(it);
 
@@ -474,19 +474,6 @@ static void mon_act(actor::Mon& mon)
         }
 
         // ---------------------------------------------------------------------
-        // Special monster actions
-        // ---------------------------------------------------------------------
-        // TODO: This will be removed eventually
-        if ((mon.m_leader != map::g_player) &&
-            (!mon.m_ai_state.target || mon.m_ai_state.target->is_player()))
-        {
-                if (mon.on_act() == DidAction::yes)
-                {
-                        return;
-                }
-        }
-
-        // ---------------------------------------------------------------------
         // Property actions (e.g. Zombie rising, Vortex pulling, ...)
         // ---------------------------------------------------------------------
         if (mon.m_properties.on_act() == DidAction::yes)
@@ -503,7 +490,7 @@ static void mon_act(actor::Mon& mon)
 
         if (mon.m_data->ai[(size_t)actor::AiId::avoids_blocking_friend] &&
             !is_player_leader &&
-            (mon.m_ai_state.target == map::g_player) &&
+            actor::is_player(mon.m_ai_state.target) &&
             mon.m_ai_state.is_target_seen &&
             rnd::coin_toss())
         {
@@ -640,7 +627,8 @@ static void mon_act(actor::Mon& mon)
 
         if (mon.m_data->ai[(size_t)actor::AiId::moves_to_lair] &&
             !is_player_leader &&
-            (!mon.m_ai_state.target || mon.m_ai_state.target->is_player()))
+            (!mon.m_ai_state.target ||
+             actor::is_player(mon.m_ai_state.target)))
         {
                 auto did_act =
                         ai::action::step_to_lair_if_los(
@@ -692,7 +680,7 @@ namespace actor
 {
 void act(Actor& actor)
 {
-        if (actor.is_player())
+        if (actor::is_player(&actor))
         {
                 player_act();
         }

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <climits>
 
+#include "ability_values.hpp"
 #include "actor_data.hpp"
 #include "actor_items.hpp"
 #include "actor_mon.hpp"
@@ -60,6 +61,16 @@ int max_sp(const Actor& actor)
         return std::max(1, result);
 }
 
+bool is_player(const Actor* const actor)
+{
+        if (!actor)
+        {
+                return false;
+        }
+
+        return (actor->m_data->id == Id::player);
+}
+
 void init_actor(Actor& actor, const P& pos_, ActorData& data)
 {
         actor.m_pos = pos_;
@@ -88,7 +99,7 @@ void init_actor(Actor& actor, const P& pos_, ActorData& data)
 
         actor.m_properties.apply_natural_props_from_actor_data();
 
-        if (!actor.is_player())
+        if (!actor::is_player(&actor))
         {
                 actor_items::make_for_actor(actor);
 
@@ -170,6 +181,13 @@ gfx::TileId Actor::tile() const
                 return m_mimic_data->tile;
         }
 
+        const auto tile_override = m_properties.override_actor_tile();
+
+        if (tile_override)
+        {
+                return tile_override.value();
+        }
+
         // HACK: Overriding tile for (firearm) Cultists
         if (id() == Id::cultist)
         {
@@ -216,12 +234,19 @@ char Actor::character() const
                 return '&';
         }
 
-        const auto* const data =
-                m_mimic_data
-                ? m_mimic_data
-                : m_data;
+        if (m_mimic_data)
+        {
+                return m_mimic_data->character;
+        }
 
-        return data->character;
+        const auto c_override = m_properties.override_actor_character();
+
+        if (c_override)
+        {
+                return c_override.value();
+        }
+
+        return m_data->character;
 }
 
 std::string Actor::name_the() const
@@ -229,6 +254,13 @@ std::string Actor::name_the() const
         if (m_mimic_data)
         {
                 return m_mimic_data->name_the;
+        }
+
+        const auto name_override = m_properties.override_actor_name_the();
+
+        if (name_override)
+        {
+                return name_override.value();
         }
 
         return m_data->name_the;
@@ -241,6 +273,13 @@ std::string Actor::name_a() const
                 return m_mimic_data->name_a;
         }
 
+        const auto name_override = m_properties.override_actor_name_a();
+
+        if (name_override)
+        {
+                return name_override.value();
+        }
+
         return m_data->name_a;
 }
 
@@ -251,7 +290,29 @@ std::string Actor::descr() const
                 return m_mimic_data->descr;
         }
 
+        const auto descr_override = m_properties.override_actor_descr();
+
+        if (descr_override)
+        {
+                return descr_override.value();
+        }
+
         return m_data->descr;
+}
+
+bool Actor::is_leader_of(const Actor* const actor) const
+{
+        if (!actor)
+        {
+                return false;
+        }
+
+        return actor->m_leader == this;
+}
+
+bool Actor::is_actor_my_leader(const Actor* const actor) const
+{
+        return m_leader == actor;
 }
 
 bool Actor::restore_hp(
@@ -286,7 +347,7 @@ bool Actor::restore_hp(
 
         if ((verbose == Verbose::yes) && is_hp_gained)
         {
-                if (is_player())
+                if (is_player(this))
                 {
                         msg_log::add("I feel healthier!", colors::msg_good());
                 }
@@ -325,7 +386,7 @@ bool Actor::restore_sp(
         if (verbose == Verbose::yes &&
             is_spi_gained)
         {
-                if (is_player())
+                if (is_player(this))
                 {
                         msg_log::add(
                                 "I feel more spirited!",
@@ -358,7 +419,7 @@ void Actor::change_max_hp(const int change, const Verbose verbose)
                 return;
         }
 
-        if (is_player())
+        if (is_player(this))
         {
                 if (change > 0)
                 {
@@ -399,7 +460,7 @@ void Actor::change_max_sp(const int change, const Verbose verbose)
                 return;
         }
 
-        if (is_player())
+        if (is_player(this))
         {
                 if (change > 0)
                 {
@@ -453,7 +514,7 @@ int Actor::armor_points() const
         }
 
         // "Natural armor"
-        if (is_player())
+        if (is_player(this))
         {
                 if (player_bon::has_trait(Trait::thick_skinned))
                 {
@@ -496,159 +557,6 @@ std::string Actor::death_msg() const
         }
 
         return actor_name_the + " " + msg_end;
-}
-
-DidAction Actor::try_eat_corpse()
-{
-        const bool actor_is_player = is_player();
-
-        PropWound* wound = nullptr;
-
-        if (actor_is_player)
-        {
-                Prop* prop = m_properties.prop(PropId::wound);
-
-                if (prop)
-                {
-                        wound = static_cast<PropWound*>(prop);
-                }
-        }
-
-        if ((m_hp >= actor::max_hp(*this)) && !wound)
-        {
-                // Not "hungry"
-                return DidAction::no;
-        }
-
-        Actor* corpse = nullptr;
-
-        // Check all corpses here, if this is the player eating, stop at any
-        // corpse which is prioritized for bashing (Zombies)
-        for (Actor* const actor : game_time::g_actors)
-        {
-                if ((actor->m_pos == m_pos) &&
-                    (actor->m_state == ActorState::corpse))
-                {
-                        corpse = actor;
-
-                        if (actor_is_player && actor->m_data->prio_corpse_bash)
-                        {
-                                break;
-                        }
-                }
-        }
-
-        if (corpse)
-        {
-                const int corpse_max_hp = corpse->m_base_max_hp;
-
-                const int destr_one_in_n =
-                        std::clamp(corpse_max_hp / 4, 1, 8);
-
-                const bool is_destroyed = rnd::one_in(destr_one_in_n);
-
-                const std::string corpse_name_the =
-                        corpse->m_data->corpse_name_the;
-
-                Snd snd(
-                        "I hear ripping and chewing.",
-                        audio::SfxId::bite,
-                        IgnoreMsgIfOriginSeen::yes,
-                        m_pos,
-                        this,
-                        SndVol::low,
-                        AlertsMon::no);
-
-                snd.run();
-
-                if (actor_is_player)
-                {
-                        msg_log::add("I feed on " + corpse_name_the + ".");
-                }
-                else
-                {
-                        // Is monster
-                        if (can_player_see_actor(*this))
-                        {
-                                const std::string actor_name_the =
-                                        text_format::first_to_upper(
-                                                name_the());
-
-                                msg_log::add(
-                                        actor_name_the +
-                                        " feeds on " +
-                                        corpse_name_the +
-                                        ".");
-                        }
-                }
-
-                if (is_destroyed)
-                {
-                        corpse->m_state = ActorState::destroyed;
-
-                        map::make_gore(m_pos);
-                        map::make_blood(m_pos);
-                }
-
-                if (actor_is_player && is_destroyed)
-                {
-                        msg_log::add(
-                                text_format::first_to_upper(corpse_name_the) +
-                                " is completely devoured.");
-
-                        std::vector<Actor*> corpses_here;
-
-                        for (auto* const actor : game_time::g_actors)
-                        {
-                                if ((actor->m_pos == m_pos) &&
-                                    (actor->m_state == ActorState::corpse))
-                                {
-                                        corpses_here.push_back(actor);
-                                }
-                        }
-
-                        if (!corpses_here.empty())
-                        {
-                                msg_log::more_prompt();
-
-                                for (auto* const other_corpse : corpses_here)
-                                {
-                                        const std::string name =
-                                                text_format::first_to_upper(
-                                                        other_corpse->m_data
-                                                                ->corpse_name_a);
-
-                                        msg_log::add(name + ".");
-                                }
-                        }
-                }
-
-                // Heal
-                on_feed();
-
-                return DidAction::yes;
-        }
-
-        return DidAction::no;
-}
-
-void Actor::on_feed()
-{
-        const int hp_restored = rnd::range(3, 5);
-
-        restore_hp(hp_restored, false, Verbose::no);
-
-        if (is_player())
-        {
-                Prop* const prop = m_properties.prop(PropId::wound);
-
-                if (prop && rnd::one_in(6))
-                {
-                        auto* const wound = static_cast<PropWound*>(prop);
-
-                        wound->heal_one_wound();
-                }
-        }
 }
 
 void Actor::add_light(Array2<bool>& light_map) const
@@ -737,22 +645,6 @@ void Actor::add_light(Array2<bool>& light_map) const
         }
 
         add_light_hook(light_map);
-}
-
-bool Actor::is_player() const
-{
-        if (map::g_player)
-        {
-                // A global player object has been defined, check if "this" is
-                // the same object as the global player object.
-                return this == map::g_player;
-        }
-        else
-        {
-                // No global player object, check the actor ID instead.
-                // TODO: Perhaps this should be the only way?
-                return (m_data->id == Id::player);
-        }
 }
 
 }  // namespace actor

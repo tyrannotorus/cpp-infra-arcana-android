@@ -28,7 +28,7 @@ static int calc_search_mod(const actor::SneakParameters& data)
                         true);
 
         const int mod =
-                data.actor_searching->is_player()
+                actor::is_player(data.actor_searching)
                 ? -search_skill
                 : 0;
 

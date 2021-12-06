@@ -188,7 +188,7 @@ std::vector<Actor*> Mon::foes_aware_of() const
                 // Add all player-hostile monsters which the player is aware of
                 for (auto* const actor : game_time::g_actors)
                 {
-                        if (!actor->is_player() &&
+                        if (!actor::is_player(actor) &&
                             !actor->is_actor_my_leader(map::g_player) &&
                             (flood.at(actor->m_pos) > 0) &&
                             actor->is_aware_of_player())
@@ -203,7 +203,7 @@ std::vector<Actor*> Mon::foes_aware_of() const
 
                 for (auto* const actor : game_time::g_actors)
                 {
-                        if (!actor->is_player() &&
+                        if (!actor::is_player(actor) &&
                             actor->is_actor_my_leader(map::g_player))
                         {
                                 result.push_back(actor);
@@ -239,17 +239,17 @@ Color Mon::color() const
                 return m_data->color;
         }
 
-        Color tmp_color;
-
         // TODO: Make this a property:
         if (id() == Id::ooze_lurking)
         {
                 return map::g_wall_color;
         }
 
-        if (m_properties.affect_actor_color(tmp_color))
+        auto color_override = m_properties.override_actor_color();
+
+        if (color_override)
         {
-                return tmp_color;
+                return color_override.value();
         }
 
         const auto* const data =
@@ -277,28 +277,6 @@ SpellSkill Mon::spell_skill(const SpellId id) const
         return SpellSkill::basic;
 }
 
-void Mon::hear_sound(const Snd& snd)
-{
-        if (m_properties.has(PropId::deaf))
-        {
-                return;
-        }
-
-        snd.on_heard(*this);
-
-        // NOTE: The monster may have become deaf through the sound callback
-        // above (e.g.  from the Horn of Deafening artifact)
-        if (m_properties.has(PropId::deaf))
-        {
-                return;
-        }
-
-        if (is_alive() && snd.is_alerting_mon())
-        {
-                become_aware_player(AwareSource::heard_sound);
-        }
-}
-
 void Mon::speak_phrase(AlertsMon alerts_others)
 {
         if (m_properties.has(PropId::always_aware))
@@ -317,10 +295,10 @@ void Mon::speak_phrase(AlertsMon alerts_others)
 
         msg = text_format::first_to_upper(msg);
 
-        const audio::SfxId sfx =
+        const auto sfx =
                 is_seen_by_player
-                ? aware_sfx_mon_seen()
-                : aware_sfx_mon_hidden();
+                ? m_data->aware_sfx_mon_seen
+                : m_data->aware_sfx_mon_hidden;
 
         Snd snd(
                 msg,
@@ -533,7 +511,7 @@ DidAction Mon::try_attack(Actor& defender)
                 return DidAction::no;
         }
 
-        if (!is_aware_of_player() && (m_leader != map::g_player))
+        if (!is_aware_of_player() && !actor::is_player(m_leader))
         {
                 return DidAction::no;
         }
@@ -792,23 +770,6 @@ AiAttData Mon::choose_attack(const AiAvailAttacksData& avail_attacks) const
         return result;
 }
 
-bool Mon::is_leader_of(const Actor* const actor) const
-{
-        if (actor && !actor->is_player())
-        {
-                const auto* const mon = static_cast<const Mon*>(actor);
-
-                return (mon->m_leader == this);
-        }
-
-        return false;
-}
-
-bool Mon::is_actor_my_leader(const Actor* const actor) const
-{
-        return m_leader == actor;
-}
-
 int Mon::nr_mon_in_group() const
 {
         const Actor* const group_leader = m_leader ? m_leader : this;
@@ -849,171 +810,6 @@ void Mon::add_spell(SpellSkill skill, Spell* const spell)
         spell_entry.skill = skill;
 
         m_mon_spells.push_back(spell_entry);
-}
-
-// -----------------------------------------------------------------------------
-// Specific monsters
-// -----------------------------------------------------------------------------
-// TODO: This should either be a property or be controlled by the map
-DidAction Khephren::on_act()
-{
-        // Try summoning locusts
-
-        if (!is_alive() || !is_aware_of_player() || m_has_summoned_locusts)
-        {
-                return DidAction::no;
-        }
-
-        Array2<bool> blocked(map::dims());
-
-        const R fov_rect = fov::fov_rect(m_pos, blocked.dims());
-
-        map_parsers::BlocksLos()
-                .run(blocked,
-                     fov_rect,
-                     MapParseMode::overwrite);
-
-        if (!can_mon_see_actor(*this, *map::g_player, blocked))
-        {
-                return DidAction::no;
-        }
-
-        msg_log::add("Khephren calls a plague of Locusts!");
-
-        map::g_player->incr_shock(12.0, ShockSrc::misc);
-
-        Actor* const leader_of_spawned_mon = m_leader ? m_leader : this;
-
-        const size_t nr_of_spawns = 15;
-
-        auto summoned =
-                actor::spawn(
-                        m_pos,
-                        {nr_of_spawns, actor::Id::locust},
-                        map::rect());
-
-        summoned.set_leader(leader_of_spawned_mon);
-        summoned.make_aware_of_player();
-
-        std::for_each(
-                std::begin(summoned.monsters),
-                std::end(summoned.monsters),
-                [](Actor* const actor) {
-                        auto* prop = new PropSummoned();
-
-                        prop->set_indefinite();
-
-                        actor->m_properties.apply(prop);
-                });
-
-        m_has_summoned_locusts = true;
-
-        game_time::tick();
-
-        return DidAction::yes;
-}
-
-DidAction Ape::on_act()
-{
-        if (m_frenzy_cooldown > 0)
-        {
-                --m_frenzy_cooldown;
-        }
-
-        if ((m_frenzy_cooldown <= 0) &&
-            m_ai_state.target &&
-            (m_hp <= (actor::max_hp(*this) / 2)))
-        {
-                m_frenzy_cooldown = 30;
-
-                auto* prop = new PropFrenzied();
-
-                prop->set_duration(rnd::range(4, 6));
-
-                m_properties.apply(prop);
-        }
-
-        return DidAction::no;
-}
-
-void SpectralWpn::on_death()
-{
-        // Remove the item from the inventory to avoid dropping it on the floor
-        // (but do not yet delete the item, in case it's still being used in the
-        // the call stack)
-        auto* const item =
-                m_inv.remove_item_in_slot(
-                        SlotId::wpn,
-                        false);  // Do not delete the item
-
-        m_discarded_item.reset(item);
-}
-
-std::string SpectralWpn::name_the() const
-{
-        auto* item = m_inv.item_in_slot(SlotId::wpn);
-
-        ASSERT(item);
-
-        const std::string name =
-                item->name(
-                        ItemNameType::plain,
-                        ItemNameInfo::yes,
-                        ItemNameAttackInfo::none);
-
-        return "The Spectral " + name;
-}
-
-std::string SpectralWpn::name_a() const
-{
-        auto* item = m_inv.item_in_slot(SlotId::wpn);
-
-        ASSERT(item);
-
-        const std::string name =
-                item->name(
-                        ItemNameType::plain,
-                        ItemNameInfo::yes,
-                        ItemNameAttackInfo::none);
-
-        return "A Spectral " + name;
-}
-
-char SpectralWpn::character() const
-{
-        auto* item = m_inv.item_in_slot(SlotId::wpn);
-
-        ASSERT(item);
-
-        return item->character();
-}
-
-gfx::TileId SpectralWpn::tile() const
-{
-        auto* item = m_inv.item_in_slot(SlotId::wpn);
-
-        ASSERT(item);
-
-        return item->tile();
-}
-
-std::string SpectralWpn::descr() const
-{
-        auto* item = m_inv.item_in_slot(SlotId::wpn);
-
-        ASSERT(item);
-
-        std::string str =
-                item->name(
-                        ItemNameType::a,
-                        ItemNameInfo::yes,
-                        ItemNameAttackInfo::none);
-
-        str = text_format::first_to_upper(str);
-
-        str += ", floating through the air as if wielded by an invisible hand.";
-
-        return str;
 }
 
 }  // namespace actor
