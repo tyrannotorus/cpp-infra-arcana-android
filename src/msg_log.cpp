@@ -398,6 +398,12 @@ void clear()
         }
 }
 
+bool is_empty()
+{
+        // The log is considered empty if the first line is empty.
+        return s_lines[0].messages.empty();
+}
+
 void add(
         const std::string& str,
         Color color,

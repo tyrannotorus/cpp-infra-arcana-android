@@ -134,6 +134,7 @@ public:
         // there are unique monsters on the map, and the player is a Rogue
         void mon_feeling();
 
+        // Inventory and item handling state
         item::MedicalBag* m_active_medical_bag {nullptr};
         int m_equip_armor_countdown {0};
         int m_remove_armor_countdown {0};
@@ -141,18 +142,35 @@ public:
         item::Item* m_item_equipping {nullptr};
         item::Explosive* m_active_explosive {nullptr};
         item::Item* m_last_thrown_item {nullptr};
+        item::Wpn* m_unarmed_wpn {nullptr};
+
+        // Player target
         Actor* m_tgt {nullptr};
+
+        // "Five turn waiting" (long wait command) state
         int m_wait_turns_left {-1};
+
+        // Auto-move command state
+        Dir m_auto_move_dir {Dir::END};
+        bool m_has_taken_auto_move_step {false};
+
+        // Shock and insanity state
         int m_ins {0};
         double m_shock {0.0};
         double m_shock_tmp {0.0};
         int m_nr_turns_until_ins {-1};
-        Dir m_auto_move_dir {Dir::END};
-        bool m_has_taken_auto_move_step {false};
+
+        // Cooldowns to regain effects
         int m_nr_turns_until_r_spell {-1};
         int m_nr_turns_until_meditative_focused {-1};
-        item::Wpn* m_unarmed_wpn {nullptr};
+
+        // Current color for lantern flickering effect
         Color m_lantern_color {};
+
+        // State for keeping track of if a monster should be warned about
+        // ("[...] is in my view!").
+        Actor* seen_mon_to_warn_about {nullptr};
+        bool allow_print_mon_warning {false};
 
 private:
         int shock_resistance(ShockSrc shock_src) const;

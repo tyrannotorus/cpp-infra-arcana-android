@@ -52,7 +52,7 @@ void hear_sound_player(
                 if (actor_who_made_snd && !is_player(actor_who_made_snd))
                 {
                         static_cast<Mon*>(actor_who_made_snd)
-                                ->set_player_aware_of_me();
+                                ->make_player_aware_of_me();
                 }
         }
 

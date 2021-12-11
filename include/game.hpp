@@ -48,9 +48,7 @@ void on_mon_killed(actor::Actor& actor);
 
 void set_start_time_to_now();
 
-void incr_player_xp(
-        int xp_gained,
-        Verbose verbose = Verbose::yes);
+void incr_player_xp(int xp_gained, Verbose verbose = Verbose::yes);
 
 void decr_player_xp(int xp_lost);
 

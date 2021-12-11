@@ -262,7 +262,7 @@ void throw_item(
                                 }
 
                                 static_cast<actor::Mon*>(actor_here)
-                                        ->set_player_aware_of_me();
+                                        ->make_player_aware_of_me();
 
                                 Snd snd(
                                         "A creature is hit.",

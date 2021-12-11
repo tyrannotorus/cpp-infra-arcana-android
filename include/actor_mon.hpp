@@ -74,7 +74,7 @@ public:
 
         void become_wary_player();
 
-        void set_player_aware_of_me(int duration_factor = 1);
+        void make_player_aware_of_me(int duration_factor = 1);
 
         std::vector<Actor*> foes_aware_of() const;
 

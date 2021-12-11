@@ -21,6 +21,7 @@
 #include "direction.hpp"
 #include "flood.hpp"
 #include "fov.hpp"
+#include "game.hpp"
 #include "game_time.hpp"
 #include "gods.hpp"
 #include "inventory.hpp"
@@ -345,7 +346,6 @@ void Mon::become_aware_player(const AwareSource source, const int factor)
 {
         if (!is_alive() || is_actor_my_leader(map::g_player))
         {
-                TRACE_FUNC_END;
                 return;
         }
 
@@ -489,7 +489,7 @@ void Mon::print_player_see_mon_become_wary_msg() const
         msg_log::add(msg);
 }
 
-void Mon::set_player_aware_of_me(int duration_factor)
+void Mon::make_player_aware_of_me(int duration_factor)
 {
         int nr_turns = 2 * duration_factor;
 
@@ -502,6 +502,11 @@ void Mon::set_player_aware_of_me(int duration_factor)
                 std::max(
                         nr_turns,
                         m_mon_aware_state.player_aware_of_me_counter);
+
+        if (can_player_see_actor(*this))
+        {
+                game::player_discover_monster(*this);
+        }
 }
 
 DidAction Mon::try_attack(Actor& defender)

@@ -68,6 +68,9 @@ void init_actor(Actor& actor, const P& pos_, ActorData& data);
 
 void print_aware_invis_mon_msg(const Mon& mon);
 
+void make_player_aware_mon(Actor& actor);
+void make_player_aware_seen_monsters();
+
 class Actor
 {
 public:

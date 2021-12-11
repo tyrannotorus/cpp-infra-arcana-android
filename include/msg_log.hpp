@@ -131,6 +131,8 @@ void newline();
 
 void clear();
 
+bool is_empty();
+
 void add_line_to_history(const std::string& line_to_add);
 
 std::vector<Msg> history();

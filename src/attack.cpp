@@ -1089,7 +1089,7 @@ static void hit_actor_with_projectile(
         if (actor::is_player(att_data.attacker))
         {
                 auto& mon = static_cast<actor::Mon&>(*att_data.defender);
-                mon.set_player_aware_of_me();
+                mon.make_player_aware_of_me();
         }
 
         if (projectile.dmg > 0)
@@ -1922,7 +1922,7 @@ void melee(
                         auto* const mon =
                                 static_cast<actor::Mon*>(att_data.attacker);
 
-                        mon->set_player_aware_of_me();
+                        mon->make_player_aware_of_me();
                 }
                 else
                 {

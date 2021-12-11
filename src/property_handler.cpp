@@ -15,6 +15,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
+#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "colors.hpp"
@@ -246,6 +247,7 @@ void PropHandler::apply(
                 if (prop->should_update_vision_on_toggled())
                 {
                         map::update_vision();
+                        actor::make_player_aware_seen_monsters();
                 }
         }
 
@@ -534,6 +536,7 @@ void PropHandler::on_prop_end(
         if (prop->should_update_vision_on_toggled())
         {
                 map::update_vision();
+                actor::make_player_aware_seen_monsters();
         }
 
         // Print end message if this is the last active property of this type

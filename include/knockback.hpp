@@ -19,7 +19,7 @@ struct P;
 namespace knockback
 {
 void run(
-        actor::Actor& defender,
+        actor::Actor& actor,
         const P& attacked_from_pos,
         bool is_spike_gun,
         Verbose verbose = Verbose::yes,

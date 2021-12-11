@@ -307,8 +307,8 @@ static void mon_std_turn(actor::Mon& mon)
                 }
         }
 
-        // Monsters try to detect the player visually on standard turns,
-        // otherwise very fast monsters are much better at finding the player
+        // NOTE: Monsters try to detect the player visually on standard turns,
+        // otherwise very fast monsters are much better at finding the player.
         if (mon.is_alive() &&
             mon.m_data->ai[(size_t)actor::AiId::looks] &&
             !actor::is_player(mon.m_leader) &&

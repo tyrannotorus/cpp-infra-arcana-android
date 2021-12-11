@@ -49,12 +49,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-struct PlayerDetectMonState
-{
-        actor::Actor* seen_mon_to_warn_about {nullptr};
-        bool is_any_mon_already_seen {false};
-};
-
 static bool is_hostile_living_mon(const actor::Actor& actor)
 {
         if (actor::is_player(&actor))
@@ -198,12 +192,12 @@ static void make_aware_of_unseeable_mon_by_vigilant(actor::Mon& mon)
                 }
         }
 
-        mon.set_player_aware_of_me();
+        mon.make_player_aware_of_me();
 }
 
 static void on_player_spot_sneaking_mon(actor::Mon& mon)
 {
-        mon.set_player_aware_of_me();
+        mon.make_player_aware_of_me();
 
         const std::string mon_name = mon.name_a();
 
@@ -253,27 +247,44 @@ static bool player_try_spot_sneaking_mon(
 
 static void warn_player_about_mon(const actor::Actor& actor)
 {
-        const auto name_a = text_format::first_to_upper(actor.name_a());
+        // NOTE: To avoid redundant messages, a message is only printed if the
+        // message log is empty, otherwise only a "more" prompt is added.
 
-        const auto should_print_more_prompt =
-                map::g_player->is_busy_queryable_action()
-                ? MorePromptOnMsg::no
-                : MorePromptOnMsg::yes;
+        const bool is_busy = map::g_player->is_busy_queryable_action();
 
-        msg_log::add(
-                name_a + " is in my view.",
-                colors::text(),
-                MsgInterruptPlayer::yes,
-                should_print_more_prompt);
+        if (msg_log::is_empty() || is_busy)
+        {
+                // The message log is empty, or player is busy with an action,
+                // print a warning with a message.
+
+                const auto name_a = text_format::first_to_upper(actor.name_a());
+
+                // If the player is busy, there is no need for a "more" prompt,
+                // since the player will be queried to abort anyway.
+                const auto add_more_prompt =
+                        is_busy
+                        ? MorePromptOnMsg::no
+                        : MorePromptOnMsg::yes;
+
+                msg_log::add(
+                        name_a + " is in my view.",
+                        colors::text(),
+                        MsgInterruptPlayer::yes,
+                        add_more_prompt);
+        }
+        else
+        {
+                // The message log contains messages, and player is not busy,
+                // just run a "more" prompt.
+                msg_log::more_prompt();
+        }
 }
 
-static void update_player_seen_monster(
-        actor::Mon& mon,
-        PlayerDetectMonState& state)
+static void update_player_seen_monster(actor::Mon& mon)
 {
         if (mon.m_mon_aware_state.is_msg_mon_in_view_printed)
         {
-                state.is_any_mon_already_seen = true;
+                map::g_player->allow_print_mon_warning = false;
         }
 
         mon.m_mon_aware_state.is_msg_mon_in_view_printed = true;
@@ -281,17 +292,17 @@ static void update_player_seen_monster(
         const bool should_warn =
                 map::g_player->is_busy() ||
                 (config::always_warn_new_mon() &&
-                 !state.is_any_mon_already_seen);
+                 map::g_player->allow_print_mon_warning);
 
         if (should_warn)
         {
-                state.seen_mon_to_warn_about = &mon;
+                map::g_player->seen_mon_to_warn_about = &mon;
         }
         else
         {
                 // If we should not warn about this seen monster, it means we
                 // should not warn about any seen monster.
-                state.seen_mon_to_warn_about = nullptr;
+                map::g_player->seen_mon_to_warn_about = nullptr;
         }
 
         mon.m_mon_aware_state.is_player_feeling_msg_allowed = false;
@@ -299,7 +310,6 @@ static void update_player_seen_monster(
 
 static void update_player_unseen_monster(
         actor::Mon& mon,
-        PlayerDetectMonState& state,
         const Array2<int>& vigilant_flood)
 {
         if (!mon.is_player_aware_of_me())
@@ -328,8 +338,8 @@ static void update_player_unseen_monster(
                 {
                         on_player_spot_sneaking_mon(mon);
 
-                        state.seen_mon_to_warn_about = nullptr;
-                        state.is_any_mon_already_seen = true;
+                        map::g_player->seen_mon_to_warn_about = nullptr;
+                        map::g_player->allow_print_mon_warning = false;
                 }
         }
 }
@@ -337,8 +347,6 @@ static void update_player_unseen_monster(
 static void update_player_monster_detection()
 {
         const auto vigilant_flood = calc_player_vigilant_flood();
-
-        PlayerDetectMonState state;
 
         for (auto* const actor : game_time::g_actors)
         {
@@ -351,16 +359,11 @@ static void update_player_monster_detection()
 
                 if (can_player_see_actor(*actor))
                 {
-                        update_player_seen_monster(
-                                mon,
-                                state);
+                        update_player_seen_monster(mon);
                 }
                 else
                 {
-                        update_player_unseen_monster(
-                                mon,
-                                state,
-                                vigilant_flood);
+                        update_player_unseen_monster(mon, vigilant_flood);
                 }
 
                 if (mon.is_player_aware_of_me())
@@ -369,9 +372,9 @@ static void update_player_monster_detection()
                 }
         }
 
-        if (state.seen_mon_to_warn_about)
+        if (map::g_player->seen_mon_to_warn_about)
         {
-                warn_player_about_mon(*state.seen_mon_to_warn_about);
+                warn_player_about_mon(*map::g_player->seen_mon_to_warn_about);
         }
 }
 
@@ -599,7 +602,7 @@ static void player_start_turn()
         map::update_vision();
 
         // Set current temporary shock from darkness etc
-        map::g_player->update_tmp_shock();
+        player.update_tmp_shock();
 
         if (should_burning_terrain_interrupt_player())
         {
@@ -613,13 +616,11 @@ static void player_start_turn()
 
         player.mon_feeling();
 
-        const auto my_seen_foes = seen_foes(player);
+        const auto player_seen_actors = actor::seen_actors(player);
 
-        for (auto* actor : my_seen_foes)
+        for (auto* actor : player_seen_actors)
         {
-                static_cast<actor::Mon*>(actor)->set_player_aware_of_me();
-
-                game::player_discover_monster(*actor);
+                actor::make_player_aware_mon(*actor);
 
                 actor->m_properties.on_player_see();
         }
@@ -660,7 +661,10 @@ static void player_start_turn()
                 player.m_nr_turns_until_ins = -1;
         }
 
-        insanity::on_new_player_turn(my_seen_foes);
+        insanity::on_new_player_turn(player_seen_actors);
+
+        player.seen_mon_to_warn_about = nullptr;
+        player.allow_print_mon_warning = true;
 }
 
 static void mon_start_turn(actor::Mon& mon)

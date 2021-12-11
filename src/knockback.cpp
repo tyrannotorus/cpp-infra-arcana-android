@@ -12,12 +12,14 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_death.hpp"
+#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "game.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -34,7 +36,7 @@
 namespace knockback
 {
 void run(
-        actor::Actor& defender,
+        actor::Actor& actor,
         const P& attacked_from_pos,
         const bool is_spike_gun,
         const Verbose verbose,
@@ -44,14 +46,14 @@ void run(
 
         ASSERT(paralyze_extra_turns >= 0);
 
-        const bool is_defender_player = actor::is_player(&defender);
+        const bool is_player = actor::is_player(&actor);
 
-        if (defender.m_data->prevent_knockback ||
-            (defender.m_data->actor_size >= actor::Size::giant) ||
-            defender.m_properties.has(PropId::entangled) ||
-            defender.m_properties.has(PropId::ethereal) ||
-            defender.m_properties.has(PropId::ooze) ||
-            (is_defender_player && config::is_bot_playing()))
+        if (actor.m_data->prevent_knockback ||
+            (actor.m_data->actor_size >= actor::Size::giant) ||
+            actor.m_properties.has(PropId::entangled) ||
+            actor.m_properties.has(PropId::ethereal) ||
+            actor.m_properties.has(PropId::ooze) ||
+            (is_player && config::is_bot_playing()))
         {
                 // Defender is not knockable
 
@@ -60,13 +62,13 @@ void run(
                 return;
         }
 
-        if (is_defender_player)
+        if (is_player)
         {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
         }
 
-        const auto d = (defender.m_pos - attacked_from_pos).signs();
-        const auto new_pos = defender.m_pos + d;
+        const auto d = (actor.m_pos - attacked_from_pos).signs();
+        const auto new_pos = actor.m_pos + d;
 
         if (map::first_actor_at_pos(new_pos, ActorState::alive))
         {
@@ -74,8 +76,8 @@ void run(
                 return;
         }
 
-        const auto defender_can_move_into_tgt_pos =
-                !map_parsers::BlocksActor(defender, ParseActors::no)
+        const auto actor_can_move_into_tgt_pos =
+                !map_parsers::BlocksActor(actor, ParseActors::no)
                          .run(new_pos);
 
         const std::vector<terrain::Id> deep_terrains = {
@@ -87,9 +89,9 @@ void run(
 
         auto& tgt_terrain = map::g_terrain.at(new_pos);
 
-        if (!defender_can_move_into_tgt_pos && !is_tgt_pos_deep)
+        if (!actor_can_move_into_tgt_pos && !is_tgt_pos_deep)
         {
-                // Defender nailed to a wall from a spike gun?
+                // Actor nailed to a wall from a spike gun?
                 if (is_spike_gun)
                 {
                         if (!tgt_terrain->is_projectile_passable())
@@ -98,7 +100,7 @@ void run(
 
                                 prop->set_indefinite();
 
-                                defender.m_properties.apply(prop);
+                                actor.m_properties.apply(prop);
                         }
                 }
 
@@ -107,35 +109,32 @@ void run(
                 return;
         }
 
-        // TODO: Paralyzation and "knocked back" message should probably occur
-        // even if the defender is just knocked into a wall
-
-        const bool player_can_see_defender =
-                is_defender_player
+        const bool player_can_see_actor =
+                is_player
                 ? true
-                : actor::can_player_see_actor(defender);
+                : actor::can_player_see_actor(actor);
 
-        bool player_is_aware_of_defender = true;
+        bool player_is_aware_of_actor = true;
 
-        if (!is_defender_player)
+        if (!is_player)
         {
-                player_is_aware_of_defender = defender.is_player_aware_of_me();
+                player_is_aware_of_actor = actor.is_player_aware_of_me();
         }
 
-        std::string defender_name =
-                player_can_see_defender
-                ? text_format::first_to_upper(defender.name_the())
+        std::string actor_name =
+                player_can_see_actor
+                ? text_format::first_to_upper(actor.name_the())
                 : "It";
 
-        if ((verbose == Verbose::yes) && player_is_aware_of_defender)
+        if ((verbose == Verbose::yes) && player_is_aware_of_actor)
         {
-                if (is_defender_player)
+                if (is_player)
                 {
                         msg_log::add("I am knocked back!");
                 }
                 else
                 {
-                        msg_log::add(defender_name + " is knocked back!");
+                        msg_log::add(actor_name + " is knocked back!");
                 }
         }
 
@@ -143,32 +142,37 @@ void run(
 
         prop->set_duration(1 + paralyze_extra_turns);
 
-        defender.m_properties.apply(prop);
+        actor.m_properties.apply(prop);
 
         // Leave current cell
-        map::g_terrain.at(defender.m_pos)->on_leave(defender);
+        map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
-        defender.m_pos = new_pos;
+        actor.m_pos = new_pos;
 
-        if (!defender_can_move_into_tgt_pos && is_tgt_pos_deep)
+        if (!is_player && player_can_see_actor)
         {
-                if (is_defender_player)
+                actor::make_player_aware_mon(actor);
+        }
+
+        if (!actor_can_move_into_tgt_pos && is_tgt_pos_deep)
+        {
+                if (is_player)
                 {
                         msg_log::add(
                                 "I perish in the depths!",
                                 colors::msg_bad());
                 }
                 else if (
-                        player_is_aware_of_defender &&
+                        player_is_aware_of_actor &&
                         map::g_seen.at(new_pos))
                 {
                         msg_log::add(
-                                defender_name + " perishes in the depths.",
+                                actor_name + " perishes in the depths.",
                                 colors::msg_good());
                 }
 
                 actor::kill(
-                        defender,
+                        actor,
                         IsDestroyed::yes,
                         AllowGore::no,
                         AllowDropItems::no);
@@ -179,20 +183,20 @@ void run(
         }
 
         // Bump target cell
-        const auto mobs = game_time::mobs_at_pos(defender.m_pos);
+        const auto mobs = game_time::mobs_at_pos(actor.m_pos);
 
         for (auto* const mob : mobs)
         {
-                mob->bump(defender);
+                mob->bump(actor);
         }
 
-        if (!defender.is_alive())
+        if (!actor.is_alive())
         {
                 TRACE_FUNC_END;
                 return;
         }
 
-        map::g_terrain.at(defender.m_pos)->bump(defender);
+        map::g_terrain.at(actor.m_pos)->bump(actor);
 
         TRACE_FUNC_END;
 }

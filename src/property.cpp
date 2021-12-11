@@ -2209,7 +2209,7 @@ PropActResult PropVortex::on_act()
                 << "Player pos: "
                 << player_pos.x << ", " << player_pos.y << std::endl;
 
-        static_cast<actor::Mon*>(m_owner)->set_player_aware_of_me();
+        static_cast<actor::Mon*>(m_owner)->make_player_aware_of_me();
 
         if (actor::can_player_see_actor(*m_owner))
         {
@@ -3117,7 +3117,7 @@ PropActResult PropMajorClaphamSummon::on_act()
                 return {};
         }
 
-        static_cast<actor::Mon*>(m_owner)->set_player_aware_of_me();
+        static_cast<actor::Mon*>(m_owner)->make_player_aware_of_me();
 
         msg_log::add("Major Clapham Lee calls forth his Tomb-Legions!");
 
@@ -3263,8 +3263,8 @@ PropEnded PropMagicSearching::on_actor_turn()
                                 continue;
                         }
 
-                        static_cast<actor::Mon*>(actor)->set_player_aware_of_me(
-                                det_mon_multiplier);
+                        static_cast<actor::Mon*>(actor)
+                                ->make_player_aware_of_me(det_mon_multiplier);
                 }
         }
 

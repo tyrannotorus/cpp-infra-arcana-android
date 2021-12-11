@@ -331,6 +331,8 @@ void player_discover_monster(actor::Actor& actor)
         add_history_event("Discovered " + name);
 
         map::g_player->incr_shock(shock_value, ShockSrc::see_mon);
+
+        map::g_player->allow_print_mon_warning = false;
 }
 
 void on_mon_killed(actor::Actor& actor)

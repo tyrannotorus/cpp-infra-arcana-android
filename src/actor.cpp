@@ -18,6 +18,7 @@
 #include "array2.hpp"
 #include "audio_data.hpp"
 #include "fov.hpp"
+#include "game.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
@@ -142,6 +143,29 @@ void print_aware_invis_mon_msg(const Mon& mon)
                 colors::msg_note(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::yes);
+}
+
+void make_player_aware_mon(Actor& actor)
+{
+        if (is_player(&actor))
+        {
+                ASSERT(false);
+
+                return;
+        }
+
+        // NOTE: This will also "discover" the monster (give XP), if seen.
+        static_cast<actor::Mon&>(actor).make_player_aware_of_me();
+}
+
+void make_player_aware_seen_monsters()
+{
+        const auto player_seen_actors = actor::seen_actors(*map::g_player);
+
+        for (auto* actor : player_seen_actors)
+        {
+                make_player_aware_mon(*actor);
+        }
 }
 
 // -----------------------------------------------------------------------------

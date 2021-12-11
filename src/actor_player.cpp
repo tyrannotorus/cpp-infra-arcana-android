@@ -1314,7 +1314,7 @@ void Player::update_mon_awareness()
 
         for (auto* const actor : my_seen_actors)
         {
-                static_cast<Mon*>(actor)->set_player_aware_of_me();
+                static_cast<Mon*>(actor)->make_player_aware_of_me();
         }
 }
 

@@ -22,6 +22,7 @@
 #include "common_text.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "game.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
@@ -104,7 +105,9 @@ static void player_bump_known_hostile_mon(actor::Mon& mon)
             config::warn_on_ranged_wpn_melee())
         {
                 const auto answer =
-                        query_player_attack_mon_with_ranged_wpn(wpn, mon);
+                        query_player_attack_mon_with_ranged_wpn(
+                                wpn,
+                                mon);
 
                 msg_log::clear();
 
@@ -121,9 +124,11 @@ static void player_bump_known_hostile_mon(actor::Mon& mon)
 
 static void player_bump_unkown_hostile_mon(actor::Mon& mon)
 {
-        mon.set_player_aware_of_me();
-
         actor::print_aware_invis_mon_msg(mon);
+
+        mon.make_player_aware_of_me();
+
+        map::update_vision();
 }
 
 static void player_bump_allied_mon(actor::Mon& mon)
@@ -451,6 +456,9 @@ static void move_player(Dir dir)
         else if (dir != Dir::center)
         {
                 move_player_non_center_direction(target);
+
+                map::update_vision();
+                actor::make_player_aware_seen_monsters();
         }
 
         if (player.m_pos == target)
@@ -506,6 +514,11 @@ static void move_mon(actor::Mon& mon, Dir dir)
                 mon.m_pos = target_p;
 
                 bump_terrains(mon, mon.m_pos);
+
+                if (actor::can_player_see_actor(mon))
+                {
+                        actor::make_player_aware_mon(mon);
+                }
         }
 
         game_time::tick();

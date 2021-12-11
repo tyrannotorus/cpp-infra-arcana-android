@@ -52,7 +52,7 @@ static actor::Mon* spawn_at(const P& pos, const actor::Id id)
 
         if (can_player_see_actor(*mon))
         {
-                mon->set_player_aware_of_me();
+                mon->make_player_aware_of_me();
         }
 
         return mon;

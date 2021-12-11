@@ -34,6 +34,7 @@
 #include "dmg_range.hpp"
 #include "explosion.hpp"
 #include "flood.hpp"
+#include "game.hpp"
 #include "game_time.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
@@ -185,6 +186,9 @@ static void spawn_monsters(const Context& context)
 
                 actor->m_properties.apply(summoned);
         }
+
+        map::update_vision();
+        actor::make_player_aware_seen_monsters();
 
         TRACE_FUNC_END;
 }
@@ -3046,7 +3050,7 @@ void SpellFrenzy::run_effect(
 {
         (void)skill;
 
-        auto* prop = new PropFrenzied();
+        auto* prop = property_factory::make(PropId::frenzied);
 
         prop->set_duration(rnd::range(30, 40));
 
@@ -4490,7 +4494,8 @@ void SpellDisease::run_effect(
                         "!");
         }
 
-        target->m_properties.apply(new PropDiseased());
+        target->m_properties.apply(
+                property_factory::make(PropId::diseased));
 
         if (!actor::is_player(target))
         {
@@ -4634,9 +4639,11 @@ void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
                 std::begin(summoned.monsters),
                 std::end(summoned.monsters),
                 [](auto* const mon) {
-                        mon->m_properties.apply(new PropSummoned());
+                        mon->m_properties.apply(
+                                property_factory::make(PropId::summoned));
 
-                        auto* prop_waiting = new PropWaiting();
+                        auto* prop_waiting =
+                                property_factory::make(PropId::waiting);
 
                         prop_waiting->set_duration(2);
 
@@ -4655,6 +4662,8 @@ void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
                 msg_log::add(
                         text_format::first_to_upper(mon->name_a()) +
                         " appears!");
+
+                actor::make_player_aware_mon(*mon);
         }
 }
 
@@ -4704,9 +4713,11 @@ void SpellSummonTentacles::run_effect(
                 std::begin(summoned.monsters),
                 std::end(summoned.monsters),
                 [](auto* const mon) {
-                        mon->m_properties.apply(new PropSummoned());
+                        mon->m_properties.apply(
+                                property_factory::make(PropId::summoned));
 
-                        auto* prop_waiting = new PropWaiting();
+                        auto* prop_waiting =
+                                property_factory::make(PropId::waiting);
 
                         prop_waiting->set_duration(2);
 
@@ -4723,6 +4734,8 @@ void SpellSummonTentacles::run_effect(
         if (actor::can_player_see_actor(*mon))
         {
                 msg_log::add("Monstrous tentacles rises up from the ground!");
+
+                actor::make_player_aware_mon(*mon);
         }
 }
 
@@ -4889,7 +4902,7 @@ void SpellMiGoHypno::run_effect(
 
         if (rnd::coin_toss())
         {
-                auto* prop_fainted = new PropFainted();
+                auto* prop_fainted = property_factory::make(PropId::fainted);
 
                 prop_fainted->set_duration(rnd::range(2, 10));
 
@@ -4973,7 +4986,7 @@ void SpellBurn::run_effect(
                 msg_log::add("Flames are rising around " + target_str + "!");
         }
 
-        auto* prop = new PropBurning();
+        auto* prop = property_factory::make(PropId::burning);
 
         prop->set_duration(2 + (int)skill);
 

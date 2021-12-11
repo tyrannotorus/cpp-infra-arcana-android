@@ -439,7 +439,7 @@ void Potion::on_collide(const P& pos, actor::Actor* const actor)
                                 ".");
 
                         static_cast<actor::Mon*>(actor)
-                                ->set_player_aware_of_me();
+                                ->make_player_aware_of_me();
                 }
 
                 collide_hook(pos, actor);

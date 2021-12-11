@@ -25,6 +25,7 @@
 #include "direction.hpp"
 #include "flood.hpp"
 #include "fov.hpp"
+#include "game.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -34,6 +35,7 @@
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"
@@ -111,21 +113,11 @@ static void make_all_mon_not_seeing_player_unaware()
         }
 }
 
-static void make_player_aware_of_all_seen_mon()
-{
-        const auto player_seen_actors = actor::seen_actors(*map::g_player);
-
-        for (auto* const actor : player_seen_actors)
-        {
-                static_cast<actor::Mon*>(actor)->set_player_aware_of_me();
-        }
-}
-
 static void confuse_player()
 {
         msg_log::add("I suddenly find myself in a different location!");
 
-        auto* prop = new PropConfused();
+        auto* prop = property_factory::make(PropId::confused);
 
         prop->set_duration(8);
 
@@ -424,7 +416,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                 msg_log::add(actor_name_the + " " + msg_ending);
         }
 
-        make_player_aware_of_all_seen_mon();
+        actor::make_player_aware_seen_monsters();
 
         const bool has_tele_ctrl = actor.m_properties.has(PropId::tele_ctrl);
 

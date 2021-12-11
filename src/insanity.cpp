@@ -166,9 +166,9 @@ void InsBabbling::on_start_hook()
 }
 
 void InsBabbling::on_new_player_turn(
-        const std::vector<actor::Actor*>& seen_foes)
+        const std::vector<actor::Actor*>& seen_actors)
 {
-        (void)seen_foes;
+        (void)seen_actors;
 
         const int babble_on_in_n = 200;
 
@@ -211,14 +211,14 @@ bool InsPhobiaRat::is_allowed() const
 }
 
 void InsPhobiaRat::on_new_player_turn(
-        const std::vector<actor::Actor*>& seen_foes)
+        const std::vector<actor::Actor*>& seen_actors)
 {
         if (!rnd::one_in(10))
         {
                 return;
         }
 
-        for (auto* const actor : seen_foes)
+        for (auto* const actor : seen_actors)
         {
                 if (actor->m_data->is_rat)
                 {
@@ -246,14 +246,14 @@ bool InsPhobiaSpider::is_allowed() const
 }
 
 void InsPhobiaSpider::on_new_player_turn(
-        const std::vector<actor::Actor*>& seen_foes)
+        const std::vector<actor::Actor*>& seen_actors)
 {
         if (!rnd::one_in(10))
         {
                 return;
         }
 
-        for (auto* const actor : seen_foes)
+        for (auto* const actor : seen_actors)
         {
                 if (actor->m_data->is_spider)
                 {
@@ -281,7 +281,7 @@ bool InsPhobiaReptileAndAmph::is_allowed() const
 }
 
 void InsPhobiaReptileAndAmph::on_new_player_turn(
-        const std::vector<actor::Actor*>& seen_foes)
+        const std::vector<actor::Actor*>& seen_actors)
 {
         if (!rnd::one_in(10))
         {
@@ -292,7 +292,7 @@ void InsPhobiaReptileAndAmph::on_new_player_turn(
 
         std::string animal_str;
 
-        for (auto* const actor : seen_foes)
+        for (auto* const actor : seen_actors)
         {
                 if (actor->m_data->is_reptile)
                 {
@@ -336,14 +336,14 @@ bool InsPhobiaCanine::is_allowed() const
 }
 
 void InsPhobiaCanine::on_new_player_turn(
-        const std::vector<actor::Actor*>& seen_foes)
+        const std::vector<actor::Actor*>& seen_actors)
 {
         if (!rnd::one_in(10))
         {
                 return;
         }
 
-        for (auto* const actor : seen_foes)
+        for (auto* const actor : seen_actors)
         {
                 if (actor->m_data->is_canine)
                 {
@@ -371,14 +371,14 @@ bool InsPhobiaDead::is_allowed() const
 }
 
 void InsPhobiaDead::on_new_player_turn(
-        const std::vector<actor::Actor*>& seen_foes)
+        const std::vector<actor::Actor*>& seen_actors)
 {
         if (!rnd::one_in(10))
         {
                 return;
         }
 
-        for (auto* const actor : seen_foes)
+        for (auto* const actor : seen_actors)
         {
                 if (actor->m_data->is_undead)
                 {
@@ -407,9 +407,9 @@ bool InsPhobiaDeep::is_allowed() const
 }
 
 void InsPhobiaDeep::on_new_player_turn(
-        const std::vector<actor::Actor*>& seen_foes)
+        const std::vector<actor::Actor*>& seen_actors)
 {
-        (void)seen_foes;
+        (void)seen_actors;
 
         if (!rnd::one_in(10))
         {
@@ -449,9 +449,9 @@ bool InsPhobiaDark::is_allowed() const
 }
 
 void InsPhobiaDark::on_new_player_turn(
-        const std::vector<actor::Actor*>& seen_foes)
+        const std::vector<actor::Actor*>& seen_actors)
 {
-        (void)seen_foes;
+        (void)seen_actors;
 
         if (rnd::one_in(10))
         {
@@ -514,13 +514,7 @@ void InsShadows::on_start_hook()
                 });
 
         map::update_vision();
-
-        const auto player_seen_foes = actor::seen_foes(*map::g_player);
-
-        for (auto* const actor : player_seen_foes)
-        {
-                static_cast<actor::Mon*>(actor)->set_player_aware_of_me();
-        }
+        actor::make_player_aware_seen_monsters();
 
         TRACE_FUNC_END;
 }
@@ -713,7 +707,7 @@ void run_sympt()
 
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                const InsSympt* const active_sympt = s_sympts[i];
+                const auto* const active_sympt = s_sympts[i];
 
                 // Symptoms are only allowed if not already active
                 if (!active_sympt)
@@ -795,7 +789,7 @@ std::vector<const InsSympt*> active_sympts()
 
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                const InsSympt* const sympt = s_sympts[i];
+                const auto* const sympt = s_sympts[i];
 
                 if (sympt)
                 {
@@ -806,15 +800,15 @@ std::vector<const InsSympt*> active_sympts()
         return out;
 }
 
-void on_new_player_turn(const std::vector<actor::Actor*>& seen_foes)
+void on_new_player_turn(const std::vector<actor::Actor*>& seen_actors)
 {
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                InsSympt* const sympt = s_sympts[i];
+                auto* const sympt = s_sympts[i];
 
                 if (sympt)
                 {
-                        sympt->on_new_player_turn(seen_foes);
+                        sympt->on_new_player_turn(seen_actors);
                 }
         }
 }
@@ -823,7 +817,7 @@ void on_permanent_rfear()
 {
         for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
         {
-                InsSympt* const sympt = s_sympts[i];
+                auto* const sympt = s_sympts[i];
 
                 if (sympt)
                 {
