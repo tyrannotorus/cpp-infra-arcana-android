@@ -108,7 +108,7 @@ static bool try_make_aux_room(
                 }
 
                 // Make a "crumble room"?
-                if (rnd::one_in(20))
+                if (rnd::one_in(30))
                 {
                         Room* const room =
                                 room_factory::make(
@@ -137,6 +137,7 @@ namespace mapgen
 void make_aux_rooms(Region regions[3][3])
 {
         TRACE_FUNC_BEGIN;
+
         const int nr_tries_per_side = 20;
 
         auto rnd_aux_room_dim = []() {
@@ -171,7 +172,7 @@ void make_aux_rooms(Region regions[3][3])
                                 Room& main_r = *region.main_room;
 
                                 // Right
-                                if (rnd::one_in(4))
+                                if (rnd::fraction(3, 4))
                                 {
                                         for (int i = 0; i < nr_tries_per_side; ++i)
                                         {
@@ -209,7 +210,7 @@ void make_aux_rooms(Region regions[3][3])
                                 }
 
                                 // Up
-                                if (rnd::one_in(4))
+                                if (rnd::fraction(3, 4))
                                 {
                                         for (int i = 0; i < nr_tries_per_side; ++i)
                                         {
@@ -239,7 +240,7 @@ void make_aux_rooms(Region regions[3][3])
                                 }
 
                                 // Left
-                                if (rnd::one_in(4))
+                                if (rnd::fraction(3, 4))
                                 {
                                         for (int i = 0; i < nr_tries_per_side; ++i)
                                         {
@@ -269,7 +270,7 @@ void make_aux_rooms(Region regions[3][3])
                                 }
 
                                 // Down
-                                if (rnd::one_in(4))
+                                if (rnd::fraction(3, 4))
                                 {
                                         for (int i = 0; i < nr_tries_per_side; ++i)
                                         {

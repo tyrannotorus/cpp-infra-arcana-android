@@ -271,6 +271,11 @@ void incr_clvl_number()
 
 void player_discover_monster(actor::Actor& actor)
 {
+        if (init::g_is_cheat_vision_enabled)
+        {
+                return;
+        }
+
         if (actor.m_mimic_data)
         {
                 return;

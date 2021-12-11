@@ -28,6 +28,8 @@ static const int s_nr_tries_to_make_room = 100;
 // Min allowed size of the sub room, including the walls
 static const P s_walls_min_dims(4, 4);
 
+static const int s_min_outer_wall_gap = 1;
+
 static bool is_large_room(const R& area)
 {
         const int large_room_min_size = 15;
@@ -106,15 +108,6 @@ static bool is_pos_on_edge(const P& pos, const R& area)
                 (pos.y == area.p1.y));
 }
 
-static bool is_pos_inside_edge(const P& pos, const R& area)
-{
-        return (
-                (pos.x > area.p0.x) &&
-                (pos.y > area.p0.y) &&
-                (pos.x < area.p1.x) &&
-                (pos.y < area.p1.y));
-}
-
 static bool is_pos_on_corner(const P& pos, const R& area)
 {
         const bool is_on_edge_x = (pos.x == area.p0.x) || (pos.x == area.p1.x);
@@ -127,21 +120,33 @@ static R get_random_inner_walls_area(
         const R& outer_room_area,
         const P& inner_walls_max_dims)
 {
+        const int walls_min_w = s_walls_min_dims.x;
+        const int walls_min_h = s_walls_min_dims.y;
+        const int walls_max_w = inner_walls_max_dims.x;
+        const int walls_max_h = inner_walls_max_dims.y;
+
         const P inner_walls_dims(
-                rnd::range(
-                        s_walls_min_dims.x,
-                        inner_walls_max_dims.x),
-                rnd::range(
-                        s_walls_min_dims.y,
-                        inner_walls_max_dims.y));
+                rnd::range(walls_min_w, walls_max_w),
+                rnd::range(walls_min_h, walls_max_h));
+
+        const int walls_w = inner_walls_dims.x;
+        const int walls_h = inner_walls_dims.y;
+
+        const int outer_x0 = outer_room_area.p0.x;
+        const int outer_x1 = outer_room_area.p1.x;
+        const int outer_y0 = outer_room_area.p0.y;
+        const int outer_y1 = outer_room_area.p1.y;
+
+        constexpr int min_gap = s_min_outer_wall_gap;
+
+        const int x0_min = outer_x0 + min_gap;
+        const int x0_max = outer_x1 - walls_w - min_gap + 1;
+        const int y0_min = outer_y0 + min_gap;
+        const int y0_max = outer_y1 - walls_h - min_gap + 1;
 
         const P inner_walls_p0(
-                rnd::range(
-                        outer_room_area.p0.x - 1,
-                        outer_room_area.p1.x - inner_walls_dims.x + 2),
-                rnd::range(
-                        outer_room_area.p0.y - 1,
-                        outer_room_area.p1.y - inner_walls_dims.y + 2));
+                rnd::range(x0_min, x0_max),
+                rnd::range(y0_min, y0_max));
 
         const auto inner_walls_p1 = inner_walls_p0 + inner_walls_dims - 1;
 
@@ -165,7 +170,7 @@ static bool allow_put_inner_walls(
                 inner_walls_area.p0 - 1,
                 inner_walls_area.p1 + 1);
 
-        for (const P& p : expanded_area.positions())
+        for (const auto& p : expanded_area.positions())
         {
                 if (!map::is_pos_inside_map(p))
                 {
@@ -192,23 +197,13 @@ static bool try_make_inner_room(
 {
         const auto& outer_room_area = outer_room.m_r;
 
-        const R inner_walls_area =
+        const auto inner_walls_area =
                 get_random_inner_walls_area(
                         outer_room_area,
                         inner_walls_max_dims);
 
         ASSERT(map::is_pos_inside_map(inner_walls_area.p0));
         ASSERT(map::is_pos_inside_map(inner_walls_area.p1));
-
-        if ((inner_walls_area.p0.x <= outer_room_area.p0.x) &&
-            (inner_walls_area.p0.y <= outer_room_area.p0.y) &&
-            (inner_walls_area.p1.x >= outer_room_area.p1.x) &&
-            (inner_walls_area.p1.y >= outer_room_area.p1.y))
-        {
-                // None of the inner room's walls are inside the edge of the
-                // outer room - there is no point in building such a room.
-                return false;
-        }
 
         if (!allow_put_inner_walls(inner_walls_area, outer_room))
         {
@@ -241,13 +236,6 @@ static bool try_make_inner_room(
                 }
 
                 put_inner_wall(p);
-
-                if (!is_pos_inside_edge(p, outer_room_area))
-                {
-                        // Position is not completely inside the edge of the
-                        // outer room, do not put an entrance here.
-                        continue;
-                }
 
                 if (is_pos_on_corner(p, inner_walls_area))
                 {
@@ -322,10 +310,14 @@ static void make_sub_rooms_for(Room& outer_room)
         }
 
         const auto outer_room_area = outer_room.m_r;
-        const auto outer_room_dims(outer_room_area.dims());
+        const auto outer_room_dims = outer_room_area.dims();
 
         // Max sub room size, including the walls, in this outer room.
-        const auto inner_walls_max_dims = outer_room_dims + 2;
+        //
+        // The inner room must fit inside the outer room, with at least N number
+        // of floor cells between the inner room walls and the outer room walls.
+        const auto inner_walls_max_dims =
+                outer_room_dims - (s_min_outer_wall_gap * 2);
 
         if (((inner_walls_max_dims.x < s_walls_min_dims.x)) ||
             ((inner_walls_max_dims.y < s_walls_min_dims.y)))
@@ -335,9 +327,9 @@ static void make_sub_rooms_for(Room& outer_room)
                 return;
         }
 
-        const bool is_outer_big =
-                (outer_room_dims.x > 16) ||
-                (outer_room_dims.y > 8);
+        // const bool is_outer_big =
+        //         (outer_room_dims.x > 16) ||
+        //         (outer_room_dims.y > 8);
 
         const bool is_outer_std_room =
                 ((int)outer_room.m_type <
@@ -346,7 +338,7 @@ static void make_sub_rooms_for(Room& outer_room)
         // To build a room inside a room, the outer room shall:
         // * Be a standard room, and
         // * Be a "big room" - but we occasionally allow "small rooms"
-        if (!is_outer_std_room || (!is_outer_big && !rnd::one_in(4)))
+        if (!is_outer_std_room /* || (!is_outer_big && !rnd::one_in(4)) */)
         {
                 // Outer room does not meet dimensions criteria - next room.
                 return;
@@ -391,6 +383,8 @@ void make_sub_rooms()
 {
         TRACE_FUNC_BEGIN;
 
+        const bool is_late_game = (map::g_dlvl >= g_dlvl_first_late_game);
+
         // NOTE: We must iterate by index here since new rooms may be added.
         for (size_t i = 0; i < map::g_room_list.size(); ++i)
         {
@@ -401,7 +395,8 @@ void make_sub_rooms()
                 // trying to place sub-rooms in this room. (If the outer room is
                 // a sub-room, then we can go ahead and place as many rooms as
                 // possible within it.)
-                if ((map::g_dlvl >= g_dlvl_first_late_game) &&
+
+                if (is_late_game &&
                     !outer_room->m_is_sub_room &&
                     !is_large_room(outer_room->m_r) &&
                     !rnd::one_in(3))

@@ -727,6 +727,25 @@ bool MapBuilderStd::build_specific()
                 }
         }
 
+        // ---------------------------------------------------------------------
+        // Sanity check room sizes
+        // ---------------------------------------------------------------------
+        for (auto* const room : map::g_room_list)
+        {
+                if (room->m_type >= RoomType::END_OF_STD_ROOMS)
+                {
+                        continue;
+                }
+
+                if (room->m_r.min_dim() <= 1)
+                {
+                        ASSERT(false);
+
+                        // Invalidate the map
+                        mapgen::g_is_map_valid = false;
+                }
+        }
+
         if (!mapgen::g_is_map_valid)
         {
                 return false;

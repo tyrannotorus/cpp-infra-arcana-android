@@ -250,7 +250,7 @@ static void decorate_door_proposals()
 
 static void try_make_grate_at(const P& pos, const Array2<bool>& blocked)
 {
-        const int convert_to_grate_one_in_n = 6;
+        const int convert_to_grate_one_in_n = 4;
 
         if (!rnd::one_in(convert_to_grate_one_in_n))
         {

@@ -266,7 +266,7 @@ static void swap_wall_floor(const Context& context)
 
                         if (map_parsers::is_map_connected(blocked))
                         {
-                                map::put(new terrain::RubbleHigh(p));
+                                map::put(new terrain::Wall(p));
                         }
                         else
                         {
