@@ -221,7 +221,7 @@ void init(const P max_gui_dims)
                 create_char_descr_x1,
                 max_gui_dims.y - 2);
 
-        const int inventory_descr_w = 26;
+        const int inventory_descr_w = 32;
 
         const int inventory_descr_x0 = max_gui_dims.x - inventory_descr_w - 1;
 

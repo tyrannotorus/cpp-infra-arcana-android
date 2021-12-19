@@ -48,7 +48,6 @@ set(COMMON_SRC
         include/debug.hpp
         include/direction.hpp
         include/disarm.hpp
-        include/dmg_range.hpp
         include/draw_box.hpp
         include/draw_map.hpp
         include/drop.hpp
@@ -143,6 +142,7 @@ set(COMMON_SRC
         include/view.hpp
         include/view_actor_descr.hpp
         include/viewport.hpp
+        include/wpn_dmg.hpp
         include/xml.hpp
 
         src/ability_values.cpp
@@ -180,7 +180,6 @@ set(COMMON_SRC
         src/debug.cpp
         src/direction.cpp
         src/disarm.cpp
-        src/dmg_range.cpp
         src/draw_box.cpp
         src/draw_map.cpp
         src/drop.cpp
@@ -284,6 +283,7 @@ set(COMMON_SRC
         src/view.cpp
         src/view_actor_descr.cpp
         src/viewport.cpp
+        src/wpn_dmg.cpp
         src/xml.cpp
 
         xml/tinyxml2/tinyxml2.h

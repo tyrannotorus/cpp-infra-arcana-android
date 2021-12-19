@@ -19,7 +19,7 @@ item::Item* make(item::Id item_id, int nr_items = 1);
 
 // TODO: Shouldn't this be a virtual function for the Item class? Something like
 // "init_randomized()"?
-void set_item_randomized_properties(item::Item& item);
+void randomize_item_properties(item::Item& item);
 
 item::Item* make_item_on_floor(item::Id item_id, const P& pos);
 

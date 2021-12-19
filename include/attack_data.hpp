@@ -10,9 +10,9 @@
 #include <optional>
 
 #include "actor_data.hpp"
-#include "dmg_range.hpp"
 #include "item.hpp"
 #include "pos.hpp"
+#include "wpn_dmg.hpp"
 
 namespace actor
 {
@@ -25,7 +25,7 @@ public:
         virtual ~AttData() = default;
 
         int hit_chance_tot {0};
-        DmgRange dmg_range {};
+        WpnDmg dmg_range {};
         actor::Actor* attacker {nullptr};
         actor::Actor* defender {nullptr};
         const item::Item* att_item {nullptr};

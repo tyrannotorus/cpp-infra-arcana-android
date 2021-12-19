@@ -122,7 +122,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.character = '}';
                 d.color = colors::white();
                 d.melee.is_melee_wpn = true;
-                d.melee.dmg = DmgRange(1, 3);
+                d.melee.dmg = WpnDmg(1, 3);
                 d.melee.dmg_type = DmgType::blunt;
                 d.main_attack_mode = AttackMode::ranged;
                 d.ranged.is_ranged_wpn = true;
@@ -221,7 +221,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.character = '!';
                 d.tile = gfx::TileId::potion;
                 d.ranged.throw_hit_chance_mod = 15;
-                d.ranged.dmg = DmgRange(1, 3);
+                d.ranged.dmg = WpnDmg(1, 3);
                 d.ranged.dmg_type = DmgType::blunt;
                 d.ranged.always_break_on_throw = true;
                 d.max_stack_at_spawn = 1;
@@ -359,7 +359,7 @@ void init()
         d.ranged.is_shotgun = true;
         d.melee.attack_msgs = {"strike", "strikes"};
         d.ranged.max_ammo = 2;
-        d.ranged.dmg = DmgRange(8, 24);
+        d.ranged.dmg = WpnDmg(8, 24);
         d.ranged.hit_chance_mod = 0;
         d.ranged.effective_range = {0, 3};
         d.ranged.dmg_type = DmgType::shotgun;
@@ -389,7 +389,7 @@ void init()
         d.ranged.is_shotgun = true;
         d.melee.attack_msgs = {"strike", "strikes"};
         d.ranged.max_ammo = 8;
-        d.ranged.dmg = DmgRange(6, 18);
+        d.ranged.dmg = WpnDmg(6, 18);
         d.ranged.hit_chance_mod = 0;
         d.ranged.effective_range = {0, 5};
         d.ranged.dmg_type = DmgType::shotgun;
@@ -427,7 +427,7 @@ void init()
         d.tile = gfx::TileId::incinerator;
         d.melee.attack_msgs = {"strike", "strikes"};
         d.ranged.max_ammo = 5;
-        d.ranged.dmg = DmgRange(1, 3);
+        d.ranged.dmg = WpnDmg(1, 3);
         d.ranged.effective_range = {0, 8};
         d.allow_display_dmg = false;
         d.ranged.ammo_item_id = Id::incinerator_ammo;
@@ -474,7 +474,7 @@ void init()
         d.melee.attack_msgs = {"strike", "strikes"};
         d.ranged.is_machine_gun = true;
         d.ranged.max_ammo = 50;
-        d.ranged.dmg = DmgRange(4, 6);
+        d.ranged.dmg = WpnDmg(4, 6);
         d.ranged.hit_chance_mod = -10;
         d.ranged.effective_range = {0, 5};
         d.ranged.ammo_item_id = Id::drum_of_bullets;
@@ -516,7 +516,7 @@ void init()
         d.weight = (Weight::light + Weight::medium) / 2;
         d.tile = gfx::TileId::revolver;
         d.ranged.max_ammo = 6;
-        d.ranged.dmg = DmgRange(5, 10);
+        d.ranged.dmg = WpnDmg(5, 10);
         d.ranged.hit_chance_mod = 5;
         d.ranged.effective_range = {0, 5};
         d.ranged.ammo_item_id = Id::revolver_bullet;
@@ -558,7 +558,7 @@ void init()
         d.weight = (Weight::light + Weight::medium) / 2;
         d.tile = gfx::TileId::pistol;
         d.ranged.max_ammo = 7;
-        d.ranged.dmg = DmgRange(5, 12);
+        d.ranged.dmg = WpnDmg(5, 12);
         d.ranged.hit_chance_mod = 0;
         d.ranged.effective_range = {0, 5};
         d.ranged.ammo_item_id = Id::pistol_mag;
@@ -599,7 +599,7 @@ void init()
         d.tile = gfx::TileId::rifle;
         // d.color = colors::dark_brown();
         d.ranged.max_ammo = 7;
-        d.ranged.dmg = DmgRange(10, 16);
+        d.ranged.dmg = WpnDmg(10, 16);
         d.ranged.hit_chance_mod = 15;
         d.ranged.effective_range = {4, 8};
         d.ranged.ammo_item_id = Id::rifle_bullet;
@@ -640,7 +640,7 @@ void init()
         d.color = colors::dark_brown();
         d.melee.attack_msgs = {"strike", "strikes"};
         d.ranged.max_ammo = 12;
-        d.ranged.dmg = DmgRange(1, 7);
+        d.ranged.dmg = WpnDmg(1, 7);
         d.ranged.hit_chance_mod = 0;
         d.ranged.effective_range = {0, 4};
         d.ranged.dmg_type = DmgType::piercing;
@@ -678,7 +678,7 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::mi_go_gun;
         d.color = colors::yellow();
-        d.ranged.dmg = DmgRange(8, 12);
+        d.ranged.dmg = WpnDmg(8, 12);
         d.ranged.hit_chance_mod = 5;
         d.ranged.effective_range = {0, 4};
         {
@@ -703,7 +703,7 @@ void init()
         d.id = Id::trap_dart;
         d.allow_spawn = false;
         d.ranged.has_infinite_ammo = true;
-        d.ranged.dmg = DmgRange(1, 8);
+        d.ranged.dmg = WpnDmg(1, 8);
         d.ranged.hit_chance_mod = 70;
         d.ranged.effective_range = {0, 6};
         d.ranged.snd_msg = "I hear the launching of a projectile.";
@@ -722,7 +722,7 @@ void init()
         d.id = Id::trap_spear;
         d.allow_spawn = false;
         d.weight = Weight::heavy;
-        d.melee.dmg = DmgRange(6, 8);
+        d.melee.dmg = WpnDmg(6, 8);
         d.melee.hit_chance_mod = 85;
         d.melee.dmg_type = DmgType::piercing;
         d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
@@ -807,7 +807,7 @@ void init()
         d.tile = gfx::TileId::dagger;
         d.character = '/';
         d.color = colors::white();
-        d.ranged.dmg = DmgRange(2, 6);
+        d.ranged.dmg = WpnDmg(2, 6);
         d.ranged.throw_hit_chance_mod = 10;
         d.ranged.effective_range = {0, 4};
         d.ranged.max_range = d.ranged.effective_range.max + 3;
@@ -830,7 +830,7 @@ void init()
         d.tile = gfx::TileId::rock;
         d.character = '*';
         d.color = colors::gray();
-        d.ranged.dmg = DmgRange(1, 3);
+        d.ranged.dmg = WpnDmg(1, 3);
         d.ranged.effective_range = {0, 3};
         d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::blunt;
@@ -856,7 +856,7 @@ void init()
         d.weight = Weight::light;
         d.tile = gfx::TileId::dagger;
         d.melee.attack_msgs = {"stab", "stabs"};
-        d.melee.dmg = DmgRange(1, 4);
+        d.melee.dmg = WpnDmg(1, 4);
         d.melee.hit_chance_mod = 20;
         d.melee.dmg_type = DmgType::piercing;
         d.melee.is_noisy = false;
@@ -884,7 +884,7 @@ void init()
         d.weight = Weight::light;
         d.tile = gfx::TileId::axe;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = DmgRange(1, 5);
+        d.melee.dmg = WpnDmg(1, 5);
         d.melee.hit_chance_mod = 15;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
@@ -913,7 +913,7 @@ void init()
         d.tile = gfx::TileId::club;
         d.color = colors::brown();
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = DmgRange(2, 6);
+        d.melee.dmg = WpnDmg(2, 6);
         d.melee.hit_chance_mod = 10;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::blunt;
@@ -938,7 +938,7 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::hammer;
         d.melee.attack_msgs = {"smash", "smashes"};
-        d.melee.dmg = DmgRange(2, 8);
+        d.melee.dmg = WpnDmg(2, 8);
         d.melee.hit_chance_mod = 5;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::blunt;
@@ -963,7 +963,7 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::machete;
         d.melee.attack_msgs = {"chop", "chops"};
-        d.melee.dmg = DmgRange(2, 10);
+        d.melee.dmg = WpnDmg(2, 10);
         d.melee.hit_chance_mod = 0;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
@@ -991,7 +991,7 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::axe;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = DmgRange(2, 12);
+        d.melee.dmg = WpnDmg(2, 12);
         d.melee.hit_chance_mod = -5;
         d.melee.attack_corpse = true;
         d.melee.attack_terrain = true;
@@ -1021,7 +1021,7 @@ void init()
         d.weight = (Weight::medium + Weight::heavy) / 2;
         d.tile = gfx::TileId::spiked_mace;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = DmgRange(2, 14);
+        d.melee.dmg = WpnDmg(2, 14);
         d.melee.hit_chance_mod = -10;
         d.melee.attack_corpse = true;
         d.melee.attack_terrain = false;
@@ -1049,7 +1049,7 @@ void init()
         d.weight = Weight::heavy;
         d.tile = gfx::TileId::pitchfork;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = DmgRange(3, 12);
+        d.melee.dmg = WpnDmg(3, 12);
         d.melee.hit_chance_mod = -15;
         d.melee.attack_corpse = true;
         d.melee.knocks_back = true;
@@ -1077,7 +1077,7 @@ void init()
         d.weight = Weight::heavy;
         d.tile = gfx::TileId::sledge_hammer;
         d.melee.attack_msgs = {"smash", "smashes"};
-        d.melee.dmg = DmgRange(3, 15);
+        d.melee.dmg = WpnDmg(3, 15);
         d.melee.hit_chance_mod = -15;
         d.melee.attack_corpse = true;
         d.melee.attack_terrain = true;
@@ -1101,7 +1101,7 @@ void init()
         d.color = colors::gray();
         d.character = '/';
         d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.dmg = DmgRange(1, 4);
+        d.ranged.dmg = WpnDmg(1, 4);
         d.ranged.effective_range = {0, 3};
         d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.max_stack_at_spawn = 12;
@@ -1116,7 +1116,7 @@ void init()
         d.id = Id::player_kick;
         d.melee.attack_msgs = {"kick", ""};
         d.melee.hit_chance_mod = 15;
-        d.melee.dmg = DmgRange(1, 2);
+        d.melee.dmg = WpnDmg(1, 2);
         d.melee.knocks_back = true;
         d.melee.dmg_type = DmgType::kicking;
         d.melee.attack_terrain = true;
@@ -1144,7 +1144,7 @@ void init()
         d.base_name = {"Punch", "", ""};
         d.melee.attack_msgs = {"punch", ""};
         d.melee.hit_chance_mod = 20;
-        d.melee.dmg = DmgRange(1, 1);
+        d.melee.dmg = WpnDmg(1, 1);
         d.melee.miss_sfx = audio::SfxId::miss_light;
         g_data[(size_t)d.id] = d;
 
@@ -1153,7 +1153,7 @@ void init()
         d.base_name = {"Claw", "", ""};
         d.melee.attack_msgs = {"claw", ""};
         d.melee.hit_chance_mod = 20;
-        d.melee.dmg = DmgRange(1, 8);
+        d.melee.dmg = WpnDmg(1, 8);
         d.melee.is_noisy = false;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
@@ -1758,7 +1758,7 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::pharaoh_staff;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = DmgRange(4, 12);
+        d.melee.dmg = WpnDmg(4, 12);
         d.melee.hit_chance_mod = 10;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         d.melee.dmg_type = DmgType::blunt;
@@ -1959,7 +1959,7 @@ void init()
         d.tile = gfx::TileId::dagger;
         d.color = colors::violet();
         d.melee.attack_msgs = {"stab", "stabs"};
-        d.melee.dmg = DmgRange(1, 4);
+        d.melee.dmg = WpnDmg(1, 4);
         d.melee.hit_chance_mod = 20;
         d.melee.is_noisy = false;
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
@@ -2039,7 +2039,7 @@ void init()
         d.tile = gfx::TileId::zombie_dust;
         d.character = '*';
         d.color = colors::brown();
-        d.ranged.dmg = DmgRange(0, 0);
+        d.ranged.dmg = WpnDmg(0, 0);
         d.ranged.throw_hit_chance_mod = 15;
         d.ranged.always_break_on_throw = true;
         d.ranged.effective_range = {-1, -1};

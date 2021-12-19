@@ -1,8 +1,10 @@
 // =============================================================================
-// Copyright 2011-2021 Martin Törnqvist <m.tornq@gmail.com>
+// Copyright 2011-2020 Martin Törnqvist <m.tornq@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
+
+#include <stddef.h>
 
 #include "ability_values.hpp"
 #include "actor.hpp"
@@ -12,7 +14,6 @@
 #include "actor_player.hpp"
 #include "attack_data.hpp"
 #include "catch.hpp"
-#include "dmg_range.hpp"
 #include "global.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
@@ -25,6 +26,7 @@
 #include "property_handler.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
+#include "wpn_dmg.hpp"
 
 TEST_CASE("Melee attack data")
 {
@@ -63,10 +65,10 @@ TEST_CASE("Melee attack data")
 
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::axe));
 
-        wpn.incr_base_melee_damage(2);
+        wpn.set_melee_plus(2);
 
-        int expected_hit_chance_vs_mon_1 = 0;
-        int expected_hit_chance_vs_mon_2 = 0;
+        int expected_hit_chance_vs_mon_1;
+        int expected_hit_chance_vs_mon_2;
 
         {
                 const auto& player_data =
@@ -102,7 +104,7 @@ TEST_CASE("Melee attack data")
         auto expected_dmg_range = wpn.data().melee.dmg;
 
         // +1 from melee trait and +2 from weapon
-        expected_dmg_range.incr_dmg(3);
+        expected_dmg_range.set_plus(3);
 
         const MeleeAttData att_data_1(map::g_player, mon_1, wpn);
         const MeleeAttData att_data_2(map::g_player, mon_2, wpn);
@@ -146,10 +148,11 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::axe));
 
         wpn.set_base_melee_dmg({20, 60});
-        wpn.incr_base_melee_damage(2);
+        wpn.set_melee_plus(2);
 
-        // Halved damage range due to Weakened property.
-        const auto expected_dmg_range = DmgRange(11, 31);
+        // Halved damage range due to Weakened property
+        // Plus before weakening is +1 from melee trait and +2 from weapon
+        const auto expected_dmg_range = WpnDmg(10, 30, 1);
 
         const MeleeAttData att_data(map::g_player, mon, wpn);
 
@@ -186,10 +189,11 @@ TEST_CASE("Melee attack data has reduced damage against pierce resistance")
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::dagger));
 
         wpn.set_base_melee_dmg({20, 60});
-        wpn.incr_base_melee_damage(8);
+        wpn.set_melee_plus(8);
 
-        // 25% damage range due to reduced pierce damage.
-        const auto expected_dmg_range = DmgRange(7, 17);
+        // Halved damage range due to Weakened property
+        // Plus before weakening is +1 from melee trait and +8 from weapon
+        const auto expected_dmg_range = WpnDmg(5, 15, 2);
 
         const MeleeAttData att_data(map::g_player, mon, wpn);
 
@@ -205,8 +209,8 @@ TEST_CASE("Ranged attack data")
         player_bon::pick_bg(Bg::war_vet);
 
         const P p1(20, 10);
-        const P p2(22, 11);  // Distance = 2
-        const P p3(21, 13);  // Distance = 3
+        const P p2(22, 11);  // Distance 2
+        const P p3(21, 13);  // Distance 3
 
         for (int x = 1; x < map::w() - 1; ++x)
         {
@@ -239,8 +243,8 @@ TEST_CASE("Ranged attack data")
 
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::pistol));
 
-        int expected_hit_chance_vs_mon_1 = 0;
-        int expected_hit_chance_vs_mon_2 = 0;
+        int expected_hit_chance_vs_mon_1;
+        int expected_hit_chance_vs_mon_2;
 
         {
                 const auto& player_data =
@@ -314,8 +318,8 @@ TEST_CASE("Throwing attack data")
         player_bon::pick_bg(Bg::war_vet);
 
         const P p1(20, 10);
-        const P p2(22, 11);  // Distance = 2
-        const P p3(21, 13);  // Distance = 3
+        const P p2(22, 11);  // Distance 2
+        const P p3(21, 13);  // Distance 3
 
         for (int x = 1; x < map::w() - 1; ++x)
         {
@@ -348,8 +352,8 @@ TEST_CASE("Throwing attack data")
 
         auto& item = *item::make(item::Id::thr_knife);
 
-        int expected_hit_chance_vs_mon_1 = 0;
-        int expected_hit_chance_vs_mon_2 = 0;
+        int expected_hit_chance_vs_mon_1;
+        int expected_hit_chance_vs_mon_2;
 
         {
                 const auto& player_data =

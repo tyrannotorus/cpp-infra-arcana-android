@@ -20,7 +20,6 @@
 #include "common_text.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
-#include "dmg_range.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
@@ -41,6 +40,7 @@
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
 #include "text_format.hpp"
+#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -198,7 +198,7 @@ static void bash_corpse_with_wpn(
 
         const auto dmg_range = wpn_used_att_corpse.melee_dmg(map::g_player);
 
-        const int dmg = dmg_range.roll();
+        const int dmg = dmg_range.total_range().roll();
 
         actor::hit(mon, dmg, wpn_used_att_corpse.data().melee.dmg_type);
 
@@ -257,7 +257,7 @@ static void bash_terrain_with_wpn(
 
         const auto dmg_range = wpn_used_att_terrain->melee_dmg(map::g_player);
 
-        const int dmg = dmg_range.roll();
+        const int dmg = dmg_range.total_range().roll();
 
         terrain->hit(
                 wpn_used_att_terrain->data().melee.dmg_type,

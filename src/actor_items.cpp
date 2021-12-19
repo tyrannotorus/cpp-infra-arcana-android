@@ -16,7 +16,6 @@
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "debug.hpp"
-#include "dmg_range.hpp"
 #include "game.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
@@ -28,6 +27,7 @@
 #include "player_spells.hpp"
 #include "random.hpp"
 #include "spells.hpp"
+#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -595,7 +595,7 @@ static void make_item_set_zealot_spiked_mace(actor::Actor& actor)
 {
         auto* item = item::make(item::Id::spiked_mace);
 
-        item->reset_base_melee_dmg();
+        item->set_melee_plus(0);
 
         actor.m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 }
@@ -629,7 +629,7 @@ static void make_item_set_priest_dagger(actor::Actor& actor)
 
         const std::vector<int> weights = {6, 3, 1};
 
-        item->incr_base_melee_damage(rnd::weighted_choice(weights) + 1);
+        item->set_melee_plus(rnd::weighted_choice(weights) + 1);
 
         actor.m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 }
@@ -662,7 +662,7 @@ static void make_item_set_high_priest_guard_rogue(actor::Actor& actor)
 {
         auto* const item = item::make(item::Id::machete);
 
-        item->incr_base_melee_damage(1);
+        item->set_melee_plus(1);
 
         actor.m_inv.put_in_slot(
                 SlotId::wpn,
@@ -751,7 +751,7 @@ static void make_monster_intr_attacks(actor::Actor& actor)
                 // (we always override both melee and ranged damage - this
                 // doesn't matter, since only one damage type will be used and
                 // the other will have no effect)
-                const DmgRange range(1, intr_attack->dmg);
+                const WpnDmg range(1, intr_attack->dmg);
 
                 item->set_base_melee_dmg(range);
                 item->set_base_ranged_dmg(range);

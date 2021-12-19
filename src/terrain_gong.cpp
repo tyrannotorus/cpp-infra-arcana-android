@@ -452,7 +452,7 @@ void GainItem::run_effect()
 {
         auto* const item = item::make(m_item_id);
 
-        item::set_item_randomized_properties(*item);
+        item::randomize_item_properties(*item);
 
         const std::string name_a = item->name(ItemNameType::a);
 

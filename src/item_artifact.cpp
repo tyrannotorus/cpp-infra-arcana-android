@@ -17,7 +17,6 @@
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "debug.hpp"
-#include "dmg_range.hpp"
 #include "fov.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
@@ -37,6 +36,7 @@
 #include "saving.hpp"
 #include "spells.hpp"
 #include "text_format.hpp"
+#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // item
@@ -581,7 +581,7 @@ SpiritDagger::SpiritDagger(ItemData* const item_data) :
 }
 
 void SpiritDagger::specific_dmg_mod(
-        DmgRange& range,
+        WpnDmg& range,
         const actor::Actor* const actor) const
 {
         if (!actor)
@@ -595,7 +595,7 @@ void SpiritDagger::specific_dmg_mod(
 
         const int dmg_bon = (int)std::pow(sp_db, exp);
 
-        range.incr_dmg(dmg_bon);
+        range.set_plus(dmg_bon);
 }
 
 // -----------------------------------------------------------------------------

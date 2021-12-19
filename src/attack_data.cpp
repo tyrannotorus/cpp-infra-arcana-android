@@ -17,7 +17,6 @@
 #include "array2.hpp"
 #include "config.hpp"
 #include "debug.hpp"
-#include "dmg_range.hpp"
 #include "fov.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
@@ -31,6 +30,7 @@
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -333,7 +333,7 @@ MeleeAttData::MeleeAttData(
 
         if (apply_undead_bane_bon)
         {
-                dmg_range.incr_dmg(2);
+                dmg_range.set_plus(dmg_range.plus() + 2);
         }
 
         if (attacker && attacker->m_properties.has(PropId::weakened))
@@ -538,7 +538,7 @@ RangedAttData::RangedAttData(
 
         if (apply_undead_bane_bon)
         {
-                dmg_range.incr_dmg(2);
+                dmg_range.set_plus(dmg_range.plus() + 2);
         }
 
         const bool is_player_with_aiming_prop =
@@ -547,7 +547,7 @@ RangedAttData::RangedAttData(
 
         if (is_player_with_aiming_prop)
         {
-                dmg_range.set_min(dmg_range.max());
+                dmg_range.set_base_min(dmg_range.base_max());
         }
 
         if (dist > effective_range.max)
@@ -675,7 +675,7 @@ ThrowAttData::ThrowAttData(
 
         if (apply_undead_bane_bon)
         {
-                dmg_range.incr_dmg(2);
+                dmg_range.set_plus(dmg_range.plus() + 2);
         }
 
         const bool is_player_with_aiming_prop =
@@ -684,7 +684,7 @@ ThrowAttData::ThrowAttData(
 
         if (is_player_with_aiming_prop)
         {
-                dmg_range.set_min(dmg_range.max());
+                dmg_range.set_base_min(dmg_range.base_max());
         }
 
         if (dist > effective_range.max)

@@ -82,23 +82,25 @@ static std::string make_wpn_stats_str(const item::Item& wpn)
                 ? ItemNameAttackInfo::melee
                 : ItemNameAttackInfo::main_attack_mode;
 
-        const auto wpn_dmg_str =
-                wpn.dmg_str(
-                        att_inf,
-                        AbbrevItemAttackInfo::yes);
+        const auto plus_str = wpn.plus_str(att_inf);
 
-        const auto wpn_hit_mod_str =
-                wpn.hit_mod_str(
-                        att_inf,
-                        AbbrevItemAttackInfo::yes);
+        const auto dmg_str = wpn.dmg_str(att_inf, ItemNameDmg::average);
 
-        const auto wpn_inf_str = wpn.name_info_str();
+        const auto hit_mod_str =
+                wpn.hit_mod_str(att_inf, AbbrevItemAttackInfo::yes);
+
+        const auto inf_str = wpn.name_info_str();
 
         std::string wpn_str;
 
-        text_format::append_with_space(wpn_str, wpn_dmg_str);
-        text_format::append_with_space(wpn_str, wpn_hit_mod_str);
-        text_format::append_with_space(wpn_str, wpn_inf_str);
+        if (!plus_str.empty())
+        {
+                text_format::append_with_space(wpn_str, "(" + plus_str + ")");
+        }
+
+        text_format::append_with_space(wpn_str, dmg_str);
+        text_format::append_with_space(wpn_str, hit_mod_str);
+        text_format::append_with_space(wpn_str, inf_str);
 
         return wpn_str;
 }

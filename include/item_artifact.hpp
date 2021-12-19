@@ -15,7 +15,7 @@
 #include "random.hpp"
 #include "sound.hpp"
 
-class DmgRange;
+class WpnDmg;
 
 namespace actor
 {
@@ -210,7 +210,7 @@ public:
 
 protected:
         void specific_dmg_mod(
-                DmgRange& range,
+                WpnDmg& range,
                 const actor::Actor* actor) const override;
 };
 

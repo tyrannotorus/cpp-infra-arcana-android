@@ -1,24 +1,23 @@
 // =============================================================================
-// Copyright 2011-2021 Martin Törnqvist <m.tornq@gmail.com>
+// Copyright 2011-2020 Martin Törnqvist <m.tornq@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
 #include "wpn_dmg.hpp"
-#include <string>
 
-std::string WpnDmg::str() const
+std::string WpnDmg::str_plus() const
 {
-        std::string str = std::to_string(m_dmg);
-
-        if (m_plus > 0)
+        if (m_plus == 0)
         {
-                str += "+" + std::to_string(m_plus);
+                return "";
         }
-        else if (m_plus < 0)
+        else if (m_plus > 0)
         {
-                str += "-" + std::to_string(m_plus);
+                return "+" + std::to_string(m_plus);
         }
-
-        return str;
+        else
+        {
+                return "-" + std::to_string(m_plus);
+        }
 }

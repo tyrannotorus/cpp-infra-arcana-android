@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "debug.hpp"
-#include "dmg_range.hpp"
 #include "drop.hpp"
 #include "global.hpp"
 #include "item.hpp"
@@ -26,6 +25,7 @@
 #include "item_rod.hpp"
 #include "item_scroll.hpp"
 #include "random.hpp"
+#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -58,7 +58,7 @@ static void randomize_wpn_dmg(item::Item& item)
 
         const int extra_dmg = rnd::weighted_choice(weights);
 
-        item.incr_base_melee_damage(extra_dmg);
+        item.set_melee_plus(extra_dmg);
 }
 
 static void randomize_firearm_loaded_ammo(item::Wpn& wpn)
@@ -499,7 +499,7 @@ Item* make(const Id item_id, const int nr_items)
         return r;
 }
 
-void set_item_randomized_properties(Item& item)
+void randomize_item_properties(Item& item)
 {
         const auto& d = item.data();
 
@@ -552,7 +552,7 @@ Item* make_item_on_floor(const Id item_id, const P& pos)
 {
         auto* item = make(item_id);
 
-        set_item_randomized_properties(*item);
+        randomize_item_properties(*item);
 
         item_drop::drop_item_on_map(pos, *item);
 

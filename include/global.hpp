@@ -153,6 +153,12 @@ enum class ItemNameAttackInfo
         thrown
 };
 
+enum class ItemNameDmg
+{
+        average,
+        range,
+};
+
 enum class AbbrevItemAttackInfo
 {
         no,

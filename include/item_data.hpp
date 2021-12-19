@@ -16,7 +16,6 @@
 #include "ability_values.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
-#include "dmg_range.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
 #include "item_att_property.hpp"
@@ -24,6 +23,7 @@
 #include "room.hpp"
 #include "spells.hpp"
 #include "terrain_data.hpp"
+#include "wpn_dmg.hpp"
 
 enum class SndVol;
 
@@ -291,7 +291,7 @@ struct MeleeData
         bool is_melee_wpn;
         // NOTE: The "plus" field is ignored in the melee damage data,
         // melee weapons have individual plus damages per class instance
-        DmgRange dmg;
+        WpnDmg dmg;
         int hit_chance_mod;
         bool is_noisy;
         ItemAttackMsgs attack_msgs;
@@ -318,7 +318,7 @@ struct RangedData
         int max_ammo;
         // NOTE: "Pure" melee weapons should not set this value - they
         // do throw damage based on their melee damage instead
-        DmgRange dmg;
+        WpnDmg dmg;
         int hit_chance_mod;
         int throw_hit_chance_mod;
         bool always_break_on_throw;

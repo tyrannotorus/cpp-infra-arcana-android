@@ -27,7 +27,6 @@
 #include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
-#include "dmg_range.hpp"
 #include "game_time.hpp"
 #include "gfx.hpp"
 #include "inventory.hpp"
@@ -54,6 +53,7 @@
 #include "terrain_data.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
+#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -230,14 +230,14 @@ static HitSize relative_hit_size(const int dmg, const int wpn_max_dmg)
 
 static HitSize relative_hit_size_melee(const int dmg, const AttData& att_data)
 {
-        const int max_dmg = att_data.dmg_range.range().max;
+        const int max_dmg = att_data.dmg_range.total_range().max;
 
         return relative_hit_size(dmg, max_dmg);
 }
 
 static HitSize relative_hit_size_ranged(const int dmg, const AttData& att_data)
 {
-        const int max_dmg = att_data.dmg_range.range().max;
+        const int max_dmg = att_data.dmg_range.total_range().max;
 
         return relative_hit_size(dmg, max_dmg);
 }
@@ -1436,7 +1436,8 @@ static void update_projectile_states(ProjectileFireData& fire_data)
                         ability_roll::roll(
                                 projectile.att_data->hit_chance_tot);
 
-                projectile.dmg = projectile.att_data->dmg_range.range().roll();
+                projectile.dmg =
+                        projectile.att_data->dmg_range.total_range().roll();
 
                 projectile.is_seen_by_player = map::g_seen.at(projectile_pos);
 
@@ -1870,7 +1871,7 @@ void melee(
 
         const auto att_result = ability_roll::roll(att_data.hit_chance_tot);
 
-        const int dmg = att_data.dmg_range.range().roll();
+        const int dmg = att_data.dmg_range.total_range().roll();
 
         print_melee_msg(att_result, dmg, att_data);
 

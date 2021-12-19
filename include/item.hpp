@@ -12,11 +12,11 @@
 #include <vector>
 
 #include "colors.hpp"
-#include "dmg_range.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
 #include "item_curse.hpp"
 #include "item_curse_ids.hpp"
+#include "wpn_dmg.hpp"
 
 class Inventory;
 struct ItemAttackProp;
@@ -80,11 +80,13 @@ public:
 
         std::string hit_mod_str(
                 ItemNameAttackInfo attack_info,
-                AbbrevItemAttackInfo abbrev = AbbrevItemAttackInfo::no) const;
+                AbbrevItemAttackInfo abbrev) const;
 
         std::string dmg_str(
                 ItemNameAttackInfo attack_info,
-                AbbrevItemAttackInfo abbrev = AbbrevItemAttackInfo::no) const;
+                ItemNameDmg dmg_value) const;
+
+        std::string plus_str(ItemNameAttackInfo attack_info) const;
 
         // E.g. "(Off)" for Lanterns, or "(4/7)" for Pistols
         virtual std::string name_info_str() const
@@ -152,29 +154,30 @@ public:
         {
         }
 
-        void set_base_melee_dmg(const DmgRange& range)
+        void set_base_melee_dmg(const WpnDmg& range)
         {
                 m_base_melee_dmg = range;
         }
 
-        void set_base_ranged_dmg(const DmgRange& range)
+        void set_base_ranged_dmg(const WpnDmg& range)
         {
                 m_base_ranged_dmg = range;
         }
 
-        DmgRange base_melee_dmg() const
+        WpnDmg base_melee_dmg() const
         {
                 return m_base_melee_dmg;
         }
 
-        void reset_base_melee_dmg();
-
-        void incr_base_melee_damage(int value);
+        void set_melee_plus(const int plus)
+        {
+                m_base_melee_dmg.set_plus(plus);
+        }
 
         // Calculated damage taking into account things like player traits.
-        DmgRange melee_dmg(const actor::Actor* attacker) const;
-        DmgRange ranged_dmg(const actor::Actor* attacker) const;
-        DmgRange thrown_dmg(const actor::Actor* attacker) const;
+        WpnDmg melee_dmg(const actor::Actor* attacker) const;
+        WpnDmg ranged_dmg(const actor::Actor* attacker) const;
+        WpnDmg thrown_dmg(const actor::Actor* attacker) const;
 
         ItemAttackProp& prop_applied_on_melee(
                 const actor::Actor* attacker) const;
@@ -277,7 +280,7 @@ protected:
         virtual void on_player_reached_new_dlvl_hook() {}
 
         virtual void specific_dmg_mod(
-                DmgRange& range,
+                WpnDmg& range,
                 const actor::Actor* const actor) const
         {
                 (void)range;
@@ -292,8 +295,8 @@ protected:
         actor::Actor* m_actor_carrying {nullptr};
 
         // Base damage (not including actor properties, player traits, etc)
-        DmgRange m_base_melee_dmg;
-        DmgRange m_base_ranged_dmg;
+        WpnDmg m_base_melee_dmg;
+        WpnDmg m_base_ranged_dmg;
 
 private:
         // Properties to apply on owning actor (when e.g. wearing the item, or
@@ -449,7 +452,7 @@ public:
 
 protected:
         void specific_dmg_mod(
-                DmgRange& range,
+                WpnDmg& range,
                 const actor::Actor* actor) const override;
 };
 

@@ -24,7 +24,6 @@
 #include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
-#include "dmg_range.hpp"
 #include "drop.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
@@ -47,6 +46,7 @@
 #include "terrain_data.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
+#include "wpn_dmg.hpp"
 
 namespace throwing
 {
@@ -238,7 +238,8 @@ void throw_item(
                         const auto att_result =
                                 ability_roll::roll(att_data.hit_chance_tot);
 
-                        const int dmg = att_data.dmg_range.roll();
+                        const int dmg =
+                                att_data.dmg_range.total_range().roll();
 
                         if (att_result >= ActionResult::success)
                         {

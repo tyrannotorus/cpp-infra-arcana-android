@@ -97,16 +97,19 @@ On the right hand side of the screen, information is listed about your character
    Insanity        12% : Your level of insanity
                          See "Insanity" for more info
 
-   Wpn        1-4 +20% : Your currently wielded weapon
+   Wpn    (+1) 8.0 +0% : Your currently wielded weapon
 
-                         "1-4" is your damage with this weapon (including
-                         skills affecting the damage)
+                         "(+1)" means that this weapon does one extra point of
+                         damage compared to normal weapons of the same type
 
-                         "+20%" is this weapon's hit chance modifier (the total
+                         "8.0" is your average damage with this weapon
+                         (including skills affecting the damage)
+
+                         "+0%" is this weapon's hit chance modifier (the total
                          hit chance is affected by several other factors, such
                          as your character's skill and the creature attacked)
 
-   Alt    5-10 +5% 5/6 : Your prepared (alternative) weapon
+   Alt     8.5 +0% 4/7 : Your prepared (alternative) weapon
    
                          The weapon in this example is a firearm, "5/6" is the
                          weapon's loaded and maximum ammunition

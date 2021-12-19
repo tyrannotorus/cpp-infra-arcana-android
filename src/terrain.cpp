@@ -2789,7 +2789,7 @@ void ItemContainer::init(
                         {
                                 auto* item = item::make(item_bucket[idx]);
 
-                                item::set_item_randomized_properties(*item);
+                                item::randomize_item_properties(*item);
 
                                 m_items.push_back(item);
                         }

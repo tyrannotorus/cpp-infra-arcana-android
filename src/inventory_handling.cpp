@@ -523,33 +523,60 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
         // -------------------------------------------------------------
         // Damage and hit chance
         // -------------------------------------------------------------
-        // TODO: Show damage and hit chance?
-        // if (d.allow_display_dmg)
-        // {
-        //         const auto dmg_str = m_viewed_item->dmg_str(att_inf);
+        if (d.allow_display_dmg)
+        {
+                std::string combat_descr;
 
-        //         if (!dmg_str.empty())
-        //         {
-        //                 lines.emplace_back(
-        //                         "Damage: " +
-        //                                 dmg_str +
-        //                                 " (average " +
-        //                                 dmg_str +
-        //                                 ")",
-        //                         colors::text());
-        //         }
+                const std::string dmg_str =
+                        m_viewed_item->dmg_str(
+                                m_viewed_item_attack_info,
+                                ItemNameDmg::range);
 
-        //         const std::string hit_mod_str =
-        //                 m_viewed_item->hit_mod_str(att_inf);
+                const std::string dmg_str_avg =
+                        m_viewed_item->dmg_str(
+                                m_viewed_item_attack_info,
+                                ItemNameDmg::average);
 
-        //         if (!hit_mod_str.empty())
-        //         {
-        //                 lines.emplace_back(
-        //                         "Hit chance modifier: " +
-        //                                 hit_mod_str,
-        //                         colors::text());
-        //         }
-        // }
+                if (!dmg_str.empty() && !dmg_str_avg.empty())
+                {
+                        text_format::append_with_space(
+                                combat_descr,
+                                ("Your damage with this weapon is " +
+                                 dmg_str +
+                                 " (average " +
+                                 dmg_str_avg +
+                                 ")."));
+                }
+
+                const std::string plus_str =
+                        m_viewed_item->plus_str(
+                                m_viewed_item_attack_info);
+
+                if (!plus_str.empty())
+                {
+                        text_format::append_with_space(
+                                combat_descr,
+                                ("Due to its quality, damage is " +
+                                 plus_str +
+                                 " higher than normal."));
+                }
+
+                const std::string hit_mod_str =
+                        m_viewed_item->hit_mod_str(
+                                m_viewed_item_attack_info,
+                                AbbrevItemAttackInfo::yes);
+
+                text_format::append_with_space(
+                        combat_descr,
+                        ("It has a hit chance modifier of " +
+                         hit_mod_str +
+                         "."));
+
+                if (!combat_descr.empty())
+                {
+                        lines.push_back(combat_descr);
+                }
+        }
 
         // -------------------------------------------------------------
         // Can be used for breaking doors or destroying corpses?
@@ -627,7 +654,7 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
 
         std::vector<std::string> formatted_lines;
 
-        const size_t w = panels::w(Panel::inventory_descr);
+        const auto w = panels::w(Panel::inventory_descr);
 
         for (const auto& line : lines)
         {

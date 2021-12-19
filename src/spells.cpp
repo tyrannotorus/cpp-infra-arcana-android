@@ -31,7 +31,7 @@
 #include "config.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
-#include "dmg_range.hpp"
+#include "drop.hpp"
 #include "explosion.hpp"
 #include "flood.hpp"
 #include "game.hpp"
@@ -68,6 +68,7 @@
 #include "terrain_door.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
+#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -5091,9 +5092,13 @@ int SpellTransmut::chance_potion(const SpellSkill skill) const
         return skill_bon(skill) + 40;
 }
 
-int SpellTransmut::chance_weapon(const SpellSkill skill) const
+int SpellTransmut::chance_weapon(
+        const SpellSkill skill,
+        int plus) const
 {
-        return skill_bon(skill) + 10;
+        plus = std::min(5, plus);
+
+        return skill_bon(skill) + (plus * 10);
 }
 
 void SpellTransmut::run_effect(
@@ -5124,6 +5129,8 @@ void SpellTransmut::run_effect(
                 : 1;
 
         const auto item_type_before = item_before->data().type;
+
+        const int melee_plus = item_before->base_melee_dmg().plus();
 
         const auto id_before = item_before->id();
 
@@ -5207,10 +5214,10 @@ void SpellTransmut::run_effect(
                         }
                 }
         }
-        // Converting a melee weapon?
-        else if (item_type_before == ItemType::melee_wpn)
+        // Converting a melee weapon (with at least one "plus")?
+        else if ((item_type_before == ItemType::melee_wpn) && (melee_plus >= 1))
         {
-                pct_chance_per_item = chance_weapon(skill);
+                pct_chance_per_item = chance_weapon(skill, melee_plus);
 
                 for (size_t item_id = 0;
                      (item::Id)item_id != item::Id::END;
@@ -5267,23 +5274,21 @@ void SpellTransmut::run_effect(
 
         // OK, items are good, and player succeeded the rolls etc
 
-        // Spawn new item(s)
-        auto* const item_new =
-                item::make_item_on_floor(
-                        id_new,
-                        map::g_player->m_pos);
+        auto* item_new = item::make(id_new, nr_items_new);
+
+        item::randomize_item_properties(*item_new);
 
         if (item_new->data().is_stackable)
         {
                 item_new->m_nr_items = nr_items_new;
         }
 
+        const std::string item_name_new =
+                text_format::first_to_upper(
+                        item_new->name(ItemNameType::plural));
+
         if (map::g_seen.at(p))
         {
-                const std::string item_name_new =
-                        text_format::first_to_upper(
-                                item_new->name(ItemNameType::plural));
-
                 std::string appear_str =
                         (nr_items_new == 1)
                         ? "appears"
@@ -5291,6 +5296,10 @@ void SpellTransmut::run_effect(
 
                 msg_log::add(item_name_new + " " + appear_str + ".");
         }
+
+        // NOTE: This will possibly make the player "discover" the item, so it
+        // should occur last, after the "appear" message.
+        item_drop::drop_item_on_map(map::g_player->m_pos, *item_new);
 }
 
 std::vector<std::string> SpellTransmut::descr_specific(
@@ -5302,22 +5311,26 @@ std::vector<std::string> SpellTransmut::descr_specific(
                 "Attempts to convert items (stand over an item when casting). "
                 "On failure, the item is destroyed.");
 
-        std::string convert_info =
+        descr.push_back(
                 "Converts Potions with " +
                 std::to_string(chance_potion(skill)) +
-                "% chance. ";
+                "% chance.");
 
-        convert_info +=
+        descr.push_back(
                 "Converts Manuscripts with " +
                 std::to_string(chance_scroll(skill)) +
-                "% chance. ";
+                "% chance.");
 
-        convert_info +=
-                "Converts Melee Weapons to a Potion or Manuscript, with " +
-                std::to_string(chance_weapon(skill)) +
-                "% chance.";
-
-        descr.push_back(convert_info);
+        descr.push_back(
+                "Melee weapons with at least +1 damage (not counting any "
+                "damage bonus from skills) are converted to a Potion or "
+                "Manuscript, with " +
+                std::to_string(chance_weapon(skill, 1)) +
+                "% chance for a +1 weapon, " +
+                std::to_string(chance_weapon(skill, 2)) +
+                "% chance for a +2 weapon, " +
+                std::to_string(chance_weapon(skill, 3)) +
+                "% chance for a +3 weapon, etc.");
 
         return descr;
 }
