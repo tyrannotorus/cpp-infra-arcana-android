@@ -50,11 +50,6 @@ static actor::Mon* spawn_at(const P& pos, const actor::Id id)
 
         auto* const mon = static_cast<actor::Mon*>(actor);
 
-        if (can_player_see_actor(*mon))
-        {
-                mon->make_player_aware_of_me();
-        }
-
         return mon;
 }
 
@@ -198,18 +193,14 @@ MonSpawnResult spawn_random_position(
         const std::vector<Id>& monster_ids,
         const R& area_allowed)
 {
-        TRACE_FUNC_BEGIN;
-
         auto free_positions = free_spawn_positions(area_allowed);
 
         if (free_positions.empty())
         {
-                return MonSpawnResult();
+                return {};
         }
 
         rnd::shuffle(free_positions);
-
-        TRACE_FUNC_END;
 
         return spawn_at_positions(free_positions, monster_ids);
 }

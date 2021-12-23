@@ -660,6 +660,8 @@ void PropPossessedByZuul::on_death()
                 {actor::Id::zuul},
                 map::rect())
                 .make_aware_of_player();
+
+        map::update_vision();
 }
 
 void PropShapeshifts::on_placed()
@@ -702,6 +704,8 @@ void PropShapeshifts::on_death()
                         m_owner->m_pos,
                         {actor::Id::shapeshifter},
                         map::rect());
+
+        map::update_vision();
 
         ASSERT(!spawned.monsters.empty());
 
@@ -825,6 +829,8 @@ void PropShapeshifts::shapeshift(const Verbose verbose) const
 
                 mon->m_properties.apply(shapeshifts);
         }
+
+        map::update_vision();
 }
 
 PropEnded PropZealotStop::affect_move_dir(Dir& dir)
@@ -2318,7 +2324,9 @@ void PropSplitsOnDeath::on_death()
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
                 [](auto* const mon) {
-                        auto* prop_waiting = new PropWaiting();
+                        auto* prop_waiting =
+                                property_factory::make(
+                                        PropId::waiting);
 
                         prop_waiting->set_duration(1);
 
@@ -2341,6 +2349,8 @@ void PropSplitsOnDeath::on_death()
         {
                 spawned.monsters[1]->m_leader = spawned.monsters[0];
         }
+
+        map::update_vision();
 }
 
 PropActResult PropCorpseEater::on_act()
@@ -2717,11 +2727,12 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
 
         ASSERT(id_to_spawn != actor::Id::END);
 
-        const auto spawned = actor::spawn(
-                                     pos,
-                                     {id_to_spawn},
-                                     map::rect())
-                                     .make_aware_of_player();
+        const auto spawned =
+                actor::spawn(
+                        pos,
+                        {id_to_spawn},
+                        map::rect())
+                        .make_aware_of_player();
 
         std::for_each(
                 std::begin(spawned.monsters),
@@ -2733,6 +2744,8 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
 
                         mon->m_properties.apply(waiting);
                 });
+
+        map::update_vision();
 }
 
 void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_dust() const
@@ -2814,10 +2827,7 @@ void PropBreeds::on_std_turn()
 
 void PropVomitsOoze::on_std_turn()
 {
-        const int spawn_new_one_in_n =
-                m_has_triggered_before
-                ? 15
-                : 5;
+        const int spawn_new_one_in_n = m_has_triggered_before ? 15 : 5;
 
         if (actor::is_player(m_owner) ||
             !m_owner->is_alive() ||
@@ -2855,6 +2865,15 @@ void PropVomitsOoze::on_std_turn()
                 id_bucket.push_back(actor::Id::ooze_putrid);
         }
 
+        if (actor::can_player_see_actor(*m_owner))
+        {
+                const auto parent_name =
+                        text_format::first_to_upper(
+                                m_owner->name_the());
+
+                msg_log::add(parent_name + " spews ooze.");
+        }
+
         actor::Id id_to_spawn = rnd::element(id_bucket);
 
         auto* const leader =
@@ -2871,30 +2890,19 @@ void PropVomitsOoze::on_std_turn()
         std::for_each(
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
-                [this](auto* const spawned_mon) {
-                        auto* prop_waiting = new PropWaiting();
+                [](auto* const spawned_mon) {
+                        auto* prop_waiting =
+                                property_factory::make(
+                                        PropId::waiting);
 
                         prop_waiting->set_duration(1);
 
                         spawned_mon->m_properties.apply(prop_waiting);
-
-                        if (actor::can_player_see_actor(*m_owner) &&
-                            actor::can_player_see_actor(*spawned_mon))
-                        {
-                                const auto parent_name =
-                                        text_format::first_to_upper(
-                                                m_owner->name_the());
-
-                                const auto spawned_name =
-                                        spawned_mon->name_a();
-
-                                msg_log::add(
-                                        parent_name +
-                                        " spews " +
-                                        spawned_name +
-                                        ".");
-                        }
                 });
+
+        io::draw_blast_at_seen_actors(spawned.monsters, colors::white());
+
+        map::update_vision();
 
         if (m_owner->is_aware_of_player())
         {
@@ -3149,7 +3157,9 @@ PropActResult PropMajorClaphamSummon::on_act()
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
                 [](auto* const spawned_mon) {
-                        auto* prop_summoned = new PropSummoned();
+                        auto* prop_summoned =
+                                property_factory::make(
+                                        PropId::summoned);
 
                         prop_summoned->set_indefinite();
 
@@ -3158,6 +3168,8 @@ PropActResult PropMajorClaphamSummon::on_act()
                         spawned_mon->m_mon_aware_state
                                 .is_player_feeling_msg_allowed = false;
                 });
+
+        map::update_vision();
 
         map::g_player->incr_shock(12.0, ShockSrc::misc);
 
@@ -3386,6 +3398,8 @@ PropActResult PropSummonsLocusts::on_act()
 
                         actor->m_properties.apply(prop);
                 });
+
+        map::update_vision();
 
         m_has_summoned = true;
 
