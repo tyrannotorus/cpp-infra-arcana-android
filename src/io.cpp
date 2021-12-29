@@ -203,7 +203,7 @@ static SDL_Texture* create_texture_from_surface(SDL_Surface& surface)
 
 static void set_surface_color_key(SDL_Surface& surface, const Color& color)
 {
-        const int v =
+        const auto v =
                 SDL_MapRGB(
                         surface.format,
                         color.r(),

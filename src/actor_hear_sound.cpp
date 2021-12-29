@@ -43,7 +43,10 @@ void hear_sound_player(
         }
 
         // Play audio after message to ensure sync between audio and animation.
-        audio::play(sfx, dir_to_origin, percent_audible_distance);
+        audio::play_from_direction(
+                sfx,
+                dir_to_origin,
+                percent_audible_distance);
 
         if (has_snd_msg)
         {

@@ -33,7 +33,7 @@ void MapControllerStd::on_start()
 {
         if (!map::g_player->m_properties.has(PropId::deaf))
         {
-                audio::try_play_amb(1);
+                audio::try_play_ambient(1);
         }
 }
 

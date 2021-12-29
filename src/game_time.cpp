@@ -274,7 +274,7 @@ static void run_std_turn_events()
         {
                 const int play_one_in_n = 200;
 
-                audio::try_play_amb(play_one_in_n);
+                audio::try_play_ambient(play_one_in_n);
         }
 }
 

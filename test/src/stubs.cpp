@@ -240,9 +240,11 @@ void cleanup() {}
 
 void play(const SfxId, const int, const int) {}
 
-void play(const SfxId, const Dir, const int) {}
+void play_from_direction(const SfxId, const Dir, const int) {}
 
-void try_play_amb(const int) {}
+void try_play_ambient(const int) {}
+
+void stop_ambient() {}
 
 void play_music(const MusId) {}
 

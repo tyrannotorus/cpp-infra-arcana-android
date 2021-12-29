@@ -46,8 +46,10 @@ static std::vector<Mix_Music*> s_mus_chunks;
 // TODO: Also use std::chrono for sound effects?
 static uint32_t s_ms_at_sfx_played[(size_t)audio::SfxId::END];
 static int s_current_channel = 0;
-static const auto s_min_seconds_between_amb = 20s;
-static auto s_seconds_at_amb_played = 0s;
+static const int s_ambient_sfx_channel = 0;
+static const int s_first_standard_sfx_channel = s_ambient_sfx_channel + 1;
+static const auto s_min_seconds_between_ambient = 20s;
+static auto s_seconds_at_ambient_played = 0s;
 static int s_nr_files_loaded = 0;
 
 static void load(const audio::SfxId sfx, const std::string& filename)
@@ -81,33 +83,35 @@ static void load(const audio::SfxId sfx, const std::string& filename)
         ++s_nr_files_loaded;
 }
 
-static int next_channel(const int from)
+static int next_channel(
+        const int from,
+        const int first_channel,
+        const int last_channel)
 {
-        ASSERT(from >= 0 && from < audio::g_allocated_channels);
+        int channel = from + 1;
 
-        int ret = from + 1;
-
-        if (ret == audio::g_allocated_channels)
+        if (channel >= last_channel)
         {
-                ret = 0;
+                channel = first_channel;
         }
 
-        return ret;
+        return channel;
 }
 
-static int find_free_channel(const int from)
+static int find_free_channel(
+        const int from,
+        const int first_channel,
+        const int last_channel)
 {
-        ASSERT(from >= 0 && from < audio::g_allocated_channels);
+        int channel = from;
 
-        int ret = from;
-
-        for (int i = 0; i < audio::g_allocated_channels; ++i)
+        for (int i = first_channel; i <= last_channel; ++i)
         {
-                ret = next_channel(ret);
+                channel = next_channel(channel, first_channel, last_channel);
 
-                if (Mix_Playing(ret) == 0)
+                if (Mix_Playing(channel) == 0)
                 {
-                        return ret;
+                        return channel;
                 }
         }
 
@@ -115,17 +119,47 @@ static int find_free_channel(const int from)
         return -1;
 }
 
-static std::string amb_sfx_filename(const audio::SfxId sfx)
+static std::string ambient_sfx_filename(const audio::SfxId sfx)
 {
         const int amb_nr = (int)sfx - (int)audio::SfxId::AMB_START;
 
-        const std::string padding_str =
-                (amb_nr < 10) ? "00" : (amb_nr < 100) ? "0"
-                                                      : "";
+        std::string padding_str;
+
+        if (amb_nr < 10)
+        {
+                padding_str = "00";
+        }
+        else if (amb_nr < 100)
+        {
+                padding_str = "0";
+        }
 
         const std::string idx_str = std::to_string(amb_nr);
 
         return "amb_" + padding_str + idx_str + ".ogg";
+}
+
+static bool is_loaded(const audio::SfxId id)
+{
+        if ((id == audio::SfxId::AMB_START) ||
+            (id == audio::SfxId::END))
+        {
+                return false;
+        }
+
+        if (s_audio_chunks.empty())
+        {
+                return false;
+        }
+
+        return s_audio_chunks[(size_t)id];
+}
+
+static bool is_ambient_sound(const audio::SfxId id)
+{
+        return (
+                ((int)id > (int)audio::SfxId::AMB_START) &&
+                (id != audio::SfxId::END));
 }
 
 // -----------------------------------------------------------------------------
@@ -181,8 +215,8 @@ void init()
 
         ASSERT(s_nr_files_loaded == (int)SfxId::AMB_START);
 
-        if (config::is_amb_audio_preloaded() &&
-            config::is_amb_audio_enabled())
+        if (config::is_ambient_audio_preloaded() &&
+            config::is_ambient_audio_enabled())
         {
                 for (auto i = (int)SfxId::AMB_START + 1;
                      i < (int)SfxId::END;
@@ -244,7 +278,7 @@ void cleanup()
         s_mus_chunks.clear();
 
         s_current_channel = 0;
-        s_seconds_at_amb_played = 0s;
+        s_seconds_at_ambient_played = 0s;
 
         s_nr_files_loaded = 0;
 
@@ -253,9 +287,8 @@ void cleanup()
 
 void play(const SfxId sfx, int vol_pct_tot, const int vol_pct_l)
 {
-        // TODO: Ugly hack (although this is probably more robust than for
-        // example disabling the audio when deaf is applied, and enabling it
-        // when deafness ends, or when the gameplay session ends, etc(?))
+        // TODO: Ugly hack, this low level code should not know about player
+        // status effects.
         if (map::g_player && map::g_player->m_properties.has(PropId::deaf))
         {
                 return;
@@ -271,45 +304,72 @@ void play(const SfxId sfx, int vol_pct_tot, const int vol_pct_l)
         // Adjust for master volume
         vol_pct_tot = (vol_pct_tot * config::master_volume_pct()) / 100;
 
-        // Is this an ambient sound which has not yet been loaded?
-        if (((int)sfx > (int)SfxId::AMB_START) &&
-            !s_audio_chunks[(size_t)sfx])
+        const bool is_amb = is_ambient_sound(sfx);
+
+        if (is_amb && !is_loaded(sfx))
         {
-                load(sfx, amb_sfx_filename(sfx));
+                load(sfx, ambient_sfx_filename(sfx));
         }
 
-        const int free_channel = find_free_channel(s_current_channel);
+        int from_channel = 0;
+        int first_channel = 0;
+        int last_channel = 0;
+
+        if (is_amb)
+        {
+                from_channel = s_ambient_sfx_channel;
+                first_channel = s_ambient_sfx_channel;
+                last_channel = s_ambient_sfx_channel;
+        }
+        else
+        {
+                from_channel = s_current_channel;
+                first_channel = s_first_standard_sfx_channel;
+                last_channel = g_allocated_channels - 1;
+        }
+
+        const int channel =
+                find_free_channel(
+                        from_channel,
+                        first_channel,
+                        last_channel);
+
+        if (channel < 0)
+        {
+                return;
+        }
 
         const auto ms_now = SDL_GetTicks();
-
         auto& ms_last = s_ms_at_sfx_played[(size_t)sfx];
-
         const auto ms_diff = ms_now - ms_last;
 
-        if ((free_channel >= 0) &&
-            (ms_diff >= g_min_ms_between_same_sfx))
+        if (ms_diff < g_min_ms_between_same_sfx)
         {
-                s_current_channel = free_channel;
-
-                const int vol_tot = (255 * vol_pct_tot) / 100;
-                const int vol_l = (vol_pct_l * vol_tot) / 100;
-                const int vol_r = vol_tot - vol_l;
-
-                Mix_SetPanning(
-                        s_current_channel,
-                        vol_l,
-                        vol_r);
-
-                Mix_PlayChannel(
-                        s_current_channel,
-                        s_audio_chunks[(size_t)sfx],
-                        0);
-
-                ms_last = SDL_GetTicks();
+                return;
         }
+
+        if (!is_amb)
+        {
+                s_current_channel = channel;
+        }
+
+        const int vol_tot = (255 * vol_pct_tot) / 100;
+        const int vol_l = (vol_pct_l * vol_tot) / 100;
+        const int vol_r = vol_tot - vol_l;
+
+        Mix_SetPanning(channel, vol_l, vol_r);
+
+        auto* const chunk = s_audio_chunks[(size_t)sfx];
+
+        Mix_PlayChannel(channel, chunk, 0);
+
+        ms_last = SDL_GetTicks();
 }
 
-void play(const SfxId sfx, const Dir dir, const int distance_pct)
+void play_from_direction(
+        const SfxId sfx,
+        const Dir dir,
+        const int distance_pct)
 {
         if (dir == Dir::END)
         {
@@ -367,9 +427,14 @@ void play(const SfxId sfx, const Dir dir, const int distance_pct)
         play(sfx, vol_pct_tot, vol_pct_l);
 }
 
-void try_play_amb(const int one_in_n_chance_to_play)
+void stop_ambient()
 {
-        if (!config::is_amb_audio_enabled() ||
+        Mix_HaltChannel(s_ambient_sfx_channel);
+}
+
+void try_play_ambient(const int one_in_n_chance_to_play)
+{
+        if (!config::is_ambient_audio_enabled() ||
             s_audio_chunks.empty() ||
             !rnd::one_in(one_in_n_chance_to_play))
         {
@@ -381,10 +446,10 @@ void try_play_amb(const int one_in_n_chance_to_play)
                         std::chrono::system_clock::now()
                                 .time_since_epoch());
 
-        if ((seconds_now - s_seconds_at_amb_played) >
-            s_min_seconds_between_amb)
+        if ((seconds_now - s_seconds_at_ambient_played) >
+            s_min_seconds_between_ambient)
         {
-                s_seconds_at_amb_played = seconds_now;
+                s_seconds_at_ambient_played = seconds_now;
 
                 const int vol_pct = rnd::range(25, 100);
                 const int first_int = (int)SfxId::AMB_START + 1;

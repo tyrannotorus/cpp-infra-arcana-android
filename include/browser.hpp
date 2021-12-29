@@ -150,9 +150,9 @@ public:
 
         void remove_key(char key);
 
-        void disable_selection_audio()
+        void set_selection_audio_enabled(const bool value)
         {
-                m_play_selection_audio = false;
+                m_play_selection_audio = value;
         }
 
         void enable_left_right_keys()

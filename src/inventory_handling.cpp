@@ -746,7 +746,7 @@ void BrowseInv::on_start()
                 list_size,
                 panels::h(Panel::inventory_menu));
 
-        m_browser.disable_selection_audio();
+        m_browser.set_selection_audio_enabled(false);
 
         // Remove the "browse inventory" key, to avoid player key press
         // misstakes, and to allow using this key for closing the menu
@@ -1057,7 +1057,7 @@ void Apply::on_start()
                 (int)m_filtered_backpack_indexes.size(),
                 panels::h(Panel::inventory_menu));
 
-        m_browser.disable_selection_audio();
+        m_browser.set_selection_audio_enabled(false);
 
         audio::play(audio::SfxId::backpack);
 }
@@ -1180,7 +1180,7 @@ void Drop::on_start()
                 list_size,
                 panels::h(Panel::inventory_menu));
 
-        m_browser.disable_selection_audio();
+        m_browser.set_selection_audio_enabled(false);
 
         // The 'i' key is removed in the inventory menu, so we remove it in this
         // menu as well for consistency.
@@ -1419,7 +1419,7 @@ void Equip::on_start()
                 (int)m_filtered_backpack_indexes.size(),
                 panels::h(Panel::inventory_menu));
 
-        m_browser.disable_selection_audio();
+        m_browser.set_selection_audio_enabled(false);
 
         m_browser.set_y(0);
 }
@@ -1680,7 +1680,7 @@ void SelectThrow::on_start()
                 (int)list_size,
                 panels::h(Panel::inventory_menu));
 
-        m_browser.disable_selection_audio();
+        m_browser.set_selection_audio_enabled(false);
 
         // Set up custom menu keys - the throwing key is always reserved for the
         // last thrown item (if any), and never used for throwing any other item
@@ -1958,7 +1958,7 @@ void SelectIdentify::on_start()
                 (int)list_size,
                 panels::h(Panel::inventory_menu));
 
-        m_browser.disable_selection_audio();
+        m_browser.set_selection_audio_enabled(false);
 
         audio::play(audio::SfxId::backpack);
 }

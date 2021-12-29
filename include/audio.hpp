@@ -19,9 +19,11 @@ void cleanup();
 
 void play(SfxId sfx, int vol_pct_tot = 100, int vol_pct_l = 50);
 
-void play(SfxId sfx, Dir dir, int distance_pct);
+void play_from_direction(SfxId sfx, Dir dir, int distance_pct);
 
-void try_play_amb(int one_in_n_chance_to_play);
+void try_play_ambient(int one_in_n_chance_to_play);
+
+void stop_ambient();
 
 // Plays music if not already playing any music
 void play_music(MusId mus);

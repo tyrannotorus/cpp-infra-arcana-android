@@ -400,7 +400,7 @@ void BrowseSpell::on_start()
 
         m_browser.reset((int)s_learned_spells.size());
 
-        m_browser.disable_selection_audio();
+        m_browser.set_selection_audio_enabled(false);
 }
 
 void BrowseSpell::draw()

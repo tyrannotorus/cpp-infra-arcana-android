@@ -77,9 +77,10 @@ static int s_delay_explosion = -1;
 static std::string s_default_player_name;
 static bool s_is_bot_playing = false;
 static bool s_is_gj_mode = false;
-static int s_master_volume_pct = 100;
-static bool s_is_amb_audio_enabled = false;
-static bool s_is_amb_audio_preloaded = false;
+static int s_master_volume_pct_option = 100;
+static int s_master_volume_pct_adjusted = 100;
+static bool s_is_ambient_audio_enabled = false;
+static bool s_is_ambient_audio_preloaded = false;
 static int s_screen_px_w = -1;
 static int s_screen_px_h = -1;
 static int s_gui_cell_px_w = -1;
@@ -242,14 +243,14 @@ static void set_default_variables()
         s_screen_px_h = s_gui_cell_px_h * default_nr_gui_cells_y;
 
 #ifdef NDEBUG
-        s_master_volume_pct = 100;
+        s_master_volume_pct_option = s_master_volume_pct_adjusted = 100;
 #else
         // Hearing the audio all the time while debug testing gets old...
-        s_master_volume_pct = 0;
+        s_master_volume_pct_option = s_master_volume_pct_adjusted = 0;
 #endif  // NDEBUG
 
-        s_is_amb_audio_enabled = true;
-        s_is_amb_audio_preloaded = false;
+        s_is_ambient_audio_enabled = true;
+        s_is_ambient_audio_preloaded = false;
         s_is_fullscreen = false;
         s_is_2x_scale_fullscreen_requested = true;
         s_is_2x_scale_fullscreen_enabled = true;
@@ -287,7 +288,10 @@ static void player_sets_option(
         {
                 // Audio master volume
 
-                const bool was_enabled_before = (s_master_volume_pct > 0);
+                audio::stop_ambient();
+
+                const bool was_enabled_before =
+                        (s_master_volume_pct_adjusted > 0);
 
                 const int step = 10;
 
@@ -295,41 +299,67 @@ static void player_sets_option(
                     (direction == OptionToggleDirecton::right))
                 {
                         // Enter or right
-                        s_master_volume_pct += step;
+                        s_master_volume_pct_option += step;
                 }
                 else
                 {
                         //Left
-                        s_master_volume_pct -= step;
+                        s_master_volume_pct_option -= step;
                 }
 
-                s_master_volume_pct = std::clamp(s_master_volume_pct, 0, 100);
+                s_master_volume_pct_option =
+                        std::clamp(
+                                s_master_volume_pct_option,
+                                0,
+                                100);
 
-                audio::set_music_volume(s_master_volume_pct);
+                const auto f = ((double)s_master_volume_pct_option) / 100.0;
 
-                const bool is_enaled = (s_master_volume_pct > 0);
+                s_master_volume_pct_adjusted = (int)((f * f) * 100.0);
+
+                s_master_volume_pct_adjusted =
+                        std::clamp(
+                                s_master_volume_pct_adjusted,
+                                0,
+                                100);
+
+                TRACE
+                        << "Volume option: "
+                        << s_master_volume_pct_option
+                        << "%, adjusted: "
+                        << s_master_volume_pct_adjusted
+                        << "%"
+                        << std::endl;
+
+                audio::set_music_volume(s_master_volume_pct_adjusted);
+
+                const bool is_enaled = (s_master_volume_pct_adjusted > 0);
 
                 if ((was_enabled_before && !is_enaled) ||
                     (!was_enabled_before && is_enaled))
                 {
                         audio::init();
                 }
+
+                audio::play(audio::SfxId::menu_select);
         }
         break;
 
         case 1:
         {
                 // Ambient audio
-                s_is_amb_audio_enabled = !s_is_amb_audio_enabled;
+                s_is_ambient_audio_enabled = !s_is_ambient_audio_enabled;
 
-                audio::init();
+                audio::stop_ambient();
+
+                audio::play(audio::SfxId::menu_select);
         }
         break;
 
         case 2:
         {
                 // Ambient audio
-                s_is_amb_audio_preloaded = !s_is_amb_audio_preloaded;
+                s_is_ambient_audio_preloaded = !s_is_ambient_audio_preloaded;
         }
         break;
 
@@ -732,13 +762,16 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
 {
         TRACE_FUNC_BEGIN;
 
-        s_master_volume_pct = to_int(lines.front());
+        s_master_volume_pct_option = to_int(lines.front());
         lines.erase(std::begin(lines));
 
-        s_is_amb_audio_enabled = lines.front() == "1";
+        s_master_volume_pct_adjusted = to_int(lines.front());
         lines.erase(std::begin(lines));
 
-        s_is_amb_audio_preloaded = lines.front() == "1";
+        s_is_ambient_audio_enabled = lines.front() == "1";
+        lines.erase(std::begin(lines));
+
+        s_is_ambient_audio_preloaded = lines.front() == "1";
         lines.erase(std::begin(lines));
 
         s_input_mode = (InputMode)to_int(lines.front());
@@ -861,9 +894,10 @@ static std::vector<std::string> lines_from_variables()
 
         std::vector<std::string> lines;
 
-        lines.emplace_back(std::to_string(s_master_volume_pct));
-        lines.emplace_back(s_is_amb_audio_enabled ? "1" : "0");
-        lines.emplace_back(s_is_amb_audio_preloaded ? "1" : "0");
+        lines.emplace_back(std::to_string(s_master_volume_pct_option));
+        lines.emplace_back(std::to_string(s_master_volume_pct_adjusted));
+        lines.emplace_back(s_is_ambient_audio_enabled ? "1" : "0");
+        lines.emplace_back(s_is_ambient_audio_preloaded ? "1" : "0");
         lines.push_back(std::to_string((int)s_input_mode));
         lines.push_back(std::to_string(s_screen_px_w));
         lines.push_back(std::to_string(s_screen_px_h));
@@ -1030,17 +1064,17 @@ bool text_mode_filled_walls()
 
 int master_volume_pct()
 {
-        return s_master_volume_pct;
+        return s_master_volume_pct_adjusted;
 }
 
-bool is_amb_audio_enabled()
+bool is_ambient_audio_enabled()
 {
-        return s_is_amb_audio_enabled;
+        return s_is_ambient_audio_enabled;
 }
 
-bool is_amb_audio_preloaded()
+bool is_ambient_audio_preloaded()
 {
-        return s_is_amb_audio_preloaded;
+        return s_is_ambient_audio_preloaded;
 }
 
 bool is_bot_playing()
@@ -1200,10 +1234,21 @@ StateId ConfigState::id() const
 
 void ConfigState::update()
 {
+        // Do not play selection audio if we are at the audio settings - these
+        // will play a custom audio when they are toggled.
+        //
+        // TODO: This is *very* hacky, but there's no easy way to improve this
+        // without refactoring the whole option handling (which should be done).
+        const bool enable_selection_audio = (m_browser.y() >= 2);
+
+        m_browser.set_selection_audio_enabled(enable_selection_audio);
+
         const auto input = io::get();
 
         const MenuAction action =
-                m_browser.read(input, MenuInputMode::scrolling);
+                m_browser.read(
+                        input,
+                        MenuInputMode::scrolling);
 
         bool did_set_option = false;
 
@@ -1303,8 +1348,12 @@ void ConfigState::draw()
         }
 
         std::string master_volume_str(11, '-');
-        master_volume_str[s_master_volume_pct / 10] = '|';
-        master_volume_str += " " + std::to_string(s_master_volume_pct) + "%";
+
+        master_volume_str[s_master_volume_pct_option / 10] = '|';
+
+        master_volume_str +=
+                " " +
+                std::to_string(s_master_volume_pct_option) + "%";
 
         std::string hints_mode_str;
 
@@ -1326,12 +1375,12 @@ void ConfigState::draw()
                  master_volume_str},
 
                 {"Play ambient sounds",
-                 s_is_amb_audio_enabled
+                 s_is_ambient_audio_enabled
                          ? "Yes"
                          : "No"},
 
                 {"Preload ambient sounds at game startup",
-                 s_is_amb_audio_preloaded
+                 s_is_ambient_audio_preloaded
                          ? "Yes"
                          : "No"},
 
