@@ -851,9 +851,11 @@ PropEnded PropZealotStop::affect_move_dir(Dir& dir)
 
         if (actor::can_player_see_actor(*m_owner))
         {
-                msg_log::add(
-                        m_owner->name_the() +
-                        " stops and gropes about.");
+                const auto name =
+                        text_format::first_to_upper(
+                                m_owner->name_the());
+
+                msg_log::add(name + " stops and gropes about.");
         }
 
         dir = Dir::center;
