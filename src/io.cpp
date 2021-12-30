@@ -314,10 +314,10 @@ static void init_sdl()
                 PANIC;
         }
 
-        const int audio_freq = MIX_DEFAULT_FREQUENCY;
+        const int audio_freq = 44100;
         const Uint16 audio_format = MIX_DEFAULT_FORMAT;
         const int audio_channels = MIX_DEFAULT_CHANNELS;
-        const int audio_buffers = 1024;
+        const int audio_buffers = 512;
 
         const int result =
                 Mix_OpenAudio(
