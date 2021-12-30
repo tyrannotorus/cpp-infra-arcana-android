@@ -290,9 +290,6 @@ static void player_sets_option(
 
                 audio::stop_ambient();
 
-                const bool was_enabled_before =
-                        (s_master_volume_pct_adjusted > 0);
-
                 const int step = 10;
 
                 if ((direction == OptionToggleDirecton::enter) ||
@@ -332,14 +329,6 @@ static void player_sets_option(
                         << std::endl;
 
                 audio::set_music_volume(s_master_volume_pct_adjusted);
-
-                const bool is_enaled = (s_master_volume_pct_adjusted > 0);
-
-                if ((was_enabled_before && !is_enaled) ||
-                    (!was_enabled_before && is_enaled))
-                {
-                        audio::init();
-                }
 
                 audio::play(audio::SfxId::menu_select);
         }

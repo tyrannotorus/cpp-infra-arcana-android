@@ -173,13 +173,6 @@ void init()
 
         cleanup();
 
-        if (config::master_volume_pct() == 0)
-        {
-                TRACE_FUNC_END;
-
-                return;
-        }
-
         s_audio_chunks.resize((size_t)SfxId::END);
 
         for (size_t i = 0; i < s_audio_chunks.size(); ++i)
@@ -287,6 +280,11 @@ void cleanup()
 
 void play(const SfxId sfx, int vol_pct_tot, const int vol_pct_l)
 {
+        if (config::master_volume_pct() == 0)
+        {
+                return;
+        }
+
         // TODO: Ugly hack, this low level code should not know about player
         // status effects.
         if (map::g_player && map::g_player->m_properties.has(PropId::deaf))
@@ -360,10 +358,10 @@ void play(const SfxId sfx, int vol_pct_tot, const int vol_pct_l)
         if (!Mix_SetPanning(channel, vol_l, vol_r))
         {
                 TRACE
-                    << "Failed to set panning, "
-                    << "l=" << vol_l << " "
-                    << "r=" << vol_r
-                    << ": " << Mix_GetError() << std::endl;
+                        << "Failed to set panning, "
+                        << "l=" << vol_l << " "
+                        << "r=" << vol_r
+                        << ": " << Mix_GetError() << std::endl;
         }
 
         auto* const chunk = s_audio_chunks[(size_t)sfx];
@@ -378,6 +376,11 @@ void play_from_direction(
         const Dir dir,
         const int distance_pct)
 {
+        if (config::master_volume_pct() == 0)
+        {
+                return;
+        }
+
         if (dir == Dir::END)
         {
                 return;
@@ -441,10 +444,25 @@ void stop_ambient()
 
 void try_play_ambient(const int one_in_n_chance_to_play)
 {
-        if (!config::is_ambient_audio_enabled() ||
-            s_audio_chunks.empty() ||
-            !rnd::one_in(one_in_n_chance_to_play))
+        if (config::master_volume_pct() == 0)
         {
+                return;
+        }
+
+        if (!config::is_ambient_audio_enabled())
+        {
+                return;
+        }
+
+        if (s_audio_chunks.empty())
+        {
+                // Ambient sounds not loaded.
+                return;
+        }
+
+        if (!rnd::one_in(one_in_n_chance_to_play))
+        {
+                // Random chance to play ambient sound failed.
                 return;
         }
 
@@ -471,9 +489,15 @@ void try_play_ambient(const int one_in_n_chance_to_play)
 
 void play_music(const MusId mus)
 {
-        // NOTE: We do not play if already playing  music
-        if (s_mus_chunks.empty() || Mix_PlayingMusic())
+        if (Mix_PlayingMusic())
         {
+                // Already playing music.
+                return;
+        }
+
+        if (s_mus_chunks.empty())
+        {
+                // Music not loaded.
                 return;
         }
 
