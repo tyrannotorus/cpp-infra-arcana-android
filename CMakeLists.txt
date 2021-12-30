@@ -490,7 +490,7 @@ if(WIN32)
                 endif()
 
                 set(SDL2_PATH       ${SDL_BASE_DIR}/msvc/SDL2-2.0.9)
-                set(SDL2_IMAGE_PATH ${SDL_BASE_DIR}/msvc/SDL2_image-2.0.1)
+                set(SDL2_IMAGE_PATH ${SDL_BASE_DIR}/msvc/SDL2_image-2.0.5)
                 set(SDL2_MIXER_PATH ${SDL_BASE_DIR}/msvc/SDL2_mixer-2.0.4)
 
                 set(SDL_INCLUDE_DIRS
@@ -518,7 +518,7 @@ if(WIN32)
                 endif()
 
                 set(SDL2_PATH       ${SDL_BASE_DIR}/mingw/SDL2-2.0.9/${SDL_ARCH_DIR})
-                set(SDL2_IMAGE_PATH ${SDL_BASE_DIR}/mingw/SDL2_image-2.0.1/${SDL_ARCH_DIR})
+                set(SDL2_IMAGE_PATH ${SDL_BASE_DIR}/mingw/SDL2_image-2.0.5/${SDL_ARCH_DIR})
                 set(SDL2_MIXER_PATH ${SDL_BASE_DIR}/mingw/SDL2_mixer-2.0.4/${SDL_ARCH_DIR})
 
                 set(SDL_INCLUDE_DIRS
