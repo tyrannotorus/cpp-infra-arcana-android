@@ -83,6 +83,63 @@ static void load(const audio::SfxId sfx, const std::string& filename)
         ++s_nr_files_loaded;
 }
 
+static std::string get_audio_str(const audio::SfxId id)
+{
+        auto id_str = sfx_id_to_str(id);
+
+        if (id_str.empty())
+        {
+                TRACE
+                        << "Could not find an id string for "
+                           "audio with id number: "
+                        << (int)id
+                        << std::endl;
+
+                ASSERT(false);
+        }
+
+        return id_str;
+}
+
+static void load_audio_id(
+        const audio::SfxId id,
+        const std::string& filename_prefix)
+{
+        const std::string id_str = get_audio_str(id);
+
+        if (id_str.empty())
+        {
+                return;
+        }
+
+        const auto filename = filename_prefix + id_str + ".ogg";
+
+        load(id, filename);
+}
+
+static void load_game_sound_effects()
+{
+        for (int i = 0; i < (int)audio::SfxId::AMB_START; ++i)
+        {
+                const auto id = (audio::SfxId)i;
+
+                load_audio_id(id, "sfx_");
+        }
+}
+
+static void load_ambient_sounds()
+{
+        for (auto i = (int)audio::SfxId::AMB_START + 1;
+             i < (int)audio::SfxId::END;
+             ++i)
+        {
+                const auto id = (audio::SfxId)i;
+
+                // No prefix
+                load_audio_id(id, "");
+        }
+}
+
 static int next_channel(
         const int from,
         const int first_channel,
@@ -180,56 +237,18 @@ void init()
                 s_audio_chunks[i] = nullptr;
         }
 
-        // Pre-load the action sounds
-
-        for (int i = 0; i < (int)SfxId::AMB_START; ++i)
-        {
-                const auto id = (SfxId)i;
-
-                const std::string id_str = sfx_id_to_str(id);
-
-                if (id_str.empty())
-                {
-                        TRACE
-                                << "Could not find an id string for audio "
-                                   "with id number: "
-                                << (int)id
-                                << std::endl;
-
-                        ASSERT(false);
-
-                        continue;
-                }
-
-                const auto filename = "sfx_" + id_str + ".ogg";
-
-                load(id, filename);
-        }
+        // Pre-load the game sound effects.
+        load_game_sound_effects();
 
         ASSERT(s_nr_files_loaded == (int)SfxId::AMB_START);
 
         if (config::is_ambient_audio_preloaded() &&
             config::is_ambient_audio_enabled())
         {
-                for (auto i = (int)SfxId::AMB_START + 1;
-                     i < (int)SfxId::END;
-                     ++i)
-                {
-                        const int amb_nr = i - (int)SfxId::AMB_START;
+                load_ambient_sounds();
 
-                        auto amb_nr_str = std::to_string(amb_nr);
-
-                        amb_nr_str =
-                                text_format::pad_before(
-                                        amb_nr_str,
-                                        3,  // Total width
-                                        '0');
-
-                        const std::string amb_name =
-                                "amb_" + amb_nr_str + ".ogg";
-
-                        load((SfxId)i, amb_name);
-                }
+                // -1 to adjust for SfxId::AMB_START.
+                ASSERT(s_nr_files_loaded == ((int)SfxId::END - 1));
         }
 
         // Load music

@@ -224,17 +224,8 @@ Author:              suonho (username on freesound.org)
 Original title:      suonho_ScienceFortressPack » suonho_StudioDelay-Low.wav
 License:             Attribution 3.0 Unported (CC BY 3.0)
 
-File:                amb_033.ogg
-Source:              freesound.org (file no longer available)
-Author:              (Unknown)
-Original title:      (Unknown)
-License:             Attribution 3.0 Unported (CC BY 3.0)
-
-File:                amb_034.ogg
-Source:              https://www.freesound.org/people/yewbic/sounds/33703
-Author:              yewbic (username on freesound.org)
-Original title:      ambience02.wav
-License:             CC0 1.0 Universal (CC0 1.0)
+(033 unused)
+(034 unused)
 
 File:                amb_035.ogg
 Source:              https://www.freesound.org/people/Robinhood76/sounds/98059
