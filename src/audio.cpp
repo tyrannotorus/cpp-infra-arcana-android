@@ -354,10 +354,17 @@ void play(const SfxId sfx, int vol_pct_tot, const int vol_pct_l)
         }
 
         const int vol_tot = (255 * vol_pct_tot) / 100;
-        const int vol_l = (vol_pct_l * vol_tot) / 100;
+        const int vol_l = (vol_tot * vol_pct_l) / 100;
         const int vol_r = vol_tot - vol_l;
 
-        Mix_SetPanning(channel, vol_l, vol_r);
+        if (!Mix_SetPanning(channel, vol_l, vol_r))
+        {
+                TRACE
+                    << "Failed to set panning, "
+                    << "l=" << vol_l << " "
+                    << "r=" << vol_r
+                    << ": " << Mix_GetError() << std::endl;
+        }
 
         auto* const chunk = s_audio_chunks[(size_t)sfx];
 

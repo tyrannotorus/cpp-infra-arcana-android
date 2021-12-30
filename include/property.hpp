@@ -17,6 +17,7 @@
 #include "gfx.hpp"
 #include "global.hpp"
 #include "property_data.hpp"
+#include "item.hpp"
 
 namespace actor
 {
@@ -24,11 +25,6 @@ class Actor;
 }  // namespace actor
 
 enum class Dir;
-
-namespace item
-{
-class Item;
-}  // namespace item
 
 namespace actor
 {
