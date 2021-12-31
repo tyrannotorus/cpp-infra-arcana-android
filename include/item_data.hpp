@@ -193,7 +193,7 @@ enum class Id
 
         // Other Curiosities
         zombie_dust,
-        witches_eye,
+        witch_eye,
         // flask_of_damning,
         // obsidian_charm,
         fluctuating_material,
@@ -210,7 +210,7 @@ enum class ItemSetId
         supreme_treasure,
         firearm,
         spike_gun,
-        witches_eye,
+        witch_eye,
         fluctuating_material,
         zealot_spiked_mace,
         priest_dagger,

@@ -209,7 +209,7 @@ enum class TileId
         web,
         weight,
         witch_or_warlock,
-        witches_eye,
+        witch_eye,
         wolf,
         wraith,
         zombie_armed,

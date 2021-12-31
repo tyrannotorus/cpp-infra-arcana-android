@@ -211,8 +211,8 @@ Item* make(const Id item_id, const int nr_items)
                 r = new ZombieDust(d);
                 break;
 
-        case Id::witches_eye:
-                r = new WitchesEye(d);
+        case Id::witch_eye:
+                r = new WitchEye(d);
                 break;
 
                 // case Id::flask_of_damning:

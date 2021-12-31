@@ -57,7 +57,7 @@ static const StrToItemSetIdMap s_str_to_item_set_id_map = {
         {"supreme_treasure", item::ItemSetId::supreme_treasure},
         {"firearm", item::ItemSetId::firearm},
         {"spike_gun", item::ItemSetId::spike_gun},
-        {"witches_eye", item::ItemSetId::witches_eye},
+        {"witch_eye", item::ItemSetId::witch_eye},
         {"fluctuating_material", item::ItemSetId::fluctuating_material},
         {"zealot_spiked_mace", item::ItemSetId::zealot_spiked_mace},
         {"priest_dagger", item::ItemSetId::priest_dagger},
@@ -2053,20 +2053,20 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::general);
-        d.id = Id::witches_eye;
-        d.base_name = {"Witches' Eye", "Witches' Eyes", "a Witches' Eye"};
+        d.id = Id::witch_eye;
+        d.base_name = {"Witch's Eye", "Witch's Eyes", "a Witch's Eye"};
         d.base_descr = {
                 "The eye of a powerful witch. Clutching it in one's hand will "
                 "temporarily grant magical vision - doors, traps, stairs, and "
                 "other locations of interest are detected in the "
                 "surrounding area, and the presence of all items and creatures "
-                "are revealed."};
+                "is revealed."};
         d.type = ItemType::general;
         d.value = item::Value::minor_treasure;
         d.weight = Weight::extra_light;
         d.has_std_activate = true;
         d.color = colors::light_green();
-        d.tile = gfx::TileId::witches_eye;
+        d.tile = gfx::TileId::witch_eye;
         d.character = '%';
         d.max_stack_at_spawn = 1;
         d.chance_to_incl_in_spawn_list = 0;

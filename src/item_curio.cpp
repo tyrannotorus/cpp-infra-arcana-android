@@ -39,7 +39,7 @@ void ZombieDust::on_ranged_hit(actor::Actor& actor_hit)
 // -----------------------------------------------------------------------------
 // Witches Eye
 // -----------------------------------------------------------------------------
-ConsumeItem WitchesEye::activate(actor::Actor* actor)
+ConsumeItem WitchEye::activate(actor::Actor* actor)
 {
         (void)actor;
 

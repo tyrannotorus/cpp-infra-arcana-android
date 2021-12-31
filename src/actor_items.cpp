@@ -611,7 +611,7 @@ static void make_item_set_witches_eye(actor::Actor& actor)
                 return;
         }
 
-        auto* item = item::make(item::Id::witches_eye);
+        auto* item = item::make(item::Id::witch_eye);
 
         actor.m_inv.put_in_backpack(item);
 }
@@ -705,7 +705,7 @@ static void make_monster_item_sets(actor::Actor& actor)
                                 make_item_set_spike_gun(actor);
                                 break;
 
-                        case item::ItemSetId::witches_eye:
+                        case item::ItemSetId::witch_eye:
                                 make_item_set_witches_eye(actor);
                                 break;
 

@@ -31,10 +31,10 @@ public:
         void on_ranged_hit(actor::Actor& actor_hit) override;
 };
 
-class WitchesEye : public Item
+class WitchEye : public Item
 {
 public:
-        WitchesEye(ItemData* const item_data) :
+        WitchEye(ItemData* const item_data) :
                 Item(item_data) {}
 
         ConsumeItem activate(actor::Actor* actor) override;
