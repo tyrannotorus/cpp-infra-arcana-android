@@ -7661,7 +7661,7 @@
             <erratic_move_percent>0</erratic_move_percent>
             <turns_aware>10</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
-            <looks>true</looks>
+            <looks>false</looks>
             <avoids_blocking_friend>false</avoids_blocking_friend>
             <attacks>true</attacks>
             <paths_to_target_when_aware>false</paths_to_target_when_aware>
