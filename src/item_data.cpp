@@ -1379,7 +1379,7 @@ void init()
                 "An armour consisting of steel plates sewn into a waistcoat. "
                 "It offers very good protection for its weight. ",
 
-                "It is a bit bulky, so sneaking and dodging is slightly more "
+                "It is somewhat bulky, so sneaking and dodging is more "
                 "difficult (-10% stealth, -10% dodging)."};
         d.ability_mods_while_equipped[(size_t)AbilityId::stealth] = -10;
         d.ability_mods_while_equipped[(size_t)AbilityId::dodging] = -10;

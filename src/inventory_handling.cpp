@@ -566,11 +566,14 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
                                 m_viewed_item_attack_info,
                                 AbbrevItemAttackInfo::yes);
 
-                text_format::append_with_space(
-                        combat_descr,
-                        ("It has a hit chance modifier of " +
-                         hit_mod_str +
-                         "."));
+                if (!hit_mod_str.empty())
+                {
+                        text_format::append_with_space(
+                                combat_descr,
+                                ("It has a hit chance modifier of " +
+                                 hit_mod_str +
+                                 "."));
+                }
 
                 if (!combat_descr.empty())
                 {
