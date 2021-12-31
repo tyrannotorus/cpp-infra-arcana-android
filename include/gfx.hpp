@@ -188,7 +188,7 @@ enum class TileId
         stairs_down,
         stalagmite,
         stopwatch,
-        tentacles,
+        tentacle_cluster,
         the_high_priest,
         tomb_closed,
         tomb_open,

@@ -148,7 +148,7 @@ static void spawn_monsters(const Context& context)
 
         const auto p = rnd::element(context.nearby_positions);
 
-        const auto id = actor::Id::tentacles;
+        const auto id = actor::Id::tentacle_cluster;
 
         auto spawned = actor::spawn(p, {id}, map::rect());
 
@@ -4705,7 +4705,7 @@ void SpellSummonTentacles::run_effect(
         const auto summoned =
                 actor::spawn(
                         caster->m_pos,
-                        {actor::Id::tentacles},
+                        {actor::Id::tentacle_cluster},
                         map::rect())
                         .make_aware_of_player()
                         .set_leader(leader);
@@ -4734,7 +4734,7 @@ void SpellSummonTentacles::run_effect(
 
         if (actor::can_player_see_actor(*mon))
         {
-                msg_log::add("Monstrous tentacles rises up from the ground!");
+                msg_log::add("Monstrous tentacles rise up from the ground!");
 
                 actor::make_player_aware_mon(*mon);
         }

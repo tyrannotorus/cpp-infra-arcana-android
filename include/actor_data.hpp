@@ -106,7 +106,7 @@ enum class Id
         mold,
         mold_halluc,
         gas_spore,
-        tentacles,
+        tentacle_cluster,
         warping_aberrance,
         death_fiend,
         khaga_offspring,

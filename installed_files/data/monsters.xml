@@ -7595,12 +7595,12 @@
     </monster>
 
     <!--************************************************************-->
-    <!-- tentacles -->
+    <!-- tentacle_cluster -->
     <!--************************************************************-->
-    <monster id="tentacles">
+    <monster id="tentacle_cluster">
         <text>
-            <name_a>Tentacles</name_a>
-            <name_the>the Tentacles</name_the>
+            <name_a>a Tentacle Cluster</name_a>
+            <name_the>the Tentacle Cluster</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
             <description>An array of writhing tentacles sprouting up from the ground.</description>
@@ -7615,7 +7615,7 @@
         </text>
 
         <graphics>
-            <tile>tentacles</tile>
+            <tile>tentacle_cluster</tile>
             <character>e</character>
             <color>violet</color>
         </graphics>
