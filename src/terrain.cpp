@@ -65,6 +65,53 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+struct MatlBurnData
+{
+        int finish_burning_one_in_n {1};
+        int hit_adjacent_one_in_n {1};
+};
+
+static MatlBurnData get_matl_burn_data(const Matl matl)
+{
+        MatlBurnData d;
+
+        switch (matl)
+        {
+        case Matl::fluid:
+        case Matl::empty:
+                d.finish_burning_one_in_n = 1;
+                d.hit_adjacent_one_in_n = 1;
+                break;
+
+        case Matl::stone:
+                d.finish_burning_one_in_n = 14;
+                d.hit_adjacent_one_in_n = 10;
+                break;
+
+        case Matl::metal:
+                d.finish_burning_one_in_n = 14;
+                d.hit_adjacent_one_in_n = 10;
+                break;
+
+        case Matl::plant:
+                d.finish_burning_one_in_n = 25;
+                d.hit_adjacent_one_in_n = 9;
+                break;
+
+        case Matl::wood:
+                d.finish_burning_one_in_n = 25;
+                d.hit_adjacent_one_in_n = 2;
+                break;
+
+        case Matl::cloth:
+                d.finish_burning_one_in_n = 20;
+                d.hit_adjacent_one_in_n = 8;
+                break;
+        }
+
+        return d;
+}
+
 static void scorch_actor(actor::Actor& actor)
 {
         if (actor::is_player(&actor))
@@ -86,6 +133,92 @@ static void scorch_actor(actor::Actor& actor)
         }
 
         actor::hit(actor, 1, DmgType::fire);
+}
+
+static void spread_burning(const terrain::Terrain& terrain)
+{
+        // Center position not allowed.
+        const P p(dir_utils::rnd_adj_pos(terrain.pos(), false));
+
+        if (!map::is_pos_inside_outer_walls(p))
+        {
+                return;
+        }
+
+        auto* const other_terrain = map::g_terrain.at(p);
+
+        other_terrain->hit(DmgType::fire, nullptr);
+
+        if (other_terrain->is_burning())
+        {
+                other_terrain->m_started_burning_this_turn = true;
+
+                if (map::g_player->m_pos == p)
+                {
+                        msg_log::add(
+                                "Fire has spread here!",
+                                colors::msg_note(),
+                                MsgInterruptPlayer::yes,
+                                MorePromptOnMsg::yes);
+                }
+        }
+}
+
+static WasDestroyed on_new_turn_terrain_burning(terrain::Terrain& terrain)
+{
+        terrain.clear_gore();
+
+        // TODO: Hit dead actors
+
+        // Hit actor standing on terrain
+        auto* actor = map::first_actor_at_pos(terrain.pos());
+
+        if (actor)
+        {
+                // Occasionally try to set actor on fire, otherwise just do
+                // small fire damage.
+                if (rnd::one_in(4))
+                {
+                        actor->m_properties.apply(new PropBurning());
+                }
+                else
+                {
+                        scorch_actor(*actor);
+                }
+        }
+
+        const auto matl_burn_data = get_matl_burn_data(terrain.matl());
+
+        if (rnd::one_in(matl_burn_data.finish_burning_one_in_n))
+        {
+                terrain.m_burn_state = terrain::BurnState::has_burned;
+
+                const auto was_destroyed = terrain.on_finished_burning();
+
+                if (was_destroyed == WasDestroyed::yes)
+                {
+                        return was_destroyed;
+                }
+        }
+
+        if (rnd::one_in(matl_burn_data.hit_adjacent_one_in_n))
+        {
+                spread_burning(terrain);
+        }
+
+        // Create smoke?
+        if (rnd::one_in(20))
+        {
+                const P p(dir_utils::rnd_adj_pos(terrain.pos(), true));
+
+                if (map::is_pos_inside_outer_walls(p) &&
+                    !map_parsers::BlocksProjectiles().run(p))
+                {
+                        game_time::add_mob(new terrain::Smoke(p, 10));
+                }
+        }
+
+        return WasDestroyed::no;
 }
 
 // -----------------------------------------------------------------------------
@@ -138,9 +271,9 @@ AllowAction Terrain::pre_bump(actor::Actor& actor_bumping)
 
                 msg_log::clear();
 
-                return (query_result == BinaryAnswer::no)
-                        ? AllowAction::no
-                        : AllowAction::yes;
+                const bool allowed = query_result == BinaryAnswer::yes;
+
+                return allowed ? AllowAction::yes : AllowAction::no;
         }
 
         return AllowAction::yes;
@@ -156,119 +289,11 @@ void Terrain::on_new_turn()
         if ((m_burn_state == BurnState::burning) &&
             !m_started_burning_this_turn)
         {
-                clear_gore();
+                const auto was_destroyed = on_new_turn_terrain_burning(*this);
 
-                // TODO: Hit dead actors
-
-                // Hit actor standing on terrain
-                auto* actor = map::first_actor_at_pos(m_pos);
-
-                if (actor)
+                if (was_destroyed == WasDestroyed::yes)
                 {
-                        // Occasionally try to set actor on fire, otherwise just
-                        // do small fire damage
-                        if (rnd::one_in(4))
-                        {
-                                actor->m_properties.apply(new PropBurning());
-                        }
-                        else
-                        {
-                                scorch_actor(*actor);
-                        }
-                }
-
-                // Finished burning?
-                int finish_burning_one_in_n = 1;
-                int hit_adjacent_one_in_n = 1;
-
-                switch (matl())
-                {
-                case Matl::fluid:
-                case Matl::empty:
-                        finish_burning_one_in_n = 1;
-                        hit_adjacent_one_in_n = 1;
-                        break;
-
-                case Matl::stone:
-                        finish_burning_one_in_n = 14;
-                        hit_adjacent_one_in_n = 10;
-                        break;
-
-                case Matl::metal:
-                        finish_burning_one_in_n = 14;
-                        hit_adjacent_one_in_n = 10;
-                        break;
-
-                case Matl::plant:
-                        finish_burning_one_in_n = 30;
-                        hit_adjacent_one_in_n = 10;
-                        break;
-
-                case Matl::wood:
-                        finish_burning_one_in_n = 40;
-                        hit_adjacent_one_in_n = 10;
-                        break;
-
-                case Matl::cloth:
-                        finish_burning_one_in_n = 20;
-                        hit_adjacent_one_in_n = 8;
-                        break;
-                }
-
-                if (rnd::one_in(finish_burning_one_in_n))
-                {
-                        m_burn_state = BurnState::has_burned;
-
-                        if (on_finished_burning() == WasDestroyed::yes)
-                        {
-                                return;
-                        }
-                }
-
-                // Hit actors and adjacent terrains?
-                if (rnd::one_in(hit_adjacent_one_in_n))
-                {
-                        actor = map::first_actor_at_pos(m_pos);
-
-                        if (actor)
-                        {
-                                scorch_actor(*actor);
-                        }
-
-                        const P p(dir_utils::rnd_adj_pos(m_pos, false));
-
-                        if (map::is_pos_inside_map(p))
-                        {
-                                auto* const terrain = map::g_terrain.at(p);
-
-                                terrain->hit(DmgType::fire, nullptr);
-
-                                if (terrain->is_burning())
-                                {
-                                        terrain->m_started_burning_this_turn = true;
-
-                                        if (map::g_player->m_pos == p)
-                                        {
-                                                msg_log::add(
-                                                        "Fire has spread here!",
-                                                        colors::msg_note(),
-                                                        MsgInterruptPlayer::yes,
-                                                        MorePromptOnMsg::yes);
-                                        }
-                                }
-                        }
-                }
-
-                // Create smoke?
-                if (rnd::one_in(20))
-                {
-                        const P p(dir_utils::rnd_adj_pos(m_pos, true));
-
-                        if (map::is_pos_inside_map(p) &&
-                            !map_parsers::BlocksProjectiles().run(p))
-                        {
-                                game_time::add_mob(new Smoke(p, 10));
-                        }
+                        return;
                 }
         }
 
@@ -280,9 +305,10 @@ void Terrain::try_start_burning(const Verbose verbose)
 {
         clear_gore();
 
-        if ((m_burn_state == BurnState::not_burned) ||
-            ((m_burn_state == BurnState::has_burned) &&
-             rnd::one_in(3)))
+        const bool is_not_burned = m_burn_state == BurnState::not_burned;
+        const bool has_burnt = m_burn_state == BurnState::has_burned;
+
+        if (is_not_burned || (has_burnt && rnd::one_in(3)))
         {
                 if (map::is_pos_seen_by_player(m_pos) &&
                     (verbose == Verbose::yes))

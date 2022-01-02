@@ -255,6 +255,8 @@ public:
 
         virtual void on_new_turn();
 
+        virtual WasDestroyed on_finished_burning();
+
         virtual void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -303,9 +305,7 @@ public:
         virtual std::string name(Article article) const = 0;
 
         ItemContainer m_item_container {};
-
         BurnState m_burn_state {BurnState::not_burned};
-
         bool m_started_burning_this_turn {false};
 
 protected:
@@ -331,8 +331,6 @@ protected:
         virtual Color color_bg_default() const;
 
         void try_start_burning(Verbose verbose);
-
-        virtual WasDestroyed on_finished_burning();
 
         virtual DidTriggerTrap trigger_trap(actor::Actor* const actor)
         {
@@ -1099,7 +1097,7 @@ private:
 // any "trap" it has will trigger. Therefore the TombTrait type could be
 // removed, and instead an effect is just randomized when the tomb is
 // opened. But it should be kept the way it is; it could be useful. Maybe some
-// sort of hint will be re-implemented (e.g. via the "Detect Traps" spell).
+// sort of hint will be re-implemented.
 enum class TombTrait
 {
         ghost,
