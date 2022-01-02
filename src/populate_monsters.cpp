@@ -496,7 +496,7 @@ void populate_std_lvl()
 
         if (map::g_player->m_inv.has_item_in_backpack(item::Id::necronomicon))
         {
-                nr_groups_to_spawn += 2;
+                nr_groups_to_spawn += 3;
         }
 
         int nr_groups_spawned = 0;
