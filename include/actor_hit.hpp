@@ -9,23 +9,17 @@
 
 #include "global.hpp"
 
-enum class ActorDied
-{
-        no,
-        yes
-};
-
 namespace actor
 {
 class Actor;
 
-ActorDied hit(
+void hit(
         Actor& actor,
         int dmg,
         DmgType dmg_type,
         AllowWound allow_wound = AllowWound::yes);
 
-ActorDied hit_sp(
+void hit_sp(
         Actor& actor,
         int dmg,
         Verbose verbose = Verbose::yes);

@@ -2169,8 +2169,12 @@ PropActResult PropVortex::on_act()
 
         const auto& player_pos = map::g_player->m_pos;
 
-        if (is_pos_adj(m_owner->m_pos, player_pos, true) ||
-            !rnd::coin_toss())
+        if (is_pos_adj(m_owner->m_pos, player_pos, true))
+        {
+                return {};
+        }
+
+        if (!rnd::fraction(3, 4))
         {
                 return {};
         }

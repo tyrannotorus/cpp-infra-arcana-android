@@ -1073,6 +1073,59 @@ static void try_apply_attack_property_on_actor(
         }
 }
 
+static void apply_melee_attack_props(
+        actor::Actor& defender,
+        const actor::Actor* const attacker,
+        item::Wpn& wpn)
+{
+        auto att_prop = wpn.prop_applied_on_melee(attacker);
+
+        if (att_prop.prop)
+        {
+                try_apply_attack_property_on_actor(
+                        att_prop,
+                        defender,
+                        wpn.data().melee.dmg_type);
+        }
+
+        // NOTE: The 'can_bleed' flag is used as a condition here for
+        // which monsters can be weakened by crippling strikes - it
+        // should be a good enough rule so that crippling strikes can
+        // only be applied against monsters where it makes sense.
+        if (actor::is_player(attacker) &&
+            player_bon::has_trait(Trait::crippling_strikes) &&
+            defender.m_data->can_bleed &&
+            // TODO: This prevents applying on Worm Masses, but it's
+            // hacky, and only makes sense *right now*, there should be
+            // some better attribute to control this.
+            !defender.m_properties.has(PropId::splits_on_death) &&
+            rnd::percent(60))
+        {
+                auto* weak = property_factory::make(PropId::weakened);
+
+                weak->set_duration(rnd::range(2, 3));
+
+                defender.m_properties.apply(weak);
+        }
+}
+
+static void apply_ranged_attack_props(
+        const Projectile& projectile,
+        item::Wpn& wpn)
+{
+        auto att_prop =
+                wpn.prop_applied_on_ranged(
+                        projectile.att_data->attacker);
+
+        if (att_prop.prop)
+        {
+                try_apply_attack_property_on_actor(
+                        att_prop,
+                        *projectile.actor_hit,
+                        wpn.data().ranged.dmg_type);
+        }
+}
+
 static void hit_actor_with_projectile(
         const Projectile& projectile,
         item::Wpn& wpn)
@@ -1084,11 +1137,12 @@ static void hit_actor_with_projectile(
                 return;
         }
 
-        const AttData& att_data = *projectile.att_data;
+        const auto& att_data = *projectile.att_data;
 
         if (actor::is_player(att_data.attacker))
         {
                 auto& mon = static_cast<actor::Mon&>(*att_data.defender);
+
                 mon.make_player_aware_of_me();
         }
 
@@ -1101,24 +1155,14 @@ static void hit_actor_with_projectile(
                         AllowWound::yes);
         }
 
-        // NOTE: This is run regardless of if the defender died or not
+        // NOTE: This is run regardless of whether the defender died or not.
         wpn.on_ranged_hit(*projectile.actor_hit);
 
         wpn.on_projectile_blocked(projectile.pos);
 
         if (projectile.actor_hit->is_alive())
         {
-                auto att_prop =
-                        wpn.prop_applied_on_ranged(
-                                projectile.att_data->attacker);
-
-                if (att_prop.prop)
-                {
-                        try_apply_attack_property_on_actor(
-                                att_prop,
-                                *projectile.actor_hit,
-                                wpn.data().ranged.dmg_type);
-                }
+                apply_ranged_attack_props(projectile, wpn);
 
                 // Knock-back?
                 if (wpn.data().ranged.knocks_back &&
@@ -1735,13 +1779,11 @@ static void melee_hit_actor(
         actor::Actor& defender,
         const actor::Actor* const attacker,
         const P& attacker_origin,
-        item::Wpn& wpn,
-        const MeleeAttData& att_data)
+        item::Wpn& wpn)
 {
-        const bool is_ranged_wpn =
-                wpn.data().type == ItemType::ranged_wpn;
+        const bool is_ranged_wpn = wpn.data().type == ItemType::ranged_wpn;
 
-        const AllowWound allow_wound =
+        const auto allow_wound =
                 is_ranged_wpn
                 ? AllowWound::no
                 : AllowWound::yes;
@@ -1762,44 +1804,11 @@ static void melee_hit_actor(
 
         if (defender.is_alive())
         {
-                auto att_prop =
-                        wpn.prop_applied_on_melee(
-                                att_data.attacker);
-
-                if (att_prop.prop)
-                {
-                        try_apply_attack_property_on_actor(
-                                att_prop,
-                                defender,
-                                wpn.data().ranged.dmg_type);
-                }
-
-                // NOTE: The 'can_bleed' flag is used as a condition here for
-                // which monsters can be weakened by crippling strikes - it
-                // should be a good enough rule so that crippling strikes can
-                // only be applied against monsters where it makes sense.
-                if (actor::is_player(attacker) &&
-                    player_bon::has_trait(Trait::crippling_strikes) &&
-                    defender.m_data->can_bleed &&
-                    // TODO: This prevents applying on Worm Masses, but it's
-                    // hacky, and only makes sense *right now*, there should be
-                    // some better attribute to control this.
-                    !defender.m_properties.has(PropId::splits_on_death) &&
-                    rnd::percent(60))
-                {
-                        auto* weak = property_factory::make(PropId::weakened);
-
-                        weak->set_duration(rnd::range(2, 3));
-
-                        defender.m_properties.apply(weak);
-                }
+                apply_melee_attack_props(defender, attacker, wpn);
 
                 if (wpn.data().melee.knocks_back)
                 {
-                        knockback::run(
-                                defender,
-                                attacker_origin,
-                                false);
+                        knockback::run(defender, attacker_origin, false);
                 }
         }
         else
@@ -1879,13 +1888,7 @@ void melee(
 
         if (att_result >= ActionResult::success)
         {
-                melee_hit_actor(
-                        dmg,
-                        defender,
-                        attacker,
-                        attacker_origin,
-                        wpn,
-                        att_data);
+                melee_hit_actor(dmg, defender, attacker, attacker_origin, wpn);
         }
 
         // If player is cursed and the attack critically fails, occasionally
