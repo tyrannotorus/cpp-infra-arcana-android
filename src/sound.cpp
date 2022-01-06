@@ -14,6 +14,7 @@
 #include "actor_hear_sound.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
+#include "actor_see.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
@@ -65,7 +66,67 @@ static Array2<int> calc_snd_flood(const Snd& snd, const int snd_max_dist)
         return flood;
 }
 
-static void actor_hear_sound(
+static bool is_sound_origin_seen_by_player(
+        const actor::Actor* const actor_who_made_sound,
+        const P& origin)
+{
+        // NOTE: If we have an actor as "originator" of the sound, then the
+        // origin of the sound is considered seen if the player can see this
+        // actor - otherwise the origin is seen if the origin position is seen.
+        if (actor_who_made_sound)
+        {
+                return actor::can_player_see_actor(*actor_who_made_sound);
+        }
+        else
+        {
+                return map::g_seen.at(origin);
+        }
+}
+
+static void send_sound_to_player(
+        Snd& snd,
+        const int flood_val_at_actor,
+        const int snd_max_dist)
+{
+        const auto origin = snd.origin();
+
+        const bool is_origin_seen =
+                is_sound_origin_seen_by_player(
+                        snd.actor_who_made_sound(),
+                        origin);
+
+        if (is_origin_seen && snd.is_msg_ignored_if_origin_seen())
+        {
+                snd.clear_msg();
+        }
+
+        if (!snd.msg().empty())
+        {
+                // Add a direction to the message (i.e. "(NW)")
+                if (map::g_player->m_pos != origin)
+                {
+                        const std::string dir_str =
+                                dir_utils::compass_dir_name(
+                                        map::g_player->m_pos,
+                                        origin);
+
+                        snd.add_string("(" + dir_str + ")");
+                }
+        }
+
+        const int pct_dist = (flood_val_at_actor * 100) / snd_max_dist;
+        const auto offset = (origin - map::g_player->m_pos).signs();
+        const auto dir_to_origin = dir_utils::dir(offset);
+
+        actor::hear_sound_player(snd, is_origin_seen, dir_to_origin, pct_dist);
+}
+
+static void send_sound_to_mon(actor::Actor& actor, Snd& snd)
+{
+        actor::hear_sound_mon(actor, snd);
+}
+
+static void send_sound_to_actor(
         actor::Actor& actor,
         Snd& snd,
         const int flood_val_at_actor,
@@ -73,47 +134,11 @@ static void actor_hear_sound(
 {
         if (actor::is_player(&actor))
         {
-                const auto origin = snd.origin();
-
-                const bool is_origin_seen_by_player = map::g_seen.at(origin);
-
-                if (is_origin_seen_by_player &&
-                    snd.is_msg_ignored_if_origin_seen())
-                {
-                        snd.clear_msg();
-                }
-
-                if (!snd.msg().empty())
-                {
-                        // Add a direction to the message (i.e. "(NW)")
-                        if (actor.m_pos != origin)
-                        {
-                                const std::string dir_str =
-                                        dir_utils::compass_dir_name(
-                                                actor.m_pos,
-                                                origin);
-
-                                snd.add_string("(" + dir_str + ")");
-                        }
-                }
-
-                const int pct_dist =
-                        (flood_val_at_actor * 100) / snd_max_dist;
-
-                const auto offset = (origin - actor.m_pos).signs();
-
-                const auto dir_to_origin = dir_utils::dir(offset);
-
-                actor::hear_sound_player(
-                        snd,
-                        is_origin_seen_by_player,
-                        dir_to_origin,
-                        pct_dist);
+                send_sound_to_player(snd, flood_val_at_actor, snd_max_dist);
         }
         else
         {
-                // Not player
-                actor::hear_sound_mon(actor, snd);
+                send_sound_to_mon(actor, snd);
         }
 }
 
@@ -182,10 +207,14 @@ void run(Snd snd)
 
                 const int flood_val_at_actor = flood.at(actor_pos);
 
-                // Can the sound be heard at this distance?
-                if (((flood_val_at_actor == 0) &&
-                     (actor_pos != origin)) ||
-                    !is_snd_heard_at_range(flood_val_at_actor, snd))
+                // Can the sound be heard here?
+
+                if ((flood_val_at_actor == 0) && (actor_pos != origin))
+                {
+                        continue;
+                }
+
+                if (!is_snd_heard_at_range(flood_val_at_actor, snd))
                 {
                         continue;
                 }
@@ -199,7 +228,7 @@ void run(Snd snd)
                         continue;
                 }
 
-                actor_hear_sound(
+                send_sound_to_actor(
                         *actor,
                         snd,
                         flood_val_at_actor,
