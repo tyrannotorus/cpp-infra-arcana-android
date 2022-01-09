@@ -50,7 +50,7 @@ static const StrToRoomTypeMap s_str_to_room_type_map = {
         {"ritual", RoomType::ritual},
         {"jail", RoomType::jail},
         {"spider", RoomType::spider},
-        {"snake_pit", RoomType::snake_pit},
+        {"crawling_pit", RoomType::crawling_pit},
         {"crypt", RoomType::crypt},
         {"monster", RoomType::monster},
         {"damp", RoomType::damp},
@@ -95,7 +95,7 @@ static int base_pct_chance_dark(const RoomType room_type)
         case RoomType::spider:
                 return 50;
 
-        case RoomType::snake_pit:
+        case RoomType::crawling_pit:
                 return 75;
 
         case RoomType::crypt:
@@ -311,7 +311,7 @@ void init_room_bucket()
                 add_to_room_bucket(RoomType::monster, 1);
                 add_to_room_bucket(RoomType::damp, rnd::range(1, 2));
                 add_to_room_bucket(RoomType::pool, rnd::range(2, 3));
-                add_to_room_bucket(RoomType::snake_pit, 1);
+                add_to_room_bucket(RoomType::crawling_pit, 1);
 
                 const size_t nr_plain_rooms = s_room_bucket.size() * 2;
 
@@ -323,7 +323,7 @@ void init_room_bucket()
                 add_to_room_bucket(RoomType::jail, rnd::range(1, 2));
                 add_to_room_bucket(RoomType::ritual, 2);
                 add_to_room_bucket(RoomType::spider, rnd::range(1, 3));
-                add_to_room_bucket(RoomType::snake_pit, 1);
+                add_to_room_bucket(RoomType::crawling_pit, 1);
                 add_to_room_bucket(RoomType::crypt, 4);
                 add_to_room_bucket(RoomType::monster, 2);
                 add_to_room_bucket(RoomType::damp, rnd::range(1, 3));
@@ -341,7 +341,7 @@ void init_room_bucket()
                 // Late game
                 add_to_room_bucket(RoomType::monster, 1);
                 add_to_room_bucket(RoomType::spider, 1);
-                add_to_room_bucket(RoomType::snake_pit, 1);
+                add_to_room_bucket(RoomType::crawling_pit, 1);
                 add_to_room_bucket(RoomType::damp, rnd::range(1, 3));
                 add_to_room_bucket(RoomType::pool, rnd::range(2, 3));
                 add_to_room_bucket(RoomType::chasm, 2);
@@ -385,8 +385,8 @@ Room* make(const RoomType type, const R& r)
         case RoomType::monster:
                 return new MonsterRoom(r);
 
-        case RoomType::snake_pit:
-                return new SnakePitRoom(r);
+        case RoomType::crawling_pit:
+                return new CrawlingPitRoom(r);
 
         case RoomType::plain:
                 return new PlainRoom(r);
@@ -1027,20 +1027,20 @@ void SpiderRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 }
 
 // -----------------------------------------------------------------------------
-// Snake pit room
+// Crawling pit room
 // -----------------------------------------------------------------------------
-std::vector<RoomAutoTerrainRule> SnakePitRoom::auto_terrains_allowed() const
+std::vector<RoomAutoTerrainRule> CrawlingPitRoom::auto_terrains_allowed() const
 {
         return {};
 }
 
-bool SnakePitRoom::is_allowed() const
+bool CrawlingPitRoom::is_allowed() const
 {
         return m_r.min_dim() >= 2 &&
                 m_r.max_dim() <= 6;
 }
 
-void SnakePitRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
+void CrawlingPitRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
 {
         (void)door_proposals;
 
@@ -1055,7 +1055,7 @@ void SnakePitRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
         }
 }
 
-void SnakePitRoom::on_post_connect_hook(Array2<bool>& door_proposals)
+void CrawlingPitRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 {
         (void)door_proposals;
 
@@ -1080,35 +1080,51 @@ void SnakePitRoom::on_post_connect_hook(Array2<bool>& door_proposals)
         }
 }
 
-void SnakePitRoom::populate_monsters() const
+actor::Id CrawlingPitRoom::get_random_monster_type() const
 {
         std::vector<actor::Id> actor_id_bucket;
 
-        for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
+        // Snakes
+        if (map::g_dlvl <= g_dlvl_last_mid_game)
         {
-                const auto& d = actor::g_data[i];
-
-                // NOTE: We do not allow Spitting Cobras in snake pits, because
-                // it's VERY tedious to fight swarms of them (attack, get
-                // blinded, back away, repeat...)
-                if (d.is_snake && (d.id != actor::Id::spitting_cobra))
+                for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
                 {
-                        actor_id_bucket.push_back(d.id);
+                        const auto& d = actor::g_data[i];
+
+                        // NOTE: We do not allow Spitting Cobras, because it's
+                        // VERY tedious to fight swarms of them (attack, get
+                        // blinded, back away, repeat...).
+                        if (d.is_snake && (d.id != actor::Id::spitting_cobra))
+                        {
+                                actor_id_bucket.push_back(d.id);
+                        }
                 }
         }
 
-        // Hijacking snake pit rooms to make a worm room...
+        // Worm Masses
         if (map::g_dlvl <= g_dlvl_last_mid_game)
         {
                 actor_id_bucket.push_back(actor::Id::worm_mass);
         }
 
-        if (map::g_dlvl >= 3)
+        // Mind Worms
+        if ((map::g_dlvl >= 3) && (map::g_dlvl <= g_dlvl_last_mid_game))
         {
                 actor_id_bucket.push_back(actor::Id::mind_worm);
         }
 
-        const auto actor_id = rnd::element(actor_id_bucket);
+        // Primordial Worms
+        if (map::g_dlvl >= g_dlvl_first_late_game)
+        {
+                actor_id_bucket.push_back(actor::Id::primordial_worm);
+        }
+
+        return rnd::element(actor_id_bucket);
+}
+
+void CrawlingPitRoom::populate_monsters() const
+{
+        const auto actor_id = get_random_monster_type();
 
         auto blocked = populate_mon::forbidden_spawn_positions();
 
@@ -1136,7 +1152,7 @@ void SnakePitRoom::populate_monsters() const
                         return;
                 }
 
-                const P origin(rnd::element(origin_bucket));
+                const auto origin = rnd::element(origin_bucket);
 
                 const auto sorted_free_cells =
                         populate_mon::make_sorted_free_cells(origin, blocked);

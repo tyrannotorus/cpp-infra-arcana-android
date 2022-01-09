@@ -90,6 +90,7 @@ enum class Id
         ape,
         worm_mass,
         mind_worm,
+        primordial_worm,
         dust_vortex,
         fire_vortex,
         energy_vortex,

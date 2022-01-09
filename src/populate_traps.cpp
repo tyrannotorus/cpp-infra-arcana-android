@@ -77,7 +77,7 @@ static Fraction chance_for_trapped_room(const RoomType type)
                 chance = {1, 30};
                 break;
 
-        case RoomType::snake_pit:
+        case RoomType::crawling_pit:
         case RoomType::forest:
         case RoomType::cave:
         case RoomType::END_OF_STD_ROOMS:

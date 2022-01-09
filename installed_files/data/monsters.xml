@@ -5840,7 +5840,7 @@
     </monster>
 
     <!--************************************************************-->
-    <!-- mind_worms -->
+    <!-- mind_worm -->
     <!--************************************************************-->
     <monster id="mind_worm">
         <text>
@@ -5923,7 +5923,103 @@
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
-            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size weight="4">few</group_size>
+            <group_size weight="12">pack</group_size>
+            <group_size weight="1">swarm</group_size>
+            <native_room>plain</native_room>
+            <native_room>monster</native_room>
+            <native_room>cave</native_room>
+            <native_room>forest</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- primordial_worm -->
+    <!--************************************************************-->
+    <monster id="primordial_worm">
+        <text>
+            <name_a>a Primordial Worm</name_a>
+            <name_the>the Primordial Worm</name_the>
+            <corpse_name_a>a dead Primordial Worm</corpse_name_a>
+            <corpse_name_the>the dead Primordial Worm</corpse_name_the>
+            <description>This living fossil appears to have crept unchanged from the dawn of time through untold millions of years. Both a predator and a scavenger, it bites and tears with voracious jaws.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>seems disturbed.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>worm</tile>
+            <character>w</character>
+            <color>sepia</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>24</hit_points>
+            <spirit>8</spirit>
+            <speed>normal</speed>
+            <shock_level>unsettling</shock_level>
+            <melee>60</melee>
+            <ranged>0</ranged>
+            <dodging>-10</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>false</can_bash_doors>
+            <size>floor</size>
+            <always_prevent_knockback>true</always_prevent_knockback>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="bite">
+                <damage>7</damage>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>small_crawling</property>
+            <property>r_blind</property>
+            <property>r_poison</property>
+            <property>r_disease</property>
+            <property>short_hearing_range</property>
+            <property>corpse_eater</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>35</erratic_move_percent>
+            <turns_aware>10</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <looks>false</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>false</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>false</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>20</min_dungeon_level>
+            <max_dungeon_level>27</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="4">few</group_size>
             <group_size weight="12">pack</group_size>

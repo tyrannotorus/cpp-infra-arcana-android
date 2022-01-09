@@ -41,6 +41,11 @@ class Room;
 template <typename T>
 class Array2;
 
+namespace actor
+{
+enum class Id;
+}  // namespace actor
+
 enum class RoomType
 {
         // Standard rooms (standardized terrain spawning and reshaping)
@@ -49,7 +54,7 @@ enum class RoomType
         ritual,
         jail,
         spider,
-        snake_pit,
+        crawling_pit,
         crypt,
         monster,
         damp,  // Shallow water/mud scattered over the room
@@ -253,10 +258,10 @@ protected:
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
 };
 
-class SnakePitRoom : public StdRoom
+class CrawlingPitRoom : public StdRoom
 {
 public:
-        SnakePitRoom(R r) :
+        CrawlingPitRoom(R r) :
                 StdRoom(r, RoomType::monster) {}
 
         bool is_allowed() const override;
@@ -269,6 +274,8 @@ protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
+
+        actor::Id get_random_monster_type() const;
 };
 
 class CryptRoom : public StdRoom
