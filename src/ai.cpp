@@ -114,6 +114,82 @@ static std::vector<P> move_bucket(actor::Mon& mon)
         return bucket;
 }
 
+static void print_mon_desperate_cast_msg(const actor::Actor& mon)
+{
+        const std::string mon_name_the =
+                text_format::first_to_upper(
+                        mon.name_the());
+
+        msg_log::add(mon_name_the + " looks desperate.");
+}
+
+static DidAction try_cast_spell(
+        actor::Mon& mon,
+        actor::MonSpell& spell,
+        std::vector<actor::Actor*>& seen_targets)
+{
+        if (spell.cooldown > 0)
+        {
+                return DidAction::no;
+        }
+
+        if (!spell.spell->allow_mon_cast_now(mon, seen_targets))
+        {
+                return DidAction::no;
+        }
+
+        // Only cast the spell if monster has enough spirit - or sometimes try
+        // anyway if the monster has low HP and is hostile to the player.
+        const auto cost = spell.spell->spi_cost_range(spell.skill, &mon);
+        const bool has_spi = cost.max < mon.m_sp;
+
+        if (!has_spi)
+        {
+                const bool is_hostile = !map::g_player->is_leader_of(&mon);
+                const int max_hp = actor::max_hp(mon);
+                const bool is_low_hp = mon.m_hp < (max_hp / 3);
+                const bool is_desperate = is_hostile && is_low_hp;
+
+                if (is_desperate && rnd::one_in(20))
+                {
+                        if (actor::can_player_see_actor(mon))
+                        {
+                                print_mon_desperate_cast_msg(mon);
+                        }
+                }
+                else
+                {
+                        return DidAction::no;
+                }
+        }
+
+        spell.cooldown = spell.spell->mon_cooldown();
+
+        spell.spell->cast(&mon, spell.skill, SpellSrc::learned, seen_targets);
+
+        return DidAction::yes;
+}
+
+static void remove_player_with_sanctuary(std::vector<actor::Actor*>& actors)
+{
+        if (!map::g_player->m_properties.has(PropId::sanctuary))
+        {
+                return;
+        }
+
+        for (auto it = std::begin(actors); it != std::end(actors); ++it)
+        {
+                auto* const actor = *it;
+
+                if (actor::is_player(actor))
+                {
+                        actors.erase(it);
+
+                        return;
+                }
+        }
+}
+
 // -----------------------------------------------------------------------------
 // ai
 // -----------------------------------------------------------------------------
@@ -123,62 +199,38 @@ namespace action
 {
 DidAction try_cast_random_spell(actor::Mon& mon)
 {
-        if (!mon.is_alive() ||
-            mon.m_mon_spells.empty() ||
-            !mon.m_properties.allow_cast_intr_spell_absolute(Verbose::no))
+        if (!mon.is_alive())
+        {
+                return DidAction::no;
+        }
+
+        if (mon.m_mon_spells.empty())
+        {
+                return DidAction::no;
+        }
+
+        if (!mon.m_properties.allow_cast_intr_spell_absolute(Verbose::no))
         {
                 return DidAction::no;
         }
 
         rnd::shuffle(mon.m_mon_spells);
 
+        auto seen_targets = actor::seen_foes(mon);
+
+        remove_player_with_sanctuary(seen_targets);
+
         for (auto& spell : mon.m_mon_spells)
         {
-                int& cooldown = spell.cooldown;
+                const auto did_cast =
+                        try_cast_spell(
+                                mon,
+                                spell,
+                                seen_targets);
 
-                if ((cooldown > 0) ||
-                    !spell.spell->allow_mon_cast_now(mon))
+                if (did_cast == DidAction::yes)
                 {
-                        continue;
-                }
-
-                const int spell_max_spi =
-                        spell.spell->spi_cost_range(spell.skill, &mon)
-                                .max;
-
-                const int max_hp = actor::max_hp(mon);
-
-                const bool has_spi =
-                        spell_max_spi < mon.m_sp;
-
-                const bool is_hostile_player =
-                        !map::g_player->is_leader_of(&mon);
-
-                const bool is_low_hp = mon.m_hp < (max_hp / 3);
-
-                // Only cast the spell if monster has enough spirit - or
-                // sometimes try anyway if the monster has low HP and is
-                // hostile to the player.
-                if (has_spi ||
-                    (is_hostile_player &&
-                     is_low_hp &&
-                     rnd::one_in(20)))
-                {
-                        if (!has_spi &&
-                            actor::can_player_see_actor(mon))
-                        {
-                                const std::string mon_name_the =
-                                        text_format::first_to_upper(
-                                                mon.name_the());
-
-                                msg_log::add(mon_name_the + " looks desperate.");
-                        }
-
-                        cooldown = spell.spell->mon_cooldown();
-
-                        spell.spell->cast(&mon, spell.skill, SpellSrc::learned);
-
-                        return DidAction::yes;
+                        return did_cast;
                 }
         }
 

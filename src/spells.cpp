@@ -198,10 +198,6 @@ static void swap_wall_floor(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
-        // TODO: This is pretty much copy/pasted from the "Alter Environment"
-        // property, consider refactoring.
-        // Alternatively, maybe just apply that property on the caster instead.
-
         print_side_effect_trigger_message();
 
         Array2<bool> blocked(map::dims());
@@ -1140,7 +1136,8 @@ Range Spell::spi_cost_range(
 void Spell::cast(
         actor::Actor* const caster,
         const SpellSkill skill,
-        const SpellSrc spell_src) const
+        const SpellSrc spell_src,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         TRACE_FUNC_BEGIN;
 
@@ -1149,10 +1146,10 @@ void Spell::cast(
         auto& properties = caster->m_properties;
 
         // If this is an intrinsic cast, check properties which NEVER allows
-        // casting or speaking
+        // casting or speaking.
 
         // NOTE: If this is a non-intrinsic cast (e.g. from a scroll), then we
-        // assume that the caller has made all checks themselves
+        // assume that the caller has made all checks themselves.
         if ((spell_src == SpellSrc::learned) &&
             (!properties.allow_cast_intr_spell_absolute(Verbose::yes) ||
              !properties.allow_speak(Verbose::yes)))
@@ -1181,7 +1178,7 @@ void Spell::cast(
 
                 map::g_player->incr_shock((double)value, shock_src);
 
-                // Make sound if noisy - casting from scrolls is always noisy
+                // Make sound if noisy - casting from scrolls is always noisy.
                 if (is_noisy(skill) || (spell_src == SpellSrc::manuscript))
                 {
                         Snd snd(
@@ -1202,7 +1199,7 @@ void Spell::cast(
                 // Caster is monster
                 TRACE << "Monster casting spell" << std::endl;
 
-                // Make sound if noisy - casting from scrolls is always noisy
+                // Make sound if noisy - casting from scrolls is always noisy.
                 if (is_noisy(skill) ||
                     (spell_src == SpellSrc::manuscript))
                 {
@@ -1225,7 +1222,7 @@ void Spell::cast(
                                 }
                                 else
                                 {
-                                        // Cannot see monster
+                                        // Cannot see monster.
                                         mon_name =
                                                 mon->m_data->is_humanoid
                                                 ? "Someone"
@@ -1259,7 +1256,7 @@ void Spell::cast(
                         actor::hit_sp(*caster, cost_range.roll(), Verbose::no);
                 }
 
-                // Check properties which MAY allow casting with a random chance
+                // Check properties which MAY allow casting.
                 allow_cast =
                         properties.allow_cast_intr_spell_chance(
                                 Verbose::yes);
@@ -1271,7 +1268,7 @@ void Spell::cast(
 
         if (allow_cast && caster->is_alive())
         {
-                run_effect(caster, skill);
+                run_effect(caster, skill, seen_targets);
 
                 end_properties_for_casting_spell(*caster, id());
         }
@@ -1282,7 +1279,7 @@ void Spell::cast(
             (base_max_spi_cost(skill) > 0) &&
             rnd::one_in(7))
         {
-                // Run a random side effect
+                // Run a random side effect.
                 const int d = 3;
 
                 const R rect(
@@ -1446,8 +1443,11 @@ int SpellAuraOfDecay::base_max_spi_cost(const SpellSkill skill) const
 
 void SpellAuraOfDecay::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         auto* prop =
                 static_cast<PropAuraOfDecay*>(
                         property_factory::make(
@@ -1499,11 +1499,12 @@ int SpellAuraOfDecay::mon_cooldown() const
         return 30;
 }
 
-bool SpellAuraOfDecay::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellAuraOfDecay::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen &&
+                !seen_targets.empty() &&
                 !mon.m_properties.has(PropId::aura_of_decay));
 }
 
@@ -1642,13 +1643,10 @@ void Darkbolt::on_hit(
 
 void SpellBolt::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        std::vector<actor::Actor*> target_bucket;
-
-        target_bucket = actor::seen_foes(*caster);
-
-        if (target_bucket.empty())
+        if (seen_targets.empty())
         {
                 if (actor::is_player(caster))
                 {
@@ -1676,7 +1674,7 @@ void SpellBolt::run_effect(
         auto* const target =
                 map::random_closest_actor(
                         caster->m_pos,
-                        target_bucket);
+                        seen_targets);
 
         // Spell resistance?
         if (target->m_properties.has(PropId::r_spell))
@@ -1695,8 +1693,9 @@ void SpellBolt::run_effect(
                                         MorePromptOnMsg::yes);
                         }
 
-                        // Run effect with the target as caster instead
-                        run_effect(target, skill);
+                        // Run effect with the target as caster, and the caster
+                        // as seen target instead.
+                        run_effect(target, skill, {caster});
                 }
 
                 return;
@@ -1710,7 +1709,7 @@ void SpellBolt::run_effect(
                         audio::SfxId::darkbolt_impact,
                         IgnoreMsgIfOriginSeen::yes,
                         target->m_pos,
-                        caster,
+                        nullptr,
                         SndVol::low,
                         AlertsMon::yes);
 
@@ -1824,11 +1823,13 @@ void SpellBolt::draw_projectile_travel(
         }
 }
 
-bool SpellBolt::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellBolt::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -1922,6 +1923,7 @@ void SpellAzaGaze::apply_properties_on_target(
 }
 
 void SpellAzaGaze::run_effect_on_target(
+        actor::Actor* const caster,
         actor::Actor& target,
         const SpellSkill skill) const
 {
@@ -1942,8 +1944,9 @@ void SpellAzaGaze::run_effect_on_target(
                                         MorePromptOnMsg::yes);
                         }
 
-                        // Run effect with the actor as caster
-                        run_effect(&target, skill);
+                        // Run effect with the target as caster, and the caster
+                        // as seen target instead.
+                        run_effect(&target, skill, {caster});
                 }
 
                 return;
@@ -1988,15 +1991,14 @@ void SpellAzaGaze::run_effect_on_target(
 
 void SpellAzaGaze::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        const auto targets = actor::seen_foes(*caster);
-
         if (actor::is_player(caster))
         {
                 std::string msg;
 
-                if (targets.empty())
+                if (seen_targets.empty())
                 {
                         msg = "An insane cacophony resounds through the air!";
                 }
@@ -2013,11 +2015,11 @@ void SpellAzaGaze::run_effect(
                 snd.run();
         }
 
-        io::draw_blast_at_seen_actors(targets, colors::light_red());
+        io::draw_blast_at_seen_actors(seen_targets, colors::light_red());
 
-        for (auto* const target : targets)
+        for (auto* const target : seen_targets)
         {
-                run_effect_on_target(*target, skill);
+                run_effect_on_target(caster, *target, skill);
         }
 }
 
@@ -2054,11 +2056,13 @@ std::vector<std::string> SpellAzaGaze::descr_specific(
         return descr;
 }
 
-bool SpellAzaGaze::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellAzaGaze::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -2118,8 +2122,11 @@ int SpellCataclysm::base_max_spi_cost(const SpellSkill skill) const
 
 void SpellCataclysm::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         const bool is_player = actor::is_player(caster);
 
         if (actor::can_player_see_actor(*caster))
@@ -2306,11 +2313,23 @@ std::vector<std::string> SpellCataclysm::descr_specific(
         return descr;
 }
 
-bool SpellCataclysm::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellCataclysm::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                (mon.m_ai_state.is_target_seen || rnd::one_in(20)));
+        // Always allow casting with a visible target.
+        if (!seen_targets.empty())
+        {
+                return true;
+        }
+
+        // Sometimes allow casting if monster has an unseen target.
+        if (mon.m_ai_state.target && rnd::one_in(20))
+        {
+                return true;
+        }
+
+        return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -2358,8 +2377,11 @@ void SpellPestilence::on_rat_summoned(
 
 void SpellPestilence::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         const size_t nr_mon = nr_rats_summoned(skill);
 
         actor::Actor* leader = nullptr;
@@ -2458,11 +2480,23 @@ std::vector<std::string> SpellPestilence::descr_specific(
         return descr;
 }
 
-bool SpellPestilence::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellPestilence::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                (mon.m_ai_state.is_target_seen || rnd::one_in(30)));
+        // Always allow casting with a visible target.
+        if (!seen_targets.empty())
+        {
+                return true;
+        }
+
+        // Sometimes allow casting if monster has an unseen target.
+        if (mon.m_ai_state.target && rnd::one_in(30))
+        {
+                return true;
+        }
+
+        return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -2557,9 +2591,12 @@ void SpellSpectralWeapons::on_mon_summoned(
 
 void SpellSpectralWeapons::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         TRACE_FUNC_BEGIN;
+
+        (void)seen_targets;
 
         if (!actor::is_player(caster))
         {
@@ -2702,8 +2739,11 @@ int SpellControlObject::max_dist(const SpellSkill skill) const
 
 void SpellControlObject::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         const auto origin = caster->m_pos;
 
         auto ctrl_obj_state =
@@ -2775,7 +2815,8 @@ Range SpellCleansingFire::burn_duration_range() const
 
 void SpellCleansingFire::run_effect(
         actor::Actor* caster,
-        SpellSkill skill) const
+        SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         if (!caster)
         {
@@ -2784,21 +2825,19 @@ void SpellCleansingFire::run_effect(
 
         std::vector<actor::Actor*> targets;
 
-        const auto seen_foes = actor::seen_foes(*caster);
-
-        if (seen_foes.empty())
+        if (seen_targets.empty())
         {
                 return;
         }
 
         if (skill == SpellSkill::basic)
         {
-                targets.push_back(rnd::element(seen_foes));
+                targets.push_back(rnd::element(seen_targets));
         }
         else
         {
                 // Skill greater than basic - target all seen foes
-                targets = seen_foes;
+                targets = seen_targets;
         }
 
         for (auto* const actor : targets)
@@ -2820,8 +2859,9 @@ void SpellCleansingFire::run_effect(
                                                 MorePromptOnMsg::yes);
                                 }
 
-                                // Run effect with the target as caster instead
-                                run_effect(actor, skill);
+                                // Run effect with the target as caster, and the
+                                // caster as seen target instead.
+                                run_effect(actor, skill, {caster});
                         }
 
                         continue;
@@ -2891,8 +2931,11 @@ Range SpellSanctuary::duration(const SpellSkill skill) const
 
 void SpellSanctuary::run_effect(
         actor::Actor* caster,
-        SpellSkill skill) const
+        SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         if (!caster)
         {
                 return;
@@ -2940,9 +2983,11 @@ Range SpellPurge::fear_duration_range() const
 
 void SpellPurge::run_effect(
         actor::Actor* caster,
-        SpellSkill skill) const
+        SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)skill;
+        (void)seen_targets;
 
         if (!caster)
         {
@@ -3047,9 +3092,11 @@ std::vector<std::string> SpellPurge::descr_specific(
 // -----------------------------------------------------------------------------
 void SpellFrenzy::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)skill;
+        (void)seen_targets;
 
         auto* prop = property_factory::make(PropId::frenzied);
 
@@ -3096,8 +3143,11 @@ Range SpellBless::duration_range(SpellSkill skill) const
 
 void SpellBless::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         auto* prop = property_factory::make(PropId::blessed);
 
         if (skill == SpellSkill::transcendent)
@@ -3187,8 +3237,11 @@ Range SpellLight::burning_duration_range() const
 
 void SpellLight::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         auto* radiant = property_factory::make(PropId::radiant_fov);
 
         radiant->set_duration(light_duration_range(skill).roll());
@@ -3289,8 +3342,11 @@ Range SpellSeeInvis::duration_range(SpellSkill skill) const
 
 void SpellSeeInvis::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         auto* prop = property_factory::make(PropId::see_invis);
 
         prop->set_duration(duration_range(skill).roll());
@@ -3314,8 +3370,12 @@ std::vector<std::string> SpellSeeInvis::descr_specific(
         return descr;
 }
 
-bool SpellSeeInvis::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellSeeInvis::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         return (
                 !mon.m_properties.has(PropId::see_invis) &&
                 mon.is_aware_of_player() &&
@@ -3332,9 +3392,11 @@ int SpellSpellShield::base_max_spi_cost(const SpellSkill skill) const
 
 void SpellSpellShield::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)skill;
+        (void)seen_targets;
 
         auto* prop = property_factory::make(PropId::r_spell);
 
@@ -3357,8 +3419,12 @@ std::vector<std::string> SpellSpellShield::descr_specific(
         return descr;
 }
 
-bool SpellSpellShield::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellSpellShield::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         return !mon.m_properties.has(PropId::r_spell);
 }
 
@@ -3396,8 +3462,11 @@ int SpellHaste::base_max_spi_cost(const SpellSkill skill) const
 
 void SpellHaste::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         auto* prop = property_factory::make(PropId::hasted);
 
         prop->set_duration(duration_range(skill).roll());
@@ -3432,11 +3501,12 @@ int SpellHaste::mon_cooldown() const
         return 20;
 }
 
-bool SpellHaste::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellHaste::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen &&
+                !seen_targets.empty() &&
                 !mon.m_properties.has(PropId::hasted));
 }
 
@@ -3474,8 +3544,11 @@ int SpellPremonition::base_max_spi_cost(const SpellSkill skill) const
 
 void SpellPremonition::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         auto* prop = property_factory::make(PropId::premonition);
 
         prop->set_duration(duration_range(skill).roll());
@@ -3531,8 +3604,11 @@ Range SpellErudition::get_duration_range(SpellSkill skill) const
 
 void SpellErudition::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         {
                 auto* prop = property_factory::make(PropId::erudition);
 
@@ -3602,8 +3678,11 @@ int SpellIdentify::base_max_spi_cost(const SpellSkill skill) const
 
 void SpellIdentify::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         std::vector<ItemType> item_types_allowed;
 
         if (skill != SpellSkill::master)
@@ -3706,8 +3785,11 @@ int SpellTeleport::invis_duration(const SpellSkill skill) const
 
 void SpellTeleport::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         if (skill >= SpellSkill::master)
         {
                 auto* const invis = property_factory::make(PropId::invis);
@@ -3722,12 +3804,14 @@ void SpellTeleport::run_effect(
         teleport(*caster, ShouldCtrlTele::if_tele_ctrl_prop, max_d);
 }
 
-bool SpellTeleport::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellTeleport::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         const bool is_low_hp = (mon.m_hp <= (actor::max_hp(mon) / 2));
 
         return (
-                mon.is_aware_of_player() &&
+                !seen_targets.empty() &&
                 is_low_hp &&
                 rnd::fraction(3, 4));
 }
@@ -3783,8 +3867,11 @@ Range SpellResistance::duration_range(SpellSkill skill) const
 
 void SpellResistance::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         int nr_turns = duration_range(skill).roll();
 
         auto* prop_r_fire = property_factory::make(PropId::r_fire);
@@ -3813,14 +3900,16 @@ std::vector<std::string> SpellResistance::descr_specific(
         return descr;
 }
 
-bool SpellResistance::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellResistance::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         const bool has_r_fire = mon.m_properties.has(PropId::r_fire);
         const bool has_r_elec = mon.m_properties.has(PropId::r_elec);
 
-        return (
-                (!has_r_fire || !has_r_elec) &&
-                mon.m_ai_state.target);
+        return ((!has_r_fire || !has_r_elec) && mon.m_ai_state.target);
 }
 
 // -----------------------------------------------------------------------------
@@ -3828,7 +3917,8 @@ bool SpellResistance::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 void SpellKnockBack::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)skill;
 
@@ -3838,7 +3928,7 @@ void SpellKnockBack::run_effect(
         std::string target_str = "me";
         auto* caster_used = caster;
         auto* const mon = static_cast<actor::Mon*>(caster_used);
-        auto* target = mon->m_ai_state.target;
+        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
         ASSERT(mon->m_ai_state.is_target_seen);
@@ -3899,11 +3989,13 @@ void SpellKnockBack::run_effect(
         }
 }
 
-bool SpellKnockBack::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellKnockBack::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -3923,7 +4015,8 @@ int SpellCurse::mon_cooldown() const
 
 void SpellCurse::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         Range duration_range;
         duration_range.min = 15 * ((int)skill + 1);
@@ -3931,21 +4024,22 @@ void SpellCurse::run_effect(
 
         const int duration = duration_range.roll();
 
-        auto targets = actor::seen_foes(*caster);
-
-        if (targets.empty())
+        if (seen_targets.empty())
         {
                 return;
         }
 
         // There are targets available
 
+        std::vector<actor::Actor*> targets;
+
         if (skill == SpellSkill::basic)
         {
-                auto* const target = rnd::element(targets);
-
-                targets.clear();
-                targets.push_back(target);
+                targets = {rnd::element(seen_targets)};
+        }
+        else
+        {
+                targets = seen_targets;
         }
 
         io::draw_blast_at_seen_actors(targets, colors::magenta());
@@ -3969,8 +4063,9 @@ void SpellCurse::run_effect(
                                                 MorePromptOnMsg::yes);
                                 }
 
-                                // Run effect with target as caster
-                                run_effect(target, skill);
+                                // Run effect with the target as caster, and the
+                                // caster as seen target instead.
+                                run_effect(target, skill, {caster});
                         }
 
                         continue;
@@ -3998,11 +4093,13 @@ void SpellCurse::run_effect(
         }
 }
 
-bool SpellCurse::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellCurse::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -4044,13 +4141,12 @@ int SpellEnfeeble::mon_cooldown() const
 
 void SpellEnfeeble::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         const int duration = duration_range(skill).roll();
 
-        auto targets = actor::seen_foes(*caster);
-
-        if (targets.empty())
+        if (seen_targets.empty())
         {
                 msg_log::add(
                         "The bugs on the ground suddenly move very feebly.");
@@ -4060,13 +4156,15 @@ void SpellEnfeeble::run_effect(
 
         // There are targets available
 
+        std::vector<actor::Actor*> targets;
+
         if (skill == SpellSkill::basic)
         {
-                auto* const target = rnd::element(targets);
-
-                targets.clear();
-
-                targets.push_back(target);
+                targets = {rnd::element(targets)};
+        }
+        else
+        {
+                targets = seen_targets;
         }
 
         io::draw_blast_at_seen_actors(targets, colors::magenta());
@@ -4090,8 +4188,9 @@ void SpellEnfeeble::run_effect(
                                                 MorePromptOnMsg::yes);
                                 }
 
-                                // Run effect with target as caster
-                                run_effect(target, skill);
+                                // Run effect with the target as caster, and the
+                                // caster as seen target instead.
+                                run_effect(target, skill, {caster});
                         }
 
                         continue;
@@ -4142,11 +4241,13 @@ std::vector<std::string> SpellEnfeeble::descr_specific(
         return descr;
 }
 
-bool SpellEnfeeble::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellEnfeeble::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -4183,13 +4284,12 @@ int SpellSlow::base_max_spi_cost(const SpellSkill skill) const
 
 void SpellSlow::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         const int duration = duration_range(skill).roll();
 
-        auto targets = actor::seen_foes(*caster);
-
-        if (targets.empty())
+        if (seen_targets.empty())
         {
                 msg_log::add(
                         "The bugs on the ground suddenly move very slowly.");
@@ -4199,13 +4299,15 @@ void SpellSlow::run_effect(
 
         // There are targets available
 
+        std::vector<actor::Actor*> targets;
+
         if (skill == SpellSkill::basic)
         {
-                auto* const target = rnd::element(targets);
-
-                targets.clear();
-
-                targets.push_back(target);
+                targets = {rnd::element(targets)};
+        }
+        else
+        {
+                targets = seen_targets;
         }
 
         io::draw_blast_at_seen_actors(targets, colors::magenta());
@@ -4229,8 +4331,9 @@ void SpellSlow::run_effect(
                                                 MorePromptOnMsg::yes);
                                 }
 
-                                // Run effect with target as caster
-                                run_effect(target, skill);
+                                // Run effect with the target as caster, and the
+                                // caster as seen target instead.
+                                run_effect(target, skill, {caster});
                         }
 
                         continue;
@@ -4285,11 +4388,13 @@ int SpellSlow::mon_cooldown() const
         return 20;
 }
 
-bool SpellSlow::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellSlow::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -4331,11 +4436,10 @@ int SpellTerrify::mon_cooldown() const
 
 void SpellTerrify::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        auto targets = actor::seen_foes(*caster);
-
-        if (targets.empty())
+        if (seen_targets.empty())
         {
                 msg_log::add("The bugs on the ground suddenly scatter away.");
 
@@ -4344,13 +4448,15 @@ void SpellTerrify::run_effect(
 
         // There are targets available
 
+        std::vector<actor::Actor*> targets;
+
         if (skill == SpellSkill::basic)
         {
-                auto* const target = rnd::element(targets);
-
-                targets.clear();
-
-                targets.push_back(target);
+                targets = {rnd::element(targets)};
+        }
+        else
+        {
+                targets = seen_targets;
         }
 
         io::draw_blast_at_seen_actors(targets, colors::magenta());
@@ -4374,8 +4480,9 @@ void SpellTerrify::run_effect(
                                                 MorePromptOnMsg::yes);
                                 }
 
-                                // Run effect with target as caster
-                                run_effect(target, skill);
+                                // Run effect with the target as caster, and the
+                                // caster as seen target instead.
+                                run_effect(target, skill, {caster});
                         }
 
                         continue;
@@ -4426,11 +4533,13 @@ std::vector<std::string> SpellTerrify::descr_specific(
         return descr;
 }
 
-bool SpellTerrify::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellTerrify::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -4438,7 +4547,8 @@ bool SpellTerrify::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 void SpellDisease::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)skill;
 
@@ -4448,7 +4558,7 @@ void SpellDisease::run_effect(
 
         auto* const mon = static_cast<actor::Mon*>(caster_used);
 
-        auto* target = mon->m_ai_state.target;
+        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
 
@@ -4506,11 +4616,13 @@ void SpellDisease::run_effect(
         }
 }
 
-bool SpellDisease::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellDisease::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -4518,8 +4630,11 @@ bool SpellDisease::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 void SpellSummonMon::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         auto mon_dlvl_range = get_allowed_mon_dlvl_range(skill);
 
         auto summon_bucket = make_summon_bucket(mon_dlvl_range);
@@ -4668,11 +4783,23 @@ void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
         }
 }
 
-bool SpellSummonMon::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellSummonMon::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                (mon.m_ai_state.is_target_seen || rnd::one_in(30)));
+        // Always allow casting with a visible target.
+        if (!seen_targets.empty())
+        {
+                return true;
+        }
+
+        // Sometimes allow casting if monster has an unseen target.
+        if (mon.m_ai_state.target && rnd::one_in(30))
+        {
+                return true;
+        }
+
+        return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -4680,9 +4807,11 @@ bool SpellSummonMon::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 void SpellSummonTentacles::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)skill;
+        (void)seen_targets;
 
         actor::Actor* leader = nullptr;
 
@@ -4740,11 +4869,23 @@ void SpellSummonTentacles::run_effect(
         }
 }
 
-bool SpellSummonTentacles::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellSummonTentacles::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        // Always allow casting with a visible target.
+        if (!seen_targets.empty())
+        {
+                return true;
+        }
+
+        // Sometimes allow casting if monster has an unseen target.
+        if (mon.m_ai_state.target && rnd::one_in(30))
+        {
+                return true;
+        }
+
+        return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -4762,8 +4903,11 @@ Range SpellHeal::regen_duration() const
 
 void SpellHeal::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         if ((int)skill >= (int)SpellSkill::expert)
         {
                 caster->m_properties.end_prop(PropId::infected);
@@ -4807,8 +4951,12 @@ void SpellHeal::run_effect(
         caster->restore_hp(nr_hp_restored(skill));
 }
 
-bool SpellHeal::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellHeal::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
+        (void)seen_targets;
+
         return mon.m_hp < actor::max_hp(mon);
 }
 
@@ -4854,7 +5002,8 @@ std::vector<std::string> SpellHeal::descr_specific(
 // -----------------------------------------------------------------------------
 void SpellMiGoHypno::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)skill;
 
@@ -4864,7 +5013,7 @@ void SpellMiGoHypno::run_effect(
 
         auto* const mon = static_cast<actor::Mon*>(caster_used);
 
-        auto* target = mon->m_ai_state.target;
+        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
 
@@ -4922,12 +5071,13 @@ void SpellMiGoHypno::run_effect(
         }
 }
 
-bool SpellMiGoHypno::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellMiGoHypno::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen &&
-                actor::is_player(mon.m_ai_state.target));
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -4935,7 +5085,8 @@ bool SpellMiGoHypno::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 void SpellBurn::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         ASSERT(!actor::is_player(caster));
 
@@ -4943,10 +5094,9 @@ void SpellBurn::run_effect(
 
         auto* const mon = static_cast<actor::Mon*>(caster_used);
 
-        auto* target = mon->m_ai_state.target;
+        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
-
         ASSERT(mon->m_ai_state.is_target_seen);
 
         // Spell resistance?
@@ -5001,11 +5151,13 @@ void SpellBurn::run_effect(
         }
 }
 
-bool SpellBurn::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellBurn::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -5013,7 +5165,8 @@ bool SpellBurn::allow_mon_cast_now(actor::Mon& mon) const
 // -----------------------------------------------------------------------------
 void SpellDeafen::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         ASSERT(!actor::is_player(caster));
 
@@ -5021,7 +5174,7 @@ void SpellDeafen::run_effect(
 
         auto* const mon = static_cast<actor::Mon*>(caster_used);
 
-        auto* target = mon->m_ai_state.target;
+        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
 
@@ -5067,11 +5220,13 @@ void SpellDeafen::run_effect(
         }
 }
 
-bool SpellDeafen::allow_mon_cast_now(actor::Mon& mon) const
+bool SpellDeafen::allow_mon_cast_now(
+        actor::Mon& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
-        return (
-                mon.m_ai_state.target &&
-                mon.m_ai_state.is_target_seen);
+        (void)mon;
+
+        return !seen_targets.empty();
 }
 
 // -----------------------------------------------------------------------------
@@ -5103,9 +5258,11 @@ int SpellTransmut::chance_weapon(
 
 void SpellTransmut::run_effect(
         actor::Actor* const caster,
-        const SpellSkill skill) const
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)caster;
+        (void)seen_targets;
 
         const auto& p = map::g_player->m_pos;
 

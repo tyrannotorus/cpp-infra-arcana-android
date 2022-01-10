@@ -14,6 +14,7 @@
 
 #include "actor.hpp"
 #include "actor_player.hpp"
+#include "actor_see.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "game.hpp"
@@ -458,10 +459,13 @@ ConsumeItem Scroll::activate(actor::Actor* const actor)
 
         const auto skill = player_skill_for_scroll(id);
 
+        const auto seen_foes = actor::seen_foes(*map::g_player);
+
         spell->cast(
                 map::g_player,
                 skill,
-                SpellSrc::manuscript);
+                SpellSrc::manuscript,
+                seen_foes);
 
         msg_log::add(crumble_str);
 

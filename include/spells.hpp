@@ -137,11 +137,16 @@ public:
         void cast(
                 actor::Actor* caster,
                 SpellSkill skill,
-                SpellSrc spell_src) const;
+                SpellSrc spell_src,
+                const std::vector<actor::Actor*>& seen_targets) const;
 
-        virtual bool allow_mon_cast_now(actor::Mon& mon) const
+        virtual bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const
         {
                 (void)mon;
+                (void)seen_targets;
+
                 return false;
         }
 
@@ -182,7 +187,8 @@ public:
 
         virtual void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const = 0;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const = 0;
 
 protected:
         virtual int base_max_spi_cost(SpellSkill skill) const = 0;
@@ -197,7 +203,9 @@ class SpellCurse : public Spell
 public:
         SpellCurse() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
 
@@ -235,7 +243,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 protected:
         int base_max_spi_cost(SpellSkill skill) const override;
@@ -253,7 +262,9 @@ class SpellEnfeeble : public Spell
 public:
         SpellEnfeeble() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
 
@@ -287,7 +298,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 protected:
         Range duration_range(SpellSkill skill) const;
@@ -307,7 +319,9 @@ class SpellSlow : public Spell
 public:
         SpellSlow() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
 
@@ -341,7 +355,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 protected:
         Range duration_range(SpellSkill skill) const;
@@ -361,7 +376,9 @@ class SpellTerrify : public Spell
 public:
         SpellTerrify() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
 
@@ -395,7 +412,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 protected:
         int base_max_spi_cost(SpellSkill skill) const override;
@@ -415,7 +433,9 @@ class SpellAuraOfDecay : public Spell
 public:
         SpellAuraOfDecay() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
 
@@ -449,7 +469,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(SpellSkill skill) const override;
@@ -609,7 +630,9 @@ public:
                 m_impl(impl)
         {}
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -649,7 +672,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -676,7 +700,9 @@ class SpellAzaGaze : public Spell
 public:
         SpellAzaGaze() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -713,7 +739,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -737,6 +764,7 @@ private:
         Range conflict_duration_range(SpellSkill skill) const;
 
         void run_effect_on_target(
+                actor::Actor* caster,
                 actor::Actor& target,
                 SpellSkill skill) const;
 
@@ -754,7 +782,9 @@ class SpellCataclysm : public Spell
 public:
         SpellCataclysm() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         bool player_can_learn() const override
         {
@@ -786,7 +816,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int destruction_radi(SpellSkill skill) const;
@@ -810,7 +841,9 @@ class SpellPestilence : public Spell
 public:
         SpellPestilence() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -847,7 +880,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int nr_rats_summoned(SpellSkill skill) const;
@@ -904,7 +938,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -966,7 +1001,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(SpellSkill skill) const override;
@@ -1016,7 +1052,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -1076,7 +1113,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -1136,7 +1174,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -1198,7 +1237,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -1254,7 +1294,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         Range duration_range(SpellSkill skill) const;
@@ -1309,7 +1350,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int skill_bon(SpellSkill skill) const;
@@ -1369,7 +1411,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         Range light_duration_range(SpellSkill skill) const;
@@ -1398,7 +1441,9 @@ class SpellKnockBack : public Spell
 public:
         SpellKnockBack() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -1440,7 +1485,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -1463,7 +1509,9 @@ class SpellTeleport : public Spell
 public:
         SpellTeleport() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -1500,7 +1548,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int invis_duration(SpellSkill skill) const;
@@ -1527,7 +1576,9 @@ class SpellSeeInvis : public Spell
 public:
         SpellSeeInvis() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -1564,7 +1615,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         Range duration_range(SpellSkill skill) const;
@@ -1589,7 +1641,9 @@ class SpellSpellShield : public Spell
 public:
         SpellSpellShield() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -1626,7 +1680,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(SpellSkill skill) const override;
@@ -1644,7 +1699,9 @@ class SpellHaste : public Spell
 public:
         SpellHaste() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
 
@@ -1678,7 +1735,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         Range duration_range(SpellSkill skill) const;
@@ -1728,7 +1786,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         Range duration_range(SpellSkill skill) const;
@@ -1778,7 +1837,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(SpellSkill skill) const override;
@@ -1828,7 +1888,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(SpellSkill skill) const override;
@@ -1846,7 +1907,9 @@ class SpellResistance : public Spell
 public:
         SpellResistance() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -1883,7 +1946,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         Range duration_range(SpellSkill skill) const;
@@ -1908,7 +1972,9 @@ class SpellDisease : public Spell
 public:
         SpellDisease() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -1950,7 +2016,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -1973,7 +2040,9 @@ class SpellSummonMon : public Spell
 public:
         SpellSummonMon() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -2015,7 +2084,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -2045,7 +2115,9 @@ class SpellSummonTentacles : public Spell
 public:
         SpellSummonTentacles() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -2087,7 +2159,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -2110,7 +2183,9 @@ class SpellHeal : public Spell
 public:
         SpellHeal() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -2147,7 +2222,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int nr_hp_restored(SpellSkill skill) const;
@@ -2174,7 +2250,9 @@ class SpellMiGoHypno : public Spell
 public:
         SpellMiGoHypno() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -2216,7 +2294,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -2239,7 +2318,9 @@ class SpellBurn : public Spell
 public:
         SpellBurn() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -2281,7 +2362,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override
@@ -2304,7 +2386,9 @@ class SpellDeafen : public Spell
 public:
         SpellDeafen() = default;
 
-        bool allow_mon_cast_now(actor::Mon& mon) const override;
+        bool allow_mon_cast_now(
+                actor::Mon& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
         {
@@ -2346,7 +2430,8 @@ public:
 
         void run_effect(
                 actor::Actor* caster,
-                SpellSkill skill) const override;
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
         int base_max_spi_cost(const SpellSkill skill) const override

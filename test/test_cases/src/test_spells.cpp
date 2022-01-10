@@ -222,33 +222,31 @@ TEST_CASE("Test spell shield")
 {
         test_utils::init_all();
 
-        const P p0(10, 10);
-        const P p1(11, 10);
+        map::put(new terrain::Floor({10, 10}));
+        map::put(new terrain::Floor({11, 10}));
 
-        map::put(new terrain::Floor(p0));
-        map::put(new terrain::Floor(p1));
-
-        map::g_player->m_pos = p0;
+        map::g_player->m_pos.set(10, 10);
 
         SECTION("Temporary spell shield")
         {
-                auto* const mon = actor::make(actor::Id::zombie, p1);
+                auto* const mon = actor::make(actor::Id::zombie, {11, 10});
 
                 map::update_vision();
 
                 mon->m_properties.apply(
-                        property_factory::make(PropId::r_spell));
+                        property_factory::make(
+                                PropId::r_spell));
 
                 const auto* const darkbolt = spells::make(SpellId::darkbolt);
 
                 REQUIRE(mon->m_properties.has(PropId::r_spell));
 
-                darkbolt->run_effect(map::g_player, SpellSkill::basic);
+                darkbolt->run_effect(map::g_player, SpellSkill::basic, {mon});
 
                 REQUIRE(mon->m_hp == actor::max_hp(*mon));
                 REQUIRE(!mon->m_properties.has(PropId::r_spell));
 
-                darkbolt->run_effect(map::g_player, SpellSkill::basic);
+                darkbolt->run_effect(map::g_player, SpellSkill::basic, {mon});
 
                 REQUIRE(mon->m_hp < actor::max_hp(*mon));
                 REQUIRE(!mon->m_properties.has(PropId::r_spell));
@@ -256,7 +254,7 @@ TEST_CASE("Test spell shield")
 
         SECTION("Natural spell shield")
         {
-                auto* const mon = actor::make(actor::Id::khaga, p1);
+                auto* const mon = actor::make(actor::Id::khaga, {11, 10});
 
                 map::update_vision();
 
@@ -264,14 +262,57 @@ TEST_CASE("Test spell shield")
 
                 REQUIRE(mon->m_properties.has(PropId::r_spell));
 
-                darkbolt->run_effect(map::g_player, SpellSkill::basic);
+                darkbolt->run_effect(map::g_player, SpellSkill::basic, {mon});
 
                 REQUIRE(mon->m_hp == actor::max_hp(*mon));
                 REQUIRE(mon->m_properties.has(PropId::r_spell));
 
-                darkbolt->run_effect(map::g_player, SpellSkill::basic);
+                darkbolt->run_effect(map::g_player, SpellSkill::basic, {mon});
 
                 REQUIRE(mon->m_hp == actor::max_hp(*mon));
                 REQUIRE(mon->m_properties.has(PropId::r_spell));
         }
+}
+
+TEST_CASE("Test spell reflection")
+{
+        test_utils::init_all();
+
+        map::put(new terrain::Floor({10, 10}));
+        map::put(new terrain::Floor({11, 10}));
+        map::put(new terrain::Floor({12, 10}));
+
+        map::g_player->m_pos.set(10, 10);
+
+        auto* const mon_1 = actor::make(actor::Id::zombie, {11, 10});
+        auto* const mon_2 = actor::make(actor::Id::zombie, {12, 10});
+
+        map::update_vision();
+
+        map::g_player->m_properties.apply(
+                property_factory::make(
+                        PropId::r_spell));
+
+        map::g_player->m_properties.apply(
+                property_factory::make(
+                        PropId::spell_reflect));
+
+        // Cast darkbolt from monster 2 on the player.
+        const auto* const darkbolt = spells::make(SpellId::darkbolt);
+
+        darkbolt->run_effect(mon_2, SpellSkill::basic, {map::g_player});
+
+        // Only monster 2 should be hit (not the closest monster).
+        REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
+        REQUIRE(mon_1->m_hp == actor::max_hp(*mon_1));
+        REQUIRE(mon_2->m_hp < actor::max_hp(*mon_2));
+
+        mon_2->restore_hp(999);
+
+        // Cast darkbolt again, now it should hit the player (no spell shield).
+        darkbolt->run_effect(mon_2, SpellSkill::basic, {map::g_player});
+
+        REQUIRE(map::g_player->m_hp <= actor::max_hp(*map::g_player));
+        REQUIRE(mon_1->m_hp == actor::max_hp(*mon_1));
+        REQUIRE(mon_2->m_hp == actor::max_hp(*mon_2));
 }

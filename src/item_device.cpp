@@ -309,10 +309,13 @@ ConsumeItem Blaster::run_effect()
                 const std::unique_ptr<Spell> spell(
                         spells::make(SpellId::aza_gaze));
 
+                const auto seen_foes = actor::seen_foes(*map::g_player);
+
                 spell->cast(
                         map::g_player,
                         SpellSkill::basic,
-                        SpellSrc::item);
+                        SpellSrc::item,
+                        seen_foes);
         }
 
         return ConsumeItem::no;

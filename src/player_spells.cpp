@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "actor_player.hpp"
+#include "actor_see.hpp"
 #include "array2.hpp"
 #include "browser.hpp"
 #include "colors.hpp"
@@ -129,7 +130,13 @@ static void try_cast(Spell* const spell)
 
         if (map::g_player->is_alive())
         {
-                spell->cast(map::g_player, skill, SpellSrc::learned);
+                const auto seen_foes = actor::seen_foes(*map::g_player);
+
+                spell->cast(
+                        map::g_player,
+                        skill,
+                        SpellSrc::learned,
+                        seen_foes);
         }
 }
 
