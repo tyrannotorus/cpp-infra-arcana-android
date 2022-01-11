@@ -7439,7 +7439,7 @@
             <spirit>12</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
-            <melee>100</melee>
+            <melee>60</melee>
             <ranged>0</ranged>
             <dodging>30</dodging>
             <stealth>0</stealth>

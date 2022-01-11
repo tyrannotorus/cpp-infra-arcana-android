@@ -60,7 +60,7 @@ static bool is_defender_aware_of_attack(
                 // Hostile monster attacking player-allied monster
 
                 // The player-allied monster is considered aware, if the player
-                // is aware of the attacker
+                // is aware of the attacker.
                 return attacker->is_player_aware_of_me();
         }
         else
@@ -68,8 +68,8 @@ static bool is_defender_aware_of_attack(
                 // Player-allied monster attacking hostile monster
 
                 // The hostile monster is considererd aware, if it is aware of
-                // the player
-                return attacker->is_aware_of_player();
+                // the player.
+                return defender.is_aware_of_player();
         }
 }
 
