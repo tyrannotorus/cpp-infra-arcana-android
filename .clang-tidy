@@ -3,6 +3,9 @@ Checks: >
     clang-analyzer-*,
     *,
 
+
+    -altera-id-dependent-backward-branch,
+    -altera-unroll-loops,
     -readability-function-cognitive-complexity,
     -altera-struct-pack-align,
     -abseil-string-find-str-contains,
