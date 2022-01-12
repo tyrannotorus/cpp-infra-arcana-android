@@ -856,7 +856,7 @@ void init()
         d.weight = Weight::light;
         d.tile = gfx::TileId::dagger;
         d.melee.attack_msgs = {"stab", "stabs"};
-        d.melee.dmg = WpnDmg(1, 4);
+        d.melee.dmg = WpnDmg(2, 4);
         d.melee.hit_chance_mod = 20;
         d.melee.dmg_type = DmgType::piercing;
         d.melee.is_noisy = false;
@@ -884,7 +884,7 @@ void init()
         d.weight = Weight::light;
         d.tile = gfx::TileId::axe;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(1, 5);
+        d.melee.dmg = WpnDmg(1, 6);
         d.melee.hit_chance_mod = 15;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
@@ -913,7 +913,7 @@ void init()
         d.tile = gfx::TileId::club;
         d.color = colors::brown();
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(2, 6);
+        d.melee.dmg = WpnDmg(2, 7);
         d.melee.hit_chance_mod = 10;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::blunt;
@@ -938,7 +938,7 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::hammer;
         d.melee.attack_msgs = {"smash", "smashes"};
-        d.melee.dmg = WpnDmg(2, 8);
+        d.melee.dmg = WpnDmg(3, 7);
         d.melee.hit_chance_mod = 5;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::blunt;
@@ -963,7 +963,7 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::machete;
         d.melee.attack_msgs = {"chop", "chops"};
-        d.melee.dmg = WpnDmg(2, 10);
+        d.melee.dmg = WpnDmg(3, 9);
         d.melee.hit_chance_mod = 0;
         d.melee.attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
@@ -991,7 +991,7 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::axe;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(2, 12);
+        d.melee.dmg = WpnDmg(3, 12);
         d.melee.hit_chance_mod = -5;
         d.melee.attack_corpse = true;
         d.melee.attack_terrain = true;
@@ -1021,7 +1021,7 @@ void init()
         d.weight = (Weight::medium + Weight::heavy) / 2;
         d.tile = gfx::TileId::spiked_mace;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(2, 14);
+        d.melee.dmg = WpnDmg(1, 14);
         d.melee.hit_chance_mod = -10;
         d.melee.attack_corpse = true;
         d.melee.attack_terrain = false;
@@ -1049,7 +1049,7 @@ void init()
         d.weight = Weight::heavy;
         d.tile = gfx::TileId::pitchfork;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(3, 12);
+        d.melee.dmg = WpnDmg(1, 13);
         d.melee.hit_chance_mod = -15;
         d.melee.attack_corpse = true;
         d.melee.knocks_back = true;
@@ -1077,7 +1077,7 @@ void init()
         d.weight = Weight::heavy;
         d.tile = gfx::TileId::sledge_hammer;
         d.melee.attack_msgs = {"smash", "smashes"};
-        d.melee.dmg = WpnDmg(3, 15);
+        d.melee.dmg = WpnDmg(4, 15);
         d.melee.hit_chance_mod = -15;
         d.melee.attack_corpse = true;
         d.melee.attack_terrain = true;
