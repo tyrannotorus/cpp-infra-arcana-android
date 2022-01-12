@@ -5647,6 +5647,7 @@
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <unique/>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>alone</group_size>
         </spawning>
