@@ -4160,7 +4160,7 @@ void SpellEnfeeble::run_effect(
 
         if (skill == SpellSkill::basic)
         {
-                targets = {rnd::element(targets)};
+                targets = {rnd::element(seen_targets)};
         }
         else
         {
@@ -4303,7 +4303,7 @@ void SpellSlow::run_effect(
 
         if (skill == SpellSkill::basic)
         {
-                targets = {rnd::element(targets)};
+                targets = {rnd::element(seen_targets)};
         }
         else
         {
@@ -4452,7 +4452,7 @@ void SpellTerrify::run_effect(
 
         if (skill == SpellSkill::basic)
         {
-                targets = {rnd::element(targets)};
+                targets = {rnd::element(seen_targets)};
         }
         else
         {
