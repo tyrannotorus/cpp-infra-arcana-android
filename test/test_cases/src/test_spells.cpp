@@ -274,8 +274,11 @@ TEST_CASE("Test spell shield")
         }
 }
 
-TEST_CASE("Test spell reflection")
+TEST_CASE("Test spell reflection hits correct creature")
 {
+        // Verify that a reflected Darkbolt hits the caster, and not the closest
+        // creature.
+
         test_utils::init_all();
 
         map::put(new terrain::Floor({10, 10}));
@@ -315,4 +318,62 @@ TEST_CASE("Test spell reflection")
         REQUIRE(map::g_player->m_hp <= actor::max_hp(*map::g_player));
         REQUIRE(mon_1->m_hp == actor::max_hp(*mon_1));
         REQUIRE(mon_2->m_hp == actor::max_hp(*mon_2));
+}
+
+TEST_CASE("Test reflected knockback spell blocked by caster spell shield")
+{
+        // Verify that if the caster has spell shield, a reflected knockback
+        // spell is blocked by the spell shield.
+
+        test_utils::init_all();
+
+        map::put(new terrain::Floor({9, 10}));
+        map::put(new terrain::Floor({10, 10}));
+        map::put(new terrain::Floor({11, 10}));
+        map::put(new terrain::Floor({12, 10}));
+
+        map::g_player->m_pos.set(10, 10);
+
+        auto* const mon = actor::make(actor::Id::zombie, {11, 10});
+
+        map::update_vision();
+
+        map::g_player->m_properties.apply(
+                property_factory::make(
+                        PropId::r_spell));
+
+        map::g_player->m_properties.apply(
+                property_factory::make(
+                        PropId::spell_reflect));
+
+        mon->m_properties.apply(
+                property_factory::make(
+                        PropId::r_spell));
+
+        mon->m_ai_state.is_target_seen = true;
+
+        // Cast knockback from monster 2 on the player.
+        const auto* const knockback = spells::make(SpellId::knockback);
+
+        knockback->run_effect(mon, SpellSkill::basic, {map::g_player});
+
+        // Neither the player nor the monster should have been hit by the spell,
+        // but both should have lost spell shield.
+        REQUIRE(map::g_player->m_pos == P(10, 10));
+        REQUIRE(mon->m_pos == P(11, 10));
+
+        REQUIRE(!map::g_player->m_properties.has(PropId::r_spell));
+        REQUIRE(!mon->m_properties.has(PropId::r_spell));
+
+        // Re-apply spell shield on the player and cast the spell again.
+        map::g_player->m_properties.apply(
+                property_factory::make(
+                        PropId::r_spell));
+
+        knockback->run_effect(mon, SpellSkill::basic, {map::g_player});
+
+        // Now the spell should have hit the monster.
+        REQUIRE(mon->m_pos == P(12, 10));
+
+        REQUIRE(!mon->m_properties.has(PropId::r_spell));
 }

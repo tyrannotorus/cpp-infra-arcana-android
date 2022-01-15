@@ -3922,16 +3922,9 @@ void SpellKnockBack::run_effect(
 {
         (void)skill;
 
-        ASSERT(!actor::is_player(caster));
-
-        auto msg_clr = colors::msg_good();
-        std::string target_str = "me";
-        auto* caster_used = caster;
-        auto* const mon = static_cast<actor::Mon*>(caster_used);
         auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
-        ASSERT(mon->m_ai_state.is_target_seen);
 
         // Spell resistance?
         if (target->m_properties.has(PropId::r_spell))
@@ -3950,17 +3943,21 @@ void SpellKnockBack::run_effect(
                                         MorePromptOnMsg::yes);
                         }
 
-                        std::swap(caster_used, target);
+                        // Run effect with the target as caster, and the caster
+                        // as seen target instead.
+                        run_effect(target, skill, {caster});
                 }
-                else
-                {
-                        // No spell reflection, just abort
-                        return;
-                }
+
+                return;
         }
+
+        std::string target_str;
+        Color msg_clr;
 
         if (actor::is_player(target))
         {
+                target_str = "me";
+
                 msg_clr = colors::msg_bad();
         }
         else
@@ -3968,10 +3965,10 @@ void SpellKnockBack::run_effect(
                 // Target is monster
                 target_str = target->name_the();
 
-                if (map::g_player->is_leader_of(target))
-                {
-                        msg_clr = colors::white();
-                }
+                msg_clr =
+                        map::g_player->is_leader_of(target)
+                        ? colors::white()
+                        : colors::msg_good();
         }
 
         if (actor::can_player_see_actor(*target))
@@ -4552,17 +4549,9 @@ void SpellDisease::run_effect(
 {
         (void)skill;
 
-        ASSERT(!actor::is_player(caster));
-
-        auto* caster_used = caster;
-
-        auto* const mon = static_cast<actor::Mon*>(caster_used);
-
         auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
-
-        ASSERT(mon->m_ai_state.is_target_seen);
 
         // Spell resistance?
         if (target->m_properties.has(PropId::r_spell))
@@ -4581,24 +4570,21 @@ void SpellDisease::run_effect(
                                         MorePromptOnMsg::yes);
                         }
 
-                        std::swap(caster_used, target);
+                        // Run effect with the target as caster, and the caster
+                        // as seen target instead.
+                        run_effect(target, skill, {caster});
                 }
-                else
-                {
-                        // No spell reflection, just abort
-                        return;
-                }
-        }
 
-        std::string actor_name = "me";
-
-        if (!actor::is_player(target))
-        {
-                actor_name = target->name_the();
+                return;
         }
 
         if (actor::can_player_see_actor(*target))
         {
+                const std::string actor_name =
+                        actor::is_player(target)
+                        ? "me"
+                        : target->name_the();
+
                 msg_log::add(
                         "A horrible disease is starting to afflict " +
                         actor_name +
@@ -4606,7 +4592,8 @@ void SpellDisease::run_effect(
         }
 
         target->m_properties.apply(
-                property_factory::make(PropId::diseased));
+                property_factory::make(
+                        PropId::diseased));
 
         if (!actor::is_player(target))
         {
@@ -5007,17 +4994,9 @@ void SpellMiGoHypno::run_effect(
 {
         (void)skill;
 
-        ASSERT(!actor::is_player(caster));
-
-        auto* caster_used = caster;
-
-        auto* const mon = static_cast<actor::Mon*>(caster_used);
-
         auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
-
-        ASSERT(mon->m_ai_state.is_target_seen);
 
         // Spell resistance?
         if (target->m_properties.has(PropId::r_spell))
@@ -5036,13 +5015,12 @@ void SpellMiGoHypno::run_effect(
                                         MorePromptOnMsg::yes);
                         }
 
-                        std::swap(caster_used, target);
+                        // Run effect with the target as caster, and the caster
+                        // as seen target instead.
+                        run_effect(target, skill, {caster});
                 }
-                else
-                {
-                        // No spell reflection, just abort
-                        return;
-                }
+
+                return;
         }
 
         if (actor::is_player(target))
@@ -5088,16 +5066,9 @@ void SpellBurn::run_effect(
         const SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
 {
-        ASSERT(!actor::is_player(caster));
-
-        auto* caster_used = caster;
-
-        auto* const mon = static_cast<actor::Mon*>(caster_used);
-
         auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
-        ASSERT(mon->m_ai_state.is_target_seen);
 
         // Spell resistance?
         if (target->m_properties.has(PropId::r_spell))
@@ -5116,25 +5087,22 @@ void SpellBurn::run_effect(
                                         MorePromptOnMsg::yes);
                         }
 
-                        std::swap(caster_used, target);
+                        // Run effect with the target as caster, and the caster
+                        // as seen target instead.
+                        run_effect(target, skill, {caster});
                 }
-                else
-                {
-                        // No spell reflection, just abort
-                        return;
-                }
-        }
 
-        std::string target_str = "me";
-
-        if (!actor::is_player(target))
-        {
-                target_str = target->name_the();
+                return;
         }
 
         if (actor::can_player_see_actor(*target))
         {
-                msg_log::add("Flames are rising around " + target_str + "!");
+                const std::string actor_name =
+                        actor::is_player(target)
+                        ? "me"
+                        : target->name_the();
+
+                msg_log::add("Flames are rising around " + actor_name + "!");
         }
 
         auto* prop = property_factory::make(PropId::burning);
@@ -5168,17 +5136,9 @@ void SpellDeafen::run_effect(
         const SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
 {
-        ASSERT(!actor::is_player(caster));
-
-        auto* caster_used = caster;
-
-        auto* const mon = static_cast<actor::Mon*>(caster_used);
-
         auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
         ASSERT(target);
-
-        ASSERT(mon->m_ai_state.is_target_seen);
 
         // Spell resistance?
         if (target->m_properties.has(PropId::r_spell))
@@ -5197,13 +5157,12 @@ void SpellDeafen::run_effect(
                                         MorePromptOnMsg::yes);
                         }
 
-                        std::swap(caster_used, target);
+                        // Run effect with the target as caster, and the caster
+                        // as seen target instead.
+                        run_effect(target, skill, {caster});
                 }
-                else
-                {
-                        // No spell reflection, just abort
-                        return;
-                }
+
+                return;
         }
 
         auto* prop = property_factory::make(PropId::deaf);
