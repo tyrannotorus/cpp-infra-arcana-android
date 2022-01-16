@@ -52,6 +52,7 @@ Minor tweaks and balancing
 * Ghoul characters start with +8 hit points, instead of +6
 * The Ghoul ability "Frenzy" no longer costs spirit to use
 * The Ghoul trait "Toxic" has 75% chance to apply poison, instead of 25%
+* Ghoul monsters become allied to a player Ghoul when they see the player, instead of starting allied on the map (to avoid the player missing out on joining the Ghouls in combat and just finding the remains of a battle)
 * A lot more terrain objects can be destroyed or lit on fire (for example altars or monoliths are destroyed by explosions, and wooden chests or bookshelves can be lit on fire)
 * The stairs position is always lit, to make it less tedious to discover in huge dark rooms
 * Hidden doors are always detected from adjacent positions (except if blind or confused), but the map generator no longer tries to reveal doors on the path to the stairs (i.e. the stairs may be behind hidden doors)

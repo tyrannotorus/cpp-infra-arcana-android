@@ -3,7 +3,7 @@ Checks: >
     clang-analyzer-*,
     *,
 
-
+    -bugprone-easily-swappable-parameters,
     -altera-id-dependent-backward-branch,
     -altera-unroll-loops,
     -readability-function-cognitive-complexity,

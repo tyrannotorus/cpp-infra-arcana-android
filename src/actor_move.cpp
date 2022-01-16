@@ -35,6 +35,7 @@
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
 #include "reload.hpp"
@@ -406,7 +407,9 @@ static void move_player_non_center_direction(const P& target)
                 {
                         msg_log::add("I stagger.", colors::msg_note());
 
-                        player.m_properties.apply(new PropWaiting());
+                        player.m_properties.apply(
+                                property_factory::make(
+                                        PropId::waiting));
                 }
 
                 if (mon && player.is_leader_of(mon))

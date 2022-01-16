@@ -741,7 +741,9 @@ void SpawnMonsters::run_effect()
                 std::begin(mon_summoned.monsters),
                 std::end(mon_summoned.monsters),
                 [](auto* const mon) {
-                        auto* prop_waiting = new PropWaiting();
+                        auto* prop_waiting =
+                                property_factory::make(
+                                        PropId::waiting);
 
                         prop_waiting->set_duration(2);
 

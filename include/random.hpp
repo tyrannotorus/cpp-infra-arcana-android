@@ -24,7 +24,9 @@ struct Range
                 min(min_val),
                 max(max_val) {}
 
-        Range(const Range& other) = default;
+        Range(const Range&) = default;
+
+        Range& operator=(const Range&) = default;
 
         void set(const int min_val, const int max_val)
         {

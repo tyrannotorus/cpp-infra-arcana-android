@@ -114,13 +114,6 @@ static std::unique_ptr<const item::Item> make_tmp_kick_wpn()
                 std::unique_ptr<item::Item>(
                         item::make(item::Id::player_kick));
 
-        const auto* wpn = map::g_player->m_inv.item_in_slot(SlotId::wpn);
-
-        if (!wpn)
-        {
-                wpn = &map::g_player->unarmed_wpn();
-        }
-
         return kick_wpn;
 }
 

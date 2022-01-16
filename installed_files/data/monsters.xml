@@ -3659,6 +3659,7 @@
             <property>corpse_eater</property>
             <property>r_disease</property>
             <property>darkvision</property>
+            <property>allies_ghoul_player</property>
         </properties>
 
         <ai>
@@ -7703,12 +7704,12 @@
             <description>An array of writhing tentacles sprouting up from the ground.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
-            <wary_message>seem disturbed.</wary_message>
+            <wary_message>seems disturbed.</wary_message>
             <smell_message></smell_message>
             <aware_message_seen></aware_message_seen>
             <aware_message_hidden></aware_message_hidden>
             <spell_message></spell_message>
-            <death_message>are destroyed.</death_message>
+            <death_message>is destroyed.</death_message>
         </text>
 
         <graphics>

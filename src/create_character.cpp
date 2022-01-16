@@ -75,25 +75,6 @@ void PickBgState::on_start()
 
 void PickBgState::update()
 {
-        if (config::is_bot_playing())
-        {
-                player_bon::pick_bg(rnd::element(m_bgs));
-
-                ASSERT(player_bon::bg() != Bg::END);
-
-                if (player_bon::bg() == Bg::occultist)
-                {
-                        player_bon::pick_occultist_domain(
-                                (OccultistDomain)rnd::range(
-                                        0,
-                                        (int)OccultistDomain::END - 1));
-                }
-
-                states::pop();
-
-                return;
-        }
-
         const auto input = io::get();
 
         const auto action =
@@ -224,21 +205,12 @@ void PickOccultistState::on_start()
         m_domains = player_bon::pickable_occultist_domains();
 
         m_browser.reset(
-                m_domains.size(),
+                (int)m_domains.size(),
                 panels::h(Panel::create_char_menu));
 }
 
 void PickOccultistState::update()
 {
-        if (config::is_bot_playing())
-        {
-                player_bon::pick_occultist_domain(rnd::element(m_domains));
-
-                states::pop();
-
-                return;
-        }
-
         const auto input = io::get();
 
         const auto action =
@@ -378,9 +350,13 @@ void PickTraitState::init_browsers()
 {
         const int choices_h = panels::h(Panel::create_char_menu);
 
-        m_browser_traits_avail.reset(m_traits_avail.size(), choices_h);
+        m_browser_traits_avail.reset(
+                (int)m_traits_avail.size(),
+                choices_h);
 
-        m_browser_traits_unavail.reset(m_traits_unavail.size(), choices_h);
+        m_browser_traits_unavail.reset(
+                (int)m_traits_unavail.size(),
+                choices_h);
 
         m_browser_traits_avail.set_y(0);
         m_browser_traits_unavail.set_y(0);
@@ -766,7 +742,9 @@ void RemoveTraitState::init_browser()
 {
         const int choices_h = panels::h(Panel::create_char_menu);
 
-        m_browser.reset(m_traits_can_be_removed.size(), choices_h);
+        m_browser.reset(
+                (int)m_traits_can_be_removed.size(),
+                choices_h);
 
         m_browser.set_y(0);
 }

@@ -90,6 +90,7 @@ public:
 
         bool is_leader_of(const Actor* actor) const;
         bool is_actor_my_leader(const Actor* actor) const;
+        bool is_in_same_group_as(const Actor* actor) const;
 
         int ability(
                 AbilityId id,

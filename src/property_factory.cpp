@@ -173,6 +173,9 @@ Prop* make(const PropId id)
         case PropId::major_clapham_summon:
                 return new PropMajorClaphamSummon();
 
+        case PropId::allies_ghoul_player:
+                return new PropAlliesPlayerGhoul();
+
         case PropId::flying:
                 return new Prop(id);
 

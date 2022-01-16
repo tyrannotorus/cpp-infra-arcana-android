@@ -16,8 +16,8 @@
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
-#include "property_data.hpp"
 #include "item.hpp"
+#include "property_data.hpp"
 
 namespace actor
 {
@@ -354,7 +354,7 @@ public:
         {
                 (void)dmg_type;
 
-                return DmgResistData();
+                return {};
         }
 
 protected:
@@ -1560,6 +1560,15 @@ class PropMajorClaphamSummon : public Prop
 public:
         PropMajorClaphamSummon() :
                 Prop(PropId::major_clapham_summon) {}
+
+        PropActResult on_act() override;
+};
+
+class PropAlliesPlayerGhoul : public Prop
+{
+public:
+        PropAlliesPlayerGhoul() :
+                Prop(PropId::allies_ghoul_player) {}
 
         PropActResult on_act() override;
 };

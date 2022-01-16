@@ -75,7 +75,6 @@ bool is_player(const Actor* const actor)
 void init_actor(Actor& actor, const P& pos_, ActorData& data)
 {
         actor.m_pos = pos_;
-
         actor.m_data = &data;
 
         // NOTE: Cannot compare against the global player pointer here, since it
@@ -103,21 +102,6 @@ void init_actor(Actor& actor, const P& pos_, ActorData& data)
         if (!actor::is_player(&actor))
         {
                 actor_items::make_for_actor(actor);
-
-                // Monster ghouls start allied to player ghouls
-                const bool set_allied =
-                        data.is_ghoul &&
-                        (player_bon::bg() == Bg::ghoul) &&
-                        // TODO: This is a hack to not allow the boss Ghoul to
-                        // become allied
-                        (data.id != actor::Id::high_priest_guard_ghoul);
-
-                if (set_allied)
-                {
-                        Mon* const mon = static_cast<Mon*>(&actor);
-
-                        mon->m_leader = map::g_player;
-                }
         }
 }
 
@@ -337,6 +321,21 @@ bool Actor::is_leader_of(const Actor* const actor) const
 bool Actor::is_actor_my_leader(const Actor* const actor) const
 {
         return m_leader == actor;
+}
+
+bool Actor::is_in_same_group_as(const Actor* actor) const
+{
+        if (!actor)
+        {
+                return false;
+        }
+
+        // Consider the actors to be in the same group if one of the actors is
+        // the leader of the other, or they have the same leader.
+        return (
+                is_leader_of(actor) ||
+                is_actor_my_leader(actor) ||
+                actor->is_actor_my_leader(m_leader));
 }
 
 bool Actor::restore_hp(

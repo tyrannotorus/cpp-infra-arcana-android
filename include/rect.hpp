@@ -18,17 +18,19 @@ struct R
 public:
         R() = default;
 
-        R(const P p0_val, const P p1_val) :
+        R(const P& p0_val, const P& p1_val) :
                 p0(p0_val),
                 p1(p1_val)
         {}
 
         R(const int x0, const int y0, const int x1, const int y1) :
-                p0(P(x0, y0)),
-                p1(P(x1, y1))
+                p0({x0, y0}),
+                p1({x1, y1})
         {}
 
         R(const R& r) = default;
+
+        R& operator=(const R& other) = default;
 
         int w() const
         {
@@ -47,7 +49,7 @@ public:
 
         P dims() const
         {
-                return P(w(), h());
+                return {w(), h()};
         }
 
         int min_dim() const
@@ -65,7 +67,7 @@ public:
                 const int x = (p0.x + p1.x) / 2;
                 const int y = (p0.y + p1.y) / 2;
 
-                return P(x, y);
+                return {x, y};
         }
 
         bool is_pos_inside(const P p) const

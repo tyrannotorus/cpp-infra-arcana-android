@@ -45,6 +45,7 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"light_sensitive", PropId::light_sensitive},
         {"magic_searching", PropId::magic_searching},
         {"major_clapham_summon", PropId::major_clapham_summon},
+        {"allies_ghoul_player", PropId::allies_ghoul_player},
         {"spectral_wpn", PropId::spectral_wpn},
         {"ooze", PropId::ooze},
         {"paralyzed", PropId::paralyzed},
@@ -1040,6 +1041,9 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::major_clapham_summon;
+        add(d);
+
+        d.id = PropId::allies_ghoul_player;
         add(d);
 
         d.id = PropId::flying;

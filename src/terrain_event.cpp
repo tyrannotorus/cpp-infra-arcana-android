@@ -27,6 +27,7 @@
 #include "msg_log.hpp"
 #include "popup.hpp"
 #include "property.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
 
@@ -452,7 +453,7 @@ void EventSnakeEmerge::on_new_turn()
 
                 auto* const actor = actor::make(id, p);
 
-                auto* prop = new PropWaiting();
+                auto* prop = property_factory::make(PropId::waiting);
 
                 prop->set_duration(2);
 

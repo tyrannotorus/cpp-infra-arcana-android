@@ -43,11 +43,12 @@ static void finalize_screen_dims()
                 screen.p1.y = std::max(screen.p1.y, panel.p1.y);
         }
 
-        TRACE << "Screen GUI size was set to: "
-              << panels::w(Panel::screen)
-              << ", "
-              << panels::h(Panel::screen)
-              << std::endl;
+        TRACE
+                << "Screen GUI size was set to: "
+                << panels::w(Panel::screen)
+                << ", "
+                << panels::h(Panel::screen)
+                << std::endl;
 }
 
 static void validate_panels(const P max_gui_dims)

@@ -144,13 +144,13 @@ static void erase_destroyed_actor(
                 map::g_player->m_tgt = nullptr;
         }
 
+        actor::unset_actor_as_leader_for_all_mon(actor);
+
         delete actor;
 
         game_time::g_actors.erase(
                 std::begin(game_time::g_actors) +
                 (int)actor_idx);
-
-        actor::unset_actor_as_leader_for_all_mon(*actor);
 
         if (s_current_actor_idx >= game_time::g_actors.size())
         {

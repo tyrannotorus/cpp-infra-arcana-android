@@ -154,7 +154,7 @@ void kill(
         ASSERT(actor.m_data->can_leave_corpse ||
                (is_destroyed == IsDestroyed::yes));
 
-        unset_actor_as_leader_for_all_mon(actor);
+        unset_actor_as_leader_for_all_mon(&actor);
 
         if (!actor::is_player(&actor))
         {
@@ -234,11 +234,11 @@ void print_mon_death_msg(const actor::Actor& actor)
         }
 }
 
-void unset_actor_as_leader_for_all_mon(const actor::Actor& actor)
+void unset_actor_as_leader_for_all_mon(const actor::Actor* const actor)
 {
         for (auto* const other : game_time::g_actors)
         {
-                if (other->m_leader == &actor)
+                if (other->m_leader == actor)
                 {
                         other->m_leader = nullptr;
                 }

@@ -482,7 +482,7 @@ void PropSummoned::on_end()
 {
         m_owner->m_state = ActorState::destroyed;
 
-        actor::unset_actor_as_leader_for_all_mon(*m_owner);
+        actor::unset_actor_as_leader_for_all_mon(m_owner);
 }
 
 PropEnded PropInfected::on_actor_turn()
@@ -2744,7 +2744,9 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
                 [](auto* const mon) {
-                        auto* waiting = new PropWaiting();
+                        auto* waiting =
+                                property_factory::make(
+                                        PropId::waiting);
 
                         waiting->set_duration(1);
 
@@ -2809,7 +2811,9 @@ void PropBreeds::on_std_turn()
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
                 [](auto* const spawned_mon) {
-                        auto* prop_waiting = new PropWaiting();
+                        auto* prop_waiting =
+                                property_factory::make(
+                                        PropId::waiting);
 
                         prop_waiting->set_duration(2);
 
@@ -3185,6 +3189,65 @@ PropActResult PropMajorClaphamSummon::on_act()
 
         PropActResult result;
 
+        result.did_action = DidAction::yes;
+        result.prop_ended = PropEnded::yes;
+
+        return result;
+}
+
+PropActResult PropAlliesPlayerGhoul::on_act()
+{
+        if (actor::is_player(m_owner) ||
+            !m_owner->is_alive() ||
+            !player_bon::is_bg(Bg::ghoul) ||
+            m_owner->is_actor_my_leader(map::g_player))
+        {
+                return {};
+        }
+
+        Array2<bool> blocks_los(map::dims());
+
+        const auto r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
+
+        map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
+
+        if (!actor::can_mon_see_actor(*m_owner, *map::g_player, blocks_los))
+        {
+                return {};
+        }
+
+        const auto prop_id = id();
+
+        for (auto* const actor : game_time::g_actors)
+        {
+                if (!actor->m_properties.has(prop_id))
+                {
+                        continue;
+                }
+
+                if (actor::can_player_see_actor(*actor) &&
+                    actor->is_alive() &&
+                    !actor->is_actor_my_leader(map::g_player))
+                {
+                        const auto actor_name =
+                                text_format::first_to_upper(
+                                        actor->name_the());
+
+                        msg_log::add(
+                                actor_name +
+                                " recognizes me as its leader.");
+                }
+
+                actor::unset_actor_as_leader_for_all_mon(actor);
+
+                actor->m_leader = map::g_player;
+
+                actor->m_properties.end_prop(prop_id);
+        }
+
+        game_time::tick();
+
+        PropActResult result;
         result.did_action = DidAction::yes;
         result.prop_ended = PropEnded::yes;
 

@@ -1255,7 +1255,7 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 map::g_player->m_properties.apply(prop_mind_sap);
 
                 // Make the monster pause, so things don't get too crazy
-                auto* prop_waiting = new PropWaiting();
+                auto* prop_waiting = property_factory::make(PropId::waiting);
 
                 prop_waiting->set_duration(2);
 

@@ -3512,7 +3512,9 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
                         std::begin(summoned.monsters),
                         std::end(summoned.monsters),
                         [this](auto* const mon) {
-                                auto* prop = new PropWaiting();
+                                auto* prop =
+                                        property_factory::make(
+                                                PropId::waiting);
 
                                 prop->set_duration(1);
 
