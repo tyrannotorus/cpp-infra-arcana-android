@@ -482,7 +482,7 @@ void PropSummoned::on_end()
 {
         m_owner->m_state = ActorState::destroyed;
 
-        actor::unset_actor_as_leader_for_all_mon(m_owner);
+        actor::unset_actor_as_leader_and_target_for_all_mon(m_owner);
 }
 
 PropEnded PropInfected::on_actor_turn()
@@ -3238,7 +3238,7 @@ PropActResult PropAlliesPlayerGhoul::on_act()
                                 " recognizes me as its leader.");
                 }
 
-                actor::unset_actor_as_leader_for_all_mon(actor);
+                actor::unset_actor_as_leader_and_target_for_all_mon(actor);
 
                 actor->m_leader = map::g_player;
 

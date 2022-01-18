@@ -470,6 +470,10 @@ std::optional<Color> name_to_color(const std::string& name)
 
         if (search == std::end(s_str_color_pairs))
         {
+                TRACE
+                        << "WARNING: No color defined for name: " << name
+                        << std::endl;
+
                 return {};
         }
 
