@@ -4,13 +4,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ability_values.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "attack_data.hpp"
 #include "catch.hpp"
@@ -45,14 +44,10 @@ TEST_CASE("Melee attack data")
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 =
-                static_cast<actor::Mon&>(
-                        *actor::make(actor::Id::zombie, p2));
+        auto& mon_1 = *actor::make(actor::Id::zombie, p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 =
-                static_cast<actor::Mon&>(
-                        *actor::make(actor::Id::zombie, p3));
+        auto& mon_2 = *actor::make(actor::Id::zombie, p3);
 
         mon_2.m_properties.apply(property_factory::make(PropId::invis));
 
@@ -67,8 +62,8 @@ TEST_CASE("Melee attack data")
 
         wpn.set_melee_plus(2);
 
-        int expected_hit_chance_vs_mon_1;
-        int expected_hit_chance_vs_mon_2;
+        int expected_hit_chance_vs_mon_1 = 0;
+        int expected_hit_chance_vs_mon_2 = 0;
 
         {
                 const auto& player_data =
@@ -136,9 +131,7 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
                 property_factory::make(PropId::weakened));
 
         // Zombie
-        auto& mon =
-                static_cast<actor::Mon&>(
-                        *actor::make(actor::Id::zombie, p2));
+        auto& mon = *actor::make(actor::Id::zombie, p2);
 
         map::g_player->update_fov();
 
@@ -176,9 +169,7 @@ TEST_CASE("Melee attack data has reduced damage against pierce resistance")
         map::g_player->m_pos = p1;
 
         // Worm Mass
-        auto& mon =
-                static_cast<actor::Mon&>(
-                        *actor::make(actor::Id::worm_mass, p2));
+        auto& mon = *actor::make(actor::Id::worm_mass, p2);
 
         map::g_player->update_fov();
 
@@ -223,14 +214,10 @@ TEST_CASE("Ranged attack data")
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 =
-                static_cast<actor::Mon&>(
-                        *actor::make(actor::Id::zombie, p2));
+        auto& mon_1 = *actor::make(actor::Id::zombie, p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 =
-                static_cast<actor::Mon&>(
-                        *actor::make(actor::Id::zombie, p3));
+        auto& mon_2 = *actor::make(actor::Id::zombie, p3);
 
         mon_2.m_properties.apply(property_factory::make(PropId::invis));
 
@@ -332,14 +319,10 @@ TEST_CASE("Throwing attack data")
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 =
-                static_cast<actor::Mon&>(
-                        *actor::make(actor::Id::zombie, p2));
+        auto& mon_1 = *actor::make(actor::Id::zombie, p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 =
-                static_cast<actor::Mon&>(
-                        *actor::make(actor::Id::zombie, p3));
+        auto& mon_2 = *actor::make(actor::Id::zombie, p3);
 
         mon_2.m_properties.apply(property_factory::make(PropId::invis));
 

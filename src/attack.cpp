@@ -688,7 +688,6 @@ static std::string melee_snd_msg(const MeleeAttData& att_data)
         if (!actor::is_player(att_data.defender) &&
             !actor::is_player(att_data.attacker))
         {
-                // TODO: This message is not appropriate for traps
                 snd_msg = "I hear fighting.";
         }
 
@@ -712,8 +711,6 @@ static void emit_melee_snd(
                         att_data.attacker,
                         *att_data.att_item);
 
-        const std::string snd_msg = melee_snd_msg(att_data);
-
         auto sfx = audio::SfxId::END;
 
         if (att_result <= ActionResult::fail)
@@ -729,6 +726,15 @@ static void emit_melee_snd(
                 att_data.attacker
                 ? att_data.attacker->m_pos
                 : att_data.defender->m_pos;
+
+        std::string snd_msg;
+
+        if (att_data.attacker &&
+            !actor::can_player_see_actor(*att_data.attacker) &&
+            !actor::can_player_see_actor(*att_data.defender))
+        {
+                snd_msg = melee_snd_msg(att_data);
+        }
 
         auto ignore_msg_if_origin_seeen = IgnoreMsgIfOriginSeen::yes;
 
@@ -1818,6 +1824,60 @@ static void melee_hit_actor(
         }
 }
 
+static void bump_awareness_after_melee_attack(
+        actor::Actor& attacker,
+        actor::Actor& defender,
+        const MeleeAttData& att_data)
+{
+        const bool attacker_is_player = actor::is_player(&attacker);
+        const bool defender_is_player = actor::is_player(&defender);
+
+        if (defender_is_player)
+        {
+                // A monster attacked the player.
+                auto* const attacker_mon =
+                        static_cast<actor::Mon*>(
+                                att_data.attacker);
+
+                attacker_mon->make_player_aware_of_me();
+        }
+        else
+        {
+                // A monster was attacked (by player or another monster).
+
+                auto& defender_mon = static_cast<actor::Mon&>(defender);
+
+                if (attacker_is_player ||
+                    attacker.is_actor_my_leader(map::g_player))
+                {
+                        // The player, or a monster allied to the player
+                        // attacked a monster. Make the defender monster aware
+                        // of the player.
+                        defender_mon.become_aware_player(
+                                actor::AwareSource::attacked);
+                }
+
+                if (!attacker_is_player)
+                {
+                        // A monster attacked a monster.
+
+                        if (actor::can_player_see_actor(attacker) ||
+                            (actor::can_player_see_actor(defender)))
+                        {
+                                // Player saw either the attacker or the
+                                // defender. Bump player awareness of both
+                                // monsters.
+                                auto& attacker_mon =
+                                        static_cast<actor::Mon&>(
+                                                attacker);
+
+                                attacker_mon.make_player_aware_of_me();
+                                defender_mon.make_player_aware_of_me();
+                        }
+                }
+        }
+}
+
 static bool melee_should_break_wpn(
         const ActionResult att_result,
         const actor::Actor* attacker,
@@ -1869,9 +1929,9 @@ void melee(
         if (attacker && !actor::is_player(attacker))
         {
                 // A monster attacked, bump monster awareness
-                static_cast<actor::Mon*>(attacker)
-                        ->become_aware_player(
-                                actor::AwareSource::other);
+                auto* const attacker_mon = static_cast<actor::Mon*>(attacker);
+
+                attacker_mon->become_aware_player(actor::AwareSource::other);
         }
 
         map::update_vision();
@@ -1892,7 +1952,7 @@ void melee(
         }
 
         // If player is cursed and the attack critically fails, occasionally
-        // break the weapon
+        // break the weapon.
         if (melee_should_break_wpn(att_result, attacker, wpn))
         {
                 auto* const item =
@@ -1920,21 +1980,10 @@ void melee(
 
         if (attacker)
         {
-                if (actor::is_player(&defender))
-                {
-                        // A monster attacked the player
-                        auto* const mon =
-                                static_cast<actor::Mon*>(att_data.attacker);
-
-                        mon->make_player_aware_of_me();
-                }
-                else
-                {
-                        // A monster was attacked (by player or another monster)
-                        static_cast<actor::Mon&>(defender)
-                                .become_aware_player(
-                                        actor::AwareSource::attacked);
-                }
+                bump_awareness_after_melee_attack(
+                        *attacker,
+                        defender,
+                        att_data);
 
                 // Attacking ends cloaking and sanctuary
                 attacker->m_properties.end_prop(PropId::cloaked);

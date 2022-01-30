@@ -22,20 +22,20 @@ static void put_floor_and_walls_on_map()
         {
                 for (int y = 0; y < map::h(); ++y)
                 {
-                        const bool is_on_edge =
-                                (x == 0) ||
-                                (y == 0) ||
-                                (x == (map::w() - 1)) ||
-                                (y == (map::h() - 1));
+                        const P p(x, y);
 
-                        if (is_on_edge)
+                        terrain::Terrain* t = nullptr;
+
+                        if (map::is_pos_inside_outer_walls(p))
                         {
-                                map::put(new terrain::Wall({x, y}));
+                                t = new terrain::Floor(p);
                         }
                         else
                         {
-                                map::put(new terrain::Floor({x, y}));
+                                t = new terrain::Wall(p);
                         }
+
+                        map::put(t);
                 }
         }
 }

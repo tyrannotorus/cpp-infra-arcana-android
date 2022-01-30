@@ -21,8 +21,6 @@ void hear_sound_player(
         const Dir dir_to_origin,
         const int percent_audible_distance)
 {
-        (void)is_origin_seen_by_player;
-
         if (map::g_player->m_properties.has(PropId::deaf))
         {
                 return;
@@ -35,7 +33,7 @@ void hear_sound_player(
         if (has_snd_msg)
         {
                 const auto should_interrupt =
-                        (is_origin_seen_by_player)
+                        is_origin_seen_by_player
                         ? MsgInterruptPlayer::no
                         : MsgInterruptPlayer::yes;
 

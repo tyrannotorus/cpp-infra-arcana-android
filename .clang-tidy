@@ -3,6 +3,7 @@ Checks: >
     clang-analyzer-*,
     *,
 
+    -abseil-string-find-startswith,
     -bugprone-easily-swappable-parameters,
     -altera-id-dependent-backward-branch,
     -altera-unroll-loops,
