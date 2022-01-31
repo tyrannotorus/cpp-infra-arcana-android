@@ -4,24 +4,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
+#include "array2.hpp"
+#include "catch.hpp"
+#include "game_time.hpp"
+#include "global.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
-#include "terrain.hpp"
-#include "test_utils.hpp"
-#include "throwing.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "array2.hpp"
-#include "global.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
+#include "terrain.hpp"
+#include "test_utils.hpp"
+#include "throwing.hpp"
 
-namespace item {
+namespace item
+{
 class Item;
 }  // namespace item
 
@@ -82,6 +84,8 @@ TEST_CASE("Throw potion at monster")
                         // not re-apply it
                         mon->m_properties.end_prop(PropId::r_fire);
                 }
+
+                game_time::g_allow_tick = true;
 
                 throwing::throw_item(
                         *map::g_player,

@@ -36,7 +36,7 @@ TEST_CASE("Creatures are not nailed to occupied feature blocking los")
         knockback::run(
                 *map::g_player,
                 pos_l.with_x_offset(-1),
-                true);  // Is spike gun
+                knockback::KnockbackSource::spike_gun);
 
         // Target cell is occupied, nothing should happen
         REQUIRE(map::g_player->m_pos == pos_l);
@@ -48,7 +48,7 @@ TEST_CASE("Creatures are not nailed to occupied feature blocking los")
         knockback::run(
                 *map::g_player,
                 pos_l.with_x_offset(-1),
-                true);  // Is spike gun
+                knockback::KnockbackSource::spike_gun);
 
         // Now the player should be knocked back, but not nailed
         REQUIRE(map::g_player->m_pos == pos_r);
@@ -58,7 +58,7 @@ TEST_CASE("Creatures are not nailed to occupied feature blocking los")
         knockback::run(
                 *map::g_player,
                 pos_r.with_x_offset(-1),
-                true);  // Is spike gun
+                knockback::KnockbackSource::spike_gun);
 
         // Now the player should not be knocked back, but be nailed
         REQUIRE(map::g_player->m_pos == pos_r);

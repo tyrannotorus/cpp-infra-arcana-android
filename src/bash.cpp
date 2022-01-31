@@ -144,18 +144,14 @@ static void try_kick_living_monster(actor::Actor& mon)
 
         Array2<bool> blocked(map::dims());
 
-        map_parsers::BlocksLos()
-                .run(blocked, blocked.rect());
+        map_parsers::BlocksLos().run(blocked, blocked.rect());
 
         map::g_player->kick_mon(mon);
 
         bash::try_sprain_player();
 
         // Attacking ends cloaking
-        map::g_player->m_properties.end_prop(
-                PropId::cloaked);
-
-        game_time::tick();
+        map::g_player->m_properties.end_prop(PropId::cloaked);
 }
 
 static void bash_corpse_with_wpn(

@@ -413,11 +413,6 @@ static void on_player_shock_over_limit()
                 player.m_nr_turns_until_ins = -1;
 
                 player.incr_insanity();
-
-                if (player.is_alive())
-                {
-                        game_time::tick();
-                }
         }
 }
 

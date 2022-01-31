@@ -539,6 +539,14 @@ void GameState::update()
 
                 const bool is_gibbed = actor->m_state == ActorState::destroyed;
 
+#ifndef NDEBUG
+                // Allow the "tick" function in game_time to be called, to
+                // advance time. Otherwise calling the tick function is an
+                // error. This helps catching cases where time is ticked
+                // multiple times during the same actor's action.
+                game_time::g_allow_tick = true;
+#endif  // NDEBUG
+
                 if (allow_act && !is_gibbed)
                 {
                         // Tell actor to "do something". If this is the player,

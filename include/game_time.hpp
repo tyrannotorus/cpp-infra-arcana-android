@@ -29,6 +29,11 @@ extern std::vector<terrain::Terrain*> g_mobs;
 extern bool g_is_magic_descend_nxt_std_turn;
 extern bool g_is_player_acting;
 
+#ifndef NDEBUG
+// Used for checking if game ticked multiple times during the same action.
+extern bool g_allow_tick;
+#endif  // NDEBUG
+
 void init();
 void cleanup();
 

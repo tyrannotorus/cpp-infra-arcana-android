@@ -8,6 +8,7 @@
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
 #include "catch.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
@@ -196,6 +197,8 @@ TEST_CASE("Test spell bonuses for manuscripts")
         player.m_properties.apply(property_factory::make(PropId::diseased));
         player.m_properties.apply(property_factory::make(PropId::poisoned));
 
+        game_time::g_allow_tick = true;
+
         scroll->activate(map::g_player);
 
         REQUIRE(!player.m_properties.has(PropId::diseased));
@@ -211,6 +214,8 @@ TEST_CASE("Test spell bonuses for manuscripts")
 
         player.m_properties.apply(property_factory::make(PropId::diseased));
         player.m_properties.apply(property_factory::make(PropId::poisoned));
+
+        game_time::g_allow_tick = true;
 
         scroll->activate(map::g_player);
 

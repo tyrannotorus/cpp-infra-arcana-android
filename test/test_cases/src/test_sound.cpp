@@ -14,6 +14,7 @@
 #include "audio_data.hpp"
 #include "catch.hpp"
 #include "direction.hpp"
+#include "game_time.hpp"
 #include "map.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
@@ -97,6 +98,8 @@ TEST_CASE("Player wading alerts monsters")
         actor::move(*map::g_player, Dir::right);
 
         REQUIRE(!zombie->is_aware_of_player());
+
+        game_time::g_allow_tick = true;
 
         // Move player into water (wading)
         actor::move(*map::g_player, Dir::right);

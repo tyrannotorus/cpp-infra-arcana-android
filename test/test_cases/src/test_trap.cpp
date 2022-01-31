@@ -12,6 +12,7 @@
 #include "actor_player.hpp"
 #include "catch.hpp"
 #include "direction.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"
@@ -67,6 +68,7 @@ TEST_CASE("Spider web")
 
                 // Move the monster into the trap, and back again
                 mon->m_pos = pos_l;
+                game_time::g_allow_tick = true;
                 actor::move(*mon, Dir::right);
 
                 // It should never be possible to move on the first try
@@ -75,10 +77,12 @@ TEST_CASE("Spider web")
                 REQUIRE(mon->m_properties.has(PropId::entangled));
 
                 // This may or may not unstuck the monster
+                game_time::g_allow_tick = true;
                 actor::move(*mon, Dir::left);
 
                 // If the move above did unstuck the monster, this command will
                 // move it one step to the left
+                game_time::g_allow_tick = true;
                 actor::move(*mon, Dir::left);
 
                 if (mon->m_pos == pos_r)
@@ -129,6 +133,7 @@ TEST_CASE("Unlearn spells")
 
         // Step into the trap
         map::g_player->m_pos = pos_l;
+        game_time::g_allow_tick = true;
         actor::move(*map::g_player, Dir::right);
 
         REQUIRE(map::g_player->m_pos == pos_r);
@@ -142,6 +147,7 @@ TEST_CASE("Unlearn spells")
 
         // Step into the trap again
         map::g_player->m_pos = pos_l;
+        game_time::g_allow_tick = true;
         actor::move(*map::g_player, Dir::right);
 
         REQUIRE(map::g_player->m_pos == pos_r);
@@ -184,6 +190,7 @@ TEST_CASE("Do not unlearn frenzy")
 
         // Step into the trap
         map::g_player->m_pos = pos_l;
+        game_time::g_allow_tick = true;
         actor::move(*map::g_player, Dir::right);
 
         REQUIRE(map::g_player->m_pos == pos_r);
@@ -194,6 +201,7 @@ TEST_CASE("Do not unlearn frenzy")
 
         // Step into the trap again
         map::g_player->m_pos = pos_l;
+        game_time::g_allow_tick = true;
         actor::move(*map::g_player, Dir::right);
 
         REQUIRE(map::g_player->m_pos == pos_r);

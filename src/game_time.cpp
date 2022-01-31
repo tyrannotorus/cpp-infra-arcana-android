@@ -329,6 +329,10 @@ std::vector<terrain::Terrain*> g_mobs;
 bool g_is_magic_descend_nxt_std_turn;
 bool g_is_player_acting;
 
+#ifndef NDEBUG
+bool g_allow_tick;
+#endif  // NDEBUG
+
 void init()
 {
         s_current_actor_idx = 0;
@@ -341,6 +345,10 @@ void init()
 
         g_is_magic_descend_nxt_std_turn = false;
         g_is_player_acting = false;
+
+#ifndef NDEBUG
+        g_allow_tick = true;
+#endif  // NDEBUG
 }
 
 void cleanup()
@@ -460,6 +468,17 @@ void reset_current_actor_idx()
 
 void tick()
 {
+#ifndef NDEBUG
+        if (!g_allow_tick)
+        {
+                ASSERT(false);
+
+                return;
+        }
+
+        g_allow_tick = false;
+#endif  // NDEBUG
+
         g_is_player_acting = false;
 
         auto* actor = current_actor();
