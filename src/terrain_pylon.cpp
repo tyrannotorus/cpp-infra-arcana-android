@@ -422,7 +422,7 @@ void PylonKnockback::on_new_turn_activated()
                 knockback::run(
                         *actor,
                         m_pos,
-                        false,  // Not spike gun
+                        knockback::KnockbackSource::other,
                         Verbose::yes,
                         2);  // Extra paralyze turns
 

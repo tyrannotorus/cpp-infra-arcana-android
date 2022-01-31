@@ -2241,7 +2241,7 @@ PropActResult PropVortex::on_act()
         knockback::run(
                 *map::g_player,
                 knockback_from_pos,
-                false,
+                knockback::KnockbackSource::other,
                 Verbose::no);
 
         m_cooldown = 2;

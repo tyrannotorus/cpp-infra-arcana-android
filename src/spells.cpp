@@ -3976,7 +3976,10 @@ void SpellKnockBack::run_effect(
                 msg_log::add("A force pushes " + target_str + "!", msg_clr);
         }
 
-        knockback::run(*target, caster->m_pos, false);
+        knockback::run(
+                *target,
+                caster->m_pos,
+                knockback::KnockbackSource::other);
 
         if (!actor::is_player(target))
         {

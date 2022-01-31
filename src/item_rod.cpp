@@ -517,7 +517,7 @@ void Shockwave::run_effect()
                         knockback::run(
                                 *actor,
                                 player_pos,
-                                false,
+                                knockback::KnockbackSource::other,
                                 Verbose::yes,
                                 1);  // 1 extra turn paralyzed
                 }

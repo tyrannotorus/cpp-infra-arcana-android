@@ -18,10 +18,16 @@ struct P;
 
 namespace knockback
 {
+enum class KnockbackSource
+{
+        spike_gun,
+        other
+};
+
 void run(
         actor::Actor& actor,
         const P& attacked_from_pos,
-        bool is_spike_gun,
+        KnockbackSource source,
         Verbose verbose = Verbose::yes,
         int paralyze_extra_turns = 0);
 

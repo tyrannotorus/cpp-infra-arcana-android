@@ -33,12 +33,24 @@
 #include "terrain_data.hpp"
 #include "text_format.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static const std::vector<PropId> s_props_cannot_knock_back = {
+        PropId::entangled,
+        PropId::ethereal,
+        PropId::ooze,
+};
+
+// -----------------------------------------------------------------------------
+// knockback
+// -----------------------------------------------------------------------------
 namespace knockback
 {
 void run(
         actor::Actor& actor,
         const P& attacked_from_pos,
-        const bool is_spike_gun,
+        const KnockbackSource source,
         const Verbose verbose,
         const int paralyze_extra_turns)
 {
@@ -50,13 +62,23 @@ void run(
 
         if (actor.m_data->prevent_knockback ||
             (actor.m_data->actor_size >= actor::Size::giant) ||
-            actor.m_properties.has(PropId::entangled) ||
-            actor.m_properties.has(PropId::ethereal) ||
-            actor.m_properties.has(PropId::ooze) ||
             (is_player && config::is_bot_playing()))
         {
-                // Defender is not knockable
+                TRACE_FUNC_END;
 
+                return;
+        }
+
+        const bool prop_prevents_knockback =
+                std::any_of(
+                        std::cbegin(s_props_cannot_knock_back),
+                        std::cend(s_props_cannot_knock_back),
+                        [&actor](const auto id) {
+                                return actor.m_properties.has(id);
+                        });
+
+        if (prop_prevents_knockback)
+        {
                 TRACE_FUNC_END;
 
                 return;
@@ -89,14 +111,18 @@ void run(
 
         auto& tgt_terrain = map::g_terrain.at(new_pos);
 
-        if (!actor_can_move_into_tgt_pos && !is_tgt_pos_deep)
+        if (!actor_can_move_into_tgt_pos &&
+            !is_tgt_pos_deep &&
+            !actor.m_properties.has(PropId::r_phys))
         {
                 // Actor nailed to a wall from a spike gun?
-                if (is_spike_gun)
+                if (source == KnockbackSource::spike_gun)
                 {
                         if (!tgt_terrain->is_projectile_passable())
                         {
-                                auto* prop = new PropNailed();
+                                auto* prop =
+                                        property_factory::make(
+                                                PropId::nailed);
 
                                 prop->set_indefinite();
 

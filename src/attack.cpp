@@ -1174,13 +1174,15 @@ static void hit_actor_with_projectile(
                 if (wpn.data().ranged.knocks_back &&
                     att_data.attacker)
                 {
-                        const bool is_spike_gun =
-                                wpn.data().id == item::Id::spike_gun;
+                        const auto knockback_source =
+                                (wpn.data().id == item::Id::spike_gun)
+                                ? knockback::KnockbackSource::spike_gun
+                                : knockback::KnockbackSource::other;
 
                         knockback::run(
                                 *(att_data.defender),
                                 att_data.attacker->m_pos,
-                                is_spike_gun);
+                                knockback_source);
                 }
         }
 }
@@ -1814,7 +1816,10 @@ static void melee_hit_actor(
 
                 if (wpn.data().melee.knocks_back)
                 {
-                        knockback::run(defender, attacker_origin, false);
+                        knockback::run(
+                                defender,
+                                attacker_origin,
+                                knockback::KnockbackSource::other);
                 }
         }
         else
