@@ -1,7 +1,10 @@
---------------------------------------------------------------
-v21.0 *** WORK IN PROGRESS ***
---------------------------------------------------------------
-Gameplay changes
+============================================================
+= v21.0 *** WORK IN PROGRESS ***
+============================================================
+
+##############################
+# Gameplay changes
+##############################
 * Added a new background (class) "Exorcist"
 * Added weapons "S&W Revolver" and "Winchester Rifle"
 * Removed the Flare Gun
@@ -29,7 +32,9 @@ Gameplay changes
 * Removed deep liquid and swimming
 * Pylons now have different appearances, and it's possible to permanently identify their effects - also Pylons are now activated by touching them
 
-Minor tweaks and balancing
+##############################
+# Minor tweaks and balancing
+##############################
 * The Electric Gun also disables passive hit point regeneration for a number of turns
 * The Talisman of Resurrection also teleports the player when activated, to avoid leaving the player in the same situation that killed them to begin with
 * The stealth penalty in lit positions is much higher than before (see also bug fixes below concerning stealth and darkness)
@@ -61,7 +66,9 @@ Minor tweaks and balancing
 * Statues no longer block line of sight, making them much easier to kick into monsters.
 * Removed the "masochistic obsession" insanity effect
 
-User interface updates
+##############################
+# User interface updates
+##############################
 * All fonts have been replaced with new ones (the reason for this is that the origins and license information of the previous ones was unknown - now this information is clearly listed in a font license text file distributed with the game)
 * Added the ability for displaying idle animations while the game is waiting for input, currently this is used for flickering the player color when holding an activated Electric Lantern, or randomizing the color of burning tiles or tiles corrupted by Strange Colors - and also for auto-scrolling item descriptions in the (rare) case that they do not fit in the window
 * Improved the player character memory of explored map positions - it is now possible to view the names of terrain and items on previously explored positions, items seen on the floor in dark rooms are remembered on the map, and bumping terrain like fountains and doors while blind instantly updates their visual status
@@ -90,17 +97,24 @@ User interface updates
 * Removed the options to draw the walls as filled rectangles in tiles mode
 * When standing in a dark position "total darkness" is displayed in the status lines
 
-Fixes
+##############################
+# Fixes
+##############################
 * Fixed a bug that prevented messages for Rogues sensing artifacts on the dungeon floor (there were only messages for sensing artifacts in item containers, such as tombs)
 * Darkness did not give a stealth bonus
 * The effect of the Silent trait was inverted for melee attacks  - i.e. attacks were noisy with the Silent trait picked, and vice versa
 * The Asbestos Suite was not protecting against gas explosions (from gas traps)
 * Energy Vortex attacks has a paralyzing effect as they were supposed to have, instead of burning
+* And much more...
 
---------------------------------------------------------------
-v20.0 (December 17, 2019)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v20.0 (December 17, 2019)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * Maps can have different size, the standard map size is bigger than before
 * Some maps built from templates (such as the "Egypt" level)  are randomly flipped and rotated for more variety
 * Added more special levels
@@ -149,7 +163,9 @@ Gameplay
 * Removed the phobias for open/confined places (they were too annoying from a gameplay perspective)
 * Messages are now printed when monsters fight each other
 
-User interface
+##############################
+# User interface
+##############################
 * The interface has a new layout, and there is a scrolling viewport centered on the player
 * The tiles are 24x24 pixels, instead of 16x24
 * The font size is no longer locked to the tile size (for example a smaller font can be used)
@@ -178,17 +194,23 @@ User interface
 * Added option to skip the intro level popup message
 * Added more sound effects
 
-Misc
+##############################
+# Misc
+##############################
 * Save files are no longer erased when loading a saved game (only when dying, winning the game, or when actively quitting), this allows players to resume from a previous save file if the game has crashed
 * The game is auto-saved on each descent to a new dungeon level, so in the case of a crash, only the progress on the current dungeon level is lost
 * Switched license to GNU Affero General Public License v3.0 or later, and added a reference to this license at the top of each Infra Arcana source code file, and a reference from the main menu
 * User data (such as save file and highscore list) is no longer stored in the game directory, instead the user data location is based on SDL_GetPrefPath() and the current version/checksum of the game (e.g. "~/.local/share/infra_arcana/873f2d0e/") - the Infra Arcana game directory is now treated as read-only.
 * Added in-game hints for some basic concepts such as treating infections or unloading firearms
 
---------------------------------------------------------------
-v19.2 (November 6, 2017)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v19.2 (November 6, 2017)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * All items which gave XP on identification now instead gives XP when that item is found for the first time (except "Strange Devices") - the reason for this is to reduce the pressure to identify consumables as soon as possible, and also to have a more "natural" continuous stream of XP, rather than occasional bursts
 * When carrying a Potion, the player eventually gets a "feeling" for if the Potion is benign or malign
 * Increased minimum distance from player when spawning monsters (when entering a new map, or spawning over time)
@@ -243,7 +265,9 @@ Gameplay
 * Shock is completely restored when taking a sanity hit
 * The Incinerator is always aimed at the floor of the selected cell (no need for players to select a floor cell adjacent to the monster they are attacking)
 
-Interface
+##############################
+# Interface
+##############################
 * Monsters are drawn with magenta background when they have temporary negative properties (such as paralyzation)
 * When viewing monster descriptions, temporary negative properties are listed
 * Added information on high scores and memorial files in the manual
@@ -254,16 +278,22 @@ Interface
 * Added option to ask for confirmation before drinking malign potions
 * When playing in text mode, the old ascii art graveyard is shown in the postmortem menu screen again
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Fixed a crash bug for the Incinerator weapon (the game could crash when the projectile reached its max range)
 * Energy Vortexes were not resistant to electricity
 * In the game summary, insanity symptoms were written in the wrong format (e.g. "Phobia of spiders", instead of "Had a phobia of spiders")
 * Monsters no longer spawn over time on special levels (e.g. the "Egypt" level)
 
---------------------------------------------------------------
-v19.1 (August 20, 2017)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v19.1 (August 20, 2017)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * Spells have basic/expert/master tiers instead of a skill percentage - higher tiers can be achieved by picking traits for various spell domains (e.g. "Lesser Invocation" to cast all attack spells at expert level)
 * Reworked the spell skill bonuses for all spells
 * Lowered the spirit cost for many spells
@@ -334,7 +364,9 @@ Gameplay
 * The Rejuvenator Device causes heavy shock when used
 * Good properties no longer interrupt player actions when they are applied (e.g. using medical equipment is not interrupted by regaining spell resistance)
 
-Interface
+##############################
+# Interface
+##############################
 * Weapon names show average damage instead of dice rolls - melee weapons also show their "plus" damage bonus (not including any damage bonus from traits), e.g. "Machete 9.0 {+2} +0%" - the exact dice rolls can be seen in the detailed item description when viewing the item in the inventory
 * Brighter interface color scheme (some menus could be difficult to read before)
 * The descriptions for armors and gas masks includes their exact ability penalty values
@@ -352,7 +384,9 @@ Interface
 * The game no longer pre-loads the ambient sound effects (they are now only loaded on demand) - vastly reducing the program load time (should be nearly instant on most systems) and initial memory usage
 * Seeing fire on the map now interrupts actions such as waiting or using medical equipment
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * On some machines, the random number generator would have a fixed seed (apparently, the C++ std::random_device can silently fall back on this method if it cannot find a source of randomness...), resulting in deterministic map generation, etc - the RNG is now seeded with the current time instead
 * Fixed a bug which prevented accessing the manual ("Tome of Wisdom") from the esc-menu during a game
 * Fixed a bug which removed the Sentry Drone monster from the game - preventing both usage of the Sentry Drone device, and hostile Sentry Drones from spawning on the map
@@ -361,10 +395,14 @@ Bug fixes
 * The descriptions of "fast" monsters said that they appear to move "slowly"
 * Fixed some typos
 
---------------------------------------------------------------
-v19.0 (July 20, 2017)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v19.0 (July 20, 2017)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * You no longer gain XP from killing monsters - instead XP is raised by activities related to exploration and discovery, such as identifying items, drinking from some types of fountains, reading inscriptions on "monoliths", or seeing a new type of monster for the first time
 * Fewer monsters are spawned on the map overall, and many monster types now tend to spawn in smaller groups, but are individually stronger - they also generally follow and remember you for a shorter time than before
 * Monsters may become "suspicious" (typically with a message about them looking "wary" or "disturbed"), which gives them an increased chance of detecting you - they may still detect you immediately, but the chance for this is slightly lower than before
@@ -416,7 +454,9 @@ Gameplay
 * Added Spiked Maces - a weapon with a weight between medium and heavy, and with a chance to stun the victim
 * The Mi-go Electric Gun no longer uses ammo, and costs Spirit Points to fire
 
-Interface
+##############################
+# Interface
+##############################
 * The throwing slot has been removed - instead you change which item to use for throwing by pressing [T] (which can be a wielded item or an item in the backpack) - pressing [t] throws the currently selected item (this also has gameplay effects, since you don't have to spend turns to equip different items to throw them)
 * While holding lit explosives, the explosive is shown in the status lines instead of the selected throwing item (with yellow text)
 * All active properties are printed with descriptions on the [@] character decsription page, and when [v]iewing monsters
@@ -437,14 +477,20 @@ Interface
 * When entering player name, the previously used name is filled in as a default name
 * The player symbol is colored yellow when carrying a lit Electric Lantern
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Fixed a bug where dropping the Staff of the Pharaohs would cause the spell to be permanently lost, even if the staff was picked up again
 * Fixed a bug that prevented hit chance bonus against unaware targets for ranged attacks
 
---------------------------------------------------------------
-v18.2 (July 2, 2016)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v18.2 (July 2, 2016)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * All backgrounds (classes) now have ranged attack bonus vs unaware targets (not just Rogues)
 * Ghoul characters are no longer shocked by Ghoul statues
 * You no longer drop your items when you die
@@ -454,7 +500,9 @@ Gameplay
 * Slightly reduced the number of Medical Bag supplies
 * Critically failing a melee attack can no longer result in dropping the weapon
 
-Interface
+##############################
+# Interface
+##############################
 * When picking traits, the game now shows all traits and their prerequisites (no information is hidden)
 * When aiming explosives, the explosion size is marked on the map
 * Added option for confirming "-More-" prompts with any key (off by default)
@@ -463,7 +511,9 @@ Interface
 * Removed some redundant messages to reduce clutter ("I pause for a while...", "I stop waiting.")
 * Added a section in the manual about inventory handling
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Fixed a bug that caused monsters with Fear Resistance to end all player phobias when they spawned (this was mistakenly reported to the insanity system as a "player gaining permanent rFear" event)
 * Fixed some buggy item drop code (which may have caused crashes)
 * Fixed some minor bugs in the map generator (the map generator can also do a few new things now, although it's probably subtle)
@@ -471,10 +521,14 @@ Bug fixes
 * Fixed a bug that (in some rare specific cases) allowed monsters to move into the position already occupied by another monster
 * Fixed a bug were teleporting or being knocked back while held by a spider web, caused the web to be able to hold any creature that walked into it, regardless of monster type (e.g. ethereal monsters or spiders could then also be held)
 
---------------------------------------------------------------
-v18.1 (Mars 17, 2016)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v18.1 (Mars 17, 2016)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * Worms Masses may now only split once (i.e. the split worms may not also split themselves), they do not split if they are killed with enough damage, they are not allowed to attack immediately after being split, and the confusion effect from Mind Worm bites has a much shorter duration. However, Worms now move at normal speed (instead of slow).
 * Gas Mask and Asbestos Suit now protects against blindness from Ravens, Spitting Cobras, and Dust Vortexes
 * Vortex monsters no longer "explode" when they die
@@ -486,21 +540,29 @@ Gameplay
 * You are no longer "telepathically"aware of where all allied monsters are - if they are out of sight or invisible, you can lose awareness of them
 * You can now only accidentally drop your melee weapon during combat if you are Cursed
 
-Interface
+##############################
+# Interface
+##############################
 * Spells in the casting menu now appear in the order that you learned the spells (instead of alphabetically)
 * On turns that you can walk for free due to Dextrous, the "T" is now colored green instead of the number (to be less distracting)
 * Removed the "icon mode" which used a heart, brain, stopwatch etc as symbols in the user interface
 * The message "I stop waiting" is no longer printed when fainting or paralyzed
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Fixed some bugs in the monster movement AI (it wasn't anything critical, but it made them act a bit weird in a few specific situations)
 * Fixed a faulty message when pressing "t" with no item selected for throwing (the message adviced to press "w" to wield a throwing weapon, but the actual key should be "i")
 * Property messages such as "...is paralyzed" is no longer allowed for dead monsters
 
---------------------------------------------------------------
-v18.0 (January 28, 2016)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v18.0 (January 28, 2016)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * Added more monsters
 * Added invisibility property
 * Ghost-type monsters and Polyps are invisible.
@@ -537,7 +599,9 @@ Gameplay
 * New spell: Animate Weapons - causes melee weapons to rise into the air and protect you (after a while they will drop to the ground and become normal weapons again)
 * Added more Insanity symptoms
 
-Interface
+##############################
+# Interface
+##############################
 * Migrated to SDL2 (fullscreen mode may work better for you now, if you had problems with this before)
 * In window mode, the window is created centered on the screen
 * In some menus, options can now be selected directly with letter keys
@@ -557,17 +621,23 @@ Interface
 * Added more sound effects (events and ambient sounds)
 * While aiming aiming, the marker shows if the path goes through any seen blocking cells
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Fixed a bug that could crash the game, especially during map generation (thanks "stevebob"!)
 * Fixed a bug that caused the player's dodge chance to be calculated the wrong way when Ghosts attempted to "touch" you
 * If you ignited an explosive (Dynamite, Molotov, Flare, Smoke grenade) while already holding another, the first one would just be erased - now the game prevents you from igniting a new explosive instead
 * Fixed a bug that prevented Flare Guns from burning the target
 * Fixed a bug where bumping a hidden door would print a different message than bumping a wall (and thus indicating the presence of the door)
 
---------------------------------------------------------------
-v17.0 (February 18, 2015)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v17.0 (February 18, 2015)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * Monsters can now be allied to the player
 * Added spell/manuscript "Summon Creature"
 * The "Pestilence" spell now summons allied critters, and can be learned by both the player and monsters
@@ -607,7 +677,9 @@ Gameplay
 * Firearms and thrown weapons have limited effective ranges, beyond which their damage is halved. When selecting target, the marker is colored orange beyond the effective range.
 * Added phobia for darkness
 
-Interface
+##############################
+# Interface
+##############################
 * Added a quick move command [e], to automatically move in some direction until interrupted
 * Removed the Inventory menu [i] and the Use menu [e] - instead you now view and handle your inventory from a single menu, accessed with [w].
 * Removed the examine command [a]
@@ -631,7 +703,9 @@ Interface
 * Throwing explosives in tiles mode now draws the items tile instead of its ASCII character
 * The game no longer draws/delays at each intermediate cell when creatures are knocked back (or pulled by a Vortex), only when the creature reach the "destination" cell - this feels more intuitive and responsive.
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Fixed a bug that prevented backstabs from giving hit chance bonus in many cases
 * Fixed a crash that occurred if enter was pressed while equipping a slot with no available items
 * Fixed a crash that occurred if shift + enter (drop item) was pressed while a slot with no item was selected
@@ -641,10 +715,14 @@ Bug fixes
 * Flying monsters can no longer be killed by kicking them into chasms
 * The audio player now attempts to find a free channel, instead of just picking the next channel (this could stop other sounds, which frequently happened with long tracks like the ambient background noises)
 
---------------------------------------------------------------
-v16.0 (April 17, 2014)
---------------------------------------------------------------
-Gameplay
+
+============================================================
+= v16.0 (April 17, 2014)
+============================================================
+
+##############################
+# Gameplay
+##############################
 * You now pick traits when gaining character levels (as it was in v14) instead of only at the start. Many new traits have been added. You pick a trait each level, but the XP rate is roughly halved compared to older versions, and your character is limited to 10 levels.
 
 * You now select a background when starting a game, the choices are "Occultist" (magic), "Rogue" (stealth), and "War Veteran" (fighter/firearms) - Your background determines which traits and items you start with, there are also special background-specific abilities, and some traits have background prerequisites.
@@ -695,7 +773,9 @@ Gameplay
 * The postmortem information no longer lists number of kills for each type of monster, instead it only lists unique monsters killed, and the total number of monsters
 * Masochistic Obsession no longer restores shock when player is damaged, it now merely removes the shock normally taken when damaged (and raises minimum shock to 35%)
 
-Interface
+##############################
+# Interface
+##############################
 * The game now supports Vi-keys
 * You can no longer select things in menus by pressing letter keys
 * To make it easier to notice when shocking events happen, exclamation marks ("!") are now drawn on the player character if enough shock is received during a turn (up to three marks can be drawn)
@@ -720,16 +800,19 @@ Interface
 * When reloading, the amount of ammo loaded in the weapon is now printed in the log
 * Some special ranged weapons now only show "*" (asterisk) as damage info (e.g. the Incinerator, which previously displayed "1d3" as damage - this only represented the "impact damage" of the shell, and did not include the explosion - the asterisk used now should give a clearer indication that the weapon will do damage in a special way)
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Fixed many bugs related to saving/loading (e.g. crashing, losing memorized spells)
 * Fixed many bugs related to properties (especially concerning properties which were supposed to be permanent, but would time out - e.g. confusion resistance gained from picking the trait "Self-aware")
 * Corrected various spelling mistakes
 * Fixed a bug that prevented Ooze-type monsters from passing through closed doors (they should be able to do this)
 * Fixed a bug that prevented using Page Up/Page Down/Home/End for diagonal movement
 
---------------------------------------------------------------
-v15.0 (November 26, 2013)
---------------------------------------------------------------
+
+============================================================
+= v15.0 (November 26, 2013)
+============================================================
 * Added sound effects (for weapons, monsters, etc) and atmospheric ambient background sounds. Audio can be enabled/disabled in the options menu.
 * The track "Madness" by Musica Cthulhiana (from the album "Fragment") is used as intro music in the main menu
 * Reworked the status effects system, and changed/added many effects. Internally, status effects are now called "Properties". They can describe both a creature's temporary conditions (confused, burning, diseased...) and permanent attributes (natural fire resistance, light sensitivity...). It is now also possible for items to apply properties on the wearer. Properties may prevent damage (e.g. fire resistance will prevent all fire damage).
@@ -771,21 +854,29 @@ v15.0 (November 26, 2013)
 * Fixed a bug that prevented you from using melee attacks on a turn that you had a free move from the "Dextrous" bonus, and walked in liquid
 * Fixed a bug where carrying multiple electric lanterns prevented you from using any other than the top one
 
---------------------------------------------------------------
-v14.1 (June 16, 2013)
---------------------------------------------------------------
-Miscellaneous
+
+============================================================
+= v14.1 (June 16, 2013)
+============================================================
+
+##############################
+# Miscellaneous
+##############################
 * Using SDL for rendering/input again (it seems more compatible with a wider range of systems)
 * Dark areas now have less permissive field of view for spotting walls, previously it was easy to explore the walls in dark areas, whereas now you need to be adjacent to it - for a more atmospheric and oppressive feeling
 * "Slimy" walls are now "Moss-grown" walls instead
 * Added 15 more quotes to the main menu
 
-New content and features
+##############################
+# New content and features
+##############################
 * Hit chance with ranged weapons is now affected by the size, speed and proximity of the target creature
 * While aiming, you are informed what you are looking at, and hit chances are shown when aiming at monsters
 * Monsters now avoid shooting each other (though there is still a small chance that it happens)
 
-Balancing
+##############################
+# Balancing
+##############################
 * You no longer pick an ability when creating a new character
 * The monster spawn rate on explored levels (spawning due to passage of time) is now lower
 * The "Self-aware" bonus now has "Observant" as an additional prerequisite
@@ -795,7 +886,9 @@ Balancing
 * Oozes now regenerate HP each standard turn instead of on their own turn (since these monsters are very slow, their regeneration occurred in bursts, which seemed erratic and unpredictable)
 * Clear Oozes are somewhat easier to spot
 
-Usability
+##############################
+# Usability
+##############################
 * Floor cells lit by an Electric lantern, flare, burning creature, etc are now marked with yellow color
 * The menu for picking a new ability also shows previously picked abilities
 * The postmortem info shows gained abilities
@@ -806,21 +899,29 @@ Usability
 * Changed the "Kick/bash in what direction?" message to simply "Which direction?", and vice versa for other actions
 * Options for setting keyboard repeat delay and interval
 
-Graphics
+##############################
+# Graphics
+##############################
 * Made layout changes to the main menu
 * Made some changes to the wall tiles
 * Changed the general color theme in the game - the "blood red" style has been changed to a teal style (inspired by how certain old black and white movies were tinted, e.g. Nosferatu)
 * Added option to scale the font to 2x size (so you can for example use the small DOS-like font scaled up to a nice readable size) - if tiles mode is enabled, the scaled font must match the tile size
 * Fullscreen can be toggled in the options menu, or by pressing alt-enter (fullscreen mode is highly experimental, it may or may not work for you)
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Corrected a spelling error in an ability description
 * Corrected a misplaced word in a monster description
 
---------------------------------------------------------------
-v14.0 (April 23, 2013)
---------------------------------------------------------------
-New content and features
+
+============================================================
+= v14.0 (April 23, 2013)
+============================================================
+
+##############################
+# New content and features
+##############################
 * Changed API from SDL to SFML - The game should run much smoother on most systems
 * New inventory system which is easier to use, and requires much fewer keyboard commands to learn
 * Inventory items are color coded and sorted according to item type and name
@@ -864,7 +965,9 @@ New content and features
 * After a certain dungeon level, dart and spear traps can be poisoned
 * Attacking unarmed causes a punch-attack
 
-Graphics
+##############################
+# Graphics
+##############################
 * Nicer looking main menu, with a new logo (thanks to Agata Skrzypczyk)
 * The Windows version has an icon (thanks to Agata Skrzypczyk)
 * Added "clean" 16x24 font for tiles and ASCII mode, and made it default
@@ -877,7 +980,9 @@ Graphics
 * Added a secondary wall tile occasionally used as alternative (purely aesthetical)
 * Added an atmospheric fade effect to the field of view - further cells are rendered darker (monsters are always drawn at full brightness though)
 
-Balancing
+##############################
+# Balancing
+##############################
 * Made changes to the AI to make it act less irrational and more aggressive, in particular it won't run back and forth between melee attacks or pass attack opportunities as much as in the previous version
 * Made non-player aware monsters skip every second turn (they don't move at full speed if nothing exciting is happening), this makes stealth tactics more powerful, and it looks cool when they discover you and start moving fast
 * Becoming aware of the player by looking counts as an action for monsters (to give the monsters some reaction time instead of attacking instantly), though you may still be gunned down instantly if you alert the monsters beforehand (e.g. by making noise)
@@ -888,7 +993,9 @@ Balancing
 * Taking damage causes a small amount of shock (if not masochistic)
 * The Incinerator (Napalm launcher) now use clips (3 rounds) instead of single shots
 
-Usability
+##############################
+# Usability
+##############################
 * Added titles to most popups
 * Character info screen (accessed with [@]) gives more info - combat stats, resistances, item knowledge
 * Reading/drinking an unknown manuscript/potion and failing to identify it adds {tried} to the name
@@ -906,27 +1013,33 @@ Usability
 * Disease temporarily lowers your maximum HP, instead of making you rapidly lose HP down to a certain limit (with the old method it was always possible to heal yourself, even though it was useless)
 * Removed some useless attack messages ("I fumble", "It was a great hit!!!")
 
-Miscellaneous
+##############################
+# Miscellaneous
+##############################
 * Removed kill count info from the look screen, and added it to the postmortem info instead, as well as showing the total number of kills
 * Removed support for multiple save files
 * Switched colors of gas traps and teleport traps, gas traps are now magenta and teleport traps are cyan
 
-Bug fixes
+##############################
+# Bug fixes
+##############################
 * Nuclear batteries occasionally spawned with the wrong weight (reported by Surrealistik)
 * Turn number is now stored in the save file
 
---------------------------------------------------------------
-v13.1 (September 20, 2012)
---------------------------------------------------------------
+
+============================================================
+= v13.1 (September 20, 2012)
+============================================================
 * The Incinerator is a medium weight weapon
 * The Toughness ability also gives a hit point bonus
 * Lowered starting hit points from 16 to 14
 * Fixed: There was a situation that put the game in an infinite loop (not responding)
 * Fixed: The player color updates immediately after healing (instead of the turn after)
 
---------------------------------------------------------------
-v13.0 (September 15, 2012)
---------------------------------------------------------------
+
+============================================================
+= v13.0 (September 15, 2012)
+============================================================
 * The narrative is in first person perspective
 * Added new 16x24 font (typewriter)
 * Nicer looking main menu
@@ -952,22 +1065,25 @@ v13.0 (September 15, 2012)
 * Fixed: "High ceiling rooms" could spawn monsters outside the room
 * Fixed: Armor durability and clip ammo count were not stored in save files
 
---------------------------------------------------------------
-v12.2 (June 10, 2012)
---------------------------------------------------------------
+
+============================================================
+= v12.2 (June 10, 2012)
+============================================================
 * Game crashed when loading a game while "blessed" or "cursed"
 
---------------------------------------------------------------
-v12.1 (June 9, 2012)
---------------------------------------------------------------
+
+============================================================
+= v12.1 (June 9, 2012)
+============================================================
 * Linux version
 * The game should use a lot less CPU power
 * Smoother rendering in certain cases (e.g. no flickering when blinded)
 * Blue colors are brighter for better visibility
 
---------------------------------------------------------------
-v12.0 (May 27, 2012)
---------------------------------------------------------------
+
+============================================================
+= v12.0 (May 27, 2012)
+============================================================
 * New map generator
 * A character screen (@) with info about skills and mental conditions
 * Reworked skill system - merging, balancing, grouping
@@ -992,9 +1108,10 @@ v12.0 (May 27, 2012)
 * Fixed a bug that allowed explosion graphics to be rendered in unseen cells
 * The number of dungeon levels has been reduced from 30 to 25
 
---------------------------------------------------------------
-v11.2 (December 19, 2011)
---------------------------------------------------------------
+
+============================================================
+= v11.2 (December 19, 2011)
+============================================================
 * The 16x24 font is fully available in ASCII mode
 * Fixed a bug that prevented monsters from stepping on corpses
 * Fixed a bug that allowed saving anywhere
@@ -1006,16 +1123,18 @@ v11.2 (December 19, 2011)
 * Chances for scrolls and potions spawning is a bit higher
 * Slightly reduced the damage from spear traps
 
---------------------------------------------------------------
-v11.1 (December 14, 2011)
---------------------------------------------------------------
+
+============================================================
+= v11.1 (December 14, 2011)
+============================================================
 * Added a Flare Gun
 * There was some problems with the map in the postmortem screen
 * The 16x24 font is unfinished for ascii mode, removed that option from the config file
 
---------------------------------------------------------------
-v11.0 (December 13, 2011)
---------------------------------------------------------------
+
+============================================================
+= v11.0 (December 13, 2011)
+============================================================
 * Tile set
 * New font (16x24)
 * New time system (easier to predict how much the monsters will move between your turns)
@@ -1031,19 +1150,22 @@ v11.0 (December 13, 2011)
 * Fixed a bug that caused the 'get' command to crash the game after loading a save file
 * Decreased the HP of all monsters
 
---------------------------------------------------------------
-v10.2 (November 20, 2011)
---------------------------------------------------------------
+
+============================================================
+= v10.2 (November 20, 2011)
+============================================================
 * The game crashed when dying from drinking a potion of scorching (changed it so you can't die from it)
 
---------------------------------------------------------------
-v10.1 (November 19, 2011)
---------------------------------------------------------------
+
+============================================================
+= v10.1 (November 19, 2011)
+============================================================
 * Casting spells from manuscripts drained spirit points
 
---------------------------------------------------------------
-v10.0 (November 19, 2011)
---------------------------------------------------------------
+
+============================================================
+= v10.0 (November 19, 2011)
+============================================================
 * The game is winnable
 * New armor system:
 > Armors provide different amount of protection from different damage types (physical, fire, electricity, etc)
@@ -1075,29 +1197,43 @@ v10.0 (November 19, 2011)
 * Removed some stuff from the character info lines to make room for new things
 * Pools no longer slows you down (it didn't work very well)
 
---------------------------------------------------------------
-v9.2 (October 16, 2011)
---------------------------------------------------------------
-New features
+
+============================================================
+= v9.2 (October 16, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * A new font image added (11x19), edit config.txt to use it
 
-Fixes & changes
+##############################
+# Fixes & changes
+##############################
 * You can no longer wait ('s') while you see an enemy
 * Missiles always landed at the end of their path (even if it hit a monster along the way)
 * Fixed some grammatical errors
 * Added a missing message (related to jamming doors)
 
---------------------------------------------------------------
-v9.1 (October 13, 2011)
---------------------------------------------------------------
-Fixes & changes
+
+============================================================
+= v9.1 (October 13, 2011)
+============================================================
+
+##############################
+# Fixes & changes
+##############################
 * Fixed a faulty message when throwing potions on monsters ("it had no apparent effect..." even when the effect was obvious. Only the message was wrong though, not the actual identification)
 * You lost iron spikes if you tried to jam an open door
 
---------------------------------------------------------------
-v9.0 (October 12, 2011)
---------------------------------------------------------------
-New features
+
+============================================================
+= v9.0 (October 12, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * Linux version
 * Modified and expanded skill system:
 > Some skills have been split (e.g. Firearms->Shotguns, Pistols, Automatics)
@@ -1121,7 +1257,9 @@ New features
 * Melee attack for fire hounds
 * Command to "un-wield" missile weapons (M)
 
-Fixes & changes
+##############################
+# Fixes & changes
+##############################
 * The command to show the message log is now 'L' (used to be 'M')
 * Cultists can drop scrolls and potions
 * Potions and scrolls can spawn stacked
@@ -1139,22 +1277,32 @@ Fixes & changes
 * Prevented chasms from making unreachable "islands"
 * Fixed some code that may have made the game less stable
 
---------------------------------------------------------------
-v8.1 (September 24, 2011)
---------------------------------------------------------------
-New features
+
+============================================================
+= v8.1 (September 24, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * 2 new unique monsters
 * The tab key performs a melee attack vs an adjacent monster
 
-Fixes & changes
+##############################
+# Fixes & changes
+##############################
 * The FoV is more permissive with walls (especially corridors and corners)
 * Default aim position is at last monster attacked
 * If there is only one adjacent door, the 'close' command does not ask for direction
 
---------------------------------------------------------------
-v8.0 (September 20, 2011)
---------------------------------------------------------------
-New features
+
+============================================================
+= v8.0 (September 20, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * Potions (14 types)
 * 6 new scrolls (some old scroll effects are now potions instead)
 * Special rooms with descriptions and various effects
@@ -1171,7 +1319,9 @@ New features
 * New symbol for gravestones
 * New symbol for impassable rubble
 
-Fixes & changes
+##############################
+# Fixes & changes
+##############################
 * "SAN" (sanity) changed to "INS" (insanity) in the interface. Counts up from 0%. The values are called "insanity" and "shock" (or stress)
 * Insanity increases when shock reaches 100% (instead of randomly happening when shock is high)
 * The backstabbing skill gives highest dmg +50/100/150% extra dmg (was +50/100/150% added to rolled dmg)
@@ -1185,20 +1335,28 @@ Fixes & changes
 * When reading a scroll of summoning, the scroll identity is always revealed
 * Fixed a typo when reading scrolls
 
---------------------------------------------------------------
-v7.1 (August 29, 2011)
---------------------------------------------------------------
-Fixes
+
+============================================================
+= v7.1 (August 29, 2011)
+============================================================
+
+##############################
+# Fixes
+##############################
 * Every melee attack was presented like a back-stab (only the message was bugged though)
 * Fixed a horrible horrible bug that prevented the player from dodging melee attacks
 * CPU usage % should be much lower
 * The inventory can store more items
 * Windowed mode is now the default
 
---------------------------------------------------------------
-v7.0 (August 25, 2011)
---------------------------------------------------------------
-New features
+
+============================================================
+= v7.0 (August 25, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * Save function
 * Sneaking (unaware creatures are marked with an underscore)
 * Backstabbing ("You stab the Cultist covertly with a dagger")
@@ -1209,7 +1367,9 @@ New features
 * The back-story is written in the game
 * Some text (e.g. insanity events) is shown in a pop-up box instead of the message log (they were too easy to miss)
 
-Fixes
+##############################
+# Fixes
+##############################
 * Lower monster spawn rate
 * Removed hunger (the sanity system made it redundant)
 * Animals listen for sound
@@ -1222,10 +1382,14 @@ Fixes
 * Toughness increases HP instead of decreasing damage taken
 * You can no longer use the throwing attack while "Terrified"
 
---------------------------------------------------------------
-v6.0 (August 5, 2011)
---------------------------------------------------------------
-New features
+
+============================================================
+= v6.0 (August 5, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * Insanity
 * High Score
 * New explosive weapon: Molotov Cocktail
@@ -1239,7 +1403,9 @@ New features
 * One new monster
 * The tombstone screen has a command to quit the game
 
-Fixes
+##############################
+# Fixes
+##############################
 * The game restarts smoother (doesn't restart the renderer when going to main menu)
 * Zombies leave no corpse the second time they are killed
 * The pre-set player name is empty instead of "Player"
@@ -1247,10 +1413,14 @@ Fixes
 * Cancellation commands in some places where they were missing
 * Rewrote level up-bonus description text
 
---------------------------------------------------------------
-v5.0 (July 24, 2011)
---------------------------------------------------------------
-New features:
+
+============================================================
+= v5.0 (July 24, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * Monster spell casting
 * New monsters
 * Throwing weapons
@@ -1261,20 +1431,28 @@ New features:
 * Some rats and clawing zombies are diseased (attack causes disease). Ghouls always cause disease
 * Some Cultist Acolytes can cast a few spells (very rare). Some Mi-Go (Fungi) can cast spells (somewhat rare)
 
-Fixes:
+##############################
+# Fixes
+##############################
 * Fixed a bug that caused unique monsters to sometimes spawn more than once
 * The minimum value for any skill roll was 5%, causing hidden things to be found much too easily even without "Alertness". This value is now 1%
 * Monsters give less xp (to compensate for spawning)
 * The "Melee" and "Firearms" skills now only gives better chance to hit
 * Safeguard against accidental quitting
 
---------------------------------------------------------------
-v4.0 (July 12, 2011)
---------------------------------------------------------------
-New features:
-One unique monster
 
-Fixes:
+============================================================
+= v4.0 (July 12, 2011)
+============================================================
+
+##############################
+# New features
+##############################
+* One unique monster
+
+##############################
+# Fixes
+##############################
 * Much better map (no dead end corridors)
 * Changed healing back so you spend a number of turns to apply first aid (instead of healing at stairs)
 * +2HP at level up instead of +1
@@ -1289,10 +1467,14 @@ Fixes:
 * Cultist anger phrases were too infrequent in the previous version
 * Reading scrolls now causes your turn to end
 
---------------------------------------------------------------
-v3.0 (July 9, 2011)
---------------------------------------------------------------
-New features:
+
+============================================================
+= v3.0 (July 9, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * More monsters
 * Pump-action shotgun
 * Monsters spawn while you are on the level
@@ -1305,7 +1487,9 @@ New features:
 * Explosions leave smoke
 * More pre-defined rooms
 
-Fixes:
+##############################
+# Fixes
+##############################
 * Much balancing of weapons and monsters
 * Changed the names of some weapons
 * Fixed a bug with machine gun weapons (killing a monster caused the following bullets to hit the floor where he stood. Now machine guns are more effective against rows of monsters)
@@ -1318,10 +1502,14 @@ Fixes:
 * Confusion is less random
 * Some small improvements to the interface
 
---------------------------------------------------------------
-v2.0 (June 23, 2011)
---------------------------------------------------------------
-New features:
+
+============================================================
+= v2.0 (June 23, 2011)
+============================================================
+
+##############################
+# New features
+##############################
 * Traps
 * A command to trigger known traps on purpose
 * Secret doors
@@ -1334,7 +1522,9 @@ New features:
 * Starvation is not lethal (but still very dangerous)
 * Expanded the command list screen to a brief manual
 
-Fixes:
+##############################
+# Fixes
+##############################
 * Much better looking explosions and projectile hits
 * The in-game quit command returns to the main menu instead of shutting down the game
 * Monsters roam the map more
@@ -1342,9 +1532,10 @@ Fixes:
 * Removed bouncing of thrown items (it felt too unpredictable)
 * Fixed some grammatical errors
 
---------------------------------------------------------------
+
+============================================================
 Old changelogs from before the game was named Infra Arcana
---------------------------------------------------------------
+============================================================
 Feb 7, 2011
 * There are incantation scrolls with mysterious titles that you can read. Their effect and true identity are unknown until you try them (and only if their effect is visible and obvious to the player character). Once you learn the true identity of a scroll, all scrolls of that type are always known. There are a decent number of types in the game already.
 * Items are found in the dungeon (not only dropped from killed monsters).
