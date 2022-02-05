@@ -3498,34 +3498,39 @@ void PropSpectralWpn::on_death()
         m_discarded_item.reset(item);
 }
 
-std::optional<std::string> PropSpectralWpn::override_actor_name_the() const
+std::string PropSpectralWpn::get_weapon_name() const
 {
         auto* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         ASSERT(item);
 
-        const std::string name =
+        std::string name =
                 item->name(
                         ItemNameType::plain,
                         ItemNameInfo::yes,
                         ItemNameAttackInfo::none);
 
-        return "The Spectral " + name;
+        // HACK: Remove all characters from the first comma. This is intended to
+        // give unique weapons a more sensible name - e.g. "Spectral Gahana",
+        // instead of "Spectral Gahana, The Black Dagger".
+        const auto comma_pos = name.find_first_of(',');
+
+        if (comma_pos != std::string::npos)
+        {
+                name.erase(comma_pos, name.size());
+        }
+
+        return name;
+}
+
+std::optional<std::string> PropSpectralWpn::override_actor_name_the() const
+{
+        return "The Spectral " + get_weapon_name();
 }
 
 std::optional<std::string> PropSpectralWpn::override_actor_name_a() const
 {
-        auto* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
-
-        ASSERT(item);
-
-        const std::string name =
-                item->name(
-                        ItemNameType::plain,
-                        ItemNameInfo::yes,
-                        ItemNameAttackInfo::none);
-
-        return "A Spectral " + name;
+        return "A Spectral " + get_weapon_name();
 }
 
 std::optional<char> PropSpectralWpn::override_actor_character() const

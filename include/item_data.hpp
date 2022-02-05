@@ -187,7 +187,7 @@ enum class Id
         pharaoh_staff,
         refl_talisman,
         resurrect_talisman,
-        spirit_dagger,
+        shadow_dagger,
         tele_ctrl_talisman,
         necronomicon,
 

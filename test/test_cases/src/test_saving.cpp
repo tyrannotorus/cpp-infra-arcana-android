@@ -168,7 +168,7 @@ TEST_CASE("Saving and loading the game")
 
                 inv.put_in_backpack(item);
 
-                item = item::make(item::Id::spirit_dagger);
+                item = item::make(item::Id::shadow_dagger);
 
                 item->remove_curse();
 
@@ -307,7 +307,7 @@ TEST_CASE("Saving and loading the game")
                 bool is_lantern_found = false;
                 bool is_horn_of_malice_found = false;
                 bool is_horn_of_banishment_found = false;
-                bool is_spirit_dagger_found = false;
+                bool is_shadow_dagger_found = false;
 
                 for (auto* item : inv.m_backpack)
                 {
@@ -387,9 +387,9 @@ TEST_CASE("Saving and loading the game")
                         }
                         break;
 
-                        case item::Id::spirit_dagger:
+                        case item::Id::shadow_dagger:
                         {
-                                is_spirit_dagger_found = true;
+                                is_shadow_dagger_found = true;
 
                                 REQUIRE(
                                         !item->current_curse().is_active());
@@ -415,7 +415,7 @@ TEST_CASE("Saving and loading the game")
                 REQUIRE(is_lantern_found);
                 REQUIRE(is_horn_of_malice_found);
                 REQUIRE(is_horn_of_banishment_found);
-                REQUIRE(is_spirit_dagger_found);
+                REQUIRE(is_shadow_dagger_found);
 
                 // map
                 REQUIRE(map::g_dlvl == 7);

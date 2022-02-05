@@ -253,6 +253,43 @@ static void on_actor_not_killed_by_hit(
         }
 }
 
+static bool is_light_sensitive(const actor::Actor& actor)
+{
+        return (
+                actor.m_properties.has(PropId::light_sensitive) ||
+                actor.m_properties.has(PropId::light_sensitive_curse));
+}
+
+static int calc_new_dmg_for_light_sensitive(
+        const actor::Actor& actor,
+        const int dmg)
+{
+        // NOTE: Only the basic "light sensitive" property has a damage
+        // modifier, not the player light sensitive curse.
+        auto* const prop = actor.m_properties.prop(PropId::light_sensitive);
+
+        if (prop)
+        {
+                auto* const lgt_sens = static_cast<PropLgtSens*>(prop);
+
+                return dmg + lgt_sens->get_extra_damage();
+        }
+        else
+        {
+                return dmg;
+        }
+}
+
+static void on_light_sensitive_player_hit_by_light()
+{
+        map::g_player->interrupt_actions(
+                ForceInterruptActions::no);
+
+        msg_log::add(
+                "I am wracked by light!",
+                colors::msg_bad());
+}
+
 // -----------------------------------------------------------------------------
 // actor
 // -----------------------------------------------------------------------------
@@ -271,20 +308,19 @@ void hit(
 
         if (dmg_type == DmgType::light)
         {
-                if (!actor.m_properties.has(PropId::light_sensitive) &&
-                    !actor.m_properties.has(PropId::light_sensitive_curse))
+                if (!is_light_sensitive(actor))
                 {
                         return;
                 }
-                else if (actor::is_player(&actor))
-                {
-                        map::g_player->interrupt_actions(
-                                ForceInterruptActions::no);
 
-                        msg_log::add(
-                                "I am wracked by light!",
-                                colors::msg_bad());
+                if (actor::is_player(&actor))
+                {
+                        on_light_sensitive_player_hit_by_light();
                 }
+
+                dmg = calc_new_dmg_for_light_sensitive(actor, dmg);
+
+                TRACE << dmg << std::endl;
         }
 
         const int hp_pct_before = (actor.m_hp * 100) / max_hp(actor);

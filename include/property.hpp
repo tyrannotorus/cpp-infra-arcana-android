@@ -1334,6 +1334,19 @@ class PropLgtSens : public Prop
 public:
         PropLgtSens() :
                 Prop(PropId::light_sensitive) {}
+
+        int get_extra_damage() const
+        {
+                return m_extra_dmg;
+        }
+
+        void raise_extra_damage_to(const int dmg)
+        {
+                m_extra_dmg = std::max(dmg, m_extra_dmg);
+        }
+
+private:
+        int m_extra_dmg {0};
 };
 
 class PropVortex : public Prop
@@ -1677,6 +1690,8 @@ public:
 
 private:
         std::unique_ptr<item::Item> m_discarded_item {};
+
+        std::string get_weapon_name() const;
 };
 
 #endif  // PROPERTY_HPP

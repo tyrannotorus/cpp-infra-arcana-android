@@ -10,6 +10,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
+#include "actor_hit.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
@@ -20,6 +21,7 @@
 #include "fov.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "io.hpp"
 #include "item_artifact.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
@@ -573,29 +575,105 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
 }
 
 // -----------------------------------------------------------------------------
-// Spirit Dagger
+// Shadow Dagger
 // -----------------------------------------------------------------------------
-SpiritDagger::SpiritDagger(ItemData* const item_data) :
+ShadowDagger::ShadowDagger(ItemData* const item_data) :
         Wpn(item_data)
 {
 }
 
-void SpiritDagger::specific_dmg_mod(
-        WpnDmg& range,
-        const actor::Actor* const actor) const
+void ShadowDagger::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
-        if (!actor)
+        (void)dmg;
+
+        if (actor_hit.m_state == ActorState::destroyed)
         {
                 return;
         }
 
-        const auto sp_db = (double)actor->m_sp;
+        if (is_radiant_creature(actor_hit))
+        {
+                hit_radiant_creature(actor_hit);
+        }
+        else
+        {
+                hit_normal_creature(actor_hit);
+        }
+}
 
-        const double exp = 0.5;
+void ShadowDagger::on_ranged_hit(actor::Actor& actor_hit)
+{
+        const int dmg = 1;  // Doesn't matter.
 
-        const int dmg_bon = (int)std::pow(sp_db, exp);
+        on_melee_hit(actor_hit, dmg);
+}
 
-        range.set_plus(dmg_bon);
+bool ShadowDagger::is_radiant_creature(const actor::Actor& actor) const
+{
+        const std::vector<PropId> radiant_props = {
+                PropId::radiant_self,
+                PropId::radiant_adjacent,
+                PropId::radiant_fov};
+
+        return std::any_of(
+                std::cbegin(radiant_props),
+                std::cend(radiant_props),
+                [&actor](const auto id) {
+                        return actor.m_data->natural_props[(size_t)id];
+                });
+}
+
+void ShadowDagger::hit_normal_creature(actor::Actor& actor) const
+{
+        {
+                auto* const prop =
+                        property_factory::make(
+                                PropId::light_sensitive);
+
+                prop->set_indefinite();
+
+                actor.m_properties.apply(prop);
+        }
+
+        {
+                auto* const prop =
+                        actor.m_properties.prop(
+                                PropId::light_sensitive);
+
+                if (!prop)
+                {
+                        ASSERT(false);
+
+                        return;
+                }
+
+                auto* const lgt_sens = static_cast<PropLgtSens*>(prop);
+
+                lgt_sens->raise_extra_damage_to(1);
+        }
+}
+
+void ShadowDagger::hit_radiant_creature(actor::Actor& actor) const
+{
+        if (!actor.is_alive())
+        {
+                return;
+        }
+
+        if (actor::can_player_see_actor(actor))
+        {
+                const auto actor_name =
+                        text_format::first_to_upper(
+                                actor.name_the());
+
+                msg_log::add(actor_name + " is assailed by dark energy.");
+
+                io::draw_blast_at_seen_actors({&actor}, colors::gray());
+        }
+
+        const int dmg = rnd::range(1, 4);
+
+        actor::hit(actor, dmg, DmgType::pure);
 }
 
 // -----------------------------------------------------------------------------

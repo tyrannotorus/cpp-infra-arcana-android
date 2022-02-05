@@ -453,8 +453,8 @@ Item* make(const Id item_id, const int nr_items)
                 r = new Clockwork(d);
                 break;
 
-        case Id::spirit_dagger:
-                r = new SpiritDagger(d);
+        case Id::shadow_dagger:
+                r = new ShadowDagger(d);
                 break;
 
         case Id::orb_of_life:

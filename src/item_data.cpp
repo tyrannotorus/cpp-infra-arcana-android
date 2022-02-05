@@ -1940,17 +1940,20 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn);
-        d.id = Id::spirit_dagger;
+        d.id = Id::shadow_dagger;
         d.base_name = {
-                "Spirit Dagger",
+                "Gahana, The Black Dagger",
                 "",
-                "the Spirit Dagger"};
+                "Gahana, The Black Dagger"};
         d.base_descr = {
-                "A black dagger with elaborate ornaments. The blade appears "
-                "blurry, as if perpetually covered in a dark haze.",
+                "A pitch black dagger with elaborate ornaments. The blade "
+                "appears blurry, as if perpetually covered in a dark haze.",
 
-                "This damage dealt by this weapon is based on the current "
-                "number of of spirit points of the wielder.",
+                "A creature struck by this weapon is cursed to forever dwell "
+                "in darkness, or suffer great agony (becomes permanently "
+                "light sensitive, and takes +1 extra damage from light). "
+                "Creatures which naturally emit light (such as beings of "
+                "fire or energy) takes 1-4 irresistible damage instead.",
 
                 "Attacking an unaware opponent with a dagger does +200% damage "
                 "(in addition to the normal +50% damage from stealth attacks).",
@@ -1959,7 +1962,7 @@ void init()
         d.tile = gfx::TileId::dagger;
         d.color = colors::violet();
         d.melee.attack_msgs = {"stab", "stabs"};
-        d.melee.dmg = WpnDmg(1, 4);
+        d.melee.dmg = WpnDmg(4, 8);
         d.melee.hit_chance_mod = 20;
         d.melee.is_noisy = false;
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;

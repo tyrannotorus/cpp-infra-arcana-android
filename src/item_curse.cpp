@@ -277,13 +277,15 @@ void Curse::on_new_turn(const item::Item& item)
 
 void Curse::print_trigger_msg(const item::Item& item) const
 {
+        // NOTE: Unique artifacts have a different "a" form (typically "the",
+        // instead of "a").
         const auto item_name =
                 item.name(
-                        ItemNameType::plain,
+                        ItemNameType::a,
                         ItemNameInfo::none);
 
         msg_log::add(
-                "A curse lies upon the " + item_name + "!",
+                "A curse lies upon " + item_name + "!",
                 colors::msg_note(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::yes);
@@ -298,16 +300,18 @@ void Curse::print_trigger_msg(const item::Item& item) const
 
 void Curse::print_warning_msg(const item::Item& item) const
 {
+        // NOTE: Unique artifacts have a different "a" form (typically "the",
+        // instead of "a").
         const auto item_name =
                 item.name(
-                        ItemNameType::plain,
+                        ItemNameType::a,
                         ItemNameInfo::none);
 
         const std::vector<std::string> msg_bucket = {
-                {"I am growing very attached to the " +
+                {"I am growing very attached to " +
                  item_name +
                  "."},
-                {"I am starting to think that I should hold on to the " +
+                {"I am starting to think that I should hold on to " +
                  item_name +
                  ", forever..."},
         };
@@ -502,9 +506,15 @@ std::string Heavy::descr() const
 
 std::string Heavy::curse_msg(const item::Item& item) const
 {
-        const auto name = item.name(ItemNameType::plain, ItemNameInfo::none);
+        // NOTE: Unique artifacts have a different "a" form (typically "the",
+        // instead of "a").
+        const auto name =
+                text_format::first_to_upper(
+                        item.name(
+                                ItemNameType::a,
+                                ItemNameInfo::none));
 
-        return "The " + name + " suddenly feels much heavier to carry.";
+        return name + " suddenly feels much heavier to carry.";
 }
 
 // -----------------------------------------------------------------------------
@@ -607,13 +617,16 @@ void Shriek::on_new_turn_active(const item::Item& item)
 
 void Shriek::shriek(const item::Item& item) const
 {
+        // NOTE: Unique artifacts have a different "a" form (typically "the",
+        // instead of "a").
         const std::string name =
-                item.name(
-                        ItemNameType::plain,
-                        ItemNameInfo::none);
+                text_format::first_to_upper(
+                        item.name(
+                                ItemNameType::a,
+                                ItemNameInfo::none));
 
         msg_log::add(
-                "The " + name + " shrieks...",
+                name + " shrieks...",
                 colors::text(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::yes);
@@ -674,11 +687,13 @@ void Teleport::on_new_turn_active(const item::Item& item)
 
 void Teleport::teleport(const item::Item& item) const
 {
-        const auto name = item.name(ItemNameType::plain, ItemNameInfo::none);
+        // NOTE: Unique artifacts have a different "a" form (typically "the",
+        // instead of "a").
+        const auto name = item.name(ItemNameType::a, ItemNameInfo::none);
 
         msg_log::add(
                 "I somehow sense that a burst of energy is discharged "
-                "from the " +
+                "from " +
                 name +
                 ".");
 

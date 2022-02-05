@@ -2980,6 +2980,7 @@
             <property>r_elec</property>
             <property>r_disease</property>
             <property>darkvision</property>
+            <property>radiant_self</property>
         </properties>
 
         <ai>
@@ -6295,6 +6296,7 @@
             <property>r_blind</property>
             <property>r_para</property>
             <property>flying</property>
+            <property>radiant_self</property>
         </properties>
 
         <ai>

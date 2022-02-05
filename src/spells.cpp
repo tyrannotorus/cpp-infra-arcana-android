@@ -1418,7 +1418,7 @@ int Spell::shock_value() const
 // -----------------------------------------------------------------------------
 Range SpellAuraOfDecay::dmg_range(const SpellSkill skill) const
 {
-        const int max_dmg = std::min(3, 1 + (int)skill);
+        const int max_dmg = std::min(1 + (int)skill, 3);
 
         return {1, max_dmg};
 }

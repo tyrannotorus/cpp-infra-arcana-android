@@ -86,6 +86,12 @@ static const std::pair<PropId, std::string> s_custom_props[] = {
         {PropId::reduced_pierce_dmg,
          "Piercing attacks such as pistol shots or dagger strikes are "
          "very ineffective against them"},
+        {PropId::radiant_self,
+         "They emit light and can be seen in darkness"},
+        {PropId::radiant_adjacent,
+         "They emit light and can be seen in darkness"},
+        {PropId::radiant_fov,
+         "They emit light and can be seen in darkness"},
 };
 
 struct MonShockStrings
@@ -499,14 +505,19 @@ static std::string auto_description_str(actor::Actor& actor)
                 ? *actor.m_mimic_data
                 : *actor.m_data;
 
-        text_format::append_with_space(
-                str,
-                get_melee_hit_chance_descr(actor));
+        if (!actor.is_actor_my_leader(map::g_player))
+        {
+                text_format::append_with_space(
+                        str,
+                        get_melee_hit_chance_descr(actor));
+        }
 
         const auto& ai = actor_data.ai;
         const auto looks = ai[(size_t)actor::AiId::looks];
 
-        if (!actor.is_aware_of_player() && looks)
+        if (!actor.is_aware_of_player() &&
+            !actor.is_actor_my_leader(map::g_player) &&
+            looks)
         {
                 text_format::append_with_space(
                         str,
@@ -520,9 +531,12 @@ static std::string auto_description_str(actor::Actor& actor)
                         get_mon_speed_descr(actor_data, actor));
         }
 
-        text_format::append_with_space(
-                str,
-                get_mon_memory_turns_descr(actor_data, actor));
+        if (!actor.is_actor_my_leader(map::g_player))
+        {
+                text_format::append_with_space(
+                        str,
+                        get_mon_memory_turns_descr(actor_data, actor));
+        }
 
         if (!looks)
         {
@@ -549,9 +563,12 @@ static std::string auto_description_str(actor::Actor& actor)
                         "{magenta}This creature is undead.{reset_color}");
         }
 
-        text_format::append_with_space(
-                str,
-                get_mon_shock_descr(actor_data, actor));
+        if (!actor.is_actor_my_leader(map::g_player))
+        {
+                text_format::append_with_space(
+                        str,
+                        get_mon_shock_descr(actor_data, actor));
+        }
 
         if (actor_data.allow_wielded_wpn_descr)
         {
@@ -565,7 +582,12 @@ static std::string auto_description_str(actor::Actor& actor)
 
         if (!natural_properties_descr.empty())
         {
-                str += "\n\n" + natural_properties_descr;
+                if (!str.empty())
+                {
+                        str += "\n\n";
+                }
+
+                str += natural_properties_descr;
         }
 
         return str;
@@ -636,25 +658,31 @@ void ViewActorDescr::draw()
                 y += text.nr_lines();
         }
 
-        ++y;
-
         // Auto description
         {
-                Text text;
+                const std::string auto_descr_str =
+                        auto_description_str(m_actor);
 
-                text.set_w(panels::w(Panel::info_screen_content));
-                text.set_str(auto_description_str(m_actor));
-                text.set_color(colors::text());
+                if (!auto_descr_str.empty())
+                {
+                        ++y;
 
-                text.draw(Panel::info_screen_content, {0, y});
+                        Text text;
 
-                y += text.nr_lines();
+                        text.set_w(panels::w(Panel::info_screen_content));
+                        text.set_str(auto_description_str(m_actor));
+                        text.set_color(colors::text());
+
+                        text.draw(Panel::info_screen_content, {0, y});
+
+                        y += text.nr_lines();
+                }
         }
-
-        ++y;
 
         // Temporary negative properties
         {
+                ++y;
+
                 Text text;
 
                 text.set_w(panels::w(Panel::info_screen_content));
@@ -665,8 +693,6 @@ void ViewActorDescr::draw()
 
                 y += text.nr_lines();
         }
-
-        ++y;
 }
 
 void ViewActorDescr::update()

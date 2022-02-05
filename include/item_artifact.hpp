@@ -50,7 +50,6 @@ class ReflTalisman : public Item
 public:
         ReflTalisman(ItemData* item_data);
 
-private:
         void on_pickup_hook() override;
 
         void on_removed_from_inv_hook() override;
@@ -87,7 +86,6 @@ public:
                 return id != item_curse::Id::teleport;
         }
 
-private:
         void on_pickup_hook() override;
 
         void on_removed_from_inv_hook() override;
@@ -201,17 +199,23 @@ private:
 };
 
 // -----------------------------------------------------------------------------
-// Spirit Dagger
+// Shadow Dagger
 // -----------------------------------------------------------------------------
-class SpiritDagger : public Wpn
+class ShadowDagger : public Wpn
 {
 public:
-        SpiritDagger(ItemData* item_data);
+        ShadowDagger(ItemData* item_data);
 
-protected:
-        void specific_dmg_mod(
-                WpnDmg& range,
-                const actor::Actor* actor) const override;
+        void on_melee_hit(actor::Actor& actor_hit, int dmg) override;
+
+        void on_ranged_hit(actor::Actor& actor_hit) override;
+
+private:
+        bool is_radiant_creature(const actor::Actor& actor) const;
+
+        void hit_normal_creature(actor::Actor& actor) const;
+
+        void hit_radiant_creature(actor::Actor& actor) const;
 };
 
 // -----------------------------------------------------------------------------
@@ -222,7 +226,6 @@ class OrbOfLife : public Item
 public:
         OrbOfLife(ItemData* item_data);
 
-private:
         void on_pickup_hook() override;
 
         void on_removed_from_inv_hook() override;
@@ -238,7 +241,6 @@ public:
 
         ItemPrePickResult pre_pickup_hook() override;
 
-private:
         void on_std_turn_in_inv_hook(InvType inv_type) override;
 
         void on_pickup_hook() override;

@@ -48,6 +48,87 @@
 #include "viewport.hpp"
 #include "wpn_dmg.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static void print_creature_hit_msg(const actor::Actor& actor)
+{
+        const std::string name =
+                actor::can_player_see_actor(actor)
+                ? text_format::first_to_upper(actor.name_the())
+                : "An unseen creature";
+
+        msg_log::add(name + " is hit.", colors::msg_good());
+}
+
+static void apply_potion_on_actor(item::Item& item, actor::Actor& actor)
+{
+        auto* const potion = static_cast<potion::Potion*>(&item);
+
+        potion->on_collide(actor.m_pos, &actor);
+}
+
+static void collide_potion_on_terrain(item::Item& item, const P& pos)
+{
+        const auto hit_color = item.color();
+
+        io::draw_blast_at_seen_cells({pos}, hit_color);
+
+        auto& potion = static_cast<potion::Potion&>(item);
+
+        potion.on_collide(pos, nullptr);
+}
+
+static void on_attack_performed(actor::Actor& actor)
+{
+        // Attacking ends cloaking and sanctuary
+        actor.m_properties.end_prop(PropId::cloaked);
+        actor.m_properties.end_prop(PropId::sanctuary);
+}
+
+static bool is_noisy_terrain(const terrain::Terrain& terrain)
+{
+        const auto matl = terrain.matl();
+
+        switch (matl)
+        {
+        case Matl::empty:
+                return false;
+                break;
+
+        case Matl::stone:
+                return true;
+                break;
+
+        case Matl::metal:
+                return true;
+                break;
+
+        case Matl::plant:
+                return false;
+                break;
+
+        case Matl::wood:
+                return true;
+                break;
+
+        case Matl::cloth:
+                return false;
+                break;
+
+        case Matl::fluid:
+                return false;
+                break;
+        }
+
+        ASSERT(false);
+
+        return false;
+}
+
+// -----------------------------------------------------------------------------
+// throwing
+// -----------------------------------------------------------------------------
 namespace throwing
 {
 void player_throw_lit_explosive(const P& aim_cell)
@@ -108,8 +189,7 @@ void player_throw_lit_explosive(const P& aim_cell)
 
                                 io::update_screen();
 
-                                io::sleep(
-                                        config::delay_projectile_draw());
+                                io::sleep(config::delay_projectile_draw());
                         }
                 }
         }
@@ -190,13 +270,9 @@ void throw_item(
         states::draw();
 
         bool is_actor_hit = false;
-
-        const Color item_color = item_thrown.color();
-
+        const auto item_color = item_thrown.color();
         int break_item_one_in_n = -1;
-
         P pos(-1, -1);
-
         P drop_pos(-1, -1);
 
         for (size_t path_idx = 1; path_idx < path.size(); ++path_idx)
@@ -278,17 +354,7 @@ void throw_item(
 
                                 if (player_see_cell)
                                 {
-                                        const std::string defender_name =
-                                                actor::can_player_see_actor(
-                                                        *actor_here)
-                                                ? text_format::first_to_upper(
-                                                          actor_here->name_the())
-                                                : "An unseen creature";
-
-                                        msg_log::add(
-                                                (defender_name +
-                                                 " is hit."),
-                                                colors::msg_good());
+                                        print_creature_hit_msg(*actor_here);
                                 }
 
                                 if (dmg > 0)
@@ -314,18 +380,11 @@ void throw_item(
                                 // it should not know about potions!
                                 if (is_potion)
                                 {
-                                        if (actor_here->m_state == ActorState::alive)
+                                        if (actor_here->is_alive())
                                         {
-                                                // Apply potion effects
-                                                auto* const potion =
-                                                        static_cast<potion::Potion*>(
-                                                                &item_thrown);
+                                                apply_potion_on_actor(item_thrown, *actor_here);
 
-                                                potion->on_collide(pos, actor_here);
-
-                                                // Attacking ends cloaking and sanctuary
-                                                actor_throwing.m_properties.end_prop(PropId::cloaked);
-                                                actor_throwing.m_properties.end_prop(PropId::sanctuary);
+                                                on_attack_performed(actor_throwing);
                                         }
 
                                         delete &item_thrown;
@@ -351,7 +410,7 @@ void throw_item(
                                 }
 
                                 break;
-                        }
+                        }  // if attack success
                 }  // if actor hit
 
                 const auto* terrain_here = map::g_terrain.at(pos);
@@ -364,8 +423,7 @@ void throw_item(
                         break;
                 }
 
-                if (map::g_seen.at(pos) &&
-                    viewport::is_in_view(pos))
+                if (map::g_seen.at(pos) && viewport::is_in_view(pos))
                 {
                         io::draw_symbol(
                                 item_thrown.tile(),
@@ -386,22 +444,14 @@ void throw_item(
                 }
         }  // path loop
 
-        // If potion, collide it on the landscape
+        // No actor hit - if potion, collide it on the terrain
         if (item_thrown_data.type == ItemType::potion)
         {
-                const Color hit_color = item_color;
-
-                io::draw_blast_at_seen_cells({pos}, hit_color);
-
-                auto* const potion = static_cast<potion::Potion*>(&item_thrown);
-
-                potion->on_collide(pos, nullptr);
+                collide_potion_on_terrain(item_thrown, pos);
 
                 delete &item_thrown;
 
-                // Attacking ends cloaking and sanctuary
-                actor_throwing.m_properties.end_prop(PropId::cloaked);
-                actor_throwing.m_properties.end_prop(PropId::sanctuary);
+                on_attack_performed(actor_throwing);
 
                 game_time::tick();
 
@@ -416,7 +466,8 @@ void throw_item(
                 ? AlertsMon::yes
                 : AlertsMon::no;
 
-        Snd snd(item_thrown_data.land_on_hard_snd_msg,
+        Snd snd(
+                item_thrown_data.land_on_hard_snd_msg,
                 item_thrown_data.land_on_hard_sfx,
                 IgnoreMsgIfOriginSeen::yes,
                 drop_pos,
@@ -436,62 +487,20 @@ void throw_item(
                 item_drop::drop_item_on_map(drop_pos, item_thrown);
         }
 
-        auto is_noisy_matl = [](const Matl matl) {
-                bool is_noisy = false;
-
-                switch (matl)
-                {
-                case Matl::empty:
-                        is_noisy = false;
-                        break;
-
-                case Matl::stone:
-                        is_noisy = true;
-                        break;
-
-                case Matl::metal:
-                        is_noisy = true;
-                        break;
-
-                case Matl::plant:
-                        is_noisy = false;
-                        break;
-
-                case Matl::wood:
-                        is_noisy = true;
-                        break;
-
-                case Matl::cloth:
-                        is_noisy = false;
-                        break;
-
-                case Matl::fluid:
-                        is_noisy = false;
-                        break;
-                }
-
-                return is_noisy;
-        };
-
         if (!is_actor_hit)
         {
-                const Matl matl_at_last_pos =
-                        map::g_terrain.at(pos)->matl();
+                const auto& terrain_at_last_pos = *map::g_terrain.at(pos);
+                const auto& terrain_at_drop_pos = *map::g_terrain.at(drop_pos);
 
-                const Matl matl_at_drop_pos =
-                        map::g_terrain.at(drop_pos)->matl();
-
-                if (is_noisy_matl(matl_at_last_pos) ||
-                    is_noisy_matl(matl_at_drop_pos))
+                if (is_noisy_terrain(terrain_at_last_pos) ||
+                    is_noisy_terrain(terrain_at_drop_pos))
                 {
-                        // OK, run the sound that we set up earlier
+                        // Run the sound that we set up earlier
                         snd.run();
                 }
         }
 
-        // Attacking ends cloaking and sanctuary
-        actor_throwing.m_properties.end_prop(PropId::cloaked);
-        actor_throwing.m_properties.end_prop(PropId::sanctuary);
+        on_attack_performed(actor_throwing);
 
         game_time::tick();
 

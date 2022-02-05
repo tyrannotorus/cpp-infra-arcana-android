@@ -8,7 +8,7 @@
 * Added a new background (class) "Exorcist"
 * Added weapons "S&W Revolver" and "Winchester Rifle"
 * Removed the Flare Gun
-* Added miscellaneous rare items and artifacts
+* Added miscellaneous rare items and artifacts, completely reworked and renamed the Spirit Dagger
 * Added more sound effects, removed the generic spell sound effect
 * Added more monsters
 * Some monsters have a smell that can be detected by the player

@@ -367,7 +367,7 @@ MeleeAttData::MeleeAttData(
                 const auto id = wpn.data().id;
 
                 if ((id == item::Id::dagger) ||
-                    (id == item::Id::spirit_dagger))
+                    (id == item::Id::shadow_dagger))
                 {
                         dmg_pct += 200;
                 }

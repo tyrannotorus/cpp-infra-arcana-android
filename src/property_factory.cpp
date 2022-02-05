@@ -153,7 +153,7 @@ Prop* make(const PropId id)
                 return new PropRSleep();
 
         case PropId::light_sensitive:
-                return new Prop(id);
+                return new PropLgtSens();
 
         case PropId::zuul_possess_priest:
                 return new PropZuulPossessPriest();
