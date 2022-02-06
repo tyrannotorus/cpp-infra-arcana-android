@@ -3482,12 +3482,6 @@ std::vector<std::string> SpellHaste::descr_specific(
         descr.emplace_back(
                 "The caster moves faster relative to the world around them.");
 
-        if (skill == SpellSkill::transcendent)
-        {
-                descr.emplace_back(
-                        "The speed difference is much larger than normal.");
-        }
-
         descr.push_back(
                 "The spell lasts " +
                 duration_range(skill).str() +
