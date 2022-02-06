@@ -105,19 +105,26 @@ void print_location_info_msgs(const P& pos)
                 // Describe mobile terrains
                 for (auto* mob : game_time::g_mobs)
                 {
-                        if (mob->pos() == pos)
+                        if (mob->pos() != pos)
                         {
-                                str = mob->name(Article::a);
-
-                                str = text_format::first_to_upper(str);
-
-                                msg_log::add(
-                                        str + ".",
-                                        colors::text(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::no,
-                                        CopyToMsgHistory::no);
+                                continue;
                         }
+
+                        str = mob->name(Article::a);
+
+                        if (str.empty())
+                        {
+                                continue;
+                        }
+
+                        str = text_format::first_to_upper(str);
+
+                        msg_log::add(
+                                str + ".",
+                                colors::text(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::no,
+                                CopyToMsgHistory::no);
                 }
 
                 // Describe darkness
