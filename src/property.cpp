@@ -1348,6 +1348,11 @@ PropEnded PropConfused::affect_move_dir(Dir& dir)
 
 void PropHallucinating::on_applied()
 {
+        if (!actor::is_player(m_owner))
+        {
+                return;
+        }
+
         apply_fake_actor_data();
 
         create_fake_stairs();
@@ -1355,6 +1360,11 @@ void PropHallucinating::on_applied()
 
 void PropHallucinating::on_std_turn()
 {
+        if (!actor::is_player(m_owner))
+        {
+                return;
+        }
+
         if (rnd::one_in(10))
         {
                 apply_fake_actor_data();
@@ -1368,6 +1378,11 @@ void PropHallucinating::on_std_turn()
 
 void PropHallucinating::on_end()
 {
+        if (!actor::is_player(m_owner))
+        {
+                return;
+        }
+
         clear_fake_actor_data();
 
         clear_all_fake_stairs();
