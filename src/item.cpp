@@ -1350,10 +1350,7 @@ std::string AmmoMag::name_info_str() const
 // Medical bag
 // -----------------------------------------------------------------------------
 MedicalBag::MedicalBag(ItemData* const item_data) :
-        Item(item_data),
-        m_nr_supplies(24),
-        m_nr_turns_left_action(-1),
-        m_current_action(MedBagAction::END) {}
+        Item(item_data) {}
 
 void MedicalBag::save_hook() const
 {
@@ -1363,6 +1360,14 @@ void MedicalBag::save_hook() const
 void MedicalBag::load_hook()
 {
         m_nr_supplies = saving::get_int();
+}
+
+void MedicalBag::randomize_nr_supplies()
+{
+        const int nr_supplies_max = m_max_starting_supplies;
+        const int nr_supplies_min = nr_supplies_max - (nr_supplies_max / 3);
+
+        m_nr_supplies = rnd::range(nr_supplies_min, nr_supplies_max);
 }
 
 void MedicalBag::on_pickup_hook()
@@ -1418,7 +1423,6 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
         }
 
         const int nr_supplies_needed = tot_suppl_for_action(m_current_action);
-
         const bool is_enough_supplies = m_nr_supplies >= nr_supplies_needed;
 
         if (!is_enough_supplies)
@@ -1485,6 +1489,41 @@ void MedicalBag::continue_action()
 {
         ASSERT(m_current_action != MedBagAction::END);
 
+        // Check if current action should be stopped.
+        switch (m_current_action)
+        {
+        case MedBagAction::treat_wound:
+        {
+                if (!map::g_player->m_properties.has(PropId::wound))
+                {
+                        // Player is no longer wounded, presumably it was healed
+                        // by something else.
+                        stop_action();
+
+                        return;
+                }
+        }
+        break;
+
+        case MedBagAction::sanitize_infection:
+        {
+                if (!map::g_player->m_properties.has(PropId::infected))
+                {
+                        // Player is no longer infected, presumably it was
+                        // healed by something else.
+                        stop_action();
+
+                        return;
+                }
+        }
+        break;
+
+        case MedBagAction::END:
+        {
+        }
+        break;
+        }
+
         --m_nr_turns_left_action;
 
         if (m_nr_turns_left_action <= 0)
@@ -1506,12 +1545,20 @@ void MedicalBag::finish_current_action()
         {
         case MedBagAction::treat_wound:
         {
-                Prop* const wound_prop =
-                        map::g_player->m_properties.prop(PropId::wound);
+                auto* const prop =
+                        map::g_player->m_properties.prop(
+                                PropId::wound);
 
-                ASSERT(wound_prop);
+                if (!prop)
+                {
+                        ASSERT(false);
 
-                auto* const wound = static_cast<PropWound*>(wound_prop);
+                        stop_action();
+
+                        return;
+                }
+
+                auto* const wound = static_cast<PropWound*>(prop);
 
                 wound->heal_one_wound();
         }
@@ -1519,6 +1566,15 @@ void MedicalBag::finish_current_action()
 
         case MedBagAction::sanitize_infection:
         {
+                if (!map::g_player->m_properties.has(PropId::infected))
+                {
+                        ASSERT(false);
+
+                        stop_action();
+
+                        return;
+                }
+
                 map::g_player->m_properties.end_prop(PropId::infected);
         }
         break;
@@ -1586,11 +1642,7 @@ void MedicalBag::interrupted(const ForceInterruptActions is_forced)
 
         if (!should_continue)
         {
-                m_current_action = MedBagAction::END;
-
-                m_nr_turns_left_action = -1;
-
-                map::g_player->m_active_medical_bag = nullptr;
+                stop_action();
         }
 }
 
@@ -1632,6 +1684,14 @@ int MedicalBag::tot_turns_for_action() const
 std::string MedicalBag::name_info_str() const
 {
         return "(" + std::to_string(m_nr_supplies) + " supplies)";
+}
+
+void MedicalBag::stop_action()
+{
+        m_nr_turns_left_action = -1;
+        m_current_action = MedBagAction::END;
+
+        map::g_player->m_active_medical_bag = nullptr;
 }
 
 // -----------------------------------------------------------------------------

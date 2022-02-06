@@ -96,7 +96,7 @@ void init()
 
 void save()
 {
-        saving::put_int(s_map_list.size());
+        saving::put_int((int)s_map_list.size());
 
         for (const MapType type : s_map_list)
         {

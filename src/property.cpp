@@ -1099,9 +1099,27 @@ int PropWound::affect_max_hp(const int hp_max) const
         return (hp_max * (100 - hp_pen_pct)) / 100;
 }
 
-void PropWound::print_wound_healed_msg() const
+std::string PropWound::get_one_wound_heal_str() const
 {
-        msg_log::add("A wound is healed.");
+        return "A wound is healed.";
+}
+
+std::string PropWound::get_all_wounds_heal_str() const
+{
+        return "All my wounds are healed!";
+}
+
+std::string PropWound::msg_end_player() const
+{
+        return (
+                (m_nr_wounds > 1)
+                        ? get_all_wounds_heal_str()
+                        : get_one_wound_heal_str());
+}
+
+void PropWound::print_one_wound_healed_msg() const
+{
+        msg_log::add(get_one_wound_heal_str());
 }
 
 void PropWound::heal_one_wound()
@@ -1112,7 +1130,7 @@ void PropWound::heal_one_wound()
 
         if (m_nr_wounds > 0)
         {
-                print_wound_healed_msg();
+                print_one_wound_healed_msg();
         }
         else
         {
@@ -1152,7 +1170,7 @@ PropEnded PropWound::on_actor_turn()
 
                 if (m_nr_wounds > 0)
                 {
-                        print_wound_healed_msg();
+                        print_one_wound_healed_msg();
 
                         return PropEnded::no;
                 }

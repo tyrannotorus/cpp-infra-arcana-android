@@ -568,7 +568,12 @@ public:
 
         void finish_current_action();
 
-        int m_nr_supplies;
+        void randomize_nr_supplies();
+
+        int nr_supplies() const
+        {
+                return m_nr_supplies;
+        }
 
 protected:
         MedBagAction choose_action() const;
@@ -577,9 +582,12 @@ protected:
 
         int tot_turns_for_action() const;
 
-        int m_nr_turns_left_action;
+        void stop_action();
 
-        MedBagAction m_current_action;
+        const int m_max_starting_supplies {24};
+        int m_nr_supplies {m_max_starting_supplies};
+        int m_nr_turns_left_action {-1};
+        MedBagAction m_current_action {MedBagAction::END};
 };
 
 class Headwear : public Item

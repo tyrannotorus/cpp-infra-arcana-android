@@ -474,15 +474,21 @@ ConsumeItem ForceField::run_effect()
 // Electric lantern
 // -----------------------------------------------------------------------------
 Lantern::Lantern(item::ItemData* const item_data) :
-        Device(item_data),
-        nr_turns_left(150),
-        is_activated(false) {}
+        Device(item_data) {}
+
+void Lantern::randomize_duration()
+{
+        const int duration_max = m_max_turns_left;
+        const int duration_min = duration_max / 2;
+
+        m_nr_turns_left = rnd::range(duration_min, duration_max);
+}
 
 std::string Lantern::name_info_str() const
 {
-        std::string inf = "(" + std::to_string(nr_turns_left) + " turns";
+        std::string inf = "(" + std::to_string(m_nr_turns_left) + " turns";
 
-        if (is_activated)
+        if (m_is_activated)
         {
                 inf += ", Lit";
         }
@@ -505,14 +511,14 @@ ConsumeItem Lantern::activate(actor::Actor* const actor)
 
 void Lantern::save_hook() const
 {
-        saving::put_int(nr_turns_left);
-        saving::put_bool(is_activated);
+        saving::put_int(m_nr_turns_left);
+        saving::put_bool(m_is_activated);
 }
 
 void Lantern::load_hook()
 {
-        nr_turns_left = saving::get_int();
-        is_activated = saving::get_bool();
+        m_nr_turns_left = saving::get_int();
+        m_is_activated = saving::get_bool();
 }
 
 void Lantern::on_pickup_hook()
@@ -529,7 +535,7 @@ void Lantern::on_pickup_hook()
 
                 auto* other_lantern = static_cast<Lantern*>(other);
 
-                other_lantern->nr_turns_left += nr_turns_left;
+                other_lantern->m_nr_turns_left += m_nr_turns_left;
 
                 m_actor_carrying->m_inv
                         .remove_item_in_backpack_with_ptr(this, true);
@@ -541,18 +547,18 @@ void Lantern::on_pickup_hook()
 void Lantern::toggle()
 {
         const std::string toggle_str =
-                is_activated
+                m_is_activated
                 ? "I turn off"
                 : "I turn on";
 
         msg_log::add(toggle_str + " an Electric Lantern.");
 
-        is_activated = !is_activated;
+        m_is_activated = !m_is_activated;
 
         // Discourage flipping on and off frequently
-        if (is_activated && (nr_turns_left >= 4))
+        if (m_is_activated && (m_nr_turns_left >= 4))
         {
-                nr_turns_left -= 2;
+                m_nr_turns_left -= 2;
         }
 
         audio::play(audio::SfxId::electric_lantern);
@@ -562,7 +568,7 @@ void Lantern::on_std_turn_in_inv_hook(const InvType inv_type)
 {
         (void)inv_type;
 
-        if (!is_activated)
+        if (!m_is_activated)
         {
                 return;
         }
@@ -570,10 +576,10 @@ void Lantern::on_std_turn_in_inv_hook(const InvType inv_type)
         if (!(player_bon::has_trait(Trait::elec_incl) &&
               ((game_time::turn_nr() % 2) == 0)))
         {
-                --nr_turns_left;
+                --m_nr_turns_left;
         }
 
-        if (nr_turns_left <= 0)
+        if (m_nr_turns_left <= 0)
         {
                 msg_log::add(
                         "My Electric Lantern has expired.",
@@ -591,9 +597,7 @@ void Lantern::on_std_turn_in_inv_hook(const InvType inv_type)
 
 LgtSize Lantern::lgt_size() const
 {
-        return is_activated
-                ? LgtSize::fov
-                : LgtSize::none;
+        return m_is_activated ? LgtSize::fov : LgtSize::none;
 }
 
 }  // namespace device

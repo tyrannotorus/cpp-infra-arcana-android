@@ -938,7 +938,7 @@ Color Player::color() const
                 const auto* const lantern =
                         static_cast<const device::Lantern*>(lantern_item);
 
-                if (lantern->is_activated)
+                if (lantern->is_activated())
                 {
                         return m_lantern_color;
                 }

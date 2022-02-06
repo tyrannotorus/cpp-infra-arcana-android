@@ -520,12 +520,12 @@ static void draw_lantern(const int y, const Panel panel)
                 const auto* const lantern =
                         static_cast<const device::Lantern*>(item);
 
-                if (lantern->is_activated)
+                if (lantern->is_activated())
                 {
                         color = colors::yellow();
                 }
 
-                lantern_str = std::to_string(lantern->nr_turns_left);
+                lantern_str = std::to_string(lantern->nr_turns_left());
         }
 
         io::draw_text_right(
@@ -555,7 +555,7 @@ static void draw_med_suppl(const int y, const Panel panel)
                 const auto* const medical_bag =
                         static_cast<const item::MedicalBag*>(item);
 
-                suppl_str = std::to_string(medical_bag->m_nr_supplies);
+                suppl_str = std::to_string(medical_bag->nr_supplies());
         }
 
         io::draw_text_right(

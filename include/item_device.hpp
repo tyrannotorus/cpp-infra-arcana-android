@@ -182,6 +182,7 @@ private:
         ConsumeItem run_effect() override;
 };
 
+// TODO: This should not be a device
 class Lantern : public Device
 {
 public:
@@ -193,6 +194,16 @@ public:
 
         ConsumeItem activate(actor::Actor* actor) override;
 
+        bool is_activated() const
+        {
+                return m_is_activated;
+        }
+
+        int nr_turns_left() const
+        {
+                return m_nr_turns_left;
+        }
+
         void on_std_turn_in_inv_hook(InvType inv_type) override;
 
         void on_pickup_hook() override;
@@ -202,11 +213,14 @@ public:
         void save_hook() const override;
         void load_hook() override;
 
-        int nr_turns_left;
-        bool is_activated;
+        void randomize_duration();
 
 private:
         void toggle();
+
+        const int m_max_turns_left {150};
+        int m_nr_turns_left {m_max_turns_left};
+        bool m_is_activated {false};
 };
 
 }  // namespace device

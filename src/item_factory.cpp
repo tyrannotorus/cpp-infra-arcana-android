@@ -100,19 +100,12 @@ static void randomize_firearm_loaded_ammo(item::Wpn& wpn)
 
 static void randomize_medical_supplies(item::MedicalBag& medbag)
 {
-        const int nr_supplies_max = medbag.m_nr_supplies;
-        const int nr_supplies_min = nr_supplies_max - (nr_supplies_max / 3);
-
-        medbag.m_nr_supplies = rnd::range(nr_supplies_min, nr_supplies_max);
+        medbag.randomize_nr_supplies();
 }
 
 static void randomize_lantern_duration(device::Lantern& lantern)
 {
-        const int duration_max = lantern.nr_turns_left;
-
-        const int duration_min = duration_max / 2;
-
-        lantern.nr_turns_left = rnd::range(duration_min, duration_max);
+        lantern.randomize_duration();
 }
 
 // -----------------------------------------------------------------------------

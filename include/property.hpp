@@ -851,15 +851,7 @@ public:
 
         void load() override;
 
-        std::string msg_end_player() const override
-        {
-                const auto* const str =
-                        (m_nr_wounds > 1)
-                        ? "All my wounds are healed!"
-                        : "A wound is healed!";
-
-                return str;
-        }
+        std::string msg_end_player() const override;
 
         std::string name_short() const override
         {
@@ -887,7 +879,10 @@ public:
         void heal_one_wound();
 
 private:
-        void print_wound_healed_msg() const;
+        void print_one_wound_healed_msg() const;
+
+        std::string get_one_wound_heal_str() const;
+        std::string get_all_wounds_heal_str() const;
 
         int m_nr_wounds {1};
 };
