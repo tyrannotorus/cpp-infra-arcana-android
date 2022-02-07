@@ -601,7 +601,7 @@ Color Pylon::color_default() const
 
         const auto& appearance = get_appearance_for_id(m_pylon_impl->id());
 
-        if (m_is_active)
+        if (m_is_activated)
         {
                 return appearance.color;
         }
@@ -631,7 +631,7 @@ std::string Pylon::name(const Article article) const
                 str = get_fake_name(m_pylon_impl->id(), article);
         }
 
-        if (m_is_active)
+        if (m_is_activated)
         {
                 str += " (activated)";
         }
@@ -682,7 +682,7 @@ void Pylon::bump(actor::Actor& actor_bumping)
 
         msg_log::add("I touch the Pylon.");
 
-        if (m_is_active)
+        if (m_is_activated)
         {
                 msg_log::add("Nothing happens.");
 
@@ -701,13 +701,16 @@ void Pylon::bump(actor::Actor& actor_bumping)
 
 void Pylon::activate()
 {
-        m_is_active = true;
+        m_is_activated = true;
+        m_startup_countdown = 3;
 
         // TODO: Add sound effect
 
         if (map::g_seen.at(m_pos))
         {
-                msg_log::add("The Pylon lights up with a humming noise.");
+                msg_log::add(
+                        "The Pylon starts to light up and emit a humming "
+                        "noise.");
         }
 }
 
@@ -717,12 +720,34 @@ void Pylon::on_hit(
         const P& from_pos,
         int dmg)
 {
-        (void)dmg_type;
         (void)actor;
         (void)from_pos;
         (void)dmg;
 
-        // TODO
+        switch (dmg_type)
+        {
+        case DmgType::explosion:
+        case DmgType::pure:
+        {
+                if (map::is_pos_seen_by_player(m_pos))
+                {
+                        const std::string terrain_name =
+                                text_format::first_to_upper(
+                                        this->name(Article::the));
+
+                        msg_log::add(terrain_name + " is destroyed.");
+                }
+
+                map::put(new RubbleLow(m_pos));
+                map::update_vision();
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
 }
 
 void Pylon::on_new_turn_hook()
@@ -734,15 +759,24 @@ void Pylon::on_new_turn_hook()
                 return;
         }
 
-        if (m_is_active)
+        if (m_is_activated)
         {
-                m_pylon_impl->on_new_turn_activated();
+                if (m_startup_countdown > 0)
+                {
+                        --m_startup_countdown;
+                }
+                else
+                {
+                        ASSERT(m_startup_countdown == 0);
+
+                        m_pylon_impl->on_new_turn_activated();
+                }
         }
 }
 
 void Pylon::add_light_hook(Array2<bool>& light) const
 {
-        if (m_is_active)
+        if (m_is_activated)
         {
                 for (const auto& d : dir_utils::g_dir_list_w_center)
                 {

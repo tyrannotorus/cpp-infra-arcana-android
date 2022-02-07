@@ -183,16 +183,20 @@ public:
                 return Id::pylon;
         }
 
+        void on_new_turn_hook() override;
+
         void activate();
 
         bool is_activated() const
         {
-                return m_is_active;
+                return m_is_activated;
         }
 
         void bump(actor::Actor& actor_bumping) override;
 
         gfx::TileId tile() const override;
+
+        Color color_default() const override;
 
         std::string name(Article article) const override;
 
@@ -207,13 +211,10 @@ private:
 
         pylon::PylonImpl* make_pylon_impl_from_id(pylon::PylonId id);
 
-        void on_new_turn_hook() override;
-
-        Color color_default() const override;
-
         std::unique_ptr<pylon::PylonImpl> m_pylon_impl;
 
-        bool m_is_active {false};
+        bool m_is_activated {false};
+        int m_startup_countdown {-1};
 };
 
 }  // namespace terrain
