@@ -246,9 +246,6 @@ void EventWallCrumble::on_new_turn()
 // -----------------------------------------------------------------------------
 // Snake emerge
 // -----------------------------------------------------------------------------
-EventSnakeEmerge::EventSnakeEmerge() :
-        Event({-1, -1}) {}
-
 bool EventSnakeEmerge::try_find_p()
 {
         const auto blocked = blocked_cells(map::rect());
@@ -468,12 +465,43 @@ void EventSnakeEmerge::on_new_turn()
 }
 
 // -----------------------------------------------------------------------------
+// Spawn monsters delayed
+// -----------------------------------------------------------------------------
+void EventSpawnMonstersDelayed::on_new_turn()
+{
+        if (m_countdown > 0)
+        {
+                --m_countdown;
+
+                return;
+        }
+
+        const auto mon_summoned =
+                actor::spawn(
+                        m_pos,
+                        {m_nr_mon, m_id},
+                        map::rect())
+                        .make_aware_of_player();
+
+        std::for_each(
+                std::begin(mon_summoned.monsters),
+                std::end(mon_summoned.monsters),
+                [](auto* const mon) {
+                        auto* prop_waiting =
+                                property_factory::make(
+                                        PropId::waiting);
+
+                        prop_waiting->set_duration(1);
+
+                        mon->m_properties.apply(prop_waiting);
+                });
+
+        game_time::erase_mob(this, true);
+}
+
+// -----------------------------------------------------------------------------
 // Rats in the walls discovery
 // -----------------------------------------------------------------------------
-EventRatsInTheWallsDiscovery::EventRatsInTheWallsDiscovery(
-        const P& terrain_pos) :
-        Event(terrain_pos) {}
-
 void EventRatsInTheWallsDiscovery::on_new_turn()
 {
         // Run the event if player is at the event position or to the right of

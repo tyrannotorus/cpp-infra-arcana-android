@@ -43,6 +43,7 @@
 #include "sound.hpp"
 #include "spells.hpp"
 #include "terrain.hpp"
+#include "terrain_event.hpp"
 
 struct P;
 
@@ -689,7 +690,6 @@ void Cursed::run_effect()
 // Spawn monsters
 // -----------------------------------------------------------------------------
 SpawnMonsters::SpawnMonsters()
-
 {
         std::vector<actor::Id> summon_bucket;
 
@@ -728,27 +728,17 @@ void SpawnMonsters::run_effect()
                 return;
         }
 
+        msg_log::add("Something approaches...");
+
         const size_t nr_mon = rnd::range(3, 4);
 
-        const auto mon_summoned =
-                actor::spawn(
+        auto* const event =
+                new terrain::EventSpawnMonstersDelayed(
                         map::g_player->m_pos,
-                        {nr_mon, m_id_to_spawn},
-                        map::rect())
-                        .make_aware_of_player();
+                        m_id_to_spawn,
+                        nr_mon);
 
-        std::for_each(
-                std::begin(mon_summoned.monsters),
-                std::end(mon_summoned.monsters),
-                [](auto* const mon) {
-                        auto* prop_waiting =
-                                property_factory::make(
-                                        PropId::waiting);
-
-                        prop_waiting->set_duration(2);
-
-                        mon->m_properties.apply(prop_waiting);
-                });
+        game_time::add_mob(event);
 }
 
 // -----------------------------------------------------------------------------

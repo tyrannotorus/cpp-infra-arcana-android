@@ -69,6 +69,7 @@ enum class Id
         force_field,
         event_wall_crumble,
         event_snake_emerge,
+        event_spawn_monsters_delayed,
         event_rat_cave_discovery,
 
         END

@@ -178,7 +178,7 @@ MonSpawnResult spawn(
 
         if (free_positions.empty())
         {
-                return MonSpawnResult();
+                return {};
         }
 
         std::sort(

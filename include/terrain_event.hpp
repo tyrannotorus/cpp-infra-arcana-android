@@ -21,6 +21,11 @@
 
 // TODO: Events should probably not be terrain
 
+namespace actor
+{
+enum class Id;
+}  // namespace actor
+
 namespace terrain
 {
 class Event : public Terrain
@@ -73,7 +78,8 @@ private:
 class EventSnakeEmerge : public Event
 {
 public:
-        EventSnakeEmerge();
+        EventSnakeEmerge() :
+                Event({-1, -1}) {}
 
         EventSnakeEmerge(const P& p) :
                 Event(p) {}
@@ -104,13 +110,41 @@ private:
         const Range allowed_emerge_dist_range =
                 Range(2, g_fov_radi_int - 1);
 
-        const int m_min_nr_snakes = 3;
+        const static int m_min_nr_snakes {3};
+};
+
+class EventSpawnMonstersDelayed : public Event
+{
+public:
+        EventSpawnMonstersDelayed(
+                const P& p,
+                const actor::Id id,
+                const size_t nr_mon) :
+                Event(p),
+                m_id(id),
+                m_nr_mon(nr_mon) {}
+
+        ~EventSpawnMonstersDelayed() = default;
+
+        Id id() const override
+        {
+                return Id::event_spawn_monsters_delayed;
+        }
+
+        void on_new_turn() override;
+
+private:
+        const actor::Id m_id;
+        const size_t m_nr_mon;
+
+        int m_countdown {3};
 };
 
 class EventRatsInTheWallsDiscovery : public Event
 {
 public:
-        EventRatsInTheWallsDiscovery(const P& terrain_pos);
+        EventRatsInTheWallsDiscovery(const P& p) :
+                Event(p) {}
 
         Id id() const override
         {

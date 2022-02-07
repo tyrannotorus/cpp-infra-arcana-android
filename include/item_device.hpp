@@ -218,7 +218,8 @@ public:
 private:
         void toggle();
 
-        const int m_max_turns_left {150};
+        static const int m_max_turns_left {150};
+
         int m_nr_turns_left {m_max_turns_left};
         bool m_is_activated {false};
 };

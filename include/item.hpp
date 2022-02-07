@@ -584,7 +584,8 @@ protected:
 
         void stop_action();
 
-        const int m_max_starting_supplies {24};
+        static const int m_max_starting_supplies {24};
+
         int m_nr_supplies {m_max_starting_supplies};
         int m_nr_turns_left_action {-1};
         MedBagAction m_current_action {MedBagAction::END};
