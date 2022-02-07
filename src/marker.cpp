@@ -1224,19 +1224,60 @@ bool CtrlObjCloseDoor::can_control(
         }
 
         const auto& door = static_cast<const terrain::Door&>(terrain);
+
+        if (!door.is_open())
+        {
+                return false;
+        }
+
+        if (door.is_hidden())
+        {
+                return false;
+        }
+
         const bool is_metal = door.type() == terrain::DoorType::metal;
         const bool is_basic_skill = skill == SpellSkill::basic;
 
-        return (
-                door.is_open() &&
-                !door.is_hidden() &&
-                !(is_metal && is_basic_skill));
+        if (is_metal && is_basic_skill)
+        {
+                return false;
+        }
+
+        return true;
 }
 
 DidAction CtrlObjCloseDoor::run(
         terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
+        const auto* const actor_here = map::first_actor_at_pos(terrain.pos());
+
+        if (actor_here)
+        {
+                std::string actor_name;
+
+                if (actor::can_player_see_actor(*actor_here))
+                {
+                        actor_name =
+                                text_format::first_to_upper(
+                                        actor_here->name_the());
+                }
+                else
+                {
+                        actor_name = "Something";
+                }
+
+                const std::string terrain_name = terrain.name(Article::the);
+
+                msg_log::add(
+                        actor_name +
+                        " prevents closing " +
+                        terrain_name +
+                        ".");
+
+                return DidAction::no;
+        }
+
         spells::run_close_spell_effect_at(terrain.pos(), skill);
 
         return DidAction::yes;
@@ -1600,7 +1641,9 @@ int CtrlObj::current_dist() const
 
 bool CtrlObj::is_allowed_at_dist() const
 {
-        return (current_dist() <= m_max_dist);
+        const int d = current_dist();
+
+        return ((d != 0) && (d <= m_max_dist));
 }
 
 void CtrlObj::on_start_hook()
@@ -1696,8 +1739,13 @@ void CtrlObj::handle_input(const InputData& input)
 
         if (!is_allowed_at_dist())
         {
+                const std::string msg =
+                        (current_dist() == 0)
+                        ? "The distance is too small."
+                        : "The distance is too great.";
+
                 msg_log::add(
-                        "The distance is too great.",
+                        msg,
                         colors::white(),
                         MsgInterruptPlayer::no,
                         MorePromptOnMsg::no,
