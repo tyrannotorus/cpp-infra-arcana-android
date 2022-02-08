@@ -39,7 +39,7 @@
 static int hit_armor(actor::Actor& actor, int dmg)
 {
         // NOTE: We retrieve armor points BEFORE damaging the armor, since it
-        // should reduce damage taken even if it gets damaged or destroyed
+        // should reduce damage taken even if it gets damaged or destroyed.
         const int ap = actor.armor_points();
 
         // Danage worn armor
@@ -83,6 +83,8 @@ static int hit_armor(actor::Actor& actor, int dmg)
         // Reduce damage by the total ap value - the new damage value may be
         // negative, this is the callers resonsibility to handle
         dmg -= ap;
+
+        dmg = std::max(1, dmg);
 
         return dmg;
 }
@@ -245,6 +247,8 @@ static void on_actor_not_killed_by_hit(
         if (((hp_pct_before > hp_warn_lvl)) &&
             ((hp_pct_after <= hp_warn_lvl)))
         {
+                msg_log::more_prompt();
+
                 msg_log::add(
                         "-LOW HP WARNING!-",
                         colors::msg_bad(),
@@ -290,6 +294,27 @@ static void on_light_sensitive_player_hit_by_light()
                 colors::msg_bad());
 }
 
+static int absorb_dmg_for_prolonged_life_player(int dmg)
+{
+        // Soak up as much damage as possible with SP instead of HP (but never
+        // reduce SP below 1).
+        const int missing_hp = dmg - map::g_player->m_hp + 1;
+
+        if (missing_hp < 0)
+        {
+                const int sp_dmg =
+                        std::min(
+                                missing_hp,
+                                map::g_player->m_sp - 1);
+
+                map::g_player->m_sp -= sp_dmg;
+
+                dmg -= sp_dmg;
+        }
+
+        return dmg;
+}
+
 // -----------------------------------------------------------------------------
 // actor
 // -----------------------------------------------------------------------------
@@ -319,8 +344,6 @@ void hit(
                 }
 
                 dmg = calc_new_dmg_for_light_sensitive(actor, dmg);
-
-                TRACE << dmg << std::endl;
         }
 
         const int hp_pct_before = (actor.m_hp * 100) / max_hp(actor);
@@ -343,40 +366,28 @@ void hit(
         const auto verbose = actor.is_alive() ? Verbose::yes : Verbose::no;
 
         const bool is_dmg_resisted =
-                actor.m_properties.is_resisting_dmg(dmg_type, verbose);
+                actor.m_properties.is_resisting_dmg(
+                        dmg_type,
+                        verbose);
 
         if (is_dmg_resisted)
         {
                 return;
         }
 
-        // TODO: Perhaps allow zero damage?
-        dmg = std::max(1, dmg);
-
-        if (is_physical_dmg_type(dmg_type))
+        if ((dmg > 0))
         {
-                dmg = hit_armor(actor, dmg);
-        }
-
-        dmg = std::max(1, dmg);
-
-        // Soaking up damage with SP instead due ot Prolonged Life trait?
-        if (actor::is_player(&actor) &&
-            player_bon::has_trait(Trait::prolonged_life))
-        {
-                const int missing_hp = dmg - actor.m_hp + 1;
-
-                if (missing_hp > 0)
+                if (is_physical_dmg_type(dmg_type))
                 {
-                        // This hit would kill the player
+                        // NOTE: Armor never reduces damage to zero.
+                        dmg = hit_armor(actor, dmg);
+                }
 
-                        // Soak up as much damage as possible with SP instead
-                        // (but never reduce SP below 1)
-                        const int sp_dmg = std::min(missing_hp, actor.m_sp - 1);
-
-                        actor.m_sp -= sp_dmg;
-
-                        dmg -= sp_dmg;
+                // Soaking up damage with SP instead due to Prolonged Life?
+                if (actor::is_player(&actor) &&
+                    player_bon::has_trait(Trait::prolonged_life))
+                {
+                        absorb_dmg_for_prolonged_life_player(dmg);
 
                         if (dmg <= 0)
                         {
@@ -392,10 +403,9 @@ void hit(
 
         actor.m_properties.on_hit();
 
-        // TODO: Perhaps allow zero damage?
-        dmg = std::max(1, dmg);
-
-        if (!(actor::is_player(&actor) && config::is_bot_playing()))
+        if ((dmg > 0) &&
+            !(actor::is_player(&actor) &&
+              config::is_bot_playing()))
         {
                 actor.m_hp -= dmg;
         }

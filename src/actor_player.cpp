@@ -388,12 +388,14 @@ void Player::on_hit(
         // etc, while taking a minor hit by something like poison ticking would
         // not necessarily stop you.
         const bool is_small_pure_damage =
-                ((dmg_type == DmgType::pure) && (dmg == 1));
+                ((dmg_type == DmgType::pure) && (dmg <= 1));
 
         if (!is_small_pure_damage)
         {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
         }
+
+        incr_shock(1.0, ShockSrc::misc);
 
         const bool is_enough_dmg_for_wound = (dmg >= g_min_dmg_to_wound);
         const bool is_physical = is_physical_dmg_type(dmg_type);
@@ -405,7 +407,7 @@ void Player::on_hit(
 
         const bool is_wounded =
                 (allow_wound == AllowWound::yes) &&
-                (m_hp - dmg) > 0 &&
+                ((m_hp - dmg) > 0) &&
                 is_enough_dmg_for_wound &&
                 is_physical &&
                 !is_ghoul_resist_wound &&

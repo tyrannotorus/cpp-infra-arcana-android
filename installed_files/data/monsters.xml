@@ -2683,7 +2683,7 @@
                 <property_applied duration="16">poisoned</property_applied>
             </attack>
             <attack id="snake_venom_spit">
-                <damage>1</damage>
+                <damage>0</damage>
             </attack>
         </attacks>
 

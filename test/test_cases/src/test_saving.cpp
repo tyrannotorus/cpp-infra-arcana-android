@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+#include <cstddef>
 #include <memory>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
@@ -29,6 +29,7 @@
 #include "player_spells.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "saving.hpp"
 #include "spells.hpp"
@@ -134,12 +135,16 @@ TEST_CASE("Saving and loading the game")
 
                 item = item::make(item::Id::lantern);
 
+                inv.put_in_backpack(item);
+
                 auto* lantern = static_cast<device::Lantern*>(item);
 
-                lantern->nr_turns_left = 789;
-                lantern->is_activated = true;
+                // NOTE: This will drain some turns from the lantern, and tick
+                // the game time.
+                lantern->activate(map::g_player);
 
-                inv.put_in_backpack(item);
+                REQUIRE(lantern->is_activated());
+                REQUIRE(lantern->nr_turns_left() == 147);
 
                 item = item::make(item::Id::horn_of_malice);
 
@@ -199,18 +204,24 @@ TEST_CASE("Saving and loading the game")
                 auto& props = map::g_player->m_properties;
 
                 {
-                        auto* const prop = new PropRSleep();
+                        auto* const prop =
+                                property_factory::make(
+                                        PropId::r_sleep);
+
                         prop->set_duration(3);
                         props.apply(prop);
                 }
 
                 {
-                        auto* const prop = new PropDiseased();
+                        auto* const prop =
+                                property_factory::make(
+                                        PropId::diseased);
+
                         prop->set_indefinite();
                         props.apply(prop);
                 }
 
-                props.apply(new PropBlessed());
+                props.apply(property_factory::make(PropId::blessed));
 
                 REQUIRE(props.has(PropId::diseased));
                 REQUIRE(props.has(PropId::blessed));
@@ -355,9 +366,8 @@ TEST_CASE("Saving and loading the game")
                                 const auto* const lantern =
                                         static_cast<device::Lantern*>(item);
 
-                                REQUIRE(lantern->nr_turns_left == 789);
-
-                                REQUIRE(lantern->is_activated);
+                                REQUIRE(lantern->nr_turns_left() == 147);
+                                REQUIRE(lantern->is_activated());
                         }
                         break;
 
@@ -484,8 +494,8 @@ TEST_CASE("Saving and loading the game")
 
                 REQUIRE(!props.has(PropId::hit_chance_penalty_curse));
 
-                // Turn number
-                REQUIRE(game_time::turn_nr() == 0);
+                // Turn number (1 turn due to activating lantern).
+                REQUIRE(game_time::turn_nr() == 1);
 
                 // Cleanup
                 saving::erase_save();

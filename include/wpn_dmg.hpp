@@ -70,12 +70,24 @@ public:
 
         WpnDmg scaled_pct(const int pct) const
         {
-                int new_min = (m_min * pct) / 100;
-                int new_max = (m_max * pct) / 100;
-                int new_plus = (m_plus * pct) / 100;
+                int new_min = m_min;
 
-                new_min = std::max(new_min, 1);
-                new_max = std::max(new_max, 1);
+                if (m_min > 0)
+                {
+                        new_min = (m_min * pct) / 100;
+                        new_min = std::max(new_min, 1);
+                }
+
+                int new_max = m_max;
+
+                if (m_max > 0)
+                {
+                        new_max = (m_max * pct) / 100;
+
+                        new_max = std::max(new_max, 1);
+                }
+
+                int new_plus = (m_plus * pct) / 100;
 
                 return {new_min, new_max, new_plus};
         }

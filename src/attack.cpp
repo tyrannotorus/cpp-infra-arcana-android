@@ -1798,14 +1798,17 @@ static void melee_hit_actor(
 
         const auto dmg_type = wpn.data().melee.dmg_type;
 
-        actor::hit(defender, dmg, dmg_type, allow_wound);
-
-        if (defender.m_data->can_bleed &&
-            (is_physical_dmg_type(dmg_type) ||
-             (dmg_type == DmgType::pure) ||
-             (dmg_type == DmgType::light)))
+        if (dmg > 0)
         {
-                map::make_blood(defender.m_pos);
+                actor::hit(defender, dmg, dmg_type, allow_wound);
+
+                if (defender.m_data->can_bleed &&
+                    (is_physical_dmg_type(dmg_type) ||
+                     (dmg_type == DmgType::pure) ||
+                     (dmg_type == DmgType::light)))
+                {
+                        map::make_blood(defender.m_pos);
+                }
         }
 
         wpn.on_melee_hit(defender, dmg);
