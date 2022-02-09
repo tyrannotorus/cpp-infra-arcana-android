@@ -27,6 +27,10 @@ class Actor;
 
 struct CellRenderData
 {
+        CellRenderData() = default;
+
+        CellRenderData(const CellRenderData&) = default;
+
         CellRenderData& operator=(const CellRenderData&) = default;
 
         gfx::TileId tile = gfx::TileId::END;

@@ -749,34 +749,39 @@ void Wall::on_hit(
         }
 }
 
-bool Wall::is_wall_front_tile(const gfx::TileId tile)
+gfx::TileId Wall::tile() const
 {
-        switch (tile)
-        {
-        case gfx::TileId::wall_front:
-        case gfx::TileId::wall_front_alt1:
-        case gfx::TileId::wall_front_alt2:
-        case gfx::TileId::cave_wall_front:
-        case gfx::TileId::egypt_wall_front:
-                return true;
+        const auto p_below = m_pos.with_y_offset(1);
 
-        default:
-                return false;
+        auto id_below = terrain::Id::END;
+
+        if (p_below.y < map::h())
+        {
+                const auto* const terrain_below = map::g_terrain.at(p_below);
+
+                if (map::g_seen.at(p_below))
+                {
+                        id_below = terrain_below->id();
+                }
+                else
+                {
+                        const auto& memory_below =
+                                map::g_terrain_memory.at(
+                                        p_below);
+
+                        id_below = memory_below.id;
+                }
         }
-}
 
-bool Wall::is_wall_top_tile(const gfx::TileId tile)
-{
-        switch (tile)
+        switch (id_below)
         {
-        case gfx::TileId::wall_top:
-        case gfx::TileId::cave_wall_top:
-        case gfx::TileId::egypt_wall_top:
-        case gfx::TileId::rubble_high:
-                return true;
+        case Id::wall:
+        case Id::door:
+        case Id::rubble_high:
+                return top_wall_tile();
 
         default:
-                return false;
+                return front_wall_tile();
         }
 }
 
@@ -2056,8 +2061,11 @@ void Carpet::on_hit(
 
         switch (dmg_type)
         {
-        default:
+        case DmgType::fire:
                 try_start_burning(Verbose::no);
+                break;
+
+        default:
                 break;
         }
 }
@@ -2560,9 +2568,10 @@ WasDestroyed Tree::on_finished_burning()
 
 gfx::TileId Tree::tile() const
 {
-        return is_fungi()
-                ? gfx::TileId::tree_fungi
-                : gfx::TileId::tree;
+        return (
+                is_fungi()
+                        ? gfx::TileId::tree_fungi
+                        : gfx::TileId::tree);
 }
 
 std::string Tree::name(const Article article) const
@@ -3164,9 +3173,10 @@ std::string Tomb::name(const Article article) const
 
 gfx::TileId Tomb::tile() const
 {
-        return m_is_open
-                ? gfx::TileId::tomb_open
-                : gfx::TileId::tomb_closed;
+        return (
+                m_is_open
+                        ? gfx::TileId::tomb_open
+                        : gfx::TileId::tomb_closed);
 }
 
 Color Tomb::color_default() const
@@ -3901,16 +3911,17 @@ std::string Chest::name(const Article article) const
 
 gfx::TileId Chest::tile() const
 {
-        return m_is_open
-                ? gfx::TileId::chest_open
-                : gfx::TileId::chest_closed;
+        return (m_is_open
+                        ? gfx::TileId::chest_open
+                        : gfx::TileId::chest_closed);
 }
 
 Color Chest::color_default() const
 {
-        return (m_matl == ChestMatl::wood)
-                ? colors::dark_brown()
-                : colors::gray();
+        return (
+                (m_matl == ChestMatl::wood)
+                        ? colors::dark_brown()
+                        : colors::gray());
 }
 
 // -----------------------------------------------------------------------------
@@ -4750,9 +4761,10 @@ std::string Bookshelf::name(const Article article) const
 
 gfx::TileId Bookshelf::tile() const
 {
-        return m_is_looted
-                ? gfx::TileId::bookshelf_empty
-                : gfx::TileId::bookshelf_full;
+        return (
+                m_is_looted
+                        ? gfx::TileId::bookshelf_empty
+                        : gfx::TileId::bookshelf_full);
 }
 
 Color Bookshelf::color_default() const
@@ -4927,9 +4939,10 @@ std::string AlchemistBench::name(const Article article) const
 
 gfx::TileId AlchemistBench::tile() const
 {
-        return m_is_looted
-                ? gfx::TileId::alchemist_bench_empty
-                : gfx::TileId::alchemist_bench_full;
+        return (
+                m_is_looted
+                        ? gfx::TileId::alchemist_bench_empty
+                        : gfx::TileId::alchemist_bench_full);
 }
 
 Color AlchemistBench::color_default() const
@@ -5199,9 +5212,10 @@ std::string Cocoon::name(const Article article) const
 
 gfx::TileId Cocoon::tile() const
 {
-        return m_is_open
-                ? gfx::TileId::cocoon_open
-                : gfx::TileId::cocoon_closed;
+        return (
+                m_is_open
+                        ? gfx::TileId::cocoon_open
+                        : gfx::TileId::cocoon_closed);
 }
 
 Color Cocoon::color_default() const

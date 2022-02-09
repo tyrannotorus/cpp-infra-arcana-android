@@ -95,106 +95,10 @@ static void set_terrains()
                         render_data.color_bg = terrain_color_bg;
                 }
 
-                // TODO: Do in post_process_wall_tiles instead
                 if ((map::g_terrain.at(i)->id() == terrain::Id::wall) &&
                     config::text_mode_filled_walls())
                 {
                         render_data.character = s_filled_rect_char;
-                }
-        }
-}
-
-// Returns wall or wall mimicked by a door at given position, if any.
-static const terrain::Wall* wall_at(const P& p)
-{
-        const terrain::Wall* wall = nullptr;
-
-        const auto* const t = map::g_terrain.at(p);
-
-        const auto id = t->id();
-
-        if (id == terrain::Id::wall)
-        {
-                wall = static_cast<const terrain::Wall*>(t);
-        }
-        else if (id == terrain::Id::door)
-        {
-                const auto* door = static_cast<const terrain::Door*>(t);
-
-                if (door->is_hidden())
-                {
-                        wall = door->mimic();
-                }
-        }
-
-        return wall;
-}
-
-static void post_process_wall_tile_at(const P& p)
-{
-        auto& render_data = s_render_array.at(p);
-
-        const bool is_wall_top_tile =
-                terrain::Wall::is_wall_top_tile(
-                        render_data.tile);
-
-        if (!is_wall_top_tile)
-        {
-                return;
-        }
-
-        const auto* const wall = wall_at(p);
-
-        if (!wall)
-        {
-                return;
-        }
-
-        const auto p_below = p.with_y_offset(1);
-        const auto render_data_below = s_render_array.at(p_below);
-
-        if (render_data_below.tile == gfx::TileId::END)
-        {
-                // No terrain remembered here, use front wall tile for the
-                // current wall.
-                render_data.tile = wall->front_wall_tile();
-
-                return;
-        }
-
-        // Player remembers terrain below this wall.
-
-        const auto tile_below = s_render_array.at(p_below).tile;
-
-        if (terrain::Wall::is_wall_front_tile(tile_below) ||
-            terrain::Wall::is_wall_top_tile(tile_below) ||
-            terrain::Door::is_tile_any_door(tile_below))
-        {
-                // Tile below is a wall or door tile, use top wall tile.
-                render_data.tile = wall->top_wall_tile();
-        }
-        else
-        {
-                // Other tile below (e.g. floor), use front wall tile.
-                render_data.tile = wall->front_wall_tile();
-        }
-}
-
-static void post_process_wall_tiles()
-{
-        if (!config::is_tiles_mode())
-        {
-                return;
-        }
-
-        const int x1 = map::w() - 1;
-        const int y1 = map::h() - 2;
-
-        for (int x = 0; x <= x1; ++x)
-        {
-                for (int y = 0; y <= y1; ++y)
-                {
-                        post_process_wall_tile_at({x, y});
                 }
         }
 }
@@ -629,7 +533,7 @@ static void draw_player_character()
         const auto color = map::g_player->color();
         const auto color_bg = colors::black();
 
-        gfx::TileId tile;
+        auto tile = gfx::TileId::END;
 
         if (player_bon::is_bg(Bg::ghoul))
         {
@@ -696,8 +600,6 @@ void run()
         set_unseen_cells_from_player_memory();
 
         set_terrains();
-
-        post_process_wall_tiles();
 
         set_dead_actors();
 

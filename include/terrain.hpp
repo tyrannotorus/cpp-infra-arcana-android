@@ -610,6 +610,8 @@ public:
                 return Id::wall;
         }
 
+        gfx::TileId tile() const override;
+
         std::string name(Article article) const override;
         gfx::TileId front_wall_tile() const;
         gfx::TileId top_wall_tile() const;
@@ -619,9 +621,6 @@ public:
 
         WallType m_type;
         bool m_is_mossy;
-
-        static bool is_wall_front_tile(gfx::TileId tile);
-        static bool is_wall_top_tile(gfx::TileId tile);
 
 private:
         Color color_default() const override;
