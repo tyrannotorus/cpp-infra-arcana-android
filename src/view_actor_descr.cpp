@@ -690,8 +690,6 @@ void ViewActorDescr::draw()
                 text.set_color(colors::text());
 
                 text.draw(Panel::info_screen_content, {0, y});
-
-                y += text.nr_lines();
         }
 }
 

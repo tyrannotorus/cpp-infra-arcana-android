@@ -74,19 +74,18 @@ static void set_terrains()
                         gore_character = t->gore_character();
                 }
 
-                if (gore_tile != gfx::TileId::END)
+                if (gore_tile == gfx::TileId::END)
                 {
-                        // Override with "gore"
+                        render_data.tile = t->tile();
+                        render_data.character = t->character();
+                        render_data.color = t->color();
+                }
+                else
+                {
                         render_data.tile = gore_tile;
                         render_data.character = gore_character;
                         render_data.color = colors::red();
-
-                        continue;
                 }
-
-                render_data.tile = t->tile();
-                render_data.character = t->character();
-                render_data.color = t->color();
 
                 const Color terrain_color_bg = t->color_bg();
 

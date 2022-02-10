@@ -1150,9 +1150,8 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                auto* const prop = property_factory::make(PropId::blind);
-                prop->set_duration(20);
-                map::g_player->m_properties.apply(prop);
+                map::make_gore(map::g_player->m_pos.with_x_offset(2));
+                map::make_blood(map::g_player->m_pos.with_x_offset(2));
         }
         break;
 
