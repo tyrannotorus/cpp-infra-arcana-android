@@ -91,9 +91,9 @@
 # User input
 - All menus have shortcut keys (either with "(Y)es (N)o" style, or "a) b) c) ...")
 - The "i" key is skipped as a letter index in the inventory (and drop menu), instead this key can be used for closing the inventory menu again (to allow more convenient toggling of the menu and to help prevent key press mistakes)
-- Added 'l' or 'e' as a shortcut command for toggling the Electric Lantern
-- Added ',' (comma) as an alternative pick up command
-- 'C' is the standard key for the character info screen, with '@' as alternative key
+- Added "l" or "e" as a shortcut command for toggling the Electric Lantern
+- Added "," (comma) as an alternative pick up command
+- "C" is the standard key for the character info screen, with "@" as alternative key
 - In the options menu, left and right can also be used to change option values
 
 # Graphics
@@ -104,7 +104,7 @@
 - Added tiles for Cultists wielding different firearms (see gameplay changes above)
 - Removed the options to draw the walls as filled rectangles in tiles mode
 
-# Interface design
+# Design
 - Changed the appearance of popups
 - Many screens such as the background/trait screens and character info screen use a nicer positioning for drawing, and they handle window resizing better
 - Added more elaborate border graphics (used for example around the player information panel), instead of only simple lines (these graphics existed in older versions of the game)
