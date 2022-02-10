@@ -241,7 +241,7 @@ Color Mon::color() const
         }
 
         // TODO: Make this a property:
-        if (id() == Id::ooze_lurking)
+        if ((id() == Id::ooze_lurking) && !m_mimic_data)
         {
                 return map::g_wall_color;
         }
