@@ -66,6 +66,7 @@
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
+#include "terrain_factory.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
 #include "wpn_dmg.hpp"
@@ -249,7 +250,8 @@ static void swap_wall_floor(const Context& context)
 
                         if (map_parsers::is_map_connected(blocked))
                         {
-                                map::put(new terrain::Floor(p));
+                                map::update_terrain(
+                                        terrain::make(terrain::Id::floor, p));
                         }
                         else
                         {
@@ -263,7 +265,8 @@ static void swap_wall_floor(const Context& context)
 
                         if (map_parsers::is_map_connected(blocked))
                         {
-                                map::put(new terrain::Wall(p));
+                                map::update_terrain(
+                                        terrain::make(terrain::Id::wall, p));
                         }
                         else
                         {
@@ -460,11 +463,15 @@ static void create_water(const Context& context)
                         printed_msg = true;
                 }
 
-                auto* const liquid = new terrain::Liquid(p);
+                auto* const liquid =
+                        static_cast<terrain::Liquid*>(
+                                terrain::make(
+                                        terrain::Id::liquid,
+                                        p));
 
                 liquid->m_type = LiquidType::water;
 
-                map::put(liquid);
+                map::update_terrain(liquid);
         }
 
         TRACE_FUNC_END;
@@ -502,7 +509,7 @@ static void create_trees(const Context& context)
         for (const auto& p : context.nearby_positions)
         {
                 const bool is_floor_like =
-                        map::g_terrain.at(p)->data().is_floor_like;
+                        map::g_terrain.at(p)->m_data->is_floor_like;
 
                 const bool is_adj_to_lever =
                         map_parsers::AnyAdjIsAnyOfTerrains(terrain::Id::lever)
@@ -515,7 +522,7 @@ static void create_trees(const Context& context)
 
                 tree_pos_bucket.push_back(p);
 
-                map::put(new terrain::Grass(p));
+                map::update_terrain(terrain::make(terrain::Id::grass, p));
         }
 
         Array2<bool> has_actor(map::dims());
@@ -549,7 +556,7 @@ static void create_trees(const Context& context)
 
                 if (map_parsers::is_map_connected(blocked))
                 {
-                        map::put(new terrain::Tree(p));
+                        map::update_terrain(terrain::make(terrain::Id::tree, p));
 
                         ++nr_trees_placed;
                 }
@@ -591,16 +598,21 @@ static void create_doors(const Context& context)
                         printed_msg = true;
                 }
 
-                const auto* const mimic = new terrain::Wall(p);
+                auto* const mimic = terrain::make(terrain::Id::wall, p);
 
                 auto* const door =
-                        new terrain::Door(
-                                p,
-                                mimic,
-                                terrain::DoorType::wood,
-                                terrain::DoorSpawnState::closed);
+                        static_cast<terrain::Door*>(
+                                terrain::make(
+                                        terrain::Id::door,
+                                        p));
 
-                map::put(door);
+                door->set_mimic_terrain(mimic);
+
+                door->init_type_and_state(
+                        terrain::DoorType::wood,
+                        terrain::DoorSpawnState::closed);
+
+                map::update_terrain(door);
         }
 
         TRACE_FUNC_END;
@@ -663,7 +675,8 @@ static void create_dark_void(const Context& context)
 
                         if (map_parsers::is_map_connected(blocked))
                         {
-                                map::put(new terrain::Floor(p));
+                                map::update_terrain(
+                                        terrain::make(terrain::Id::floor, p));
                         }
                         else
                         {
@@ -1268,6 +1281,11 @@ void Spell::cast(
 
         if (allow_cast && caster->is_alive())
         {
+                TRACE
+                        << "Running spell effect for spell "
+                        << "'" << name() << "'"
+                        << std::endl;
+
                 run_effect(caster, skill, seen_targets);
 
                 end_properties_for_casting_spell(*caster, id());
@@ -1804,19 +1822,20 @@ void SpellBolt::draw_projectile_travel(
                 {
                         const auto& p = path[i];
 
-                        if (!map::g_seen.at(p) || !viewport::is_in_view(p))
+                        if (!map::g_seen.at(p))
                         {
                                 continue;
                         }
 
                         states::draw();
 
-                        io::draw_symbol(
-                                gfx::TileId::blast1,
-                                '*',
-                                Panel::map,
-                                viewport::to_view_pos(p),
-                                colors::magenta());
+                        io::MapDrawObj draw_obj;
+                        draw_obj.tile = gfx::TileId::blast1;
+                        draw_obj.character = '*';
+                        draw_obj.pos = viewport::to_view_pos(p);
+                        draw_obj.color = colors::magenta();
+
+                        draw_obj.draw();
 
                         io::update_screen();
 
@@ -2217,7 +2236,8 @@ void SpellCataclysm::run_effect(
 
                         snd.run();
 
-                        map::put(new terrain::RubbleLow(p));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::rubble_low, p));
 
                         auto* const burning =
                                 property_factory::make(PropId::burning);
@@ -3008,7 +3028,7 @@ void SpellPurge::run_effect(
                 case terrain::Id::monolith:
                 case terrain::Id::gong:
                 {
-                        if (map::is_pos_seen_by_player(p))
+                        if (map::g_seen.at(p))
                         {
                                 io::draw_blast_at_cells(
                                         {p},

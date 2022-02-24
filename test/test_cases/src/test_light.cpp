@@ -8,16 +8,16 @@
 #include <iterator>
 #include <vector>
 
-#include "catch.hpp"
 #include "actor_player.hpp"
+#include "array2.hpp"
+#include "catch.hpp"
+#include "direction.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "map.hpp"
+#include "pos.hpp"
 #include "terrain.hpp"
 #include "test_utils.hpp"
-#include "array2.hpp"
-#include "direction.hpp"
-#include "global.hpp"
-#include "pos.hpp"
 
 TEST_CASE("Test light map")
 {
@@ -37,7 +37,7 @@ TEST_CASE("Test light map")
                 burn_terrain->hit(DmgType::fire, nullptr);
         }
 
-        game_time::update_light_map();
+        map::update_light_map();
 
         map::g_player->update_fov();
 

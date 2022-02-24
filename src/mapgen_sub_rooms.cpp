@@ -19,6 +19,7 @@
 #include "room.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -58,44 +59,47 @@ static void put_inner_wall(const P& pos)
                 {
                 case 0:
                 {
-                        terrain = new terrain::Wall(pos);
+                        terrain = terrain::make(terrain::Id::wall, pos);
                 }
                 break;
 
                 case 1:
                 {
-                        terrain = new terrain::RubbleHigh(pos);
+                        terrain = terrain::make(terrain::Id::rubble_high, pos);
                 }
                 break;
 
                 case 2:
                 {
-                        terrain = new terrain::RubbleLow(pos);
+                        terrain = terrain::make(terrain::Id::rubble_low, pos);
                 }
                 break;
 
                 case 3:
                 {
-                        auto* const floor = new terrain::Floor(pos);
-                        floor->m_type = terrain::FloorType::cave;
-                        terrain = floor;
+                        terrain = terrain::make(terrain::Id::floor, pos);
+
+                        static_cast<terrain::Floor*>(terrain)->m_type =
+                                terrain::FloorType::cave;
                 }
                 break;
 
                 default:
                 {
                         ASSERT(false);
-                        terrain = new terrain::Wall(pos);
+                        terrain = terrain::make(terrain::Id::wall, pos);
                 }
                 break;
                 }
 
-                map::put(terrain);
+                map::set_terrain(terrain);
         }
         else
         {
                 // Not late game
-                map::put(new terrain::Wall(pos));
+                auto* const t = terrain::make(terrain::Id::wall, pos);
+
+                map::set_terrain(t);
         }
 }
 
@@ -264,7 +268,9 @@ static bool try_make_inner_room(
                 // One entrance that may have a door.
                 const auto door_pos = rnd::element(entrance_bucket);
 
-                map::put(new terrain::Floor(door_pos));
+                auto* const t = terrain::make(terrain::Id::floor, door_pos);
+
+                map::set_terrain(t);
 
                 mapgen::g_door_proposals.at(door_pos) = true;
         }
@@ -292,7 +298,13 @@ static bool try_make_inner_room(
 
                         if (is_pos_ok)
                         {
-                                map::put(new terrain::Floor(try_p));
+                                auto* const t =
+                                        terrain::make(
+                                                terrain::Id::floor,
+                                                try_p);
+
+                                map::set_terrain(t);
+
                                 positions_placed.push_back(try_p);
                         }
                 }

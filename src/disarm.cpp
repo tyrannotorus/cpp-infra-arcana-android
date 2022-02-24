@@ -45,8 +45,13 @@ void player_disarm()
                 return;
         }
 
+        const std::string hint =
+                common_text::g_direction_query +
+                " " +
+                common_text::g_cancel_hint;
+
         msg_log::add(
-                "Which direction? " + common_text::g_cancel_hint,
+                hint,
                 colors::light_white(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::no,
@@ -95,7 +100,7 @@ void player_disarm()
 
         // There is a known and seen trap here
 
-        const auto* const actor_on_trap = map::first_actor_at_pos(pos);
+        const auto* const actor_on_trap = map::living_actor_at(pos);
 
         if (actor_on_trap && !actor::is_player(actor_on_trap))
         {

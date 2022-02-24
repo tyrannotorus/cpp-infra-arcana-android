@@ -214,7 +214,7 @@ static bool query_overwrite_savefile()
         popup::Popup(popup::AddToMsgHistory::no)
                 .set_title("A saved game exists")
                 .set_msg("Start a new game?")
-                .set_menu(
+                .setup_menu_mode(
                         {"(Y)es", "(N)o"},
                         {'y', 'n'},
                         &choice)
@@ -330,7 +330,7 @@ void MainMenuState::draw()
                 ++pos.y;
         }
 
-        const Color quote_clr = colors::gray_brown().fraction(1.75);
+        const Color quote_clr = colors::gray_brown().shaded(40);
 
         std::vector<std::string> quote_lines;
 
@@ -424,8 +424,6 @@ void MainMenuState::draw()
                 Panel::screen,
                 {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
                 colors::gray());
-
-        io::update_screen();
 
 }  // draw
 

@@ -11,8 +11,10 @@
 #include "SDL_keyboard.h"
 #include "SDL_keycode.h"
 #include "SDL_timer.h"
+#include "actor.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "game_time.hpp"
 #include "io.hpp"
 #include "io_internal.hpp"
 #include "pos.hpp"
@@ -23,7 +25,7 @@
 // -----------------------------------------------------------------------------
 static SDL_Event s_sdl_event;
 
-static InputData s_input;
+static io::InputData s_input;
 
 static bool s_is_done_reading_input = false;
 static bool s_is_window_resized = false;
@@ -31,12 +33,14 @@ static bool s_is_window_resized = false;
 static const uint32_t s_window_resize_draw_delay_ms = 400;
 static uint32_t s_last_window_resize_ms = 0;
 
-// TODO: Most of the graphics cycling code probably doesn't belong in this file,
-// move it somewhere else.
-static bool s_is_graphics_cycling_enabled = true;
+// TODO: Most of the rendering stuff probably doesn't belong in this file, move
+// it somewhere else.
+static bool s_is_redraw_needed = false;
+
 static const size_t nr_graphics_cycle_types = (size_t)io::GraphicsCycle::END;
 static std::uint32_t s_graphics_cycle_delay_ms[nr_graphics_cycle_types];
-static uint32_t s_last_graphics_cycle_ms[nr_graphics_cycle_types];
+static std::uint32_t s_last_graphics_cycle_ms[nr_graphics_cycle_types];
+static int s_graphics_cycle_nr[nr_graphics_cycle_types];
 
 static void update_input_mod_key_status()
 {
@@ -52,7 +56,7 @@ static void on_window_resized_signalled()
         io::on_window_resized();
         io::clear_screen();
         io::update_screen();
-        io::clear_events();
+        io::flush_input();
 
         s_is_window_resized = false;
         s_last_window_resize_ms = SDL_GetTicks();
@@ -78,13 +82,8 @@ static void window_resized_delayed_draw()
         }
 }
 
-static void run_graphics_cycling()
+static void step_graphics_cycling()
 {
-        if (!s_is_graphics_cycling_enabled)
-        {
-                return;
-        }
-
         // Do not cycle graphics if window has been resized recently.
         if (s_last_window_resize_ms != 0)
         {
@@ -93,28 +92,24 @@ static void run_graphics_cycling()
 
         const auto current_time_ms = SDL_GetTicks();
 
-        bool is_any_cycled = false;
-
         for (size_t i = 0; i < (size_t)io::GraphicsCycle::END; ++i)
         {
                 const auto d = current_time_ms - s_last_graphics_cycle_ms[i];
 
-                if (d > s_graphics_cycle_delay_ms[i])
+                if (d < s_graphics_cycle_delay_ms[i])
                 {
-                        s_last_graphics_cycle_ms[i] = current_time_ms;
-
-                        const auto cycle = (io::GraphicsCycle)i;
-
-                        states::cycle_graphics(cycle);
-
-                        is_any_cycled = true;
+                        continue;
                 }
-        }
 
-        if (is_any_cycled)
-        {
-                states::draw();
-                io::update_screen();
+                s_last_graphics_cycle_ms[i] = current_time_ms;
+
+                const auto cycle = (io::GraphicsCycle)i;
+
+                states::cycle_graphics(cycle);
+
+                ++s_graphics_cycle_nr[i];
+
+                s_is_redraw_needed = true;
         }
 }
 
@@ -221,7 +216,10 @@ static void handle_window_event()
         {
                 TRACE << "Window gained focus" << std::endl;
 
-                io::clear_events();
+                // TODO: This is not actually stopping accidental game input
+                // commands when alt-tabbing or switching workspace. It is
+                // *very* easy to accidentally move or tab-attack a monster!
+                io::flush_input();
 
                 io::sleep(100);
         }
@@ -265,8 +263,6 @@ static void handle_keydown_enter_event()
                 // manually. Don't know if this is an issue in the IA
                 // code, or an SDL bug.
                 SDL_SetModState(KMOD_NONE);
-
-                io::clear_events();
 
                 io::flush_input();
         }
@@ -383,7 +379,7 @@ static void handle_textinput_event()
 
         if (is_printable_ascii_char(c))
         {
-                io::clear_events();
+                io::flush_input();
 
                 s_input.key = (unsigned char)c;
 
@@ -452,7 +448,7 @@ namespace io
 {
 void init_input()
 {
-        s_is_graphics_cycling_enabled = true;
+        s_is_redraw_needed = false;
 
         for (size_t i = 0; i < (size_t)GraphicsCycle::END; ++i)
         {
@@ -480,29 +476,25 @@ void init_input()
                 }
 
                 s_last_graphics_cycle_ms[i] = 0;
+                s_graphics_cycle_nr[i] = 0;
         }
 }
 
-void enable_graphics_cycling()
+int graphics_cycle_nr(const GraphicsCycle cycle_type)
 {
-        s_is_graphics_cycling_enabled = true;
-}
+        if (cycle_type == GraphicsCycle::END)
+        {
+                ASSERT(false);
 
-void disable_graphics_cycling()
-{
-        s_is_graphics_cycling_enabled = false;
+                return 0;
+        }
+
+        return s_graphics_cycle_nr[(size_t)cycle_type];
 }
 
 void flush_input()
 {
         SDL_PumpEvents();
-}
-
-void clear_events()
-{
-        while (SDL_PollEvent(&s_sdl_event))
-        {
-        }
 }
 
 InputData get()
@@ -530,7 +522,16 @@ InputData get()
                         window_resized_delayed_draw();
                 }
 
-                run_graphics_cycling();
+                s_is_redraw_needed = false;
+
+                step_graphics_cycling();
+
+                if (s_is_redraw_needed)
+                {
+                        io::clear_screen();
+                        states::draw();
+                        io::update_screen();
+                }
 
                 run_handle_event_cycle();
         }

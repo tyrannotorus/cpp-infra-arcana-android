@@ -70,9 +70,9 @@ struct Projectile
         actor::Actor* actor_hit {nullptr};
         terrain::Terrain* terrain_hit {nullptr};
         bool is_seen_by_player {false};
-        gfx::TileId tile {gfx::TileId::END};
-        signed char character {-1};
-        Color color {colors::white()};
+        io::MapDrawObj draw_obj;
+        // Used for drawing a trail (e.g. a beam weapon):
+        std::vector<io::MapDrawObj> drawn_trail;
         std::unique_ptr<RangedAttData> att_data {nullptr};
 
 #ifndef NDEBUG
@@ -1276,9 +1276,9 @@ static void init_projectiles_gfx(ProjectileFireData& fire_data)
 
         for (auto& projectile : fire_data.projectiles)
         {
-                projectile.tile = projectile_tile;
-                projectile.character = projectile_character;
-                projectile.color = projectile_color;
+                projectile.draw_obj.tile = projectile_tile;
+                projectile.draw_obj.character = projectile_character;
+                projectile.draw_obj.color = projectile_color;
         }
 }
 
@@ -1512,7 +1512,7 @@ static void update_projectile_states(ProjectileFireData& fire_data)
                 if (projectile.actor_hit)
                 {
                         projectile.obstructed_in_path_idx = projectile.path_idx;
-                        projectile.color = colors::light_red();
+                        projectile.draw_obj.color = colors::light_red();
 
                         continue;
                 }
@@ -1523,7 +1523,7 @@ static void update_projectile_states(ProjectileFireData& fire_data)
                 if (projectile.terrain_hit)
                 {
                         projectile.obstructed_in_path_idx = projectile.path_idx;
-                        projectile.color = colors::yellow();
+                        projectile.draw_obj.color = colors::yellow();
 
                         continue;
                 }
@@ -1539,12 +1539,12 @@ static void update_projectile_states(ProjectileFireData& fire_data)
 
                         if (terrain_id == terrain::Id::liquid)
                         {
-                                projectile.color =
+                                projectile.draw_obj.color =
                                         projectile.terrain_hit->color();
                         }
                         else
                         {
-                                projectile.color =
+                                projectile.draw_obj.color =
                                         colors::yellow();
                         }
 
@@ -1609,7 +1609,7 @@ static void run_projectiles_messages_and_sounds(
 
 static void draw_projectile(const Projectile& projectile)
 {
-        if (projectile.tile == gfx::TileId::END)
+        if (projectile.draw_obj.tile == gfx::TileId::END)
         {
                 return;
         }
@@ -1619,93 +1619,71 @@ static void draw_projectile(const Projectile& projectile)
                 return;
         }
 
-        io::draw_symbol(
-                projectile.tile,
-                projectile.character,
-                Panel::map,
-                viewport::to_view_pos(projectile.pos),
-                projectile.color);
+        projectile.draw_obj.draw();
 }
 
-static void draw_projectile_hit(
-        Projectile& projectile,
-        const int animation_delay)
+static void draw_previous_trail(const std::vector<io::MapDrawObj>& draw_objs)
 {
-        if (config::is_tiles_mode())
+        for (const auto& draw_obj : draw_objs)
         {
-                projectile.tile = gfx::TileId::blast1;
-
-                draw_projectile(projectile);
-
-                io::update_screen();
-
-                io::sleep(animation_delay / 2);
-
-                projectile.tile = gfx::TileId::blast2;
-
-                draw_projectile(projectile);
-
-                io::update_screen();
-
-                io::sleep(animation_delay / 2);
-        }
-        else
-        {
-                // Text mode
-                projectile.character = '*';
-
-                draw_projectile(projectile);
-
-                io::update_screen();
-
-                io::sleep(animation_delay);
+                draw_obj.draw();
         }
 }
 
 static bool should_draw_projectile_as_travelling(const Projectile& projectile)
 {
-        return !projectile.is_dead &&
+        return (
+                !projectile.is_dead &&
                 projectile.is_seen_by_player &&
-                (projectile.path_idx >= 1);
+                (projectile.path_idx >= 1) &&
+                (projectile.obstructed_in_path_idx < 0));
 }
 
 static bool should_draw_projectile_as_hit(const Projectile& projectile)
 {
-        return !projectile.is_dead &&
+        return (
+                !projectile.is_dead &&
                 projectile.is_seen_by_player &&
-                (projectile.obstructed_in_path_idx >= 0);
+                (projectile.obstructed_in_path_idx >= 0));
 }
 
 static void draw_projectiles(ProjectileFireData& fire_data)
 {
-        if (!fire_data.projectile_animation_leaves_trail)
-        {
-                states::draw();
-        }
+        states::draw();
 
-        // Draw travelling projectiles
         for (auto& projectile : fire_data.projectiles)
         {
-                if (!should_draw_projectile_as_travelling(projectile))
-                {
-                        continue;
-                }
+                projectile.draw_obj.pos =
+                        viewport::to_view_pos(projectile.pos);
 
-                draw_projectile(projectile);
+                if (should_draw_projectile_as_travelling(projectile))
+                {
+                        // Draw travelling projectile.
+                        draw_projectile(projectile);
+
+                        if (fire_data.projectile_animation_leaves_trail)
+                        {
+                                draw_previous_trail(projectile.drawn_trail);
+                        }
+
+                        projectile.drawn_trail.push_back(projectile.draw_obj);
+                }
+                else if (should_draw_projectile_as_hit(projectile))
+                {
+                        // Draw projectile hit.
+                        projectile.draw_obj.tile =
+                                (projectile.draw_obj.tile ==
+                                 gfx::TileId::blast1)
+                                ? gfx::TileId::blast2
+                                : gfx::TileId::blast1;
+
+                        projectile.draw_obj.character = '*';
+
+                        draw_projectile(projectile);
+                }
         }
 
         io::update_screen();
-
-        // Draw projectiles hitting something
-        for (auto& projectile : fire_data.projectiles)
-        {
-                if (!should_draw_projectile_as_hit(projectile))
-                {
-                        continue;
-                }
-
-                draw_projectile_hit(projectile, fire_data.animation_delay);
-        }
 }
 
 static bool is_any_projectile_seen(const std::vector<Projectile>& projectiles)
@@ -1769,14 +1747,20 @@ static ProjectileFireData fire_projectiles(
 
                 run_projectiles_messages_and_sounds(fire_data);
 
-                draw_projectiles(fire_data);
+                // NOTE: Here we draw the projectiles twice and sleep twice -
+                // each draw call will progress hit animations (the animation
+                // has two steps).
+                for (int i = 0; i <= 1; ++i)
+                {
+                        draw_projectiles(fire_data);
+
+                        if (is_any_projectile_seen(fire_data.projectiles))
+                        {
+                                io::sleep(fire_data.animation_delay / 2);
+                        }
+                }
 
                 run_projectile_hits(fire_data);
-
-                if (is_any_projectile_seen(fire_data.projectiles))
-                {
-                        io::sleep(fire_data.animation_delay);
-                }
         }
 
         return {};
@@ -1807,7 +1791,7 @@ static void melee_hit_actor(
                      (dmg_type == DmgType::pure) ||
                      (dmg_type == DmgType::light)))
                 {
-                        map::make_blood(defender.m_pos);
+                        terrain::make_blood(defender.m_pos);
                 }
         }
 
@@ -2042,7 +2026,7 @@ DidAction ranged(
                 }
 
                 // Player could have for example fired an explosive weapon into
-                // a wall and killed themselves - if so, abort early
+                // a wall and killed themselves - if so, abort early.
                 if (!map::g_player->is_alive())
                 {
                         return DidAction::yes;

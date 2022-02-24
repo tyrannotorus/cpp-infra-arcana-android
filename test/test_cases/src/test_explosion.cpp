@@ -4,29 +4,30 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_death.hpp"
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
-#include "explosion.hpp"
-#include "item_factory.hpp"
-#include "map.hpp"
-#include "misc.hpp"
-#include "property.hpp"
-#include "property_factory.hpp"
-#include "terrain.hpp"
-#include "test_utils.hpp"
-#include "actor_data.hpp"
 #include "array2.hpp"
+#include "catch.hpp"
 #include "colors.hpp"
+#include "explosion.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
 #include "item_data.hpp"
+#include "item_factory.hpp"
+#include "map.hpp"
+#include "misc.hpp"
 #include "pos.hpp"
+#include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
+#include "test_utils.hpp"
 
 TEST_CASE("Explosions damage walls")
 {
@@ -36,13 +37,14 @@ TEST_CASE("Explosions damage walls")
         {
                 for (int y = 0; y < map::h(); ++y)
                 {
-                        map::put(new terrain::Wall({x, y}));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::wall, {x, y}));
                 }
         }
 
         const P origin(5, 7);
 
-        map::put(new terrain::Floor(origin));
+        map::update_terrain(terrain::make(terrain::Id::floor, origin));
 
         // Run enough explosions to guarantee destroying adjacent walls
         for (int i = 0; i < 100; ++i)
@@ -108,7 +110,8 @@ TEST_CASE("Explosions at map edge")
         {
                 for (int y = 0; y < map::h(); ++y)
                 {
-                        map::put(new terrain::Wall({x, y}));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::wall, {x, y}));
                 }
         }
 
@@ -116,7 +119,7 @@ TEST_CASE("Explosions at map edge")
         int x = 1;
         int y = 1;
 
-        map::put(new terrain::Floor(P(x, y)));
+        map::update_terrain(terrain::make(terrain::Id::floor, {x, y}));
 
         const auto wall_id = terrain::Id::wall;
 
@@ -127,7 +130,7 @@ TEST_CASE("Explosions at map edge")
 
         for (int i = 0; i < 100; ++i)
         {
-                explosion::run(P(x, y), ExplType::expl);
+                explosion::run({x, y}, ExplType::expl);
         }
 
         REQUIRE(map::g_terrain.at(x + 1, y)->id() != wall_id);
@@ -139,7 +142,7 @@ TEST_CASE("Explosions at map edge")
         x = map::w() - 2;
         y = map::h() - 2;
 
-        map::put(new terrain::Floor(P(x, y)));
+        map::update_terrain(terrain::make(terrain::Id::floor, {x, y}));
 
         REQUIRE(map::g_terrain.at(x - 1, y)->id() == wall_id);
         REQUIRE(map::g_terrain.at(x, y - 1)->id() == wall_id);
@@ -296,7 +299,7 @@ TEST_CASE("Gas explosions not affecting gas immune creatures")
 
         const P origin(5, 7);
 
-        map::put(new terrain::Floor(origin));
+        map::update_terrain(terrain::make(terrain::Id::floor, origin));
 
         auto* const actor = actor::make(actor::Id::zombie, origin);
 
@@ -339,7 +342,7 @@ TEST_CASE("Gas mask protects against gas explosions")
 
         const P origin(5, 7);
 
-        map::put(new terrain::Floor(origin));
+        map::update_terrain(terrain::make(terrain::Id::floor, origin));
 
         auto& player = *map::g_player;
 
@@ -389,7 +392,7 @@ TEST_CASE("Asbestos suite protects against gas explosions")
 
         const P origin(5, 7);
 
-        map::put(new terrain::Floor(origin));
+        map::update_terrain(terrain::make(terrain::Id::floor, origin));
 
         auto& player = *map::g_player;
 

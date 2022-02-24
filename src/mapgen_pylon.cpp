@@ -18,6 +18,7 @@
 #include "misc.hpp"
 #include "pos.hpp"
 #include "random.hpp"
+#include "terrain_factory.hpp"
 #include "terrain_pylon.hpp"
 
 // -----------------------------------------------------------------------------
@@ -93,9 +94,9 @@ void make_pylons()
 
                 const auto pylon_p = rnd::element(p_bucket);
 
-                auto* const pylon = new terrain::Pylon(pylon_p);
+                auto* const pylon = terrain::make(terrain::Id::pylon, pylon_p);
 
-                map::put(pylon);
+                map::set_terrain(pylon);
 
                 // Don't place other pylons too near
                 const int min_dist = 8;

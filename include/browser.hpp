@@ -11,7 +11,10 @@
 
 #include "random.hpp"
 
+namespace io
+{
 struct InputData;
+}  // namespace io
 
 enum class VerDir;
 
@@ -101,7 +104,7 @@ public:
 
         MenuBrowser& operator=(const MenuBrowser&) = default;
 
-        MenuAction read(const InputData& input, MenuInputMode mode);
+        MenuAction read(const io::InputData& input, MenuInputMode mode);
 
         void move(VerDir dir);
 

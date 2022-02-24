@@ -484,7 +484,7 @@ void BrowseSpell::draw()
 
                 if (spi_cost.min > 0)
                 {
-                        const Color fill_color = colors::gray().fraction(3.0);
+                        const Color fill_color = colors::gray().shaded(70);
 
                         io::draw_text(
                                 fill_str,

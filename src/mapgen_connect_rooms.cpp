@@ -47,21 +47,6 @@ void connect_rooms()
                 {
                         mapgen::g_is_map_valid = false;
 
-#ifndef NDEBUG
-                        if (init::g_is_demo_mapgen)
-                        {
-                                io::cover_panel(Panel::log);
-                                states::draw();
-                                io::draw_text(
-                                        "Failed to connect map",
-                                        Panel::screen,
-                                        P(0, 0),
-                                        colors::light_red());
-                                io::update_screen();
-                                io::sleep(8000);
-                        }
-#endif  // NDEBUG
-
                         break;
                 }
 

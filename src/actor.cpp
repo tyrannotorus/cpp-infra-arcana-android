@@ -77,15 +77,12 @@ void init_actor(Actor& actor, const P& pos_, ActorData& data)
         actor.m_pos = pos_;
         actor.m_data = &data;
 
-        // NOTE: Cannot compare against the global player pointer here, since it
-        // may not yet have been set up
-        if (actor.m_data->id == actor::Id::player)
+        if (is_player(&actor))
         {
                 actor.m_base_max_hp = data.hp;
         }
         else
         {
-                // Is monster
                 const int hp_max_variation_pct = 25;
                 const int hp_variation = (data.hp * hp_max_variation_pct) / 100;
                 Range hp_range(data.hp - hp_variation, data.hp + hp_variation);
@@ -632,17 +629,18 @@ void Actor::add_light(Array2<bool>& light_map) const
 
         case LgtSize::fov:
         {
-                Array2<bool> hard_blocked(map::dims());
+                const R fov_lmt = fov::fov_rect(m_pos, map::dims());
 
-                const auto fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
+                Array2<bool> blocked(map::dims());
 
                 map_parsers::BlocksLos()
-                        .run(hard_blocked,
-                             fov_lmt,
-                             MapParseMode::overwrite);
+                        .run(
+                                blocked,
+                                fov_lmt,
+                                MapParseMode::overwrite);
 
                 FovMap fov_map;
-                fov_map.hard_blocked = &hard_blocked;
+                fov_map.hard_blocked = &blocked;
                 fov_map.light = &map::g_light;
                 fov_map.dark = &map::g_dark;
 

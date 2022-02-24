@@ -230,25 +230,6 @@ bool BlocksWalking::parse_actor(const actor::Actor& a) const
         return a.is_alive();
 }
 
-bool BlocksActor::parse_terrain(
-        const terrain::Terrain& t,
-        const P& pos) const
-{
-        return (
-                !map::is_pos_inside_outer_walls(pos) ||
-                !t.can_move(m_actor));
-}
-
-bool BlocksActor::parse_mob(const terrain::Terrain& f) const
-{
-        return !f.can_move(m_actor);
-}
-
-bool BlocksActor::parse_actor(const actor::Actor& a) const
-{
-        return a.is_alive();
-}
-
 bool BlocksProjectiles::parse_terrain(
         const terrain::Terrain& t,
         const P& pos) const

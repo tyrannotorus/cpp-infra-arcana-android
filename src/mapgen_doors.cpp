@@ -24,6 +24,7 @@
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
+#include "terrain_factory.hpp"
 
 static bool is_wall(const P& p)
 {
@@ -82,25 +83,28 @@ static void try_make_door(const P& p)
 
                 if (rnd::fraction(4, 5))
                 {
-                        const auto* const mimic = new terrain::Wall(p);
+                        auto* const mimic =
+                                terrain::make(terrain::Id::wall, p);
 
                         door =
-                                new terrain::Door(
-                                        p,
-                                        mimic,
-                                        terrain::DoorType::wood);
+                                static_cast<terrain::Door*>(
+                                        terrain::make(terrain::Id::door, p));
+
+                        door->set_mimic_terrain(mimic);
+
+                        door->init_type_and_state(terrain::DoorType::wood);
                 }
                 else
                 {
                         // Barred gate
                         door =
-                                new terrain::Door(
-                                        p,
-                                        nullptr,
-                                        terrain::DoorType::gate);
+                                static_cast<terrain::Door*>(
+                                        terrain::make(terrain::Id::door, p));
+
+                        door->init_type_and_state(terrain::DoorType::gate);
                 }
 
-                map::put(door);
+                map::set_terrain(door);
         }
 }
 
@@ -374,13 +378,17 @@ void make_metal_doors_and_levers()
 
                         // OK, there exists valid positions for the door, and at
                         // least a lever on the player side
-                        auto* door = new terrain::Door(
-                                door_p,
-                                nullptr,  // No mimic needed
+                        auto* const door =
+                                static_cast<terrain::Door*>(
+                                        terrain::make(
+                                                terrain::Id::door,
+                                                door_p));
+
+                        door->init_type_and_state(
                                 terrain::DoorType::metal,
                                 terrain::DoorSpawnState::closed);
 
-                        map::put(door);
+                        map::set_terrain(door);
 
                         terrain::Lever* lever_1 = nullptr;
                         terrain::Lever* lever_2 = nullptr;
@@ -394,11 +402,15 @@ void make_metal_doors_and_levers()
 
                                 const P& lever_1_p = positions[lever_p_idx];
 
-                                auto* lever = new terrain::Lever(lever_1_p);
+                                auto* lever =
+                                        static_cast<terrain::Lever*>(
+                                                terrain::make(
+                                                        terrain::Id::lever,
+                                                        lever_1_p));
 
                                 lever->set_linked_terrain(*linked_door);
 
-                                map::put(lever);
+                                map::set_terrain(lever);
 
                                 return lever;
                         };

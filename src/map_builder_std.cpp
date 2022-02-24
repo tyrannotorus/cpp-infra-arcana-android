@@ -34,13 +34,7 @@
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
 #include "terrain_event.hpp"
-
-// For map generation demo
-#ifndef NDEBUG
-#include "init.hpp"
-#include "io.hpp"
-#include "query.hpp"
-#endif  // NDEBUG
+#include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
 // MapBuilderStd
@@ -183,22 +177,6 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Make auxiliary rooms
         // ---------------------------------------------------------------------
-#ifndef NDEBUG
-        if (init::g_is_demo_mapgen)
-        {
-                io::cover_panel(Panel::log);
-                states::draw();
-                io::draw_text(
-                        "Press any key to make aux rooms...",
-                        Panel::screen,
-                        {0, 0},
-                        colors::white());
-                io::update_screen();
-                query::wait_for_key_press();
-                io::cover_panel(Panel::log);
-        }
-#endif  // NDEBUG
-
         mapgen::make_aux_rooms(regions);
 
         if (!mapgen::g_is_map_valid)
@@ -245,22 +223,6 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Make sub-rooms
         // ---------------------------------------------------------------------
-#ifndef NDEBUG
-        if (init::g_is_demo_mapgen)
-        {
-                io::cover_panel(Panel::log);
-                states::draw();
-                io::draw_text(
-                        "Press any key to make sub rooms...",
-                        Panel::screen,
-                        {0, 0},
-                        colors::white());
-                io::update_screen();
-                query::wait_for_key_press();
-                io::cover_panel(Panel::log);
-        }
-#endif  // NDEBUG
-
         mapgen::make_sub_rooms();
 
         if (!mapgen::g_is_map_valid)
@@ -286,22 +248,6 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         TRACE << "Running pre-connect for all rooms" << std::endl;
 
-#ifndef NDEBUG
-        if (init::g_is_demo_mapgen)
-        {
-                io::cover_panel(Panel::log);
-                states::draw();
-                io::draw_text(
-                        "Press any key to run pre-connect on rooms...",
-                        Panel::screen,
-                        {0, 0},
-                        colors::white());
-                io::update_screen();
-                query::wait_for_key_press();
-                io::cover_panel(Panel::log);
-        }
-#endif  // NDEBUG
-
         for (auto* const room : map::g_room_list)
         {
                 room->on_pre_connect(mapgen::g_door_proposals);
@@ -315,22 +261,6 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Connect the rooms
         // ---------------------------------------------------------------------
-#ifndef NDEBUG
-        if (init::g_is_demo_mapgen)
-        {
-                io::cover_panel(Panel::log);
-                states::draw();
-                io::draw_text(
-                        "Press any key to connect rooms...",
-                        Panel::screen,
-                        {0, 0},
-                        colors::white());
-                io::update_screen();
-                query::wait_for_key_press();
-                io::cover_panel(Panel::log);
-        }
-#endif  // NDEBUG
-
         mapgen::connect_rooms();
 
         if (!mapgen::g_is_map_valid)
@@ -342,21 +272,6 @@ bool MapBuilderStd::build_specific()
         // Run the post-connect hook on all rooms
         // ---------------------------------------------------------------------
         TRACE << "Running post-connect for all rooms" << std::endl;
-#ifndef NDEBUG
-        if (init::g_is_demo_mapgen)
-        {
-                io::cover_panel(Panel::log);
-                states::draw();
-                io::draw_text(
-                        "Press any key to run post-connect on rooms...",
-                        Panel::screen,
-                        {0, 0},
-                        colors::white());
-                io::update_screen();
-                query::wait_for_key_press();
-                io::cover_panel(Panel::log);
-        }
-#endif  // NDEBUG
 
         for (auto* const room : map::g_room_list)
         {
@@ -680,7 +595,11 @@ bool MapBuilderStd::build_specific()
 
         for (int i = 0; i < nr_snake_emerge_events_to_try; ++i)
         {
-                auto* const event = new terrain::EventSnakeEmerge();
+                auto* const event =
+                        static_cast<terrain::EventSnakeEmerge*>(
+                                terrain::make(
+                                        terrain::Id::event_snake_emerge,
+                                        {-1, -1}));
 
                 if (event->try_find_p())
                 {

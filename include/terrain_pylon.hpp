@@ -172,16 +172,11 @@ protected:
 class Pylon : public Terrain
 {
 public:
-        Pylon(const P& p);
+        Pylon(const P& p, const TerrainData* data);
 
         Pylon() = delete;
 
         ~Pylon() = default;
-
-        Id id() const override
-        {
-                return Id::pylon;
-        }
 
         void on_new_turn_hook() override;
 

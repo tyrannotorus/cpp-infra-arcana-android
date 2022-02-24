@@ -61,88 +61,56 @@ static bool run_drop_query(
 
         msg_log::clear();
 
-        if (data.is_stackable && (item.m_nr_items > 1))
-        {
-                TRACE << "Item is stackable and more than one" << std::endl;
-
-                io::clear_screen();
-
-                states::draw();
-
-                const std::string nr_str =
-                        "1-" +
-                        std::to_string(item.m_nr_items);
-
-                const std::string drop_str = "Drop how many (" + nr_str + ")?:";
-
-                io::draw_text(
-                        drop_str,
-                        Panel::map,
-                        {0, 0},
-                        colors::light_white());
-
-                io::update_screen();
-
-                const P nr_query_pos((int)drop_str.size() + 1, 0);
-
-                const int max_digits = 3;
-                const P done_inf_pos = nr_query_pos + P(max_digits + 2, 0);
-
-                io::draw_text(
-                        "[enter] to drop " + common_text::g_cancel_hint,
-                        Panel::screen,
-                        done_inf_pos,
-                        colors::light_white());
-
-                const int nr_to_drop =
-                        query::number(
-                                nr_query_pos,
-                                colors::light_white(),
-                                {0, item.m_nr_items},
-                                item.m_nr_items,
-                                false);
-
-                if (nr_to_drop <= 0)
-                {
-                        TRACE << "Nr to drop <= 0, nothing to be done"
-                              << std::endl;
-
-                        TRACE_FUNC_END;
-
-                        return false;
-                }
-                else
-                {
-                        // Number to drop is at least one
-                        item_drop::drop_item_from_inv(
-                                *map::g_player,
-                                inv_type,
-                                idx,
-                                nr_to_drop);
-
-                        TRACE_FUNC_END;
-
-                        return true;
-                }
-        }
-        else
+        if (!data.is_stackable || (item.m_nr_items <= 1))
         {
                 // Not a stack
                 TRACE << "Item not stackable, or only one item" << std::endl;
 
-                item_drop::drop_item_from_inv(
-                        *map::g_player,
-                        inv_type,
-                        idx);
+                item_drop::drop_item_from_inv(*map::g_player, inv_type, idx);
 
                 TRACE_FUNC_END;
 
                 return true;
         }
 
+        TRACE << "Item is stackable and more than one" << std::endl;
+
+        io::clear_screen();
+
+        states::draw();
+
+        const std::string title =
+                item.name(ItemNameType::plural) +
+                " - drop how many?";
+
+        query::QueryNumberConfig query_config;
+
+        query_config.allowed_range = {0, item.m_nr_items};
+        query_config.default_value = item.m_nr_items;
+        query_config.cancel_returns_default = false;
+
+        const int nr_to_drop = query::number(query_config, title);
+
+        if (nr_to_drop <= 0)
+        {
+                TRACE << "Nr to drop <= 0, nothing to be done" << std::endl;
+
+                TRACE_FUNC_END;
+
+                return false;
+        }
+
+        // Number to drop is at least one
+
+        item_drop::drop_item_from_inv(
+                *map::g_player,
+                inv_type,
+                idx,
+                nr_to_drop);
+
         TRACE_FUNC_END;
 
-        return false;
+        return true;
 }
 
 static void cap_str_to_menu_x1(
@@ -901,9 +869,6 @@ void BrowseInv::update()
                         auto* item = inv.m_backpack[backpack_idx];
 
                         const auto& data = item->data();
-
-                        // TODO: Also allow equipping body and head items by
-                        // selecting them
 
                         if ((data.type == ItemType::melee_wpn) ||
                             (data.type == ItemType::ranged_wpn) ||

@@ -11,6 +11,7 @@
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "sound.hpp"
+#include "terrain.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -177,8 +178,8 @@ DidAction try_eat_corpse(actor::Actor& actor)
         {
                 corpse->m_state = ActorState::destroyed;
 
-                map::make_gore(actor.m_pos);
-                map::make_blood(actor.m_pos);
+                terrain::make_gore(actor.m_pos);
+                terrain::make_blood(actor.m_pos);
 
                 if (is_player(&actor))
                 {

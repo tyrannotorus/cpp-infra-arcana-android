@@ -132,7 +132,7 @@ static void player_bump_unkown_hostile_mon(actor::Mon& mon)
         map::update_vision();
 }
 
-static void player_bump_allied_mon(actor::Mon& mon)
+static void player_displace_allied_mon(actor::Mon& mon, const P& new_mon_pos)
 {
         if (mon.is_player_aware_of_me())
         {
@@ -144,7 +144,7 @@ static void player_bump_allied_mon(actor::Mon& mon)
                 msg_log::add("I displace " + mon_name + ".");
         }
 
-        mon.m_pos = map::g_player->m_pos;
+        actor::set_position(mon, new_mon_pos);
 }
 
 static void player_walk_on_item(item::Item* const item)
@@ -216,7 +216,7 @@ static AllowAction pre_bump_terrains(
         actor::Actor& actor,
         const P& target)
 {
-        const auto mobs = game_time::mobs_at_pos(target);
+        const auto mobs = game_time::mobs_at(target);
 
         for (auto* mob : mobs)
         {
@@ -262,7 +262,7 @@ static void print_ooze_enter_terrain_msg(
         msg_log::add(mon_name + " seeps " + preposition + " " + ter_name + ".");
 }
 
-static void print_small_crawling_enter_terrain_msg(
+static void print_small_creature_enter_terrain_msg(
         const actor::Actor& actor,
         const terrain::Terrain& terrain)
 {
@@ -276,19 +276,27 @@ static void print_mon_enter_non_walkable_terrain_msg(
         const actor::Actor& actor,
         const terrain::Terrain& terrain)
 {
-        if (actor.m_properties.has(PropId::ooze))
+        const auto& props = actor.m_properties;
+
+        const bool is_ooze = props.has(PropId::ooze);
+
+        const bool is_small =
+                props.has(PropId::small_crawling) ||
+                props.has(PropId::tiny_flying);
+
+        if (is_ooze)
         {
                 print_ooze_enter_terrain_msg(actor, terrain);
         }
-        else if (actor.m_properties.has(PropId::small_crawling))
+        else if (is_small)
         {
-                print_small_crawling_enter_terrain_msg(actor, terrain);
+                print_small_creature_enter_terrain_msg(actor, terrain);
         }
 }
 
 static void bump_terrains(actor::Actor& actor, const P& target)
 {
-        const auto mobs = game_time::mobs_at_pos(target);
+        const auto mobs = game_time::mobs_at(target);
 
         for (auto* mob : mobs)
         {
@@ -299,7 +307,7 @@ static void bump_terrains(actor::Actor& actor, const P& target)
 
         if (!actor::is_player(&actor) &&
             !terrain->is_walkable() &&
-            (terrain->data().matl_type != Matl::fluid) &&
+            (terrain->m_data->matl_type != Matl::fluid) &&
             can_player_see_actor(actor))
         {
                 print_mon_enter_non_walkable_terrain_msg(actor, *terrain);
@@ -359,12 +367,11 @@ static void move_player_non_center_direction(const P& target)
         auto& player = *map::g_player;
 
         const bool is_terrain_blocking_move =
-                map_parsers::BlocksActor(player, ParseActors::no)
-                        .run(target);
+                !map::can_actor_move_into_terrain_at(player, target);
 
         auto* const mon =
                 static_cast<actor::Mon*>(
-                        map::first_actor_at_pos(target));
+                        map::living_actor_at(target));
 
         const auto is_aware_of_mon = (mon && mon->is_player_aware_of_me());
 
@@ -414,12 +421,12 @@ static void move_player_non_center_direction(const P& target)
 
                 if (mon && player.is_leader_of(mon))
                 {
-                        player_bump_allied_mon(*mon);
+                        player_displace_allied_mon(*mon, map::g_player->m_pos);
                 }
 
                 map::g_terrain.at(player.m_pos)->on_leave(player);
 
-                player.m_pos = target;
+                actor::set_position(player, target);
 
                 player_walk_on_item(map::g_items.at(player.m_pos));
 
@@ -432,7 +439,7 @@ static void move_player_non_center_direction(const P& target)
         bump_terrains(player, target);
 }
 
-static void move_player(Dir dir)
+static void do_move_action_player(Dir dir)
 {
         auto& player = *map::g_player;
 
@@ -458,7 +465,16 @@ static void move_player(Dir dir)
         }
         else if (dir != Dir::center)
         {
+                const int dlvl_before = map::g_dlvl;
+
+                // NOTE: The player might bump the stairs here and go to a new
+                // dungeon level:
                 move_player_non_center_direction(target);
+
+                if (map::g_dlvl != dlvl_before)
+                {
+                        return;
+                }
 
                 map::update_vision();
                 actor::make_player_aware_seen_monsters();
@@ -475,20 +491,110 @@ static void move_player(Dir dir)
         }
 }
 
-static void move_mon(actor::Mon& mon, Dir dir)
-{
 #ifndef NDEBUG
-        if (dir == Dir::END)
+static void sanity_check_mon_direction(const actor::Actor& mon, const Dir dir)
+{
+        if (dir != Dir::END)
         {
-                TRACE << "Illegal direction parameter" << std::endl;
-                ASSERT(false);
+                return;
         }
 
-        if (!map::is_pos_inside_outer_walls(mon.m_pos))
+        TRACE
+                << "Illegal direction parameter "
+                << "'" << (int)dir << "' "
+                << "given for monster '" << mon.name_a() + "'"
+                << std::endl;
+        PANIC;
+}
+#endif  // NDEBUG
+
+#ifndef NDEBUG
+static void sanity_check_mon_not_outside_map(const actor::Actor& mon)
+{
+        if (map::is_pos_inside_outer_walls(mon.m_pos))
         {
-                TRACE << "Monster outside map" << std::endl;
-                ASSERT(false);
+                return;
         }
+
+        TRACE
+                << "Monster '" << mon.name_a() << "' "
+                << "outside map, at "
+                << mon.m_pos.x << "," << mon.m_pos.y
+                << std::endl;
+        PANIC;
+}
+#endif  // NDEBUG
+
+#ifndef NDEBUG
+static void sanity_check_mon_can_move_into_terrain(
+        const actor::Actor& mon,
+        const P& target_pos)
+{
+        if (map::can_actor_move_into_terrain_at(mon, target_pos))
+        {
+                return;
+        }
+
+        const std::string mon_name = mon.name_a();
+
+        const std::string terrain_name =
+                map::g_terrain.at(target_pos)->name(Article::a);
+
+        TRACE
+                << "Monster '" << mon_name << "' "
+                << "tried to move into terrain it cannot move into: "
+                << '"' << terrain_name << "'"
+                << std::endl;
+
+        TRACE
+                << ("The following mobile terrains also exists at "
+                    "target position:")
+                << std::endl;
+
+        for (terrain::Terrain* mob : game_time::g_mobs)
+        {
+                if (mob->pos() == target_pos)
+                {
+                        TRACE
+                                << mob->name(Article::a)
+                                << std::endl;
+                }
+        }
+
+        PANIC;
+}
+#endif  // NDEBUG
+
+#ifndef NDEBUG
+static void sanity_check_no_living_actor_at_target_pos(
+        const actor::Actor& mon,
+        const P& target_pos)
+{
+        const actor::Actor* const mon_2 = map::living_actor_at(target_pos);
+
+        if (!mon_2)
+        {
+                return;
+        }
+
+        const std::string mon_name_1 = mon.name_a();
+        const std::string mon_name_2 = mon_2->name_a();
+
+        TRACE
+                << "Monster '" << mon_name_1 << "' "
+                << "tried to move into a position with monster "
+                << '"' << mon_name_2 << "'"
+                << std::endl;
+
+        PANIC;
+}
+#endif  // NDEBUG
+
+static void do_move_action_mon(actor::Mon& mon, Dir dir)
+{
+#ifndef NDEBUG
+        sanity_check_mon_direction(mon, dir);
+        sanity_check_mon_not_outside_map(mon);
 #endif  // NDEBUG
 
         mon.m_properties.affect_move_dir(dir);
@@ -501,11 +607,8 @@ static void move_mon(actor::Mon& mon, Dir dir)
 #ifndef NDEBUG
         if (target_p != mon.m_pos)
         {
-                const bool is_blocked =
-                        map_parsers::BlocksActor(mon, ParseActors::yes)
-                                .run(target_p);
-
-                ASSERT(!is_blocked);
+                sanity_check_mon_can_move_into_terrain(mon, target_p);
+                sanity_check_no_living_actor_at_target_pos(mon, target_p);
         }
 #endif  // NDEBUG
 
@@ -514,7 +617,7 @@ static void move_mon(actor::Mon& mon, Dir dir)
                 // Leave current cell
                 map::g_terrain.at(mon.m_pos)->on_leave(mon);
 
-                mon.m_pos = target_p;
+                actor::set_position(mon, target_p);
 
                 bump_terrains(mon, mon.m_pos);
 
@@ -532,15 +635,36 @@ static void move_mon(actor::Mon& mon, Dir dir)
 // -----------------------------------------------------------------------------
 namespace actor
 {
-void move(Actor& actor, const Dir dir)
+void do_move_action(Actor& actor, const Dir dir)
 {
         if (actor::is_player(&actor))
         {
-                move_player(dir);
+                do_move_action_player(dir);
         }
         else
         {
-                move_mon(static_cast<Mon&>(actor), dir);
+                do_move_action_mon(static_cast<Mon&>(actor), dir);
+        }
+}
+
+void set_position(Actor& actor, const P& pos)
+{
+        actor.m_pos = pos;
+
+        // Update light map if necessary.
+
+        // NOTE: For the player, we take the lazy approach and always update the
+        // light map (in case the lantern is active for example). It couuld
+        // possibly be done more selectively, but it would probably not be worth
+        // the trouble.
+        const auto& props = actor.m_properties;
+
+        if (is_player(&actor) ||
+            props.has(PropId::radiant_self) ||
+            props.has(PropId::radiant_adjacent) ||
+            props.has(PropId::radiant_fov))
+        {
+                map::update_light_map();
         }
 }
 

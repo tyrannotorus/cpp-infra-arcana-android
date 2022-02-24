@@ -16,6 +16,7 @@
 #include "random.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -47,7 +48,10 @@ static void decorate_walls()
 
                 if (rnd::one_in(rubble_one_in_n))
                 {
-                        map::put(new terrain::RubbleHigh(p));
+                        auto* const t =
+                                terrain::make(terrain::Id::rubble_high, p);
+
+                        map::set_terrain(t);
                 }
                 else
                 {
@@ -186,7 +190,10 @@ static void put_a_bunch_of_vines_at(const P& p)
 
                 if (is_floor && ((p == adj_p) || rnd::one_in(3)))
                 {
-                        map::put(new terrain::Vines(adj_p));
+                        auto* const t =
+                                terrain::make(terrain::Id::vines, adj_p);
+
+                        map::set_terrain(t);
                 }
         }
 }
@@ -200,7 +207,9 @@ static void decorate_floor_at(const P& p)
 
         if (rnd::one_in(100))
         {
-                map::put(new terrain::RubbleLow(p));
+                auto* const t = terrain::make(terrain::Id::rubble_low, p);
+
+                map::set_terrain(t);
         }
 
         if (rnd::one_in(150))
@@ -262,7 +271,9 @@ static void try_make_grate_at(const P& pos, const Array2<bool>& blocked)
                 return;
         }
 
-        map::put(new terrain::Grate(pos));
+        auto* const t = terrain::make(terrain::Id::grate, pos);
+
+        map::set_terrain(t);
 }
 
 static void make_grates()

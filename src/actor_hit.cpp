@@ -116,8 +116,8 @@ static void hit_corpse_destroy_success(
 
         if (actor.m_data->is_humanoid)
         {
-                map::make_blood(actor.m_pos);
-                map::make_gore(actor.m_pos);
+                terrain::make_blood(actor.m_pos);
+                terrain::make_gore(actor.m_pos);
         }
 
         if (map::g_seen.at(actor.m_pos))

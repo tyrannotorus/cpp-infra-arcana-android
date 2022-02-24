@@ -47,9 +47,10 @@ static bool is_snd_heard_at_range(const int range, const Snd& snd)
 
 static Array2<int> calc_snd_flood(const Snd& snd, const int snd_max_dist)
 {
-        Array2<bool> blocked(map::dims());
+        Array2<bool> blocks_sound(map::dims());
 
-        map_parsers::BlocksSound().run(blocked, blocked.rect());
+        map_parsers::BlocksSound()
+                .run(blocks_sound, blocks_sound.rect());
 
         const auto& origin = snd.origin();
 
@@ -57,9 +58,15 @@ static Array2<int> calc_snd_flood(const Snd& snd, const int snd_max_dist)
         // e.g. a closing door, after it was closed (and we don't want this to
         // depend on the floodfill algorithm, so we explicitly set the origin to
         // free here).
-        blocked.at(origin) = false;
+        blocks_sound.at(origin) = false;
 
-        auto flood = floodfill(origin, blocked, snd_max_dist, {-1, -1}, true);
+        auto flood =
+                floodfill(
+                        origin,
+                        blocks_sound,
+                        snd_max_dist,
+                        {-1, -1},
+                        true);
 
         flood.at(origin.x, origin.y) = 0;
 

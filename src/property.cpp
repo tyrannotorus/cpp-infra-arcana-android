@@ -59,6 +59,7 @@
 #include "teleport.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -66,7 +67,7 @@
 // -----------------------------------------------------------------------------
 static bool is_player_aware_of_hostile_mon_at(const P& pos)
 {
-        const auto* const mon = map::first_actor_at_pos(pos);
+        const auto* const mon = map::living_actor_at(pos);
 
         return (
                 mon &&
@@ -648,9 +649,9 @@ void PropPossessedByZuul::on_death()
 
         const auto& pos = m_owner->m_pos;
 
-        map::make_gore(pos);
+        terrain::make_gore(pos);
 
-        map::make_blood(pos);
+        terrain::make_blood(pos);
 
         // Zuul is now free, allow it to spawn infinitely
         actor::g_data[(size_t)actor::Id::zuul].nr_left_allowed_to_spawn = -1;
@@ -1326,21 +1327,12 @@ PropEnded PropConfused::affect_move_dir(Dir& dir)
                 return PropEnded::no;
         }
 
-        Array2<bool> blocked(map::dims());
-
-        const R area_check_blocked(
-                m_owner->m_pos - P(1, 1),
-                m_owner->m_pos + P(1, 1));
-
-        map_parsers::BlocksActor(*m_owner, ParseActors::yes)
-                .run(blocked,
-                     area_check_blocked,
-                     MapParseMode::overwrite);
-
         if (!rnd::one_in(8))
         {
                 return PropEnded::no;
         }
+
+        const auto& blocked = map::get_blocked_map_info_for_actor(*m_owner);
 
         std::vector<P> d_bucket;
 
@@ -1348,10 +1340,12 @@ PropEnded PropConfused::affect_move_dir(Dir& dir)
         {
                 const auto tgt_p = m_owner->m_pos + d;
 
-                if (!blocked.at(tgt_p))
+                if (blocked.at(tgt_p) || map::living_actor_at(tgt_p))
                 {
-                        d_bucket.push_back(d);
+                        continue;
                 }
+
+                d_bucket.push_back(d);
         }
 
         if (!d_bucket.empty())
@@ -1515,7 +1509,10 @@ void PropHallucinating::clear_all_fake_stairs() const
 
                 // Is fake stairs
 
-                map::put(new terrain::RubbleLow(terrain->pos()));
+                map::update_terrain(
+                        terrain::make(
+                                terrain::Id::rubble_low,
+                                terrain->pos()));
         }
 }
 
@@ -1632,8 +1629,7 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
 
         const auto new_pos = m_owner->m_pos + dir_utils::offset(dir);
 
-        const actor::Actor* actor_at_tgt =
-                map::first_actor_at_pos(new_pos, ActorState::alive);
+        const actor::Actor* actor_at_tgt = map::living_actor_at(new_pos);
 
         if (actor_at_tgt &&
             actor_at_tgt->is_player_aware_of_me() &&
@@ -1651,10 +1647,7 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
                 return true;
         }
 
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksActor(*m_owner, ParseActors::no)
-                .run(blocked, blocked.rect());
+        Array2<bool> blocked = map::get_blocked_map_info_for_actor(*m_owner);
 
         // Mark the positions of all seen actors as free (the monsters may be
         // inside wall cells, e.g. worms crawling through rubble).
@@ -1683,9 +1676,9 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
 
                 const auto is_blocked =
                         std::any_of(
-                                std::begin(line),
-                                std::end(line),
-                                [&blocked](const P& p) {
+                                std::cbegin(line),
+                                std::cend(line),
+                                [blocked](const P& p) {
                                         return blocked.at(p);
                                 });
 
@@ -2580,7 +2573,8 @@ void PropAltersEnv::on_std_turn()
 
                         if (map_parsers::is_map_connected(blocked))
                         {
-                                map::put(new terrain::Floor(p));
+                                map::update_terrain(
+                                        terrain::make(terrain::Id::floor, p));
                         }
                         else
                         {
@@ -2593,7 +2587,8 @@ void PropAltersEnv::on_std_turn()
 
                         if (map_parsers::is_map_connected(blocked))
                         {
-                                map::put(new terrain::Wall(p));
+                                map::update_terrain(
+                                        terrain::make(terrain::Id::wall, p));
                         }
                         else
                         {
@@ -2617,7 +2612,7 @@ void PropRegenerating::on_std_turn()
 PropActResult PropCorpseRises::on_act()
 {
         if (!m_owner->is_corpse() ||
-            map::first_actor_at_pos(m_owner->m_pos))
+            map::living_actor_at(m_owner->m_pos))
         {
                 return {};
         }
@@ -3125,7 +3120,8 @@ void PropAuraOfDecay::run_effect_on_env_at(const P& p) const
         {
                 if (rnd::one_in(100))
                 {
-                        map::put(new terrain::RubbleLow(p));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::rubble_low, p));
                 }
         }
         break;

@@ -162,6 +162,7 @@ public:
                 return m_mon_aware_state.player_aware_of_me_counter > 0;
         }
 
+        // Creature state
         P m_pos {};
         ActorState m_state {ActorState::alive};
         int m_hp {-1};

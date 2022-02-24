@@ -168,14 +168,14 @@ void on_std_turn()
         // iterate over the map and let each smell get a chance to spread
         // without affecting other smells.
 
-        Array2<bool> blocked(map::dims());
+        Array2<bool> blocks_projectiles(map::dims());
 
-        // Re-using projectile blocking should be good enough
+        // Re-using projectile blocking should be good enough.
         // TODO: Or allow smell to spread through closed doors?
-        map_parsers::BlocksProjectiles().run(blocked, map::rect());
+        map_parsers::BlocksProjectiles().run(blocks_projectiles, map::rect());
 
         map::g_smell_spread = map::g_smell;
-        update_smell_spread_map(blocked);
+        update_smell_spread_map(blocks_projectiles);
         map::g_smell = map::g_smell_spread;
 }
 

@@ -32,7 +32,7 @@ static terrain::TerrainData s_data[(size_t)terrain::Id::END];
 
 static void reset_data(terrain::TerrainData& d)
 {
-        d = terrain::TerrainData();
+        d = {};
 }
 
 static void add_to_list_and_reset(terrain::TerrainData& d)
@@ -48,9 +48,6 @@ static void init_data_list()
         reset_data(d);
 
         d.id = terrain::Id::floor;
-        d.make_obj = [](const P& p) {
-                return new terrain::Floor(p);
-        };
         d.character = '.';
         d.tile = gfx::TileId::floor;
         d.move_rules.is_walkable = true;
@@ -61,17 +58,11 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::bridge;
-        d.make_obj = [](const P& p) {
-                return new terrain::Bridge(p);
-        };
         d.move_rules.is_walkable = true;
         d.matl_type = Matl::wood;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::wall;
-        d.make_obj = [](const P& p) {
-                return new terrain::Wall(p);
-        };
         d.character = '#';
         d.tile = gfx::TileId::wall_top;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
@@ -87,9 +78,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::tree;
-        d.make_obj = [](const P& p) {
-                return new terrain::Tree(p);
-        };
         d.character = '|';
         d.tile = gfx::TileId::tree;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
@@ -105,9 +93,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::grass;
-        d.make_obj = [](const P& p) {
-                return new terrain::Grass(p);
-        };
         d.character = '.';
         d.tile = gfx::TileId::floor;
         d.move_rules.is_walkable = true;
@@ -118,9 +103,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::bush;
-        d.make_obj = [](const P& p) {
-                return new terrain::Bush(p);
-        };
         d.character = '"';
         d.tile = gfx::TileId::bush;
         d.move_rules.is_walkable = true;
@@ -129,9 +111,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::vines;
-        d.make_obj = [](const P& p) {
-                return new terrain::Vines(p);
-        };
         d.character = '"';
         d.tile = gfx::TileId::vines;
         d.move_rules.is_walkable = true;
@@ -143,9 +122,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::chains;
-        d.make_obj = [](const P& p) {
-                return new terrain::Chains(p);
-        };
         d.character = '"';
         d.tile = gfx::TileId::chains;
         d.move_rules.is_walkable = true;
@@ -157,15 +133,13 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::grate;
-        d.make_obj = [](const P& p) {
-                return new terrain::Grate(p);
-        };
         d.character = '#';
         d.tile = gfx::TileId::grate;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::burrowing);
         d.move_rules.props_allow_move.push_back(PropId::ooze);
         d.move_rules.props_allow_move.push_back(PropId::small_crawling);
+        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
         d.is_los_passable = true;
         d.can_have_blood = false;  // Looks weird
         d.can_have_gore = false;
@@ -175,9 +149,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::stairs;
-        d.make_obj = [](const P& p) {
-                return new terrain::Stairs(p);
-        };
         d.character = '>';
         d.tile = gfx::TileId::stairs_down;
         d.can_have_blood = false;
@@ -188,9 +159,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::monolith;
-        d.make_obj = [](const P& p) {
-                return new terrain::Monolith(p);
-        };
         d.character = '|';
         d.tile = gfx::TileId::monolith;
         d.is_projectile_passable = false;
@@ -204,9 +172,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::pylon;
-        d.make_obj = [](const P& p) {
-                return new terrain::Pylon(p);
-        };
         d.character = '|';
         d.tile = gfx::TileId::END;  // This is set elsewhere
         d.is_projectile_passable = false;
@@ -220,9 +185,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::lever;
-        d.make_obj = [](const P& p) {
-                return new terrain::Lever(p);
-        };
         d.character = '%';
         d.tile = gfx::TileId::lever_left;
         d.can_have_blood = false;
@@ -233,9 +195,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::brazier;
-        d.make_obj = [](const P& p) {
-                return new terrain::Brazier(p);
-        };
         d.character = '0';
         d.tile = gfx::TileId::brazier;
         d.can_have_blood = false;
@@ -247,9 +206,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::liquid;
-        d.make_obj = [](const P& p) {
-                return new terrain::Liquid(p);
-        };
         d.character = '~';
         d.tile = gfx::TileId::water;
         d.move_rules.is_walkable = true;
@@ -259,13 +215,11 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::chasm;
-        d.make_obj = [](const P& p) {
-                return new terrain::Chasm(p);
-        };
         d.character = '.';
         d.tile = gfx::TileId::floor;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::flying);
+        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
         d.can_have_item = false;
         d.can_have_blood = false;
         d.can_have_gore = false;
@@ -278,13 +232,11 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::gravestone;
-        d.make_obj = [](const P& p) {
-                return new terrain::GraveStone(p);
-        };
         d.character = ']';
         d.tile = gfx::TileId::grave_stone;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::flying);
+        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.can_have_corpse = false;
@@ -294,13 +246,11 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::church_bench;
-        d.make_obj = [](const P& p) {
-                return new terrain::ChurchBench(p);
-        };
         d.character = '[';
         d.tile = gfx::TileId::church_bench;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::flying);
+        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
         d.move_rules.props_allow_move.push_back(PropId::ooze);
         d.is_projectile_passable = false;
         d.is_los_passable = false;
@@ -312,9 +262,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::carpet;
-        d.make_obj = [](const P& p) {
-                return new terrain::Carpet(p);
-        };
         d.character = '.';
         d.tile = gfx::TileId::floor;
         d.move_rules.is_walkable = true;
@@ -326,15 +273,13 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::rubble_high;
-        d.make_obj = [](const P& p) {
-                return new terrain::RubbleHigh(p);
-        };
         d.character = ';';
         d.tile = gfx::TileId::rubble_high;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::ooze);
         d.move_rules.props_allow_move.push_back(PropId::burrowing);
         d.move_rules.props_allow_move.push_back(PropId::small_crawling);
+        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
         d.is_projectile_passable = false;
         d.is_los_passable = false;
         d.is_smoke_passable = false;
@@ -346,9 +291,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::rubble_low;
-        d.make_obj = [](const P& p) {
-                return new terrain::RubbleLow(p);
-        };
         d.character = ',';
         d.tile = gfx::TileId::rubble_low;
         d.move_rules.is_walkable = true;
@@ -359,9 +301,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::bones;
-        d.make_obj = [](const P& p) {
-                return new terrain::Bones(p);
-        };
         d.character = '&';
         d.tile = gfx::TileId::corpse2;
         d.move_rules.is_walkable = true;
@@ -372,9 +311,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::statue;
-        d.make_obj = [](const P& p) {
-                return new terrain::Statue(p);
-        };
         d.character = '|';
         d.tile = gfx::TileId::witch_or_warlock;
         d.is_projectile_passable = false;
@@ -388,9 +324,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::cocoon;
-        d.make_obj = [](const P& p) {
-                return new terrain::Cocoon(p);
-        };
         d.character = '8';
         d.tile = gfx::TileId::cocoon_closed;
         d.is_projectile_passable = true;
@@ -405,9 +338,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::chest;
-        d.make_obj = [](const P& p) {
-                return new terrain::Chest(p);
-        };
         d.character = '7';
         d.tile = gfx::TileId::chest_closed;
         d.can_have_blood = false;
@@ -418,9 +348,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::cabinet;
-        d.make_obj = [](const P& p) {
-                return new terrain::Cabinet(p);
-        };
         d.character = '7';
         d.tile = gfx::TileId::cabinet_closed;
         d.is_projectile_passable = false;
@@ -434,9 +361,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::bookshelf;
-        d.make_obj = [](const P& p) {
-                return new terrain::Bookshelf(p);
-        };
         d.character = '7';
         d.tile = gfx::TileId::bookshelf_full;
         d.is_projectile_passable = false;
@@ -450,9 +374,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::alchemist_bench;
-        d.make_obj = [](const P& p) {
-                return new terrain::AlchemistBench(p);
-        };
         d.character = '7';
         d.tile = gfx::TileId::alchemist_bench_full;
         d.is_projectile_passable = false;
@@ -466,9 +387,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::fountain;
-        d.make_obj = [](const P& p) {
-                return new terrain::Fountain(p);
-        };
         d.character = '1';
         d.tile = gfx::TileId::fountain;
         d.is_projectile_passable = false;
@@ -482,9 +400,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::stalagmite;
-        d.make_obj = [](const P& p) {
-                return new terrain::Stalagmite(p);
-        };
         d.character = ':';
         d.tile = gfx::TileId::stalagmite;
         d.is_projectile_passable = false;
@@ -498,9 +413,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::altar;
-        d.make_obj = [](const P& p) {
-                return new terrain::Altar(p);
-        };
         d.character = '_';
         d.tile = gfx::TileId::altar;
         d.can_have_blood = false;
@@ -513,9 +425,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::gong;
-        d.make_obj = [](const P& p) {
-                return new terrain::Gong(p);
-        };
         d.character = '_';
         d.tile = gfx::TileId::gong;
         d.is_los_passable = true;
@@ -530,13 +439,11 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::tomb;
-        d.make_obj = [](const P& p) {
-                return new terrain::Tomb(p);
-        };
         d.character = '7';
         d.tile = gfx::TileId::tomb_closed;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::flying);
+        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.can_have_corpse = false;
@@ -547,9 +454,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::door;
-        d.make_obj = [](const P& p) {
-                return new terrain::Door(p);
-        };
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.can_have_corpse = false;
@@ -558,9 +462,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::trap;
-        d.make_obj = [](const P& p) {
-                return new terrain::Trap(p);
-        };
         d.move_rules.is_walkable = true;
         add_to_list_and_reset(d);
 
@@ -568,27 +469,18 @@ static void init_data_list()
         // Mobile terrain
         // ---------------------------------------------------------------------
         d.id = terrain::Id::lit_dynamite;
-        d.make_obj = [](const P& p) {
-                return new terrain::LitDynamite(p);
-        };
         d.character = '/';
         d.tile = gfx::TileId::dynamite_lit;
         d.move_rules.is_walkable = true;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::lit_flare;
-        d.make_obj = [](const P& p) {
-                return new terrain::LitFlare(p);
-        };
         d.character = '/';
         d.tile = gfx::TileId::flare_lit;
         d.move_rules.is_walkable = true;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::smoke;
-        d.make_obj = [](const P& p) {
-                return new terrain::Smoke(p);
-        };
         d.character = '*';
         d.tile = gfx::TileId::smoke;
         d.move_rules.is_walkable = true;
@@ -596,9 +488,6 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::force_field;
-        d.make_obj = [](const P& p) {
-                return new terrain::ForceField(p);
-        };
         d.character = '#';
         d.tile = gfx::TileId::square_checkered;
         d.move_rules.reset();
@@ -613,23 +502,14 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::event_wall_crumble;
-        d.make_obj = [](const P& p) {
-                return new terrain::EventWallCrumble(p);
-        };
         d.move_rules.is_walkable = true;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::event_snake_emerge;
-        d.make_obj = [](const P& p) {
-                return new terrain::EventSnakeEmerge(p);
-        };
         d.move_rules.is_walkable = true;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::event_rat_cave_discovery;
-        d.make_obj = [](const P& p) {
-                return new terrain::EventRatsInTheWallsDiscovery(p);
-        };
         d.move_rules.is_walkable = true;
         add_to_list_and_reset(d);
 }
@@ -639,24 +519,13 @@ static void init_data_list()
 // -----------------------------------------------------------------------------
 namespace terrain
 {
-bool MoveRules::can_move(const actor::Actor& actor) const
+bool MoveRules::is_property_allowing_move(const PropId id) const
 {
-        if (is_walkable)
-        {
-                return true;
-        }
-
-        // This terrain blocks walking, check if any property overrides this
-        // (e.g. flying)
-
-        const auto match = std::find_if(
-                std::begin(props_allow_move),
-                std::end(props_allow_move),
-                [&actor](const PropId id) {
-                        return actor.m_properties.has(id);
-                });
-
-        return match != std::end(props_allow_move);
+        return (
+                std::find(
+                        std::begin(props_allow_move),
+                        std::end(props_allow_move),
+                        id) != std::end(props_allow_move));
 }
 
 void init()

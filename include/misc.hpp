@@ -39,15 +39,13 @@ bool is_pos_adj(
 
 P closest_pos(const P& p, const std::vector<P>& positions);
 
-// Distance as the king moves in chess
+// Distance as the king moves in chess. This is also referred to as the
+// "chessboard distance" or "Chebyshev distance".
+//
 // The distance between (x0, y0) and (x1, y1) is defined as:
 // max(|x1 - x0|, |y1 - y0|).
 // This is typically the model used for movement in roguelikes.
-int king_dist(
-        int x0,
-        int y0,
-        int x1,
-        int y1);
+int king_dist(int x0, int y0, int x1, int y1);
 
 int king_dist(const P& p0, const P& p1);
 

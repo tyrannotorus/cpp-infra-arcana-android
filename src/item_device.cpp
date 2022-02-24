@@ -39,8 +39,26 @@
 #include "spells.hpp"
 #include "teleport.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 #include "terrain_mob.hpp"
 #include "text_format.hpp"
+
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static Array2<std::vector<actor::Actor*>> get_actor_array()
+{
+        Array2<std::vector<actor::Actor*>> a(map::dims());
+
+        for (auto* actor : game_time::g_actors)
+        {
+                const auto& p = actor->m_pos;
+
+                a.at(p).push_back(actor);
+        }
+
+        return a;
+}
 
 // -----------------------------------------------------------------------------
 // device
@@ -458,7 +476,7 @@ ConsumeItem ForceField::run_effect()
 
         const int duration = duration_range.roll();
 
-        const auto actors = map::get_actor_array();
+        const auto actors = get_actor_array();
 
         const auto blocked_parser =
                 map_parsers::BlocksWalking(ParseActors::yes);
@@ -488,12 +506,20 @@ ConsumeItem ForceField::run_effect()
                         {
                                 actor->m_state = ActorState::destroyed;
 
-                                map::make_blood(p);
-                                map::make_gore(p);
+                                terrain::make_blood(p);
+                                terrain::make_gore(p);
                         }
                 }
 
-                game_time::add_mob(new terrain::ForceField(p, duration));
+                auto* const force_field =
+                        static_cast<terrain::ForceField*>(
+                                terrain::make(
+                                        terrain::Id::force_field,
+                                        p));
+
+                force_field->set_nr_turns(duration);
+
+                game_time::add_mob(force_field);
         }
 
         return ConsumeItem::no;

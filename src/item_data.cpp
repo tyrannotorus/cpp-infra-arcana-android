@@ -329,7 +329,6 @@ void init()
 
         reset_data(d, ItemType::general);
         d.id = Id::trapez;
-        ;
         d.base_name = {
                 "Shining Trapezohedron",
                 "Shining Trapezohedrons",

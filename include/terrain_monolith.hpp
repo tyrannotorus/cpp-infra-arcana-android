@@ -25,14 +25,9 @@ namespace terrain
 class Monolith : public Terrain
 {
 public:
-        Monolith(const P& p);
+        Monolith(const P& p, const TerrainData* data);
         Monolith() = delete;
         ~Monolith() = default;
-
-        Id id() const override
-        {
-                return Id::monolith;
-        }
 
         std::string name(Article article) const override;
 

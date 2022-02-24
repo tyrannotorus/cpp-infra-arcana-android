@@ -179,6 +179,9 @@ Prop* make(const PropId id)
         case PropId::flying:
                 return new Prop(id);
 
+        case PropId::tiny_flying:
+                return new Prop(id);
+
         case PropId::ethereal:
                 return new Prop(id);
 

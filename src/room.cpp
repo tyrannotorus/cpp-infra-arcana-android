@@ -32,6 +32,7 @@
 #include "random.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 
 #ifndef NDEBUG
 #include "io.hpp"
@@ -602,7 +603,7 @@ P StdRoom::find_auto_terrain_placement(
                 TRACE_FUNC_END_VERBOSE << "No eligible cells found"
                                        << std::endl;
 
-                return P(-1, -1);
+                return {-1, -1};
         }
 
         // TODO: This method is crap, use a bucket instead!
@@ -652,7 +653,7 @@ P StdRoom::find_auto_terrain_placement(
         }
 
         TRACE_FUNC_END_VERBOSE;
-        return P(-1, -1);
+        return {-1, -1};
 }
 
 void StdRoom::place_auto_terrains()
@@ -707,7 +708,7 @@ void StdRoom::place_auto_terrains()
 
                         ASSERT(map::is_pos_inside_outer_walls(p));
 
-                        map::put(static_cast<terrain::Terrain*>(d.make_obj(p)));
+                        map::set_terrain(terrain::make(d.id, p));
 
                         // Erase all adjacent positions
                         auto is_adj = [&](const P& other_p) {
@@ -830,26 +831,28 @@ void HumanRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 {
         (void)door_proposals;
 
-        if (rnd::coin_toss())
+        if (!rnd::coin_toss())
         {
-                Array2<bool> blocked(map::dims());
+                return;
+        }
 
-                map_parsers::BlocksWalking(ParseActors::no)
-                        .run(blocked, blocked.rect());
+        Array2<bool> blocked(map::dims());
 
-                for (int x = m_r.p0.x + 1; x <= m_r.p1.x - 1; ++x)
+        map_parsers::BlocksWalking(ParseActors::no)
+                .run(blocked, blocked.rect());
+
+        for (int x = m_r.p0.x + 1; x <= m_r.p1.x - 1; ++x)
+        {
+                for (int y = m_r.p0.y + 1; y <= m_r.p1.y - 1; ++y)
                 {
-                        for (int y = m_r.p0.y + 1; y <= m_r.p1.y - 1; ++y)
+                        if (blocked.at(x, y) ||
+                            (map::g_room_map.at(x, y) != this))
                         {
-                                if (!blocked.at(x, y) &&
-                                    map::g_room_map.at(x, y) == this)
-                                {
-                                        auto* const carpet =
-                                                new terrain::Carpet(P(x, y));
-
-                                        map::put(carpet);
-                                }
+                                continue;
                         }
+
+                        map::set_terrain(
+                                terrain::make(terrain::Id::carpet, {x, y}));
                 }
         }
 }
@@ -971,8 +974,8 @@ void RitualRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                                         if (!blocked.at(pos))
                                         {
-                                                map::make_gore(pos);
-                                                map::make_blood(pos);
+                                                terrain::make_gore(pos);
+                                                terrain::make_blood(pos);
                                         }
                                 }
                         }
@@ -1071,11 +1074,14 @@ void CrawlingPitRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                         const P p(x, y);
 
-                        if (map::g_terrain.at(x, y)->is_floor_like() &&
-                            rnd::coin_toss())
+                        if (!map::g_terrain.at(p)->is_floor_like() ||
+                            !rnd::coin_toss())
                         {
-                                map::put(new terrain::RubbleLow(p));
+                                continue;
                         }
+
+                        map::set_terrain(
+                                terrain::make(terrain::Id::rubble_low, p));
                 }
         }
 }
@@ -1275,8 +1281,8 @@ void MonsterRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                                     map::g_room_map.at(x, y) == this &&
                                     rnd::fraction(2, 5))
                                 {
-                                        map::make_gore(P(x, y));
-                                        map::make_blood(P(x, y));
+                                        terrain::make_gore(P(x, y));
+                                        terrain::make_blood(P(x, y));
                                         nr_blood_put++;
                                 }
                         }
@@ -1349,17 +1355,22 @@ void DampRoom::on_post_connect_hook(Array2<bool>& door_proposals)
         {
                 for (int y = m_r.p0.y; y <= m_r.p1.y; ++y)
                 {
-                        if (!blocked.at(x, y) &&
-                            map::g_room_map.at(x, y) == this &&
-                            rnd::one_in(liquid_one_in_n))
+                        if (blocked.at(x, y) ||
+                            (map::g_room_map.at(x, y) != this) ||
+                            !rnd::one_in(liquid_one_in_n))
                         {
-                                auto* const liquid =
-                                        new terrain::Liquid({x, y});
-
-                                liquid->m_type = liquid_type;
-
-                                map::put(liquid);
+                                continue;
                         }
+
+                        auto* const liquid =
+                                static_cast<terrain::Liquid*>(
+                                        terrain::make(
+                                                terrain::Id::liquid,
+                                                {x, y}));
+
+                        liquid->m_type = liquid_type;
+
+                        map::set_terrain(liquid);
                 }
         }
 }
@@ -1520,15 +1531,20 @@ void PoolRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                                 continue;
                         }
 
+                        // TODO: Should this really be "NOT is_natural_pool"?
                         if (!is_natural_pool ||
                             (flood.at(p) < (flood_travel_limit / 2)) ||
                             rnd::fraction(2, 3))
                         {
-                                auto* const liquid = new terrain::Liquid(p);
+                                auto* const liquid =
+                                        static_cast<terrain::Liquid*>(
+                                                terrain::make(
+                                                        terrain::Id::liquid,
+                                                        p));
 
                                 liquid->m_type = LiquidType::water;
 
-                                map::put(liquid);
+                                map::set_terrain(liquid);
                         }
                 }
         }
@@ -1618,7 +1634,7 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
         for (const auto& p : m_r.positions())
         {
                 const bool is_floor_like =
-                        map::g_terrain.at(p)->data().is_floor_like;
+                        map::g_terrain.at(p)->m_data->is_floor_like;
 
                 const bool is_this_room = (map::g_room_map.at(p) == this);
 
@@ -1631,11 +1647,11 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                 if (rnd::one_in(10))
                 {
-                        map::put(new terrain::Bush(p));
+                        map::set_terrain(terrain::make(terrain::Id::bush, p));
                 }
                 else
                 {
-                        map::put(new terrain::Grass(p));
+                        map::set_terrain(terrain::make(terrain::Id::grass, p));
                 }
         }
 
@@ -1658,7 +1674,7 @@ void ForestRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                 if (map_parsers::is_map_connected(blocked))
                 {
-                        map::put(new terrain::Tree(p));
+                        map::set_terrain(terrain::make(terrain::Id::tree, p));
                 }
                 else
                 {
@@ -1738,7 +1754,8 @@ void ChasmRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                         if (p == origin || flood.at(x, y) != 0)
                         {
-                                map::put(new terrain::Chasm(p));
+                                map::set_terrain(
+                                        terrain::make(terrain::Id::chasm, p));
                         }
                 }
         }
@@ -1916,7 +1933,8 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
 
                         if (flood.at(x, y) > 0 || p == origin)
                         {
-                                map::put(new terrain::Chasm(p));
+                                map::set_terrain(
+                                        terrain::make(terrain::Id::chasm, p));
 
                                 map::g_room_map.at(x, y) = this;
 
@@ -2060,46 +2078,6 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                 }
         }
 
-#ifndef NDEBUG
-        if (init::g_is_demo_mapgen)
-        {
-                states::draw();
-
-                for (int y = 1; y < map::h() - 1; ++y)
-                {
-                        for (int x = 1; x < map::w() - 1; ++x)
-                        {
-                                P p(x, y);
-
-                                if (valid_room_entries0.at(x, y))
-                                {
-                                        io::draw_character(
-                                                '0',
-                                                Panel::map,
-                                                p,
-                                                colors::light_red());
-                                }
-
-                                if (valid_room_entries1.at(x, y))
-                                {
-                                        io::draw_character(
-                                                '1',
-                                                Panel::map,
-                                                p,
-                                                colors::light_red());
-                                }
-
-                                if (valid_room_entries0.at(x, y) ||
-                                    valid_room_entries1.at(x, y))
-                                {
-                                        io::update_screen();
-                                        io::sleep(100);
-                                }
-                        }
-                }
-        }
-#endif  // NDEBUG
-
         std::vector<int> positions(
                 is_hor
                         ? map::w()
@@ -2197,21 +2175,6 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                 // Make the bridge if valid connection pairs found
                 if (room_con0.x != -1 && room_con1.x != -1)
                 {
-#ifndef NDEBUG
-                        if (init::g_is_demo_mapgen)
-                        {
-                                states::draw();
-
-                                io::draw_character('0', Panel::map, room_con0, colors::light_green());
-
-                                io::draw_character('1', Panel::map, room_con1, colors::yellow());
-
-                                io::update_screen();
-
-                                io::sleep(2000);
-                        }
-#endif  // NDEBUG
-
                         TRACE << "Found valid connection pair at: "
                               << room_con0.x << "," << room_con0.y << " / "
                               << room_con1.x << "," << room_con1.y << std::endl
@@ -2222,18 +2185,21 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                         {
                                 for (int y = room_con0.y; y <= room_con1.y; ++y)
                                 {
-                                        if (map::g_room_map.at(bridge_n, y) ==
+                                        if (map::g_room_map.at(bridge_n, y) !=
                                             this)
                                         {
-                                                auto* const floor =
-                                                        new terrain::Floor(
-                                                                {bridge_n, y});
-
-                                                floor->m_type =
-                                                        terrain::FloorType::common;
-
-                                                map::put(floor);
+                                                continue;
                                         }
+
+                                        auto* const floor =
+                                                static_cast<terrain::Floor*>(
+                                                        terrain::make(
+                                                                terrain::Id::floor,
+                                                                {bridge_n, y}));
+
+                                        floor->m_type = terrain::FloorType::common;
+
+                                        map::set_terrain(floor);
                                 }
                         }
                         else
@@ -2241,23 +2207,30 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                                 // Vertical
                                 for (int x = room_con0.x; x <= room_con1.x; ++x)
                                 {
-                                        if (map::g_room_map.at(x, bridge_n) ==
+                                        if (map::g_room_map.at(x, bridge_n) !=
                                             this)
                                         {
-                                                auto* const floor =
-                                                        new terrain::Floor(
-                                                                {x, bridge_n});
-
-                                                floor->m_type =
-                                                        terrain::FloorType::common;
-
-                                                map::put(floor);
+                                                continue;
                                         }
+
+                                        auto* const floor =
+                                                static_cast<terrain::Floor*>(
+                                                        terrain::make(
+                                                                terrain::Id::floor,
+                                                                {x, bridge_n}));
+
+                                        floor->m_type =
+                                                terrain::FloorType::common;
+
+                                        map::set_terrain(floor);
                                 }
                         }
 
-                        map::put(new terrain::Floor(room_con0));
-                        map::put(new terrain::Floor(room_con1));
+                        map::set_terrain(
+                                terrain::make(terrain::Id::floor, room_con0));
+
+                        map::set_terrain(
+                                terrain::make(terrain::Id::floor, room_con1));
 
                         door_proposals.at(room_con0) = true;
                         door_proposals.at(room_con1) = true;
@@ -2301,7 +2274,10 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                                              x) ==
                                      std::end(c_built)))
                                 {
-                                        map::put(new terrain::Floor(P(x, y)));
+                                        map::set_terrain(
+                                                terrain::make(
+                                                        terrain::Id::floor,
+                                                        {x, y}));
 
                                         map::g_room_map.at(x, y) = this;
                                 }
@@ -2319,12 +2295,14 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                                     map::g_room_map.at(x, y) == this)
                                 {
                                         auto* const floor =
-                                                new terrain::Floor(P(x, y));
+                                                static_cast<terrain::Floor*>(
+                                                        terrain::make(
+                                                                terrain::Id::floor,
+                                                                {x, y}));
 
-                                        floor->m_type =
-                                                terrain::FloorType::common;
+                                        floor->m_type = terrain::FloorType::common;
 
-                                        map::put(floor);
+                                        map::set_terrain(floor);
 
                                         map::g_room_map.at(x, y) = nullptr;
                                 }

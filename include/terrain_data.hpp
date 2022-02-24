@@ -90,7 +90,9 @@ struct MoveRules
                 props_allow_move.clear();
         }
 
-        bool can_move(const actor::Actor& actor) const;
+        // Is this given property allowing movement into this terrain, when it
+        // normally wouldn't be?
+        bool is_property_allowing_move(PropId id) const;
 
         bool is_walkable {false};
         std::vector<PropId> props_allow_move {};
@@ -98,12 +100,6 @@ struct MoveRules
 
 struct TerrainData
 {
-        std::function<Terrain*(const P& p)> make_obj {
-                [](const P& p) {
-                        (void)p;
-                        return nullptr;
-                }};
-
         Id id {Id::END};
         char character {'x'};
         gfx::TileId tile {gfx::TileId::END};

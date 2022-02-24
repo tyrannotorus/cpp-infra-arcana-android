@@ -36,6 +36,7 @@
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
+#include "terrain_factory.hpp"
 
 #ifndef NDEBUG
 #include "io.hpp"
@@ -65,7 +66,9 @@ static bool allow_place_pillar_at(const P& pos)
 
 static void place_pillar_at(const P& pos)
 {
-        auto* const wall = new terrain::Wall(pos);
+        auto* const wall =
+                static_cast<terrain::Wall*>(
+                        terrain::make(terrain::Id::wall, pos));
 
         if (rnd::fraction(4, 5))
         {
@@ -76,18 +79,18 @@ static void place_pillar_at(const P& pos)
                 wall->m_type = terrain::WallType::pillar_broken;
         }
 
-        map::put(wall);
+        map::set_terrain(wall);
 }
 
 static void place_wall_pillar_at(const P& pos)
 {
         if (rnd::fraction(4, 5))
         {
-                map::put(new terrain::Wall(pos));
+                map::set_terrain(terrain::make(terrain::Id::wall, pos));
         }
         else
         {
-                map::put(new terrain::RubbleHigh(pos));
+                map::set_terrain(terrain::make(terrain::Id::rubble_high, pos));
         }
 }
 
@@ -134,7 +137,10 @@ void make_floor(const Room& room)
         {
                 for (int y = room.m_r.p0.y; y <= room.m_r.p1.y; ++y)
                 {
-                        map::put(new terrain::Floor(P(x, y)));
+                        map::set_terrain(
+                                terrain::make(
+                                        terrain::Id::floor,
+                                        {x, y}));
                 }
         }
 }
@@ -281,7 +287,11 @@ void cut_room_corners(const Room& room)
                         {
                                 for (int y = r.p0.y; y <= r.p1.y; ++y)
                                 {
-                                        map::put(new terrain::Wall(P(x, y)));
+                                        map::set_terrain(
+                                                terrain::make(
+                                                        terrain::Id::wall,
+                                                        {x, y}));
+
                                         map::g_room_map.at(x, y) = nullptr;
                                 }
                         }
@@ -327,7 +337,10 @@ void make_pillars_in_room(const Room& room)
                         }
                         else if (rnd::coin_toss())
                         {
-                                map::put(new terrain::RubbleLow(p));
+                                map::set_terrain(
+                                        terrain::make(
+                                                terrain::Id::rubble_low,
+                                                p));
                         }
                 }
         }
@@ -401,7 +414,10 @@ void cavify_room(Room& room)
                                 if ((flood.at(x, y) > 0) &&
                                     (map::g_room_map.at(x, y) != &room))
                                 {
-                                        map::put(new terrain::Floor({x, y}));
+                                        map::set_terrain(
+                                                terrain::make(
+                                                        terrain::Id::floor,
+                                                        {x, y}));
 
                                         map::g_room_map.at(x, y) = &room;
 
@@ -940,12 +956,15 @@ void make_pathfind_corridor(
                                         if (is_inside &&
                                             !blocked_expanded.at(p_adj))
                                         {
-                                                map::put(new terrain::Floor(p_adj));
+                                                map::set_terrain(
+                                                        terrain::make(
+                                                                terrain::Id::floor,
+                                                                p_adj));
                                         }
                                 }
                         }
 
-                        map::put(new terrain::Floor(p));
+                        map::set_terrain(terrain::make(terrain::Id::floor, p));
 
                         // Make it possible to branch from the corridor
                         if ((i > 1) &&
@@ -1256,15 +1275,19 @@ void move_player_to_nearest_allowed_pos()
 
                 IsCloserToPos is_closer_to_origin(map::g_player->m_pos);
 
-                sort(pos_bucket.begin(),
-                     pos_bucket.end(),
-                     is_closer_to_origin);
+                std::sort(
+                        std::begin(pos_bucket),
+                        std::end(pos_bucket),
+                        is_closer_to_origin);
 
                 map::g_player->m_pos = pos_bucket.front();
 
                 // Ensure that the player always descends to a floor cell (and
                 // not into a bush or something)
-                map::put(new terrain::Floor(map::g_player->m_pos));
+                map::set_terrain(
+                        terrain::make(
+                                terrain::Id::floor,
+                                map::g_player->m_pos));
         }
 
         TRACE_FUNC_END;
@@ -1290,21 +1313,7 @@ P make_stairs_at_random_pos()
 
                 g_is_map_valid = false;
 
-#ifndef NDEBUG
-                if (init::g_is_demo_mapgen)
-                {
-                        io::cover_panel(Panel::log);
-                        states::draw();
-                        io::draw_text(
-                                "Too few cells to place stairs",
-                                Panel::screen,
-                                P(0, 0),
-                                colors::light_red());
-                        io::update_screen();
-                        io::sleep(8000);
-                }
-#endif  // NDEBUG
-                return P(-1, -1);
+                return {-1, -1};
         }
 
         TRACE << "Sorting the allowed cells vector "
@@ -1368,14 +1377,14 @@ P make_stairs_at_random_pos()
 
                 g_is_map_valid = false;
 
-                return P(-1, -1);
+                return {-1, -1};
         }
 
         const P stairs_pos(pos_bucket[cell_idx]);
 
         TRACE << "Spawning stairs at chosen cell" << std::endl;
 
-        map::put(new terrain::Stairs(stairs_pos));
+        map::set_terrain(terrain::make(terrain::Id::stairs, stairs_pos));
 
         TRACE_FUNC_END;
 

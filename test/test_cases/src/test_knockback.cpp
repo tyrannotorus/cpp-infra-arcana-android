@@ -16,6 +16,7 @@
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 #include "test_utils.hpp"
 
 TEST_CASE("Creatures are not nailed to occupied feature blocking los")
@@ -25,9 +26,14 @@ TEST_CASE("Creatures are not nailed to occupied feature blocking los")
 
         test_utils::init_all();
 
-        map::put(new terrain::Floor(pos_l));
-        map::put(new terrain::Vines(pos_r));
-        map::put(new terrain::Wall(pos_r.with_x_offset(1)));
+        map::update_terrain(
+                terrain::make(terrain::Id::floor, pos_l));
+
+        map::update_terrain(
+                terrain::make(terrain::Id::vines, pos_r));
+
+        map::update_terrain(
+                terrain::make(terrain::Id::wall, pos_r.with_x_offset(1)));
 
         auto* other_actor = actor::make(actor::Id::zombie, pos_r);
 

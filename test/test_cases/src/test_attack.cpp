@@ -17,6 +17,7 @@
 #include "msg_log.hpp"
 #include "property_factory.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 #include "test_utils.hpp"
 
 // Puts walls and floor in the following pattern:
@@ -33,23 +34,23 @@ static void init_terrain()
 
         for (int y = 5; y <= 9; ++y)
         {
-                map::put(new terrain::Floor({x, y}));
+                map::update_terrain(terrain::make(terrain::Id::floor, {x, y}));
         }
 
         x = 8;
 
         for (int y = 5; y <= 8; ++y)
         {
-                map::put(new terrain::Wall({x, y}));
+                map::update_terrain(terrain::make(terrain::Id::wall, {x, y}));
         }
 
-        map::put(new terrain::Floor({x, 9}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {x, 9}));
 
         x = 9;
 
         for (int y = 5; y <= 9; ++y)
         {
-                map::put(new terrain::Floor({x, 9}));
+                map::update_terrain(terrain::make(terrain::Id::floor, {x, 9}));
         }
 }
 
@@ -451,11 +452,22 @@ TEST_CASE("Test player killing invisible monster")
         REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter <= 0);
         REQUIRE(!mon->m_data->has_player_seen);
 
-        while (mon->is_alive())
+        while (true)
         {
                 attack::melee(map::g_player, map::g_player->m_pos, *mon, *wpn);
 
                 game_time::g_allow_tick = true;
+
+                const bool exists =
+                        std::find(
+                                std::begin(game_time::g_actors),
+                                std::end(game_time::g_actors),
+                                mon) != std::end(game_time::g_actors);
+
+                if (!exists || !mon->is_alive())
+                {
+                        break;
+                }
         }
 
         REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter > 0);

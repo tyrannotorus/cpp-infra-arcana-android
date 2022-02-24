@@ -40,6 +40,9 @@ const std::string g_cancel_hint =
 const std::string g_confirm_hint =
         "[space, esc, enter] to continue";
 
+const std::string g_confirm_drop_hint =
+        "[enter] to confirm";
+
 const std::string g_any_key_hint =
         "[any key] to continue";
 

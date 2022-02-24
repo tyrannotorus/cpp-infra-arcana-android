@@ -24,6 +24,7 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 #include "test_utils.hpp"
 #include "wpn_dmg.hpp"
 
@@ -37,9 +38,9 @@ TEST_CASE("Melee attack data")
         const P p2(21, 10);
         const P p3(20, 11);
 
-        map::put(new terrain::Floor(p1));
-        map::put(new terrain::Floor(p2));
-        map::put(new terrain::Floor(p3));
+        map::update_terrain(terrain::make(terrain::Id::floor, p1));
+        map::update_terrain(terrain::make(terrain::Id::floor, p2));
+        map::update_terrain(terrain::make(terrain::Id::floor, p3));
 
         map::g_player->m_pos = p1;
 
@@ -122,8 +123,8 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
         const P p1(20, 10);
         const P p2(21, 10);
 
-        map::put(new terrain::Floor(p1));
-        map::put(new terrain::Floor(p2));
+        map::update_terrain(terrain::make(terrain::Id::floor, p1));
+        map::update_terrain(terrain::make(terrain::Id::floor, p2));
 
         map::g_player->m_pos = p1;
 
@@ -163,8 +164,8 @@ TEST_CASE("Melee attack data has reduced damage against pierce resistance")
         const P p1(20, 10);
         const P p2(21, 10);
 
-        map::put(new terrain::Floor(p1));
-        map::put(new terrain::Floor(p2));
+        map::update_terrain(terrain::make(terrain::Id::floor, p1));
+        map::update_terrain(terrain::make(terrain::Id::floor, p2));
 
         map::g_player->m_pos = p1;
 
@@ -207,7 +208,8 @@ TEST_CASE("Ranged attack data")
         {
                 for (int y = 1; y < map::h() - 1; ++y)
                 {
-                        map::put(new terrain::Floor({x, y}));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::floor, {x, y}));
                 }
         }
 
@@ -230,8 +232,8 @@ TEST_CASE("Ranged attack data")
 
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::pistol));
 
-        int expected_hit_chance_vs_mon_1;
-        int expected_hit_chance_vs_mon_2;
+        int expected_hit_chance_vs_mon_1 = 0;
+        int expected_hit_chance_vs_mon_2 = 0;
 
         {
                 const auto& player_data =
@@ -312,7 +314,8 @@ TEST_CASE("Throwing attack data")
         {
                 for (int y = 1; y < map::h() - 1; ++y)
                 {
-                        map::put(new terrain::Floor({x, y}));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::floor, {x, y}));
                 }
         }
 
@@ -335,8 +338,8 @@ TEST_CASE("Throwing attack data")
 
         auto& item = *item::make(item::Id::thr_knife);
 
-        int expected_hit_chance_vs_mon_1;
-        int expected_hit_chance_vs_mon_2;
+        int expected_hit_chance_vs_mon_1 = 0;
+        int expected_hit_chance_vs_mon_2 = 0;
 
         {
                 const auto& player_data =

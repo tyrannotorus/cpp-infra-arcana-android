@@ -29,6 +29,7 @@
 #include "io.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_device.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -93,28 +94,39 @@ static void show_map_and_freeze(const std::string& msg)
 
 static void find_stair_path()
 {
-        Array2<bool> blocked(map::dims());
+        Array2<bool> blocked =
+                map::get_blocked_map_info_for_actor(*map::g_player);
 
-        map_parsers::BlocksActor(*map::g_player, ParseActors::no)
-                .run(blocked, blocked.rect());
+        const int w = map::w();
+        const int h = map::h();
 
         P stair_p(-1, -1);
 
-        for (int x = 0; x < map::w(); ++x)
+        for (int x = 0; x < w; ++x)
         {
-                for (int y = 0; y < map::h(); ++y)
+                for (int y = 0; y < h; ++y)
                 {
-                        const auto id = map::g_terrain.at(x, y)->id();
-
-                        if (id == terrain::Id::stairs)
+                        switch (map::g_terrain.at(x, y)->id())
+                        {
+                        case terrain::Id::stairs:
                         {
                                 blocked.at(x, y) = false;
 
                                 stair_p.set(x, y);
                         }
-                        else if (id == terrain::Id::door)
+                        break;
+
+                        case terrain::Id::door:
+                        case terrain::Id::force_field:
                         {
                                 blocked.at(x, y) = false;
+                        }
+                        break;
+
+                        default:
+                        {
+                        }
+                        break;
                         }
                 }
         }
@@ -124,7 +136,7 @@ static void find_stair_path()
                 show_map_and_freeze("Could not find stairs");
         }
 
-        const P& player_p = map::g_player->m_pos;
+        const auto& player_p = map::g_player->m_pos;
 
         if (blocked.at(player_p))
         {
@@ -202,7 +214,7 @@ static bool walk_to_adj_cell(const P& p)
 
         game_commands::handle(cmd);
 
-        return map::g_player->m_pos == p;
+        return (map::g_player->m_pos == p);
 }
 
 // Act function used when just using the bot to run through the game.
@@ -220,6 +232,11 @@ static void bot_act()
 
                 ASSERT(map::is_pos_inside_map(actor->m_pos));
 
+                if (!actor->is_alive())
+                {
+                        continue;
+                }
+
                 for (size_t inner_idx = 0;
                      inner_idx < game_time::g_actors.size();
                      ++inner_idx)
@@ -227,29 +244,18 @@ static void bot_act()
                         const auto* const other_actor =
                                 game_time::g_actors[inner_idx];
 
-                        if (outer_idx == inner_idx ||
-                            !actor->is_alive() ||
+                        if ((outer_idx == inner_idx) ||
                             !other_actor->is_alive())
                         {
                                 continue;
                         }
 
-                        if (actor == other_actor)
-                        {
-                                show_map_and_freeze(
-                                        "Same actor encountered twice in list");
-                        }
-
-                        if (actor->m_pos == other_actor->m_pos)
-                        {
-                                show_map_and_freeze(
-                                        "Two living actors at same pos (" +
-                                        std::to_string(actor->m_pos.x) + ", " +
-                                        std::to_string(actor->m_pos.y) + ")");
-                        }
+                        ASSERT(actor != other_actor);
+                        ASSERT(actor->m_pos != other_actor->m_pos);
                 }
         }
-#endif
+#endif  // NDEBUG
+
         // =====================================================================
 
         // Abort?
@@ -273,7 +279,7 @@ static void bot_act()
         auto& inv = map::g_player->m_inv;
 
         // If no armor, occasionally equip an asbesthos suite (helps not getting
-        // stuck on e.g. Energy Hounds)
+        // stuck on e.g. Energy Hounds).
         if (!inv.m_slots[(size_t)SlotId::body].item && rnd::one_in(20))
         {
                 inv.put_in_slot(
@@ -283,7 +289,7 @@ static void bot_act()
         }
 
         // Keep an allied Mi-go around (to help getting out of sticky
-        // situations, and for some allied monster code exercise)
+        // situations, and for some allied monster code exercise).
         bool has_allied_mon = false;
 
         for (const auto* const actor : game_time::g_actors)
@@ -303,7 +309,7 @@ static void bot_act()
                         .make_aware_of_player();
         }
 
-        // Apply permanent paralysis resistance, to avoid getting stuck
+        // Apply permanent paralysis resistance, to avoid getting stuck.
         if (!map::g_player->m_properties.has(PropId::r_para))
         {
                 auto* prop = new PropRPara();
@@ -313,7 +319,7 @@ static void bot_act()
                 map::g_player->m_properties.apply(prop);
         }
 
-        // Occasionally apply fear resistance to avoid getting stuck
+        // Apply fear resistance to avoid getting stuck.
         if (rnd::one_in(7))
         {
                 auto* prop = new PropRFear();
@@ -323,7 +329,7 @@ static void bot_act()
                 map::g_player->m_properties.apply(prop);
         }
 
-        // Occasionally apply burning to a random actor (to avoid getting stuck)
+        // Apply burning to a random actor (to avoid getting stuck).
         if (rnd::one_in(10))
         {
                 const auto element =
@@ -337,13 +343,13 @@ static void bot_act()
                 }
         }
 
-        // Occasionally teleport (to avoid getting stuck)
+        // Teleport (to avoid getting stuck).
         if (rnd::one_in(200))
         {
                 teleport(*map::g_player);
         }
 
-        // Occasionally send a TAB command to attack nearby monsters
+        // Send a TAB command to attack nearby monsters.
         if (rnd::coin_toss())
         {
                 game_commands::handle(GameCmd::auto_melee);
@@ -351,7 +357,7 @@ static void bot_act()
                 return;
         }
 
-        // Occasionally send a 'wait 5 turns' command (just code exercise)
+        // Send a 'wait 5 turns' command (just code exercise).
         if (rnd::one_in(50))
         {
                 game_commands::handle(GameCmd::wait_long);
@@ -359,7 +365,7 @@ static void bot_act()
                 return;
         }
 
-        // Occasionally fire at a random position
+        // Fire at a random position.
         if (rnd::one_in(20))
         {
                 auto* wpn_item = map::g_player->m_inv.item_in_slot(SlotId::wpn);
@@ -376,7 +382,7 @@ static void bot_act()
                 }
         }
 
-        // Occasionally apply a random property (to exercise the prop code)
+        // Apply a random property (to exercise the prop code).
         if (rnd::one_in(30))
         {
                 std::vector<PropId> prop_bucket;
@@ -397,8 +403,8 @@ static void bot_act()
                 map::g_player->m_properties.apply(prop);
         }
 
-        // Occasionally end a random property (helps clearing out properties
-        // that cause spammy or interrupting effects like mind sapping)
+        // End a random property (helps clearing out properties that cause
+        // spammy or interrupting effects like mind sapping).
         if (rnd::one_in(100))
         {
                 const auto id = (PropId)rnd::range(0, (int)PropId::END - 1);
@@ -406,7 +412,7 @@ static void bot_act()
                 map::g_player->m_properties.end_prop(id);
         }
 
-        // Occasionally swap weapon (just some code exercise)
+        // Swap weapon (just some code exercise).
         if (rnd::one_in(50))
         {
                 game_commands::handle(GameCmd::swap_weapon);
@@ -414,15 +420,16 @@ static void bot_act()
                 return;
         }
 
-        // Occasionally cause shock spikes (code exercise)
+        // Cause shock spikes (code exercise).
         if (rnd::one_in(100))
         {
                 map::g_player->incr_shock(200.0, ShockSrc::misc);
+
                 return;
         }
 
-        // Occasionally run an explosion around the player (code exercise, and
-        // to avoid getting stuck)
+        // Run an explosion around the player (code exercise, and to avoid
+        // getting stuck).
         if (rnd::one_in(50))
         {
                 explosion::run(map::g_player->m_pos, ExplType::expl);
@@ -430,7 +437,34 @@ static void bot_act()
                 return;
         }
 
-        // Handle blocking door
+        // Run the effect of a random "strange device".
+        if (rnd::one_in(50))
+        {
+                std::vector<item::Id> id_bucket;
+
+                for (size_t i = 0; i < (size_t)item::Id::END; ++i)
+                {
+                        item::ItemData& d = item::g_data[i];
+
+                        if ((d.type == ItemType::device) &&
+                            (d.id != item::Id::lantern))
+                        {
+                                d.is_identified = true;
+                                id_bucket.push_back((item::Id)i);
+                        }
+                }
+
+                const item::Id id = rnd::element(id_bucket);
+
+                std::unique_ptr<device::Device> device(
+                        static_cast<device::Device*>(item::make(id)));
+
+                device->activate(map::g_player);
+
+                return;
+        }
+
+        // Handle blocking door.
         for (const P& d : dir_utils::g_dir_list)
         {
                 const auto p = map::g_player->m_pos + d;
@@ -455,7 +489,7 @@ static void bot_act()
                 }
         }
 
-        // If we are terrified, wait in place
+        // If we are terrified, wait in place.
         if (map::g_player->m_properties.has(PropId::terrified))
         {
                 if (walk_to_adj_cell(map::g_player->m_pos))

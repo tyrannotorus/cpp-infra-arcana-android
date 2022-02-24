@@ -88,6 +88,21 @@ public:
                 return *this;
         }
 
+        bool operator==(const Array2<T>& other) const
+        {
+                if (m_dims != other.m_dims)
+                {
+                        return false;
+                }
+
+                return memcmp(m_data, other.m_data, length()) == 0;
+        }
+
+        bool operator!=(const Array2<T>& other) const
+        {
+                return !(*this == other);
+        }
+
         T& at(const P& p)
         {
                 return get_element_ref(p);
@@ -258,7 +273,7 @@ public:
 
         size_t length() const
         {
-                return m_dims.x * m_dims.y;
+                return (size_t)(m_dims.x * m_dims.y);
         }
 
         const P& dims() const
@@ -278,7 +293,7 @@ public:
 
         R rect() const
         {
-                return R({0, 0}, m_dims - 1);
+                return {{0, 0}, m_dims - 1};
         }
 
         T* data()
@@ -291,14 +306,6 @@ public:
                 return m_data;
         }
 
-private:
-        T& get_element_ref(const P& p) const
-        {
-                const size_t idx = pos_to_idx(p);
-
-                return m_data[idx];
-        }
-
         size_t pos_to_idx(const P& p) const
         {
                 return (p.x * m_dims.y) + p.y;
@@ -307,6 +314,14 @@ private:
         size_t pos_to_idx(const int x, const int y) const
         {
                 return pos_to_idx({x, y});
+        }
+
+private:
+        T& get_element_ref(const P& p) const
+        {
+                const size_t idx = pos_to_idx(p);
+
+                return m_data[idx];
         }
 
         T* m_data {nullptr};

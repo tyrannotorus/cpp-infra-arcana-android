@@ -94,7 +94,7 @@ namespace io
 {
 Color read_px_on_surface(const SDL_Surface& surface, const P& px_pos)
 {
-        // 'p' is the address to the pixel we want to retrieve
+        // 'p' is the address to the pixel we want to retrieve.
         Uint8* p =
                 (Uint8*)surface.pixels +
                 (px_pos.y * surface.pitch) +
@@ -150,7 +150,7 @@ Color read_px_on_surface(const SDL_Surface& surface, const P& px_pos)
                 &sdl_color.g,
                 &sdl_color.b);
 
-        return Color(sdl_color);
+        return {sdl_color};
 }
 
 void put_px_on_surface(

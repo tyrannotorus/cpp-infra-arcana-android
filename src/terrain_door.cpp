@@ -29,6 +29,7 @@
 #include "random.hpp"
 #include "sound.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 #include "text_format.hpp"
 
 namespace item
@@ -88,16 +89,36 @@ static terrain::DoorSpawnState get_random_spawn_state(
 // -----------------------------------------------------------------------------
 namespace terrain
 {
-Door::Door(
-        const P& terrain_pos,
-        const Wall* const mimic_terrain,
-        DoorType type,
-        DoorSpawnState spawn_state) :
-
-        Terrain(terrain_pos),
-        m_mimic_terrain(mimic_terrain),
-        m_type(type)
+Door::~Door()
 {
+        // Unlink all levers
+        if (m_type == DoorType::metal)
+        {
+                const size_t nr_positions = map::nr_positions();
+                for (size_t i = 0; i < nr_positions; ++i)
+                {
+                        auto* const terrain = map::g_terrain.at(i);
+
+                        if (terrain && (terrain->id() == terrain::Id::lever))
+                        {
+                                auto* const lever =
+                                        static_cast<Lever*>(terrain);
+
+                                if (lever->is_linked_to(*this))
+                                {
+                                        lever->unlink();
+                                }
+                        }
+                }
+        }
+
+        delete m_mimic_terrain;
+}
+
+void Door::init_type_and_state(const DoorType type, DoorSpawnState spawn_state)
+{
+        m_type = type;
+
         // Gates should never be secret
         ASSERT(!((m_type == DoorType::gate) && m_mimic_terrain));
         ASSERT(
@@ -110,7 +131,7 @@ Door::Door(
                 spawn_state = get_random_spawn_state(m_type);
         }
 
-        switch (DoorSpawnState(spawn_state))
+        switch (spawn_state)
         {
         case DoorSpawnState::open:
                 m_is_open = true;
@@ -151,32 +172,7 @@ Door::Door(
                 break;
         }
 
-}  // Door
-
-Door::~Door()
-{
-        // Unlink all levers
-        if (m_type == DoorType::metal)
-        {
-                const size_t nr_positions = map::nr_positions();
-                for (size_t i = 0; i < nr_positions; ++i)
-                {
-                        auto* const terrain = map::g_terrain.at(i);
-
-                        if (terrain && (terrain->id() == terrain::Id::lever))
-                        {
-                                auto* const lever =
-                                        static_cast<Lever*>(terrain);
-
-                                if (lever->is_linked_to(*this))
-                                {
-                                        lever->unlink();
-                                }
-                        }
-                }
-        }
-
-        delete m_mimic_terrain;
+        map::update_map_info_for_terrain_at(m_pos);
 }
 
 void Door::on_hit(
@@ -191,7 +187,7 @@ void Door::on_hit(
         {
         case DmgType::pure:
         {
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
 
                 map::update_vision();
 
@@ -208,7 +204,7 @@ void Door::on_hit(
                         case DoorType::wood:
                         case DoorType::gate:
                         {
-                                if (map::is_pos_seen_by_player(m_pos))
+                                if (map::g_seen.at(m_pos))
                                 {
                                         const std::string a =
                                                 m_is_hidden
@@ -221,7 +217,7 @@ void Door::on_hit(
                                                 " is blown to pieces!");
                                 }
 
-                                map::put(new RubbleLow(m_pos));
+                                map::update_terrain(make(Id::rubble_low, m_pos));
 
                                 map::update_vision();
 
@@ -277,7 +273,7 @@ void Door::on_hit(
 void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
 {
         const bool is_player = actor::is_player(&actor);
-        const bool is_cell_seen = map::is_pos_seen_by_player(m_pos);
+        const bool is_cell_seen = map::g_seen.at(m_pos);
 
         if ((m_type == DoorType::metal) &&
             is_player &&
@@ -306,7 +302,7 @@ void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
 void Door::player_bash(const DmgType dmg_type, const int dmg)
 {
         const bool is_weak = map::g_player->m_properties.has(PropId::weakened);
-        const bool is_cell_seen = map::is_pos_seen_by_player(m_pos);
+        const bool is_cell_seen = map::g_seen.at(m_pos);
 
         int destr_chance_pct = 25 + (dmg * 5) - (m_jam_level * 4);
 
@@ -375,7 +371,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                                 msg_log::add("I feel a door crashing open!");
                         }
 
-                        map::put(new RubbleLow(m_pos));
+                        map::update_terrain(make(Id::rubble_low, m_pos));
 
                         map::update_vision();
                 }
@@ -422,7 +418,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 void Door::mon_bash(actor::Actor& mon)
 {
         const bool is_weak = map::g_player->m_properties.has(PropId::weakened);
-        const bool is_cell_seen = map::is_pos_seen_by_player(m_pos);
+        const bool is_cell_seen = map::g_seen.at(m_pos);
 
         int destr_chance_pct = 7 - (m_jam_level * 2);
 
@@ -464,7 +460,7 @@ void Door::mon_bash(actor::Actor& mon)
                                 " crashes open!");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
 
                 map::update_vision();
         }
@@ -486,16 +482,16 @@ void Door::mon_bash(actor::Actor& mon)
 
 WasDestroyed Door::on_finished_burning()
 {
-        if (map::is_pos_seen_by_player(m_pos))
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("The door burns down.");
         }
 
-        auto* const rubble = new RubbleLow(m_pos);
+        auto* const t = make(Id::rubble_low, m_pos);
 
-        rubble->m_burn_state = BurnState::has_burned;
+        t->m_burn_state = BurnState::has_burned;
 
-        map::put(rubble);
+        map::update_terrain(t);
 
         map::update_vision();
 
@@ -507,27 +503,23 @@ bool Door::is_walkable() const
         return m_is_open;
 }
 
-bool Door::can_move(const actor::Actor& actor) const
+bool Door::is_property_allowing_move(PropId id) const
 {
-        if (m_is_open)
-        {
-                return true;
-        }
-
-        // The door is closed
-
-        const auto& properties = actor.m_properties;
-
         // Can move through all door types
-        if (properties.has(PropId::ethereal) ||
-            properties.has(PropId::ooze))
+        if ((id == PropId::ethereal) || (id == PropId::ooze))
         {
                 return true;
         }
 
-        // Small crawling creatures can pass through gates
-        if ((m_type == DoorType::gate) &&
-            properties.has(PropId::small_crawling))
+        // Small creatures can pass through gates
+        const bool is_gate =
+                (m_type == DoorType::gate);
+
+        const bool is_small_creature =
+                (id == PropId::small_crawling) ||
+                (id == PropId::tiny_flying);
+
+        if (is_gate && is_small_creature)
         {
                 return true;
         }
@@ -1090,6 +1082,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 {
                         m_is_open = false;
 
+                        map::update_map_info_for_terrain_at(m_pos);
                         map::update_vision();
 
                         if (is_player)
@@ -1177,6 +1170,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
         m_is_open = false;
 
+        map::update_map_info_for_terrain_at(m_pos);
         map::update_vision();
 
         if (is_player)
@@ -1479,6 +1473,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                 game_time::tick();
 
+                map::update_map_info_for_terrain_at(m_pos);
                 map::update_vision();
         }
 
@@ -1504,6 +1499,10 @@ DidOpen Door::open(actor::Actor* const actor_opening)
         m_is_hidden = false;
         m_is_stuck = false;
         m_is_known_stuck = false;
+
+        map::update_map_info_for_terrain_at(m_pos);
+
+        ASSERT(!map::g_terrain_blocks_walking.at(m_pos));
 
         if (map::g_seen.at(m_pos))
         {
@@ -1540,6 +1539,8 @@ DidClose Door::close(actor::Actor* const actor_closing)
         (void)actor_closing;
 
         m_is_open = false;
+
+        map::update_map_info_for_terrain_at(m_pos);
 
         if (map::g_seen.at(m_pos))
         {

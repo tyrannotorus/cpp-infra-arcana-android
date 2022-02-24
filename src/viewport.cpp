@@ -44,7 +44,7 @@ R get_map_view_area()
         return map_area;
 }
 
-void show(const P map_pos, const ForceCentering force_centering)
+void show(const P& map_pos, const ForceCentering force_centering)
 {
         const auto map_view_area = get_map_view_area();
 
@@ -83,17 +83,17 @@ void show(const P map_pos, const ForceCentering force_centering)
         }
 }
 
-bool is_in_view(const P map_pos)
+bool is_in_view(const P& map_pos)
 {
         return get_map_view_area().is_pos_inside(map_pos);
 }
 
-P to_view_pos(const P map_pos)
+P to_view_pos(const P& map_pos)
 {
         return map_pos - s_p0;
 }
 
-P to_map_pos(const P view_pos)
+P to_map_pos(const P& view_pos)
 {
         return view_pos + s_p0;
 }

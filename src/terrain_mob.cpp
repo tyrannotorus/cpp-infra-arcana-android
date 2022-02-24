@@ -72,7 +72,7 @@ void Smoke::on_placed()
 void Smoke::on_new_turn()
 {
         // If smoke has turns left, or is permanent, harm the actor here
-        auto* actor = map::first_actor_at_pos(m_pos);
+        auto* actor = map::living_actor_at(m_pos);
 
         if (actor && ((m_nr_turns_left > 0) || (m_nr_turns_left == -1)))
         {

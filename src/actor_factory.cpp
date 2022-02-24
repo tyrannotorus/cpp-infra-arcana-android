@@ -34,17 +34,41 @@
 // -----------------------------------------------------------------------------
 static std::vector<P> free_spawn_positions(const R& area)
 {
-        Array2<bool> blocked(map::dims());
+        // NOTE: Here we only allow spawning on positions that do not block
+        // walking. This is a simple rule but somewhat strict rule; all
+        // creatures may exist on such positions, but some creatures could
+        // potentially be spawned elsewhere (such as a flying creature over a
+        // chasm). The current method should be good enough however.
 
-        map_parsers::BlocksWalking(ParseActors::yes)
-                .run(blocked, area, MapParseMode::overwrite);
+        Array2<bool> blocked = map::g_terrain_blocks_walking;
+
+        for (const actor::Actor* const actor : game_time::g_actors)
+        {
+                if (actor->is_alive())
+                {
+                        blocked.at(actor->m_pos) = true;
+                }
+        }
 
         return to_vec(blocked, false, area);
 }
 
 static actor::Mon* spawn_at(const P& pos, const actor::Id id)
 {
-        ASSERT(map::is_pos_inside_outer_walls(pos));
+        if (!map::is_pos_inside_outer_walls(pos))
+        {
+                TRACE
+                        << ("Attempted to spawn monster at position not "
+                            "completely inside the outer walls: ")
+                        << pos.x << "," << pos.y
+                        << " - position blocks walking in map info cache?: "
+                        << map::g_terrain_blocks_walking.at(pos)
+                        << std::endl;
+
+                ASSERT(false);
+
+                return nullptr;
+        }
 
         auto* const actor = actor::make(id, pos);
 
@@ -66,7 +90,12 @@ static actor::MonSpawnResult spawn_at_positions(
                 const auto& pos = positions[i];
                 const auto id = ids[i];
 
-                result.monsters.emplace_back(spawn_at(pos, id));
+                actor::Mon* const new_mon = spawn_at(pos, id);
+
+                if (new_mon)
+                {
+                        result.monsters.push_back(new_mon);
+                }
         }
 
         return result;

@@ -72,7 +72,7 @@ protected:
                 int red_from_idx);
 
         // Fire etc
-        virtual void handle_input(const InputData& input) = 0;
+        virtual void handle_input(const io::InputData& input) = 0;
 
         // Print messages
         virtual void on_moved() = 0;
@@ -100,9 +100,6 @@ protected:
                 return -1;
         }
 
-        // Necessary e.g. for marker states drawing overlayed graphics
-        Array2<CellRenderData> m_marker_render_data {{0, 0}};
-
         const P m_origin;
 
         P m_pos {0, 0};
@@ -111,8 +108,6 @@ protected:
         bool m_allow_draw {true};
 
 private:
-        void init_marker_render_data();
-
         void move(Dir dir, int nr_steps = 1);
 
         bool try_go_to_tgt();
@@ -132,7 +127,7 @@ public:
 protected:
         void on_moved() override;
 
-        void handle_input(const InputData& input) override;
+        void handle_input(const io::InputData& input) override;
 
         bool use_player_tgt() const override
         {
@@ -158,7 +153,7 @@ public:
 protected:
         void on_moved() override;
 
-        void handle_input(const InputData& input) override;
+        void handle_input(const io::InputData& input) override;
 
         bool use_player_tgt() const override
         {
@@ -190,7 +185,7 @@ public:
 protected:
         void on_moved() override;
 
-        void handle_input(const InputData& input) override;
+        void handle_input(const io::InputData& input) override;
 
         bool use_player_tgt() const override
         {
@@ -224,7 +219,7 @@ protected:
 
         void on_moved() override;
 
-        void handle_input(const InputData& input) override;
+        void handle_input(const io::InputData& input) override;
 
         bool use_player_tgt() const override
         {
@@ -254,7 +249,7 @@ protected:
 
         void on_moved() override;
 
-        void handle_input(const InputData& input) override;
+        void handle_input(const io::InputData& input) override;
 
 private:
         int chance_of_success_pct() const;
@@ -410,7 +405,7 @@ protected:
 
         void on_moved() override;
 
-        void handle_input(const InputData& input) override;
+        void handle_input(const io::InputData& input) override;
 
 private:
         int current_dist() const;

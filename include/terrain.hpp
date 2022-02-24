@@ -81,6 +81,9 @@ enum class PrintRevealMsg
 enum class Id;
 class Lever;
 
+void make_blood(const P& origin);
+void make_gore(const P& origin);
+
 class ItemContainer
 {
 public:
@@ -115,16 +118,17 @@ private:
 class Terrain
 {
 public:
-        Terrain(const P& p) :
+        Terrain(const P& p, const TerrainData* const data) :
+                m_data(data),
                 m_pos(p) {}
 
         Terrain() = delete;
 
         virtual ~Terrain() = default;
 
-        const TerrainData& data() const
+        Id id() const
         {
-                return ::terrain::data(id());
+                return m_data->id;
         }
 
         P pos() const
@@ -176,77 +180,79 @@ public:
 
         virtual bool is_walkable() const
         {
-                return data().move_rules.is_walkable;
+                return m_data->move_rules.is_walkable;
         }
 
-        virtual bool can_move(const actor::Actor& actor) const
+        // Is this given property allowing movement into this terrain, when it
+        // normally wouldn't be?
+        virtual bool is_property_allowing_move(PropId id) const
         {
-                return data().move_rules.can_move(actor);
+                return m_data->move_rules.is_property_allowing_move(id);
         }
 
         virtual bool is_sound_passable() const
         {
-                return data().is_sound_passable;
+                return m_data->is_sound_passable;
         }
 
         virtual bool is_floor_like() const
         {
-                return data().is_floor_like;
+                return m_data->is_floor_like;
         }
 
         virtual bool is_los_passable() const
         {
-                return data().is_los_passable;
+                return m_data->is_los_passable;
         }
 
         virtual bool is_projectile_passable() const
         {
-                return data().is_projectile_passable;
+                return m_data->is_projectile_passable;
         }
 
         virtual bool is_smoke_passable() const
         {
-                return data().is_smoke_passable;
+                return m_data->is_smoke_passable;
         }
 
         virtual char character() const
         {
-                return data().character;
+                return m_data->character;
         }
 
         virtual gfx::TileId tile() const
         {
-                return data().tile;
+                return m_data->tile;
         }
 
         virtual bool can_have_corpse() const
         {
-                return data().can_have_corpse;
+                return m_data->can_have_corpse;
         }
 
         virtual bool can_have_blood() const
         {
-                return data().can_have_blood;
+                return m_data->can_have_blood;
         }
 
         virtual bool can_have_gore() const
         {
-                return data().can_have_gore;
+                return m_data->can_have_gore;
         }
 
         virtual bool can_have_trap() const
         {
-                return data().can_have_trap;
+                return m_data->can_have_trap;
         }
 
         virtual bool can_have_item() const
         {
-                return data().can_have_item;
+                return m_data->can_have_item;
         }
 
         virtual Matl matl() const
         {
-                return data().matl_type;
+                return m_data->matl_type;
         }
 
         virtual void on_placed()
@@ -300,10 +306,9 @@ public:
 
         virtual void add_light(Array2<bool>& light) const;
 
-        virtual Id id() const = 0;
-
         virtual std::string name(Article article) const = 0;
 
+        const TerrainData* m_data {nullptr};
         ItemContainer m_item_container {};
         BurnState m_burn_state {BurnState::not_burned};
         bool m_started_burning_this_turn {false};
@@ -371,14 +376,9 @@ enum class FloorType
 class Floor : public Terrain
 {
 public:
-        Floor(const P& p);
+        Floor(const P& p, const TerrainData* data);
 
         Floor() = delete;
-
-        Id id() const override
-        {
-                return Id::floor;
-        }
 
         gfx::TileId tile() const override;
 
@@ -399,14 +399,9 @@ private:
 class Carpet : public Terrain
 {
 public:
-        Carpet(const P& p);
+        Carpet(const P& p, const TerrainData* data);
 
         Carpet() = delete;
-
-        Id id() const override
-        {
-                return Id::carpet;
-        }
 
         std::string name(Article article) const override;
 
@@ -431,14 +426,9 @@ enum class GrassType
 class Grass : public Terrain
 {
 public:
-        Grass(const P& p);
+        Grass(const P& p, const TerrainData* data);
 
         Grass() = delete;
-
-        Id id() const override
-        {
-                return Id::grass;
-        }
 
         gfx::TileId tile() const override;
         std::string name(Article article) const override;
@@ -458,14 +448,9 @@ private:
 class Bush : public Terrain
 {
 public:
-        Bush(const P& p);
+        Bush(const P& p, const TerrainData* data);
 
         Bush() = delete;
-
-        Id id() const override
-        {
-                return Id::bush;
-        }
 
         std::string name(Article article) const override;
         WasDestroyed on_finished_burning() override;
@@ -485,14 +470,9 @@ private:
 class Vines : public Terrain
 {
 public:
-        Vines(const P& p);
+        Vines(const P& p, const TerrainData* data);
 
         Vines() = delete;
-
-        Id id() const override
-        {
-                return Id::vines;
-        }
 
         std::string name(Article article) const override;
         WasDestroyed on_finished_burning() override;
@@ -510,14 +490,9 @@ private:
 class Chains : public Terrain
 {
 public:
-        Chains(const P& p);
+        Chains(const P& p, const TerrainData* data);
 
         Chains() = delete;
-
-        Id id() const override
-        {
-                return Id::chains;
-        }
 
         std::string name(Article article) const override;
 
@@ -538,14 +513,9 @@ private:
 class Grate : public Terrain
 {
 public:
-        Grate(const P& p);
+        Grate(const P& p, const TerrainData* data);
 
         Grate() = delete;
-
-        Id id() const override
-        {
-                return Id::grate;
-        }
 
         std::string name(Article article) const override;
 
@@ -562,15 +532,10 @@ private:
 class Brazier : public Terrain
 {
 public:
-        Brazier(const P& p) :
-                Terrain(p) {}
+        Brazier(const P& p, const TerrainData* const data) :
+                Terrain(p, data) {}
 
         Brazier() = delete;
-
-        Id id() const override
-        {
-                return Id::brazier;
-        }
 
         std::string name(Article article) const override;
 
@@ -601,14 +566,9 @@ enum class WallType
 class Wall : public Terrain
 {
 public:
-        Wall(const P& p);
+        Wall(const P& p, const TerrainData* data);
 
         Wall() = delete;
-
-        Id id() const override
-        {
-                return Id::wall;
-        }
 
         gfx::TileId tile() const override;
 
@@ -635,14 +595,9 @@ private:
 class RubbleLow : public Terrain
 {
 public:
-        RubbleLow(const P& p);
+        RubbleLow(const P& p, const TerrainData* data);
 
         RubbleLow() = delete;
-
-        Id id() const override
-        {
-                return Id::rubble_low;
-        }
 
         std::string name(Article article) const override;
 
@@ -659,14 +614,9 @@ private:
 class Bones : public Terrain
 {
 public:
-        Bones(const P& p);
+        Bones(const P& p, const TerrainData* data);
 
         Bones() = delete;
-
-        Id id() const override
-        {
-                return Id::bones;
-        }
 
         std::string name(Article article) const override;
 
@@ -683,14 +633,9 @@ private:
 class RubbleHigh : public Terrain
 {
 public:
-        RubbleHigh(const P& p);
+        RubbleHigh(const P& p, const TerrainData* data);
 
         RubbleHigh() = delete;
-
-        Id id() const override
-        {
-                return Id::rubble_high;
-        }
 
         std::string name(Article article) const override;
 
@@ -707,14 +652,9 @@ private:
 class GraveStone : public Terrain
 {
 public:
-        GraveStone(const P& p);
+        GraveStone(const P& p, const TerrainData* data);
 
         GraveStone() = delete;
-
-        Id id() const override
-        {
-                return Id::gravestone;
-        }
 
         std::string name(Article article) const override;
 
@@ -740,14 +680,9 @@ private:
 class ChurchBench : public Terrain
 {
 public:
-        ChurchBench(const P& p);
+        ChurchBench(const P& p, const TerrainData* data);
 
         ChurchBench() = delete;
-
-        Id id() const override
-        {
-                return Id::church_bench;
-        }
 
         std::string name(Article article) const override;
 
@@ -770,13 +705,8 @@ enum class StatueType
 class Statue : public Terrain
 {
 public:
-        Statue(const P& p);
+        Statue(const P& p, const TerrainData* data);
         Statue() = delete;
-
-        Id id() const override
-        {
-                return Id::statue;
-        }
 
         std::string name(Article article) const override;
 
@@ -817,13 +747,8 @@ private:
 class Stalagmite : public Terrain
 {
 public:
-        Stalagmite(const P& p);
+        Stalagmite(const P& p, const TerrainData* data);
         Stalagmite() = delete;
-
-        Id id() const override
-        {
-                return Id::stalagmite;
-        }
 
         std::string name(Article article) const override;
 
@@ -840,13 +765,8 @@ private:
 class Stairs : public Terrain
 {
 public:
-        Stairs(const P& p);
+        Stairs(const P& p, const TerrainData* data);
         Stairs() = delete;
-
-        Id id() const override
-        {
-                return Id::stairs;
-        }
 
         std::string name(Article article) const override;
 
@@ -883,16 +803,11 @@ private:
 class Bridge : public Terrain
 {
 public:
-        Bridge(const P& p) :
-                Terrain(p),
+        Bridge(const P& p, const TerrainData* const data) :
+                Terrain(p, data),
                 m_axis(Axis::hor) {}
 
         Bridge() = delete;
-
-        Id id() const override
-        {
-                return Id::bridge;
-        }
 
         std::string name(Article article) const override;
         gfx::TileId tile() const override;
@@ -918,13 +833,8 @@ private:
 class Liquid : public Terrain
 {
 public:
-        Liquid(const P& p);
+        Liquid(const P& p, const TerrainData* data);
         Liquid() = delete;
-
-        Id id() const override
-        {
-                return Id::liquid;
-        }
 
         std::string name(Article article) const override;
 
@@ -949,13 +859,8 @@ private:
 class Chasm : public Terrain
 {
 public:
-        Chasm(const P& p);
+        Chasm(const P& p, const TerrainData* data);
         Chasm() = delete;
-
-        Id id() const override
-        {
-                return Id::chasm;
-        }
 
         std::string name(Article article) const override;
 
@@ -972,14 +877,9 @@ private:
 class Lever : public Terrain
 {
 public:
-        Lever(const P& p);
+        Lever(const P& p, const TerrainData* data);
 
         Lever() = delete;
-
-        Id id() const override
-        {
-                return Id::lever;
-        }
 
         std::string name(Article article) const override;
 
@@ -1034,14 +934,9 @@ private:
 class Altar : public Terrain
 {
 public:
-        Altar(const P& p);
+        Altar(const P& p, const TerrainData* data);
 
         Altar() = delete;
-
-        Id id() const override
-        {
-                return Id::altar;
-        }
 
         void bump(actor::Actor& actor_bumping) override;
 
@@ -1062,13 +957,8 @@ private:
 class Tree : public Terrain
 {
 public:
-        Tree(const P& p);
+        Tree(const P& p, const TerrainData* data);
         Tree() = delete;
-
-        Id id() const override
-        {
-                return Id::tree;
-        }
 
         gfx::TileId tile() const override;
 
@@ -1117,13 +1007,8 @@ enum class TombAppearance
 class Tomb : public Terrain
 {
 public:
-        Tomb(const P& pos);
+        Tomb(const P& pos, const TerrainData* data);
         Tomb() = delete;
-
-        Id id() const override
-        {
-                return Id::tomb;
-        }
 
         std::string name(Article article) const override;
 
@@ -1169,13 +1054,8 @@ enum class ChestMatl
 class Chest : public Terrain
 {
 public:
-        Chest(const P& pos);
+        Chest(const P& pos, const TerrainData* data);
         Chest() = delete;
-
-        Id id() const override
-        {
-                return Id::chest;
-        }
 
         std::string name(Article article) const override;
 
@@ -1220,13 +1100,8 @@ private:
 class Cabinet : public Terrain
 {
 public:
-        Cabinet(const P& pos);
+        Cabinet(const P& pos, const TerrainData* data);
         Cabinet() = delete;
-
-        Id id() const override
-        {
-                return Id::cabinet;
-        }
 
         std::string name(Article article) const override;
 
@@ -1260,13 +1135,8 @@ private:
 class Bookshelf : public Terrain
 {
 public:
-        Bookshelf(const P& pos);
+        Bookshelf(const P& pos, const TerrainData* data);
         Bookshelf() = delete;
-
-        Id id() const override
-        {
-                return Id::bookshelf;
-        }
 
         std::string name(Article article) const override;
 
@@ -1293,13 +1163,8 @@ private:
 class AlchemistBench : public Terrain
 {
 public:
-        AlchemistBench(const P& pos);
+        AlchemistBench(const P& pos, const TerrainData* data);
         AlchemistBench() = delete;
-
-        Id id() const override
-        {
-                return Id::alchemist_bench;
-        }
 
         std::string name(Article article) const override;
 
@@ -1342,14 +1207,9 @@ enum class FountainEffect
 class Fountain : public Terrain
 {
 public:
-        Fountain(const P& pos);
+        Fountain(const P& pos, const TerrainData* data);
 
         Fountain() = delete;
-
-        Id id() const override
-        {
-                return Id::fountain;
-        }
 
         std::string name(Article article) const override;
 
@@ -1397,14 +1257,9 @@ private:
 class Cocoon : public Terrain
 {
 public:
-        Cocoon(const P& pos);
+        Cocoon(const P& pos, const TerrainData* data);
 
         Cocoon() = delete;
-
-        Id id() const override
-        {
-                return Id::cocoon;
-        }
 
         std::string name(Article article) const override;
 

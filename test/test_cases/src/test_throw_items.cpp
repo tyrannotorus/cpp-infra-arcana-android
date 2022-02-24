@@ -19,6 +19,7 @@
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 #include "test_utils.hpp"
 #include "throwing.hpp"
 
@@ -40,10 +41,11 @@ TEST_CASE("Throw weapon at wall")
 
         test_utils::init_all();
 
-        map::put(new terrain::Floor({5, 7}));
-        map::put(new terrain::Wall({5, 8}));
-        map::put(new terrain::Floor({5, 9}));
-        map::put(new terrain::Floor({5, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {5, 7}));
+        map::update_terrain(terrain::make(terrain::Id::wall, {5, 8}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {5, 9}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {5, 10}));
+
         map::g_player->m_pos = {5, 10};
 
         auto* item = item::make(item::Id::thr_knife);
@@ -59,8 +61,8 @@ TEST_CASE("Throw potion at monster")
 {
         test_utils::init_all();
 
-        map::put(new terrain::Floor({5, 7}));
-        map::put(new terrain::Floor({6, 7}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {5, 7}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {6, 7}));
 
         map::g_player->m_pos = {5, 7};
 

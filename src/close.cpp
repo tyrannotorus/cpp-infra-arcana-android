@@ -125,8 +125,13 @@ void player_try_close_or_jam()
 {
         msg_log::clear();
 
+        const std::string hint =
+                common_text::g_direction_query +
+                " " +
+                common_text::g_cancel_hint;
+
         msg_log::add(
-                "Which direction? " + common_text::g_cancel_hint,
+                hint,
                 colors::light_white(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::no,

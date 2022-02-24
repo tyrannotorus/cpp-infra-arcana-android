@@ -22,6 +22,7 @@ extern const std::string g_next_page_up_hint;
 extern const std::string g_next_page_down_hint;
 extern const std::string g_cancel_hint;
 extern const std::string g_confirm_hint;
+extern const std::string g_confirm_drop_hint;
 extern const std::string g_any_key_hint;
 extern const std::string g_yes_or_no_hint;
 extern const std::string g_direction_query;

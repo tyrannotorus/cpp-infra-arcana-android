@@ -186,7 +186,7 @@ static void draw_alt_wpn(const int y, const Panel panel)
                 wpn_str,
                 panel,
                 {panels::w(panel) - 1, y},
-                color.fraction(2.0),
+                color.shaded(50),
                 io::DrawBg::no);
 }
 
@@ -334,7 +334,7 @@ static void draw_insanity(const int y, const Panel panel)
                 ins_str,
                 panel,
                 {panels::w(panel) - 1, y},
-                colors::magenta().fraction(1.5),
+                colors::magenta().shaded(40),
                 io::DrawBg::no);
 }
 

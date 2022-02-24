@@ -30,7 +30,7 @@ R fov_rect(const P& p, const P& map_dims)
                 std::min(map_dims.x - 1, p.x + radi),
                 std::min(map_dims.y - 1, p.y + radi));
 
-        return R(p0, p1);
+        return {p0, p1};
 }
 
 bool is_in_fov_range(const P& p0, const P& p1)
@@ -43,10 +43,6 @@ LosResult check_cell(
         const P& p1,
         const FovMap& map)
 {
-        ASSERT(map.hard_blocked);
-        ASSERT(map.dark);
-        ASSERT(map.light);
-
         LosResult los_result;
 
         // Assume we are blocked initially

@@ -68,8 +68,6 @@ StateId MarkerState::id() const
 
 void MarkerState::on_start()
 {
-        init_marker_render_data();
-
         m_pos = map::g_player->m_pos;
 
         if (use_player_tgt())
@@ -93,20 +91,12 @@ void MarkerState::on_start()
         on_moved();
 }
 
-void MarkerState::init_marker_render_data()
-{
-        m_marker_render_data.resize(
-                viewport::get_map_view_area().dims());
-}
-
 void MarkerState::on_window_resized()
 {
         // This is safe and convenient:
         m_pos = map::g_player->m_pos;
 
-        viewport::show(m_pos, viewport::ForceCentering::no);
-
-        init_marker_render_data();
+        viewport::show(m_pos, viewport::ForceCentering::yes);
 
         msg_log::clear();
 }
@@ -138,7 +128,7 @@ void MarkerState::draw()
         // Remove origin position
         if (!line.empty())
         {
-                line.erase(line.begin());
+                line.erase(std::begin(line));
         }
 
         const auto effective_dist_range = effective_king_dist_range();
@@ -172,7 +162,7 @@ void MarkerState::draw()
 
                         if (map::g_seen.at(p) && blocked_parser.run(p))
                         {
-                                red_from_idx = i;
+                                red_from_idx = (int)i;
                                 break;
                         }
                 }
@@ -192,7 +182,7 @@ void MarkerState::update()
 {
         const int nr_jump_steps = 5;
 
-        InputData input;
+        io::InputData input;
 
         if (!config::is_bot_playing())
         {
@@ -285,19 +275,6 @@ void MarkerState::draw_marker(
         int red_from_king_dist,
         int red_from_idx)
 {
-        const P map_view_dims = viewport::get_map_view_area().dims();
-
-        for (int x = 0; x < map_view_dims.x; ++x)
-        {
-                for (int y = 0; y < map_view_dims.y; ++y)
-                {
-                        auto& d = m_marker_render_data.at(x, y);
-
-                        d.tile = gfx::TileId::END;
-                        d.character = 0;
-                }
-        }
-
         auto color = colors::light_green();
 
         // Draw the line
@@ -353,24 +330,15 @@ void MarkerState::draw_marker(
                 {
                         const P view_pos = viewport::to_view_pos(line_pos);
 
-                        auto& d = m_marker_render_data.at(view_pos);
+                        io::MapDrawObj draw_obj;
 
-                        d.tile = gfx::TileId::aim_marker_line;
+                        draw_obj.pos = view_pos;
+                        draw_obj.tile = gfx::TileId::aim_marker_line;
+                        draw_obj.character = '*';
+                        draw_obj.color = color;
+                        draw_obj.color_bg = colors::black();
 
-                        d.character = '*';
-
-                        d.color = color;
-
-                        d.color_bg = colors::black();
-
-                        io::draw_symbol(
-                                d.tile,
-                                d.character,
-                                Panel::map,
-                                view_pos,
-                                d.color,
-                                io::DrawBg::yes,
-                                d.color_bg);
+                        draw_obj.draw();
                 }
         }  // line loop
 
@@ -393,24 +361,15 @@ void MarkerState::draw_marker(
 
                 const P view_pos = viewport::to_view_pos(head_pos);
 
-                auto& d = m_marker_render_data.at(view_pos);
+                io::MapDrawObj draw_obj;
 
-                d.tile = gfx::TileId::aim_marker_head;
+                draw_obj.pos = view_pos;
+                draw_obj.tile = gfx::TileId::aim_marker_head;
+                draw_obj.character = 'X';
+                draw_obj.color = color;
+                draw_obj.color_bg = colors::black();
 
-                d.character = 'X';
-
-                d.color = color;
-
-                d.color_bg = colors::black();
-
-                io::draw_symbol(
-                        d.tile,
-                        d.character,
-                        Panel::map,
-                        viewport::to_view_pos(head_pos),
-                        d.color,
-                        io::DrawBg::yes,
-                        d.color_bg);
+                draw_obj.draw();
         }
 }
 
@@ -476,7 +435,7 @@ void MarkerState::try_go_to_closest_enemy()
         {
                 m_pos = closest_pos(map::g_player->m_pos, seen_foes_positions);
 
-                map::g_player->m_tgt = map::first_actor_at_pos(m_pos);
+                map::g_player->m_tgt = map::living_actor_at(m_pos);
         }
 }
 
@@ -489,7 +448,7 @@ void Viewing::on_moved()
 
         view::print_location_info_msgs(m_pos);
 
-        const auto* const actor = map::first_actor_at_pos(m_pos);
+        const auto* const actor = map::living_actor_at(m_pos);
 
         if (actor &&
             !actor::is_player(actor) &&
@@ -502,7 +461,7 @@ void Viewing::on_moved()
                 // however see TODO above
 #ifndef NDEBUG
                 {
-                        InputData dummy_input;
+                        io::InputData dummy_input;
                         dummy_input.key = view_key;
 
                         const auto game_cmd =
@@ -533,13 +492,13 @@ void Viewing::on_moved()
                 CopyToMsgHistory::no);
 }
 
-void Viewing::handle_input(const InputData& input)
+void Viewing::handle_input(const io::InputData& input)
 {
         const auto game_cmd = game_commands::to_cmd(input);
 
         if (game_cmd == GameCmd::look)
         {
-                auto* const actor = map::first_actor_at_pos(m_pos);
+                auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor &&
                     !actor::is_player(actor) &&
@@ -575,7 +534,7 @@ void Aiming::on_moved()
 
         if (is_in_max_range)
         {
-                auto* const actor = map::first_actor_at_pos(m_pos);
+                auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor &&
                     !actor::is_player(actor) &&
@@ -608,7 +567,7 @@ void Aiming::on_moved()
         // however see TODO above
 #ifndef NDEBUG
         {
-                InputData dummy_input;
+                io::InputData dummy_input;
                 dummy_input.key = fire_key;
 
                 const auto game_cmd = game_commands::to_cmd(dummy_input);
@@ -631,7 +590,7 @@ void Aiming::on_moved()
                 CopyToMsgHistory::no);
 }
 
-void Aiming::handle_input(const InputData& input)
+void Aiming::handle_input(const io::InputData& input)
 {
         auto game_cmd = GameCmd::undefined;
 
@@ -689,14 +648,14 @@ void Aiming::handle_input(const InputData& input)
                         }
                 }
 
-                auto* const actor = map::first_actor_at_pos(m_pos);
+                auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor && actor::can_player_see_actor(*actor))
                 {
                         map::g_player->m_tgt = actor;
                 }
 
-                const auto pos = m_pos;
+                const P pos = m_pos;
 
                 auto* const wpn = &m_wpn;
 
@@ -739,7 +698,7 @@ void Throwing::on_moved()
 
         if (is_in_range)
         {
-                auto* const actor = map::first_actor_at_pos(m_pos);
+                auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor &&
                     !actor::is_player(actor) &&
@@ -772,7 +731,7 @@ void Throwing::on_moved()
         // however see TODO above
 #ifndef NDEBUG
         {
-                InputData dummy_input;
+                io::InputData dummy_input;
                 dummy_input.key = throw_key;
 
                 const auto game_cmd = game_commands::to_cmd(dummy_input);
@@ -795,7 +754,7 @@ void Throwing::on_moved()
                 CopyToMsgHistory::no);
 }
 
-void Throwing::handle_input(const InputData& input)
+void Throwing::handle_input(const io::InputData& input)
 {
         const auto game_cmd = game_commands::to_cmd(input);
 
@@ -839,7 +798,7 @@ void Throwing::handle_input(const InputData& input)
                         }
                 }
 
-                auto* const actor = map::first_actor_at_pos(m_pos);
+                auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor && actor::can_player_see_actor(*actor))
                 {
@@ -891,17 +850,19 @@ void ThrowingExplosive::on_draw()
 {
         const auto id = m_explosive.id();
 
-        if (id != item::Id::dynamite &&
-            id != item::Id::molotov &&
-            id != item::Id::smoke_grenade)
+        if ((id != item::Id::dynamite) &&
+            (id != item::Id::molotov) &&
+            (id != item::Id::smoke_grenade))
         {
                 return;
         }
 
         const R expl_area =
-                explosion::explosion_area(m_pos, g_expl_std_radi);
+                explosion::explosion_area_outside_map_allowed(
+                        m_pos,
+                        g_expl_std_radi);
 
-        const Color color_bg = colors::red().fraction(1.5);
+        const Color color = colors::red();
 
         // Draw explosion radius area overlay
         for (int y = expl_area.p0.y; y <= expl_area.p1.y; ++y)
@@ -910,49 +871,23 @@ void ThrowingExplosive::on_draw()
                 {
                         const P p(x, y);
 
-                        if (!viewport::is_in_view(p) ||
-                            !map::is_pos_inside_map(p) ||
-                            !map::g_seen.at(p))
+                        if (!viewport::is_in_view(p))
                         {
                                 continue;
                         }
-
-                        const auto& render_d = draw_map::get_drawn_cell(x, y);
 
                         const P view_pos = viewport::to_view_pos(p);
 
-                        const auto& marker_render_d =
-                                m_marker_render_data.at(view_pos);
+                        const P px_pos = io::map_to_px_coords(view_pos);
 
-                        // Draw overlay if the cell contains either a map
-                        // symbol or a marker symbol.
-                        if ((render_d.character == 0) &&
-                            (marker_render_d.character == 0))
-                        {
-                                continue;
-                        }
+                        const P px_dims(
+                                config::map_cell_px_w(),
+                                config::map_cell_px_h());
 
-                        const bool has_marker =
-                                marker_render_d.character != 0;
-
-                        const auto& d =
-                                has_marker
-                                ? marker_render_d
-                                : render_d;
-
-                        const Color color_fg =
-                                has_marker
-                                ? d.color
-                                : colors::orange();
-
-                        io::draw_symbol(
-                                d.tile,
-                                d.character,
-                                Panel::map,
-                                view_pos,
-                                color_fg,
-                                io::DrawBg::yes,
-                                color_bg);
+                        io::draw_rectangle_filled(
+                                {px_pos, px_pos + px_dims - 1},
+                                color,
+                                80);
                 }
         }
 }
@@ -968,7 +903,7 @@ void ThrowingExplosive::on_moved()
         // however see TODO above
 #ifndef NDEBUG
         {
-                InputData dummy_input;
+                io::InputData dummy_input;
                 dummy_input.key = throw_key;
 
                 const auto game_cmd = game_commands::to_cmd(dummy_input);
@@ -991,7 +926,7 @@ void ThrowingExplosive::on_moved()
                 CopyToMsgHistory::no);
 }
 
-void ThrowingExplosive::handle_input(const InputData& input)
+void ThrowingExplosive::handle_input(const io::InputData& input)
 {
         const auto game_cmd = game_commands::to_cmd(input);
 
@@ -1078,7 +1013,7 @@ void CtrlTele::on_moved()
         }
 }
 
-void CtrlTele::handle_input(const InputData& input)
+void CtrlTele::handle_input(const io::InputData& input)
 {
         if ((input.key != SDLK_RETURN) || (m_pos == map::g_player->m_pos))
         {
@@ -1250,7 +1185,7 @@ DidAction CtrlObjCloseDoor::run(
         terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
-        const auto* const actor_here = map::first_actor_at_pos(terrain.pos());
+        const auto* const actor_here = map::living_actor_at(terrain.pos());
 
         if (actor_here)
         {
@@ -1711,7 +1646,7 @@ void CtrlObj::on_moved()
                 CopyToMsgHistory::no);
 }
 
-void CtrlObj::handle_input(const InputData& input)
+void CtrlObj::handle_input(const io::InputData& input)
 {
         if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE))
         {
@@ -1858,7 +1793,7 @@ CtrlObjActionPtr CtrlObj::query_control() const
 
         int choice = 0;
 
-        popup.set_menu(menu_labels, menu_keys, &choice);
+        popup.setup_menu_mode(menu_labels, menu_keys, &choice);
 
         popup.set_title("Control object");
 

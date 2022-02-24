@@ -48,6 +48,7 @@
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 #include "terrain_mob.hpp"
 #include "text_format.hpp"
 
@@ -959,7 +960,7 @@ Color Wpn::color() const
             !m_data->ranged.has_infinite_ammo &&
             (m_ammo_loaded == 0))
         {
-                return m_data->color.fraction(2.0);
+                return m_data->color.shaded(50);
         }
 
         return m_data->color;
@@ -1852,7 +1853,13 @@ void Dynamite::on_std_turn_player_hold_ignited()
 
 void Dynamite::on_thrown_ignited_landing(const P& p)
 {
-        game_time::add_mob(new terrain::LitDynamite(p, m_fuse_turns));
+        auto* const t =
+                static_cast<terrain::LitDynamite*>(
+                        terrain::make(terrain::Id::lit_dynamite, p));
+
+        t->set_nr_turns(m_fuse_turns);
+
+        game_time::add_mob(t);
 }
 
 void Dynamite::on_player_paralyzed()
@@ -1867,7 +1874,13 @@ void Dynamite::on_player_paralyzed()
 
         if (t_id != terrain::Id::chasm)
         {
-                game_time::add_mob(new terrain::LitDynamite(p, m_fuse_turns));
+                auto* const t =
+                        static_cast<terrain::LitDynamite*>(
+                                terrain::make(terrain::Id::lit_dynamite, p));
+
+                t->set_nr_turns(m_fuse_turns);
+
+                game_time::add_mob(t);
         }
 
         delete this;
@@ -2014,7 +2027,13 @@ void Flare::on_std_turn_player_hold_ignited()
 
 void Flare::on_thrown_ignited_landing(const P& p)
 {
-        game_time::add_mob(new terrain::LitFlare(p, m_fuse_turns));
+        auto* const t =
+                static_cast<terrain::LitDynamite*>(
+                        terrain::make(terrain::Id::lit_flare, p));
+
+        t->set_nr_turns(m_fuse_turns);
+
+        game_time::add_mob(t);
 }
 
 void Flare::on_player_paralyzed()
@@ -2029,7 +2048,13 @@ void Flare::on_player_paralyzed()
 
         if (t_id != terrain::Id::chasm)
         {
-                game_time::add_mob(new terrain::LitFlare(p, m_fuse_turns));
+                auto* const t =
+                        static_cast<terrain::LitDynamite*>(
+                                terrain::make(terrain::Id::lit_flare, p));
+
+                t->set_nr_turns(m_fuse_turns);
+
+                game_time::add_mob(t);
         }
 
         delete this;

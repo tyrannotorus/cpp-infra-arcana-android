@@ -42,10 +42,11 @@ std::vector<P> to_vec(
 
 bool is_pos_inside(const P& pos, const R& area)
 {
-        return pos.x >= area.p0.x &&
+        return (
+                pos.x >= area.p0.x &&
                 pos.x <= area.p1.x &&
                 pos.y >= area.p0.y &&
-                pos.y <= area.p1.y;
+                pos.y <= area.p1.y);
 }
 
 bool is_area_inside(
@@ -55,17 +56,19 @@ bool is_area_inside(
 {
         if (count_equal_as_inside)
         {
-                return inner.p0.x >= outer.p0.x &&
+                return (
+                        inner.p0.x >= outer.p0.x &&
                         inner.p1.x <= outer.p1.x &&
                         inner.p0.y >= outer.p0.y &&
-                        inner.p1.y <= outer.p1.y;
+                        inner.p1.y <= outer.p1.y);
         }
         else
         {
-                return inner.p0.x > outer.p0.x &&
+                return (
+                        inner.p0.x > outer.p0.x &&
                         inner.p1.x < outer.p1.x &&
                         inner.p0.y > outer.p0.y &&
-                        inner.p1.y < outer.p1.y;
+                        inner.p1.y < outer.p1.y);
         }
 }
 

@@ -191,8 +191,8 @@ void kill(
 
                 if (actor.m_data->can_bleed && (allow_gore == AllowGore::yes))
                 {
-                        map::make_gore(actor.m_pos);
-                        map::make_blood(actor.m_pos);
+                        terrain::make_gore(actor.m_pos);
+                        terrain::make_blood(actor.m_pos);
                 }
         }
         else

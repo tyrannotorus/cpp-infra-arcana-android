@@ -225,7 +225,7 @@ static void run_std_turn_events()
                 }
         }  // Actor loop
 
-        // Allow already burning terrains to damage stuff, spread fire, etc
+        // Allow already burning terrains to damage stuff, spread fire, etc.
         for (auto* const terrain : map::g_terrain)
         {
                 if (terrain->is_burning())
@@ -241,9 +241,9 @@ static void run_std_turn_events()
 
         const std::vector<terrain::Terrain*> mobs_cpy = game_time::g_mobs;
 
-        for (auto* t : mobs_cpy)
+        for (auto* terrain : mobs_cpy)
         {
-                t->on_new_turn();
+                terrain->on_new_turn();
         }
 
         if (map_control::g_controller)
@@ -283,7 +283,11 @@ static void run_atomic_turn_events()
         // Stop burning for any actor standing in liquid
         for (auto* const actor : game_time::g_actors)
         {
-                if (actor->m_properties.has(PropId::flying))
+                auto& props = actor->m_properties;
+
+                if (props.has(PropId::flying) ||
+                    props.has(PropId::tiny_flying) ||
+                    !props.has(PropId::burning))
                 {
                         continue;
                 }
@@ -292,15 +296,15 @@ static void run_atomic_turn_events()
 
                 const auto* const terrain = map::g_terrain.at(p);
 
-                if (terrain->data().matl_type == Matl::fluid)
+                if (terrain->m_data->matl_type == Matl::fluid)
                 {
+                        // TODO: Add a message here.
+
                         actor->m_properties.end_prop(PropId::burning);
+
+                        map::update_light_map();
                 }
         }
-
-        // NOTE: We add light AFTER ending burning for actors in liquid, since
-        // those actors shouldn't add light.
-        game_time::update_light_map();
 }
 
 static void set_actor_max_delay(actor::Actor& actor)
@@ -381,7 +385,7 @@ int turn_nr()
         return s_turn_nr;
 }
 
-std::vector<terrain::Terrain*> mobs_at_pos(const P& p)
+std::vector<terrain::Terrain*> mobs_at(const P& p)
 {
         std::vector<terrain::Terrain*> mobs;
 
@@ -396,29 +400,49 @@ std::vector<terrain::Terrain*> mobs_at_pos(const P& p)
         return mobs;
 }
 
-void add_mob(terrain::Terrain* const t)
+void add_mob(terrain::Terrain* const terrain)
 {
-        g_mobs.push_back(t);
+        g_mobs.push_back(terrain);
 
-        t->on_placed();
+        terrain->on_placed();
+
+        map::update_map_info_for_terrain_at(terrain->pos());
 }
 
-void erase_mob(terrain::Terrain* const f, const bool destroy_object)
+void erase_mob(
+        const terrain::Terrain* const terrain,
+        const bool destroy_object)
 {
-        for (auto it = g_mobs.begin(); it != g_mobs.end(); ++it)
+        for (auto it = std::begin(g_mobs); it != std::end(g_mobs); ++it)
         {
-                if (*it == f)
+                if (*it == terrain)
                 {
+                        const P pos = terrain->pos();
+
                         if (destroy_object)
                         {
-                                delete f;
+                                delete terrain;
                         }
 
                         g_mobs.erase(it);
 
+                        map::update_map_info_for_terrain_at(pos);
+
                         return;
                 }
         }
+
+        TRACE
+                << "Could not erase mobile terrain '"
+                << terrain
+                << "', not found in list of size '"
+                << g_mobs.size()
+                << "'"
+                << std::endl;
+
+        TRACE
+                << "Terrain name: '" << terrain->name(Article::a) << "'"
+                << std::endl;
 
         ASSERT(false);
 }
@@ -552,29 +576,6 @@ void tick()
         }
 
         actor::start_turn(*next_actor);
-}
-
-void update_light_map()
-{
-        Array2<bool> light_tmp(map::dims());
-
-        for (const auto* const a : g_actors)
-        {
-                a->add_light(light_tmp);
-        }
-
-        for (const auto* const m : g_mobs)
-        {
-                m->add_light(light_tmp);
-        }
-
-        for (auto* const terrain : map::g_terrain)
-        {
-                terrain->add_light(light_tmp);
-        }
-
-        // Copy the temporary buffer to the real light map
-        memcpy(map::g_light.data(), light_tmp.data(), map::g_light.length());
 }
 
 actor::Actor* current_actor()

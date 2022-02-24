@@ -85,7 +85,7 @@ static bool should_put_contour_at(
         const Color& contour_color)
 {
         // Only allow drawing a contour at pixels with the same color as the
-        // background color parameter
+        // background color parameter.
         {
                 const auto color =
                         io::read_px_on_surface(
@@ -94,13 +94,42 @@ static bool should_put_contour_at(
 
                 if (color != bg_color)
                 {
+#ifndef NDEBUG
+                        if (color != Color(255, 255, 255))
+                        {
+                                TRACE
+                                        << "Found color other than "
+                                           "background color or full white: "
+                                        << (int)color.r()
+                                        << ","
+                                        << (int)color.g()
+                                        << ","
+                                        << (int)color.b()
+                                        << " - at position: "
+                                        << surface_px_pos.x
+                                        << "x"
+                                        << surface_px_pos.y
+                                        << std::endl
+                                        << "(Background color is: "
+                                        << (int)bg_color.r()
+                                        << ","
+                                        << (int)bg_color.g()
+                                        << ","
+                                        << (int)bg_color.b()
+                                        << ")"
+                                        << std::endl;
+
+                                PANIC;
+                        }
+#endif  // NDEBUG
+
                         return false;
                 }
         }
 
         // Draw a contour here if it has a neighbour with different color than
         // the background or contour color (i.e. if it has a neighbour with a
-        // color that will be drawn to the screen)
+        // color that will be drawn to the screen).
         auto pred = [&](const auto d) {
                 const auto adj_p = surface_px_pos + d;
 
@@ -236,7 +265,7 @@ static SDL_Renderer* create_renderer()
                 SDL_CreateRenderer(
                         io::g_sdl_window,
                         -1,
-                        SDL_RENDERER_ACCELERATED);
+                        SDL_RENDERER_SOFTWARE);
 
         if (!renderer)
         {
@@ -369,6 +398,8 @@ static void load_font()
 
         const auto img_path = paths::fonts_dir() + config::font_name();
 
+        TRACE << "Loading font image: " << img_path << std::endl;
+
         auto* const surface = load_surface(img_path);
 
         swap_surface_color(*surface, colors::black(), colors::magenta());
@@ -396,6 +427,8 @@ static void load_tile(const gfx::TileId id, const P& cell_px_dims)
 {
         const auto img_name = gfx::tile_id_to_str(id);
         const auto img_path = paths::tiles_dir() + img_name + ".png";
+
+        TRACE << "Loading tile image: " << img_path << std::endl;
 
         auto* const surface = load_surface(img_path);
 
@@ -459,6 +492,8 @@ void init()
         init_window();
         init_renderer();
 
+        SDL_SetRenderDrawBlendMode(io::g_sdl_renderer, SDL_BLENDMODE_BLEND);
+
         load_font();
 
         if (config::is_tiles_mode())
@@ -518,6 +553,29 @@ void on_user_toggle_scaling()
         TRACE_FUNC_END;
 }
 
+void set_clip_rect_to_panel(const Panel panel)
+{
+        auto px_area = gui_to_px_rect(panels::area(panel));
+
+        if (config::is_2x_scale_enabled())
+        {
+                px_area = px_area.scaled_up(2);
+        }
+
+        const SDL_Rect clip_rect {
+                px_area.p0.x,
+                px_area.p0.y,
+                px_area.w(),
+                px_area.h()};
+
+        SDL_RenderSetClipRect(g_sdl_renderer, &clip_rect);
+}
+
+void disable_clip_rect()
+{
+        SDL_RenderSetClipRect(g_sdl_renderer, nullptr);
+}
+
 void draw_character_at_px(
         const char character,
         P px_pos,
@@ -536,14 +594,14 @@ void draw_character_at_px(
         if (draw_bg == io::DrawBg::yes)
         {
                 // NOTE: No rendering offsets or scaling calculated yet, the
-                // rectangle function performs its own offsets and scaling
+                // rectangle function performs its own offsets and scaling.
                 io::draw_rectangle_filled(
                         {px_pos, px_pos + gui_cell_px_dims - 1},
                         bg_color);
         }
 
         // Set up the texture clip rectangle, before calculating scaling
-        // NOTE: We expect one pixel separator between each glyph
+        // NOTE: We expect one pixel separator between each glyph.
         auto char_px_pos = gfx::character_pos(character);
 
         char_px_pos.x *= (gui_cell_px_dims.x + 1);
@@ -594,25 +652,34 @@ void draw_character_at_px(
         SDL_RenderCopy(g_sdl_renderer, texture, &clip_rect, &render_rect);
 }
 
-void draw_tile(
-        const gfx::TileId tile,
-        const Panel panel,
-        const P& pos,
-        const Color& color,
-        const DrawBg draw_bg,
-        const Color& bg_color)
+void draw_character(const CharacterDrawObj& obj)
 {
-        P px_pos = map_to_px_coords(panel, pos);
+        const auto px_pos = gui_to_px_coords(obj.panel, obj.pos);
+
+        const auto sdl_color = obj.color.sdl_color();
+        const auto sdl_color_bg = obj.bg_color.sdl_color();
+
+        draw_character_at_px(
+                obj.character,
+                px_pos,
+                sdl_color,
+                obj.draw_bg,
+                sdl_color_bg);
+}
+
+void draw_tile(const TileDrawObj& obj)
+{
+        P px_pos = map_to_px_coords(obj.panel, obj.pos);
 
         P map_cell_px_dims(config::map_cell_px_w(), config::map_cell_px_h());
 
-        if (draw_bg == DrawBg::yes)
+        if (obj.draw_bg == DrawBg::yes)
         {
                 // NOTE: No rendering offsets or scaling calculated yet, the
                 // rectangle function performs its own offsets and scaling
                 draw_rectangle_filled(
                         {px_pos, px_pos + map_cell_px_dims - 1},
-                        bg_color);
+                        obj.bg_color);
         }
 
         // * Now apply offset and scaling, if needed *
@@ -638,18 +705,23 @@ void draw_tile(
 
         SDL_Texture* texture = nullptr;
 
-        if ((color == colors::black()) || (bg_color == colors::black()))
+        if ((obj.color == colors::black()) ||
+            (obj.bg_color == colors::black()))
         {
                 // Foreground or background is black - no contours
-                texture = g_tile_textures[(size_t)tile];
+                texture = g_tile_textures[(size_t)obj.tile];
         }
         else
         {
                 // Both foreground and background are non-black - use contours
-                texture = g_tile_textures_with_contours[(size_t)tile];
+                texture = g_tile_textures_with_contours[(size_t)obj.tile];
         }
 
-        SDL_SetTextureColorMod(texture, color.r(), color.g(), color.b());
+        SDL_SetTextureColorMod(
+                texture,
+                obj.color.r(),
+                obj.color.g(),
+                obj.color.b());
 
         SDL_RenderCopy(
                 g_sdl_renderer,

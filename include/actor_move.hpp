@@ -9,11 +9,17 @@
 
 #include "direction.hpp"
 
+struct P;
+
 namespace actor
 {
 class Actor;
 
-void move(Actor& actor, Dir dir);
+void do_move_action(Actor& actor, Dir dir);
+
+// NOTE: Changing an actor's position shall always be done through this function
+// (not by directly changing their position data):
+void set_position(Actor& actor, const P& pos);
 
 }  // namespace actor
 

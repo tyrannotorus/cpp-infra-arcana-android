@@ -11,10 +11,14 @@
 
 #include "colors.hpp"
 #include "direction.hpp"
+#include "pos.hpp"
+#include "random.hpp"
+#include "state.hpp"
 
+namespace io
+{
 struct InputData;
-struct P;
-struct Range;
+}  // namespace io
 
 enum class BinaryAnswer
 {
@@ -37,6 +41,13 @@ enum class AllowSpaceCancel
 
 namespace query
 {
+struct QueryNumberConfig
+{
+        Range allowed_range {};
+        int default_value {0};
+        bool cancel_returns_default {false};
+};
+
 void init();
 
 void cleanup();
@@ -53,14 +64,12 @@ void wait_for_msg_more();
 
 void wait_for_confirm();
 
-InputData letter(bool accept_enter);
+io::InputData letter(bool accept_enter);
 
 int number(
-        const P& pos,
-        Color color,
-        const Range& allowed_range,
-        int default_value,
-        bool cancel_returns_default);
+        const QueryNumberConfig& config,
+        const std::string& title,
+        const std::string& msg = "");
 
 }  // namespace query
 

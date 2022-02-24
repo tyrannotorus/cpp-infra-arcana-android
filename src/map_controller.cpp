@@ -25,6 +25,7 @@
 #include "property_handler.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
 // MapController
@@ -102,9 +103,15 @@ void MapControllerBoss::on_std_turn()
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::yes);
 
-        map::put(new terrain::Stairs(stair_pos));
+        map::update_terrain(
+                terrain::make(
+                        terrain::Id::stairs,
+                        stair_pos));
 
-        map::put(new terrain::RubbleLow(stair_pos - P(1, 0)));
+        map::update_terrain(
+                terrain::make(
+                        terrain::Id::rubble_low,
+                        stair_pos - P(1, 0)));
 
         // TODO: This was in the 'on_death' hook for TheHighPriest - it should
         // be a property if this event should still exist

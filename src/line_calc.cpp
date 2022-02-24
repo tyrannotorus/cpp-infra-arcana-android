@@ -81,7 +81,7 @@ const std::vector<P>* fov_delta_line(
         const int x = delta.x + g_fov_radi_int;
         const int y = delta.y + g_fov_radi_int;
 
-        if (x >= 0 && y >= 0 && x < g_fov_w_int && y < g_fov_w_int)
+        if ((x >= 0) && (y >= 0) && (x < g_fov_w_int) && (y < g_fov_w_int))
         {
                 if (s_fov_abs_distances[x][y] <= max_dist_abs)
                 {

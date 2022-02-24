@@ -58,8 +58,6 @@ public:
                         m_sdl_color.b != other.m_sdl_color.b);
         }
 
-        Color fraction(double div) const;
-
         Color shaded(int pct) const;
 
         Color tinted(int pct) const;

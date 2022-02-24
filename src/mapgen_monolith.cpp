@@ -23,6 +23,7 @@
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "terrain_factory.hpp"
 #include "terrain_monolith.hpp"
 
 namespace mapgen
@@ -93,7 +94,7 @@ void make_monoliths()
 
                 const auto p = spawn_weight_positions[spawn_p_idx];
 
-                map::put(new terrain::Monolith(p));
+                map::set_terrain(terrain::make(terrain::Id::monolith, p));
 
                 // Block this position and all adjacent positions
                 for (const P& d : dir_utils::g_cardinal_list_w_center)

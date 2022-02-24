@@ -80,6 +80,8 @@ namespace map_builder
 {
 std::unique_ptr<MapBuilder> make(const MapType map_type)
 {
+        TRACE << "Making map of type '" << (int)map_type << "'" << std::endl;
+
         switch (map_type)
         {
         case MapType::deep_one_lair:
@@ -149,6 +151,8 @@ void MapBuilder::build()
         }
 
         gods::set_random_god();
+
+        map::update_map_info();
 
         spawn_starting_allies();
 

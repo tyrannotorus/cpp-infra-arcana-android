@@ -62,6 +62,8 @@ void run_smoke_explosion_at(const P& origin, int radi_change = 0);
 
 R explosion_area(const P& c, int radi);
 
+R explosion_area_outside_map_allowed(const P& c, int radi);
+
 }  // namespace explosion
 
 #endif

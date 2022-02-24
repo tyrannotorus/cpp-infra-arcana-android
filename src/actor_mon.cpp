@@ -50,33 +50,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static void unblock_passable_doors(
-        const actor::ActorData& actor_data,
-        Array2<bool>& blocked)
-{
-        for (size_t i = 0; i < blocked.length(); ++i)
-        {
-                const auto* const t = map::g_terrain.at(i);
-
-                if (t->id() != terrain::Id::door)
-                {
-                        continue;
-                }
-
-                const auto* const door = static_cast<const terrain::Door*>(t);
-
-                if (door->type() == terrain::DoorType::metal)
-                {
-                        continue;
-                }
-
-                if (actor_data.can_open_doors ||
-                    actor_data.can_bash_doors)
-                {
-                        blocked.at(i) = false;
-                }
-        }
-}
 
 // -----------------------------------------------------------------------------
 // actor
@@ -173,26 +146,13 @@ std::vector<Actor*> Mon::foes_aware_of() const
 
         if (is_actor_my_leader(map::g_player))
         {
-                // TODO: This prevents player-allied monsters from casting
-                // spells on unreachable hostile monsters - but it probably
-                // doesn't matter for now
-
-                Array2<bool> blocked(map::dims());
-
-                map_parsers::BlocksActor(*this, ParseActors::no)
-                        .run(blocked, blocked.rect());
-
-                unblock_passable_doors(*m_data, blocked);
-
-                const auto flood = floodfill(m_pos, blocked);
-
-                // Add all player-hostile monsters which the player is aware of
+                // Player allied monster - add all player hostile monsters which
+                // the player is aware of.
                 for (auto* const actor : game_time::g_actors)
                 {
                         if (!actor::is_player(actor) &&
                             !actor->is_actor_my_leader(map::g_player) &&
-                            (flood.at(actor->m_pos) > 0) &&
-                            actor->is_aware_of_player())
+                            actor->is_player_aware_of_me())
                         {
                                 result.push_back(actor);
                         }
@@ -200,6 +160,8 @@ std::vector<Actor*> Mon::foes_aware_of() const
         }
         else if (is_aware_of_player())
         {
+                // Player-hostile monster aware of the player - add the player,
+                // and all creatures allied to the player.
                 result.push_back(map::g_player);
 
                 for (auto* const actor : game_time::g_actors)
@@ -521,7 +483,7 @@ DidAction Mon::try_attack(Actor& defender)
                 return DidAction::no;
         }
 
-        map::update_vision();
+        map::update_light_map();
 
         const auto my_avail_attacks = avail_attacks(defender);
 
@@ -603,7 +565,7 @@ bool Mon::is_ranged_attack_blocked(const P& target_pos) const
                 if (!ignore_blocking_friend)
                 {
                         // TODO: This does not consider allies/hostiles.
-                        const auto* const actor = map::first_actor_at_pos(p);
+                        const auto* const actor = map::living_actor_at(p);
 
                         if (actor &&
                             (actor->m_data->actor_size != actor::Size::floor))

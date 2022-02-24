@@ -91,10 +91,11 @@ enum class PropId
         frenzies_self,  // E.g. Apes
         summons_locusts,  // Khephren ability
 
-        // Properties describing the actors body and/or method of moving around
-        // (typically affects which terrain types the actor can move through,
-        // but may have other effects)
+        // Properties describing the actors body or method of moving around.
+        // These affect which terrain types the actor can move through, but
+        // may have other effects as well.
         flying,
+        tiny_flying,  // E.g. Locusts
         ethereal,
         ooze,
         small_crawling,

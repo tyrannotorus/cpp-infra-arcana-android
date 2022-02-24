@@ -40,17 +40,11 @@ void update_screen() {}
 
 void clear_screen() {}
 
-void on_fullscreen_toggled() {}
+void on_user_toggle_fullscreen() {}
+void on_user_toggle_scaling() {}
 
-P min_screen_gui_dims()
+R gui_to_px_rect(const R&)
 {
-        return {};
-}
-
-R gui_to_px_rect(const R rect)
-{
-        (void)rect;
-
         return {};
 }
 
@@ -74,7 +68,7 @@ int map_to_px_coords_y(const int)
         return 0;
 }
 
-P gui_to_px_coords(const P)
+P gui_to_px_coords(const P&)
 {
         return {};
 }
@@ -84,7 +78,7 @@ P gui_to_px_coords(const int, const int)
         return {};
 }
 
-P map_to_px_coords(const P)
+P map_to_px_coords(const P&)
 {
         return {};
 }
@@ -94,55 +88,36 @@ P map_to_px_coords(const int, const int)
         return {};
 }
 
-P px_to_gui_coords(const P)
+P px_to_gui_coords(const P&)
 {
         return {};
 }
 
-P px_to_map_coords(const P)
+P px_to_map_coords(const P&)
 {
         return {};
 }
 
-P gui_to_map_coords(const P)
+P gui_to_map_coords(const P&)
 {
         return {};
 }
 
-P gui_to_px_coords(const Panel, const P)
+P gui_to_px_coords(const Panel, const P&)
 {
         return {};
 }
 
-P map_to_px_coords(const Panel, const P)
+P map_to_px_coords(const Panel, const P&)
 {
         return {};
 }
 
-void draw_symbol(
-        const gfx::TileId,
-        const char,
-        const Panel,
-        P,
-        const Color&,
-        const DrawBg,
-        const Color&) {}
+void draw_map_obj(const MapDrawObj&) {}
 
-void draw_tile(
-        const gfx::TileId,
-        const Panel,
-        const P&,
-        const Color&,
-        const DrawBg,
-        const Color&) {}
+void draw_tile(const TileDrawObj&) {}
 
-void draw_character(
-        const char,
-        const Panel,
-        P,
-        const Color&,
-        const DrawBg,
-        const Color&) {}
+void draw_character(const CharacterDrawObj&) {}
 
 void draw_text(
         Text,
@@ -190,6 +165,12 @@ void draw_rectangle(R, const Color&) {}
 
 void draw_rectangle_filled(R, const Color&) {}
 
+void TileDrawObj::draw() const {}
+
+void CharacterDrawObj::draw() const {}
+
+void MapDrawObj::draw() const {}
+
 void draw_blast_at_cells(
         const std::vector<P>&,
         const Color&) {}
@@ -206,8 +187,6 @@ void draw_logo() {}
 
 void flush_input() {}
 
-void clear_events() {}
-
 InputData get()
 {
         InputData d = {};
@@ -217,15 +196,17 @@ InputData get()
         return d;
 }
 
+int graphics_cycle_nr(const GraphicsCycle)
+{
+        return 0;
+}
+
 std::string sdl_pref_dir()
 {
         return "./";
 }
 
 void sleep(const Uint32) {}
-
-void enable_graphics_cycling() {}
-void disable_graphics_cycling() {}
 
 }  // namespace io
 

@@ -77,8 +77,6 @@ static Array2<int> calc_player_vigilant_flood()
 
         if (player_bon::has_trait(Trait::vigilant))
         {
-                Array2<bool> blocks_sound(map::dims());
-
                 const int d = 3;
 
                 const R area(
@@ -87,10 +85,10 @@ static Array2<int> calc_player_vigilant_flood()
                         P(std::min(map::w() - 1, player.m_pos.x + d),
                           std::min(map::h() - 1, player.m_pos.y + d)));
 
+                Array2<bool> blocks_sound(map::dims());
+
                 map_parsers::BlocksSound()
-                        .run(blocks_sound,
-                             area,
-                             MapParseMode::overwrite);
+                        .run(blocks_sound, area, MapParseMode::overwrite);
 
                 vigilant_flood = floodfill(player.m_pos, blocks_sound, d);
         }

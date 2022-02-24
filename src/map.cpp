@@ -36,6 +36,7 @@
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
+#include "terrain_factory.hpp"
 #include "text_format.hpp"
 
 #ifndef NDEBUG
@@ -47,7 +48,7 @@
 // -----------------------------------------------------------------------------
 static P s_dims(0, 0);
 
-static void init_layers_data()
+static void init_arrays_data()
 {
         LosResult default_los;
         default_los.is_blocked_hard = true;
@@ -66,10 +67,18 @@ static void init_layers_data()
                 map::g_item_memory.at(i) = {};
                 map::g_terrain.at(i) = nullptr;
                 map::g_terrain_memory.at(i) = {};
+                map::g_terrain_blocks_walking.at(i) = {};
+                map::g_terrain_blocks_flying.at(i) = {};
+                map::g_terrain_blocks_tiny_flying.at(i) = {};
+                map::g_terrain_blocks_ethereal.at(i) = {};
+                map::g_terrain_blocks_ooze.at(i) = {};
+                map::g_terrain_blocks_small_crawling.at(i) = {};
+                map::g_terrain_blocks_burrowing.at(i) = {};
+                map::g_terrain_blocks_los.at(i) = {};
         }
 }
 
-static void resize_layers()
+static void resize_arrays()
 {
         map::g_seen.resize_no_init(s_dims);
         map::g_los.resize_no_init(s_dims);
@@ -81,6 +90,14 @@ static void resize_layers()
         map::g_item_memory.resize_no_init(s_dims);
         map::g_terrain.resize_no_init(s_dims);
         map::g_terrain_memory.resize_no_init(s_dims);
+        map::g_terrain_blocks_walking.resize_no_init(s_dims);
+        map::g_terrain_blocks_flying.resize_no_init(s_dims);
+        map::g_terrain_blocks_tiny_flying.resize_no_init(s_dims);
+        map::g_terrain_blocks_ethereal.resize_no_init(s_dims);
+        map::g_terrain_blocks_ooze.resize_no_init(s_dims);
+        map::g_terrain_blocks_small_crawling.resize_no_init(s_dims);
+        map::g_terrain_blocks_burrowing.resize_no_init(s_dims);
+        map::g_terrain_blocks_los.resize_no_init(s_dims);
 }
 
 static void free_layers_owned_memory()
@@ -97,6 +114,133 @@ static void free_layers_owned_memory()
                 auto* const item_pp = &map::g_items.at(i);
                 delete *item_pp;
                 *item_pp = nullptr;
+        }
+}
+
+static void set_map_blocking_info_true_for_all_at(const P& pos)
+{
+        map::g_terrain_blocks_walking.at(pos) = true;
+        map::g_terrain_blocks_flying.at(pos) = true;
+        map::g_terrain_blocks_tiny_flying.at(pos) = true;
+        map::g_terrain_blocks_ethereal.at(pos) = true;
+        map::g_terrain_blocks_ooze.at(pos) = true;
+        map::g_terrain_blocks_small_crawling.at(pos) = true;
+        map::g_terrain_blocks_burrowing.at(pos) = true;
+        map::g_terrain_blocks_los.at(pos) = true;
+}
+
+static void set_map_blocking_info_for_terrain(const terrain::Terrain& terrain)
+{
+        // NOTE: If the position can be walked through, every creature can move
+        // through it.
+        //
+        // TODO: Consider explicitly setting for all terrain whether the terrain
+        // blocks walking, flying, small crawling etc (in the terrain data or in
+        // overridden functions). Then this function could perhaps just do
+        // straightforward assignments instead.
+        //
+
+        const auto& p = terrain.pos();
+
+        const bool blocks_walking = !terrain.is_walkable();
+
+        map::g_terrain_blocks_walking.at(p) =
+                blocks_walking;
+
+        map::g_terrain_blocks_flying.at(p) =
+                blocks_walking &&
+                !terrain.is_property_allowing_move(PropId::flying);
+
+        map::g_terrain_blocks_tiny_flying.at(p) =
+                blocks_walking &&
+                !terrain.is_property_allowing_move(PropId::tiny_flying);
+
+        map::g_terrain_blocks_ethereal.at(p) =
+                blocks_walking &&
+                !terrain.is_property_allowing_move(PropId::ethereal);
+
+        map::g_terrain_blocks_ooze.at(p) =
+                blocks_walking &&
+                !terrain.is_property_allowing_move(PropId::ooze);
+
+        map::g_terrain_blocks_small_crawling.at(p) =
+                blocks_walking &&
+                !terrain.is_property_allowing_move(PropId::small_crawling);
+
+        map::g_terrain_blocks_burrowing.at(p) =
+                blocks_walking &&
+                !terrain.is_property_allowing_move(PropId::burrowing);
+
+        map::g_terrain_blocks_los.at(p) =
+                !terrain.is_los_passable();
+}
+
+// This function can only set blocking status from false to true.
+static void append_map_blocking_info_for_terrain(
+        const terrain::Terrain& terrain)
+{
+        const auto& p = terrain.pos();
+
+        const bool blocks_walking = !terrain.is_walkable();
+
+        if (!map::g_terrain_blocks_walking.at(p))
+        {
+                map::g_terrain_blocks_walking.at(p) =
+                        blocks_walking;
+        }
+
+        if (!map::g_terrain_blocks_flying.at(p))
+        {
+                map::g_terrain_blocks_flying.at(p) =
+                        blocks_walking &&
+                        !terrain.is_property_allowing_move(
+                                PropId::flying);
+        }
+
+        if (!map::g_terrain_blocks_tiny_flying.at(p))
+        {
+                map::g_terrain_blocks_tiny_flying.at(p) =
+                        blocks_walking &&
+                        !terrain.is_property_allowing_move(
+                                PropId::tiny_flying);
+        }
+
+        if (!map::g_terrain_blocks_ethereal.at(p))
+        {
+                map::g_terrain_blocks_ethereal.at(p) =
+                        blocks_walking &&
+                        !terrain.is_property_allowing_move(
+                                PropId::ethereal);
+        }
+
+        if (!map::g_terrain_blocks_ooze.at(p))
+        {
+                map::g_terrain_blocks_ooze.at(p) =
+                        blocks_walking &&
+                        !terrain.is_property_allowing_move(
+                                PropId::ooze);
+        }
+
+        if (!map::g_terrain_blocks_small_crawling.at(p))
+        {
+                map::g_terrain_blocks_small_crawling.at(p) =
+                        blocks_walking &&
+                        !terrain.is_property_allowing_move(
+                                PropId::small_crawling);
+        }
+
+        if (!map::g_terrain_blocks_burrowing.at(p))
+        {
+                map::g_terrain_blocks_burrowing.at(p) =
+                        blocks_walking &&
+                        !terrain.is_property_allowing_move(
+                                PropId::burrowing);
+        }
+
+        if (!map::g_terrain_blocks_los.at(p))
+        {
+                map::g_terrain_blocks_los.at(p) =
+                        !terrain.is_los_passable();
         }
 }
 
@@ -146,6 +290,14 @@ Array2<item::Item*> g_items(0, 0);
 Array2<PlayerMemoryItem> g_item_memory(0, 0);
 Array2<terrain::Terrain*> g_terrain(0, 0);
 Array2<PlayerMemoryTerrain> g_terrain_memory(0, 0);
+Array2<bool> g_terrain_blocks_walking(0, 0);
+Array2<bool> g_terrain_blocks_flying(0, 0);
+Array2<bool> g_terrain_blocks_tiny_flying(0, 0);
+Array2<bool> g_terrain_blocks_ethereal(0, 0);
+Array2<bool> g_terrain_blocks_ooze(0, 0);
+Array2<bool> g_terrain_blocks_small_crawling(0, 0);
+Array2<bool> g_terrain_blocks_burrowing(0, 0);
+Array2<bool> g_terrain_blocks_los(0, 0);
 
 actor::Player* g_player = nullptr;
 
@@ -193,14 +345,20 @@ void reset(const P& dims)
         free_layers_owned_memory();
 
         s_dims = dims;
-        resize_layers();
-        init_layers_data();
+        resize_arrays();
+        init_arrays_data();
 
-        for (int x = 0; x < w(); ++x)
+        const int map_w = w();
+        const int map_h = h();
+
+        for (int x = 0; x < map_w; ++x)
         {
-                for (int y = 0; y < h(); ++y)
+                for (int y = 0; y < map_h; ++y)
                 {
-                        put(new terrain::Wall({x, y}));
+                        auto* const wall =
+                                terrain::make(terrain::Id::wall, {x, y});
+
+                        set_terrain(wall);
                 }
         }
 
@@ -249,75 +407,73 @@ int h()
         return s_dims.y;
 }
 
-P dims()
+const P& dims()
 {
         return s_dims;
 }
 
 R rect()
 {
-        return R({0, 0}, s_dims - 1);
+        return {{0, 0}, s_dims - 1};
 }
 
 size_t nr_positions()
 {
-        return s_dims.x * s_dims.y;
+        return (size_t)s_dims.x * (size_t)s_dims.y;
 }
 
-terrain::Terrain* put(terrain::Terrain* const t)
+void update_map_info()
 {
-        ASSERT(t);
-
-        const auto p = t->pos();
-
-        auto& terrain_ref = g_terrain.at(p);
-
-        delete terrain_ref;
-
-        terrain_ref = t;
-
-#ifndef NDEBUG
-        if (init::g_is_demo_mapgen)
+        for (int x = 0; x < s_dims.x; ++x)
         {
-                if (t->id() == terrain::Id::floor)
+                for (int y = 0; y < s_dims.y; ++y)
                 {
-                        viewport::show(p, viewport::ForceCentering::no);
+                        const P pos(x, y);
 
-                        for (auto& seen : g_seen)
+                        if (map::is_pos_inside_outer_walls(pos))
                         {
-                                seen = true;
-                        }
+                                const terrain::Terrain& terrain =
+                                        *g_terrain.at(pos);
 
-                        for (auto& explored : g_explored)
+                                set_map_blocking_info_for_terrain(terrain);
+                        }
+                        else
                         {
-                                explored = true;
+                                set_map_blocking_info_true_for_all_at(pos);
                         }
-
-                        states::draw();
-
-                        io::draw_symbol(
-                                gfx::TileId::aim_marker_line,
-                                'X',
-                                Panel::map,
-                                viewport::to_view_pos(p),
-                                colors::yellow());
-
-                        io::update_screen();
-
-                        // NOTE: Delay must be > 1 for user input to be read
-                        io::sleep(3);
                 }
         }
-#endif  // NDEBUG
 
-        t->on_placed();
+        for (const terrain::Terrain* const mob : game_time::g_mobs)
+        {
+                append_map_blocking_info_for_terrain(*mob);
+        }
+}
 
-        return t;
+void update_map_info_for_terrain_at(const P& pos)
+{
+        if (!map::is_pos_inside_outer_walls(pos))
+        {
+                set_map_blocking_info_true_for_all_at(pos);
+
+                return;
+        }
+
+        const terrain::Terrain& terrain = *g_terrain.at(pos);
+
+        set_map_blocking_info_for_terrain(terrain);
+
+        const std::vector<terrain::Terrain*> mobs = game_time::mobs_at(pos);
+
+        for (const terrain::Terrain* const mob : mobs)
+        {
+                append_map_blocking_info_for_terrain(*mob);
+        }
 }
 
 void update_vision()
 {
-        game_time::update_light_map();
+        update_light_map();
 
         g_player->update_fov();
 
@@ -332,9 +488,12 @@ void update_vision()
 
 void update_player_memory()
 {
-        for (int x = 0; x < w(); ++x)
+        const int map_w = w();
+        const int map_h = h();
+
+        for (int x = 0; x < map_w; ++x)
         {
-                for (int y = 0; y < h(); ++y)
+                for (int y = 0; y < map_h; ++y)
                 {
                         const P p(x, y);
 
@@ -350,6 +509,35 @@ void update_player_memory()
                         memorize_item_at(p);
                 }
         }
+}
+
+void update_terrain(terrain::Terrain* terrain)
+{
+        set_terrain(terrain);
+
+        terrain->on_placed();
+
+        update_map_info_for_terrain_at(terrain->pos());
+
+        // TODO: This is a very paranoid approach. Updating could be done more
+        // selectively (for example check if the updated terrain could possibly
+        // change light levels), which might help improve performance.
+        update_light_map();
+}
+
+void set_terrain(terrain::Terrain* terrain)
+{
+        ASSERT(terrain);
+
+        const auto p = terrain->pos();
+
+        terrain::Terrain* const prev_terrain = g_terrain.at(p);
+
+        ASSERT(prev_terrain != terrain);
+
+        delete prev_terrain;
+
+        g_terrain.at(p) = terrain;
 }
 
 void memorize_terrain_at(const P& p)
@@ -483,35 +671,30 @@ void clear_player_memory_at(const P& p)
         map::g_item_memory.at(p) = {};
 }
 
-void make_blood(const P& origin)
+void update_light_map()
 {
-        for (const auto& d : dir_utils::g_dir_list_w_center)
+        Array2<bool> light_tmp(dims());
+
+        for (const auto* const a : game_time::g_actors)
         {
-                if (!rnd::one_in(3))
-                {
-                        continue;
-                }
-
-                const auto p = origin + d;
-
-                g_terrain.at(p)->try_make_bloody();
+                a->add_light(light_tmp);
         }
-}
 
-void make_gore(const P& origin)
-{
-        for (int dx = -1; dx <= 1; ++dx)
+        for (const auto* const m : game_time::g_mobs)
         {
-                for (int dy = -1; dy <= 1; ++dy)
-                {
-                        const auto c = origin + P(dx, dy);
-
-                        if (rnd::one_in(3))
-                        {
-                                g_terrain.at(c)->try_put_gore();
-                        }
-                }
+                m->add_light(light_tmp);
         }
+
+        for (auto* const terrain : map::g_terrain)
+        {
+                terrain->add_light(light_tmp);
+        }
+
+        // Copy the temporary buffer to the real light map
+
+        // TODO: Maybe just use the Array2 "=" operator, which does std::copy,
+        // this should be as fast as memcpy...
+        memcpy(g_light.data(), light_tmp.data(), g_light.length());
 }
 
 void delete_and_remove_room_from_list(Room* const room)
@@ -529,18 +712,60 @@ void delete_and_remove_room_from_list(Room* const room)
         ASSERT(false && "Tried to remove non-existing room");
 }
 
-bool is_pos_seen_by_player(const P& p)
+const Array2<bool>& get_blocked_map_info_for_actor(const actor::Actor& actor)
 {
-        ASSERT(is_pos_inside_map(p));
+        const auto& props = actor.m_properties;
 
-        return g_seen.at(p);
+        if (props.has(PropId::ethereal))
+        {
+                return g_terrain_blocks_ethereal;
+        }
+        else if (props.has(PropId::tiny_flying))
+        {
+                return g_terrain_blocks_tiny_flying;
+        }
+        else if (props.has(PropId::flying))
+        {
+                return g_terrain_blocks_flying;
+        }
+        else if (props.has(PropId::ooze))
+        {
+                return g_terrain_blocks_ooze;
+        }
+        else if (props.has(PropId::small_crawling))
+        {
+                return g_terrain_blocks_small_crawling;
+        }
+        else
+        {
+                return g_terrain_blocks_walking;
+        }
 }
 
-actor::Actor* first_actor_at_pos(const P& pos, ActorState state)
+bool can_actor_move_into_terrain_at(const actor::Actor& actor, const P& pos)
+{
+        return !get_blocked_map_info_for_actor(actor).at(pos);
+}
+
+actor::Actor* living_actor_at(const P& pos)
 {
         for (auto* const actor : game_time::g_actors)
         {
-                if ((actor->m_pos == pos) && (actor->m_state == state))
+                if ((actor->m_pos == pos) && actor->is_alive())
+                {
+                        return actor;
+                }
+        }
+
+        return nullptr;
+}
+
+actor::Actor* first_corpse_at(const P& pos)
+{
+        for (auto* const actor : game_time::g_actors)
+        {
+                if ((actor->m_pos == pos) &&
+                    (actor->m_state == ActorState::corpse))
                 {
                         return actor;
                 }
@@ -560,20 +785,6 @@ terrain::Terrain* first_mob_at_pos(const P& pos)
         }
 
         return nullptr;
-}
-
-Array2<std::vector<actor::Actor*>> get_actor_array()
-{
-        Array2<std::vector<actor::Actor*>> a(dims());
-
-        for (auto* actor : game_time::g_actors)
-        {
-                const P& p = actor->m_pos;
-
-                a.at(p).push_back(actor);
-        }
-
-        return a;
 }
 
 actor::Actor* random_closest_actor(

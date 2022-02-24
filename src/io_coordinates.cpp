@@ -20,7 +20,7 @@
 // -----------------------------------------------------------------------------
 namespace io
 {
-R gui_to_px_rect(const R rect)
+R gui_to_px_rect(const R& rect)
 {
         const int gui_cell_px_w = config::gui_cell_px_w();
         const int gui_cell_px_h = config::gui_cell_px_h();
@@ -50,7 +50,7 @@ int map_to_px_coords_y(const int value)
         return value * config::map_cell_px_h();
 }
 
-P gui_to_px_coords(const P pos)
+P gui_to_px_coords(const P& pos)
 {
         return {gui_to_px_coords_x(pos.x), gui_to_px_coords_y(pos.y)};
 }
@@ -60,7 +60,7 @@ P gui_to_px_coords(const int x, const int y)
         return gui_to_px_coords({x, y});
 }
 
-P map_to_px_coords(const P pos)
+P map_to_px_coords(const P& pos)
 {
         return {map_to_px_coords_x(pos.x), map_to_px_coords_y(pos.y)};
 }
@@ -70,39 +70,39 @@ P map_to_px_coords(const int x, const int y)
         return map_to_px_coords({x, y});
 }
 
-P px_to_gui_coords(const P px_pos)
+P px_to_gui_coords(const P& px_pos)
 {
         return {
                 px_pos.x / config::gui_cell_px_w(),
                 px_pos.y / config::gui_cell_px_h()};
 }
 
-P px_to_map_coords(const P px_pos)
+P px_to_map_coords(const P& px_pos)
 {
         return {
                 px_pos.x / config::map_cell_px_w(),
                 px_pos.y / config::map_cell_px_h()};
 }
 
-P gui_to_map_coords(const P gui_pos)
+P gui_to_map_coords(const P& gui_pos)
 {
-        const P px_coords = gui_to_px_coords(gui_pos);
+        const auto px_coords = gui_to_px_coords(gui_pos);
 
         return px_to_map_coords(px_coords);
 }
 
-P gui_to_px_coords(const Panel panel, const P offset)
+P gui_to_px_coords(const Panel panel, const P& offset)
 {
-        const P pos = panels::p0(panel) + offset;
+        const auto pos = panels::p0(panel) + offset;
 
         return gui_to_px_coords(pos);
 }
 
-P map_to_px_coords(const Panel panel, const P offset)
+P map_to_px_coords(const Panel panel, const P& offset)
 {
-        const P px_p0 = gui_to_px_coords(panels::p0(panel));
+        const auto px_p0 = gui_to_px_coords(panels::p0(panel));
 
-        const P px_offset = map_to_px_coords(offset);
+        const auto px_offset = map_to_px_coords(offset);
 
         return px_p0 + px_offset;
 }

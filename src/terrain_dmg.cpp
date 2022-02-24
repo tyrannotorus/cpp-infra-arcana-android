@@ -17,6 +17,7 @@
 #include "random.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 
 // // --------------------------------------------------------------------------
 // // Private
@@ -27,26 +28,33 @@
 // // --------------------------------------------------------------------------
 namespace terrain
 {
-void destr_all_adj_doors(const P& p)
+void destr_all_adj_doors(const P p)
 {
         for (const P& d : dir_utils::g_cardinal_list)
         {
-                const P p_adj(p + d);
+                const auto p_adj = p + d;
 
-                if (map::is_pos_inside_map(p_adj))
+                if (!map::is_pos_inside_map(p_adj))
                 {
-                        if (map::g_terrain.at(p_adj)->id() ==
-                            terrain::Id::door)
-                        {
-                                map::put(new RubbleLow(p_adj));
-                        }
+                        continue;
                 }
+
+                if (map::g_terrain.at(p_adj)->id() !=
+                    terrain::Id::door)
+                {
+                        continue;
+                }
+
+                map::update_terrain(
+                        terrain::make(
+                                terrain::Id::rubble_low,
+                                p_adj));
         }
 }
 
-void destr_stone_wall(const P& p)
+void destr_stone_wall(const P p)
 {
-        map::put(new RubbleLow(p));
+        map::update_terrain(terrain::make(terrain::Id::rubble_low, p));
 
         if (rnd::one_in(4))
         {

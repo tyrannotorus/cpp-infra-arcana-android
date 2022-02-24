@@ -42,6 +42,7 @@
 #include "sound.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 #include "terrain_mob.hpp"
 #include "viewport.hpp"
 
@@ -192,12 +193,13 @@ static void draw(
 
                                 is_any_cell_seen_by_player = true;
 
-                                io::draw_symbol(
-                                        tile,
-                                        '*',
-                                        Panel::map,
-                                        viewport::to_view_pos(pos),
-                                        color);
+                                io::MapDrawObj render_obj;
+                                render_obj.tile = tile;
+                                render_obj.character = '*';
+                                render_obj.pos = viewport::to_view_pos(pos);
+                                render_obj.color = color;
+
+                                render_obj.draw();
                         }
                 }
 
@@ -255,7 +257,13 @@ static void apply_explosion_on_pos(
         // Add smoke
         if (rnd::fraction(6, 10))
         {
-                game_time::add_mob(new terrain::Smoke(pos, rnd::range(2, 4)));
+                auto* const smoke =
+                        static_cast<terrain::Smoke*>(
+                                terrain::make(terrain::Id::smoke, pos));
+
+                smoke->set_nr_turns(rnd::range(2, 4));
+
+                game_time::add_mob(smoke);
         }
 }
 
@@ -370,7 +378,7 @@ void run(
                 }
         }
 
-        const int nr_outer = pos_lists.size();
+        const int nr_outer = (int)pos_lists.size();
 
         for (int dist = 0; dist < nr_outer; ++dist)
         {
@@ -442,14 +450,20 @@ void run_smoke_explosion_at(const P& origin, const int radi_change)
 
         for (const std::vector<P>& inner : pos_lists)
         {
-                for (const P& pos : inner)
+                for (const auto& pos : inner)
                 {
-                        if (!blocked.at(pos))
+                        if (blocked.at(pos))
                         {
-                                game_time::add_mob(
-                                        new terrain::Smoke(
-                                                pos, rnd::range(25, 30)));
+                                continue;
                         }
+
+                        auto* const smoke =
+                                static_cast<terrain::Smoke*>(
+                                        terrain::make(terrain::Id::smoke, pos));
+
+                        smoke->set_nr_turns(rnd::range(25, 30));
+
+                        game_time::add_mob(smoke);
                 }
         }
 
@@ -458,15 +472,20 @@ void run_smoke_explosion_at(const P& origin, const int radi_change)
 
 R explosion_area(const P& c, const int radi)
 {
-        const P x0y0(
-                std::max(c.x - radi, 1),
-                std::max(c.y - radi, 1));
+        R area = explosion_area_outside_map_allowed(c, radi);
 
-        const P x1y1(
-                std::min(c.x + radi, map::w() - 2),
-                std::min(c.y + radi, map::h() - 2));
+        area.p0.x = std::max(area.p0.x, 1);
+        area.p0.y = std::max(area.p0.y, 1);
 
-        return {x0y0, x1y1};
+        area.p1.x = std::min(area.p1.x, map::w() - 2);
+        area.p1.y = std::min(area.p1.y, map::h() - 2);
+
+        return area;
+}
+
+R explosion_area_outside_map_allowed(const P& c, const int radi)
+{
+        return {c - radi, c + radi};
 }
 
 }  // namespace explosion

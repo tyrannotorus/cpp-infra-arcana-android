@@ -7,15 +7,11 @@
 #ifndef DRAW_MAP_HPP
 #define DRAW_MAP_HPP
 
-struct CellRenderData;
-
 namespace draw_map
 {
 void clear();
 
 void run();
-
-const CellRenderData& get_drawn_cell(int x, int y);
 
 }  // namespace draw_map
 

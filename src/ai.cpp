@@ -41,6 +41,17 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static bool can_move_into_pos(
+        const actor::Actor& actor,
+        const P& pos,
+        const R& area_allowed)
+{
+        return (
+                map::can_actor_move_into_terrain_at(actor, pos) &&
+                !map::living_actor_at(pos) &&
+                is_pos_inside(pos, area_allowed));
+}
+
 // Check if position is on a line between two points
 static bool is_pos_on_line(const P& p, const P& line_p0, const P& line_p1)
 {
@@ -57,8 +68,6 @@ static bool is_pos_on_line(const P& p, const P& line_p0, const P& line_p1)
         {
                 return false;
         }
-
-        // OK, we could be on the line!
 
         const auto line =
                 line_calc::calc_new_line(
@@ -77,38 +86,37 @@ static bool is_pos_on_line(const P& p, const P& line_p0, const P& line_p1)
                         }));
 }
 
-// Returns all free positions around the acting monster that is closer to the
-// player than the monster's current position
+// Returns all free positions around the acting monster that is closer or equal
+// distance to the player than the monster's current position.
 static std::vector<P> move_bucket(actor::Mon& mon)
 {
         std::vector<P> bucket;
 
-        const P& mon_p = mon.m_pos;
-
-        const P& player_p = map::g_player->m_pos;
-
-        Array2<bool> blocked(map::dims());
-
-        const R area_to_check_blocked(mon_p - P(1, 1), mon_p + P(1, 1));
-
-        map_parsers::BlocksActor(mon, ParseActors::yes)
-                .run(blocked,
-                     area_to_check_blocked,
-                     MapParseMode::overwrite);
+        const auto& mon_p = mon.m_pos;
+        const auto& player_p = map::g_player->m_pos;
 
         for (const P& d : dir_utils::g_dir_list)
         {
-                const P target_p = mon_p + d;
+                const auto target_p = mon_p + d;
+
+                if (!map::can_actor_move_into_terrain_at(mon, target_p) ||
+                    map::living_actor_at(target_p))
+                {
+                        // Impossible to move here.
+                        continue;
+                }
 
                 const int current_dist_to_player = king_dist(mon_p, player_p);
 
                 const int target_dist_to_player = king_dist(target_p, player_p);
 
-                if ((target_dist_to_player <= current_dist_to_player) &&
-                    !blocked.at(target_p))
+                if (target_dist_to_player > current_dist_to_player)
                 {
-                        bucket.push_back(target_p);
+                        // Not closer to the player.
+                        continue;
                 }
+
+                bucket.push_back(target_p);
         }
 
         return bucket;
@@ -246,16 +254,17 @@ DidAction handle_closed_blocking_door(actor::Mon& mon, std::vector<P>& path)
 
         const auto& p = path.back();
 
-        auto* const t = map::g_terrain.at(p);
+        auto* const terrain = map::g_terrain.at(p);
 
-        if ((t->id() != terrain::Id::door) || t->can_move(mon))
+        if ((terrain->id() != terrain::Id::door) ||
+            map::can_actor_move_into_terrain_at(mon, p))
         {
                 return DidAction::no;
         }
 
-        // This is a door which is blocking the monster
+        // This is a door which is blocking the monster.
 
-        auto* const door = static_cast<terrain::Door*>(t);
+        auto* const door = static_cast<terrain::Door*>(terrain);
 
         // There should never be a path past metal doors
         ASSERT(door->type() != terrain::DoorType::metal);
@@ -335,24 +344,21 @@ DidAction handle_inventory(actor::Mon& mon)
 
 DidAction make_room_for_friend(actor::Mon& mon)
 {
+        // TODO: Refactor this function
+
         if (!mon.is_alive())
         {
                 return DidAction::no;
         }
 
-        Array2<bool> blocked_los(map::dims());
-
-        map_parsers::BlocksLos()
-                .run(blocked_los, blocked_los.rect());
-
-        if (!can_mon_see_actor(mon, *map::g_player, blocked_los))
+        if (!can_mon_see_actor(mon, *map::g_player, map::g_terrain_blocks_los))
         {
                 return DidAction::no;
         }
 
-        const P& player_p = map::g_player->m_pos;
+        const auto& player_p = map::g_player->m_pos;
 
-        // Check if there is an allied monster that we should move away for
+        // Check if there is an allied monster that we should move away for.
         for (auto* other_actor : game_time::g_actors)
         {
                 if (other_actor == &mon ||
@@ -368,14 +374,11 @@ DidAction make_room_for_friend(actor::Mon& mon)
                 const bool is_other_adj =
                         is_pos_adj(mon.m_pos, other_mon->m_pos, false);
 
-                // TODO: It's probably better to check LOS than vision
-                // here? We don't want to move out of the way for a
-                // blind monster.
                 const bool is_other_seeing_player =
                         actor::can_mon_see_actor(
                                 *other_mon,
                                 *map::g_player,
-                                blocked_los);
+                                map::g_terrain_blocks_los);
 
                 /*
                   Do we have this situation?
@@ -439,7 +442,10 @@ DidAction make_room_for_friend(actor::Mon& mon)
                                                 auto* const mon3 = static_cast<actor::Mon*>(actor3);
 
                                                 const bool other_is_seeing_player =
-                                                        actor::can_mon_see_actor(*mon3, *map::g_player, blocked_los);
+                                                        actor::can_mon_see_actor(
+                                                                *mon3,
+                                                                *map::g_player,
+                                                                map::g_terrain_blocks_los);
 
                                                 // TODO: We also need to check that we don't move
                                                 // into a cell which is adjacent to a third
@@ -461,7 +467,7 @@ DidAction make_room_for_friend(actor::Mon& mon)
                                 {
                                         const P offset = target_p - mon.m_pos;
 
-                                        actor::move(mon, dir_utils::dir(offset));
+                                        actor::do_move_action(mon, dir_utils::dir(offset));
 
                                         return DidAction::yes;
                                 }
@@ -485,48 +491,38 @@ DidAction move_to_random_adj_cell(actor::Mon& mon)
                 return DidAction::no;
         }
 
-        Array2<bool> blocked(map::dims());
+        // Try to find a valid direction to move in.
+        auto dir = Dir::END;
 
-        const R parse_area(mon.m_pos - 1, mon.m_pos + 1);
-
-        map_parsers::BlocksActor(mon, ParseActors::yes)
-                .run(blocked,
-                     parse_area,
-                     MapParseMode::overwrite);
-
-        const R area_allowed(P(1, 1), P(map::w() - 2, map::h() - 2));
-
-        // First, try the same direction as last travelled
-        Dir dir = Dir::END;
+        const R area_allowed({1, 1}, {map::w() - 2, map::h() - 2});
 
         const Dir last_dir_moved = mon.m_ai_state.last_dir_moved;
 
-        if (last_dir_moved != Dir::center &&
-            last_dir_moved != Dir::END)
+        if ((last_dir_moved != Dir::center) && (last_dir_moved != Dir::END))
         {
-                const P target_p(
+                // Try the same direction as last travelled.
+                const auto target_p =
                         mon.m_pos +
-                        dir_utils::offset(last_dir_moved));
+                        dir_utils::offset(last_dir_moved);
 
-                if (!blocked.at(target_p) &&
-                    is_pos_inside(target_p, area_allowed))
+                if (can_move_into_pos(mon, target_p, area_allowed))
                 {
                         dir = last_dir_moved;
                 }
         }
 
-        // Attempt to find a random non-blocked adjacent cell
         if (dir == Dir::END)
         {
+                // Valid direction not found yet - attempt to find a random
+                // non-blocked adjacent cell.
                 std::vector<Dir> dir_bucket;
                 dir_bucket.clear();
 
                 for (const P& d : dir_utils::g_dir_list)
                 {
-                        const P target_p(mon.m_pos + d);
+                        const auto target_p = mon.m_pos + d;
 
-                        if (!blocked.at(target_p) &&
-                            is_pos_inside(target_p, area_allowed))
+                        if (can_move_into_pos(mon, target_p, area_allowed))
                         {
                                 dir_bucket.push_back(dir_utils::dir(d));
                         }
@@ -541,10 +537,10 @@ DidAction move_to_random_adj_cell(actor::Mon& mon)
                 }
         }
 
-        // Valid direction found?
         if (dir != Dir::END)
         {
-                actor::move(mon, dir);
+                // Valid direction found
+                actor::do_move_action(mon, dir);
 
                 return DidAction::yes;
         }
@@ -565,82 +561,66 @@ DidAction move_to_target_simple(actor::Mon& mon)
         const auto signs = offset.signs();
         const auto new_pos = mon.m_pos + signs;
 
-        const bool is_blocked =
-                map_parsers::BlocksActor(mon, ParseActors::yes)
-                        .run(new_pos);
-
-        if (!is_blocked)
+        if (map::can_actor_move_into_terrain_at(mon, new_pos) &&
+            !map::living_actor_at(new_pos))
         {
-                actor::move(mon, dir_utils::dir(signs));
+                actor::do_move_action(mon, dir_utils::dir(signs));
 
                 return DidAction::yes;
         }
-
-        return DidAction::no;
+        else
+        {
+                return DidAction::no;
+        }
 }
 
 DidAction step_path(actor::Mon& mon, const std::vector<P>& path)
 {
-        if (mon.is_alive() &&
-            !path.empty())
+        if (!mon.is_alive() || path.empty())
         {
-                const P delta = path.back() - mon.m_pos;
-
-                actor::move(mon, dir_utils::dir(delta));
-
-                return DidAction::yes;
+                return DidAction::no;
         }
 
-        return DidAction::no;
+        const auto delta = path.back() - mon.m_pos;
+
+        actor::do_move_action(mon, dir_utils::dir(delta));
+
+        return DidAction::yes;
 }
 
 DidAction step_to_lair_if_los(actor::Mon& mon, const P& lair_p)
 {
-        if (mon.is_alive())
+        if (!mon.is_alive())
         {
-                Array2<bool> blocked(map::dims());
-
-                const R area_check_blocked =
-                        fov::fov_rect(mon.m_pos, blocked.dims());
-
-                map_parsers::BlocksLos()
-                        .run(blocked,
-                             area_check_blocked,
-                             MapParseMode::overwrite);
-
-                FovMap fov_map;
-                fov_map.hard_blocked = &blocked;
-                fov_map.light = &map::g_light;
-                fov_map.dark = &map::g_dark;
-
-                const LosResult los =
-                        fov::check_cell(mon.m_pos, lair_p, fov_map);
-
-                if (!los.is_blocked_hard)
-                {
-                        const auto d = (lair_p - mon.m_pos).signs();
-
-                        const auto target_p = mon.m_pos + d;
-
-                        const bool is_blocked =
-                                map_parsers::BlocksActor(mon, ParseActors::yes)
-                                        .run(target_p);
-
-                        if (is_blocked)
-                        {
-                                return DidAction::no;
-                        }
-                        else
-                        {
-                                // Step is not blocked
-                                actor::move(mon, dir_utils::dir(d));
-
-                                return DidAction::yes;
-                        }
-                }
+                return DidAction::no;
         }
 
-        return DidAction::no;
+        FovMap fov_map;
+        fov_map.hard_blocked = &map::g_terrain_blocks_los;
+        fov_map.light = &map::g_light;
+        fov_map.dark = &map::g_dark;
+
+        const auto los = fov::check_cell(mon.m_pos, lair_p, fov_map);
+
+        if (los.is_blocked_hard)
+        {
+                return DidAction::no;
+        }
+
+        const auto d = (lair_p - mon.m_pos).signs();
+        const auto target_p = mon.m_pos + d;
+
+        if (map::can_actor_move_into_terrain_at(mon, target_p) &&
+            !map::living_actor_at(target_p))
+        {
+                actor::do_move_action(mon, dir_utils::dir(d));
+
+                return DidAction::yes;
+        }
+        else
+        {
+                return DidAction::no;
+        }
 }
 
 }  // namespace action
@@ -734,17 +714,8 @@ std::vector<P> find_path_to_lair_if_no_los(actor::Mon& mon, const P& lair_p)
                 return {};
         }
 
-        Array2<bool> blocked(map::dims());
-
-        const R fov_lmt = fov::fov_rect(mon.m_pos, blocked.dims());
-
-        map_parsers::BlocksLos()
-                .run(blocked,
-                     fov_lmt,
-                     MapParseMode::overwrite);
-
         FovMap fov_map;
-        fov_map.hard_blocked = &blocked;
+        fov_map.hard_blocked = &map::g_terrain_blocks_los;
         fov_map.dark = &map::g_dark;
         fov_map.light = &map::g_light;
 
@@ -755,13 +726,10 @@ std::vector<P> find_path_to_lair_if_no_los(actor::Mon& mon, const P& lair_p)
                 return {};
         }
 
-        map_parsers::BlocksActor(mon, ParseActors::no)
-                .run(blocked, blocked.rect());
+        Array2<bool> blocked = map::get_blocked_map_info_for_actor(mon);
 
         map_parsers::LivingActorsAdjToPos(mon.m_pos)
-                .run(blocked,
-                     blocked.rect(),
-                     MapParseMode::append);
+                .run(blocked, blocked.rect(), MapParseMode::append);
 
         return pathfind(mon.m_pos, lair_p, blocked);
 }
@@ -780,39 +748,22 @@ std::vector<P> find_path_to_leader(actor::Mon& mon)
                 return {};
         }
 
-        Array2<bool> blocked(map::dims());
-
-        const R fov_lmt = fov::fov_rect(mon.m_pos, blocked.dims());
-
-        map_parsers::BlocksLos()
-                .run(
-                        blocked,
-                        fov_lmt,
-                        MapParseMode::overwrite);
-
         FovMap fov_map;
-        fov_map.hard_blocked = &blocked;
+        fov_map.hard_blocked = &map::g_terrain_blocks_los;
         fov_map.dark = &map::g_dark;
         fov_map.light = &map::g_light;
 
-        const LosResult los =
-                fov::check_cell(mon.m_pos, leader->m_pos, fov_map);
+        const auto los = fov::check_cell(mon.m_pos, leader->m_pos, fov_map);
 
         if (!los.is_blocked_hard)
         {
                 return {};
         }
 
-        map_parsers::BlocksActor(mon, ParseActors::no)
-                .run(
-                        blocked,
-                        blocked.rect());
+        Array2<bool> blocked = map::get_blocked_map_info_for_actor(mon);
 
         map_parsers::LivingActorsAdjToPos(mon.m_pos)
-                .run(
-                        blocked,
-                        blocked.rect(),
-                        MapParseMode::append);
+                .run(blocked, blocked.rect(), MapParseMode::append);
 
         return pathfind(mon.m_pos, leader->m_pos, blocked);
 }
@@ -826,7 +777,7 @@ std::vector<P> find_path_to_target(actor::Mon& mon)
 
         const auto& target = *mon.m_ai_state.target;
 
-        // Monsters should not pathfind to the target if there is LOS, but they
+        // Monsters should not pathfind to the target if there is LOS but they
         // cannot see the target (e.g. the target is invisible).
         //
         // If the target is invisible for example, we want pathfinding as long
@@ -836,20 +787,9 @@ std::vector<P> find_path_to_target(actor::Mon& mon)
         //
         // This creates a nice effect, where monsters appear a bit confused that
         // they cannot see anyone when they should have come into sight.
-        Array2<bool> blocked(map::dims());
-
-        const int los_x0 = std::min(target.m_pos.x, mon.m_pos.x);
-        const int los_y0 = std::min(target.m_pos.y, mon.m_pos.y);
-        const int los_x1 = std::max(target.m_pos.x, mon.m_pos.x);
-        const int los_y1 = std::max(target.m_pos.y, mon.m_pos.y);
-
-        map_parsers::BlocksLos()
-                .run(blocked,
-                     R(los_x0, los_y0, los_x1, los_y1),
-                     MapParseMode::overwrite);
 
         FovMap fov_map;
-        fov_map.hard_blocked = &blocked;
+        fov_map.hard_blocked = &map::g_terrain_blocks_los;
         fov_map.light = &map::g_light;
         fov_map.dark = &map::g_dark;
 
@@ -871,78 +811,65 @@ std::vector<P> find_path_to_target(actor::Mon& mon)
         // Monster does not have LOS to target - alright, let's go!
 
         // NOTE: Only actors adjacent to the monster are considered to be
-        // blokcing the path
-        auto blocked_parser = map_parsers::BlocksActor(mon, ParseActors::no);
+        // blocking the path.
 
-        for (int x = 0; x < map::w(); ++x)
+        Array2<bool> blocked = map::get_blocked_map_info_for_actor(mon);
+
+        const int w = map::w();
+        const int h = map::h();
+
+        // Set all doors to free that the actor could handle (e.g. open them).
+        for (int x = 0; x < w; ++x)
         {
-                for (int y = 0; y < map::h(); ++y)
+                for (int y = 0; y < h; ++y)
                 {
                         const P p(x, y);
 
-                        blocked.at(p) = false;
-
-                        if (!blocked_parser.run(p))
+                        if (!blocked.at(p))
                         {
                                 continue;
                         }
 
-                        // This cell is blocked
-
                         const auto* const t = map::g_terrain.at(p);
 
-                        if (t->id() == terrain::Id::door)
+                        if (t->id() != terrain::Id::door)
                         {
-                                // NOTE: The door is guaranteed to be closed,
-                                // since this point is only reached for terrains
-                                // considered blocking by the map parser
-
-                                const auto* const door =
-                                        static_cast<const terrain::Door*>(t);
-
-                                bool should_door_block = false;
-
-                                if (door->type() == terrain::DoorType::metal)
-                                {
-                                        // Metal door
-                                        should_door_block = true;
-                                }
-                                else if (door->is_stuck())
-                                {
-                                        // Stuck non-metal door
-                                        if (!mon.m_data->can_bash_doors)
-                                        {
-                                                should_door_block = true;
-                                        }
-                                }
-                                else
-                                {
-                                        // Non-stuck, non-metal door
-                                        if (!mon.m_data->can_bash_doors &&
-                                            !mon.m_data->can_open_doors)
-                                        {
-                                                should_door_block = true;
-                                        }
-                                }
-
-                                if (should_door_block)
-                                {
-                                        blocked.at(p) = true;
-                                }
+                                continue;
                         }
-                        else
+
+                        const auto* const door =
+                                static_cast<const terrain::Door*>(t);
+
+                        if (door->type() == terrain::DoorType::metal)
                         {
-                                // Not a door (e.g. a wall)
-                                blocked.at(p) = true;
+                                // Metal door - none shall pass!
+                                continue;
                         }
+
+                        if (door->is_stuck() && !mon.m_data->can_bash_doors)
+                        {
+                                // Stuck non-metal door, and the actor cannot
+                                // bash doors.
+                                continue;
+                        }
+
+                        if (!mon.m_data->can_bash_doors &&
+                            !mon.m_data->can_open_doors)
+                        {
+                                // Non-stuck, non-metal door, but the actor
+                                // cannot handle doors at all.
+                                continue;
+                        }
+
+                        // OK, this door can be handled by the monster, allow
+                        // calculating a path through it.
+                        blocked.at(p) = false;
                 }
         }
 
         // Append living adjacent actors to the blocking array
         map_parsers::LivingActorsAdjToPos(mon.m_pos)
-                .run(blocked,
-                     blocked.rect(),
-                     MapParseMode::append);
+                .run(blocked, blocked.rect(), MapParseMode::append);
 
         return pathfind(mon.m_pos, target.m_pos, blocked);
 }

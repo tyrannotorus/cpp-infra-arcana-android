@@ -7,7 +7,9 @@
 #include "query.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "SDL_keycode.h"
 #include "colors.hpp"
@@ -15,6 +17,7 @@
 #include "game_commands.hpp"
 #include "io.hpp"
 #include "panel.hpp"
+#include "popup.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 
@@ -22,54 +25,6 @@
 // Private
 // -----------------------------------------------------------------------------
 static bool s_is_inited = false;
-
-static std::string query_nr_make_input_str(
-        const int v,
-        const bool has_player_entered_value)
-{
-        std::string nr_str;
-
-        if (v > 0)
-        {
-                nr_str = std::to_string(v);
-        }
-
-        if (has_player_entered_value)
-        {
-                nr_str += "_";
-        }
-
-        return nr_str;
-}
-
-static void query_nr_draw(
-        const Color& color,
-        const P& pos,
-        const std::string& input_str,
-        const bool has_player_entered_value)
-{
-        Color fg_color;
-        Color bg_color;
-
-        if (has_player_entered_value)
-        {
-                fg_color = color;
-                bg_color = colors::black();
-        }
-        else
-        {
-                fg_color = colors::light_white();
-                bg_color = colors::blue();
-        }
-
-        io::draw_text(
-                input_str,
-                Panel::screen,
-                pos,
-                fg_color,
-                io::DrawBg::yes,
-                bg_color);
-}
 
 // -----------------------------------------------------------------------------
 // query
@@ -107,7 +62,7 @@ BinaryAnswer yes_or_no(
 
         io::update_screen();
 
-        InputData input;
+        io::InputData input;
 
         while (true)
         {
@@ -146,9 +101,9 @@ BinaryAnswer yes_or_no(
         }
 }
 
-InputData letter(const bool accept_enter)
+io::InputData letter(const bool accept_enter)
 {
-        InputData input;
+        io::InputData input;
 
         if (!s_is_inited || config::is_bot_playing())
         {
@@ -178,227 +133,27 @@ InputData letter(const bool accept_enter)
 }
 
 int number(
-        const P& pos,
-        const Color color,
-        const Range& allowed_range,
-        const int default_value,
-        const bool cancel_returns_default)
+        const QueryNumberConfig& config,
+        const std::string& title,
+        const std::string& msg)
 {
         if (!s_is_inited || config::is_bot_playing())
         {
                 return 0;
         }
 
-        // HACK: If graphics cycling is performed while entering a number, the
-        // text will flicker or get overdrawn, so it is disabled here. However
-        // the right solution is probably to make this into a state that is
-        // drawn overlayed.
-        io::disable_graphics_cycling();
+        int result = 0;
 
-        int ret_num =
-                std::clamp(
-                        default_value,
-                        allowed_range.min,
-                        allowed_range.max);
+        auto popup = std::make_unique<popup::Popup>(popup::AddToMsgHistory::no);
 
-        int max_nr_digits = 0;
+        popup->set_title(title);
+        popup->set_msg(msg);
 
-        {
-                int v = allowed_range.max;
-                while (true)
-                {
-                        v /= 10;
-                        ++max_nr_digits;
+        popup->setup_number_query_mode(config, &result);
 
-                        if (v == 0)
-                        {
-                                break;
-                        }
-                }
-        }
+        popup->run();
 
-        // Adjust for underscore
-        const int max_input_str_len = max_nr_digits + 1;
-
-        io::cover_area(Panel::screen, pos, {max_input_str_len, 1});
-
-        bool has_player_entered_value = false;
-
-        auto input_str =
-                query_nr_make_input_str(
-                        ret_num,
-                        has_player_entered_value);
-
-        query_nr_draw(
-                color,
-                pos,
-                input_str,
-                has_player_entered_value);
-
-        io::update_screen();
-
-        while (true)
-        {
-                InputData input;
-
-                while (((input.key < '0') || (input.key > '9')) &&
-                       (input.key != SDLK_RETURN) &&
-                       (input.key != SDLK_SPACE) &&
-                       (input.key != SDLK_ESCAPE) &&
-                       (input.key != SDLK_BACKSPACE))
-                {
-                        input = io::get();
-
-                        // Translate keypad keys to numbers
-                        switch (input.key)
-                        {
-                        case SDLK_KP_1:
-                                input.key = '1';
-                                break;
-                        case SDLK_KP_2:
-                                input.key = '2';
-                                break;
-                        case SDLK_KP_3:
-                                input.key = '3';
-                                break;
-                        case SDLK_KP_4:
-                                input.key = '4';
-                                break;
-                        case SDLK_KP_5:
-                                input.key = '5';
-                                break;
-                        case SDLK_KP_6:
-                                input.key = '6';
-                                break;
-                        case SDLK_KP_7:
-                                input.key = '7';
-                                break;
-                        case SDLK_KP_8:
-                                input.key = '8';
-                                break;
-                        case SDLK_KP_9:
-                                input.key = '9';
-                                break;
-                        case SDLK_KP_0:
-                                input.key = '0';
-                                break;
-                        default:
-                                break;
-                        }
-                }
-
-                if (input.key == SDLK_RETURN)
-                {
-                        ret_num =
-                                std::clamp(
-                                        ret_num,
-                                        allowed_range.min,
-                                        allowed_range.max);
-
-                        // HACK: See comment in the beginning of this function.
-                        io::enable_graphics_cycling();
-                        return ret_num;
-                }
-
-                if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE))
-                {
-                        // HACK: See comment in the beginning of this function.
-                        io::enable_graphics_cycling();
-                        return cancel_returns_default ? default_value : -1;
-                }
-
-                if (input.key == SDLK_BACKSPACE)
-                {
-                        has_player_entered_value = true;
-
-                        ret_num = ret_num / 10;
-
-                        io::cover_area(
-                                Panel::screen,
-                                pos,
-                                {max_input_str_len, 1});
-
-                        input_str =
-                                query_nr_make_input_str(
-                                        ret_num,
-                                        has_player_entered_value);
-
-                        query_nr_draw(
-                                color,
-                                pos,
-                                input_str,
-                                has_player_entered_value);
-
-                        io::update_screen();
-
-                        continue;
-                }
-
-                if (!has_player_entered_value)
-                {
-                        ret_num = 0;
-
-                        io::cover_area(
-                                Panel::screen,
-                                pos,
-                                {max_input_str_len, 1});
-
-                        input_str =
-                                query_nr_make_input_str(
-                                        ret_num,
-                                        has_player_entered_value);
-
-                        query_nr_draw(
-                                color,
-                                pos,
-                                input_str,
-                                has_player_entered_value);
-
-                        io::update_screen();
-                }
-
-                const auto ret_num_str = std::to_string(ret_num);
-
-                // Adjust for the underscore
-                const auto current_num_digits = (int)ret_num_str.size() - 1;
-
-                if (current_num_digits < max_nr_digits)
-                {
-                        has_player_entered_value = true;
-
-                        int current_digit = input.key - '0';
-
-                        ret_num =
-                                std::clamp(
-                                        (ret_num * 10) + current_digit,
-                                        allowed_range.min,
-                                        allowed_range.max);
-
-                        io::cover_area(
-                                Panel::screen,
-                                pos,
-                                P(max_input_str_len, 1));
-
-                        input_str =
-                                query_nr_make_input_str(
-                                        ret_num,
-                                        has_player_entered_value);
-
-                        query_nr_draw(
-                                color,
-                                pos,
-                                input_str,
-                                has_player_entered_value);
-
-                        io::update_screen();
-
-                        continue;
-                }
-        }
-
-        // HACK: See comment in the beginning of this function.
-        io::enable_graphics_cycling();
-        return -1;
+        return result;
 }
 
 void wait_for_msg_more()

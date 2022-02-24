@@ -74,7 +74,7 @@ static void query_quit()
         popup::Popup(popup::AddToMsgHistory::no)
                 .set_title("Quit the current game?")
                 .set_msg("Save and highscore are not kept.")
-                .set_menu(
+                .setup_menu_mode(
                         {"(N)o", "(Y)es"},
                         {'n', 'y'},
                         &choice)
@@ -220,7 +220,7 @@ static void handle_game_menu_command()
         int choice = 0;
 
         popup::Popup(popup::AddToMsgHistory::no)
-                .set_menu(
+                .setup_menu_mode(
                         choices,
                         {'t', 'o', 'q', 'c'},
                         &choice)
@@ -365,7 +365,7 @@ static void handle_auto_move_command(const Dir dir)
         map::g_player->set_auto_move(dir);
 }
 
-static GameCmd to_cmd_default(const InputData& input)
+static GameCmd to_cmd_default(const io::InputData& input)
 {
         // When running on windows, with numlock enabled, each numpad key press
         // yields two input events - one for the keypad key, and one as a number
@@ -618,7 +618,7 @@ static GameCmd to_cmd_default(const InputData& input)
         return GameCmd::undefined;
 }  // to_cmd_default
 
-static GameCmd to_cmd_vi(const InputData& input)
+static GameCmd to_cmd_vi(const io::InputData& input)
 {
         // Overriden keys for vi-mode
         switch (input.key)
@@ -685,7 +685,7 @@ static GameCmd to_cmd_vi(const InputData& input)
 // -----------------------------------------------------------------------------
 namespace game_commands
 {
-GameCmd to_cmd(const InputData& input)
+GameCmd to_cmd(const io::InputData& input)
 {
         switch (config::input_mode())
         {
@@ -729,49 +729,49 @@ void handle(const GameCmd cmd)
 
         case GameCmd::right:
         {
-                actor::move(*map::g_player, Dir::right);
+                actor::do_move_action(*map::g_player, Dir::right);
         }
         break;
 
         case GameCmd::down:
         {
-                actor::move(*map::g_player, Dir::down);
+                actor::do_move_action(*map::g_player, Dir::down);
         }
         break;
 
         case GameCmd::left:
         {
-                actor::move(*map::g_player, Dir::left);
+                actor::do_move_action(*map::g_player, Dir::left);
         }
         break;
 
         case GameCmd::up:
         {
-                actor::move(*map::g_player, Dir::up);
+                actor::do_move_action(*map::g_player, Dir::up);
         }
         break;
 
         case GameCmd::up_right:
         {
-                actor::move(*map::g_player, Dir::up_right);
+                actor::do_move_action(*map::g_player, Dir::up_right);
         }
         break;
 
         case GameCmd::down_right:
         {
-                actor::move(*map::g_player, Dir::down_right);
+                actor::do_move_action(*map::g_player, Dir::down_right);
         }
         break;
 
         case GameCmd::down_left:
         {
-                actor::move(*map::g_player, Dir::down_left);
+                actor::do_move_action(*map::g_player, Dir::down_left);
         }
         break;
 
         case GameCmd::up_left:
         {
-                actor::move(*map::g_player, Dir::up_left);
+                actor::do_move_action(*map::g_player, Dir::up_left);
         }
         break;
 
@@ -781,11 +781,13 @@ void handle(const GameCmd cmd)
                 {
                         auto* const aiming =
                                 property_factory::make(PropId::aiming);
+
                         aiming->set_duration(1);
+
                         map::g_player->m_properties.apply(aiming);
                 }
 
-                actor::move(*map::g_player, Dir::center);
+                actor::do_move_action(*map::g_player, Dir::center);
         }
         break;
 
@@ -1151,42 +1153,12 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                map::g_player->m_properties.apply(
-                        property_factory::make(PropId::blind));
+                const auto* const spell = spells::make(SpellId::pestilence);
+                spell->run_effect(map::g_player, SpellSkill::master, {});
         }
         break;
 
         case GameCmd::debug_f9:
-        {
-                const std::string query_str = "Summon monster id:";
-
-                io::draw_text(
-                        query_str,
-                        Panel::screen,
-                        {0, 0},
-                        colors::yellow());
-
-                const int idx =
-                        query::number(
-                                {(int)query_str.size(), 0},
-                                colors::light_white(),
-                                {1, (int)actor::Id::END - 1},
-                                (int)actor::Id::zombie,
-                                false);
-
-                if (idx != -1)
-                {
-                        const auto mon_id = (actor::Id)idx;
-
-                        actor::spawn(
-                                map::g_player->m_pos.with_x_offset(2),
-                                {mon_id},
-                                map::rect());
-                }
-        }
-        break;
-
-        case GameCmd::debug_f10:
         {
                 std::string msg = "Listing all monsters (ID#  Name):";
 
@@ -1200,6 +1172,57 @@ void handle(const GameCmd cmd)
                 }
 
                 TRACE << msg << std::endl;
+
+                std::string query_str = "Summon monster id";
+
+                query::QueryNumberConfig query_config;
+
+                query_config.allowed_range = {1, (int)actor::Id::END - 1};
+                query_config.default_value = (int)actor::Id::zombie;
+                query_config.cancel_returns_default = false;
+
+                const int idx =
+                        query::number(
+                                query_config,
+                                query_str);
+
+                if (idx == -1)
+                {
+                        return;
+                }
+
+                io::clear_screen();
+                states::draw();
+                io::update_screen();
+
+                query_str = "How many?";
+
+                query_config.allowed_range = {1, 999};
+                query_config.default_value = 1;
+                query_config.cancel_returns_default = false;
+
+                const int nr_to_spawn =
+                        query::number(
+                                query_config,
+                                query_str);
+
+                if (nr_to_spawn == -1)
+                {
+                        return;
+                }
+
+                const auto mon_id = (actor::Id)idx;
+
+                actor::spawn(
+                        map::g_player->m_pos.with_x_offset(2),
+                        {(size_t)nr_to_spawn, mon_id},
+                        map::rect());
+        }
+        break;
+
+        case GameCmd::debug_f10:
+        {
+                // Unused
         }
 
 #endif  // NDEBUG

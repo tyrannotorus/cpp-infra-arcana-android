@@ -22,6 +22,7 @@
 #include "room.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 #include "terrain_trap.hpp"
 
 // -----------------------------------------------------------------------------
@@ -117,13 +118,9 @@ static std::vector<P> find_allowed_cells_in_room(
         return positions;
 }
 
-static terrain::Trap* make_trap(const terrain::TrapId id, const P& pos)
+static terrain::Trap* try_make_trap(const terrain::TrapId id, const P& pos)
 {
         const auto* const t = map::g_terrain.at(pos);
-
-        const auto& d = terrain::data(t->id());
-
-        auto* const mimic = static_cast<terrain::Terrain*>(d.make_obj(pos));
 
         if (!t->can_have_trap())
         {
@@ -137,7 +134,22 @@ static terrain::Trap* make_trap(const terrain::TrapId id, const P& pos)
                 return nullptr;
         }
 
-        auto* const trap = new terrain::Trap(pos, mimic, id);
+        auto* const mimic = terrain::make(t->id(), pos);
+
+        auto* const trap =
+                static_cast<terrain::Trap*>(
+                        terrain::make(terrain::Id::trap, pos));
+
+        trap->set_mimic_terrain(mimic);
+
+        const bool is_trap_ok = trap->try_init_type(id);
+
+        if (!is_trap_ok)
+        {
+                delete trap;
+
+                return nullptr;
+        }
 
         return trap;
 }
@@ -160,7 +172,7 @@ void populate_std_lvl()
 
         blocked.at(player_p) = true;
 
-        for (Room* const room : map::g_room_list)
+        for (auto* const room : map::g_room_list)
         {
                 const auto chance_trapped =
                         chance_for_trapped_room(room->m_type);
@@ -191,16 +203,12 @@ void populate_std_lvl()
 
                         const auto pos = trap_pos_bucket[i];
 
-                        auto* const trap = make_trap(trap_type, pos);
+                        auto* const trap = try_make_trap(trap_type, pos);
 
-                        if (!trap->valid())
+                        if (trap)
                         {
-                                delete trap;
-
-                                continue;
+                                map::set_terrain(trap);
                         }
-
-                        map::put(trap);
                 }
         }  // room loop
 

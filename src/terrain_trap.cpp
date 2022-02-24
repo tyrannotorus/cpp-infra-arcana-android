@@ -44,6 +44,7 @@
 #include "state.hpp"
 #include "teleport.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -55,15 +56,19 @@
 // -----------------------------------------------------------------------------
 namespace terrain
 {
-Trap::Trap(const P& pos, Terrain* const mimic_terrain, TrapId id) :
-        Terrain(pos),
-        m_mimic_terrain(mimic_terrain)
+Trap::~Trap()
+{
+        delete m_trap_impl;
+        delete m_mimic_terrain;
+}
+
+bool Trap::try_init_type(const TrapId id)
 {
         ASSERT(id != TrapId::END);
 
         m_is_hidden = true;
 
-        auto* const terrain_here = map::g_terrain.at(pos);
+        auto* const terrain_here = map::g_terrain.at(m_pos);
 
         if (!terrain_here->can_have_trap())
         {
@@ -74,10 +79,11 @@ Trap::Trap(const P& pos, Terrain* const mimic_terrain, TrapId id) :
                       << std::endl;
 
                 ASSERT(false);
-                return;
+
+                return false;
         }
 
-        auto try_place_trap_or_discard = [&](const TrapId trap_id) {
+        auto try_make_impl = [&](const TrapId trap_id) {
                 auto* impl = make_trap_impl_from_id(trap_id);
 
                 auto valid = impl->on_place();
@@ -102,7 +108,7 @@ Trap::Trap(const P& pos, Terrain* const mimic_terrain, TrapId id) :
 
                         const auto random_id = (TrapId)rnd::range(0, last);
 
-                        try_place_trap_or_discard(random_id);
+                        try_make_impl(random_id);
 
                         if (m_trap_impl)
                         {
@@ -118,14 +124,10 @@ Trap::Trap(const P& pos, Terrain* const mimic_terrain, TrapId id) :
                 // NOTE: This may fail, in which case we have no trap
                 // implementation. The trap creator is responsible for handling
                 // this situation.
-                try_place_trap_or_discard(id);
+                try_make_impl(id);
         }
-}
 
-Trap::~Trap()
-{
-        delete m_trap_impl;
-        delete m_mimic_terrain;
+        return m_trap_impl != nullptr;
 }
 
 TrapImpl* Trap::make_trap_impl_from_id(const TrapId trap_id)
@@ -354,10 +356,13 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
                 return AllowAction::yes;
         }
 
+        const auto& props = actor_bumping.m_properties;
+
         if (map::g_seen.at(m_pos) &&
             !m_is_hidden &&
-            !actor_bumping.m_properties.has(PropId::ethereal) &&
-            !actor_bumping.m_properties.has(PropId::flying))
+            !props.has(PropId::ethereal) &&
+            !props.has(PropId::flying) &&
+            !props.has(PropId::tiny_flying))
         {
                 // The trap is known, and will be triggered by the player
 
@@ -380,9 +385,10 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
 
                 msg_log::clear();
 
-                return (query_result == BinaryAnswer::no)
-                        ? AllowAction::no
-                        : AllowAction::yes;
+                return (
+                        (query_result == BinaryAnswer::no)
+                                ? AllowAction::no
+                                : AllowAction::yes);
         }
         else
         {
@@ -401,8 +407,11 @@ void Trap::bump(actor::Actor& actor_bumping)
 
         const auto& d = *actor_bumping.m_data;
 
-        if (actor_bumping.m_properties.has(PropId::ethereal) ||
-            actor_bumping.m_properties.has(PropId::flying) ||
+        const auto& props = actor_bumping.m_properties;
+
+        if (props.has(PropId::ethereal) ||
+            props.has(PropId::flying) ||
+            props.has(PropId::tiny_flying) ||
             (d.actor_size < actor::Size::humanoid) ||
             d.is_spider)
         {
@@ -468,12 +477,13 @@ void Trap::destroy()
                 m_mimic_terrain = nullptr;
 
                 // NOTE: This call destroys the object!
-                map::put(f_tmp);
+                map::update_terrain(f_tmp);
         }
         else
         {
                 // "Mechanical" trap
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(
+                        terrain::make(terrain::Id::rubble_low, m_pos));
         }
 }
 
@@ -560,11 +570,7 @@ Color Trap::color_default() const
 Color Trap::color_bg_default() const
 {
         const auto* const item = map::g_items.at(m_pos);
-
-        const auto* const corpse =
-                map::first_actor_at_pos(
-                        m_pos,
-                        ActorState::corpse);
+        const auto* const corpse = map::first_corpse_at(m_pos);
 
         if (!m_is_hidden && (item || corpse))
         {
@@ -586,16 +592,12 @@ char Trap::character() const
 
 gfx::TileId Trap::tile() const
 {
-        return m_is_hidden
-                ? m_mimic_terrain->tile()
-                : m_trap_impl->tile();
+        return m_is_hidden ? m_mimic_terrain->tile() : m_trap_impl->tile();
 }
 
 Matl Trap::matl() const
 {
-        return m_is_hidden
-                ? m_mimic_terrain->matl()
-                : data().matl_type;
+        return m_is_hidden ? m_mimic_terrain->matl() : m_data->matl_type;
 }
 
 // -----------------------------------------------------------------------------
@@ -677,8 +679,8 @@ TrapPlacementValid TrapDart::on_place()
 
                         if (rnd::fraction(2, 3))
                         {
-                                map::make_gore(m_pos);
-                                map::make_blood(m_pos);
+                                terrain::make_gore(m_pos);
+                                terrain::make_blood(m_pos);
                         }
 
                         break;
@@ -794,8 +796,8 @@ TrapPlacementValid TrapSpear::on_place()
 
                         if (rnd::fraction(2, 3))
                         {
-                                map::make_gore(m_pos);
-                                map::make_blood(m_pos);
+                                terrain::make_gore(m_pos);
+                                terrain::make_blood(m_pos);
                         }
 
                         break;
@@ -833,7 +835,7 @@ void TrapSpear::trigger()
         }
 
         // Is anyone standing on the trap now?
-        auto* const actor_on_trap = map::first_actor_at_pos(m_pos);
+        auto* const actor_on_trap = map::living_actor_at(m_pos);
 
         if (actor_on_trap)
         {
@@ -1014,7 +1016,7 @@ void TrapTeleport::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        auto* const actor_here = map::first_actor_at_pos(m_pos);
+        auto* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1072,7 +1074,7 @@ void TrapSummonMon::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::first_actor_at_pos(m_pos);
+        auto* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1190,7 +1192,7 @@ void TrapHpSap::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        auto* const actor_here = map::first_actor_at_pos(m_pos);
+        auto* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1254,7 +1256,7 @@ void TrapSpiSap::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        auto* const actor_here = map::first_actor_at_pos(m_pos);
+        auto* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1394,7 +1396,7 @@ void TrapWeb::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        auto* const actor_here = map::first_actor_at_pos(m_pos);
+        auto* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1468,7 +1470,7 @@ void TrapSlow::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        auto* const actor_here = map::first_actor_at_pos(m_pos);
+        auto* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1488,7 +1490,7 @@ void TrapCurse::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        auto* const actor_here = map::first_actor_at_pos(m_pos);
+        auto* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1508,7 +1510,7 @@ void TrapUnlearnSpell::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        auto* const actor_here = map::first_actor_at_pos(m_pos);
+        auto* const actor_here = map::living_actor_at(m_pos);
 
         if (!actor_here)
         {

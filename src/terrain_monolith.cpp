@@ -19,13 +19,14 @@
 #include "player_bon.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
+#include "terrain_factory.hpp"
 
 struct P;
 
 namespace terrain
 {
-Monolith::Monolith(const P& p) :
-        Terrain(p),
+Monolith::Monolith(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_is_activated(false) {}
 
 void Monolith::on_hit(
@@ -42,12 +43,12 @@ void Monolith::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The monolith is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
 
                 if (player_bon::is_bg(Bg::exorcist))

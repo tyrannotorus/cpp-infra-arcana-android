@@ -38,6 +38,7 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"explodes_on_death", PropId::explodes_on_death},
         {"fainted", PropId::fainted},
         {"flying", PropId::flying},
+        {"tiny_flying", PropId::tiny_flying},
         {"frenzied", PropId::frenzied},
         {"hasted", PropId::hasted},
         {"infected", PropId::infected},
@@ -1047,9 +1048,18 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::flying;
-        d.name = "Flying";
-        d.name_short = "Flying";
-        d.descr = "Can fly over low obstacles.";
+        d.name = "";
+        d.name_short = "";
+        d.descr = "";
+        d.allow_display_turns = false;
+        d.allow_test_on_bot = false;
+        d.alignment = PropAlignment::neutral;
+        add(d);
+
+        d.id = PropId::tiny_flying;
+        d.name = "";
+        d.name_short = "";
+        d.descr = "";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
         d.alignment = PropAlignment::neutral;

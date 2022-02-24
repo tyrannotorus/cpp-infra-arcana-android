@@ -534,22 +534,21 @@ static void player_sets_option(
         case 20:
         {
                 // Projectile delay
-                const auto p =
-                        panels::p0(Panel::info_screen_content)
-                                .with_offsets(s_opt_values_x_pos, browser.y());
-
                 const Range allowed_range(0, 900);
 
                 if (direction == OptionToggleDirecton::enter)
                 {
                         // Enter
+                        query::QueryNumberConfig query_config;
+
+                        query_config.allowed_range = allowed_range;
+                        query_config.default_value = s_delay_projectile_draw;
+                        query_config.cancel_returns_default = true;
+
                         const int nr =
                                 query::number(
-                                        p,
-                                        colors::menu_highlight(),
-                                        allowed_range,
-                                        s_delay_projectile_draw,
-                                        true);
+                                        query_config,
+                                        "Projectile delay");
 
                         if (nr != -1)
                         {
@@ -578,22 +577,21 @@ static void player_sets_option(
         case 21:
         {
                 // Shotgun delay
-                const auto p =
-                        panels::p0(Panel::info_screen_content)
-                                .with_offsets(s_opt_values_x_pos, browser.y());
-
                 const Range allowed_range(0, 900);
 
                 if (direction == OptionToggleDirecton::enter)
                 {
                         // Enter
+                        query::QueryNumberConfig query_config;
+
+                        query_config.allowed_range = allowed_range;
+                        query_config.default_value = s_delay_shotgun;
+                        query_config.cancel_returns_default = true;
+
                         const int nr =
                                 query::number(
-                                        p,
-                                        colors::menu_highlight(),
-                                        allowed_range,
-                                        s_delay_shotgun,
-                                        true);
+                                        query_config,
+                                        "Shotgun delay");
 
                         if (nr != -1)
                         {
@@ -622,22 +620,21 @@ static void player_sets_option(
         case 22:
         {
                 // Explosion delay
-                const auto p =
-                        panels::p0(Panel::info_screen_content)
-                                .with_offsets(s_opt_values_x_pos, browser.y());
-
                 const Range allowed_range(0, 900);
 
                 if (direction == OptionToggleDirecton::enter)
                 {
                         // Enter
+                        query::QueryNumberConfig query_config;
+
+                        query_config.allowed_range = allowed_range;
+                        query_config.default_value = s_delay_explosion;
+                        query_config.cancel_returns_default = true;
+
                         const int nr =
                                 query::number(
-                                        p,
-                                        colors::menu_highlight(),
-                                        allowed_range,
-                                        s_delay_explosion,
-                                        true);
+                                        query_config,
+                                        "Explosion delay");
 
                         if (nr != -1)
                         {

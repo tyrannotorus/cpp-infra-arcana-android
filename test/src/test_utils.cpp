@@ -6,6 +6,7 @@
 
 #include "test_utils.hpp"
 
+#include "actor_move.hpp"
 #include "actor_player.hpp"
 #include "config.hpp"
 #include "init.hpp"
@@ -15,6 +16,7 @@
 #include "random.hpp"
 #include "rect.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 
 static void put_floor_and_walls_on_map()
 {
@@ -28,16 +30,18 @@ static void put_floor_and_walls_on_map()
 
                         if (map::is_pos_inside_outer_walls(p))
                         {
-                                t = new terrain::Floor(p);
+                                t = terrain::make(terrain::Id::floor, p);
                         }
                         else
                         {
-                                t = new terrain::Wall(p);
+                                t = terrain::make(terrain::Id::wall, p);
                         }
 
-                        map::put(t);
+                        map::set_terrain(t);
                 }
         }
+
+        map::update_map_info();
 }
 
 namespace test_utils
@@ -57,7 +61,7 @@ void init_all()
 
         put_floor_and_walls_on_map();
 
-        map::g_player->m_pos = map::rect().center();
+        actor::set_position(*map::g_player, map::rect().center());
 }
 
 void cleanup_all()

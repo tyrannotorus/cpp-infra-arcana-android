@@ -14,6 +14,7 @@
 #include "debug.hpp"
 #include "gfx.hpp"
 #include "io.hpp"
+#include "io_internal.hpp"
 #include "map.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
@@ -24,41 +25,90 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static void draw_filled_rect(const P& view_pos, const Color& color)
+{
+        const auto px_pos = io::gui_to_px_coords(Panel::map, view_pos);
+
+        const auto px_dims =
+                P(config::gui_cell_px_w(),
+                  config::gui_cell_px_h());
+
+        io::draw_rectangle_filled({px_pos, px_pos + px_dims - 1}, color);
+}
 
 // -----------------------------------------------------------------------------
 // io
 // -----------------------------------------------------------------------------
 namespace io
 {
-void draw_symbol(
-        const gfx::TileId tile,
-        const char character,
-        const Panel panel,
-        const P pos,
-        const Color& color,
-        const DrawBg draw_bg,
-        const Color& color_bg)
+void TileDrawObj::draw() const
 {
+        draw_tile(*this);
+}
+
+void CharacterDrawObj::draw() const
+{
+        draw_character(*this);
+}
+
+void MapDrawObj::draw() const
+{
+        io::draw_map_obj(*this);
+}
+
+void draw_map_obj(const MapDrawObj& obj)
+{
+        // NOTE: It is not checked here if the object is inside the map, this is
+        // the callers responsibility.
+
+        const bool is_drawable =
+                (obj.tile != gfx::TileId::END) &&
+                (obj.character != 0) &&
+                (obj.character != ' ');
+
+        if (!is_drawable)
+        {
+                return;
+        }
+
+        set_clip_rect_to_panel(Panel::map);
+
+        if (!config::is_tiles_mode() &&
+            (obj.character == g_filled_rect_char))
+        {
+                draw_filled_rect(obj.pos, obj.color);
+
+                return;
+        }
+
         if (config::is_tiles_mode())
         {
-                draw_tile(
-                        tile,
-                        panel,
-                        pos,
-                        color,
-                        draw_bg,
-                        color_bg);
+                TileDrawObj tile_obj;
+
+                tile_obj.tile = obj.tile;
+                tile_obj.panel = Panel::map;
+                tile_obj.pos = obj.pos;
+                tile_obj.color = obj.color;
+                tile_obj.bg_color = obj.color_bg;
+                tile_obj.draw_bg = DrawBg::yes;
+
+                tile_obj.draw();
         }
         else
         {
-                draw_character(
-                        character,
-                        panel,
-                        pos,
-                        color,
-                        draw_bg,
-                        color_bg);
+                CharacterDrawObj char_obj;
+
+                char_obj.character = obj.character;
+                char_obj.panel = Panel::map;
+                char_obj.pos = obj.pos;
+                char_obj.color = obj.color;
+                char_obj.bg_color = obj.color_bg;
+                char_obj.draw_bg = DrawBg::yes;
+
+                char_obj.draw();
         }
+
+        disable_clip_rect();
 }
 
 void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
@@ -81,12 +131,13 @@ void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
                         continue;
                 }
 
-                draw_symbol(
-                        gfx::TileId::blast1,
-                        '*',
-                        Panel::map,
-                        viewport::to_view_pos(pos),
-                        color);
+                MapDrawObj draw_obj;
+                draw_obj.tile = gfx::TileId::blast1;
+                draw_obj.character = '*';
+                draw_obj.pos = viewport::to_view_pos(pos);
+                draw_obj.color = color;
+
+                draw_obj.draw();
         }
 
         update_screen();
@@ -100,12 +151,13 @@ void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
                         continue;
                 }
 
-                draw_symbol(
-                        gfx::TileId::blast2,
-                        '*',
-                        Panel::map,
-                        viewport::to_view_pos(pos),
-                        color);
+                MapDrawObj draw_obj;
+                draw_obj.tile = gfx::TileId::blast2;
+                draw_obj.character = '*';
+                draw_obj.pos = viewport::to_view_pos(pos);
+                draw_obj.color = color;
+
+                draw_obj.draw();
         }
 
         update_screen();

@@ -13,6 +13,7 @@
 #include "actor_data.hpp"
 #include "actor_death.hpp"
 #include "actor_mon.hpp"
+#include "actor_move.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
@@ -92,15 +93,14 @@ void run(
         const auto d = (actor.m_pos - attacked_from_pos).signs();
         const auto new_pos = actor.m_pos + d;
 
-        if (map::first_actor_at_pos(new_pos, ActorState::alive))
+        if (map::living_actor_at(new_pos))
         {
                 // Target position is occupied by another actor
                 return;
         }
 
-        const auto actor_can_move_into_tgt_pos =
-                !map_parsers::BlocksActor(actor, ParseActors::no)
-                         .run(new_pos);
+        const bool actor_can_move_into_tgt_pos =
+                map::can_actor_move_into_terrain_at(actor, new_pos);
 
         const std::vector<terrain::Id> deep_terrains = {
                 terrain::Id::chasm};
@@ -167,7 +167,7 @@ void run(
         // Leave current cell
         map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
-        actor.m_pos = new_pos;
+        actor::set_position(actor, new_pos);
 
         if (!is_player && player_can_see_actor)
         {
@@ -211,7 +211,7 @@ void run(
         actor.m_properties.apply(prop);
 
         // Bump target cell
-        const auto mobs = game_time::mobs_at_pos(actor.m_pos);
+        const auto mobs = game_time::mobs_at(actor.m_pos);
 
         for (auto* const mob : mobs)
         {

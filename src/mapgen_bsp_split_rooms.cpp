@@ -21,6 +21,7 @@
 #include "room.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -107,7 +108,7 @@ static std::vector<Room*> try_bsp_split_room(Room& room)
 
         for (const auto pos : room.m_r.positions())
         {
-                map::put(new terrain::Wall(pos));
+                map::set_terrain(terrain::make(terrain::Id::wall, pos));
         }
 
         std::vector<Room*> new_rooms;
@@ -343,7 +344,10 @@ static void make_entrances(const std::vector<std::vector<P>>& edges)
                 {
                         const P entr_pos = rnd::element(entrance_bucket);
 
-                        map::put(new terrain::Floor(entr_pos));
+                        map::set_terrain(
+                                terrain::make(
+                                        terrain::Id::floor,
+                                        entr_pos));
 
                         // Until the door placement algorithm is more
                         // intelligent (i.e. avoids placing a door near an
@@ -386,7 +390,7 @@ static void make_grates(const std::vector<std::vector<P>>& edges)
                                 continue;
                         }
 
-                        map::put(new terrain::Grate(p));
+                        map::set_terrain(terrain::make(terrain::Id::grate, p));
                 }
         }
 }

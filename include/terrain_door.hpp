@@ -43,27 +43,20 @@ enum class DoorType
 class Door : public Terrain
 {
 public:
-        Door(
-                const P& terrain_pos,
-
-                // NOTE: This should always be nullptr if type is "gate"
-                const Wall* mimic_terrain,
-
-                DoorType type = DoorType::wood,
-
-                // NOTE: For gates, this should never be any "secret" variant
-                DoorSpawnState spawn_state = DoorSpawnState::any);
-
-        Door(const P& terrain_pos) :
-                Terrain(terrain_pos) {}
+        Door(const P& pos, const TerrainData* const data) :
+                Terrain(pos, data) {}
 
         Door() = delete;
 
         ~Door();
 
-        Id id() const override
+        void init_type_and_state(
+                DoorType type,
+                DoorSpawnState spawn_state = DoorSpawnState::any);
+
+        void set_mimic_terrain(terrain::Terrain* const terrain)
         {
-                return Id::door;
+                m_mimic_terrain = terrain;
         }
 
         // Sometimes we want to refer to a door as just a "door", instead of
@@ -84,7 +77,7 @@ public:
 
         bool is_walkable() const override;
 
-        bool can_move(const actor::Actor& actor) const override;
+        bool is_property_allowing_move(PropId id) const override;
 
         bool is_los_passable() const override;
 
@@ -145,7 +138,7 @@ public:
                 m_actor_currently_opening = nullptr;
         }
 
-        const Wall* mimic() const
+        const Terrain* mimic() const
         {
                 return m_mimic_terrain;
         }
@@ -168,7 +161,7 @@ private:
         void player_bash(DmgType dmg_type, int dmg);
         void mon_bash(actor::Actor& mon);
 
-        const Wall* const m_mimic_terrain {nullptr};
+        Terrain* m_mimic_terrain {nullptr};
 
         bool m_is_open {false};
         bool m_is_stuck {false};

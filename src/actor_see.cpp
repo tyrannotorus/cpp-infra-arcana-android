@@ -17,7 +17,6 @@
 #include "global.hpp"
 #include "init.hpp"
 #include "map.hpp"
-#include "map_parsing.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
@@ -40,19 +39,6 @@ static bool is_seeable_for_mon(
                 return true;
         }
 
-        // Outside FOV range?
-        if (!fov::is_in_fov_range(mon.m_pos, other.m_pos))
-        {
-                // Other actor is outside FOV range
-                return false;
-        }
-
-        // Monster is blind?
-        if (!mon.m_properties.allow_see())
-        {
-                return false;
-        }
-
         FovMap fov_map;
         fov_map.hard_blocked = &hard_blocked_los;
         fov_map.light = &map::g_light;
@@ -66,22 +52,31 @@ static bool is_seeable_for_mon(
                 return false;
         }
 
-        const bool can_see_invis = mon.m_properties.has(PropId::see_invis);
+        const auto& properties = mon.m_properties;
+        const auto& other_properties = other.m_properties;
+
+        // NOTE: It should be much more common that a monster's LOS is blocked
+        // than a monster being blind, so for performance it actually makes
+        // sense to just run the LOS then only check to see if the monster is
+        // blind if the LOS succeeds.
+        if (!properties.allow_see())
+        {
+                // Monster is blind.
+                return false;
+        }
 
         // Actor is invisible, and monster cannot see invisible?
-        if ((other.m_properties.has(PropId::invis) ||
-             other.m_properties.has(PropId::cloaked)) &&
-            !can_see_invis)
+        if ((other_properties.has(PropId::invis) ||
+             other_properties.has(PropId::cloaked)) &&
+            !properties.has(PropId::see_invis))
         {
                 return false;
         }
 
-        bool has_darkvision = mon.m_properties.has(PropId::darkvision);
-
-        const bool can_see_other_in_dark = can_see_invis || has_darkvision;
-
         // Blocked by darkness, and not seeing actor with infravision?
-        if (los.is_blocked_by_dark && !can_see_other_in_dark)
+        if (los.is_blocked_by_dark &&
+            !properties.has(PropId::darkvision) &&
+            !properties.has(PropId::see_invis))
         {
                 return false;
         }
@@ -142,18 +137,11 @@ static std::vector<actor::Actor*> seen_actors_mon(const actor::Actor& mon)
 {
         std::vector<actor::Actor*> result;
 
-        Array2<bool> blocked_los(map::dims());
-
         R los_rect(
                 std::max(0, mon.m_pos.x - g_fov_radi_int),
                 std::max(0, mon.m_pos.y - g_fov_radi_int),
                 std::min(map::w() - 1, mon.m_pos.x + g_fov_radi_int),
                 std::min(map::h() - 1, mon.m_pos.y + g_fov_radi_int));
-
-        map_parsers::BlocksLos()
-                .run(blocked_los,
-                     los_rect,
-                     MapParseMode::overwrite);
 
         for (auto* const other_actor : game_time::g_actors)
         {
@@ -167,7 +155,13 @@ static std::vector<actor::Actor*> seen_actors_mon(const actor::Actor& mon)
                         continue;
                 }
 
-                if (!actor::can_mon_see_actor(mon, *other_actor, blocked_los))
+                const bool can_see_actor =
+                        actor::can_mon_see_actor(
+                                mon,
+                                *other_actor,
+                                map::g_terrain_blocks_los);
+
+                if (!can_see_actor)
                 {
                         continue;
                 }
@@ -342,15 +336,6 @@ std::vector<Actor*> seeable_foes_for_mon(const Actor& mon)
 {
         std::vector<Actor*> result;
 
-        Array2<bool> blocked_los(map::dims());
-
-        const R fov_rect = fov::fov_rect(mon.m_pos, blocked_los.dims());
-
-        map_parsers::BlocksLos()
-                .run(blocked_los,
-                     fov_rect,
-                     MapParseMode::overwrite);
-
         for (auto* other_actor : game_time::g_actors)
         {
                 if (other_actor == &mon)
@@ -380,7 +365,10 @@ std::vector<Actor*> seeable_foes_for_mon(const Actor& mon)
                         continue;
                 }
 
-                if (!is_seeable_for_mon(mon, *other_actor, blocked_los))
+                if (!is_seeable_for_mon(
+                            mon,
+                            *other_actor,
+                            map::g_terrain_blocks_los))
                 {
                         continue;
                 }

@@ -40,6 +40,7 @@ enum class StateId
         view_actor,
         view_minimap,
         win_game,  // TODO: This should just be a popup
+        query_number,
 };
 
 class State

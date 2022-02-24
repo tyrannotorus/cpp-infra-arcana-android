@@ -64,6 +64,9 @@ int panel_px_w(Panel panel);
 int panel_px_h(Panel panel);
 P panel_px_dims(Panel panel);
 
+void set_clip_rect_to_panel(Panel panel);
+void disable_clip_rect();
+
 void draw_character_at_px(
         char character,
         P px_pos,

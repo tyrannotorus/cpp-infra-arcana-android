@@ -109,8 +109,10 @@ namespace popup
 // Popup
 // -----------------------------------------------------------------------------
 Popup::Popup(const AddToMsgHistory add_to_msg_history) :
-        m_popup_state(std::make_unique<PopupState>(add_to_msg_history))
+        m_popup_state(std::make_unique<MsgPopupState>()),
+        m_add_to_msg_history(add_to_msg_history)
 {
+        m_popup_state->m_add_to_msg_history = m_add_to_msg_history;
 }
 
 Popup::~Popup()
@@ -138,14 +140,46 @@ Popup& Popup::set_msg(const std::string& msg)
         return *this;
 }
 
-Popup& Popup::set_menu(
+void Popup::copy_common_config(
+        const PopupState* const from,
+        PopupState* const to) const
+{
+        to->m_title = from->m_title;
+        to->m_msg = from->m_msg;
+        to->m_sfx = from->m_sfx;
+        to->m_add_to_msg_history = from->m_add_to_msg_history;
+}
+
+Popup& Popup::setup_menu_mode(
         const std::vector<std::string>& choices,
         const std::vector<char>& menu_keys,
         int* menu_choice_result)
 {
-        m_popup_state->m_menu_choices = choices;
-        m_popup_state->m_menu_keys = menu_keys;
-        m_popup_state->m_menu_choice_result = menu_choice_result;
+        auto new_popup_state = std::make_unique<MenuPopupState>();
+
+        copy_common_config(m_popup_state.get(), new_popup_state.get());
+
+        new_popup_state->m_menu_choices = choices;
+        new_popup_state->m_menu_keys = menu_keys;
+        new_popup_state->m_menu_choice_result = menu_choice_result;
+
+        m_popup_state = std::move(new_popup_state);
+
+        return *this;
+}
+
+Popup& Popup::setup_number_query_mode(
+        const query::QueryNumberConfig& config,
+        int* const number_result)
+{
+        auto new_popup_state = std::make_unique<NumberQueryPopupState>();
+
+        copy_common_config(m_popup_state.get(), new_popup_state.get());
+
+        new_popup_state->m_config = config;
+        new_popup_state->m_number_result = number_result;
+
+        m_popup_state = std::move(new_popup_state);
 
         return *this;
 }
@@ -160,15 +194,10 @@ Popup& Popup::set_sfx(audio::SfxId sfx)
 // -----------------------------------------------------------------------------
 // PopupState
 // -----------------------------------------------------------------------------
-PopupState::PopupState(const AddToMsgHistory add_to_msg_history) :
-        m_add_to_msg_history(add_to_msg_history)
-{
-}
+PopupState::PopupState() = default;
 
 void PopupState::on_start()
 {
-        ASSERT(m_menu_choices.size() == m_menu_keys.size());
-
         if (m_sfx != audio::SfxId::END)
         {
                 audio::play(m_sfx);
@@ -195,27 +224,28 @@ void PopupState::on_start()
                 }
         }
 
-        if (!m_menu_choices.empty())
-        {
-                m_browser.reset((int)m_menu_choices.size());
-
-                m_browser.set_custom_menu_keys(m_menu_keys);
-        }
+        on_start_specific();
 }
 
-void PopupState::draw()
+void PopupState::on_window_resized()
 {
-        if (m_menu_choices.empty())
-        {
-                draw_msg_popup();
-        }
-        else
-        {
-                draw_menu_popup();
-        }
 }
 
-void PopupState::draw_msg_popup() const
+StateId PopupState::id() const
+{
+        return StateId::popup;
+}
+
+// -----------------------------------------------------------------------------
+// MsgPopupState
+// -----------------------------------------------------------------------------
+MsgPopupState::MsgPopupState() = default;
+
+void MsgPopupState::on_start_specific()
+{
+}
+
+void MsgPopupState::draw()
 {
         const auto text_max_w = max_msg_w();
         const auto msg_lines = text_format::split(m_msg, text_max_w);
@@ -232,19 +262,16 @@ void PopupState::draw_msg_popup() const
                 const auto confirm_line_w =
                         (int)common_text::g_confirm_hint.size();
 
-                const int title_padding = 12;
-                const int confirm_padding = title_padding;
+                const int padding = 12;
 
                 horizontal_line_w =
                         std::max(
-                                {(int)m_title.size() + title_padding,
+                                {(int)m_title.size() + padding,
                                  msg_line_w,
-                                 confirm_line_w + confirm_padding});
+                                 confirm_line_w + padding});
 
                 horizontal_line_w = std::min(horizontal_line_w, text_max_w);
         }
-
-        io::clear_screen();
 
         draw_box(panels::area(Panel::screen));
 
@@ -323,7 +350,45 @@ void PopupState::draw_msg_popup() const
                 colors::black());
 }
 
-void PopupState::draw_menu_popup() const
+void MsgPopupState::update()
+{
+        if (config::is_bot_playing())
+        {
+                states::pop();
+
+                return;
+        }
+
+        const auto input = io::get();
+
+        switch (input.key)
+        {
+        case SDLK_SPACE:
+        case SDLK_ESCAPE:
+        case SDLK_RETURN:
+                states::pop();
+                break;
+
+        default:
+                break;
+        }
+}
+
+// -----------------------------------------------------------------------------
+// MenuPopupState
+// -----------------------------------------------------------------------------
+MenuPopupState::MenuPopupState() = default;
+
+void MenuPopupState::on_start_specific()
+{
+        ASSERT(m_menu_choices.size() == m_menu_keys.size());
+
+        m_browser.reset((int)m_menu_choices.size());
+
+        m_browser.set_custom_menu_keys(m_menu_keys);
+}
+
+void MenuPopupState::draw()
 {
         const auto text_max_w = max_msg_w();
         const auto msg_lines = text_format::split(m_msg, text_max_w);
@@ -384,8 +449,6 @@ void PopupState::draw_menu_popup() const
                 // More than one message line
                 horizontal_line_w = text_max_w;
         }
-
-        io::clear_screen();
 
         draw_box(panels::area(Panel::screen));
 
@@ -501,18 +564,11 @@ void PopupState::draw_menu_popup() const
         io::update_screen();
 }
 
-void PopupState::on_window_resized()
-{
-}
-
-void PopupState::update()
+void MenuPopupState::update()
 {
         if (config::is_bot_playing())
         {
-                if (m_menu_choice_result)
-                {
-                        *m_menu_choice_result = 0;
-                }
+                *m_menu_choice_result = 0;
 
                 states::pop();
 
@@ -521,60 +577,332 @@ void PopupState::update()
 
         const auto input = io::get();
 
-        if (m_menu_choices.empty())
+        const auto action =
+                m_browser.read(
+                        input,
+                        MenuInputMode::scrolling_and_letters);
+
+        switch (action)
         {
-                switch (input.key)
-                {
-                case SDLK_SPACE:
-                case SDLK_ESCAPE:
-                case SDLK_RETURN:
-                        states::pop();
-                        break;
+        case MenuAction::moved:
+                break;
 
-                default:
-                        break;
-                }
-        }
-        else
-        {
-                const auto action =
-                        m_browser.read(
-                                input,
-                                MenuInputMode::scrolling_and_letters);
+        case MenuAction::esc:
+        case MenuAction::space:
+                *m_menu_choice_result = -1;
+                states::pop();
+                break;
 
-                switch (action)
-                {
-                case MenuAction::moved:
-                        break;
+        case MenuAction::selected:
+                *m_menu_choice_result = m_browser.y();
 
-                case MenuAction::esc:
-                case MenuAction::space:
-                        *m_menu_choice_result = -1;
-                        states::pop();
-                        break;
+                TRACE
+                        << "*m_menu_choice_result: "
+                        << *m_menu_choice_result
+                        << std::endl;
 
-                case MenuAction::selected:
-                        *m_menu_choice_result = m_browser.y();
+                states::pop();
+                break;
 
-                        TRACE
-                                << "*m_menu_choice_result: "
-                                << *m_menu_choice_result
-                                << std::endl;
-
-                        states::pop();
-                        break;
-
-                case MenuAction::left:
-                case MenuAction::right:
-                case MenuAction::none:
-                        break;
-                }
+        case MenuAction::left:
+        case MenuAction::right:
+        case MenuAction::none:
+                break;
         }
 }
 
-StateId PopupState::id() const
+// -----------------------------------------------------------------------------
+// NumberQueryPopupState
+// -----------------------------------------------------------------------------
+NumberQueryPopupState::NumberQueryPopupState() = default;
+
+void NumberQueryPopupState::on_start_specific()
 {
-        return StateId::popup;
+        *m_number_result =
+                std::clamp(
+                        m_config.default_value,
+                        m_config.allowed_range.min,
+                        m_config.allowed_range.max);
+
+        update_input_str();
+}
+
+void NumberQueryPopupState::update_input_str()
+{
+        m_input_str =
+                (*m_number_result > 0)
+                ? std::to_string(*m_number_result)
+                : "";
+
+        if (m_has_player_entered_value &&
+            ((io::graphics_cycle_nr(io::GraphicsCycle::fast) % 2) == 0))
+        {
+                m_input_str += "_";
+        }
+}
+
+int NumberQueryPopupState::calc_max_nr_digits() const
+{
+        const auto max_str = std::to_string(m_config.allowed_range.max);
+
+        return (int)max_str.length();
+}
+
+void NumberQueryPopupState::draw()
+{
+        const auto text_max_w = max_msg_w();
+        const auto msg_lines = text_format::split(m_msg, text_max_w);
+        const auto text_h = (int)msg_lines.size() + 4;
+
+        // Including underscore
+        const int nr_str_max_w = calc_max_nr_digits() + 1;
+
+        int horizontal_line_w = 0;
+
+        {
+                const auto msg_line_w =
+                        (msg_lines.size() == 1)
+                        ? (int)msg_lines[0].size()
+                        : text_max_w;
+
+                const auto confirm_line_w =
+                        (int)common_text::g_confirm_hint.size() +
+                        (int)common_text::g_cancel_hint.size() +
+                        1;
+
+                const int padding = 12;
+
+                horizontal_line_w =
+                        std::max(
+                                {(int)m_title.size() + padding,
+                                 msg_line_w,
+                                 nr_str_max_w + padding,
+                                 confirm_line_w + padding});
+
+                horizontal_line_w = std::min(horizontal_line_w, text_max_w);
+        }
+
+        draw_box(panels::area(Panel::screen));
+
+        auto y = get_title_y(text_h);
+
+        draw_horizontal_line(horizontal_line_w, y);
+
+        if (!m_title.empty())
+        {
+                io::draw_text_center(
+                        " " + m_title + " ",
+                        Panel::screen,
+                        {panels::center_x(Panel::screen), y},
+                        colors::title(),
+                        io::DrawBg::yes,
+                        colors::black(),
+                        true);  // Allow pixel-level adjustmet
+        }
+
+        const bool show_msg_centered = msg_lines.size() == 1;
+
+        if (show_msg_centered)
+        {
+                // Centered one-liner message.
+
+                // NOTE: draw_text_center just takes a plain std::string -
+                // *FORMATTING NOT SUPPORTED!*
+
+                for (const std::string& line : msg_lines)
+                {
+                        ++y;
+
+                        io::draw_text_center(
+                                line,
+                                Panel::screen,
+                                {panels::center_x(Panel::screen), y},
+                                colors::text(),
+                                io::DrawBg::no,
+                                colors::black(),
+                                true);  // Allow pixel-level adjustmet
+                }
+
+                y += 2;
+        }
+        else
+        {
+                // Multiline message, formatting supported here (draw_text takes
+                // a Text object).
+
+                ++y;
+
+                const auto text_x0 = get_x0(text_max_w);
+
+                Text text(m_msg);
+
+                text.set_w(text_max_w);
+
+                io::draw_text(
+                        text,
+                        Panel::screen,
+                        {text_x0, y},
+                        colors::text(),
+                        io::DrawBg::no);
+
+                y += text.nr_lines() + 1;
+        }
+
+        update_input_str();
+
+        Color fg_color;
+        Color bg_color;
+
+        if (m_has_player_entered_value)
+        {
+                fg_color = colors::light_white();
+        }
+        else
+        {
+                fg_color = colors::gray();
+        }
+
+        io::draw_text(
+                m_input_str,
+                Panel::screen,
+                {panels::center_x(Panel::screen) - (nr_str_max_w / 2) - 1, y},
+                fg_color);
+
+        y += 2;
+
+        draw_horizontal_line(horizontal_line_w, y);
+
+        const std::string hint =
+                " " +
+                common_text::g_confirm_drop_hint +
+                " " +
+                common_text::g_cancel_hint +
+                " ";
+
+        io::draw_text_center(
+                hint,
+                Panel::screen,
+                {panels::center_x(Panel::screen), y},
+                colors::menu_dark(),
+                io::DrawBg::yes,
+                colors::black());
+}
+
+void NumberQueryPopupState::update()
+{
+        auto input = io::get();
+
+        // Convert keypad keys to numbers.
+        switch (input.key)
+        {
+        case SDLK_KP_1:
+                input.key = '1';
+                break;
+        case SDLK_KP_2:
+                input.key = '2';
+                break;
+        case SDLK_KP_3:
+                input.key = '3';
+                break;
+        case SDLK_KP_4:
+                input.key = '4';
+                break;
+        case SDLK_KP_5:
+                input.key = '5';
+                break;
+        case SDLK_KP_6:
+                input.key = '6';
+                break;
+        case SDLK_KP_7:
+                input.key = '7';
+                break;
+        case SDLK_KP_8:
+                input.key = '8';
+                break;
+        case SDLK_KP_9:
+                input.key = '9';
+                break;
+        case SDLK_KP_0:
+                input.key = '0';
+                break;
+        default:
+                break;
+        }
+
+        if (input.key == SDLK_RETURN)
+        {
+                // Confirm entered.
+                *m_number_result =
+                        std::clamp(
+                                *m_number_result,
+                                m_config.allowed_range.min,
+                                m_config.allowed_range.max);
+
+                states::pop();
+
+                return;
+        }
+
+        if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE))
+        {
+                // Cancel entered.
+                *m_number_result =
+                        m_config.cancel_returns_default
+                        ? m_config.default_value
+                        : -1;
+
+                states::pop();
+
+                return;
+        }
+
+        if (input.key == SDLK_BACKSPACE)
+        {
+                // Backspace entered.
+                m_has_player_entered_value = true;
+
+                *m_number_result = *m_number_result / 10;
+
+                return;
+        }
+
+        if ((input.key >= '0') && (input.key <= '9'))
+        {
+                // Number entered.
+
+                if (!m_has_player_entered_value)
+                {
+                        // Player has not yet modified the default value, clear
+                        // the current value.
+                        *m_number_result = 0;
+                }
+
+                update_input_str();
+
+                // Adjust for the underscore.
+                const int current_num_digits = (int)m_input_str.size() - 1;
+
+                const int max_nr_digits = calc_max_nr_digits();
+
+                if (current_num_digits >= max_nr_digits)
+                {
+                        // Not possible to add more digits.
+                        return;
+                }
+
+                // Add another digit and clamp the result.
+                m_has_player_entered_value = true;
+
+                int current_digit = input.key - '0';
+
+                *m_number_result = (*m_number_result * 10) + current_digit;
+
+                *m_number_result =
+                        std::clamp(
+                                *m_number_result,
+                                m_config.allowed_range.min,
+                                m_config.allowed_range.max);
+        }
 }
 
 }  // namespace popup

@@ -12,6 +12,13 @@
 #include "direction.hpp"
 #include "rect.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// Floodfill
+// -----------------------------------------------------------------------------
 Array2<int> floodfill(
         const P& p0,
         const Array2<bool>& blocked,
@@ -36,7 +43,7 @@ Array2<int> floodfill(
         bool is_at_tgt = false;
         bool is_stopping_at_tgt = p1.x != -1;
 
-        const R bounds(P(1, 1), flood.dims() - 2);
+        const R bounds({1, 1}, flood.dims() - 2);
 
         P p(p0);
 

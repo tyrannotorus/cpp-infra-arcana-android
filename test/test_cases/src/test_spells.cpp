@@ -22,6 +22,7 @@
 #include "spells.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
+#include "terrain_factory.hpp"
 #include "test_utils.hpp"
 
 TEST_CASE("Test opening spell effect")
@@ -34,26 +35,33 @@ TEST_CASE("Test opening spell effect")
         const P lever_2_pos(75, 75);
 
         auto* const wood_door =
-                new terrain::Door(
-                        wood_door_pos,
-                        nullptr,
-                        terrain::DoorType::wood,
-                        terrain::DoorSpawnState::closed);
+                static_cast<terrain::Door*>(
+                        terrain::make(terrain::Id::door, wood_door_pos));
+
+        wood_door->init_type_and_state(
+                terrain::DoorType::wood,
+                terrain::DoorSpawnState::closed);
 
         auto* const metal_door =
-                new terrain::Door(
-                        metal_door_pos,
-                        nullptr,
-                        terrain::DoorType::metal,
-                        terrain::DoorSpawnState::closed);
+                static_cast<terrain::Door*>(
+                        terrain::make(terrain::Id::door, metal_door_pos));
 
-        auto* const lever_1 = new terrain::Lever(lever_1_pos);
-        auto* const lever_2 = new terrain::Lever(lever_2_pos);
+        metal_door->init_type_and_state(
+                terrain::DoorType::metal,
+                terrain::DoorSpawnState::closed);
 
-        map::put(wood_door);
-        map::put(metal_door);
-        map::put(lever_1);
-        map::put(lever_2);
+        auto* const lever_1 =
+                static_cast<terrain::Lever*>(
+                        terrain::make(terrain::Id::lever, lever_1_pos));
+
+        auto* const lever_2 =
+                static_cast<terrain::Lever*>(
+                        terrain::make(terrain::Id::lever, lever_2_pos));
+
+        map::update_terrain(wood_door);
+        map::update_terrain(metal_door);
+        map::update_terrain(lever_1);
+        map::update_terrain(lever_2);
 
         lever_1->set_linked_terrain(*metal_door);
         lever_2->set_linked_terrain(*metal_door);
@@ -107,7 +115,10 @@ TEST_CASE("Test spell bonuses for learned spells")
                 SpellSkill::basic);
 
         // With altar bonus
-        map::put(new terrain::Altar(player.m_pos.with_x_offset(1)));
+        map::update_terrain(
+                terrain::make(
+                        terrain::Id::altar,
+                        player.m_pos.with_x_offset(1)));
 
         REQUIRE(
                 player_spells::spell_skill(SpellId::heal) ==
@@ -121,7 +132,10 @@ TEST_CASE("Test spell bonuses for learned spells")
                 SpellSkill::master);
 
         // Remove altar bonus
-        map::put(new terrain::Wall(player.m_pos.with_x_offset(1)));
+        map::update_terrain(
+                terrain::make(
+                        terrain::Id::wall,
+                        player.m_pos.with_x_offset(1)));
 
         REQUIRE(
                 player_spells::spell_skill(SpellId::heal) ==
@@ -136,7 +150,10 @@ TEST_CASE("Test spell bonuses for learned spells")
                 SpellSkill::master);
 
         // Re-add the altar bonus
-        map::put(new terrain::Altar(player.m_pos.with_x_offset(1)));
+        map::update_terrain(
+                terrain::make(
+                        terrain::Id::altar,
+                        player.m_pos.with_x_offset(1)));
 
         REQUIRE(
                 player_spells::spell_skill(SpellId::heal) ==
@@ -192,7 +209,10 @@ TEST_CASE("Test spell bonuses for manuscripts")
 
         // Casting healing from manuscript at altar (master level) should clear
         // both disease and deafness.
-        map::put(new terrain::Altar(player.m_pos.with_x_offset(1)));
+        map::update_terrain(
+                terrain::make(
+                        terrain::Id::altar,
+                        player.m_pos.with_x_offset(1)));
 
         player.m_properties.apply(property_factory::make(PropId::diseased));
         player.m_properties.apply(property_factory::make(PropId::deaf));
@@ -205,7 +225,10 @@ TEST_CASE("Test spell bonuses for manuscripts")
         REQUIRE(!player.m_properties.has(PropId::deaf));
 
         // Remove the altar
-        map::put(new terrain::Wall(player.m_pos.with_x_offset(1)));
+        map::update_terrain(
+                terrain::make(
+                        terrain::Id::wall,
+                        player.m_pos.with_x_offset(1)));
 
         // Casting healing from manuscript with erudition (master level) should
         // clear both disease and deafness.
@@ -227,8 +250,8 @@ TEST_CASE("Test spell shield")
 {
         test_utils::init_all();
 
-        map::put(new terrain::Floor({10, 10}));
-        map::put(new terrain::Floor({11, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {10, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {11, 10}));
 
         map::g_player->m_pos.set(10, 10);
 
@@ -286,9 +309,9 @@ TEST_CASE("Test spell reflection hits correct creature")
 
         test_utils::init_all();
 
-        map::put(new terrain::Floor({10, 10}));
-        map::put(new terrain::Floor({11, 10}));
-        map::put(new terrain::Floor({12, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {10, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {11, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {12, 10}));
 
         map::g_player->m_pos.set(10, 10);
 
@@ -332,10 +355,10 @@ TEST_CASE("Test reflected knockback spell blocked by caster spell shield")
 
         test_utils::init_all();
 
-        map::put(new terrain::Floor({9, 10}));
-        map::put(new terrain::Floor({10, 10}));
-        map::put(new terrain::Floor({11, 10}));
-        map::put(new terrain::Floor({12, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {9, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {10, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {11, 10}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {12, 10}));
 
         map::g_player->m_pos.set(10, 10);
 

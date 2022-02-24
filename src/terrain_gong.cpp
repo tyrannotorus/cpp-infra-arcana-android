@@ -44,6 +44,7 @@
 #include "spells.hpp"
 #include "terrain.hpp"
 #include "terrain_event.hpp"
+#include "terrain_factory.hpp"
 
 struct P;
 
@@ -733,10 +734,14 @@ void SpawnMonsters::run_effect()
         const size_t nr_mon = rnd::range(3, 4);
 
         auto* const event =
-                new terrain::EventSpawnMonstersDelayed(
-                        map::g_player->m_pos,
-                        m_id_to_spawn,
-                        nr_mon);
+                static_cast<EventSpawnMonstersDelayed*>(
+                        make(
+                                Id::event_spawn_monsters_delayed,
+                                map::g_player->m_pos));
+
+        event->set_mon_id(m_id_to_spawn);
+
+        event->set_nr_mon((int)nr_mon);
 
         game_time::add_mob(event);
 }
@@ -818,8 +823,8 @@ std::vector<SpellId> UnlearnSpell::make_spell_bucket() const
 // -----------------------------------------------------------------------------
 // Gong
 // -----------------------------------------------------------------------------
-Gong::Gong(const P& p) :
-        Terrain(p) {}
+Gong::Gong(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Gong::bump(actor::Actor& actor_bumping)
 {
@@ -910,12 +915,14 @@ void Gong::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The gong is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(
+                        terrain::make(terrain::Id::rubble_low, m_pos));
+
                 map::update_vision();
 
                 if (player_bon::is_bg(Bg::exorcist))

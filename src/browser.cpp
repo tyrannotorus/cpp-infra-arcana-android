@@ -38,7 +38,7 @@ static bool is_printable_ascii_char(const int key)
 // -----------------------------------------------------------------------------
 // MenuBrowser
 // -----------------------------------------------------------------------------
-MenuAction MenuBrowser::read(const InputData& input, MenuInputMode mode)
+MenuAction MenuBrowser::read(const io::InputData& input, MenuInputMode mode)
 {
         // NOTE: j k l are reserved for browsing with vi keys (not included in
         // the standard menu key letters)

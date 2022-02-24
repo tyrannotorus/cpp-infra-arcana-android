@@ -120,6 +120,8 @@ void go_to_nxt()
 {
         TRACE_FUNC_BEGIN;
 
+        TRACE << "Leaving dungeon level '" << map::g_dlvl << "'" << std::endl;
+
         io::clear_screen();
         io::update_screen();
 
@@ -180,6 +182,11 @@ void go_to_nxt()
         {
                 map_control::g_controller->on_start();
         }
+
+        TRACE
+                << "Dungeon level '" << map::g_dlvl << "' ready"
+                << std::endl
+                << "Map type is: '" << (int)map_type << "'" << std::endl;
 
         TRACE_FUNC_END;
 }

@@ -26,32 +26,6 @@
 // -----------------------------------------------------------------------------
 namespace io
 {
-void draw_character(
-        const char character,
-        const Panel panel,
-        const P pos,
-        const Color& color,
-        const DrawBg draw_bg,
-        const Color& bg_color)
-{
-        // if (!panels::is_valid())
-        // {
-        //         return;
-        // }
-
-        const auto px_pos = gui_to_px_coords(panel, pos);
-
-        const auto sdl_color = color.sdl_color();
-        const auto sdl_color_bg = bg_color.sdl_color();
-
-        draw_character_at_px(
-                character,
-                px_pos,
-                sdl_color,
-                draw_bg,
-                sdl_color_bg);
-}
-
 void draw_text_at_px(
         const std::string& str,
         P px_pos,
@@ -128,11 +102,6 @@ void draw_text(
         const DrawBg draw_bg,
         const Color& bg_color)
 {
-        // if (!panels::is_valid())
-        // {
-        //         return;
-        // }
-
         text.set_color(color);
 
         auto origin_pos = pos;
@@ -187,11 +156,6 @@ void draw_text_center(
         const Color& bg_color,
         const bool is_pixel_pos_adj_allowed)
 {
-        // if (!panels::is_valid())
-        // {
-        //         return;
-        // }
-
         const int len = (int)str.size();
         const int len_half = len / 2;
         const int x_pos_left = pos.x - len_half;
@@ -222,11 +186,6 @@ void draw_text_right(
         const DrawBg draw_bg,
         const Color& bg_color)
 {
-        // if (!panels::is_valid())
-        // {
-        //         return;
-        // }
-
         const int x_pos_left = pos.x - (int)str.size() + 1;
 
         auto px_pos =

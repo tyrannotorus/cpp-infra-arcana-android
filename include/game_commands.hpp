@@ -7,7 +7,10 @@
 #ifndef GAME_COMMANDS_HPP
 #define GAME_COMMANDS_HPP
 
+namespace io
+{
 struct InputData;
+}  // namespace io
 
 enum class GameCmd
 {
@@ -75,7 +78,7 @@ enum class GameCmd
 namespace game_commands
 {
 // NOTE: This is a pure function, except for reading the options
-GameCmd to_cmd(const InputData& input);
+GameCmd to_cmd(const io::InputData& input);
 
 void handle(GameCmd cmd);
 

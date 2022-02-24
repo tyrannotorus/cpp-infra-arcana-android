@@ -16,6 +16,7 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 #include "test_utils.hpp"
 
 static bool starts_with_any_of(
@@ -94,11 +95,11 @@ TEST_CASE("Frenzy allows moving away from monster if LOS blocked")
         map::update_vision();
 
         // Try moving away from a seen monster - this should NOT be allowed.
-        actor::move(*map::g_player, Dir::left);
+        actor::do_move_action(*map::g_player, Dir::left);
 
         REQUIRE(map::g_player->m_pos == P(10, 10));
 
-        map::put(new terrain::Wall({12, 10}));
+        map::update_terrain(terrain::make(terrain::Id::wall, {12, 10}));
 
         map::update_vision();
 
@@ -106,7 +107,7 @@ TEST_CASE("Frenzy allows moving away from monster if LOS blocked")
 
         // Try moving away from a known monster to the right, but with the LOS
         // to the monster blocked - this SHOULD be allowed.
-        actor::move(*map::g_player, Dir::left);
+        actor::do_move_action(*map::g_player, Dir::left);
 
         REQUIRE(map::g_player->m_pos == P(9, 10));
 
@@ -128,7 +129,7 @@ TEST_CASE("Frenzy allows moving away from unseen known monster")
         map::update_vision();
 
         // Try moving away from a seen monster - this should NOT be allowed.
-        actor::move(*map::g_player, Dir::left);
+        actor::do_move_action(*map::g_player, Dir::left);
 
         REQUIRE(map::g_player->m_pos == P(10, 10));
 
@@ -141,7 +142,7 @@ TEST_CASE("Frenzy allows moving away from unseen known monster")
 
         // Try moving away from an unseen known monster - this SHOULD be
         // allowed.
-        actor::move(*map::g_player, Dir::left);
+        actor::do_move_action(*map::g_player, Dir::left);
 
         REQUIRE(map::g_player->m_pos == P(9, 10));
 
@@ -168,7 +169,7 @@ TEST_CASE("Frenzy allows attacking adjacent unseen known monster")
         map::update_vision();
 
         // Try moving away from a seen monster - this should NOT be allowed.
-        actor::move(*map::g_player, Dir::down);
+        actor::do_move_action(*map::g_player, Dir::down);
 
         REQUIRE(map::g_player->m_pos == P(10, 10));
 
@@ -186,7 +187,7 @@ TEST_CASE("Frenzy allows attacking adjacent unseen known monster")
 
         // Try attacking an unseen known monster directly below the player, with
         // a seen monster to the right - this SHOULD be allowed.
-        actor::move(*map::g_player, Dir::down);
+        actor::do_move_action(*map::g_player, Dir::down);
 
         // Send the current message to history
         msg_log::clear();

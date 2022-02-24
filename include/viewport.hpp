@@ -23,13 +23,15 @@ R get_map_view_area();
 // NOTE: This function does not necessarily center the map on the given position
 // (unless force_centering is true). It only guarantees that the position will
 // be visible in the viewport.
-void show(P map_pos, ForceCentering force_centering);
+void show(
+        const P& map_pos,
+        ForceCentering force_centering = ForceCentering::no);
 
-bool is_in_view(P map_pos);
+bool is_in_view(const P& map_pos);
 
-P to_view_pos(P map_pos);
+P to_view_pos(const P& map_pos);
 
-P to_map_pos(P view_pos);
+P to_map_pos(const P& view_pos);
 
 }  // namespace viewport
 

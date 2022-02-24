@@ -8,6 +8,6 @@ root_dir=$PWD
 
 cd build
 
-./ia-debug
+./ia-debug $*
 
 cd $root_dir

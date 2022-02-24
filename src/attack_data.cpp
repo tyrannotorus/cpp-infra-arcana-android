@@ -112,7 +112,7 @@ static int get_attacker_ranged_skill(const actor::Actor* const attacker)
 
 static actor::Size calc_aim_lvl_at(const P& aim_pos)
 {
-        auto* const actor_aimed_at = map::first_actor_at_pos(aim_pos);
+        auto* const actor_aimed_at = map::living_actor_at(aim_pos);
 
         if (actor_aimed_at)
         {
@@ -418,7 +418,7 @@ RangedAttData::RangedAttData(
                 }
         }
 
-        defender = map::first_actor_at_pos(current_pos);
+        defender = map::living_actor_at(current_pos);
 
         if (!defender || (defender == attacker))
         {
@@ -583,7 +583,7 @@ ThrowAttData::ThrowAttData(
 
         aim_lvl = calc_aim_lvl_at(aim_pos);
 
-        defender = map::first_actor_at_pos(current_pos);
+        defender = map::living_actor_at(current_pos);
 
         if (!defender || (defender == attacker))
         {

@@ -31,8 +31,8 @@ namespace terrain
 class Event : public Terrain
 {
 public:
-        Event(const P& pos) :
-                Terrain(pos) {}
+        Event(const P& pos, const TerrainData* const data) :
+                Terrain(pos, data) {}
 
         virtual ~Event() = default;
 
@@ -53,43 +53,35 @@ public:
 class EventWallCrumble : public Event
 {
 public:
-        EventWallCrumble(
-                const P& p,
-                std::vector<P>& walls,
-                std::vector<P>& inner);
-
-        EventWallCrumble(const P& p) :
-                Event(p) {}
+        EventWallCrumble(const P& p, const TerrainData* const data) :
+                Event(p, data) {}
 
         ~EventWallCrumble() = default;
 
-        Id id() const override
+        void set_wall_positions(const std::vector<P>& wall_positions)
         {
-                return Id::event_wall_crumble;
+                m_wall_positions = wall_positions;
+        }
+
+        void set_inner_positions(const std::vector<P>& inner_positions)
+        {
+                m_inner_positions = inner_positions;
         }
 
         void on_new_turn() override;
 
 private:
-        std::vector<P> m_wall_cells;
-        std::vector<P> m_inner_cells;
+        std::vector<P> m_wall_positions {};
+        std::vector<P> m_inner_positions {};
 };
 
 class EventSnakeEmerge : public Event
 {
 public:
-        EventSnakeEmerge() :
-                Event({-1, -1}) {}
-
-        EventSnakeEmerge(const P& p) :
-                Event(p) {}
+        EventSnakeEmerge(const P& p, const TerrainData* const data) :
+                Event(p, data) {}
 
         ~EventSnakeEmerge() = default;
-
-        Id id() const override
-        {
-                return Id::event_snake_emerge;
-        }
 
         bool try_find_p();
 
@@ -100,7 +92,7 @@ private:
 
         bool is_ok_terrain_at(const P& p) const;
 
-        Array2<bool> blocked_cells(const R& r) const;
+        Array2<bool> blocked_positions(const R& r) const;
 
         std::vector<P> emerge_p_bucket(
                 const P& p,
@@ -116,26 +108,26 @@ private:
 class EventSpawnMonstersDelayed : public Event
 {
 public:
-        EventSpawnMonstersDelayed(
-                const P& p,
-                const actor::Id id,
-                const size_t nr_mon) :
-                Event(p),
-                m_id(id),
-                m_nr_mon(nr_mon) {}
+        EventSpawnMonstersDelayed(const P& p, const TerrainData* const data) :
+                Event(p, data) {}
 
         ~EventSpawnMonstersDelayed() = default;
 
-        Id id() const override
+        void set_mon_id(const actor::Id id)
         {
-                return Id::event_spawn_monsters_delayed;
+                m_id = id;
+        }
+
+        void set_nr_mon(const int nr)
+        {
+                m_nr_mon = nr;
         }
 
         void on_new_turn() override;
 
 private:
-        const actor::Id m_id;
-        const size_t m_nr_mon;
+        actor::Id m_id {(actor::Id)0};
+        size_t m_nr_mon {1};
 
         int m_countdown {3};
 };
@@ -143,13 +135,10 @@ private:
 class EventRatsInTheWallsDiscovery : public Event
 {
 public:
-        EventRatsInTheWallsDiscovery(const P& p) :
-                Event(p) {}
-
-        Id id() const override
-        {
-                return Id::event_rat_cave_discovery;
-        }
+        EventRatsInTheWallsDiscovery(
+                const P& p,
+                const TerrainData* const data) :
+                Event(p, data) {}
 
         void on_new_turn() override;
 };

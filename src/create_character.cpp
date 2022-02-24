@@ -434,7 +434,7 @@ void PickTraitState::update()
 
                                 popup::Popup(popup::AddToMsgHistory::no)
                                         .set_title(title)
-                                        .set_menu(
+                                        .setup_menu_mode(
                                                 {"(Y)es", "(N)o"},
                                                 {'y', 'n'},
                                                 &choice)
@@ -796,7 +796,7 @@ void RemoveTraitState::update()
 
                 popup::Popup(popup::AddToMsgHistory::no)
                         .set_title(title)
-                        .set_menu(
+                        .setup_menu_mode(
                                 {"(Y)es", "(N)o"},
                                 {'y', 'n'},
                                 &choice)
@@ -1039,10 +1039,13 @@ void EnterNameState::draw()
 
         const int y_name = 3;
 
-        const std::string name_str =
-                (m_current_str.size() < g_player_name_max_len)
-                ? m_current_str + "_"
-                : m_current_str;
+        std::string name_str = m_current_str;
+
+        if ((m_current_str.size() < g_player_name_max_len) &&
+            ((io::graphics_cycle_nr(io::GraphicsCycle::fast) % 2) == 0))
+        {
+                name_str += "_";
+        }
 
         const auto name_x0 = screen_center_x - ((int)g_player_name_max_len / 2);
         const auto name_x1 = name_x0 + (int)g_player_name_max_len - 1;

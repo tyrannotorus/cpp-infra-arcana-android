@@ -506,16 +506,7 @@ void GameState::draw()
 
         if (states::is_current_state(this))
         {
-#ifndef NDEBUG
-                if (!init::g_is_demo_mapgen)
-                {
-#endif  // NDEBUG
-                        viewport::show(
-                                map::g_player->m_pos,
-                                viewport::ForceCentering::no);
-#ifndef NDEBUG
-                }
-#endif  // NDEBUG
+                viewport::show(map::g_player->m_pos);
         }
 
         draw_map::run();

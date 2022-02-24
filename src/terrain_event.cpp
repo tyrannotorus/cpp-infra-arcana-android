@@ -59,14 +59,6 @@ namespace terrain
 // -----------------------------------------------------------------------------
 // Wall crumble
 // -----------------------------------------------------------------------------
-EventWallCrumble::EventWallCrumble(
-        const P& p,
-        std::vector<P>& walls,
-        std::vector<P>& inner) :
-        Event(p),
-        m_wall_cells(walls),
-        m_inner_cells(inner) {}
-
 void EventWallCrumble::on_new_turn()
 {
         if (!is_pos_adj(map::g_player->m_pos, m_pos, true))
@@ -75,8 +67,8 @@ void EventWallCrumble::on_new_turn()
         }
 
         // Check that it still makes sense to run the crumbling
-        const bool edge_ok = has_only_walls(m_wall_cells);
-        const bool inner_ok = has_only_walls(m_inner_cells);
+        const bool edge_ok = has_only_walls(m_wall_positions);
+        const bool inner_ok = has_only_walls(m_inner_positions);
 
         if (!edge_ok || !inner_ok)
         {
@@ -102,10 +94,10 @@ void EventWallCrumble::on_new_turn()
 
         const bool event_is_on_edge =
                 std::find(
-                        std::begin(m_wall_cells),
-                        std::end(m_wall_cells),
+                        std::begin(m_wall_positions),
+                        std::end(m_wall_positions),
                         m_pos) !=
-                std::end(m_wall_cells);
+                std::end(m_wall_positions);
 
         ASSERT(event_is_on_edge);
 
@@ -131,7 +123,7 @@ void EventWallCrumble::on_new_turn()
         bool should_make_dark = false;
 
         // Check if any cell adjacent to the destroyed walls is dark
-        for (const P& p : m_wall_cells)
+        for (const P& p : m_wall_positions)
         {
                 for (const P& d : dir_utils::g_dir_list_w_center)
                 {
@@ -157,7 +149,7 @@ void EventWallCrumble::on_new_turn()
         }
 
         // Destroy the outer walls
-        for (const P& p : m_wall_cells)
+        for (const P& p : m_wall_positions)
         {
                 if (!map::is_pos_inside_outer_walls(p))
                 {
@@ -175,7 +167,7 @@ void EventWallCrumble::on_new_turn()
         }
 
         // Destroy the inner walls
-        for (const P& p : m_inner_cells)
+        for (const P& p : m_inner_positions)
         {
                 if (should_make_dark)
                 {
@@ -188,8 +180,8 @@ void EventWallCrumble::on_new_turn()
 
                 if (rnd::one_in(8))
                 {
-                        map::make_gore(p);
-                        map::make_blood(p);
+                        terrain::make_gore(p);
+                        terrain::make_blood(p);
                 }
         }
 
@@ -213,11 +205,11 @@ void EventWallCrumble::on_new_turn()
 
         const auto nr_mon_limit_except_adj_to_entry = spawn_data.second;
 
-        rnd::shuffle(m_inner_cells);
+        rnd::shuffle(m_inner_positions);
 
         std::vector<actor::Mon*> mon_spawned;
 
-        for (const P& p : m_inner_cells)
+        for (const P& p : m_inner_positions)
         {
                 if ((mon_spawned.size() < nr_mon_limit_except_adj_to_entry) ||
                     is_pos_adj(p, m_pos, false))
@@ -248,7 +240,7 @@ void EventWallCrumble::on_new_turn()
 // -----------------------------------------------------------------------------
 bool EventSnakeEmerge::try_find_p()
 {
-        const auto blocked = blocked_cells(map::rect());
+        const auto blocked = blocked_positions(map::rect());
 
         auto p_bucket = to_vec(blocked, false, blocked.rect());
 
@@ -286,7 +278,7 @@ R EventSnakeEmerge::allowed_emerge_rect(const P& p) const
         const int x1 = std::min(map::w() - 2, p.x + max_d);
         const int y1 = std::min(map::h() - 2, p.y + max_d);
 
-        return R(x0, y0, x1, y1);
+        return {x0, y0, x1, y1};
 }
 
 bool EventSnakeEmerge::is_ok_terrain_at(const P& p) const
@@ -343,7 +335,7 @@ std::vector<P> EventSnakeEmerge::emerge_p_bucket(
         return result;
 }
 
-Array2<bool> EventSnakeEmerge::blocked_cells(const R& r) const
+Array2<bool> EventSnakeEmerge::blocked_positions(const R& r) const
 {
         Array2<bool> result(map::dims());
 
@@ -376,7 +368,7 @@ void EventSnakeEmerge::on_new_turn()
 
         const R r = allowed_emerge_rect(m_pos);
 
-        const auto blocked = blocked_cells(r);
+        const auto blocked = blocked_positions(r);
 
         auto tgt_bucket = emerge_p_bucket(m_pos, blocked, r);
 

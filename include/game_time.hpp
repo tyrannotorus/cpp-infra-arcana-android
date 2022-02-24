@@ -23,6 +23,9 @@ class Terrain;
 
 namespace game_time
 {
+// TODO: These should be in the map namespace instead (however consider what
+// functions in the map namespace such as init/reset should do and how they
+// should be named):
 extern std::vector<actor::Actor*> g_actors;
 extern std::vector<terrain::Terrain*> g_mobs;
 
@@ -46,17 +49,15 @@ int turn_nr();
 
 actor::Actor* current_actor();
 
-std::vector<terrain::Terrain*> mobs_at_pos(const P& p);
+std::vector<terrain::Terrain*> mobs_at(const P& p);
 
-void add_mob(terrain::Terrain* t);
+void add_mob(terrain::Terrain* terrain);
 
-void erase_mob(terrain::Terrain* f, bool destroy_object);
+void erase_mob(const terrain::Terrain* terrain, bool destroy_object);
 
 void erase_all_mobs();
 
 void reset_current_actor_idx();
-
-void update_light_map();
 
 }  // namespace game_time
 

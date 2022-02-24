@@ -129,6 +129,7 @@ set(COMMON_SRC
         include/terrain_dmg.hpp
         include/terrain_door.hpp
         include/terrain_event.hpp
+        include/terrain_factory.hpp
         include/terrain_gong.hpp
         include/terrain_mob.hpp
         include/terrain_monolith.hpp
@@ -270,6 +271,7 @@ set(COMMON_SRC
         src/terrain_dmg.cpp
         src/terrain_door.cpp
         src/terrain_event.cpp
+        src/terrain_factory.cpp
         src/terrain_gong.cpp
         src/terrain_mob.cpp
         src/terrain_monolith.cpp
@@ -371,11 +373,15 @@ if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX
                 -Wunused
                 -Wnull-dereference
                 # NOTE: For some reason, -O0 breaks the "ar" command when building
-                # with mingw (the command seems to freeze forever), but -Og works
+                # with mingw (the command seems to freeze forever), but -Og works.
+                # -Og is also recommended by the gcc manual for debug builds.
                 -Og
                 -g
-                # -fsanitize=undefined
-                # -fno-sanitize-recover
+                -fsanitize=address
+                -fsanitize=undefined
+                -fno-sanitize-recover
+                # Needed for full stack trace when running gcc sanitizers
+                -fno-omit-frame-pointer
                 #
                 # Uncomment to generate gmon.out for gprof (must also be done for linker
                 # flags, see below)
@@ -403,9 +409,11 @@ set(RELEASE_COMPILE_FLAGS
 
 set(TEST_COMPILE_FLAGS
         ${DEBUG_COMPILE_FLAGS}
+        -fno-sanitize=all
+        -fsanitize=undefined
         -DTRACE_LVL=0
         )
-
+ 
 target_compile_options(ia PUBLIC
         ${COMMON_COMPILE_FLAGS}
         ${RELEASE_COMPILE_FLAGS}
@@ -617,10 +625,11 @@ else()
                 ${SDL2_MIXER_LIBRARIES}
                 )
 
+        target_link_libraries(ia-debug PUBLIC   -lasan -lubsan)
+        target_link_libraries(ia-test PUBLIC    -lubsan)
+
         target_link_libraries(ia PUBLIC         ${SDL_LIBS})
         target_link_libraries(ia-debug PUBLIC   ${SDL_LIBS})
-
-        # target_link_libraries(ia-debug PUBLIC   -lubsan)
 
         # Uncomment to generate gmon.out for gprof (must also be done for compile
         # flags, see above)

@@ -345,14 +345,9 @@ private:
 class Gong : public Terrain
 {
 public:
-        Gong(const P& p);
+        Gong(const P& p, const TerrainData* data);
 
         Gong() = delete;
-
-        Id id() const override
-        {
-                return Id::gong;
-        }
 
         std::string name(Article article) const override;
 

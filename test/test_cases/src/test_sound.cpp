@@ -21,6 +21,7 @@
 #include "property_handler.hpp"
 #include "sound.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 #include "test_utils.hpp"
 
 TEST_CASE("Sound alerts monster")
@@ -31,7 +32,8 @@ TEST_CASE("Sound alerts monster")
         {
                 for (int y = 0; y < map::h(); ++y)
                 {
-                        map::put(new terrain::Wall({x, y}));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::wall, {x, y}));
                 }
         }
 
@@ -44,12 +46,13 @@ TEST_CASE("Sound alerts monster")
         {
                 for (int y = wall_pos.y - 1; y <= wall_pos.y + 1; ++y)
                 {
-                        map::put(new terrain::Floor({x, y}));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::floor, {x, y}));
                 }
         }
 
         // Put a wall in the middle (the sound will travel around this wall)
-        map::put(new terrain::Wall(wall_pos));
+        map::update_terrain(terrain::make(terrain::Id::wall, wall_pos));
 
         auto* const zombie = actor::make(actor::Id::zombie, mon_pos);
 
@@ -83,10 +86,10 @@ TEST_CASE("Player wading alerts monsters")
 {
         test_utils::init_all();
 
-        map::put(new terrain::Floor({4, 5}));
-        map::put(new terrain::Floor({5, 5}));
-        map::put(new terrain::Liquid({6, 5}));
-        map::put(new terrain::Floor({7, 5}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {4, 5}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {5, 5}));
+        map::update_terrain(terrain::make(terrain::Id::liquid, {6, 5}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {7, 5}));
 
         map::g_player->m_pos = {4, 5};
 
@@ -95,14 +98,14 @@ TEST_CASE("Player wading alerts monsters")
         REQUIRE(!zombie->is_aware_of_player());
 
         // Move player into floor
-        actor::move(*map::g_player, Dir::right);
+        actor::do_move_action(*map::g_player, Dir::right);
 
         REQUIRE(!zombie->is_aware_of_player());
 
         game_time::g_allow_tick = true;
 
         // Move player into water (wading)
-        actor::move(*map::g_player, Dir::right);
+        actor::do_move_action(*map::g_player, Dir::right);
 
         REQUIRE(zombie->is_aware_of_player());
 
@@ -113,9 +116,9 @@ TEST_CASE("Monster wading does not alert monsters")
 {
         test_utils::init_all();
 
-        map::put(new terrain::Floor({5, 5}));
-        map::put(new terrain::Liquid({6, 5}));
-        map::put(new terrain::Floor({7, 5}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {5, 5}));
+        map::update_terrain(terrain::make(terrain::Id::liquid, {6, 5}));
+        map::update_terrain(terrain::make(terrain::Id::floor, {7, 5}));
 
         auto* const zombie_1 = actor::make(actor::Id::zombie, {5, 5});
         auto* const zombie_2 = actor::make(actor::Id::zombie, {7, 5});
@@ -124,7 +127,7 @@ TEST_CASE("Monster wading does not alert monsters")
         REQUIRE(!zombie_2->is_aware_of_player());
 
         // Move zombie 1 into water (wading)
-        actor::move(*zombie_1, Dir::right);
+        actor::do_move_action(*zombie_1, Dir::right);
 
         REQUIRE(!zombie_1->is_aware_of_player());
         REQUIRE(!zombie_2->is_aware_of_player());

@@ -31,6 +31,7 @@
 #include "random.hpp"
 #include "saving.hpp"
 #include "teleport.hpp"
+#include "terrain_factory.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -533,8 +534,8 @@ void PylonTerrify::on_new_turn_activated()
 // -----------------------------------------------------------------------------
 // Pylon
 // -----------------------------------------------------------------------------
-Pylon::Pylon(const P& p) :
-        Terrain(p),
+Pylon::Pylon(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_pylon_impl(nullptr)
 {
         const auto id =
@@ -729,7 +730,7 @@ void Pylon::on_hit(
         case DmgType::explosion:
         case DmgType::pure:
         {
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         const std::string terrain_name =
                                 text_format::first_to_upper(
@@ -738,8 +739,7 @@ void Pylon::on_hit(
                         msg_log::add(terrain_name + " is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
-                map::update_vision();
+                map::update_terrain(make(Id::rubble_low, m_pos));
         }
         break;
 

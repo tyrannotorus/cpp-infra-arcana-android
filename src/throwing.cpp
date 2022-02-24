@@ -177,15 +177,15 @@ void player_throw_lit_explosive(const P& aim_cell)
                 {
                         states::draw();
 
-                        if (map::g_seen.at(p) &&
-                            viewport::is_in_view(p))
+                        if (map::g_seen.at(p))
                         {
-                                io::draw_symbol(
-                                        explosive->tile(),
-                                        explosive->character(),
-                                        Panel::map,
-                                        viewport::to_view_pos(p),
-                                        color);
+                                io::MapDrawObj draw_obj;
+                                draw_obj.tile = explosive->tile();
+                                draw_obj.character = explosive->character();
+                                draw_obj.pos = viewport::to_view_pos(p);
+                                draw_obj.color = color;
+
+                                draw_obj.draw();
 
                                 io::update_screen();
 
@@ -296,7 +296,7 @@ void throw_item(
 
                 drop_pos = pos;
 
-                auto* const actor_here = map::first_actor_at_pos(pos);
+                auto* const actor_here = map::living_actor_at(pos);
 
                 if (actor_here &&
                     ((pos == tgt_pos) ||
@@ -425,12 +425,13 @@ void throw_item(
 
                 if (map::g_seen.at(pos) && viewport::is_in_view(pos))
                 {
-                        io::draw_symbol(
-                                item_thrown.tile(),
-                                item_thrown.character(),
-                                Panel::map,
-                                viewport::to_view_pos(pos),
-                                item_color);
+                        io::MapDrawObj draw_obj;
+                        draw_obj.tile = item_thrown.tile();
+                        draw_obj.character = item_thrown.character();
+                        draw_obj.pos = viewport::to_view_pos(pos);
+                        draw_obj.color = item_color;
+
+                        draw_obj.draw();
 
                         io::update_screen();
 

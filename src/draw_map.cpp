@@ -38,109 +38,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static Array2<CellRenderData> s_render_array(0, 0);
-
-static char s_filled_rect_char = 1;
-
-static void clear_render_array()
-{
-        std::fill(
-                std::begin(s_render_array),
-                std::end(s_render_array),
-                CellRenderData());
-}
-
-static void set_terrains()
-{
-        const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
-                if (!map::g_seen.at(i))
-                {
-                        continue;
-                }
-
-                auto& render_data = s_render_array.at(i);
-
-                const auto* const t = map::g_terrain.at(i);
-
-                gfx::TileId gore_tile = gfx::TileId::END;
-
-                char gore_character = 0;
-
-                if (t->can_have_gore())
-                {
-                        gore_tile = t->gore_tile();
-                        gore_character = t->gore_character();
-                }
-
-                if (gore_tile == gfx::TileId::END)
-                {
-                        render_data.tile = t->tile();
-                        render_data.character = t->character();
-                        render_data.color = t->color();
-                }
-                else
-                {
-                        render_data.tile = gore_tile;
-                        render_data.character = gore_character;
-                        render_data.color = colors::red();
-                }
-
-                const Color terrain_color_bg = t->color_bg();
-
-                if (terrain_color_bg != colors::black())
-                {
-                        render_data.color_bg = terrain_color_bg;
-                }
-
-                if ((map::g_terrain.at(i)->id() == terrain::Id::wall) &&
-                    config::text_mode_filled_walls())
-                {
-                        render_data.character = s_filled_rect_char;
-                }
-        }
-}
-
-static void set_dead_actors()
-{
-        for (auto* actor : game_time::g_actors)
-        {
-                const P& p(actor->m_pos);
-
-                if (!map::g_seen.at(p) || !actor->is_corpse())
-                {
-                        continue;
-                }
-
-                auto& render_data = s_render_array.at(p);
-
-                render_data.color = actor->color();
-                render_data.tile = actor->tile();
-                render_data.character = actor->character();
-        }
-}
-
-static void set_items()
-{
-        const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
-                const auto* const item = map::g_items.at(i);
-
-                if (!map::g_seen.at(i) || !item)
-                {
-                        continue;
-                }
-
-                auto& render_data = s_render_array.at(i);
-
-                render_data.color = item->color();
-                render_data.tile = item->tile();
-                render_data.character = item->character();
-        }
-}
-
 static void adapt_color_for_lit_pos(Color& color)
 {
         color.set_rgb(
@@ -159,76 +56,202 @@ static void adapt_color_for_dark_pos(Color& color)
                 std::min(255, color.b() + 20));
 }
 
-static void set_light_level()
+static void adapt_color_for_light_level(const size_t pos_idx, Color& color)
 {
-        const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
-                const auto* const t = map::g_terrain.at(i);
+        const auto* const t = map::g_terrain.at(pos_idx);
 
-                if (!map::g_seen.at(i) ||
-                    !t->is_los_passable() ||
-                    (t->id() == terrain::Id::chasm))
-                {
-                        continue;
-                }
-
-                auto& color = s_render_array.at(i).color;
-
-                if (map::g_light.at(i))
-                {
-                        adapt_color_for_lit_pos(color);
-                }
-                else if (map::g_dark.at(i))
-                {
-                        adapt_color_for_dark_pos(color);
-                }
-        }
-}
-
-static void set_mobiles()
-{
-        for (auto* mob : game_time::g_mobs)
-        {
-                const P& p = mob->pos();
-
-                const gfx::TileId mob_tile = mob->tile();
-
-                const char mob_character = mob->character();
-
-                if (map::g_seen.at(p) &&
-                    mob_tile != gfx::TileId::END &&
-                    mob_character != 0 &&
-                    mob_character != ' ')
-                {
-                        auto& render_data = s_render_array.at(p);
-
-                        render_data.color = mob->color();
-                        render_data.tile = mob_tile;
-                        render_data.character = mob_character;
-                }
-        }
-}
-
-static void set_living_seen_monster(
-        const actor::Actor& mon,
-        CellRenderData& render_data)
-{
-        if (mon.tile() == gfx::TileId::END ||
-            mon.character() == 0 ||
-            mon.character() == ' ')
+        if (!map::g_seen.at(pos_idx) ||
+            !t->is_los_passable() ||
+            (t->id() == terrain::Id::chasm))
         {
                 return;
         }
 
-        render_data.color = mon.color();
-        render_data.tile = mon.tile();
-        render_data.character = mon.character();
+        if (map::g_light.at(pos_idx))
+        {
+                adapt_color_for_lit_pos(color);
+        }
+        else if (map::g_dark.at(pos_idx))
+        {
+                adapt_color_for_dark_pos(color);
+        }
+}
+
+static void adapt_color_for_light_level(const P& pos, Color& color)
+{
+        adapt_color_for_light_level(map::g_terrain.pos_to_idx(pos), color);
+}
+
+static void draw_terrains()
+{
+        const size_t nr_positions = map::nr_positions();
+
+        for (size_t i = 0; i < nr_positions; ++i)
+        {
+                if (!map::g_seen.at(i))
+                {
+                        continue;
+                }
+
+                const auto* const t = map::g_terrain.at(i);
+
+                io::MapDrawObj draw_obj;
+
+                draw_obj.pos = viewport::to_view_pos(t->pos());
+
+                auto gore_tile = gfx::TileId::END;
+                char gore_character = 0;
+
+                if (t->can_have_gore())
+                {
+                        gore_tile = t->gore_tile();
+                        gore_character = t->gore_character();
+                }
+
+                if (gore_tile == gfx::TileId::END)
+                {
+                        draw_obj.tile = t->tile();
+                        draw_obj.character = t->character();
+                        draw_obj.color = t->color();
+                }
+                else
+                {
+                        draw_obj.tile = gore_tile;
+                        draw_obj.character = gore_character;
+                        draw_obj.color = colors::red();
+                }
+
+                const auto terrain_color_bg = t->color_bg();
+
+                if (terrain_color_bg != colors::black())
+                {
+                        draw_obj.color_bg = terrain_color_bg;
+                }
+
+                if ((t->id() == terrain::Id::wall) &&
+                    config::text_mode_filled_walls())
+                {
+                        draw_obj.character = io::g_filled_rect_char;
+                }
+
+                adapt_color_for_light_level(i, draw_obj.color);
+
+                draw_obj.draw();
+        }
+}
+
+static void draw_dead_actors()
+{
+        for (auto* actor : game_time::g_actors)
+        {
+                const auto& p = actor->m_pos;
+
+                if (!map::g_seen.at(p) || !actor->is_corpse())
+                {
+                        continue;
+                }
+
+                io::MapDrawObj draw_obj;
+
+                draw_obj.pos = viewport::to_view_pos(p);
+                draw_obj.color = actor->color();
+                draw_obj.tile = actor->tile();
+                draw_obj.character = actor->character();
+
+                adapt_color_for_light_level(p, draw_obj.color);
+
+                draw_obj.draw();
+        }
+}
+
+static void draw_items()
+{
+        const auto map_dims = map::dims();
+
+        for (int x = 0; x < map_dims.x; ++x)
+        {
+                for (int y = 0; y < map_dims.y; ++y)
+                {
+                        const P p(x, y);
+
+                        if (!map::g_seen.at(p))
+                        {
+                                continue;
+                        }
+
+                        const auto* const item = map::g_items.at(p);
+
+                        if (!item)
+                        {
+                                continue;
+                        }
+
+                        io::MapDrawObj draw_obj;
+
+                        draw_obj.pos = viewport::to_view_pos(p);
+                        draw_obj.color = item->color();
+                        draw_obj.tile = item->tile();
+                        draw_obj.character = item->character();
+
+                        adapt_color_for_light_level(p, draw_obj.color);
+
+                        draw_obj.draw();
+                }
+        }
+}
+
+static void draw_mobiles()
+{
+        for (auto* mob : game_time::g_mobs)
+        {
+                const auto& p = mob->pos();
+                const auto mob_tile = mob->tile();
+                const auto mob_character = mob->character();
+
+                if (!map::g_seen.at(p) ||
+                    (mob_tile == gfx::TileId::END) ||
+                    (mob_character == 0) ||
+                    (mob_character == ' '))
+                {
+                        continue;
+                }
+
+                io::MapDrawObj draw_obj;
+
+                draw_obj.pos = viewport::to_view_pos(p);
+                draw_obj.color = mob->color();
+                draw_obj.tile = mob_tile;
+                draw_obj.character = mob_character;
+
+                adapt_color_for_light_level(p, draw_obj.color);
+
+                draw_obj.draw();
+        }
+}
+
+static void draw_living_seen_monster(const actor::Actor& mon)
+{
+        const auto mon_tile = mon.tile();
+        const auto mon_char = mon.character();
+
+        if ((mon_tile == gfx::TileId::END) ||
+            (mon_char == 0) ||
+            (mon_char == ' '))
+        {
+                return;
+        }
+
+        io::MapDrawObj draw_obj;
+
+        draw_obj.pos = viewport::to_view_pos(mon.m_pos);
+        draw_obj.color = mon.color();
+        draw_obj.tile = mon.tile();
+        draw_obj.character = mon.character();
 
         if (map::g_player->is_leader_of(&mon))
         {
                 // The monster is player-friendly
-                render_data.color_bg = colors::mon_allied();
+                draw_obj.color_bg = colors::mon_allied();
         }
         else
         {
@@ -242,39 +265,48 @@ static void set_living_seen_monster(
 
                         if (has_temporary_negative_prop)
                         {
-                                render_data.color_bg =
+                                draw_obj.color_bg =
                                         colors::mon_temp_property();
                         }
                 }
                 else
                 {
                         // Monster is not aware of the player
-                        render_data.color_bg = colors::mon_unaware();
+                        draw_obj.color_bg = colors::mon_unaware();
                 }
         }
+
+        adapt_color_for_light_level(mon.m_pos, draw_obj.color);
+
+        draw_obj.draw();
 }
 
-static void set_living_hidden_monster(
-        const actor::Actor& mon,
-        CellRenderData& render_data)
+static void draw_living_hidden_monster(const actor::Actor& mon)
 {
         if (!mon.is_player_aware_of_me())
         {
                 return;
         }
 
+        io::MapDrawObj draw_obj;
+
         const auto color_bg =
                 map::g_player->is_leader_of(&mon)
                 ? colors::mon_allied()
                 : colors::dark_gray();
 
-        render_data.tile = gfx::TileId::excl_mark;
-        render_data.character = '!';
-        render_data.color = colors::white();
-        render_data.color_bg = color_bg;
+        draw_obj.pos = viewport::to_view_pos(mon.m_pos);
+        draw_obj.tile = gfx::TileId::excl_mark;
+        draw_obj.character = '!';
+        draw_obj.color = colors::white();
+        draw_obj.color_bg = color_bg;
+
+        adapt_color_for_light_level(mon.m_pos, draw_obj.color);
+
+        draw_obj.draw();
 }
 
-static void set_living_monsters()
+static void draw_living_monsters()
 {
         for (auto* actor : game_time::g_actors)
         {
@@ -283,149 +315,77 @@ static void set_living_monsters()
                         continue;
                 }
 
-                const P& pos = actor->m_pos;
-
-                auto& render_data = s_render_array.at(pos);
-
                 if (can_player_see_actor(*actor))
                 {
-                        set_living_seen_monster(*actor, render_data);
+                        draw_living_seen_monster(*actor);
                 }
                 else
                 {
-                        set_living_hidden_monster(*actor, render_data);
+                        draw_living_hidden_monster(*actor);
                 }
         }
 }
 
-static CellRenderData player_memory_to_render_data(
+static io::MapDrawObj player_memory_to_draw_obj(
         const map::PlayerMemoryAppearance& d)
 {
-        CellRenderData result;
+        io::MapDrawObj draw_obj;
 
-        result.tile = d.tile;
-        result.color = d.color;
-        result.color_bg = colors::black();  // TODO: Is background ever needed?
-        result.character = d.character;
+        draw_obj.tile = d.tile;
+        draw_obj.color = d.color;
+        draw_obj.color_bg = colors::black();
+        draw_obj.character = d.character;
 
-        return result;
+        return draw_obj;
 }
 
-static void set_unseen_cells_from_player_memory()
+static void draw_unseen_cells_from_player_memory()
 {
-        const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
-                auto& render_data = s_render_array.at(i);
+        const auto view = viewport::get_map_view_area();
 
-                if (map::g_seen.at(i))
+        for (int x = view.p0.x; x < view.p1.x; ++x)
+        {
+                for (int y = view.p0.y; y < view.p1.y; ++y)
                 {
-                        continue;
-                }
+                        const P p(x, y);
 
-                const auto& terrain_memory = map::g_terrain_memory.at(i);
-                const auto& item_memory = map::g_item_memory.at(i);
-
-                if (terrain_memory.appearance.is_defined())
-                {
-                        render_data =
-                                player_memory_to_render_data(
-                                        terrain_memory.appearance);
-                }
-
-                if (item_memory.appearance.is_defined())
-                {
-                        render_data =
-                                player_memory_to_render_data(
-                                        item_memory.appearance);
-                }
-
-                const double div = 3.0;
-
-                render_data.color = render_data.color.fraction(div);
-        }
-}
-
-static void draw_filled_rect(const P& view_pos, const Color& color)
-{
-        const auto px_pos = io::gui_to_px_coords(Panel::map, view_pos);
-
-        const auto px_dims =
-                P(config::gui_cell_px_w(),
-                  config::gui_cell_px_h());
-
-        io::draw_rectangle_filled({px_pos, px_pos + px_dims - 1}, color);
-}
-
-static void draw_render_array_tile(const P& view_pos, CellRenderData& data)
-{
-        const bool has_drawable_tile = data.tile != gfx::TileId::END;
-
-        if (has_drawable_tile)
-        {
-                io::draw_tile(
-                        data.tile,
-                        Panel::map,
-                        view_pos,
-                        data.color,
-                        io::DrawBg::yes,
-                        data.color_bg);
-        }
-}
-
-static void draw_render_array_char(const P& view_pos, CellRenderData& data)
-{
-        if (data.character == s_filled_rect_char)
-        {
-                draw_filled_rect(view_pos, data.color);
-
-                return;
-        }
-
-        const bool has_drawable_char =
-                (data.character != 0) &&
-                (data.character != ' ');
-
-        if (!has_drawable_char)
-        {
-                return;
-        }
-
-        io::draw_character(
-                data.character,
-                Panel::map,
-                view_pos,
-                data.color,
-                io::DrawBg::yes,
-                data.color_bg);
-}
-
-static void draw_render_array()
-{
-        const R map_view = viewport::get_map_view_area();
-
-        for (int x = map_view.p0.x; x <= map_view.p1.x; ++x)
-        {
-                for (int y = map_view.p0.y; y <= map_view.p1.y; ++y)
-                {
-                        const P map_pos(x, y);
-                        const P view_pos = viewport::to_view_pos(map_pos);
-
-                        if (!map::is_pos_inside_map(map_pos))
+                        if (!map::is_pos_inside_map(p))
                         {
                                 continue;
                         }
 
-                        auto& render_data = s_render_array.at(map_pos);
+                        if (map::g_seen.at(p))
+                        {
+                                continue;
+                        }
 
-                        if (config::is_tiles_mode())
+                        io::MapDrawObj draw_obj;
+
+                        const auto& terrain_memory =
+                                map::g_terrain_memory.at(p);
+
+                        const auto& item_memory =
+                                map::g_item_memory.at(p);
+
+                        if (terrain_memory.appearance.is_defined())
                         {
-                                draw_render_array_tile(view_pos, render_data);
+                                draw_obj =
+                                        player_memory_to_draw_obj(
+                                                terrain_memory.appearance);
                         }
-                        else
+
+                        if (item_memory.appearance.is_defined())
                         {
-                                draw_render_array_char(view_pos, render_data);
+                                draw_obj =
+                                        player_memory_to_draw_obj(
+                                                item_memory.appearance);
                         }
+
+                        draw_obj.pos = viewport::to_view_pos(p);
+
+                        draw_obj.color = draw_obj.color.shaded(80);
+
+                        draw_obj.draw();
                 }
         }
 }
@@ -465,19 +425,16 @@ static void draw_life_bar(const actor::Actor& actor)
         const P cell_dims(config::map_cell_px_w(), config::map_cell_px_h());
 
         const int w_green = length;
-
         const int w_bar_tot = cell_dims.x - 2;
-
         const int w_red = w_bar_tot - w_green;
 
-        const P view_pos = viewport::to_view_pos(map_pos);
+        const auto view_pos = viewport::to_view_pos(map_pos);
 
         P px_pos = io::map_to_px_coords(Panel::map, view_pos);
 
         px_pos.y -= 2;
 
         const int x0_green = px_pos.x + 1;
-
         const int x0_red = x0_green + w_green;
 
         if (w_green > 0)
@@ -522,14 +479,14 @@ static void draw_monster_life_bars()
 
 static void draw_player_character()
 {
-        const P& pos = map::g_player->m_pos;
+        const auto& player = *map::g_player;
 
-        if (!viewport::is_in_view(pos))
+        if (!viewport::is_in_view(player.m_pos))
         {
                 return;
         }
 
-        const auto color = map::g_player->color();
+        const auto color = player.color();
         const auto color_bg = colors::black();
 
         auto tile = gfx::TileId::END;
@@ -540,7 +497,7 @@ static void draw_player_character()
         }
         else
         {
-                auto* item = map::g_player->m_inv.item_in_slot(SlotId::wpn);
+                auto* item = player.m_inv.item_in_slot(SlotId::wpn);
 
                 if (item && item->data().ranged.is_ranged_wpn)
                 {
@@ -556,23 +513,17 @@ static void draw_player_character()
                 }
         }
 
+        io::MapDrawObj draw_obj;
+
         const char character = '@';
 
-        auto& player_render_data = s_render_array.at(pos);
+        draw_obj.pos = viewport::to_view_pos(player.m_pos);
+        draw_obj.tile = tile;
+        draw_obj.character = character;
+        draw_obj.color = color;
+        draw_obj.color_bg = color_bg;
 
-        player_render_data.tile = tile;
-        player_render_data.character = character;
-        player_render_data.color = color;
-        player_render_data.color_bg = color_bg;
-
-        io::draw_symbol(
-                tile,
-                character,
-                Panel::map,
-                viewport::to_view_pos(pos),
-                color,
-                io::DrawBg::yes,
-                color_bg);
+        draw_obj.draw();
 
         draw_life_bar(*map::g_player);
 }
@@ -584,42 +535,18 @@ namespace draw_map
 {
 void clear()
 {
-        clear_render_array();
 }
 
 void run()
 {
-        if (s_render_array.dims() != map::dims())
-        {
-                s_render_array.resize(map::dims());
-        }
-
-        clear_render_array();
-
-        set_unseen_cells_from_player_memory();
-
-        set_terrains();
-
-        set_dead_actors();
-
-        set_items();
-
-        set_mobiles();
-
-        set_living_monsters();
-
-        set_light_level();
-
-        draw_render_array();
-
+        draw_unseen_cells_from_player_memory();
+        draw_terrains();
+        draw_dead_actors();
+        draw_items();
+        draw_mobiles();
+        draw_living_monsters();
         draw_monster_life_bars();
-
         draw_player_character();
-}
-
-const CellRenderData& get_drawn_cell(int x, int y)
-{
-        return s_render_array.at(x, y);
 }
 
 }  // namespace draw_map

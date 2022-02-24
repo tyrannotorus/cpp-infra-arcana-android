@@ -20,6 +20,7 @@
 #include "room.hpp"
 #include "terrain.hpp"
 #include "terrain_event.hpp"
+#include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -52,15 +53,23 @@ static void make_crumble_room(const R& room_area_incl_walls, const P& event_pos)
 
                         // Fill the room with walls (so we don't have an
                         // inaccessible empty room)
-                        map::put(new terrain::Wall(p));
+                        auto* const terrain =
+                                terrain::make(terrain::Id::wall, p);
+
+                        map::set_terrain(terrain);
                 }
         }
 
-        game_time::add_mob(
-                new terrain::EventWallCrumble(
-                        event_pos,
-                        wall_cells,
-                        inner_cells));
+        auto* const event =
+                static_cast<terrain::EventWallCrumble*>(
+                        terrain::make(
+                                terrain::Id::event_wall_crumble,
+                                event_pos));
+
+        event->set_inner_positions(inner_cells);
+        event->set_wall_positions(wall_cells);
+
+        game_time::add_mob(event);
 
 }  // make_crumble_room
 

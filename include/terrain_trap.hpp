@@ -64,25 +64,18 @@ enum class TrapPlacementValid
 class Trap : public Terrain
 {
 public:
-        Trap(const P& p, Terrain* mimic_terrain, TrapId id);
-
-        Trap(const P& p) :
-                Terrain(p) {}
+        Trap(const P& pos, const TerrainData* const data) :
+                Terrain(pos, data) {}
 
         Trap() = delete;
 
         ~Trap();
 
-        Id id() const override
-        {
-                return Id::trap;
-        }
+        bool try_init_type(TrapId id);
 
-        bool valid()
+        void set_mimic_terrain(terrain::Terrain* const terrain)
         {
-                // Trap is valid if we have succesfully created an
-                // implementation
-                return m_trap_impl;
+                m_mimic_terrain = terrain;
         }
 
         AllowAction pre_bump(actor::Actor& actor_bumping) override;

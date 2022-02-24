@@ -23,47 +23,39 @@ namespace terrain
 class Smoke : public Terrain
 {
 public:
-        Smoke(const P& pos, const int nr_turns) :
-                Terrain(pos),
-                m_nr_turns_left(nr_turns) {}
-
-        Smoke(const P& pos) :
-                Terrain(pos) {}
+        Smoke(const P& pos, const TerrainData* const data) :
+                Terrain(pos, data) {}
 
         ~Smoke() = default;
-
-        terrain::Id id() const override
-        {
-                return terrain::Id::smoke;
-        }
 
         std::string name(Article article) const override;
 
         Color color() const override;
+
+        void set_nr_turns(const int value)
+        {
+                m_nr_turns_left = value;
+        }
 
         void on_placed() override;
 
         void on_new_turn() override;
 
 protected:
-        int m_nr_turns_left {-1};
+        int m_nr_turns_left {1};
 };
 
 class ForceField : public Terrain
 {
 public:
-        ForceField(const P& pos, const int nr_turns) :
-                Terrain(pos),
-                m_nr_turns_left(nr_turns) {}
-
-        ForceField(const P& pos) :
-                Terrain(pos) {}
+        ForceField(const P& pos, const TerrainData* const data) :
+                Terrain(pos, data) {}
 
         ~ForceField() = default;
 
-        terrain::Id id() const override
+        void set_nr_turns(const int value)
         {
-                return terrain::Id::force_field;
+                m_nr_turns_left = value;
         }
 
         void on_new_turn() override;
@@ -73,29 +65,25 @@ public:
         Color color() const override;
 
 protected:
-        int m_nr_turns_left {-1};
+        int m_nr_turns_left {1};
 };
 
 class LitDynamite : public Terrain
 {
 public:
-        LitDynamite(const P& pos, const int nr_turns) :
-                Terrain(pos),
-                m_nr_turns_left(nr_turns) {}
-
-        LitDynamite(const P& pos) :
-                Terrain(pos) {}
+        LitDynamite(const P& pos, const TerrainData* const data) :
+                Terrain(pos, data) {}
 
         ~LitDynamite() = default;
-
-        terrain::Id id() const override
-        {
-                return terrain::Id::lit_dynamite;
-        }
 
         std::string name(Article article) const override;
 
         Color color() const override;
+
+        void set_nr_turns(const int value)
+        {
+                m_nr_turns_left = value;
+        }
 
         // TODO: Lit dynamite should add light on their own cell (just one cell)
         // void add_light(Array2<bool>& light) const;
@@ -103,36 +91,32 @@ public:
         void on_new_turn() override;
 
 private:
-        int m_nr_turns_left {-1};
+        int m_nr_turns_left {1};
 };
 
 class LitFlare : public Terrain
 {
 public:
-        LitFlare(const P& pos, const int nr_turns) :
-                Terrain(pos),
-                m_nr_turns_left(nr_turns) {}
-
-        LitFlare(const P& pos) :
-                Terrain(pos) {}
+        LitFlare(const P& pos, const TerrainData* const data) :
+                Terrain(pos, data) {}
 
         ~LitFlare() = default;
-
-        terrain::Id id() const override
-        {
-                return terrain::Id::lit_flare;
-        }
 
         std::string name(Article article) const override;
 
         Color color() const override;
+
+        void set_nr_turns(const int value)
+        {
+                m_nr_turns_left = value;
+        }
 
         void on_new_turn() override;
 
         void add_light(Array2<bool>& light) const override;
 
 private:
-        int m_nr_turns_left {-1};
+        int m_nr_turns_left {1};
 };
 
 }  // namespace terrain

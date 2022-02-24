@@ -4,19 +4,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "catch.hpp"
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_player.hpp"
 #include "attack.hpp"
+#include "catch.hpp"
 #include "item.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
-#include "terrain.hpp"
-#include "test_utils.hpp"
-#include "actor.hpp"
-#include "actor_data.hpp"
-#include "item_data.hpp"
 #include "pos.hpp"
+#include "terrain.hpp"
+#include "terrain_factory.hpp"
+#include "test_utils.hpp"
 
 TEST_CASE("Incinerator projectile explodes on hitting creature")
 {
@@ -26,7 +27,8 @@ TEST_CASE("Incinerator projectile explodes on hitting creature")
         {
                 for (int y = 1; y < (map::h() - 1); ++y)
                 {
-                        map::put(new terrain::Floor({x, y}));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::floor, {x, y}));
                 }
         }
 
@@ -68,7 +70,8 @@ TEST_CASE("Incinerator projectile explodes on hitting floor")
         {
                 for (int y = 1; y < (map::h() - 1); ++y)
                 {
-                        map::put(new terrain::Floor({x, y}));
+                        map::update_terrain(
+                                terrain::make(terrain::Id::floor, {x, y}));
                 }
         }
 

@@ -1010,19 +1010,20 @@ SpellSkill Player::spell_skill(const SpellId id) const
 void Player::auto_melee()
 {
         if (m_tgt &&
-            (m_tgt->m_state == ActorState::alive) &&
+            m_tgt->is_alive() &&
             is_pos_adj(m_pos, m_tgt->m_pos, false) &&
             can_player_see_actor(*m_tgt))
         {
-                move(*this, dir_utils::dir(m_tgt->m_pos - m_pos));
+                do_move_action(*this, dir_utils::dir(m_tgt->m_pos - m_pos));
 
                 return;
         }
 
-        // If this line reached, there is no adjacent cur target.
-        for (const P& d : dir_utils::g_dir_list)
+        // If this line reached, there is no adjacent current target.
+
+        for (const auto& d : dir_utils::g_dir_list)
         {
-                Actor* const actor = map::first_actor_at_pos(m_pos + d);
+                auto* const actor = map::living_actor_at(m_pos + d);
 
                 if (actor &&
                     !is_leader_of(actor) &&
@@ -1030,7 +1031,7 @@ void Player::auto_melee()
                 {
                         m_tgt = actor;
 
-                        move(*this, dir_utils::dir(d));
+                        do_move_action(*this, dir_utils::dir(d));
 
                         return;
                 }
@@ -1056,13 +1057,15 @@ void Player::kick_mon(Actor& defender)
              (d.id == Id::crawling_hand) ||
              (d.id == Id::thing)))
         {
-                kick_wpn = static_cast<item::Wpn*>(
-                        item::make(item::Id::player_stomp));
+                kick_wpn =
+                        static_cast<item::Wpn*>(
+                                item::make(item::Id::player_stomp));
         }
         else
         {
-                kick_wpn = static_cast<item::Wpn*>(
-                        item::make(item::Id::player_kick));
+                kick_wpn =
+                        static_cast<item::Wpn*>(
+                                item::make(item::Id::player_kick));
         }
 
         attack::melee(this, m_pos, defender, *kick_wpn);
@@ -1179,19 +1182,17 @@ void Player::update_fov()
 
         const bool has_darkvision = m_properties.has(PropId::darkvision);
 
+        Array2<bool> blocked_los(map::dims());
+
         if (m_properties.allow_see())
         {
-                Array2<bool> hard_blocked(map::dims());
-
-                const auto fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
+                const auto fov_lmt = fov::fov_rect(m_pos, map::dims());
 
                 map_parsers::BlocksLos()
-                        .run(hard_blocked,
-                             fov_lmt,
-                             MapParseMode::overwrite);
+                        .run(blocked_los, fov_lmt, MapParseMode::overwrite);
 
                 FovMap fov_map;
-                fov_map.hard_blocked = &hard_blocked;
+                fov_map.hard_blocked = &blocked_los;
                 fov_map.light = &map::g_light;
                 fov_map.dark = &map::g_dark;
 
@@ -1234,25 +1235,28 @@ void Player::update_fov()
         // Cheat vision
         if (init::g_is_cheat_vision_enabled)
         {
+                Array2<bool> blocked_projectiles(map::dims());
+
                 // Show all cells adjacent to cells which can be shot through or
                 // seen through
-                Array2<bool> reveal(map::dims());
-
                 map_parsers::BlocksProjectiles()
-                        .run(reveal, reveal.rect());
+                        .run(blocked_projectiles, blocked_projectiles.rect());
 
                 map_parsers::BlocksLos()
-                        .run(reveal,
-                             reveal.rect(),
-                             MapParseMode::append);
+                        .run(
+                                blocked_projectiles,
+                                blocked_projectiles.rect(),
+                                MapParseMode::append);
 
-                for (auto& reveal_cell : reveal)
+                for (auto& reveal_cell : blocked_projectiles)
                 {
                         reveal_cell = !reveal_cell;
                 }
 
                 const auto reveal_expanded =
-                        map_parsers::expand(reveal, reveal.rect());
+                        map_parsers::expand(
+                                blocked_projectiles,
+                                blocked_projectiles.rect());
 
                 for (size_t i = 0; i < nr_map_positions; ++i)
                 {
@@ -1268,22 +1272,19 @@ void Player::update_fov()
 
 void Player::fov_hack()
 {
-        Array2<bool> blocked_los(map::dims());
-
-        map_parsers::BlocksLos()
-                .run(blocked_los, blocked_los.rect());
-
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksWalking(ParseActors::no)
-                .run(blocked, blocked.rect());
+        Array2<bool> blocked =
+                map::get_blocked_map_info_for_actor(
+                        *map::g_player);
 
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::chasm};
 
-        for (int x = 0; x < blocked.w(); ++x)
+        const int w = blocked.w();
+        const int h = blocked.h();
+
+        for (int x = 0; x < w; ++x)
         {
-                for (int y = 0; y < blocked.h(); ++y)
+                for (int y = 0; y < h; ++y)
                 {
                         const P p(x, y);
 
@@ -1296,11 +1297,12 @@ void Player::fov_hack()
 
         const bool has_darkvision = m_properties.has(PropId::darkvision);
 
-        for (int x = 0; x < map::w(); ++x)
+        for (int x = 0; x < w; ++x)
         {
-                for (int y = 0; y < map::h(); ++y)
+                for (int y = 0; y < h; ++y)
                 {
-                        if (!blocked_los.at(x, y) || !blocked.at(x, y))
+                        if (!map::g_terrain_blocks_los.at(x, y) ||
+                            !blocked.at(x, y))
                         {
                                 continue;
                         }

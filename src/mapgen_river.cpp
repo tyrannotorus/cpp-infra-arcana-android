@@ -18,6 +18,7 @@
 #include "rect.hpp"
 #include "room.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 
 namespace mapgen
 {
@@ -125,7 +126,13 @@ void reserve_river(Region regions[3][3])
                         {
                                 // Just put floor for now, river terrain will be
                                 // placed later
-                                map::put(new terrain::Floor(P(x, y)));
+                                auto* const t =
+                                        terrain::make(
+                                                terrain::Id::floor,
+                                                {x, y});
+
+                                map::set_terrain(t);
+
                                 map::g_room_map.at(x, y) = room;
                         }
                 }

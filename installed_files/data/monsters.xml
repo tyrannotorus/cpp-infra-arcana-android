@@ -5045,9 +5045,8 @@
         </attacks>
 
         <properties>
-            <property>small_crawling</property>
             <property>darkvision</property>
-            <property>flying</property>
+            <property>tiny_flying</property>
         </properties>
 
         <ai>

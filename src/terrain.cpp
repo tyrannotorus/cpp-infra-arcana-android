@@ -20,6 +20,7 @@
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
 #include "actor_mon.hpp"
+#include "actor_move.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
@@ -59,6 +60,7 @@
 #include "sound.hpp"
 #include "state.hpp"
 #include "terrain_dmg.hpp"
+#include "terrain_factory.hpp"
 #include "terrain_mob.hpp"
 #include "text_format.hpp"
 
@@ -171,7 +173,7 @@ static WasDestroyed on_new_turn_terrain_burning(terrain::Terrain& terrain)
         // TODO: Hit dead actors
 
         // Hit actor standing on terrain
-        auto* actor = map::first_actor_at_pos(terrain.pos());
+        auto* actor = map::living_actor_at(terrain.pos());
 
         if (actor)
         {
@@ -209,12 +211,18 @@ static WasDestroyed on_new_turn_terrain_burning(terrain::Terrain& terrain)
         // Create smoke?
         if (rnd::one_in(20))
         {
-                const P p(dir_utils::rnd_adj_pos(terrain.pos(), true));
+                const auto p = dir_utils::rnd_adj_pos(terrain.pos(), true);
 
                 if (map::is_pos_inside_outer_walls(p) &&
                     !map_parsers::BlocksProjectiles().run(p))
                 {
-                        game_time::add_mob(new terrain::Smoke(p, 10));
+                        auto* const smoke =
+                                static_cast<terrain::Smoke*>(
+                                        terrain::make(terrain::Id::smoke, p));
+
+                        smoke->set_nr_turns(10);
+
+                        game_time::add_mob(smoke);
                 }
         }
 
@@ -226,18 +234,49 @@ static WasDestroyed on_new_turn_terrain_burning(terrain::Terrain& terrain)
 // -----------------------------------------------------------------------------
 namespace terrain
 {
+void make_blood(const P& origin)
+{
+        for (const auto& d : dir_utils::g_dir_list_w_center)
+        {
+                if (!rnd::one_in(3))
+                {
+                        continue;
+                }
+
+                const auto p = origin + d;
+
+                map::g_terrain.at(p)->try_make_bloody();
+        }
+}
+
+void make_gore(const P& origin)
+{
+        for (int dx = -1; dx <= 1; ++dx)
+        {
+                for (int dy = -1; dy <= 1; ++dy)
+                {
+                        const auto c = origin + P(dx, dy);
+
+                        if (rnd::one_in(3))
+                        {
+                                map::g_terrain.at(c)->try_put_gore();
+                        }
+                }
+        }
+}
+
 void Terrain::bump(actor::Actor& actor_bumping)
 {
-        if (!can_move(actor_bumping) &&
+        if (!map::can_actor_move_into_terrain_at(actor_bumping, m_pos) &&
             actor::is_player(&actor_bumping))
         {
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
-                        msg_log::add(data().msg_on_player_blocked);
+                        msg_log::add(m_data->msg_on_player_blocked);
                 }
                 else
                 {
-                        msg_log::add(data().msg_on_player_blocked_blind);
+                        msg_log::add(m_data->msg_on_player_blocked_blind);
                 }
         }
 }
@@ -250,10 +289,13 @@ AllowAction Terrain::pre_bump(actor::Actor& actor_bumping)
                 return AllowAction::yes;
         }
 
+        const auto& props = actor_bumping.m_properties;
+
         if ((m_burn_state == BurnState::burning) &&
-            !actor_bumping.m_properties.has(PropId::r_fire) &&
-            !actor_bumping.m_properties.has(PropId::flying) &&
-            can_move(actor_bumping) &&
+            !props.has(PropId::r_fire) &&
+            !props.has(PropId::flying) &&
+            !props.has(PropId::tiny_flying) &&
+            map::can_actor_move_into_terrain_at(actor_bumping, m_pos) &&
             map::g_seen.at(m_pos))
         {
                 const std::string msg =
@@ -310,7 +352,7 @@ void Terrain::try_start_burning(const Verbose verbose)
 
         if (is_not_burned || (has_burnt && rnd::one_in(3)))
         {
-                if (map::is_pos_seen_by_player(m_pos) &&
+                if (map::g_seen.at(m_pos) &&
                     (verbose == Verbose::yes))
                 {
                         std::string str = name(Article::the) + " catches fire.";
@@ -366,7 +408,7 @@ int Terrain::shock_when_adj() const
 
 int Terrain::base_shock_when_adj() const
 {
-        return data().shock_when_adjacent;
+        return m_data->shock_when_adjacent;
 }
 
 void Terrain::try_make_bloody()
@@ -566,8 +608,8 @@ Color Terrain::color_bg_default() const
 // -----------------------------------------------------------------------------
 // Floor
 // -----------------------------------------------------------------------------
-Floor::Floor(const P& p) :
-        Terrain(p),
+Floor::Floor(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_type(FloorType::common) {}
 
 void Floor::on_hit(
@@ -602,7 +644,7 @@ gfx::TileId Floor::tile() const
         }
         else
         {
-                return data().tile;
+                return m_data->tile;
         }
 }
 
@@ -653,8 +695,8 @@ Color Floor::color_default() const
 // -----------------------------------------------------------------------------
 // Wall
 // -----------------------------------------------------------------------------
-Wall::Wall(const P& p) :
-        Terrain(p),
+Wall::Wall(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_type(WallType::common),
         m_is_mossy(false) {}
 
@@ -681,7 +723,7 @@ void Wall::on_hit(
                 }
                 else
                 {
-                        map::put(new RubbleHigh(m_pos));
+                        map::update_terrain(make(Id::rubble_high, m_pos));
                 }
 
                 map::update_vision();
@@ -874,8 +916,8 @@ void Wall::set_moss_grown()
 // -----------------------------------------------------------------------------
 // High rubble
 // -----------------------------------------------------------------------------
-RubbleHigh::RubbleHigh(const P& p) :
-        Terrain(p) {}
+RubbleHigh::RubbleHigh(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void RubbleHigh::on_hit(
         const DmgType dmg_type,
@@ -916,8 +958,8 @@ Color RubbleHigh::color_default() const
 // -----------------------------------------------------------------------------
 // Low rubble
 // -----------------------------------------------------------------------------
-RubbleLow::RubbleLow(const P& p) :
-        Terrain(p) {}
+RubbleLow::RubbleLow(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void RubbleLow::on_hit(
         const DmgType dmg_type,
@@ -966,8 +1008,8 @@ Color RubbleLow::color_default() const
 // -----------------------------------------------------------------------------
 // Bones
 // -----------------------------------------------------------------------------
-Bones::Bones(const P& p) :
-        Terrain(p) {}
+Bones::Bones(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Bones::on_hit(
         const DmgType dmg_type,
@@ -1001,8 +1043,8 @@ Color Bones::color_default() const
 // -----------------------------------------------------------------------------
 // Grave
 // -----------------------------------------------------------------------------
-GraveStone::GraveStone(const P& p) :
-        Terrain(p) {}
+GraveStone::GraveStone(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void GraveStone::on_hit(
         const DmgType dmg_type,
@@ -1039,8 +1081,8 @@ Color GraveStone::color_default() const
 // -----------------------------------------------------------------------------
 // Church bench
 // -----------------------------------------------------------------------------
-ChurchBench::ChurchBench(const P& p) :
-        Terrain(p) {}
+ChurchBench::ChurchBench(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void ChurchBench::on_hit(
         const DmgType dmg_type,
@@ -1056,12 +1098,12 @@ void ChurchBench::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The church bench is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -1089,8 +1131,8 @@ Color ChurchBench::color_default() const
 // -----------------------------------------------------------------------------
 // Statue
 // -----------------------------------------------------------------------------
-Statue::Statue(const P& p) :
-        Terrain(p),
+Statue::Statue(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_type(rnd::one_in(8) ? StatueType::ghoul : StatueType::common),
         m_player_bg(Bg::END)
 {
@@ -1139,12 +1181,11 @@ void Statue::topple(
 
         const auto dst_pos = m_pos + dir_utils::offset(direction);
 
-        map::put(new RubbleLow(m_pos));
+        map::update_terrain(make(Id::rubble_low, m_pos));
 
         // NOTE: This object is now deleted!
 
-        actor::Actor* const actor_behind =
-                map::first_actor_at_pos(dst_pos);
+        actor::Actor* const actor_behind = map::living_actor_at(dst_pos);
 
         if (actor_behind &&
             actor_behind->is_alive() &&
@@ -1194,7 +1235,7 @@ void Statue::topple(
             terrain_id == terrain::Id::grass ||
             terrain_id == terrain::Id::carpet)
         {
-                map::put(new RubbleLow(dst_pos));
+                map::update_terrain(make(Id::rubble_low, dst_pos));
         }
 
         map::update_vision();
@@ -1233,7 +1274,7 @@ void Statue::on_hit(
         case DmgType::explosion:
         case DmgType::pure:
         {
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
         }
         break;
@@ -1322,8 +1363,8 @@ void Statue::set_player_bg(const Bg bg)
 // -----------------------------------------------------------------------------
 // Stalagmite
 // -----------------------------------------------------------------------------
-Stalagmite::Stalagmite(const P& p) :
-        Terrain(p) {}
+Stalagmite::Stalagmite(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Stalagmite::on_hit(
         const DmgType dmg_type,
@@ -1339,7 +1380,7 @@ void Stalagmite::on_hit(
         {
         case DmgType::pure:
         case DmgType::explosion:
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -1363,8 +1404,8 @@ Color Stalagmite::color_default() const
 // -----------------------------------------------------------------------------
 // Stairs
 // -----------------------------------------------------------------------------
-Stairs::Stairs(const P& p) :
-        Terrain(p) {}
+Stairs::Stairs(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Stairs::on_hit(
         const DmgType dmg_type,
@@ -1396,7 +1437,7 @@ void Stairs::bump(actor::Actor& actor_bumping)
 
         popup::Popup(popup::AddToMsgHistory::no)
                 .set_title("A staircase leading downwards")
-                .set_menu(
+                .setup_menu_mode(
                         {"(D)escend",
                          "(S)ave and quit",
                          "(space, esc) Cancel"},
@@ -1407,7 +1448,7 @@ void Stairs::bump(actor::Actor& actor_bumping)
         switch (choice)
         {
         case 0:
-                map::g_player->m_pos = m_pos;
+                actor::set_position(*map::g_player, m_pos);
 
                 if (is_fake())
                 {
@@ -1431,7 +1472,7 @@ void Stairs::bump(actor::Actor& actor_bumping)
                 break;
 
         case 1:
-                map::g_player->m_pos = m_pos;
+                actor::set_position(*map::g_player, m_pos);
 
                 if (is_fake())
                 {
@@ -1464,9 +1505,9 @@ void Stairs::player_use_fake_stairs()
                 .set_msg(msg)
                 .run();
 
-        map::put(new Floor(m_pos));
+        map::update_terrain(make(Id::floor, m_pos));
 
-        auto* prop = new PropConfused();
+        auto* prop = property_factory::make(PropId::confused);
 
         prop->set_duration(8);
 
@@ -1537,8 +1578,8 @@ Color Bridge::color_default() const
 // -----------------------------------------------------------------------------
 // Shallow liquid
 // -----------------------------------------------------------------------------
-Liquid::Liquid(const P& p) :
-        Terrain(p),
+Liquid::Liquid(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_type(LiquidType::water) {}
 
 void Liquid::on_hit(
@@ -1555,8 +1596,11 @@ void Liquid::on_hit(
 
 void Liquid::bump(actor::Actor& actor_bumping)
 {
-        if (actor_bumping.m_properties.has(PropId::ethereal) ||
-            actor_bumping.m_properties.has(PropId::flying) ||
+        const auto& props = actor_bumping.m_properties;
+
+        if (props.has(PropId::ethereal) ||
+            props.has(PropId::flying) ||
+            props.has(PropId::tiny_flying) ||
             actor_bumping.m_data->is_amphibian)
         {
                 return;
@@ -1711,11 +1755,7 @@ Color Liquid::color_default() const
 Color Liquid::color_bg_default() const
 {
         const auto* const item = map::g_items.at(m_pos);
-
-        const auto* const corpse =
-                map::first_actor_at_pos(
-                        m_pos,
-                        ActorState::corpse);
+        const auto* const corpse = map::first_corpse_at(m_pos);
 
         if (item || corpse)
         {
@@ -1731,8 +1771,8 @@ Color Liquid::color_bg_default() const
 // -----------------------------------------------------------------------------
 // Chasm
 // -----------------------------------------------------------------------------
-Chasm::Chasm(const P& p) :
-        Terrain(p) {}
+Chasm::Chasm(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Chasm::on_hit(
         const DmgType dmg_type,
@@ -1761,8 +1801,8 @@ Color Chasm::color_default() const
 // -----------------------------------------------------------------------------
 // Lever
 // -----------------------------------------------------------------------------
-Lever::Lever(const P& p) :
-        Terrain(p),
+Lever::Lever(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_is_left_pos(true),
         m_linked_terrain(nullptr) {}
 
@@ -1898,8 +1938,8 @@ void Lever::toggle()
 // -----------------------------------------------------------------------------
 // Altar
 // -----------------------------------------------------------------------------
-Altar::Altar(const P& p) :
-        Terrain(p) {}
+Altar::Altar(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Altar::on_hit(
         const DmgType dmg_type,
@@ -1915,12 +1955,12 @@ void Altar::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The altar is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
 
                 if (player_bon::is_bg(Bg::exorcist))
@@ -1946,7 +1986,7 @@ void Altar::on_hit(
 void Altar::on_new_turn()
 {
         if (map::g_player->m_pos.is_adjacent(m_pos) &&
-            map::is_pos_seen_by_player(m_pos) &&
+            map::g_seen.at(m_pos) &&
             !player_bon::is_bg(Bg::exorcist))
         {
                 hints::display(hints::Id::altars);
@@ -1964,7 +2004,7 @@ void Altar::bump(actor::Actor& actor_bumping)
         map::update_vision();
 
         if (player_bon::is_bg(Bg::exorcist) &&
-            map::is_pos_seen_by_player(m_pos))
+            map::g_seen.at(m_pos))
         {
                 // Exorcist player is bumping a seen altar
                 msg_log::add(
@@ -1993,8 +2033,8 @@ Color Altar::color_default() const
 // -----------------------------------------------------------------------------
 // Carpet
 // -----------------------------------------------------------------------------
-Carpet::Carpet(const P& p) :
-        Terrain(p) {}
+Carpet::Carpet(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Carpet::on_hit(
         const DmgType dmg_type,
@@ -2019,11 +2059,12 @@ void Carpet::on_hit(
 
 WasDestroyed Carpet::on_finished_burning()
 {
-        auto* const floor = new Floor(m_pos);
+        auto* const floor =
+                static_cast<Floor*>(make(Id::floor, m_pos));
 
         floor->m_burn_state = BurnState::has_burned;
 
-        map::put(floor);
+        map::update_terrain(floor);
 
         return WasDestroyed::yes;
 }
@@ -2045,8 +2086,8 @@ Color Carpet::color_default() const
 // -----------------------------------------------------------------------------
 // Grass
 // -----------------------------------------------------------------------------
-Grass::Grass(const P& p) :
-        Terrain(p),
+Grass::Grass(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_type(GrassType::common)
 {
         if (rnd::one_in(5))
@@ -2084,7 +2125,7 @@ gfx::TileId Grass::tile() const
         }
         else
         {
-                return data().tile;
+                return m_data->tile;
         }
 }
 
@@ -2141,8 +2182,8 @@ Color Grass::color_default() const
 // -----------------------------------------------------------------------------
 // Bush
 // -----------------------------------------------------------------------------
-Bush::Bush(const P& p) :
-        Terrain(p),
+Bush::Bush(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_type(GrassType::common)
 {
         if (rnd::one_in(5))
@@ -2174,11 +2215,12 @@ void Bush::on_hit(
 
 WasDestroyed Bush::on_finished_burning()
 {
-        auto* const grass = new Grass(m_pos);
+        auto* const grass =
+                static_cast<Grass*>(make(Id::grass, m_pos));
 
         grass->m_burn_state = BurnState::has_burned;
 
-        map::put(grass);
+        map::update_terrain(grass);
 
         return WasDestroyed::yes;
 }
@@ -2232,8 +2274,8 @@ Color Bush::color_default() const
 // -----------------------------------------------------------------------------
 // Vines
 // -----------------------------------------------------------------------------
-Vines::Vines(const P& p) :
-        Terrain(p) {}
+Vines::Vines(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Vines::on_hit(
         const DmgType dmg_type,
@@ -2249,7 +2291,7 @@ void Vines::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -2264,11 +2306,12 @@ void Vines::on_hit(
 
 WasDestroyed Vines::on_finished_burning()
 {
-        auto* const floor = new Floor(m_pos);
+        auto* const floor =
+                static_cast<Floor*>(make(Id::floor, m_pos));
 
         floor->m_burn_state = BurnState::has_burned;
 
-        map::put(floor);
+        map::update_terrain(floor);
 
         return WasDestroyed::yes;
 }
@@ -2302,8 +2345,8 @@ Color Vines::color_default() const
 // -----------------------------------------------------------------------------
 // Chains
 // -----------------------------------------------------------------------------
-Chains::Chains(const P& p) :
-        Terrain(p) {}
+Chains::Chains(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 std::string Chains::name(const Article article) const
 {
@@ -2320,11 +2363,7 @@ Color Chains::color_default() const
 Color Chains::color_bg_default() const
 {
         const auto* const item = map::g_items.at(m_pos);
-
-        const auto* const corpse =
-                map::first_actor_at_pos(
-                        m_pos,
-                        ActorState::corpse);
+        const auto* const corpse = map::first_corpse_at(m_pos);
 
         if (item || corpse)
         {
@@ -2386,7 +2425,7 @@ void Chains::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -2398,8 +2437,8 @@ void Chains::on_hit(
 // -----------------------------------------------------------------------------
 // Grate
 // -----------------------------------------------------------------------------
-Grate::Grate(const P& p) :
-        Terrain(p) {}
+Grate::Grate(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
 void Grate::on_hit(
         const DmgType dmg_type,
@@ -2416,7 +2455,7 @@ void Grate::on_hit(
         case DmgType::pure:
         case DmgType::explosion:
                 destr_all_adj_doors(m_pos);
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -2440,8 +2479,8 @@ Color Grate::color_default() const
 // -----------------------------------------------------------------------------
 // Tree
 // -----------------------------------------------------------------------------
-Tree::Tree(const P& p) :
-        Terrain(p)
+Tree::Tree(const P& p, const TerrainData* const data) :
+        Terrain(p, data)
 {
         if (is_fungi())
         {
@@ -2502,11 +2541,12 @@ WasDestroyed Tree::on_finished_burning()
                 return WasDestroyed::no;
         }
 
-        auto* const grass = new Grass(m_pos);
+        auto* const grass =
+                static_cast<Grass*>(make(Id::grass, m_pos));
 
         grass->m_burn_state = BurnState::has_burned;
 
-        map::put(grass);
+        map::update_terrain(grass);
 
         map::update_vision();
 
@@ -2619,7 +2659,7 @@ void Brazier::on_hit(
 
                 const P my_pos = m_pos;
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
 
                 // NOTE: "this" is now deleted!
 
@@ -2660,7 +2700,7 @@ void Brazier::on_hit(
         case DmgType::explosion:
         case DmgType::pure:
         {
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
         }
         break;
@@ -2853,7 +2893,7 @@ void ItemContainer::on_item_found(
                 msg_log::add("Unload? [u]");
         }
 
-        BinaryAnswer answer;
+        auto answer = BinaryAnswer::no;
 
         if (is_unloadable_wpn)
         {
@@ -2954,8 +2994,8 @@ void ItemContainer::destroy_single_fragile()
 // -----------------------------------------------------------------------------
 // Tomb
 // -----------------------------------------------------------------------------
-Tomb::Tomb(const P& p) :
-        Terrain(p),
+Tomb::Tomb(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_is_open(false),
         m_is_trait_known(false),
         m_push_lid_one_in_n(rnd::range(4, 10)),
@@ -3051,12 +3091,12 @@ void Tomb::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The tomb is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -3503,8 +3543,8 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
 // -----------------------------------------------------------------------------
 // Chest
 // -----------------------------------------------------------------------------
-Chest::Chest(const P& p) :
-        Terrain(p),
+Chest::Chest(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_is_open(false),
         m_is_locked(false),
         m_matl(ChestMatl::wood)
@@ -3674,12 +3714,12 @@ void Chest::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The chest is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -3698,16 +3738,16 @@ void Chest::on_hit(
 
 WasDestroyed Chest::on_finished_burning()
 {
-        if (map::is_pos_seen_by_player(m_pos))
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("The chest burns down.");
         }
 
-        auto* const rubble = new RubbleLow(m_pos);
+        auto* const rubble = make(Id::rubble_low, m_pos);
 
         rubble->m_burn_state = BurnState::has_burned;
 
-        map::put(rubble);
+        map::update_terrain(rubble);
 
         map::update_vision();
 
@@ -3874,8 +3914,8 @@ Color Chest::color_default() const
 // -----------------------------------------------------------------------------
 // Fountain
 // -----------------------------------------------------------------------------
-Fountain::Fountain(const P& p) :
-        Terrain(p)
+Fountain::Fountain(const P& p, const TerrainData* const data) :
+        Terrain(p, data)
 {
         std::vector<int> weights = {
                 4,  // Refreshing
@@ -3930,12 +3970,12 @@ void Fountain::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The fountain is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -4357,8 +4397,8 @@ std::string Fountain::type_indefinite_article() const
 // -----------------------------------------------------------------------------
 // Cabinet
 // -----------------------------------------------------------------------------
-Cabinet::Cabinet(const P& p) :
-        Terrain(p),
+Cabinet::Cabinet(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_is_open(false)
 {
         // Contained items
@@ -4400,12 +4440,12 @@ void Cabinet::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The cabinet is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -4421,17 +4461,16 @@ void Cabinet::on_hit(
 
 WasDestroyed Cabinet::on_finished_burning()
 {
-        if (map::is_pos_seen_by_player(m_pos))
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("The cabinet burns down.");
         }
 
-        auto* const rubble = new RubbleLow(m_pos);
+        auto* const rubble = make(Id::rubble_low, m_pos);
 
         rubble->m_burn_state = BurnState::has_burned;
 
-        map::put(rubble);
-
+        map::update_terrain(rubble);
         map::update_vision();
 
         return WasDestroyed::yes;
@@ -4551,8 +4590,8 @@ Color Cabinet::color_default() const
 // -----------------------------------------------------------------------------
 // Bookshelf
 // -----------------------------------------------------------------------------
-Bookshelf::Bookshelf(const P& p) :
-        Terrain(p),
+Bookshelf::Bookshelf(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_is_looted(false)
 {
         // Contained items
@@ -4594,12 +4633,12 @@ void Bookshelf::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The bookshelf is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -4616,16 +4655,16 @@ void Bookshelf::on_hit(
 
 WasDestroyed Bookshelf::on_finished_burning()
 {
-        if (map::is_pos_seen_by_player(m_pos))
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("The bookshelf burns down.");
         }
 
-        auto* const rubble = new RubbleLow(m_pos);
+        auto* const rubble = make(Id::rubble_low, m_pos);
 
         rubble->m_burn_state = BurnState::has_burned;
 
-        map::put(rubble);
+        map::update_terrain(rubble);
 
         map::update_vision();
 
@@ -4722,8 +4761,8 @@ Color Bookshelf::color_default() const
 // -----------------------------------------------------------------------------
 // AlchemistBench
 // -----------------------------------------------------------------------------
-AlchemistBench::AlchemistBench(const P& p) :
-        Terrain(p),
+AlchemistBench::AlchemistBench(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_is_looted(false)
 {
         // Contained items
@@ -4765,12 +4804,12 @@ void AlchemistBench::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The alchemist's workbench is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -4787,16 +4826,16 @@ void AlchemistBench::on_hit(
 
 WasDestroyed AlchemistBench::on_finished_burning()
 {
-        if (map::is_pos_seen_by_player(m_pos))
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("The alchemist's workbench burns down.");
         }
 
-        auto* const rubble = new RubbleLow(m_pos);
+        auto* const rubble = make(Id::rubble_low, m_pos);
 
         rubble->m_burn_state = BurnState::has_burned;
 
-        map::put(rubble);
+        map::update_terrain(rubble);
 
         map::update_vision();
 
@@ -4900,8 +4939,8 @@ Color AlchemistBench::color_default() const
 // -----------------------------------------------------------------------------
 // Cocoon
 // -----------------------------------------------------------------------------
-Cocoon::Cocoon(const P& p) :
-        Terrain(p),
+Cocoon::Cocoon(const P& p, const TerrainData* const data) :
+        Terrain(p, data),
         m_is_trapped(rnd::fraction(6, 10)),
         m_is_open(false)
 {
@@ -4947,12 +4986,12 @@ void Cocoon::on_hit(
         {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::is_pos_seen_by_player(m_pos))
+                if (map::g_seen.at(m_pos))
                 {
                         msg_log::add("The cocoon is destroyed.");
                 }
 
-                map::put(new RubbleLow(m_pos));
+                map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
                 break;
 
@@ -4968,16 +5007,16 @@ void Cocoon::on_hit(
 
 WasDestroyed Cocoon::on_finished_burning()
 {
-        if (map::is_pos_seen_by_player(m_pos))
+        if (map::g_seen.at(m_pos))
         {
                 msg_log::add("The cocoon burns down.");
         }
 
-        auto* const rubble = new RubbleLow(m_pos);
+        auto* const rubble = make(Id::rubble_low, m_pos);
 
         rubble->m_burn_state = BurnState::has_burned;
 
-        map::put(rubble);
+        map::update_terrain(rubble);
 
         map::update_vision();
 

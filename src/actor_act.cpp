@@ -220,7 +220,7 @@ static void player_act()
         {
                 --player.m_wait_turns_left;
 
-                move(player, Dir::center);
+                do_move_action(player, Dir::center);
 
                 return;
         }
@@ -253,7 +253,7 @@ static void player_act()
                         const auto* const target_terrain =
                                 map::g_terrain.at(target);
 
-                        if (!target_terrain->can_move(player))
+                        if (!map::can_actor_move_into_terrain_at(player, target))
                         {
                                 should_abort = true;
                         }
@@ -289,7 +289,7 @@ static void player_act()
                 const auto adj_known_closed_doors_before =
                         adj_known_closed_doors(player.m_pos);
 
-                move(player, player.m_auto_move_dir);
+                do_move_action(player, player.m_auto_move_dir);
 
                 player.m_has_taken_auto_move_step = true;
 

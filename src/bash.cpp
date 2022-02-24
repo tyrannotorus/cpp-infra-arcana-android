@@ -303,10 +303,7 @@ static void bash_pos(const P& pos)
         const auto kick_wpn = make_tmp_kick_wpn();
         const auto* wpn = get_wielded_wpn_or_unarmed();
 
-        auto* living_actor =
-                map::first_actor_at_pos(
-                        pos,
-                        ActorState::alive);
+        auto* living_actor = map::living_actor_at(pos);
 
         // --- Kick living actor that the player is aware of? ---
         if ((pos != map::g_player->m_pos) &&

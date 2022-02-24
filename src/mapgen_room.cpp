@@ -18,6 +18,7 @@
 #include "room.hpp"
 #include "terrain.hpp"
 #include "terrain_door.hpp"
+#include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -28,81 +29,86 @@ static void put_templ_symbol_at(const P& p, const char c)
         {
         case '.':
         {
-                map::put(new terrain::Floor(p));
+                map::set_terrain(terrain::make(terrain::Id::floor, p));
         }
         break;
 
         case '#':
         {
-                map::put(new terrain::Wall(p));
+                map::set_terrain(terrain::make(terrain::Id::wall, p));
         }
         break;
 
         case '-':
         {
-                map::put(new terrain::Altar(p));
+                map::set_terrain(terrain::make(terrain::Id::altar, p));
         }
         break;
 
         case '~':
         {
-                auto* liquid = new terrain::Liquid(p);
+                auto* const t = terrain::make(terrain::Id::liquid, p);
 
-                liquid->m_type = LiquidType::water;
+                static_cast<terrain::Liquid*>(t)->m_type = LiquidType::water;
 
-                map::put(liquid);
+                map::set_terrain(t);
         }
         break;
 
         case '0':
         {
-                map::put(new terrain::Brazier(p));
+                map::set_terrain(terrain::make(terrain::Id::brazier, p));
         }
         break;
 
         case 'P':
         {
-                map::put(new terrain::Statue(p));
+                map::set_terrain(terrain::make(terrain::Id::statue, p));
         }
         break;
 
         case '+':
         {
-                auto* mimic = new terrain::Wall(p);
+                auto* mimic = terrain::make(terrain::Id::wall, p);
 
-                map::put(
-                        new terrain::Door(
-                                p,
-                                mimic,
-                                terrain::DoorType::wood));
+                auto* const t =
+                        static_cast<terrain::Door*>(
+                                terrain::make(terrain::Id::door, p));
+
+                t->set_mimic_terrain(mimic);
+                t->init_type_and_state(terrain::DoorType::wood);
+
+                map::set_terrain(t);
         }
         break;
 
         case 'x':
         {
-                map::put(
-                        new terrain::Door(
-                                p,
-                                nullptr,
-                                terrain::DoorType::gate));
+                auto* const t =
+                        static_cast<terrain::Door*>(
+                                terrain::make(terrain::Id::door, p));
+
+                t->init_type_and_state(terrain::DoorType::gate);
+
+                map::set_terrain(t);
         }
         break;
 
         case '=':
         {
-                map::put(new terrain::Grate(p));
+                map::set_terrain(terrain::make(terrain::Id::grate, p));
         }
         break;
 
         case '"':
         {
-                map::put(new terrain::Vines(p));
+                map::set_terrain(terrain::make(terrain::Id::vines, p));
         }
         break;
 
         case '*':
         {
-                map::put(new terrain::Chains(p));
+                map::set_terrain(terrain::make(terrain::Id::chains, p));
         }
         break;
 

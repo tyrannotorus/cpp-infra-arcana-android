@@ -22,6 +22,7 @@
 #include "property_handler.hpp"
 #include "spells.hpp"
 #include "terrain.hpp"
+#include "terrain_factory.hpp"
 #include "terrain_trap.hpp"
 #include "test_utils.hpp"
 
@@ -43,15 +44,21 @@ TEST_CASE("Spider web")
         {
                 test_utils::init_all();
 
-                map::put(new terrain::Floor(pos_l));
+                map::update_terrain(terrain::make(terrain::Id::floor, pos_l));
 
                 {
-                        auto* const web = new terrain::Trap(
-                                pos_r,
-                                new terrain::Floor(pos_r),
-                                terrain::TrapId::web);
+                        auto* const web =
+                                static_cast<terrain::Trap*>(
+                                        terrain::make(
+                                                terrain::Id::trap,
+                                                pos_r));
 
-                        map::put(web);
+                        web->try_init_type(terrain::TrapId::web);
+
+                        web->set_mimic_terrain(
+                                terrain::make(terrain::Id::floor, pos_r));
+
+                        map::update_terrain(web);
 
                         web->reveal(terrain::PrintRevealMsg::no);
                 }
@@ -69,7 +76,7 @@ TEST_CASE("Spider web")
                 // Move the monster into the trap, and back again
                 mon->m_pos = pos_l;
                 game_time::g_allow_tick = true;
-                actor::move(*mon, Dir::right);
+                actor::do_move_action(*mon, Dir::right);
 
                 // It should never be possible to move on the first try
                 REQUIRE(mon->m_pos == pos_r);
@@ -78,12 +85,12 @@ TEST_CASE("Spider web")
 
                 // This may or may not unstuck the monster
                 game_time::g_allow_tick = true;
-                actor::move(*mon, Dir::left);
+                actor::do_move_action(*mon, Dir::left);
 
                 // If the move above did unstuck the monster, this command will
                 // move it one step to the left
                 game_time::g_allow_tick = true;
-                actor::move(*mon, Dir::left);
+                actor::do_move_action(*mon, Dir::left);
 
                 if (mon->m_pos == pos_r)
                 {
@@ -112,15 +119,21 @@ TEST_CASE("Unlearn spells")
 
         test_utils::init_all();
 
-        map::put(new terrain::Floor(pos_l));
+        map::update_terrain(terrain::make(terrain::Id::floor, pos_l));
 
         {
-                auto* const unlearn_trap = new terrain::Trap(
-                        pos_r,
-                        new terrain::Floor(pos_r),
-                        terrain::TrapId::unlearn_spell);
+                auto* const unlearn_trap =
+                        static_cast<terrain::Trap*>(
+                                terrain::make(
+                                        terrain::Id::trap,
+                                        pos_r));
 
-                map::put(unlearn_trap);
+                unlearn_trap->try_init_type(terrain::TrapId::unlearn_spell);
+
+                unlearn_trap->set_mimic_terrain(
+                        terrain::make(terrain::Id::floor, pos_r));
+
+                map::update_terrain(unlearn_trap);
 
                 unlearn_trap->reveal(terrain::PrintRevealMsg::no);
         }
@@ -134,7 +147,7 @@ TEST_CASE("Unlearn spells")
         // Step into the trap
         map::g_player->m_pos = pos_l;
         game_time::g_allow_tick = true;
-        actor::move(*map::g_player, Dir::right);
+        actor::do_move_action(*map::g_player, Dir::right);
 
         REQUIRE(map::g_player->m_pos == pos_r);
 
@@ -148,7 +161,7 @@ TEST_CASE("Unlearn spells")
         // Step into the trap again
         map::g_player->m_pos = pos_l;
         game_time::g_allow_tick = true;
-        actor::move(*map::g_player, Dir::right);
+        actor::do_move_action(*map::g_player, Dir::right);
 
         REQUIRE(map::g_player->m_pos == pos_r);
 
@@ -168,15 +181,21 @@ TEST_CASE("Do not unlearn frenzy")
 
         test_utils::init_all();
 
-        map::put(new terrain::Floor(pos_l));
+        map::update_terrain(terrain::make(terrain::Id::floor, pos_l));
 
         {
-                auto* const unlearn_trap = new terrain::Trap(
-                        pos_r,
-                        new terrain::Floor(pos_r),
-                        terrain::TrapId::unlearn_spell);
+                auto* const unlearn_trap =
+                        static_cast<terrain::Trap*>(
+                                terrain::make(
+                                        terrain::Id::trap,
+                                        pos_r));
 
-                map::put(unlearn_trap);
+                unlearn_trap->try_init_type(terrain::TrapId::unlearn_spell);
+
+                unlearn_trap->set_mimic_terrain(
+                        terrain::make(terrain::Id::floor, pos_r));
+
+                map::update_terrain(unlearn_trap);
 
                 unlearn_trap->reveal(terrain::PrintRevealMsg::no);
         }
@@ -191,7 +210,7 @@ TEST_CASE("Do not unlearn frenzy")
         // Step into the trap
         map::g_player->m_pos = pos_l;
         game_time::g_allow_tick = true;
-        actor::move(*map::g_player, Dir::right);
+        actor::do_move_action(*map::g_player, Dir::right);
 
         REQUIRE(map::g_player->m_pos == pos_r);
 
@@ -202,7 +221,7 @@ TEST_CASE("Do not unlearn frenzy")
         // Step into the trap again
         map::g_player->m_pos = pos_l;
         game_time::g_allow_tick = true;
-        actor::move(*map::g_player, Dir::right);
+        actor::do_move_action(*map::g_player, Dir::right);
 
         REQUIRE(map::g_player->m_pos == pos_r);
 
