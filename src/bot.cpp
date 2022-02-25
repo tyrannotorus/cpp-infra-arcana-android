@@ -18,6 +18,7 @@
 #include "actor_player.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
+#include "config.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
 #include "explosion.hpp"
@@ -41,6 +42,7 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
+#include "state.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
@@ -203,17 +205,8 @@ static bool walk_to_adj_cell(const P& p)
         return map::g_player->m_pos == p;
 }
 
-// -----------------------------------------------------------------------------
-// bot
-// -----------------------------------------------------------------------------
-namespace bot
-{
-void init()
-{
-        s_path.clear();
-}
-
-void act()
+// Act function used when just using the bot to run through the game.
+static void bot_act()
 {
         // =====================================================================
         // TESTS
@@ -474,6 +467,85 @@ void act()
         find_stair_path();
 
         walk_to_adj_cell(s_path.back());
+}
+
+// Act function to use when running stress test for time measurements.
+static void stress_test_act()
+{
+        static int stress_test_step = 1;
+        static bool move_right = true;
+        static bool is_rats_hostile = true;
+
+        map::g_player->m_properties.end_prop(PropId::terrified);
+        map::g_player->m_properties.end_prop(PropId::frenzied);
+        map::g_player->m_properties.end_prop(PropId::confused);
+
+        if ((stress_test_step % 150) == 0)
+        {
+                auto* const leader = is_rats_hostile ? nullptr : map::g_player;
+
+                actor::spawn(
+                        map::g_player->m_pos,
+                        {400, actor::Id::rat},
+                        map::rect())
+                        .set_leader(leader);
+
+                is_rats_hostile = !is_rats_hostile;
+        }
+
+        const auto p_adj =
+                move_right
+                ? map::g_player->m_pos.with_x_offset(1)
+                : map::g_player->m_pos.with_x_offset(-1);
+
+        const terrain::Id terrain_id = map::g_terrain.at(p_adj)->id();
+
+        if ((terrain_id == terrain::Id::wall) ||
+            (terrain_id == terrain::Id::rubble_high) ||
+            (terrain_id == terrain::Id::tree))
+        {
+                move_right = !move_right;
+        }
+
+        if (move_right)
+        {
+                game_commands::handle(GameCmd::right);
+        }
+        else
+        {
+                game_commands::handle(GameCmd::left);
+        }
+
+        if (stress_test_step == 1000)
+        {
+                states::pop_all();
+        }
+        else
+        {
+                ++stress_test_step;
+        }
+}
+
+// -----------------------------------------------------------------------------
+// bot
+// -----------------------------------------------------------------------------
+namespace bot
+{
+void init()
+{
+        s_path.clear();
+}
+
+void act()
+{
+        if (config::is_stress_test())
+        {
+                stress_test_act();
+        }
+        else
+        {
+                bot_act();
+        }
 }
 
 }  // namespace bot

@@ -236,7 +236,7 @@ static SDL_Renderer* create_renderer()
                 SDL_CreateRenderer(
                         io::g_sdl_window,
                         -1,
-                        SDL_RENDERER_SOFTWARE);
+                        SDL_RENDERER_ACCELERATED);
 
         if (!renderer)
         {

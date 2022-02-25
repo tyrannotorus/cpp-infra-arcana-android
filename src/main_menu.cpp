@@ -431,12 +431,25 @@ void MainMenuState::draw()
 
 void MainMenuState::update()
 {
-        const auto input = io::get();
+        auto action = MenuAction::selected;
 
-        const MenuAction action =
-                m_browser.read(
-                        input,
-                        MenuInputMode::scrolling_and_letters);
+#ifndef NDEBUG
+        if (config::is_stress_test())
+        {
+                // Stress-test mode, we just want to run everything
+                // automatically without requiring manual input.
+                action = MenuAction::selected;
+        }
+        else
+#endif  // NDEBUG
+        {
+                const auto input = io::get();
+
+                action =
+                        m_browser.read(
+                                input,
+                                MenuInputMode::scrolling_and_letters);
+        }
 
         switch (action)
         {

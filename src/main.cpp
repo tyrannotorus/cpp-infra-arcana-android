@@ -17,6 +17,46 @@
 #ifdef _WIN32
 #undef main
 #endif
+
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+#ifndef NDEBUG
+static void handle_args(int argc, char** argv)
+{
+        for (int arg_nr = 0; arg_nr < argc; ++arg_nr)
+        {
+                const std::string arg_str = std::string(argv[arg_nr]);
+
+                if (arg_str == "--demo-mapgen")
+                {
+                        init::g_is_demo_mapgen = true;
+                }
+
+                if (arg_str == "--bot")
+                {
+                        config::enable_bot_playing();
+                }
+
+                if (arg_str == "--stress-test")
+                {
+                        rnd::seed(0);
+                        config::enable_stress_test();
+                        config::enable_bot_playing();
+                }
+
+                // Extra challenge for user "GJ" from the Discord chat ;-)
+                if (arg_str == "--gj")
+                {
+                        config::toggle_gj_mode();
+                }
+        }
+}
+#endif  // NDEBUG
+
+// -----------------------------------------------------------------------------
+// main
+// -----------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
         TRACE_FUNC_BEGIN;
@@ -25,28 +65,12 @@ int main(int argc, char** argv)
 
         init::init_io();
 
-        for (int arg_nr = 0; arg_nr < argc; ++arg_nr)
-        {
-                const std::string arg_str = std::string(argv[arg_nr]);
-
-#ifndef NDEBUG
-                if (arg_str == "--demo-mapgen")
-                {
-                        init::g_is_demo_mapgen = true;
-                }
-
-                if (arg_str == "--bot")
-                {
-                        config::toggle_bot_playing();
-                }
+#ifdef NDEBUG
+        (void)argc;
+        (void)argv;
+#else
+        handle_args(argc, argv);
 #endif  // NDEBUG
-
-                // Extra challenge for user "GJ" from the Discord chat ;-)
-                if (arg_str == "--gj")
-                {
-                        config::toggle_gj_mode();
-                }
-        }
 
         init::init_game();
 

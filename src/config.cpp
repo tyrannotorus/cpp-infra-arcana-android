@@ -77,6 +77,7 @@ static int s_delay_shotgun = -1;
 static int s_delay_explosion = -1;
 static std::string s_default_player_name;
 static bool s_is_bot_playing = false;
+static bool s_is_stress_test = false;
 static bool s_is_gj_mode = false;
 static int s_master_volume_pct_option = 100;
 static int s_master_volume_pct_adjusted = 100;
@@ -898,6 +899,7 @@ void init()
 {
         s_font_name = "";
         s_is_bot_playing = false;
+        s_is_stress_test = false;
         s_is_gj_mode = false;
 
         set_default_variables();
@@ -1031,9 +1033,24 @@ bool is_bot_playing()
         return s_is_bot_playing;
 }
 
+void enable_bot_playing()
+{
+        s_is_bot_playing = true;
+}
+
 void toggle_bot_playing()
 {
         s_is_bot_playing = !s_is_bot_playing;
+}
+
+bool is_stress_test()
+{
+        return s_is_stress_test;
+}
+
+void enable_stress_test()
+{
+        s_is_stress_test = true;
 }
 
 bool is_gj_mode()

@@ -80,7 +80,13 @@ bool is_ambient_audio_preloaded();
 
 bool is_bot_playing();
 
+void enable_bot_playing();
+
 void toggle_bot_playing();
+
+bool is_stress_test();
+
+void enable_stress_test();
 
 bool is_gj_mode();
 
