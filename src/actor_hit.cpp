@@ -298,9 +298,9 @@ static int absorb_dmg_for_prolonged_life_player(int dmg)
 {
         // Soak up as much damage as possible with SP instead of HP (but never
         // reduce SP below 1).
-        const int missing_hp = dmg - map::g_player->m_hp + 1;
+        const int missing_hp = (dmg - map::g_player->m_hp) + 1;
 
-        if (missing_hp < 0)
+        if (missing_hp > 0)
         {
                 const int sp_dmg =
                         std::min(
@@ -387,7 +387,7 @@ void hit(
                 if (actor::is_player(&actor) &&
                     player_bon::has_trait(Trait::prolonged_life))
                 {
-                        absorb_dmg_for_prolonged_life_player(dmg);
+                        dmg = absorb_dmg_for_prolonged_life_player(dmg);
 
                         if (dmg <= 0)
                         {
