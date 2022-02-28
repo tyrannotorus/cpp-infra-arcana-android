@@ -328,10 +328,7 @@ std::vector<terrain::Terrain*> g_mobs;
 
 bool g_is_magic_descend_nxt_std_turn;
 bool g_is_player_acting;
-
-#ifndef NDEBUG
 bool g_allow_tick;
-#endif  // NDEBUG
 
 void init()
 {
@@ -346,9 +343,7 @@ void init()
         g_is_magic_descend_nxt_std_turn = false;
         g_is_player_acting = false;
 
-#ifndef NDEBUG
         g_allow_tick = true;
-#endif  // NDEBUG
 }
 
 void cleanup()
