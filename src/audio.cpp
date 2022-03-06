@@ -508,6 +508,11 @@ void try_play_ambient(const int one_in_n_chance_to_play)
 
 void play_music(const MusId mus)
 {
+        if (config::master_volume_pct() == 0)
+        {
+                return;
+        }
+
         if (Mix_PlayingMusic())
         {
                 // Already playing music.
