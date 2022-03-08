@@ -21,7 +21,18 @@
 // -----------------------------------------------------------------------------
 static int nr_menu_keys_avail(const std::vector<char>& menu_keys)
 {
-        return (int)std::distance(std::begin(menu_keys), std::end(menu_keys));
+        return (
+                (int)std::distance(
+                        std::cbegin(menu_keys),
+                        std::cend(menu_keys)));
+}
+
+static bool is_printable_ascii_char(const int key)
+{
+        // '!' = 33
+        // '~' = 126
+
+        return (key >= 33) && (key < 126);
 }
 
 // -----------------------------------------------------------------------------
@@ -98,7 +109,7 @@ MenuAction MenuBrowser::read(const InputData& input, MenuInputMode mode)
         }
         else
         {
-                // Left/right keys are not used - consider 'l' as "selected"
+                // Left/right keys are not used - consider 'l' as "selected".
                 if (input.key == 'l')
                 {
                         if (m_play_selection_audio)
@@ -131,17 +142,18 @@ MenuAction MenuBrowser::read(const InputData& input, MenuInputMode mode)
         }
 
         // Handle shortcut keys
-        if (mode == MenuInputMode::scrolling_and_letters)
+        if ((mode == MenuInputMode::scrolling_and_letters) &&
+            is_printable_ascii_char(input.key))
         {
-                const char c = (char)input.key;
+                const auto c = (char)input.key;
 
                 const auto find_result =
                         std::find(
-                                std::begin(m_menu_keys),
-                                std::end(m_menu_keys),
+                                std::cbegin(m_menu_keys),
+                                std::cend(m_menu_keys),
                                 c);
 
-                if (find_result == std::end(m_menu_keys))
+                if (find_result == std::cend(m_menu_keys))
                 {
                         // Not a valid menu key, ever
                         return MenuAction::none;
@@ -157,7 +169,7 @@ MenuAction MenuBrowser::read(const InputData& input, MenuInputMode mode)
 
                 const auto relative_idx =
                         (int)std::distance(
-                                std::begin(m_menu_keys),
+                                std::cbegin(m_menu_keys),
                                 find_result);
 
                 if (relative_idx >= nr_items_shown())
@@ -259,7 +271,7 @@ Range MenuBrowser::range_shown() const
                 // List height undefined (i.e. showing all)
 
                 // Just return a range of the total number of items
-                return Range(0, m_nr_items - 1);
+                return {0, m_nr_items - 1};
         }
 }
 
@@ -371,11 +383,11 @@ void MenuBrowser::remove_key(const char key)
 {
         const auto it =
                 std::find(
-                        std::begin(m_menu_keys),
-                        std::end(m_menu_keys),
+                        std::cbegin(m_menu_keys),
+                        std::cend(m_menu_keys),
                         key);
 
-        if (it != std::end(m_menu_keys))
+        if (it != std::cend(m_menu_keys))
         {
                 m_menu_keys.erase(it);
         }
