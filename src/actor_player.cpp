@@ -22,8 +22,6 @@
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "attack.hpp"
-#include "audio.hpp"
-#include "audio_data.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "config.hpp"

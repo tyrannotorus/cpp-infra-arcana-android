@@ -219,6 +219,53 @@ static bool is_ambient_sound(const audio::SfxId id)
                 (id != audio::SfxId::END));
 }
 
+static int volume_pct_left_for_direction(const Dir dir)
+{
+        switch (dir)
+        {
+        case Dir::left:
+                return 75;
+                break;
+
+        case Dir::up_left:
+                return 60;
+                break;
+
+        case Dir::down_left:
+                return 60;
+                break;
+
+        case Dir::up:
+                return 50;
+                break;
+
+        case Dir::center:
+                return 50;
+                break;
+
+        case Dir::down:
+                return 50;
+                break;
+
+        case Dir::up_right:
+                return 40;
+                break;
+
+        case Dir::down_right:
+                return 40;
+                break;
+
+        case Dir::right:
+                return 25;
+                break;
+
+        case Dir::END:
+                break;
+        }
+
+        return 50;
+}
+
 // -----------------------------------------------------------------------------
 // audio
 // -----------------------------------------------------------------------------
@@ -405,53 +452,12 @@ void play_from_direction(
                 return;
         }
 
-        // The distance is scaled down to avoid too much volume reduction
-        const int vol_pct_tot = 100 - ((distance_pct * 2) / 3);
+        // NOTE: Distance is scaled down to avoid too much volume reduction.
+        const int distance_pct_scaled = (distance_pct * 2) / 3;
 
-        int vol_pct_l = 0;
+        const int vol_pct_tot = 100 - distance_pct_scaled;
 
-        switch (dir)
-        {
-        case Dir::left:
-                vol_pct_l = 85;
-                break;
-
-        case Dir::up_left:
-                vol_pct_l = 75;
-                break;
-
-        case Dir::down_left:
-                vol_pct_l = 75;
-                break;
-
-        case Dir::up:
-                vol_pct_l = 50;
-                break;
-
-        case Dir::center:
-                vol_pct_l = 50;
-                break;
-
-        case Dir::down:
-                vol_pct_l = 50;
-                break;
-
-        case Dir::up_right:
-                vol_pct_l = 25;
-                break;
-
-        case Dir::down_right:
-                vol_pct_l = 25;
-                break;
-
-        case Dir::right:
-                vol_pct_l = 15;
-                break;
-
-        case Dir::END:
-                vol_pct_l = 50;
-                break;
-        }
+        const int vol_pct_l = volume_pct_left_for_direction(dir);
 
         play(sfx, vol_pct_tot, vol_pct_l);
 }
