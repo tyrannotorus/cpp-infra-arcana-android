@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright 2011-2021 Martin Törnqvist <m.tornq@gmail.com>
+// Copyright 2011-2022 Martin Törnqvist <m.tornq@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
@@ -355,22 +355,14 @@ static void init_window(const P& px_dims)
 
         std::string title = "Infra Arcana ";
 
-        if (version_info::g_version_str.empty())
-        {
-                const auto git_sha1_str =
-                        version_info::read_git_sha1_str_from_file();
+        const auto git_sha1_result =
+                version_info::read_git_sha1_str_from_file();
 
-                title +=
-                        "(build " +
-                        git_sha1_str +
-                        ", " +
-                        version_info::g_date_str +
-                        ")";
-        }
-        else
+        title += version_info::g_version_str;
+
+        if (git_sha1_result)
         {
-                // Version string defined
-                title += version_info::g_version_str;
+                title += " (" + git_sha1_result.value() + ")";
         }
 
         if (io::g_sdl_window)
@@ -1125,24 +1117,27 @@ P sdl_window_gui_dims()
 
 std::string sdl_pref_dir()
 {
-        std::string version_str;
+        std::string subdir_str = version_info::g_version_str;
 
-        if (version_info::g_version_str.empty())
+        std::replace(
+                std::begin(subdir_str),
+                std::end(subdir_str),
+                '.',
+                '_');
+
+        const auto sha1_result = version_info::read_git_sha1_str_from_file();
+
+        if (sha1_result)
         {
-                version_str = version_info::read_git_sha1_str_from_file();
-        }
-        else
-        {
-                version_str = version_info::g_version_str;
+                subdir_str += "_" + sha1_result.value();
         }
 
         auto* const path_ptr =
                 // NOTE: This is somewhat of a hack, see the function arguments
                 SDL_GetPrefPath(
                         "infra_arcana",  // "Organization"
-                        version_str.c_str());  // "Application"
+                        subdir_str.c_str());  // "Application"
 
-        // NOTE: Using non-const value to allow move on return
         std::string path_str = path_ptr;
 
         SDL_free(path_ptr);

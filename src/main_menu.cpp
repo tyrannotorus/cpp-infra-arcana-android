@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright 2011-2021 Martin Törnqvist <m.tornq@gmail.com>
+// Copyright 2011-2022 Martin Törnqvist <m.tornq@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
@@ -401,22 +401,14 @@ void MainMenuState::draw()
                 }
         }
 
-        std::string build_str;
+        std::string build_str = version_info::g_version_str + " (";
 
-        if (version_info::g_version_str.empty())
+        if (!s_git_sha1_str.empty())
         {
-                build_str = "Build " + s_git_sha1_str;
-        }
-        else
-        {
-                build_str =
-                        version_info::g_version_str +
-                        " (" +
-                        s_git_sha1_str +
-                        ")";
+                build_str += s_git_sha1_str + ", ";
         }
 
-        build_str += ", " + version_info::g_date_str;
+        build_str += version_info::g_date_str + ")";
 
         io::draw_text_right(
                 " " + build_str + " ",
@@ -554,7 +546,9 @@ void MainMenuState::update()
 
 void MainMenuState::on_start()
 {
-        s_git_sha1_str = version_info::read_git_sha1_str_from_file();
+        const auto sha1_result = version_info::read_git_sha1_str_from_file();
+
+        s_git_sha1_str = sha1_result.value_or("");
 
         s_current_quote = rnd::element(s_quotes);
 
