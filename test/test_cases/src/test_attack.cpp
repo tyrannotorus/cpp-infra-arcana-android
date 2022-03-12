@@ -353,3 +353,49 @@ TEST_CASE("Visible friendly monster attacking invisible hostile monster")
 
         test_utils::cleanup_all();
 }
+
+TEST_CASE("Player kicking invisible monster")
+{
+        test_utils::init_all();
+
+        player_bon::pick_bg(Bg::war_vet);
+
+        init_terrain();
+
+        map::g_player->m_pos.set(7, 5);
+
+        auto* mon = actor::make(actor::Id::zombie, {8, 5});
+
+        mon->m_properties.apply(property_factory::make(PropId::invis));
+
+        // Make the hostile monster aware so it doesn't become aware and runs
+        // its "aware phrase".
+        mon->m_mon_aware_state.aware_counter = 100;
+
+        map::update_vision();
+
+        // Reset/clear the message history
+        msg_log::init();
+
+        REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter <= 0);
+
+        map::g_player->kick_mon(*mon);
+
+        // Send the current message to history
+        msg_log::clear();
+
+        const auto& history = msg_log::history();
+
+        REQUIRE(history.size() == 1);
+
+        const std::vector<std::string> possible_messages = {
+                "I miss",
+                "I kick it"};
+
+        REQUIRE(starts_with_any_of(history[0].text(), possible_messages));
+
+        REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter > 0);
+        REQUIRE(mon->m_mon_aware_state.aware_counter > 0);
+
+        test_utils::cleanup_all();
+}

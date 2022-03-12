@@ -1858,14 +1858,20 @@ static void bump_awareness_after_melee_attack(
                 if (attacker_is_player ||
                     attacker.is_actor_my_leader(map::g_player))
                 {
-                        // The player, or a monster allied to the player
+                        // The player (or a monster allied to the player)
                         // attacked a monster. Make the defender monster aware
                         // of the player.
                         defender_mon.become_aware_player(
                                 actor::AwareSource::attacked);
                 }
 
-                if (!attacker_is_player)
+                if (attacker_is_player)
+                {
+                        // Player attacked monster, make player aware of the
+                        // monster.
+                        defender_mon.make_player_aware_of_me();
+                }
+                else
                 {
                         // A monster attacked a monster.
 
