@@ -259,9 +259,9 @@ void Door::on_hit(
         {
                 if (matl() == Matl::wood)
                 {
-                        try_start_burning(Verbose::yes);
-
                         reveal(PrintRevealMsg::if_seen);
+
+                        try_start_burning(Verbose::yes);
                 }
         }
         break;
