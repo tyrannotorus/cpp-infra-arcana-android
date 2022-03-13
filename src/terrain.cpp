@@ -337,69 +337,11 @@ void Terrain::hit(
         std::optional<P> from_pos,
         std::optional<int> dmg)
 {
-        bool is_terrain_hit = true;
-
-        if (actor::is_player(actor))
-        {
-                switch (dmg_type)
-                {
-                case DmgType::kicking:
-                case DmgType::blunt:
-                case DmgType::slashing:
-                {
-                        const bool is_blocking =
-                                !is_walkable() &&
-                                (id() != terrain::Id::stairs);
-
-                        if (is_blocking)
-                        {
-                                if (dmg_type == DmgType::kicking)
-                                {
-                                        const std::string terrain_name =
-                                                map::g_seen.at(m_pos)
-                                                ? name(Article::the)
-                                                : "something";
-
-                                        msg_log::add(
-                                                "I kick " +
-                                                terrain_name +
-                                                "!");
-
-                                        bash::try_sprain_player();
-                                }
-                                else
-                                {
-                                        // Not kicking
-                                        msg_log::add("*WHAM!*");
-                                }
-                        }
-                        else
-                        {
-                                // The terrain is not blocking
-                                is_terrain_hit = false;
-
-                                msg_log::add("*Whoosh!*");
-
-                                audio::play(audio::SfxId::miss_medium);
-                        }
-                }
-                break;
-
-                default:
-                {
-                }
-                break;
-                }
-        }
-
-        if (is_terrain_hit)
-        {
-                on_hit(
-                        dmg_type,
-                        actor,
-                        from_pos.value_or(actor ? actor->m_pos : m_pos),
-                        dmg.value_or(-1));
-        }
+        on_hit(
+                dmg_type,
+                actor,
+                from_pos.value_or(actor ? actor->m_pos : m_pos),
+                dmg.value_or(-1));
 }
 
 int Terrain::shock_when_adj() const

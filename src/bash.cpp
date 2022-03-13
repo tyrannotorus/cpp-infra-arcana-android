@@ -16,6 +16,7 @@
 #include "actor_hit.hpp"
 #include "actor_player.hpp"
 #include "array2.hpp"
+#include "audio.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "debug.hpp"
@@ -142,10 +143,6 @@ static void try_kick_living_monster(actor::Actor& mon)
                 return;
         }
 
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksLos().run(blocked, blocked.rect());
-
         map::g_player->kick_mon(mon);
 
         bash::try_sprain_player();
@@ -232,6 +229,13 @@ static void bash_corpse_with_wpn(
         game_time::tick();
 }
 
+static bool allow_bash_terrain(const terrain::Terrain* const terrain)
+{
+        return (
+                !terrain->is_walkable() &&
+                (terrain->id() != terrain::Id::stairs));
+}
+
 static void bash_terrain_with_wpn(
         const P& att_pos,
         const item::Item& wpn,
@@ -245,8 +249,39 @@ static void bash_terrain_with_wpn(
                 : &kick_wpn;
 
         const auto dmg_range = wpn_used_att_terrain->melee_dmg(map::g_player);
-
         const int dmg = dmg_range.total_range().roll();
+        const auto dmg_type = wpn_used_att_terrain->data().melee.dmg_type;
+
+        switch (dmg_type)
+        {
+        case DmgType::kicking:
+        {
+                const std::string terrain_name =
+                        map::g_seen.at(att_pos)
+                        ? terrain->name(Article::the)
+                        : "something";
+
+                msg_log::add(
+                        "I kick " +
+                        terrain_name +
+                        "!");
+
+                bash::try_sprain_player();
+        }
+        break;
+
+        case DmgType::blunt:
+        case DmgType::slashing:
+        {
+                msg_log::add("*WHAM!*");
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+        }
 
         terrain->hit(
                 wpn_used_att_terrain->data().melee.dmg_type,
@@ -262,6 +297,20 @@ static void bash_terrain_with_wpn(
 
 static void bash_pos(const P& pos)
 {
+        const auto kick_wpn = make_tmp_kick_wpn();
+        const auto* wpn = get_wielded_wpn_or_unarmed();
+
+        // Bash terrain?
+        auto* const terrain = map::g_terrain.at(pos);
+
+        if ((pos != map::g_player->m_pos) &&
+            allow_bash_terrain(terrain))
+        {
+                bash_terrain_with_wpn(pos, *wpn, *kick_wpn);
+
+                return;
+        }
+
         // Kick living actor?
         if (pos != map::g_player->m_pos)
         {
@@ -297,9 +346,6 @@ static void bash_pos(const P& pos)
                 }
         }
 
-        const auto kick_wpn = make_tmp_kick_wpn();
-        const auto* wpn = get_wielded_wpn_or_unarmed();
-
         if (corpse)
         {
                 bash_corpse_with_wpn(*corpse, pos, *wpn, *kick_wpn);
@@ -307,10 +353,10 @@ static void bash_pos(const P& pos)
                 return;
         }
 
-        if (pos != map::g_player->m_pos)
-        {
-                bash_terrain_with_wpn(pos, *wpn, *kick_wpn);
-        }
+        // Nothing to kick here, attack the air.
+        msg_log::add("*Whoosh!*");
+
+        audio::play(audio::SfxId::miss_medium);
 }
 
 // -----------------------------------------------------------------------------
