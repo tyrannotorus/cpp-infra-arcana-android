@@ -164,12 +164,6 @@ void run(
                 }
         }
 
-        auto* prop = property_factory::make(PropId::paralyzed);
-
-        prop->set_duration(1 + paralyze_extra_turns);
-
-        actor.m_properties.apply(prop);
-
         // Leave current cell
         map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
@@ -207,6 +201,14 @@ void run(
 
                 return;
         }
+
+        map::update_vision();
+
+        auto* prop = property_factory::make(PropId::paralyzed);
+
+        prop->set_duration(1 + paralyze_extra_turns);
+
+        actor.m_properties.apply(prop);
 
         // Bump target cell
         const auto mobs = game_time::mobs_at_pos(actor.m_pos);
