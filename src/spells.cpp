@@ -4673,13 +4673,13 @@ Range SpellSummonMon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
                 break;
 
         case SpellSkill::master:
-        case SpellSkill::transcendent:  // TODO
+        case SpellSkill::transcendent:
                 dlvl_range.min = g_dlvl_first_mid_game;
                 dlvl_range.max = g_dlvl_last;
                 break;
         }
 
-        const int dlvl = map::g_dlvl + 3;
+        const int dlvl = map::g_dlvl + 2;
 
         dlvl_range.min = std::min(dlvl_range.min, dlvl);
         dlvl_range.max = std::min(dlvl_range.max, dlvl);

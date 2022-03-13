@@ -1129,7 +1129,7 @@ void TrapSummonMon::trigger()
                 const auto& data = actor::g_data[i];
 
                 if (data.can_be_summoned_by_mon &&
-                    data.spawn_min_dlvl <= map::g_dlvl + 3)
+                    data.spawn_min_dlvl <= (map::g_dlvl + 2))
                 {
                         summon_bucket.push_back((actor::Id)i);
                 }
