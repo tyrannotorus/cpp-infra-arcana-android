@@ -464,12 +464,7 @@ void reset_current_actor_idx()
 void tick()
 {
 #ifndef NDEBUG
-        if (!g_allow_tick)
-        {
-                ASSERT(false);
-
-                return;
-        }
+        ASSERT(g_allow_tick);
 
         g_allow_tick = false;
 #endif  // NDEBUG

@@ -11,6 +11,8 @@
 #include "actor_player.hpp"
 #include "attack.hpp"
 #include "catch.hpp"
+#include "game_time.hpp"
+#include "item_factory.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "property_factory.hpp"
@@ -144,6 +146,7 @@ TEST_CASE("Hostile monster outside FOV attacking friendly monster outside FOV")
 
         REQUIRE(mon_allied_player_aware_counter == 0);
         REQUIRE(mon_hostile_player_aware_counter == 0);
+        REQUIRE(!mon_hostile->m_data->has_player_seen);
 
         auto& wpn =
                 static_cast<item::Wpn&>(
@@ -161,6 +164,7 @@ TEST_CASE("Hostile monster outside FOV attacking friendly monster outside FOV")
 
         REQUIRE(mon_allied_player_aware_counter == 0);
         REQUIRE(mon_hostile_player_aware_counter > 0);
+        REQUIRE(!mon_hostile->m_data->has_player_seen);
 
         test_utils::cleanup_all();
 }
@@ -201,6 +205,7 @@ TEST_CASE("Invisible hostile monster attacking seen friendly monster")
 
         REQUIRE(mon_allied_player_aware_counter > 0);
         REQUIRE(mon_hostile_player_aware_counter == 0);
+        REQUIRE(!mon_hostile->m_data->has_player_seen);
 
         auto& wpn =
                 static_cast<item::Wpn&>(
@@ -223,6 +228,7 @@ TEST_CASE("Invisible hostile monster attacking seen friendly monster")
 
         REQUIRE(mon_allied_player_aware_counter > 0);
         REQUIRE(mon_hostile_player_aware_counter > 0);
+        REQUIRE(!mon_hostile->m_data->has_player_seen);
 
         test_utils::cleanup_all();
 }
@@ -237,8 +243,10 @@ TEST_CASE("Invisible hostile monster attacking invisible friendly monster")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make(actor::Id::ghoul, {7, 6});
-        auto* mon_hostile = actor::make(actor::Id::zombie, {7, 7});
+        // First place the monsters outside FOV to not trigger player awareness
+        // when vision is updated when invisibility is applied.
+        auto* mon_allied = actor::make(actor::Id::ghoul, {27, 6});
+        auto* mon_hostile = actor::make(actor::Id::zombie, {27, 7});
 
         auto& mon_allied_player_aware_counter =
                 mon_allied->m_mon_aware_state.player_aware_of_me_counter;
@@ -265,11 +273,15 @@ TEST_CASE("Invisible hostile monster attacking invisible friendly monster")
 
         map::update_vision();
 
+        mon_allied->m_pos.set(7, 6);
+        mon_hostile->m_pos.set(7, 7);
+
         // Reset/clear the message history
         msg_log::init();
 
         REQUIRE(mon_allied_player_aware_counter == 0);
         REQUIRE(mon_hostile_player_aware_counter == 0);
+        REQUIRE(!mon_hostile->m_data->has_player_seen);
 
         auto& wpn =
                 static_cast<item::Wpn&>(
@@ -287,6 +299,7 @@ TEST_CASE("Invisible hostile monster attacking invisible friendly monster")
 
         REQUIRE(mon_allied_player_aware_counter == 0);
         REQUIRE(mon_hostile_player_aware_counter > 0);
+        REQUIRE(!mon_hostile->m_data->has_player_seen);
 
         test_utils::cleanup_all();
 }
@@ -378,6 +391,7 @@ TEST_CASE("Player kicking invisible monster")
         msg_log::init();
 
         REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter <= 0);
+        REQUIRE(!mon->m_data->has_player_seen);
 
         map::g_player->kick_mon(*mon);
 
@@ -396,6 +410,60 @@ TEST_CASE("Player kicking invisible monster")
 
         REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter > 0);
         REQUIRE(mon->m_mon_aware_state.aware_counter > 0);
+        REQUIRE(!mon->m_data->has_player_seen);
+
+        test_utils::cleanup_all();
+}
+
+// TODO: Make a test case with the player attacking an invisible monster with a
+// weapon doing something like +100 damage, guaranteed to kill the monster
+// (maybe have to run in a loop in case the monster dodges). Check that the
+// player does not discover the monster (etc).
+TEST_CASE("Test player killing invisible monster")
+{
+        test_utils::init_all();
+
+        player_bon::pick_bg(Bg::war_vet);
+
+        init_terrain();
+
+        map::g_player->m_pos.set(7, 5);
+
+        REQUIRE(!map::g_player->m_inv.has_item_in_slot(SlotId::wpn));
+
+        auto* const wpn =
+                static_cast<item::Wpn*>(
+                        item::make(item::Id::dagger));
+
+        wpn->set_melee_plus(100);  // Guaranteed to kill the monster.
+
+        map::g_player->m_inv.put_in_slot(SlotId::wpn, wpn, Verbose::no);
+
+        auto* mon = actor::make(actor::Id::zombie, {8, 5});
+
+        mon->m_properties.apply(property_factory::make(PropId::invis));
+
+        // Make the hostile monster aware so it doesn't become aware and runs
+        // its "aware phrase".
+        mon->m_mon_aware_state.aware_counter = 100;
+
+        map::update_vision();
+
+        // Reset/clear the message history
+        msg_log::init();
+
+        REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter <= 0);
+        REQUIRE(!mon->m_data->has_player_seen);
+
+        while (mon->is_alive())
+        {
+                attack::melee(map::g_player, map::g_player->m_pos, *mon, *wpn);
+
+                game_time::g_allow_tick = true;
+        }
+
+        REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter > 0);
+        REQUIRE(!mon->m_data->has_player_seen);
 
         test_utils::cleanup_all();
 }

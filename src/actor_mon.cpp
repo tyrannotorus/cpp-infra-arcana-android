@@ -503,7 +503,7 @@ void Mon::make_player_aware_of_me(int duration_factor)
                         nr_turns,
                         m_mon_aware_state.player_aware_of_me_counter);
 
-        if (can_player_see_actor(*this))
+        if (is_alive() && can_player_see_actor(*this))
         {
                 game::player_discover_monster(*this);
         }
