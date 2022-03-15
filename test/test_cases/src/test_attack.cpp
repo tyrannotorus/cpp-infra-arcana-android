@@ -415,10 +415,6 @@ TEST_CASE("Player kicking invisible monster")
         test_utils::cleanup_all();
 }
 
-// TODO: Make a test case with the player attacking an invisible monster with a
-// weapon doing something like +100 damage, guaranteed to kill the monster
-// (maybe have to run in a loop in case the monster dodges). Check that the
-// player does not discover the monster (etc).
 TEST_CASE("Test player killing invisible monster")
 {
         test_utils::init_all();
