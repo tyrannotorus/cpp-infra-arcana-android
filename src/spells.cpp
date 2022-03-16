@@ -4898,17 +4898,17 @@ void SpellHeal::run_effect(
                 caster->m_properties.end_prop(PropId::diseased);
                 caster->m_properties.end_prop(PropId::weakened);
                 caster->m_properties.end_prop(PropId::hp_sap);
+                caster->m_properties.end_prop(PropId::poisoned);
         }
 
         if (skill >= SpellSkill::master)
         {
                 caster->m_properties.end_prop(PropId::blind);
                 caster->m_properties.end_prop(PropId::deaf);
-                caster->m_properties.end_prop(PropId::poisoned);
 
                 if (actor::is_player(caster))
                 {
-                        Prop* const wound_prop =
+                        auto* const wound_prop =
                                 map::g_player->m_properties.prop(PropId::wound);
 
                         if (wound_prop)
@@ -4957,14 +4957,14 @@ std::vector<std::string> SpellHeal::descr_specific(
         if (skill == SpellSkill::expert)
         {
                 descr.emplace_back(
-                        "Cures infections, disease, weakening, and life "
-                        "sapping.");
+                        "Cures infections, disease, weakening, life sapping, "
+                        "and poisoning.");
         }
         else if (skill >= SpellSkill::master)
         {
                 descr.emplace_back(
                         "Cures infections, disease, weakening, life sapping, "
-                        "blindness, deafness, and poisoning.");
+                        "poisoning, blindness, and deafness.");
 
                 descr.emplace_back("Heals one wound.");
         }

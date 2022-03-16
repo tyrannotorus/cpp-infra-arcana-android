@@ -1152,7 +1152,7 @@ void handle(const GameCmd cmd)
         {
                 map::g_player->m_properties.apply(
                         property_factory::make(
-                                PropId::blind));
+                                PropId::poisoned));
         }
         break;
 

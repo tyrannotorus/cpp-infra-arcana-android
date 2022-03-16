@@ -178,49 +178,49 @@ TEST_CASE("Test spell bonuses for manuscripts")
         auto* const scroll = static_cast<scroll::Scroll*>(item);
 
         // Casting healing from manuscript (expert level) should clear disease,
-        // but not poison.
+        // but not deafness.
         player.m_properties.apply(property_factory::make(PropId::diseased));
-        player.m_properties.apply(property_factory::make(PropId::poisoned));
+        player.m_properties.apply(property_factory::make(PropId::deaf));
 
         REQUIRE(player.m_properties.has(PropId::diseased));
-        REQUIRE(player.m_properties.has(PropId::poisoned));
+        REQUIRE(player.m_properties.has(PropId::deaf));
 
         scroll->activate(map::g_player);
 
         REQUIRE(!player.m_properties.has(PropId::diseased));
-        REQUIRE(player.m_properties.has(PropId::poisoned));
+        REQUIRE(player.m_properties.has(PropId::deaf));
 
         // Casting healing from manuscript at altar (master level) should clear
-        // both disease and poison.
+        // both disease and deafness.
         map::put(new terrain::Altar(player.m_pos.with_x_offset(1)));
 
         player.m_properties.apply(property_factory::make(PropId::diseased));
-        player.m_properties.apply(property_factory::make(PropId::poisoned));
+        player.m_properties.apply(property_factory::make(PropId::deaf));
 
         game_time::g_allow_tick = true;
 
         scroll->activate(map::g_player);
 
         REQUIRE(!player.m_properties.has(PropId::diseased));
-        REQUIRE(!player.m_properties.has(PropId::poisoned));
+        REQUIRE(!player.m_properties.has(PropId::deaf));
 
         // Remove the altar
         map::put(new terrain::Wall(player.m_pos.with_x_offset(1)));
 
         // Casting healing from manuscript with erudition (master level) should
-        // clear both disease and poison.
+        // clear both disease and deafness.
         player.m_properties.apply(
                 property_factory::make(PropId::erudition));
 
         player.m_properties.apply(property_factory::make(PropId::diseased));
-        player.m_properties.apply(property_factory::make(PropId::poisoned));
+        player.m_properties.apply(property_factory::make(PropId::deaf));
 
         game_time::g_allow_tick = true;
 
         scroll->activate(map::g_player);
 
         REQUIRE(!player.m_properties.has(PropId::diseased));
-        REQUIRE(!player.m_properties.has(PropId::poisoned));
+        REQUIRE(!player.m_properties.has(PropId::deaf));
 }
 
 TEST_CASE("Test spell shield")
