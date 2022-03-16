@@ -1150,8 +1150,9 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                map::make_gore(map::g_player->m_pos.with_x_offset(2));
-                map::make_blood(map::g_player->m_pos.with_x_offset(2));
+                map::g_player->m_properties.apply(
+                        property_factory::make(
+                                PropId::blind));
         }
         break;
 

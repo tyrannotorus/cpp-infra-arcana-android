@@ -6,7 +6,7 @@
 # Fixes
 ##############################
 - Only a monster that is alive can now be discovered with an XP reward. This fixes a bug where killing an invisible monster (e.g. a Ghost) would discover it.
-
+- The message "Major Clapham Lee calls forth his Tomb-Legions" is no longer printed if the player cannot see the Major, instead a sound is heard ("A voice is calling forth [...]").
 
 ============================================================
 = v21.0.0 (Mars 13, 2022)

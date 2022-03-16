@@ -3168,9 +3168,21 @@ PropActResult PropMajorClaphamSummon::on_act()
                 return {};
         }
 
-        static_cast<actor::Mon*>(m_owner)->make_player_aware_of_me();
+        Snd snd(
+                "A voice is calling forth Tomb-Legions!",
+                audio::SfxId::END,
+                IgnoreMsgIfOriginSeen::yes,
+                m_owner->m_pos,
+                m_owner,
+                SndVol::high,
+                AlertsMon::no);
 
-        msg_log::add("Major Clapham Lee calls forth his Tomb-Legions!");
+        snd.run();
+
+        if (actor::can_player_see_actor(*m_owner))
+        {
+                msg_log::add("Major Clapham Lee calls forth his Tomb-Legions!");
+        }
 
         std::vector<actor::Id> ids_to_summon = {actor::Id::dean_halsey};
 
@@ -3181,7 +3193,7 @@ PropActResult PropMajorClaphamSummon::on_act()
                 actor::Id::bloated_zombie};
 
         const std::vector<int> weights = {
-                3,
+                4,
                 1};
 
         for (int i = 0; i < nr_of_extra_spawns; ++i)
