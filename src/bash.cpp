@@ -297,10 +297,28 @@ static void bash_terrain_with_wpn(
 
 static void bash_pos(const P& pos)
 {
+        // Try kicking/bashing something (monster, corpse, terrain) in the given
+        // position according to priority.
+
         const auto kick_wpn = make_tmp_kick_wpn();
         const auto* wpn = get_wielded_wpn_or_unarmed();
 
-        // Bash terrain?
+        auto* living_actor =
+                map::first_actor_at_pos(
+                        pos,
+                        ActorState::alive);
+
+        // --- Kick living actor that the player is aware of? ---
+        if ((pos != map::g_player->m_pos) &&
+            living_actor &&
+            living_actor->is_player_aware_of_me())
+        {
+                try_kick_living_monster(*living_actor);
+
+                return;
+        }
+
+        // --- Bash terrain? ---
         auto* const terrain = map::g_terrain.at(pos);
 
         if ((pos != map::g_player->m_pos) &&
@@ -311,23 +329,17 @@ static void bash_pos(const P& pos)
                 return;
         }
 
-        // Kick living actor?
-        if (pos != map::g_player->m_pos)
+        // --- Kick living actor that the player is unaware of? ---
+        if ((pos != map::g_player->m_pos) && living_actor)
         {
-                auto* living_actor =
-                        map::first_actor_at_pos(
-                                pos,
-                                ActorState::alive);
+                ASSERT(!living_actor->is_player_aware_of_me());
 
-                if (living_actor)
-                {
-                        try_kick_living_monster(*living_actor);
+                try_kick_living_monster(*living_actor);
 
-                        return;
-                }
+                return;
         }
 
-        // Destroy corpse?
+        // --- Destroy corpse? ---
         actor::Actor* corpse = nullptr;
 
         // Check all corpses here, stop at any corpse which is prioritized for
@@ -353,7 +365,7 @@ static void bash_pos(const P& pos)
                 return;
         }
 
-        // Nothing to kick here, attack the air.
+        // --- Nothing to kick here, attack the air. ---
         msg_log::add("*Whoosh!*");
 
         audio::play(audio::SfxId::miss_medium);
@@ -432,7 +444,7 @@ void run()
 
         // The chosen direction is valid
 
-        P pos(map::g_player->m_pos + dir_utils::offset(input_dir));
+        const auto pos = map::g_player->m_pos + dir_utils::offset(input_dir);
 
         bash_pos(pos);
 }

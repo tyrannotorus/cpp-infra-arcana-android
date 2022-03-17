@@ -8,6 +8,9 @@
 # Spells
 - Heal now also cures poisoning when cast at expert level (previously only cured from master level).
 
+# Other
+- When the player is kicking a position with a monster they are aware of inside blocking terrain (e.g. a rat inside rubble, or a ghost on a closed door), the monster is now prioritized for kicking instead of the terrain (but if they are unaware of the monster, the terrain will be kicked instead).
+
 ##############################
 # Fixes
 ##############################
