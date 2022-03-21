@@ -352,7 +352,8 @@ int Terrain::shock_when_adj() const
         {
                 shock += 6;
         }
-        else if (has_gore())
+
+        if (has_gore() && !player_bon::is_bg(Bg::ghoul))
         {
                 shock += 3;
         }
@@ -5035,69 +5036,78 @@ DidTriggerTrap Cocoon::trigger_trap(actor::Actor* const actor)
 {
         (void)actor;
 
-        if (m_is_trapped)
+        if (!m_is_trapped)
         {
-                const int rnd = rnd::range(1, 100);
+                return DidTriggerTrap::no;
+        }
 
-                if (rnd < 15)
+        const int rnd = rnd::range(1, 100);
+
+        if (rnd < 15)
+        {
+                // A dead body
+
+                if (player_bon::is_bg(Bg::ghoul))
                 {
-                        // A dead body
-                        msg_log::add(
-                                "There is a half-dissolved human body inside!");
+                        m_is_trapped = false;
 
-                        map::g_player->incr_shock(12.0, ShockSrc::misc);
+                        return DidTriggerTrap::no;
+                }
+
+                msg_log::add("There is a half-dissolved human body inside!");
+
+                map::g_player->incr_shock(12.0, ShockSrc::misc);
+
+                m_is_trapped = false;
+
+                return DidTriggerTrap::yes;
+        }
+        else if (rnd < 50)
+        {
+                // Spiders
+                TRACE << "Attempting to spawn spiders" << std::endl;
+                std::vector<actor::Id> spawn_bucket;
+
+                for (int i = 0; i < (int)actor::Id::END; ++i)
+                {
+                        const auto& d = actor::g_data[i];
+
+                        if (d.is_spider &&
+                            (d.actor_size == actor::Size::floor) &&
+                            d.is_auto_spawn_allowed &&
+                            !d.is_unique)
+                        {
+                                spawn_bucket.push_back(d.id);
+                        }
+                }
+
+                const int nr_candidates = (int)spawn_bucket.size();
+
+                if (nr_candidates > 0)
+                {
+                        TRACE << "Spawn candidates found, attempting to place"
+                              << std::endl;
+
+                        msg_log::add("There are spiders inside!");
+
+                        const auto nr_spiders =
+                                (size_t)rnd::range(2, 5);
+
+                        const auto idx =
+                                rnd::range(0, nr_candidates - 1);
+
+                        const auto actor_id_to_summon =
+                                spawn_bucket[idx];
+
+                        actor::spawn(
+                                m_pos,
+                                {nr_spiders, actor_id_to_summon},
+                                map::rect())
+                                .make_aware_of_player();
 
                         m_is_trapped = false;
 
                         return DidTriggerTrap::yes;
-                }
-                else if (rnd < 50)
-                {
-                        // Spiders
-                        TRACE << "Attempting to spawn spiders" << std::endl;
-                        std::vector<actor::Id> spawn_bucket;
-
-                        for (int i = 0; i < (int)actor::Id::END; ++i)
-                        {
-                                const auto& d = actor::g_data[i];
-
-                                if (d.is_spider &&
-                                    d.actor_size == actor::Size::floor &&
-                                    d.is_auto_spawn_allowed &&
-                                    !d.is_unique)
-                                {
-                                        spawn_bucket.push_back(d.id);
-                                }
-                        }
-
-                        const int nr_candidates = (int)spawn_bucket.size();
-
-                        if (nr_candidates > 0)
-                        {
-                                TRACE << "Spawn candidates found, attempting to place"
-                                      << std::endl;
-
-                                msg_log::add("There are spiders inside!");
-
-                                const auto nr_spiders =
-                                        (size_t)rnd::range(2, 5);
-
-                                const auto idx =
-                                        rnd::range(0, nr_candidates - 1);
-
-                                const auto actor_id_to_summon =
-                                        spawn_bucket[idx];
-
-                                actor::spawn(
-                                        m_pos,
-                                        {nr_spiders, actor_id_to_summon},
-                                        map::rect())
-                                        .make_aware_of_player();
-
-                                m_is_trapped = false;
-
-                                return DidTriggerTrap::yes;
-                        }
                 }
         }
 

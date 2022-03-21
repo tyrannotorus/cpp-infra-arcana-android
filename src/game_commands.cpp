@@ -62,6 +62,7 @@
 #include "spells.hpp"
 #include "state.hpp"
 #include "teleport.hpp"
+#include "terrain.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -1150,9 +1151,9 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                map::g_player->m_properties.apply(
-                        property_factory::make(
-                                PropId::poisoned));
+                map::put(
+                        new terrain::Cocoon(
+                                map::g_player->m_pos.with_x_offset(1)));
         }
         break;
 
