@@ -786,6 +786,56 @@ void Player::add_shock_from_seen_monsters()
         incr_shock(val, ShockSrc::see_mon);
 }
 
+double Player::increased_tmp_chock_on_blind() const
+{
+        auto* const blind = m_properties.prop(PropId::blind);
+
+        const int blind_shock = std::min(blind->nr_turns_active(), 30);
+
+        return shock_taken_after_mods((double)blind_shock, ShockSrc::misc);
+}
+
+double Player::increased_tmp_shock_from_dark() const
+{
+        if (!map::g_dark.at(m_pos) || map::g_light.at(m_pos))
+        {
+                return 0.0;
+        }
+
+        const double tmp_shock_dark =
+                insanity::has_sympt(InsSymptId::phobia_dark)
+                ? 30.0
+                : 20.0;
+
+        return shock_taken_after_mods(tmp_shock_dark, ShockSrc::misc);
+}
+
+double Player::reduced_tmp_shock_from_light() const
+{
+        return map::g_light.at(m_pos) ? 20.0 : 0.0;
+}
+
+double Player::increased_tmp_shock_from_adjacent_terrain() const
+{
+        double shock = 0.0;
+
+        for (const auto& d : dir_utils::g_dir_list_w_center)
+        {
+                const auto p = m_pos + d;
+
+                const auto* const t = map::g_terrain.at(p);
+
+                const int terrain_shock = t->shock_when_adj();
+
+                shock +=
+                        shock_taken_after_mods(
+                                (double)terrain_shock,
+                                ShockSrc::misc);
+        }
+
+        return shock;
+}
+
 void Player::update_tmp_shock()
 {
         double increased_tmp_shock = 0.0;
@@ -802,59 +852,25 @@ void Player::update_tmp_shock()
                 // prevents the player from seeing, that should cause shock
                 // (fainting also prevents seeing, but should not cause shock).
 
-                auto* const blind = m_properties.prop(PropId::blind);
-
-                const int blind_shock = std::min(blind->nr_turns_active(), 30);
+                increased_tmp_shock += increased_tmp_chock_on_blind();
+        }
+        else if (m_properties.allow_see())
+        {
+                // NOTE: Ghouls are unaffected by shock change from both light
+                // or darkness (they don't care about this).
+                if (!player_bon::is_bg(Bg::ghoul))
+                {
+                        increased_tmp_shock += increased_tmp_shock_from_dark();
+                        reduced_tmp_shock += reduced_tmp_shock_from_light();
+                }
 
                 increased_tmp_shock +=
-                        shock_taken_after_mods(
-                                (double)blind_shock,
-                                ShockSrc::misc);
-        }
-        else
-        {
-                const bool is_ghoul = player_bon::is_bg(Bg::ghoul);
-
-                // Shock reduction from light?
-                if (map::g_light.at(m_pos))
-                {
-                        reduced_tmp_shock += 20.0;
-                }
-                // Not lit - shock from darkness?
-                else if (map::g_dark.at(m_pos) && !is_ghoul)
-                {
-                        double tmp_shock_dark = 20.0;
-
-                        if (insanity::has_sympt(InsSymptId::phobia_dark))
-                        {
-                                tmp_shock_dark = 30.0;
-                        }
-
-                        increased_tmp_shock +=
-                                shock_taken_after_mods(
-                                        tmp_shock_dark,
-                                        ShockSrc::misc);
-                }
-
-                // Temporary shock from seen terrains?
-                for (const auto& d : dir_utils::g_dir_list_w_center)
-                {
-                        const auto p(m_pos + d);
-
-                        const auto* const t = map::g_terrain.at(p);
-
-                        const int terrain_shock = t->shock_when_adj();
-
-                        increased_tmp_shock +=
-                                shock_taken_after_mods(
-                                        (double)terrain_shock,
-                                        ShockSrc::misc);
-                }
+                        increased_tmp_shock_from_adjacent_terrain();
         }
 
         if (m_properties.has(PropId::r_shock))
         {
-                // Player is shock resistant, only allow reducing shock
+                // Player is shock resistant, only allow reducing shock.
                 increased_tmp_shock = 0.0;
         }
 

@@ -179,6 +179,11 @@ private:
                 double base_shock,
                 ShockSrc shock_src) const;
 
+        double increased_tmp_chock_on_blind() const;
+        double increased_tmp_shock_from_dark() const;
+        double reduced_tmp_shock_from_light() const;
+        double increased_tmp_shock_from_adjacent_terrain() const;
+
         void on_hit(
                 int dmg,
                 DmgType dmg_type,
