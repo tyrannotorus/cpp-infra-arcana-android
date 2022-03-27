@@ -5,6 +5,9 @@
 ##############################
 # Gameplay changes
 ##############################
+# Backgrounds and traits
+- Reduced hit points healed by Ghoul feeding from 3-5 to 3-4 (also affects monster Ghouls).
+
 # Spells
 - Heal now also cures poisoning when cast at expert level (previously only cured from master level).
 

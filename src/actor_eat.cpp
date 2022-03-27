@@ -195,7 +195,7 @@ DidAction try_eat_corpse(actor::Actor& actor)
 
 void heal_from_eating(actor::Actor& actor)
 {
-        const int hp_restored = rnd::range(3, 5);
+        const int hp_restored = rnd::range(3, 4);
 
         actor.restore_hp(hp_restored, false, Verbose::no);
 
