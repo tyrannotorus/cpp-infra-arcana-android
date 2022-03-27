@@ -1611,10 +1611,36 @@ int PropAstralOpiumAddict::player_extra_min_shock() const
         }
 }
 
+int PropFrenzied::ability_mod(const AbilityId ability) const
+{
+        if (ability == AbilityId::melee)
+        {
+                return 10;
+        }
+        else
+        {
+                return 0;
+        }
+}
+
 bool PropFrenzied::allow_move_dir(const Dir dir)
 {
         if (!actor::is_player(m_owner) || (dir == Dir::center))
         {
+                return true;
+        }
+
+        const auto new_pos = m_owner->m_pos + dir_utils::offset(dir);
+
+        const actor::Actor* actor_at_tgt =
+                map::first_actor_at_pos(new_pos, ActorState::alive);
+
+        if (actor_at_tgt &&
+            actor_at_tgt->is_player_aware_of_me() &&
+            !actor_at_tgt->is_actor_my_leader(map::g_player))
+        {
+                // There is a known hostile monster at the target position,
+                // allow "moving" into it (i.e. try attacking it).
                 return true;
         }
 
@@ -1677,8 +1703,6 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
         }
 
         // There are seen reachable seen foes
-
-        const auto new_pos = m_owner->m_pos + dir_utils::offset(dir);
 
         for (const auto* actor : seen_reachable_foes)
         {

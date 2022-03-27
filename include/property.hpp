@@ -1163,17 +1163,7 @@ public:
 
         bool is_resisting_other_prop(PropId prop_id) const override;
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                if (ability == AbilityId::melee)
-                {
-                        return 10;
-                }
-                else
-                {
-                        return 0;
-                }
-        }
+        int ability_mod(AbilityId ability) const override;
 };
 
 class PropRShock : public Prop
