@@ -698,17 +698,18 @@ void InvState::draw_item_descr() const
 
         P pos(0, 0);
 
-        const auto nr_lines = (int)lines.size();
-        const auto max_nr_lines_shown = panels::h(Panel::inventory_descr);
-        const auto y1 = max_nr_lines_shown - 1;
-        const auto descr_idx =
-                std::clamp(m_descr_idx, 0, nr_lines - max_nr_lines_shown);
-        const auto last_idx_can_show = descr_idx + max_nr_lines_shown - 1;
-        const auto y_to_fade_from = (y1 * 3) / 4;
-        const auto last_idx = (size_t)std::min(last_idx_can_show, nr_lines - 1);
+        const int nr_lines = (int)lines.size();
+        const int max_nr_lines_shown = panels::h(Panel::inventory_descr);
+        const int y1 = max_nr_lines_shown - 1;
+        const int idx_lo = 0;
+        const int idx_hi = std::max(0, nr_lines - max_nr_lines_shown);
+        const int descr_idx = std::clamp(m_descr_idx, idx_lo, idx_hi);
+        const int last_idx_can_show = descr_idx + max_nr_lines_shown - 1;
+        const int y_to_fade_from = (y1 * 3) / 4;
+        const int last_idx = std::min(last_idx_can_show, nr_lines - 1);
         const bool should_fade = last_idx_can_show < (nr_lines - 1);
 
-        for (size_t i = descr_idx; i <= last_idx; ++i)
+        for (int i = descr_idx; i <= last_idx; ++i)
         {
                 const auto& line = lines[i];
 

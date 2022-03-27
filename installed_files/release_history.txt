@@ -21,6 +21,7 @@
 - Ghoul player characters no longer gets increased shock from blood/gore on the floor.
 - Ghoul player characters opening a cocoon can no longer receive the event "there is a half-dissolved human body inside!" (Ghouls are not afraid of such things).
 
+
 ============================================================
 = v21.0.0 (Mars 13, 2022)
 ============================================================

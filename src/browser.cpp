@@ -201,12 +201,12 @@ void MenuBrowser::move(const VerDir dir)
         if (dir == VerDir::up)
         {
                 // Up
-                m_y = m_y == 0 ? last_idx : (m_y - 1);
+                m_y = (m_y == 0) ? last_idx : (m_y - 1);
         }
         else
         {
                 // Down
-                m_y = m_y == last_idx ? 0 : (m_y + 1);
+                m_y = (m_y == last_idx) ? 0 : (m_y + 1);
         }
 
         update_range_shown();
@@ -289,7 +289,14 @@ void MenuBrowser::update_range_shown()
 
 void MenuBrowser::set_y_nearest_valid()
 {
-        m_y = std::clamp(m_y, 0, m_nr_items - 1);
+        if (m_nr_items >= 1)
+        {
+                m_y = std::clamp(m_y, 0, m_nr_items - 1);
+        }
+        else
+        {
+                m_y = 0;
+        }
 }
 
 int MenuBrowser::nr_items_shown() const
