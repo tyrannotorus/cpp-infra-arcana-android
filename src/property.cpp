@@ -412,7 +412,7 @@ PropEnded PropEntangled::affect_move_dir(Dir& dir)
                 }
         }
 
-        if (rnd::one_in(8))
+        if (rnd::one_in(6))
         {
                 m_owner->m_properties.end_prop(id());
 
