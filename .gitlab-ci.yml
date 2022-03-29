@@ -11,23 +11,23 @@ build-linux:
         script:
                 - ./build-release.sh
                 - ./run-test.sh
-                - mv build/target/ia ia-linux-x64-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)
+                - mv build/target/ia ia-linux-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)
         artifacts:
                 paths:
                 - ia-linux-x64-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)
-                name: "ia-linux-x64-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)"
+                name: "ia-linux-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)"
         only:
-                - master
+                - tags
 
 build-windows:
         stage: build
         script:
                 - apt-get update && apt-get install -y mingw-w64
                 - ./build-release-windows-cross-compile.sh
-                - mv build/target/ia "ia windows x64 ${CI_COMMIT_SHA:0:8} $(date +%Y-%m-%d)"
+                - mv build/target/ia "ia-windows-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)"
         artifacts:
                 paths:
-                - "ia windows x64 ${CI_COMMIT_SHA:0:8} $(date +%Y-%m-%d)"
-                name: "ia windows x64 ${CI_COMMIT_SHA:0:8} $(date +%Y-%m-%d)"
+                - "ia-windows-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)"
+                name: "ia-windows-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)"
         only:
-                - master
+                - tags
