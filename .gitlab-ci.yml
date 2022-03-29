@@ -14,7 +14,7 @@ build-linux:
                 - mv build/target/ia ia-linux-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)
         artifacts:
                 paths:
-                - ia-linux-x64-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)
+                - ia-linux-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)
                 name: "ia-linux-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)"
         only:
                 - tags
