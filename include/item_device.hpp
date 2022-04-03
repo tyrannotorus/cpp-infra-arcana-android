@@ -78,11 +78,7 @@ public:
         ~Blaster() override = default;
 
 private:
-        std::string descr_identified() const override
-        {
-                return "When activated, this device blasts all visible "
-                       "enemies with infernal power.";
-        }
+        std::string descr_identified() const override;
 
         ConsumeItem run_effect() override;
 };
@@ -96,12 +92,7 @@ public:
         ~Rejuvenator() override = default;
 
 private:
-        std::string descr_identified() const override
-        {
-                return "When activated, this device heals all wounds and "
-                       "physical maladies. The procedure is very painful and "
-                       "invasive however, and causes great shock to the user.";
-        }
+        std::string descr_identified() const override;
 
         ConsumeItem run_effect() override;
 };
@@ -115,11 +106,7 @@ public:
         ~Translocator() override = default;
 
 private:
-        std::string descr_identified() const override
-        {
-                return "When activated, this device teleports all visible "
-                       "enemies to different locations.";
-        }
+        std::string descr_identified() const override;
 
         ConsumeItem run_effect() override;
 };
@@ -151,12 +138,7 @@ public:
         ~Deafening() override = default;
 
 private:
-        std::string descr_identified() const override
-        {
-                return "When activated, this device causes temporary deafness "
-                       "in all creatures in a large area (on the whole map), "
-                       "except for the user.";
-        }
+        std::string descr_identified() const override;
 
         ConsumeItem run_effect() override;
 };
@@ -170,14 +152,7 @@ public:
         ~ForceField() override = default;
 
 private:
-        std::string descr_identified() const override
-        {
-                return "When activated, this device constructs a temporary "
-                       "opaque barrier around the user, blocking all "
-                       "physical matter. The barrier can only be created in "
-                       "empty spaces (i.e. not in spaces occupied by "
-                       "creatures, walls, etc).";
-        }
+        std::string descr_identified() const override;
 
         ConsumeItem run_effect() override;
 };

@@ -8,6 +8,9 @@
 # Backgrounds and traits
 - Reduced hit points healed by Ghoul feeding from 3-5 to 3-4 (also affects monster Ghouls).
 
+# Items
+- The "Blaster" Strange Device now casts Darkbolt instead of Azathoths Gaze, which is more fitting for its name.
+
 # Spells
 - Heal now also cures poisoning when cast at expert level (previously only cured from master level).
 
@@ -26,6 +29,7 @@
 - Ghoul player characters no longer gets increased shock from blood/gore on the floor.
 - Frenzy no longer prevents melee attacking an adjacent known unseen monster while there is a seen monster in a different direction.
 - The "magic pool" now also heals infections (it already healed disease).
+- Fixed an issue where activating a "Blaster" Strange Device would tick game time twice.
 
 
 ============================================================

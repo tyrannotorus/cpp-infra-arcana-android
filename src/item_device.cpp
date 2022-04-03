@@ -302,23 +302,29 @@ ConsumeItem Blaster::run_effect()
         if (tgt_bucket.empty())
         {
                 msg_log::add("It seems to peruse area.");
-        }
-        else
-        {
-                // Targets are available
-                const std::unique_ptr<Spell> spell(
-                        spells::make(SpellId::aza_gaze));
 
-                const auto seen_foes = actor::seen_foes(*map::g_player);
-
-                spell->cast(
-                        map::g_player,
-                        SpellSkill::basic,
-                        SpellSrc::item,
-                        seen_foes);
+                return ConsumeItem::no;
         }
+
+        // Targets are available
+        const std::unique_ptr<Spell> spell(spells::make(SpellId::darkbolt));
+
+        const auto seen_foes = actor::seen_foes(*map::g_player);
+
+        spell->cast(
+                map::g_player,
+                SpellSkill::expert,
+                SpellSrc::item,
+                seen_foes);
 
         return ConsumeItem::no;
+}
+
+std::string Blaster::descr_identified() const
+{
+        return (
+                "When activated, this device blasts one visible hostile "
+                "creature with infernal power.");
 }
 
 // -----------------------------------------------------------------------------
@@ -350,6 +356,14 @@ ConsumeItem Rejuvenator::run_effect()
         return ConsumeItem::no;
 }
 
+std::string Rejuvenator::descr_identified() const
+{
+        return (
+                "When activated, this device heals all wounds and physical "
+                "maladies. The procedure is very painful and invasive "
+                "however, and causes great shock to the user.");
+}
+
 // -----------------------------------------------------------------------------
 // Translocator
 // -----------------------------------------------------------------------------
@@ -379,6 +393,13 @@ ConsumeItem Translocator::run_effect()
         }
 
         return ConsumeItem::no;
+}
+
+std::string Translocator::descr_identified() const
+{
+        return (
+                "When activated, this device teleports all visible enemies "
+                "to different locations.");
 }
 
 // -----------------------------------------------------------------------------
@@ -416,6 +437,14 @@ ConsumeItem Deafening::run_effect()
         }
 
         return ConsumeItem::no;
+}
+
+std::string Deafening::descr_identified() const
+{
+        return (
+                "When activated, this device causes temporary deafness in "
+                "all creatures in a large area (on the whole map), except "
+                "for the user.");
 }
 
 // -----------------------------------------------------------------------------
@@ -468,6 +497,15 @@ ConsumeItem ForceField::run_effect()
         }
 
         return ConsumeItem::no;
+}
+
+std::string ForceField::descr_identified() const
+{
+        return (
+                "When activated, this device constructs a temporary opaque "
+                "barrier around the user, blocking all physical matter. "
+                "The barrier can only be created in empty spaces "
+                "(i.e. not in spaces occupied by creatures, walls, etc).");
 }
 
 // -----------------------------------------------------------------------------

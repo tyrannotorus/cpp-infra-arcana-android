@@ -1301,7 +1301,9 @@ void Spell::cast(
                 side_effect({*caster, nearby_positions});
         }
 
-        if (!is_focused_player)
+        const bool is_casting_from_item = (spell_src == SpellSrc::item);
+
+        if (!is_casting_from_item && !is_focused_player)
         {
                 game_time::tick();
         }
