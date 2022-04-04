@@ -802,17 +802,36 @@ double Player::increased_tmp_shock_from_dark() const
                 return 0.0;
         }
 
-        const double tmp_shock_dark =
+        double shock =
                 insanity::has_sympt(InsSymptId::phobia_dark)
                 ? 30.0
                 : 20.0;
 
-        return shock_taken_after_mods(tmp_shock_dark, ShockSrc::misc);
+        // Ghoul characters take half shock from darkness.
+        if (player_bon::is_bg(Bg::ghoul))
+        {
+                shock /= 2.0;
+        }
+
+        return shock_taken_after_mods(shock, ShockSrc::misc);
 }
 
 double Player::reduced_tmp_shock_from_light() const
 {
-        return map::g_light.at(m_pos) ? 20.0 : 0.0;
+        if (!map::g_light.at(m_pos))
+        {
+                return 0.0;
+        }
+
+        double reduced_shock = 20.0;
+
+        // Ghoul characters have halved shock reduction from light.
+        if (player_bon::is_bg(Bg::ghoul))
+        {
+                reduced_shock /= 2.0;
+        }
+
+        return reduced_shock;
 }
 
 double Player::increased_tmp_shock_from_adjacent_terrain() const
@@ -856,13 +875,8 @@ void Player::update_tmp_shock()
         }
         else if (m_properties.allow_see())
         {
-                // NOTE: Ghouls are unaffected by shock change from both light
-                // or darkness (they don't care about this).
-                if (!player_bon::is_bg(Bg::ghoul))
-                {
-                        increased_tmp_shock += increased_tmp_shock_from_dark();
-                        reduced_tmp_shock += reduced_tmp_shock_from_light();
-                }
+                increased_tmp_shock += increased_tmp_shock_from_dark();
+                reduced_tmp_shock += reduced_tmp_shock_from_light();
 
                 increased_tmp_shock +=
                         increased_tmp_shock_from_adjacent_terrain();

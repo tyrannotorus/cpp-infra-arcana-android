@@ -1099,7 +1099,9 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 put("");
                 put("Can see in darkness");
                 put("");
-                put("-50% shock taken from seeing monsters");
+                put("-50% shock taken from seeing monsters and standing "
+                    "in darkness, but also -50% shock reduction bonus "
+                    "from light");
                 put("");
                 put("-15% hit chance with firearms and thrown weapons");
                 put("");

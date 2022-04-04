@@ -7,6 +7,9 @@
 ##############################
 # Backgrounds and traits
 - Reduced hit points healed by Ghoul feeding from 3-5 to 3-4 (also affects monster Ghouls).
+- Ghoul player characters now receive -50% shock from darkness and blood/gore, but also -50% shock reduction from light.
+- Ghoul player characters opening a cocoon can no longer receive the event "there is a half-dissolved human body inside!" (Ghouls are not afraid of such things).
+- A player with darkvision (i.e. Ghouls) can now read manuscripts in darkness.
 
 # Items
 - The "Blaster" Strange Device now casts Darkbolt instead of Azathoths Gaze, which is more fitting for its name.
@@ -23,10 +26,6 @@
 ##############################
 - Only a monster that is alive can now be discovered with an XP reward. This fixes a bug where killing an invisible monster (e.g. a Ghost) would discover it.
 - The message "Major Clapham Lee calls forth his Tomb-Legions" is no longer printed if the player cannot see the Major, instead a sound is heard ("A voice is calling forth [...]").
-- A player with darkvision (i.e. Ghouls) can now read manuscripts in darkness.
-- Ghoul player characters no longer has their shock reduced by light (they don't care about light and darkness)
-- Ghoul player characters opening a cocoon can no longer receive the event "there is a half-dissolved human body inside!" (Ghouls are not afraid of such things).
-- Ghoul player characters no longer gets increased shock from blood/gore on the floor.
 - Frenzy no longer prevents melee attacking an adjacent known unseen monster while there is a seen monster in a different direction.
 - The "magic pool" now also heals infections (it already healed disease).
 - Fixed an issue where activating a "Blaster" Strange Device would tick game time twice.

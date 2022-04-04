@@ -353,9 +353,12 @@ int Terrain::shock_when_adj() const
                 shock += 6;
         }
 
-        if (has_gore() && !player_bon::is_bg(Bg::ghoul))
+        if (has_gore())
         {
-                shock += 3;
+                shock +=
+                        player_bon::is_bg(Bg::ghoul)
+                        ? 2
+                        : 3;
         }
 
         return shock;
