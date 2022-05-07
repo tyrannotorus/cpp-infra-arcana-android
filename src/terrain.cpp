@@ -862,11 +862,11 @@ gfx::TileId Wall::front_wall_tile() const
 
         case WallType::cliff:
         case WallType::cave:
-                return gfx::TileId::cave_wall_front;
+                return gfx::TileId::wall_cave_front;
 
         case WallType::leng_monestary:
         case WallType::egypt:
-                return gfx::TileId::egypt_wall_front;
+                return gfx::TileId::wall_egypt_front;
         }
 
         ASSERT(false && "Failed to set front wall tile");
@@ -889,11 +889,11 @@ gfx::TileId Wall::top_wall_tile() const
 
         case WallType::cliff:
         case WallType::cave:
-                return gfx::TileId::cave_wall_top;
+                return gfx::TileId::wall_cave_top;
 
         case WallType::leng_monestary:
         case WallType::egypt:
-                return gfx::TileId::egypt_wall_top;
+                return gfx::TileId::wall_egypt_top;
         }
 
         ASSERT(false && "Failed to set top wall tile");

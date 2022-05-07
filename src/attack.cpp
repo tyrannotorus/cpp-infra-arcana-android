@@ -1263,7 +1263,7 @@ static void init_projectiles_gfx(ProjectileFireData& fire_data)
                 }
                 else if (projectile_character == '|')
                 {
-                        projectile_tile = gfx::TileId::projectile_std_vertical_bar;
+                        projectile_tile = gfx::TileId::projectile_std_vertical;
                 }
                 else if (projectile_character == '\\')
                 {
