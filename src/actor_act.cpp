@@ -236,9 +236,17 @@ static void player_act()
 
                 for (const P& d : dir_utils::g_dir_list_w_center)
                 {
-                        if (!map::g_seen.at(target + d))
+                        const P check_pos(target + d);
+
+                        if (!map::is_pos_inside_map(check_pos))
+                        {
+                                continue;
+                        }
+
+                        if (!map::g_seen.at(check_pos))
                         {
                                 is_target_adj_to_unseen_cell = true;
+
                                 break;
                         }
                 }

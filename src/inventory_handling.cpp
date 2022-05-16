@@ -137,6 +137,91 @@ static void activate(const size_t backpack_idx)
         }
 }
 
+static void on_body_slot_item_selected()
+{
+        if (map::g_player->m_properties.has(PropId::burning))
+        {
+                msg_log::add("Not while burning.");
+
+                return;
+        }
+
+        map::g_player->m_remove_armor_countdown = s_nr_turns_to_handle_armor;
+
+        game_time::tick();
+}
+
+static void on_equipable_backpack_item_selected(const size_t backpack_idx)
+{
+        auto& inv = map::g_player->m_inv;
+        auto* const item_to_equip = inv.m_backpack[backpack_idx];
+        const auto item_type = item_to_equip->data().type;
+
+        switch (item_type)
+        {
+        case ItemType::melee_wpn:
+        case ItemType::ranged_wpn:
+        {
+                if (inv.has_item_in_slot(SlotId::wpn))
+                {
+                        inv.unequip_slot(SlotId::wpn);
+
+                        map::g_player->m_item_equipping = item_to_equip;
+                }
+                else
+                {
+                        inv.equip_backpack_item(backpack_idx, SlotId::wpn);
+                }
+        }
+        break;
+
+        case ItemType::head_wear:
+        {
+                if (inv.has_item_in_slot(SlotId::head))
+                {
+                        inv.unequip_slot(SlotId::head);
+
+                        map::g_player->m_item_equipping = item_to_equip;
+                }
+                else
+                {
+                        inv.equip_backpack_item(backpack_idx, SlotId::head);
+                }
+        }
+        break;
+
+        case ItemType::armor:
+        {
+                if (map::g_player->m_properties.has(PropId::burning))
+                {
+                        msg_log::add("Not while burning.");
+
+                        return;
+                }
+
+                if (inv.has_item_in_slot(SlotId::body))
+                {
+                        map::g_player->m_remove_armor_countdown =
+                                s_nr_turns_to_handle_armor;
+                }
+
+                map::g_player->m_item_equipping = item_to_equip;
+
+                map::g_player->m_equip_armor_countdown =
+                        s_nr_turns_to_handle_armor;
+        }
+        break;
+
+        default:
+        {
+                ASSERT(false);
+        }
+        break;
+        }
+
+        game_time::tick();
+}
+
 // -----------------------------------------------------------------------------
 // Abstract inventory screen state
 // -----------------------------------------------------------------------------
@@ -851,9 +936,9 @@ void BrowseInv::update()
                         else
                         {
                                 inv.unequip_slot(slot.id);
-                        }
 
-                        game_time::tick();
+                                game_time::tick();
+                        }
 
                         return;
                 }
@@ -901,90 +986,6 @@ void BrowseInv::update()
         default:
                 break;
         }
-}
-
-void BrowseInv::on_body_slot_item_selected() const
-{
-        if (map::g_player->m_properties.has(PropId::burning))
-        {
-                msg_log::add("Not while burning.");
-
-                return;
-        }
-
-        map::g_player->m_remove_armor_countdown = s_nr_turns_to_handle_armor;
-}
-
-void BrowseInv::on_equipable_backpack_item_selected(
-        const size_t backpack_idx) const
-{
-        auto& inv = map::g_player->m_inv;
-        auto* const item_to_equip = inv.m_backpack[backpack_idx];
-        const auto item_type = item_to_equip->data().type;
-
-        switch (item_type)
-        {
-        case ItemType::melee_wpn:
-        case ItemType::ranged_wpn:
-        {
-                if (inv.has_item_in_slot(SlotId::wpn))
-                {
-                        inv.unequip_slot(SlotId::wpn);
-
-                        map::g_player->m_item_equipping = item_to_equip;
-                }
-                else
-                {
-                        inv.equip_backpack_item(backpack_idx, SlotId::wpn);
-                }
-        }
-        break;
-
-        case ItemType::head_wear:
-        {
-                if (inv.has_item_in_slot(SlotId::head))
-                {
-                        inv.unequip_slot(SlotId::head);
-
-                        map::g_player->m_item_equipping = item_to_equip;
-                }
-                else
-                {
-                        inv.equip_backpack_item(backpack_idx, SlotId::head);
-                }
-        }
-        break;
-
-        case ItemType::armor:
-        {
-                if (map::g_player->m_properties.has(PropId::burning))
-                {
-                        msg_log::add("Not while burning.");
-
-                        return;
-                }
-
-                if (inv.has_item_in_slot(SlotId::body))
-                {
-                        map::g_player->m_remove_armor_countdown =
-                                s_nr_turns_to_handle_armor;
-                }
-
-                map::g_player->m_item_equipping = item_to_equip;
-
-                map::g_player->m_equip_armor_countdown =
-                        s_nr_turns_to_handle_armor;
-        }
-        break;
-
-        default:
-        {
-                ASSERT(false);
-        }
-        break;
-        }
-
-        game_time::tick();
 }
 
 // -----------------------------------------------------------------------------

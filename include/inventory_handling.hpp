@@ -103,12 +103,6 @@ public:
         void draw() override;
 
         void update() override;
-
-private:
-        void on_body_slot_item_selected() const;
-
-        void on_equipable_backpack_item_selected(
-                size_t backpack_idx) const;
 };
 
 class Apply : public InvState
