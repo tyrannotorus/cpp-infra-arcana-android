@@ -18,6 +18,7 @@
 #include "actor_player.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "draw_blast.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
 #include "insanity.hpp"
@@ -426,7 +427,7 @@ void EventSnakeEmerge::on_new_turn()
                         MsgInterruptPlayer::yes,
                         MorePromptOnMsg::yes);
 
-                io::draw_blast_at_cells(seen_tgt_positions, colors::magenta());
+                draw_blast_at_cells(seen_tgt_positions, colors::magenta());
 
                 const double shock_value =
                         insanity::has_sympt(InsSymptId::phobia_reptile_and_amph)

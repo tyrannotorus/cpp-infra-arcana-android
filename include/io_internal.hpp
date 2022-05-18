@@ -42,6 +42,8 @@ extern SDL_Texture* g_logo_texture;
 extern P g_rendering_px_offset;
 
 void init_input();
+void init_animation();
+bool step_graphics_cycling();
 
 Color read_px_on_surface(const SDL_Surface& surface, const P& px_pos);
 

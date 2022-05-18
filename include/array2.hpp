@@ -316,6 +316,11 @@ public:
                 return pos_to_idx({x, y});
         }
 
+        P idx_to_pos(const size_t idx)
+        {
+                return {(int)idx / m_dims.y, (int)idx % m_dims.y};
+        }
+
 private:
         T& get_element_ref(const P& p) const
         {

@@ -189,22 +189,13 @@ void draw_rectangle_filled(
         const Color& color,
         uint8_t alpha = SDL_ALPHA_OPAQUE);
 
-void draw_blast_at_cells(
-        const std::vector<P>& positions,
-        const Color& color);
-
-void draw_blast_at_seen_cells(
-        const std::vector<P>& positions,
-        const Color& color);
-
-void draw_blast_at_seen_actors(
-        const std::vector<actor::Actor*>& actors,
-        const Color& color);
-
 void draw_logo();
 
 // Draws a description "box" for items, spells, etc. The parameter lines may be
 // empty, in which case an empty area is drawn.
+//
+// TODO: This does not belong in the io namespace (too high level).
+//
 void draw_descr_box(const std::vector<ColoredString>& lines);
 
 std::string sdl_pref_dir();

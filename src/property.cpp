@@ -28,6 +28,7 @@
 #include "common_text.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "draw_blast.hpp"
 #include "explosion.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
@@ -777,7 +778,7 @@ void PropShapeshifts::shapeshift(const Verbose verbose) const
         {
                 msg_log::add("It changes shape!");
 
-                io::draw_blast_at_cells({m_owner->m_pos}, colors::yellow());
+                draw_blast_at_cells({m_owner->m_pos}, colors::yellow());
         }
 
         m_owner->m_state = ActorState::destroyed;
@@ -2962,7 +2963,7 @@ void PropVomitsOoze::on_std_turn()
                         spawned_mon->m_properties.apply(prop_waiting);
                 });
 
-        io::draw_blast_at_seen_actors(spawned.monsters, colors::white());
+        draw_blast_at_seen_actors(spawned.monsters, colors::white());
 
         map::update_vision();
 
@@ -3069,7 +3070,7 @@ void PropAuraOfDecay::run_effect_on_actors() const
 
                 if (m_allow_instant_kill && rnd::percent(2))
                 {
-                        io::draw_blast_at_seen_actors(
+                        draw_blast_at_seen_actors(
                                 {actor},
                                 colors::light_red());
 

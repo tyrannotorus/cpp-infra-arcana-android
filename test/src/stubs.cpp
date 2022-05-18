@@ -163,7 +163,7 @@ void cover_area(
 
 void draw_rectangle(R, const Color&) {}
 
-void draw_rectangle_filled(R, const Color&) {}
+void draw_rectangle_filled(R, const Color&, const uint8_t) {}
 
 void TileDrawObj::draw() const {}
 

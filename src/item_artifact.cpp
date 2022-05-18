@@ -18,6 +18,7 @@
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "debug.hpp"
+#include "draw_blast.hpp"
 #include "fov.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
@@ -668,7 +669,7 @@ void ShadowDagger::hit_radiant_creature(actor::Actor& actor) const
 
                 msg_log::add(actor_name + " is assailed by dark energy.");
 
-                io::draw_blast_at_seen_actors({&actor}, colors::gray());
+                draw_blast_at_seen_actors({&actor}, colors::gray());
         }
 
         const int dmg = rnd::range(1, 4);

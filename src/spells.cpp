@@ -31,6 +31,7 @@
 #include "config.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "draw_blast.hpp"
 #include "drop.hpp"
 #include "explosion.hpp"
 #include "flood.hpp"
@@ -1344,7 +1345,7 @@ void Spell::on_resist(actor::Actor& target) const
                         audio::play(audio::SfxId::spell_shield_break);
                 }
 
-                io::draw_blast_at_cells({target.m_pos}, colors::white());
+                draw_blast_at_cells({target.m_pos}, colors::white());
         }
 
         // End spell resistance if not a natural property.
@@ -1742,7 +1743,7 @@ void SpellBolt::run_effect(
 
         if (player_see_tgt || player_see_cell)
         {
-                io::draw_blast_at_cells({target->m_pos}, colors::magenta());
+                draw_blast_at_cells({target->m_pos}, colors::magenta());
 
                 Color msg_clr = colors::msg_good();
 
@@ -2036,7 +2037,7 @@ void SpellAzaGaze::run_effect(
                 snd.run();
         }
 
-        io::draw_blast_at_seen_actors(seen_targets, colors::light_red());
+        draw_blast_at_seen_actors(seen_targets, colors::light_red());
 
         for (auto* const target : seen_targets)
         {
@@ -3030,7 +3031,7 @@ void SpellPurge::run_effect(
                 {
                         if (map::g_seen.at(p))
                         {
-                                io::draw_blast_at_cells(
+                                draw_blast_at_cells(
                                         {p},
                                         colors::light_white());
                         }
@@ -3067,7 +3068,7 @@ void SpellPurge::run_effect(
                                 name + " is struck.",
                                 colors::msg_good());
 
-                        io::draw_blast_at_cells(
+                        draw_blast_at_cells(
                                 {actor->m_pos},
                                 colors::light_white());
                 }
@@ -4058,7 +4059,7 @@ void SpellCurse::run_effect(
                 targets = seen_targets;
         }
 
-        io::draw_blast_at_seen_actors(targets, colors::magenta());
+        draw_blast_at_seen_actors(targets, colors::magenta());
 
         for (auto* const target : targets)
         {
@@ -4183,7 +4184,7 @@ void SpellEnfeeble::run_effect(
                 targets = seen_targets;
         }
 
-        io::draw_blast_at_seen_actors(targets, colors::magenta());
+        draw_blast_at_seen_actors(targets, colors::magenta());
 
         for (auto* const target : targets)
         {
@@ -4326,7 +4327,7 @@ void SpellSlow::run_effect(
                 targets = seen_targets;
         }
 
-        io::draw_blast_at_seen_actors(targets, colors::magenta());
+        draw_blast_at_seen_actors(targets, colors::magenta());
 
         for (auto* const target : targets)
         {
@@ -4475,7 +4476,7 @@ void SpellTerrify::run_effect(
                 targets = seen_targets;
         }
 
-        io::draw_blast_at_seen_actors(targets, colors::magenta());
+        draw_blast_at_seen_actors(targets, colors::magenta());
 
         for (auto* const target : targets)
         {

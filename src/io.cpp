@@ -504,6 +504,7 @@ void init()
         }
 
         init_input();
+        init_animation();
 
         TRACE_FUNC_END;
 }

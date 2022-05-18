@@ -24,6 +24,7 @@
 #include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "draw_blast.hpp"
 #include "drop.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
@@ -72,7 +73,7 @@ static void collide_potion_on_terrain(item::Item& item, const P& pos)
 {
         const auto hit_color = item.color();
 
-        io::draw_blast_at_seen_cells({pos}, hit_color);
+        draw_blast_at_seen_cells({pos}, hit_color);
 
         auto& potion = static_cast<potion::Potion&>(item);
 
@@ -333,7 +334,7 @@ void throw_item(
                                                 ? item_color
                                                 : colors::light_red();
 
-                                        io::draw_blast_at_cells(
+                                        draw_blast_at_cells(
                                                 {pos},
                                                 hit_color);
                                 }

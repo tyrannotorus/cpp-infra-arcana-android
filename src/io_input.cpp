@@ -24,7 +24,6 @@
 // Private
 // -----------------------------------------------------------------------------
 static SDL_Event s_sdl_event;
-
 static io::InputData s_input;
 
 static bool s_is_done_reading_input = false;
@@ -32,15 +31,6 @@ static bool s_is_window_resized = false;
 
 static const uint32_t s_window_resize_draw_delay_ms = 400;
 static uint32_t s_last_window_resize_ms = 0;
-
-// TODO: Most of the rendering stuff probably doesn't belong in this file, move
-// it somewhere else.
-static bool s_is_redraw_needed = false;
-
-static const size_t nr_graphics_cycle_types = (size_t)io::GraphicsCycle::END;
-static std::uint32_t s_graphics_cycle_delay_ms[nr_graphics_cycle_types];
-static std::uint32_t s_last_graphics_cycle_ms[nr_graphics_cycle_types];
-static int s_graphics_cycle_nr[nr_graphics_cycle_types];
 
 static void update_input_mod_key_status()
 {
@@ -79,37 +69,6 @@ static void window_resized_delayed_draw()
                 states::draw();
                 io::update_screen();
                 s_last_window_resize_ms = 0;
-        }
-}
-
-static void step_graphics_cycling()
-{
-        // Do not cycle graphics if window has been resized recently.
-        if (s_last_window_resize_ms != 0)
-        {
-                return;
-        }
-
-        const auto current_time_ms = SDL_GetTicks();
-
-        for (size_t i = 0; i < (size_t)io::GraphicsCycle::END; ++i)
-        {
-                const auto d = current_time_ms - s_last_graphics_cycle_ms[i];
-
-                if (d < s_graphics_cycle_delay_ms[i])
-                {
-                        continue;
-                }
-
-                s_last_graphics_cycle_ms[i] = current_time_ms;
-
-                const auto cycle = (io::GraphicsCycle)i;
-
-                states::cycle_graphics(cycle);
-
-                ++s_graphics_cycle_nr[i];
-
-                s_is_redraw_needed = true;
         }
 }
 
@@ -448,48 +407,6 @@ namespace io
 {
 void init_input()
 {
-        s_is_redraw_needed = false;
-
-        for (size_t i = 0; i < (size_t)GraphicsCycle::END; ++i)
-        {
-                auto& delay = s_graphics_cycle_delay_ms[i];
-
-                const auto cycle = (GraphicsCycle)i;
-
-                switch (cycle)
-                {
-                case GraphicsCycle::fast:
-                        delay = 350;
-                        break;
-
-                case GraphicsCycle::slow:
-                        delay = 800;
-                        break;
-
-                case GraphicsCycle::very_slow:
-                        delay = 1400;
-                        break;
-
-                case GraphicsCycle::END:
-                        ASSERT(false);
-                        break;
-                }
-
-                s_last_graphics_cycle_ms[i] = 0;
-                s_graphics_cycle_nr[i] = 0;
-        }
-}
-
-int graphics_cycle_nr(const GraphicsCycle cycle_type)
-{
-        if (cycle_type == GraphicsCycle::END)
-        {
-                ASSERT(false);
-
-                return 0;
-        }
-
-        return s_graphics_cycle_nr[(size_t)cycle_type];
 }
 
 void flush_input()
@@ -522,11 +439,15 @@ InputData get()
                         window_resized_delayed_draw();
                 }
 
-                s_is_redraw_needed = false;
+                bool is_redraw_needed = false;
 
-                step_graphics_cycling();
+                // Do not cycle graphics if window has been resized recently.
+                if (s_last_window_resize_ms == 0)
+                {
+                        is_redraw_needed = step_graphics_cycling();
+                }
 
-                if (s_is_redraw_needed)
+                if (is_redraw_needed)
                 {
                         io::clear_screen();
                         states::draw();

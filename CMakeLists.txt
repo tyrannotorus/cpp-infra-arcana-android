@@ -50,6 +50,7 @@ set(COMMON_SRC
         include/disarm.hpp
         include/draw_box.hpp
         include/draw_map.hpp
+        include/draw_blast.hpp
         include/drop.hpp
         include/explosion.hpp
         include/flood.hpp
@@ -182,6 +183,7 @@ set(COMMON_SRC
         src/direction.cpp
         src/disarm.cpp
         src/draw_box.cpp
+        src/draw_blast.cpp
         src/draw_map.cpp
         src/drop.cpp
         src/explosion.cpp
@@ -297,9 +299,10 @@ SET(SRC
 
         src/audio.cpp
         src/io.cpp
+        src/io_animation.cpp
         src/io_coordinates.cpp
+        src/io_draw_obj.cpp
         src/io_input.cpp
-        src/io_misc_utils.cpp
         src/io_primitives.cpp
         src/io_px_manip.cpp
         src/io_text.cpp

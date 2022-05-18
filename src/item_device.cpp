@@ -21,10 +21,10 @@
 #include "audio_data.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "draw_blast.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "inventory.hpp"
-#include "io.hpp"
 #include "item_data.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -402,7 +402,7 @@ ConsumeItem Translocator::run_effect()
                                 text_format::first_to_upper(actor->name_the()) +
                                 " is teleported.");
 
-                        io::draw_blast_at_cells(
+                        draw_blast_at_cells(
                                 std::vector<P> {actor->m_pos},
                                 colors::yellow());
 
