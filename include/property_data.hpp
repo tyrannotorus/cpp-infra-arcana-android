@@ -48,6 +48,7 @@ enum class PropId
         darkvision,
         poisoned,
         paralyzed,
+        delayed_by_liquid,  // Delayed for a turn due to bumping liquid terrain
         terrified,
         confused,
         hallucinating,

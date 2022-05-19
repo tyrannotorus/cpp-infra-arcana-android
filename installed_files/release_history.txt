@@ -19,6 +19,8 @@
 ##############################
 # Fixes
 ##############################
+* Attacking a monster that is delayed by moving into liquid no longer allows them to act immediately.
+
 
 ============================================================
 = v21.0.1 (April 7, 2022)

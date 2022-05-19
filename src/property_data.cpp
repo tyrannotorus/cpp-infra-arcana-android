@@ -419,6 +419,12 @@ static void init_data_list()
         d.alignment = PropAlignment::bad;
         add(d);
 
+        d.id = PropId::delayed_by_liquid;
+        d.std_rnd_turns = Range(1, 1);
+        d.allow_display_turns = false;
+        d.alignment = PropAlignment::neutral;
+        add(d);
+
         d.id = PropId::terrified;
         d.std_rnd_turns = Range(20, 30);
         d.name = "Terrified";

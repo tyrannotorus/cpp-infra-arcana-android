@@ -1607,7 +1607,7 @@ void Liquid::bump(actor::Actor& actor_bumping)
         }
 
         actor_bumping.m_properties.apply(
-                property_factory::make(PropId::waiting));
+                property_factory::make(PropId::delayed_by_liquid));
 
         if (actor::is_player(&actor_bumping))
         {

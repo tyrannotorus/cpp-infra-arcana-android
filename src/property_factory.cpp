@@ -35,6 +35,9 @@ Prop* make(const PropId id)
         case PropId::paralyzed:
                 return new PropParalyzed();
 
+        case PropId::delayed_by_liquid:
+                return new PropDelayedByLiquid();
+
         case PropId::terrified:
                 return new PropTerrified();
 

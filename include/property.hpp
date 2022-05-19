@@ -982,6 +982,35 @@ public:
         }
 };
 
+class PropDelayedByLiquid : public Prop
+{
+public:
+        PropDelayedByLiquid() :
+                Prop(PropId::delayed_by_liquid) {}
+
+        bool allow_move() const override
+        {
+                return false;
+        }
+
+        bool allow_act() const override
+        {
+                return false;
+        }
+
+        bool allow_attack_melee(const Verbose verbose) const override
+        {
+                (void)verbose;
+                return false;
+        }
+
+        bool allow_attack_ranged(const Verbose verbose) const override
+        {
+                (void)verbose;
+                return false;
+        }
+};
+
 class PropDisabledAttack : public Prop
 {
 public:

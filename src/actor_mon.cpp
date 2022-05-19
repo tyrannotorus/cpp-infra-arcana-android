@@ -354,10 +354,11 @@ void Mon::become_aware_player(const AwareSource source, const int factor)
 
         if (!do_reaction_time)
         {
-                // Becoming aware without reaction time also ends waiting
-                // (prevents leaving the monster in a waiting state if for
-                // example an attack made a sound which alerted the monster
-                // before the attack itself alerted it).
+                // No reaction time - clear any waiting status. The monster may
+                // for example have become aware through an attack sound before
+                // the actual attack is executed, which would apply a waiting
+                // status (as becoming aware by hearing sounds do), but if the
+                // monster is attacked we want it to act immediately.
                 m_properties.end_prop(PropId::waiting);
         }
 

@@ -1926,7 +1926,7 @@ void melee(
 {
         if (attacker && !actor::is_player(attacker))
         {
-                // A monster attacked, bump monster awareness
+                // A monster attacked, bump monster awareness.
                 auto* const attacker_mon = static_cast<actor::Mon*>(attacker);
 
                 attacker_mon->become_aware_player(actor::AwareSource::other);
@@ -1983,7 +1983,7 @@ void melee(
                         defender,
                         att_data);
 
-                // Attacking ends cloaking and sanctuary
+                // Attacking ends cloaking and sanctuary.
                 attacker->m_properties.end_prop(PropId::cloaked);
                 attacker->m_properties.end_prop(PropId::sanctuary);
 
@@ -2037,7 +2037,7 @@ DidAction ranged(
 
         if ((did_attack == DidAction::yes) && attacker)
         {
-                // Attacking ends cloaking and sanctuary
+                // Attacking ends cloaking and sanctuary.
                 attacker->m_properties.end_prop(PropId::cloaked);
                 attacker->m_properties.end_prop(PropId::sanctuary);
 
@@ -2045,7 +2045,7 @@ DidAction ranged(
                     attacker->is_actor_my_leader(map::g_player))
                 {
                         // Attacker is player, or a monster allied to the
-                        // player, alert all encountered monsters
+                        // player, alert all encountered monsters.
                         for (auto* const actor : projectile_data.actors_seen)
                         {
                                 if (actor::is_player(actor))
@@ -2061,7 +2061,7 @@ DidAction ranged(
 
                 if (!actor::is_player(attacker))
                 {
-                        // A monster attacked, bump its awareness
+                        // A monster attacked, bump its awareness.
                         static_cast<actor::Mon*>(attacker)
                                 ->become_aware_player(
                                         actor::AwareSource::other);
