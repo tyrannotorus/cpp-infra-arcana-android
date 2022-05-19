@@ -24,11 +24,11 @@ ttttttttttttttttttttttttttttttttttttttttttttttttttt
 ttttttttttttttttttttttttttttttttttttttttttttttttttt
 tttttttttt,,,,,,,,ttttttttttttttttttttttttttttttttt
 ttttttt,,,,,,,,,,,,ttt,tttttttttttttttttttttttttttt
-ttttt,,,,,~~.,,,~,,,,,,ttttttt,,ttttttttttttttttttt
-tttttt,,~.,,,,,,~..,,t,ttttt,,,,,,t,,ttt,,ttttttttt
-ttttt,,,.~~,,,,,,,~,,,,tt,tttt,,,________,,,ttttttt
-ttt,,,,,,,,,~~.~,,,,,,tt,,,t,,,___________,,,,,,ttt
-ttt,,,,,,,,~.~,,,,,,,,t,,,,,,_____######____,,ttttt
+ttttt,,,,,~~,,,,~,,,,,,ttttttt,,ttttttttttttttttttt
+tttttt,,~,,,,,,,~,,,,t,ttttt,,,,,,t,,ttt,,ttttttttt
+ttttt,,,,~~,,,,,,,~,,,,tt,tttt,,,________,,,ttttttt
+ttt,,,,,,,,,~~,~,,,,,,tt,,,t,,,___________,,,,,,ttt
+ttt,,,,,,,,~,~,,,,,,,,t,,,,,,_____######____,,ttttt
 ttt,,,,,,,,,,,,,,,,,______________#....#_____,,,,tt
 tttt,,,,,,t,,,,t,,,_____________###....###____,,,tt
 ttttt,,t,,,,,,#,,#,__#####_#__#_###....###______,,t
