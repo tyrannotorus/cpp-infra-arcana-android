@@ -43,16 +43,14 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<actor::Speed> s_turn_type_vector;
-
 // Smallest number divisible by both 2 (200% speed) and 3 (300% speed)
 static const int s_ticks_per_turn = 6;
 
 static size_t s_current_actor_idx = 0;
 
-static int s_turn_nr = 0;
-
 static int s_std_turn_delay = s_ticks_per_turn;
+
+static int s_turn_nr = 0;
 
 static int speed_to_pct(const actor::Speed speed)
 {
@@ -315,8 +313,6 @@ static void set_actor_max_delay(actor::Actor& actor)
 
         int delay_to_set = (s_ticks_per_turn * 100) / speed_pct;
 
-        // Make sure the delay is at least 1, to never give an actor
-        // infinite number of actions
         delay_to_set = std::max(1, delay_to_set);
 
         actor.m_delay = delay_to_set;
@@ -495,16 +491,18 @@ void tick()
 
         g_is_player_acting = false;
 
-        auto* actor = current_actor();
-
-        if (actor::is_player(actor))
         {
-                msg_log::newline();
+                auto* actor = current_actor();
+
+                if (actor::is_player(actor))
+                {
+                        msg_log::newline();
+                }
+
+                set_actor_max_delay(*actor);
+
+                actor->m_properties.on_turn_end();
         }
-
-        set_actor_max_delay(*actor);
-
-        actor->m_properties.on_turn_end();
 
         // Find next actor who can act
         while (true)
@@ -518,64 +516,59 @@ void tick()
 
                 if (s_current_actor_idx == g_actors.size())
                 {
+                        --s_std_turn_delay;
+
                         // New standard turn?
                         if (s_std_turn_delay == 0)
                         {
                                 // Increment the turn counter, and run standard
-                                // turn events
+                                // turn events.
+                                //
                                 // NOTE: This will prune destroyed actors, which
                                 // will decrease the actor vector size.
+                                //
                                 run_std_turn_events();
 
                                 s_std_turn_delay = s_ticks_per_turn;
-                        }
-                        else
-                        {
-                                --s_std_turn_delay;
                         }
 
                         s_current_actor_idx = 0;
                 }
 
-                actor = current_actor();
+                actor::Actor* const actor = current_actor();
 
-                if (actor->m_delay == 0)
+                --actor->m_delay;
+
+                if (actor->m_delay <= 0)
                 {
-                        // Actor is ready to go
+                        // This actor is ready to go.
                         break;
-                }
-                else
-                {
-                        // Actor is still waiting
-                        --actor->m_delay;
                 }
         }
 
         run_atomic_turn_events();
 
-        auto* const next_actor = current_actor();
+        auto* const actor = current_actor();
 
         // Clear flag that this actor is opening a door
-        if (map::rect().is_pos_inside(next_actor->m_opening_door_pos))
+        if (map::rect().is_pos_inside(actor->m_opening_door_pos))
         {
-                auto* const t =
-                        map::g_terrain.at(
-                                next_actor->m_opening_door_pos);
+                auto* const t = map::g_terrain.at(actor->m_opening_door_pos);
 
                 if (t->id() == terrain::Id::door)
                 {
                         auto* const door = static_cast<terrain::Door*>(t);
 
-                        if (door->actor_currently_opening() == next_actor)
+                        if (door->actor_currently_opening() == actor)
                         {
                                 door->clear_actor_currently_opening();
                         }
 
-                        next_actor->m_opening_door_pos = {-1, -1};
+                        actor->m_opening_door_pos = {-1, -1};
                 }
         }
 
-        actor::start_turn(*next_actor);
+        actor::start_turn(*actor);
 }
 
 actor::Actor* current_actor()
@@ -583,8 +576,6 @@ actor::Actor* current_actor()
         ASSERT(s_current_actor_idx < g_actors.size());
 
         auto* const actor = g_actors[s_current_actor_idx];
-
-        ASSERT(actor->m_delay >= 0);
 
         ASSERT(map::is_pos_inside_map(actor->m_pos));
 
