@@ -35,7 +35,6 @@ enum class TileId
         bog_tcher,
         bookshelf_empty,
         bookshelf_full,
-        brain,
         brazier,
         bush,
         byakhee,
