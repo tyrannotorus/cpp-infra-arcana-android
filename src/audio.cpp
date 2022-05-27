@@ -60,7 +60,7 @@ static void load(const audio::SfxId sfx, const std::string& filename)
                 return;
         }
 
-        // Read events, so that we don't freeze the game while we loading sounds
+        // Read events, so that we don't freeze the game while we load sounds
         SDL_PumpEvents();
 
         const std::string file_rel_path = paths::audio_dir() + filename;
@@ -103,7 +103,7 @@ static std::string get_audio_str(const audio::SfxId id)
 
 static void load_audio_id(
         const audio::SfxId id,
-        const std::string& filename_prefix)
+        const std::string& filename_prefix = "")
 {
         const std::string id_str = get_audio_str(id);
 
@@ -135,8 +135,7 @@ static void load_ambient_sounds()
         {
                 const auto id = (audio::SfxId)i;
 
-                // No prefix
-                load_audio_id(id, "");
+                load_audio_id(id);
         }
 }
 
@@ -174,26 +173,6 @@ static int find_free_channel(
 
         // Failed to find free channel
         return -1;
-}
-
-static std::string ambient_sfx_filename(const audio::SfxId sfx)
-{
-        const int amb_nr = (int)sfx - (int)audio::SfxId::AMB_START;
-
-        std::string padding_str;
-
-        if (amb_nr < 10)
-        {
-                padding_str = "00";
-        }
-        else if (amb_nr < 100)
-        {
-                padding_str = "0";
-        }
-
-        const std::string idx_str = std::to_string(amb_nr);
-
-        return "amb_" + padding_str + idx_str + ".ogg";
 }
 
 static bool is_loaded(const audio::SfxId id)
@@ -372,7 +351,7 @@ void play(const SfxId sfx, int vol_pct_tot, const int vol_pct_l)
 
         if (is_amb && !is_loaded(sfx))
         {
-                load(sfx, ambient_sfx_filename(sfx));
+                load_audio_id(sfx);
         }
 
         int from_channel = 0;
