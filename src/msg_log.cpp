@@ -761,7 +761,7 @@ void MsgHistoryState::update()
 
         const int history_size = (int)m_history.size();
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const int panel_h = panels::h(Panel::info_screen_content);
 

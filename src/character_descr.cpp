@@ -353,7 +353,7 @@ void CharacterDescr::update()
         const int line_jump = 3;
         const int nr_lines_tot = m_lines.size();
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         switch (input.key)
         {

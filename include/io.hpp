@@ -8,11 +8,10 @@
 #define IO_HPP
 
 #include <cstdint>
-#include <ctime>
-#include <optional>
 #include <string>
 #include <vector>
 
+#include "SDL_pixels.h"
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "panel.hpp"
@@ -182,9 +181,16 @@ void cover_area(
         const P& dims,
         const Color& color = colors::black());
 
-void draw_rectangle(R px_rect, const Color& color);
+void draw_rectangle(
+        R px_rect,
+        const Color& color);
 
 void draw_rectangle_filled(
+        R px_rect,
+        const Color& color,
+        uint8_t alpha = SDL_ALPHA_OPAQUE);
+
+void draw_rectangle_filled_mod_blending(
         R px_rect,
         const Color& color,
         uint8_t alpha = SDL_ALPHA_OPAQUE);
@@ -198,13 +204,22 @@ void draw_logo();
 //
 void draw_descr_box(const std::vector<ColoredString>& lines);
 
+// Run a flash animation at actor.
+void flash_at_actor(const actor::Actor& actor, const Color& color);
+
+// Draw all currently active flash animations.
+void draw_flash_animations();
+
+// Clear all ongoing flash animations (e.g. when viewport changes).
+void clear_all_flash_animations();
+
 std::string sdl_pref_dir();
 
 void sleep(uint32_t duration);
 
 void flush_input();
 
-InputData get();
+InputData read_input();
 
 }  // namespace io
 

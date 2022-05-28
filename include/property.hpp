@@ -18,6 +18,7 @@
 #include "global.hpp"
 #include "item.hpp"
 #include "property_data.hpp"
+#include "random.hpp"
 
 namespace actor
 {
@@ -1354,10 +1355,7 @@ public:
                 return m_extra_dmg;
         }
 
-        void raise_extra_damage_to(const int dmg)
-        {
-                m_extra_dmg = std::max(dmg, m_extra_dmg);
-        }
+        void raise_extra_damage_to(int dmg);
 
 private:
         int m_extra_dmg {0};

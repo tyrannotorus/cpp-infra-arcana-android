@@ -78,7 +78,7 @@ void PostmortemInfo::update()
 
         const int nr_lines = m_lines.size();
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         switch (input.key)
         {

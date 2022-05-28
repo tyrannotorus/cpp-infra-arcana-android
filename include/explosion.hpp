@@ -7,11 +7,10 @@
 #ifndef EXPLOSION_HPP
 #define EXPLOSION_HPP
 
-#include <optional>
-#include <vector>
-
 #include "colors.hpp"
 #include "rect.hpp"
+#include <optional>
+#include <vector>
 
 class Prop;
 struct P;

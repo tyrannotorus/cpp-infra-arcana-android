@@ -695,7 +695,7 @@ void ViewActorDescr::draw()
 
 void ViewActorDescr::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         switch (input.key)
         {

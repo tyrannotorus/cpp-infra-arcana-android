@@ -47,7 +47,7 @@ void wait_for_key_press()
         {
                 io::update_screen();
 
-                io::get();
+                io::read_input();
         }
 }
 
@@ -66,7 +66,7 @@ BinaryAnswer yes_or_no(
 
         while (true)
         {
-                input = io::get();
+                input = io::read_input();
 
                 const bool is_special_key_pressed =
                         key_for_special_event.has_value() &&
@@ -116,7 +116,7 @@ io::InputData letter(const bool accept_enter)
 
         while (true)
         {
-                input = io::get();
+                input = io::read_input();
 
                 if ((accept_enter && (input.key == SDLK_RETURN)) ||
                     (input.key == SDLK_ESCAPE) ||
@@ -175,7 +175,7 @@ void wait_for_msg_more()
                 // Only some keys confirm more prompts
                 while (true)
                 {
-                        const auto input = io::get();
+                        const auto input = io::read_input();
 
                         if ((input.key == SDLK_SPACE) ||
                             (input.key == SDLK_ESCAPE) ||
@@ -199,7 +199,7 @@ void wait_for_confirm()
 
         while (true)
         {
-                const auto input = io::get();
+                const auto input = io::read_input();
 
                 if ((input.key == SDLK_SPACE) ||
                     (input.key == SDLK_ESCAPE) ||
@@ -221,7 +221,7 @@ Dir dir(const AllowCenter allow_center)
 
         while (true)
         {
-                const auto input = io::get();
+                const auto input = io::read_input();
 
                 const auto game_cmd = game_commands::to_cmd(input);
 

@@ -359,7 +359,7 @@ void MsgPopupState::update()
                 return;
         }
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         switch (input.key)
         {
@@ -575,7 +575,7 @@ void MenuPopupState::update()
                 return;
         }
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const auto action =
                 m_browser.read(
@@ -790,7 +790,7 @@ void NumberQueryPopupState::draw()
 
 void NumberQueryPopupState::update()
 {
-        auto input = io::get();
+        auto input = io::read_input();
 
         // Convert keypad keys to numbers.
         switch (input.key)

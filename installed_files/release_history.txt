@@ -12,6 +12,7 @@
 * 2x scaled graphics is now also possible in windowed mode.
 * Changed the tile set size to 20x0 (from 24x24), most of the tiles are simply cropped since they had a lot of redundant black space around them, and a few tiles have been slightly reworked.
 * Added a tiny 7x13 font, intended for use with 2x scaled graphics.
+* Added a red flashing animation when a creature is hit by a melee attack.
 * When the game asks for a number (e.g. number of items to drop) this is now done in a popup screen instead.
 * When entering text or numbers, the underscore cursor is blinking
 * The explosion area hint when aiming explosives is drawn as a blended overlay instead.

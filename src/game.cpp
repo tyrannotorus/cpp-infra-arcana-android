@@ -26,6 +26,7 @@
 #include "config.hpp"
 #include "create_character.hpp"
 #include "debug.hpp"
+#include "draw_health_bars.hpp"
 #include "draw_map.hpp"
 #include "game_over.hpp"
 #include "game_time.hpp"
@@ -514,6 +515,12 @@ void GameState::draw()
         map_mode_gui::draw();
 
         msg_log::draw();
+
+        // NOTE: This must be drawn BEFORE life bars and other such overlay
+        // graphics - otherwise the life bars will flash as well.
+        io::draw_flash_animations();
+
+        draw_health_bars();
 }
 
 void GameState::update()
@@ -656,7 +663,7 @@ void WinGameState::draw()
 
 void WinGameState::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         switch (input.key)
         {

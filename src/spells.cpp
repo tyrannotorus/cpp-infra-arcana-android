@@ -35,7 +35,6 @@
 #include "drop.hpp"
 #include "explosion.hpp"
 #include "flood.hpp"
-#include "game.hpp"
 #include "game_time.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
@@ -51,7 +50,6 @@
 #include "marker.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
-#include "panel.hpp"
 #include "pathfind.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
@@ -1113,14 +1111,6 @@ terrain::DidClose run_close_spell_effect_at(
 }
 
 }  // namespace spells
-
-// -----------------------------------------------------------------------------
-// BrowseSpell
-// -----------------------------------------------------------------------------
-StateId BrowseSpell::id() const
-{
-        return StateId::browse_spells;
-}
 
 // -----------------------------------------------------------------------------
 // Spell

@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -39,7 +40,6 @@
 #include "map.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
-#include "panel.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
 #include "property.hpp"
@@ -1946,6 +1946,11 @@ void melee(
 
         if (att_result >= ActionResult::success)
         {
+                if (actor::can_player_see_actor(defender))
+                {
+                        io::flash_at_actor(defender, colors::light_red());
+                }
+
                 melee_hit_actor(dmg, defender, attacker, attacker_origin, wpn);
         }
 

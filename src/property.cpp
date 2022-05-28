@@ -36,7 +36,6 @@
 #include "hints.hpp"
 #include "insanity.hpp"
 #include "inventory.hpp"
-#include "io.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
@@ -56,7 +55,6 @@
 #include "rect.hpp"
 #include "saving.hpp"
 #include "sound.hpp"
-#include "state.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
@@ -375,7 +373,7 @@ void PropEntangled::on_applied()
         // TODO: Rather than doing this on the "on_applied" hook (which should
         // probably be reserved for when the property actually does get applied,
         // i.e. it shall not be removed), consider checking this elsewhere,
-        // perhaps in a new function such as "is_resisting_self"
+        // perhaps in a new function such as "is_resisting"
         try_player_end_with_machete();
 }
 
@@ -2198,6 +2196,11 @@ PropEnded PropBurrowing::on_actor_turn()
         return PropEnded::no;
 }
 
+void PropLgtSens::raise_extra_damage_to(const int dmg)
+{
+        m_extra_dmg = std::max(dmg, m_extra_dmg);
+}
+
 PropActResult PropVortex::on_act()
 {
         if (actor::is_player(m_owner) || !m_owner->is_alive())
@@ -3414,12 +3417,6 @@ PropEnded PropMagicSearching::on_actor_turn()
                                 ->make_player_aware_of_me(det_mon_multiplier);
                 }
         }
-
-        states::draw();
-
-        map::g_player->update_fov();
-
-        states::draw();
 
         return PropEnded::no;
 }

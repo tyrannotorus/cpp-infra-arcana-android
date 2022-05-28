@@ -48,9 +48,10 @@ set(COMMON_SRC
         include/debug.hpp
         include/direction.hpp
         include/disarm.hpp
-        include/draw_box.hpp
-        include/draw_map.hpp
         include/draw_blast.hpp
+        include/draw_box.hpp
+        include/draw_health_bars.hpp
+        include/draw_map.hpp
         include/drop.hpp
         include/explosion.hpp
         include/flood.hpp
@@ -182,8 +183,9 @@ set(COMMON_SRC
         src/debug.cpp
         src/direction.cpp
         src/disarm.cpp
-        src/draw_box.cpp
         src/draw_blast.cpp
+        src/draw_box.cpp
+        src/draw_health_bars.cpp
         src/draw_map.cpp
         src/drop.cpp
         src/explosion.cpp

@@ -889,7 +889,7 @@ void BrowseInv::draw()
 
 void BrowseInv::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         if (input.key == 'i')
         {
@@ -1097,7 +1097,7 @@ void Apply::draw()
 
 void Apply::update()
 {
-        auto input = io::get();
+        auto input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(input, MenuInputMode::scrolling_and_letters);
@@ -1233,7 +1233,7 @@ void Drop::draw()
 
 void Drop::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(input, MenuInputMode::scrolling_and_letters);
@@ -1519,7 +1519,7 @@ void Equip::draw()
 
 void Equip::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         if (m_filtered_backpack_indexes.empty() ||
             (input.key == SDLK_SPACE) ||
@@ -1748,7 +1748,7 @@ void SelectThrow::draw()
 
 void SelectThrow::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(input, MenuInputMode::scrolling_and_letters);
@@ -2008,7 +2008,7 @@ void SelectIdentify::draw()
 
 void SelectIdentify::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(

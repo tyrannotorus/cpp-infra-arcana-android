@@ -4,11 +4,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+#include "io.hpp"
+
+#include <cstdint>
+
+#include "SDL_blendmode.h"
 #include "SDL_rect.h"
 #include "SDL_render.h"
 #include "colors.hpp"
 #include "config.hpp"
-#include "io.hpp"
 #include "io_internal.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
@@ -60,7 +64,10 @@ void draw_rectangle(R px_rect, const Color& color)
         }
 }
 
-void draw_rectangle_filled(R px_rect, const Color& color, const uint8_t alpha)
+void draw_rectangle_filled(
+        R px_rect,
+        const Color& color,
+        const uint8_t alpha)
 {
         if (config::is_2x_scale_enabled())
         {
@@ -83,6 +90,18 @@ void draw_rectangle_filled(R px_rect, const Color& color, const uint8_t alpha)
                 alpha);
 
         SDL_RenderFillRect(g_sdl_renderer, &rect);
+}
+
+void draw_rectangle_filled_mod_blending(
+        R px_rect,
+        const Color& color,
+        uint8_t alpha)
+{
+        SDL_SetRenderDrawBlendMode(io::g_sdl_renderer, SDL_BLENDMODE_MOD);
+
+        draw_rectangle_filled(px_rect, color, alpha);
+
+        SDL_SetRenderDrawBlendMode(io::g_sdl_renderer, SDL_BLENDMODE_BLEND);
 }
 
 }  // namespace io

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "audio.hpp"
+#include "audio_data.hpp"
 #include "browser.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
@@ -1209,7 +1210,7 @@ void ConfigState::update()
 
         m_browser.set_selection_audio_enabled(enable_selection_audio);
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(

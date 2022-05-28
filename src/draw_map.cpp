@@ -25,6 +25,7 @@
 #include "item.hpp"
 #include "item_data.hpp"
 #include "map.hpp"
+#include "misc.hpp"
 #include "panel.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
@@ -74,6 +75,23 @@ static void adapt_color_for_light_level(const size_t pos_idx, Color& color)
         else if (map::g_dark.at(pos_idx))
         {
                 adapt_color_for_dark_pos(color);
+        }
+}
+
+static void adapt_color_for_distance_to_player(const P& pos, Color& color)
+{
+        if (map::g_light.at(pos))
+        {
+                return;
+        }
+
+        const int dist = king_dist(pos, map::g_player->m_pos);
+
+        const int k = std::clamp(dist - 1, 0, 4);
+
+        if (k > 0)
+        {
+                color = color.shaded(k * 15);
         }
 }
 
@@ -135,6 +153,8 @@ static void draw_terrains()
                 }
 
                 adapt_color_for_light_level(i, draw_obj.color);
+
+                adapt_color_for_distance_to_player(t->pos(), draw_obj.color);
 
                 draw_obj.draw();
         }
@@ -390,93 +410,6 @@ static void draw_unseen_cells_from_player_memory()
         }
 }
 
-static int lifebar_length(const actor::Actor& actor)
-{
-        const int actor_hp = std::max(0, actor.m_hp);
-
-        const int actor_hp_max = actor::max_hp(actor);
-
-        if (actor_hp < actor_hp_max)
-        {
-                int hp_percent = (actor_hp * 100) / actor_hp_max;
-
-                return ((config::map_cell_px_w() - 2) * hp_percent) / 100;
-        }
-
-        return -1;
-}
-
-static void draw_life_bar(const actor::Actor& actor)
-{
-        const int length = lifebar_length(actor);
-
-        if (length < 0)
-        {
-                return;
-        }
-
-        const P map_pos = actor.m_pos.with_y_offset(1);
-
-        if (!viewport::is_in_view(map_pos))
-        {
-                return;
-        }
-
-        const P cell_dims(config::map_cell_px_w(), config::map_cell_px_h());
-
-        const int w_green = length;
-        const int w_bar_tot = cell_dims.x - 2;
-        const int w_red = w_bar_tot - w_green;
-
-        const auto view_pos = viewport::to_view_pos(map_pos);
-
-        P px_pos = io::map_to_px_coords(Panel::map, view_pos);
-
-        px_pos.y -= 2;
-
-        const int x0_green = px_pos.x + 1;
-        const int x0_red = x0_green + w_green;
-
-        if (w_green > 0)
-        {
-                const P px_p0_green(x0_green, px_pos.y);
-
-                const R px_rect_green(
-                        px_p0_green,
-                        px_p0_green + P(w_green, 2) - 1);
-
-                io::draw_rectangle_filled(
-                        px_rect_green,
-                        colors::light_green());
-        }
-
-        if (w_red > 0)
-        {
-                const P px_p0_red(x0_red, px_pos.y);
-
-                const R px_rect_red(
-                        px_p0_red,
-                        px_p0_red + P(w_red, 2) - 1);
-
-                io::draw_rectangle_filled(
-                        px_rect_red,
-                        colors::light_red());
-        }
-}
-
-static void draw_monster_life_bars()
-{
-        for (auto* actor : game_time::g_actors)
-        {
-                if (!actor::is_player(actor) &&
-                    actor->is_alive() &&
-                    can_player_see_actor(*actor))
-                {
-                        draw_life_bar(*actor);
-                }
-        }
-}
-
 static void draw_player_character()
 {
         const auto& player = *map::g_player;
@@ -524,8 +457,6 @@ static void draw_player_character()
         draw_obj.color_bg = color_bg;
 
         draw_obj.draw();
-
-        draw_life_bar(*map::g_player);
 }
 
 // -----------------------------------------------------------------------------
@@ -545,7 +476,6 @@ void run()
         draw_items();
         draw_mobiles();
         draw_living_monsters();
-        draw_monster_life_bars();
         draw_player_character();
 }
 

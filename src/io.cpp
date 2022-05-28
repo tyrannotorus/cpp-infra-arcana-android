@@ -8,15 +8,17 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
+#include <optional>
 #include <ostream>
 
 #include "SDL.h"
+#include "SDL_blendmode.h"
 #include "SDL_error.h"
 #include "SDL_events.h"
 #include "SDL_filesystem.h"
 #include "SDL_image.h"
 #include "SDL_mixer.h"
-#include "SDL_pixels.h"
 #include "SDL_rect.h"
 #include "SDL_render.h"
 #include "SDL_stdinc.h"
@@ -31,8 +33,6 @@
 #include "paths.hpp"
 #include "state.hpp"
 #include "version.hpp"
-
-struct SDL_Texture;
 
 // -----------------------------------------------------------------------------
 // Private

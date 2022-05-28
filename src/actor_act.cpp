@@ -345,7 +345,7 @@ static void player_act()
         else
         {
                 // Not bot playing
-                const auto input = io::get();
+                const auto input = io::read_input();
 
                 const auto game_cmd = game_commands::to_cmd(input);
 

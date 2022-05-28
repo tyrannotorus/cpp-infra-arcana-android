@@ -434,7 +434,7 @@ void BrowseHighscore::update()
                 return;
         }
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(
@@ -528,7 +528,7 @@ void BrowseHighscoreEntry::update()
 
         const int nr_lines_tot = m_lines.size();
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         switch (input.key)
         {

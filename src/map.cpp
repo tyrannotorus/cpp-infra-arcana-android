@@ -377,24 +377,17 @@ void reset(const P& dims)
 
         g_choke_point_data.clear();
 
-        // Occasionally set wall color to something unusual
-        if (rnd::one_in(3))
-        {
-                const std::vector<Color> wall_color_bucket = {
-                        colors::red(),
-                        colors::sepia(),
-                        colors::dark_sepia(),
-                        colors::dark_brown(),
-                        colors::gray_brown(),
-                };
+        const std::vector<Color> wall_color_bucket = {
+                colors::gray(),
+                colors::teal().shaded(25),
+                colors::red(),
+                colors::sepia(),
+                colors::dark_sepia(),
+                colors::dark_brown(),
+                colors::gray_brown(),
+        };
 
-                g_wall_color = rnd::element(wall_color_bucket);
-        }
-        else
-        {
-                // Standard wall color
-                g_wall_color = colors::gray();
-        }
+        g_wall_color = rnd::element(wall_color_bucket);
 }
 
 int w()

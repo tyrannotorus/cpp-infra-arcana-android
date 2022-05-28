@@ -441,7 +441,7 @@ void MainMenuState::update()
         else
 #endif  // NDEBUG
         {
-                const auto input = io::get();
+                const auto input = io::read_input();
 
                 action =
                         m_browser.read(

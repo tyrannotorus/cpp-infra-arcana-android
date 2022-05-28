@@ -62,6 +62,8 @@ void show(const P& map_pos, const ForceCentering force_centering)
 
         const auto centered_pos = map_pos - view_dims.scaled_down(2);
 
+        const P p0_before = s_p0;
+
         if (config::always_center_view_on_player() ||
             (force_centering == ForceCentering::yes))
         {
@@ -80,6 +82,11 @@ void show(const P& map_pos, const ForceCentering force_centering)
                 {
                         s_p0.y = centered_pos.y;
                 }
+        }
+
+        if (s_p0 != p0_before)
+        {
+                io::clear_all_flash_animations();
         }
 }
 

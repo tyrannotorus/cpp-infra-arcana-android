@@ -215,7 +215,7 @@ void BrowseManual::on_window_resized()
 
 void BrowseManual::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(
@@ -286,7 +286,7 @@ void BrowseManualPage::update()
 
         const int nr_lines_tot = m_page.lines.size();
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         switch (input.key)
         {

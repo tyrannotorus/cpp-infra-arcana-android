@@ -29,9 +29,7 @@ static void run_state_iteration()
         }
 
         io::clear_screen();
-
         states::draw();
-
         io::update_screen();
 
         states::update();

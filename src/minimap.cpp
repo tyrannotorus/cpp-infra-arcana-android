@@ -168,7 +168,7 @@ void ViewMinimap::draw()
 
 void ViewMinimap::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         switch (input.key)
         {

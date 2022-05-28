@@ -24,7 +24,6 @@
 #include "common_text.hpp"
 #include "config.hpp"
 #include "debug.hpp"
-#include "draw_map.hpp"
 #include "explosion.hpp"
 #include "game_commands.hpp"
 #include "gfx.hpp"
@@ -38,7 +37,6 @@
 #include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
-#include "panel.hpp"
 #include "popup.hpp"
 #include "query.hpp"
 #include "rect.hpp"
@@ -186,7 +184,7 @@ void MarkerState::update()
 
         if (!config::is_bot_playing())
         {
-                input = io::get();
+                input = io::read_input();
         }
 
         const auto game_cmd = game_commands::to_cmd(input);

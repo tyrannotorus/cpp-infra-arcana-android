@@ -394,6 +394,11 @@ bool is_getting_altar_bonus()
 // -----------------------------------------------------------------------------
 // BrowseSpell
 // -----------------------------------------------------------------------------
+StateId BrowseSpell::id() const
+{
+        return StateId::browse_spells;
+}
+
 void BrowseSpell::on_start()
 {
         if (s_learned_spells.empty())
@@ -578,7 +583,7 @@ void BrowseSpell::draw()
 
 void BrowseSpell::update()
 {
-        auto input = io::get();
+        auto input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(

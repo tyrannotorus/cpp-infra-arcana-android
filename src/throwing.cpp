@@ -42,7 +42,6 @@
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "sound.hpp"
-#include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "text_format.hpp"

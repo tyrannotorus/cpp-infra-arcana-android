@@ -14,7 +14,6 @@
 #include "array2.hpp"
 #include "direction.hpp"
 #include "global.hpp"
-#include "io.hpp"
 #include "pos.hpp"
 #include "random.hpp"
 #include "state.hpp"
@@ -31,6 +30,11 @@ namespace terrain
 {
 class Terrain;
 }  // namespace terrain
+
+namespace io
+{
+struct InputData;
+}  // namespace io
 
 // -----------------------------------------------------------------------------
 // Abstract marker state base class

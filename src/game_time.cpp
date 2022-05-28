@@ -8,7 +8,10 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iterator>
 #include <memory>
+#include <ostream>
+#include <string>
 #include <vector>
 
 #include "actor.hpp"

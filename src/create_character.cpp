@@ -87,7 +87,7 @@ void PickBgState::update()
         else
 #endif  // NDEBUG
         {
-                const auto input = io::get();
+                const auto input = io::read_input();
 
                 action =
                         m_browser.read(
@@ -224,7 +224,7 @@ void PickOccultistState::on_start()
 
 void PickOccultistState::update()
 {
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const auto action =
                 m_browser.read(
@@ -384,7 +384,7 @@ void PickTraitState::update()
                 return;
         }
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         // Switch trait screen mode?
         if (input.key == SDLK_TAB)
@@ -771,7 +771,7 @@ void RemoveTraitState::update()
                 return;
         }
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         const auto action =
                 m_browser.read(
@@ -962,7 +962,7 @@ void EnterNameState::update()
                 return;
         }
 
-        const auto input = io::get();
+        const auto input = io::read_input();
 
         if (input.key == SDLK_ESCAPE)
         {

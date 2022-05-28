@@ -40,7 +40,6 @@
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "sound.hpp"
-#include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_factory.hpp"
 #include "terrain_mob.hpp"

@@ -28,7 +28,15 @@ enum class IsFullscreen
 
 namespace io
 {
-class TextBlock;
+struct FlashData
+{
+        // Actor is optional, if set, the flash will "follow" the actor (e.g. if
+        // knocked back).
+        const actor::Actor* actor_flashed_at {nullptr};
+        R px_rect {};
+        Color color {};
+        int alpha_pct {0};
+};
 
 extern SDL_Window* g_sdl_window;
 extern SDL_Renderer* g_sdl_renderer;
@@ -44,6 +52,7 @@ extern P g_rendering_px_offset;
 void init_input();
 void init_animation();
 bool step_graphics_cycling();
+bool step_flash_animations();
 
 Color read_px_on_surface(const SDL_Surface& surface, const P& px_pos);
 

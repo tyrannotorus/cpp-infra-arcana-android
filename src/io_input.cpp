@@ -11,10 +11,9 @@
 #include "SDL_keyboard.h"
 #include "SDL_keycode.h"
 #include "SDL_timer.h"
-#include "actor.hpp"
+#include "SDL_video.h"
 #include "config.hpp"
 #include "debug.hpp"
-#include "game_time.hpp"
 #include "io.hpp"
 #include "io_internal.hpp"
 #include "pos.hpp"
@@ -414,7 +413,7 @@ void flush_input()
         SDL_PumpEvents();
 }
 
-InputData get()
+InputData read_input()
 {
         SDL_StartTextInput();
 
@@ -425,7 +424,7 @@ InputData get()
 
         while (!s_is_done_reading_input)
         {
-                io::sleep(1);
+                sleep(1);
 
                 if (!config::is_fullscreen())
                 {
@@ -439,19 +438,21 @@ InputData get()
                         window_resized_delayed_draw();
                 }
 
-                bool is_redraw_needed = false;
+                bool should_redraw_cycling = false;
 
                 // Do not cycle graphics if window has been resized recently.
                 if (s_last_window_resize_ms == 0)
                 {
-                        is_redraw_needed = step_graphics_cycling();
+                        should_redraw_cycling = step_graphics_cycling();
                 }
 
-                if (is_redraw_needed)
+                bool should_redraw_flash = step_flash_animations();
+
+                if (should_redraw_cycling || should_redraw_flash)
                 {
-                        io::clear_screen();
+                        clear_screen();
                         states::draw();
-                        io::update_screen();
+                        update_screen();
                 }
 
                 run_handle_event_cycle();
