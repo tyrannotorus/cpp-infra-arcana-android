@@ -25,6 +25,7 @@
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
+#include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"

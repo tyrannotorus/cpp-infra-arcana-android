@@ -6,11 +6,18 @@
 
 #include "actor_hear_sound.hpp"
 
+#include <string>
+
+#include "actor.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
 #include "audio.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
 #include "sound.hpp"
 
 namespace actor

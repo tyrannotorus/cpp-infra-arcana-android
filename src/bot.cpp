@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -32,7 +33,6 @@
 #include "item_device.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
-#include "map_parsing.hpp"
 #include "map_travel.hpp"
 #include "misc.hpp"
 #include "panel.hpp"

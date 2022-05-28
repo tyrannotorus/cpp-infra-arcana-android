@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <optional>
 
 #include "ability_values.hpp"
 #include "actor_data.hpp"
@@ -16,13 +17,12 @@
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
-#include "audio_data.hpp"
+#include "debug.hpp"
 #include "fov.hpp"
-#include "game.hpp"
-#include "game_time.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "item_data.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
@@ -32,7 +32,6 @@
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"
-#include "sound.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------

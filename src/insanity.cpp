@@ -15,7 +15,6 @@
 #include "actor_factory.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
-#include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
 #include "debug.hpp"

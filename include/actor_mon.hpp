@@ -7,15 +7,11 @@
 #ifndef ACTOR_MON_HPP
 #define ACTOR_MON_HPP
 
-#include <memory>
 #include <string>
 #include <vector>
 
 #include "actor.hpp"
-#include "actor_data.hpp"
-#include "audio_data.hpp"
 #include "colors.hpp"
-#include "gfx.hpp"
 #include "global.hpp"
 #include "item.hpp"
 #include "sound.hpp"

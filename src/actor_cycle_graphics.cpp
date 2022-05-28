@@ -11,12 +11,11 @@
 #include "colors.hpp"
 #include "io.hpp"
 #include "map.hpp"
+#include "property_handler.hpp"
 #include "random.hpp"
 
 namespace actor
 {
-class Actor;
-
 void cycle_graphics(Actor& actor, const io::GraphicsCycle cycle)
 {
         if (actor::is_player(&actor) &&

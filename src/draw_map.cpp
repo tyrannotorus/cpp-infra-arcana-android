@@ -8,11 +8,9 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <iterator>
 #include <vector>
 
 #include "actor.hpp"
-#include "actor_data.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
@@ -26,14 +24,12 @@
 #include "item_data.hpp"
 #include "map.hpp"
 #include "misc.hpp"
-#include "panel.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
 #include "property_handler.hpp"
 #include "rect.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
-#include "terrain_door.hpp"
 #include "viewport.hpp"
 
 // -----------------------------------------------------------------------------

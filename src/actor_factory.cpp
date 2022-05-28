@@ -9,12 +9,12 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <ostream>
 
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_mon.hpp"
 #include "actor_player.hpp"
-#include "actor_see.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "game_time.hpp"

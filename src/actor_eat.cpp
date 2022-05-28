@@ -6,10 +6,21 @@
 
 #include "actor_eat.hpp"
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_see.hpp"
+#include "audio_data.hpp"
 #include "game_time.hpp"
-#include "map.hpp"
 #include "msg_log.hpp"
+#include "pos.hpp"
+#include "property.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
 #include "sound.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"

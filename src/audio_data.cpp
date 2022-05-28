@@ -6,7 +6,9 @@
 
 #include "audio_data.hpp"
 
+#include <iterator>
 #include <unordered_map>
+#include <utility>
 
 // -----------------------------------------------------------------------------
 // Private

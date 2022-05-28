@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "global.hpp"
+#include "io.hpp"
 #include "state.hpp"
 #include "time.hpp"
 

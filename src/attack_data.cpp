@@ -29,7 +29,6 @@
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
-#include "rect.hpp"
 #include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------

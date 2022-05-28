@@ -13,7 +13,6 @@
 #include "global.hpp"
 #include "spells.hpp"
 
-class Snd;
 template <typename T>
 class Array2;
 

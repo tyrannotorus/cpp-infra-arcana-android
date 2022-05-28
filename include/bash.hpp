@@ -7,8 +7,6 @@
 #ifndef BASH_HPP
 #define BASH_HPP
 
-#include "direction.hpp"
-
 struct P;
 
 namespace bash

@@ -28,6 +28,7 @@
 #include "popup.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "text.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------

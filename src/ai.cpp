@@ -7,6 +7,7 @@
 #include "ai.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 
 #include "ability_values.hpp"
@@ -29,6 +30,7 @@
 #include "msg_log.hpp"
 #include "pathfind.hpp"
 #include "pos.hpp"
+#include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"

@@ -10,7 +10,8 @@
 #include <vector>
 
 #include "colors.hpp"
-#include "pos.hpp"
+
+struct P;
 
 namespace actor
 {

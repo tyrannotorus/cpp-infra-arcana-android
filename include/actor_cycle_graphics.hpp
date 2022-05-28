@@ -7,8 +7,6 @@
 #ifndef ACTOR_CYCLE_GRAPHICS_HPP
 #define ACTOR_CYCLE_GRAPHICS_HPP
 
-#include "io.hpp"
-
 namespace io
 {
 enum class GraphicsCycle;

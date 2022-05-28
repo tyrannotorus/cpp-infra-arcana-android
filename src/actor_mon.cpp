@@ -7,20 +7,17 @@
 #include "actor_mon.hpp"
 
 #include <algorithm>
-#include <cstring>
 #include <iterator>
+#include <optional>
 #include <vector>
 
 #include "ability_values.hpp"
-#include "actor_factory.hpp"
+#include "actor_data.hpp"
 #include "actor_player.hpp"
 #include "actor_see.hpp"
-#include "array2.hpp"
 #include "attack.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
-#include "flood.hpp"
-#include "fov.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "gods.hpp"
@@ -29,22 +26,17 @@
 #include "item_data.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
-#include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
-#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
-#include "rect.hpp"
 #include "reload.hpp"
 #include "sound.hpp"
 #include "terrain.hpp"
-#include "terrain_data.hpp"
-#include "terrain_door.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -575,7 +567,7 @@ bool Mon::is_ranged_attack_blocked(const P& target_pos) const
                         }
                 }
 
-                const auto* const terrain = map::g_terrain.at(p);
+                const terrain::Terrain* const terrain = map::g_terrain.at(p);
 
                 if (!terrain->is_projectile_passable())
                 {

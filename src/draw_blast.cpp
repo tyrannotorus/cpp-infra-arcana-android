@@ -6,11 +6,17 @@
 
 #include "draw_blast.hpp"
 
+#include <algorithm>
+
 #include "actor.hpp"
+#include "array2.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "gfx.hpp"
 #include "io.hpp"
 #include "map.hpp"
+#include "pos.hpp"
+#include "state.hpp"
 #include "viewport.hpp"
 
 // -----------------------------------------------------------------------------

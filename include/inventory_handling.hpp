@@ -16,9 +16,9 @@
 #include "colors.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
+#include "io.hpp"
 #include "state.hpp"
 
-class Color;
 namespace item
 {
 class Item;

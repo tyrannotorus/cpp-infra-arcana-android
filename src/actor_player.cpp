@@ -45,6 +45,7 @@
 #include "player_spells.hpp"
 #include "popup.hpp"
 #include "pos.hpp"
+#include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
@@ -52,7 +53,6 @@
 #include "random.hpp"
 #include "rect.hpp"
 #include "saving.hpp"
-#include "sound.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 

@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <vector>
 
-#include "ability_values.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_hit.hpp"
@@ -25,7 +24,6 @@
 #include "item.hpp"
 #include "item_data.hpp"
 #include "map.hpp"
-#include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "property.hpp"
@@ -34,8 +32,6 @@
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "smell.hpp"
-#include "terrain.hpp"
-#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

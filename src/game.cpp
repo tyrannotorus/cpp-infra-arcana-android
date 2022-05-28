@@ -7,7 +7,6 @@
 #include "game.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <memory>
 #include <ostream>
 
@@ -19,6 +18,7 @@
 #include "actor_data.hpp"
 #include "actor_items.hpp"
 #include "actor_player.hpp"
+#include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
@@ -43,7 +43,6 @@
 #include "panel.hpp"
 #include "player_bon.hpp"
 #include "popup.hpp"
-#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"

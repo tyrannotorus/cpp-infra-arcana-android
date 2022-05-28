@@ -7,6 +7,7 @@
 #include "actor_start_turn.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -23,7 +24,6 @@
 #include "debug.hpp"
 #include "direction.hpp"
 #include "flood.hpp"
-#include "game.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
 #include "hints.hpp"

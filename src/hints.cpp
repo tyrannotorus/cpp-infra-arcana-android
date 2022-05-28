@@ -16,6 +16,7 @@
 #include "msg_log.hpp"
 #include "popup.hpp"
 #include "saving.hpp"
+#include "state.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
