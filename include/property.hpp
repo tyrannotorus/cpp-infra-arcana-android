@@ -76,6 +76,11 @@ struct PropActResult
         PropEnded prop_ended {PropEnded::no};
 };
 
+// TODO: There should be a property namespace, and the "Prop" prefix should be
+// removed from the property classes.
+
+extern const std::string g_property_ending_suffix;
+
 // -----------------------------------------------------------------------------
 // Property base class
 // -----------------------------------------------------------------------------

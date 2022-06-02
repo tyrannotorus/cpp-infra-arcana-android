@@ -1154,8 +1154,13 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f8:
         {
-                const auto* const spell = spells::make(SpellId::pestilence);
-                spell->run_effect(map::g_player, SpellSkill::master, {});
+                Prop* const prop = property_factory::make(PropId::r_conf);
+
+                prop->set_duration(2);
+
+                map::g_player->m_properties.apply(prop);
+
+                game_time::tick();
         }
         break;
 

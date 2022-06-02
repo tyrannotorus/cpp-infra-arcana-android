@@ -57,6 +57,62 @@ static int calc_resist_chance_from_player_traits()
         return resist_chance;
 }
 
+static Color get_property_gui_color(const Prop& property)
+{
+        const PropAlignment alignment = property.alignment();
+
+        const std::optional<Color> color_override =
+                property.override_property_color();
+
+        const bool is_ending =
+                (property.duration_mode() != PropDurationMode::indefinite) &&
+                (property.nr_turns_left() == 0);
+
+        if (is_ending)
+        {
+                return colors::gray();
+        }
+        else if (color_override)
+        {
+                return color_override.value();
+        }
+        else if (alignment == PropAlignment::good)
+        {
+                return colors::msg_good();
+        }
+        else if (alignment == PropAlignment::bad)
+        {
+                return colors::msg_bad();
+        }
+        else
+        {
+                return colors::white();
+        }
+}
+
+static std::string get_property_nr_turns_suffix(const Prop& property)
+{
+        // NOTE: Since turns left are decremented at the start of an actor's
+        // turn, and checked when they end the turn - "turns left" practically
+        // represents how many more times that the player can act without ending
+        // the property (i.e. if the property has "N turns left" this means the
+        // player can do N actions without ending the property, and it will only
+        // end after action N + 1).
+        //
+        // However this is probably not what is most intuitive for the
+        // player. What may feel more natural is a number that represents how
+        // many actions they have left until the turn ends (i.e. "N turn left"
+        // means after N actions, the property ends). Therefore the value is
+        // incremented by one here.
+        //
+        return ":" + std::to_string(property.nr_turns_left() + 1);
+}
+
+// -----------------------------------------------------------------------------
+// Globals
+// -----------------------------------------------------------------------------
+const std::string g_property_ending_suffix = " (ending)";
+
 // -----------------------------------------------------------------------------
 // Property handler
 // -----------------------------------------------------------------------------
@@ -350,7 +406,7 @@ bool PropHandler::try_apply_more_on_existing_intr_prop(
         const Verbose verbose)
 {
         // NOTE: If an existing property exists which the new property shall be
-        // merged with, we keep the old property object and discard the new one
+        // merged with, we keep the old property object and discard the new one.
 
         for (auto& old_prop : m_props)
         {
@@ -797,7 +853,7 @@ bool PropHandler::has_temporary_negative_prop_mon() const
 
         return (
                 std::any_of(
-                        std::begin(m_props),
+                        std::cbegin(m_props),
                         std::cend(m_props),
                         [this](const auto& prop) {
                                 return is_temporary_negative_prop(*prop);
@@ -808,91 +864,52 @@ std::vector<ColoredString> PropHandler::property_names_short() const
 {
         std::vector<ColoredString> line;
 
+        line.reserve(m_props.size());
+
+        const bool is_self_aware = player_bon::has_trait(Trait::self_aware);
+
         for (const auto& prop : m_props)
         {
-                std::string str = prop->name_short();
+                std::string name = prop->name_short();
 
-                if (str.empty())
+                if (name.empty())
                 {
                         continue;
                 }
 
-                const int turns_left = prop->m_nr_turns_left;
+                const bool is_indefinite =
+                        (prop->m_duration_mode ==
+                         PropDurationMode::indefinite);
 
-                if (prop->m_duration_mode == PropDurationMode::indefinite)
+                if (is_indefinite)
                 {
                         if (prop->src() == PropSrc::intr)
                         {
-                                str = text_format::to_upper(str);
+                                name = text_format::to_upper(name);
                         }
                 }
-                else
+                else if (prop->m_nr_turns_left == 0)
                 {
-                        // Not indefinite
-
-                        // Player can see number of turns left on own properties
-                        // with Self-aware?
-                        if (actor::is_player(m_owner) &&
-                            player_bon::has_trait(Trait::self_aware) &&
-                            prop->allow_display_turns())
-                        {
-                                // NOTE: Since turns left are decremented before
-                                // the actors turn, and checked after the turn -
-                                // "turns_left" practically represents how many
-                                // more times the actor will act with the
-                                // property enabled, EXCLUDING the current
-                                // (ongoing) turn.
-                                //
-                                // I.e. one "turns_left" means that the property
-                                // will be enabled the whole next turn, while
-                                // Zero "turns_left", means that it will only be
-                                // active the current turn. However, from a
-                                // players perspective, this is unintuitive;
-                                // "one turn left" means the current turn, plus
-                                // the next - but is likely interpreted as just
-                                // the current turn. Therefore we add +1 to the
-                                // displayed value, so that a displayed value of
-                                // one means that the property will end after
-                                // performing the next action.
-                                const int turns_displayed = turns_left + 1;
-
-                                str += ":" + std::to_string(turns_displayed);
-                        }
+                        name += g_property_ending_suffix;
+                }
+                else if (is_self_aware && prop->allow_display_turns())
+                {
+                        name += get_property_nr_turns_suffix(*prop);
                 }
 
-                const auto alignment = prop->alignment();
+                const Color color = get_property_gui_color(*prop);
 
-                Color color;
-
-                auto color_override = prop->override_property_color();
-
-                if (color_override)
-                {
-                        color = color_override.value();
-                }
-                else if (alignment == PropAlignment::good)
-                {
-                        color = colors::msg_good();
-                }
-                else if (alignment == PropAlignment::bad)
-                {
-                        color = colors::msg_bad();
-                }
-                else
-                {
-                        color = colors::white();
-                }
-
-                line.emplace_back(str, color);
+                line.emplace_back(name, color);
         }
 
         return line;
 }
 
-// TODO: Lots of copy paste here, refactor
 std::vector<PropListEntry> PropHandler::property_names_and_descr() const
 {
         std::vector<PropListEntry> list;
+
+        list.reserve(m_props.size());
 
         const bool is_player = actor::is_player(m_owner);
         const bool is_self_aware = player_bon::has_trait(Trait::self_aware);
@@ -906,69 +923,37 @@ std::vector<PropListEntry> PropHandler::property_names_and_descr() const
                         continue;
                 }
 
-                const int turns_left = prop->m_nr_turns_left;
-
-                const bool is_indefinite =
-                        prop->m_duration_mode ==
-                        PropDurationMode::indefinite;
-
-                const bool is_intr = prop->src() == PropSrc::intr;
-
-                const bool allow_display_turns = prop->allow_display_turns();
+                const bool is_intr = (prop->src() == PropSrc::intr);
 
                 if (is_player && is_intr)
                 {
+                        const bool is_indefinite =
+                                (prop->m_duration_mode ==
+                                 PropDurationMode::indefinite);
+
                         if (is_indefinite)
                         {
                                 name += " (indefinite)";
                         }
-                        else if (is_self_aware && allow_display_turns)
+                        else if (prop->m_nr_turns_left == 0)
                         {
-                                // See NOTE in 'props_line' above.
-                                const int turns_displayed =
-                                        turns_left + 1;
-
-                                name += ":" + std::to_string(turns_displayed);
+                                name += g_property_ending_suffix;
+                        }
+                        else if (is_self_aware && prop->allow_display_turns())
+                        {
+                                name += get_property_nr_turns_suffix(*prop);
                         }
                 }
-
-                const PropAlignment alignment = prop->alignment();
-
-                Color color;
-
-                auto color_override = prop->override_property_color();
-
-                if (color_override)
-                {
-                        color = color_override.value();
-                }
-                else if (alignment == PropAlignment::good)
-                {
-                        color = colors::msg_good();
-                }
-                else if (alignment == PropAlignment::bad)
-                {
-                        color = colors::msg_bad();
-                }
-                else
-                {
-                        color = colors::white();
-                }
-
-                const std::string descr = prop->descr();
 
                 const size_t new_size = list.size() + 1;
 
                 list.resize(new_size);
 
-                auto& entry = list[new_size - 1];
+                PropListEntry& entry = list[new_size - 1];
 
                 entry.title.str = name;
-
-                entry.title.color = color;
-
-                entry.descr = descr;
-
+                entry.title.color = get_property_gui_color(*prop);
+                entry.descr = prop->descr();
                 entry.prop = prop.get();
         }
 

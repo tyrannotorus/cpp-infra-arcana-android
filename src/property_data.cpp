@@ -9,6 +9,9 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include "panel.hpp"
+#include "property.hpp"
+
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
@@ -99,6 +102,32 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
 
 static void add(PropData& d)
 {
+#ifndef NDEBUG
+        const std::string worst_case_str =
+                d.name_short +
+                g_property_ending_suffix;
+
+        const size_t worst_case_w = worst_case_str.length();
+
+        const size_t panel_w = panels::w(Panel::map_gui_stats);
+
+        if (worst_case_w > panel_w)
+        {
+                TRACE
+                        << "The string '"
+                        << worst_case_str
+                        << "' of length '"
+                        << worst_case_w
+                        << "' will not fit in panel of width '"
+                        << panel_w
+                        << "'"
+                        << std::endl;
+
+                PANIC;
+        }
+
+#endif  // NDEBUG
+
         property_data::g_data[(size_t)d.id] = d;
 
         d = {};
@@ -111,7 +140,7 @@ static void init_data_list()
         d.id = PropId::r_phys;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Physical Resistance";
-        d.name_short = "Physical Res.";
+        d.name_short = "Phys Res";
         d.descr = "Cannot be harmed by plain physical force.";
         d.msg_start_player = "I feel resistant to physical harm.";
         d.msg_start_mon = "is resistant to physical harm.";
@@ -125,7 +154,7 @@ static void init_data_list()
         d.id = PropId::r_fire;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Fire Resistance";
-        d.name_short = "Fire Res.";
+        d.name_short = "Fire Res";
         d.descr = "Cannot be harmed by fire.";
         d.msg_start_player = "I feel resistant to fire.";
         d.msg_start_mon = "is resistant to fire.";
@@ -139,7 +168,7 @@ static void init_data_list()
         d.id = PropId::r_poison;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Poison Resistance";
-        d.name_short = "Poison Res.";
+        d.name_short = "Poison Res";
         d.descr = "Cannot be harmed by poison.";
         d.msg_start_player = "I feel resistant to poison.";
         d.msg_start_mon = "is resistant to poison.";
@@ -153,7 +182,7 @@ static void init_data_list()
         d.id = PropId::r_elec;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Electric Resistance";
-        d.name_short = "Electric Res.";
+        d.name_short = "Elec Res";
         d.descr = "Cannot be harmed by electricity.";
         d.msg_start_player = "I feel resistant to electricity.";
         d.msg_start_mon = "is resistant to electricity.";
@@ -167,7 +196,7 @@ static void init_data_list()
         d.id = PropId::r_acid;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Acid Resistance";
-        d.name_short = "Acid Res.";
+        d.name_short = "Acid Res";
         d.descr = "Cannot be harmed by acid.";
         d.msg_start_player = "I feel resistant to acid.";
         d.msg_start_mon = "is resistant to acid.";
@@ -181,7 +210,7 @@ static void init_data_list()
         d.id = PropId::r_sleep;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Sleep Resistance";
-        d.name_short = "Sleep Res.";
+        d.name_short = "Sleep Res";
         d.descr = "Cannot faint or become hypnotized.";
         d.msg_start_player = "I feel wide awake.";
         d.msg_start_mon = "is wide awake.";
@@ -195,7 +224,7 @@ static void init_data_list()
         d.id = PropId::r_fear;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Fear Resistance";
-        d.name_short = "Fear Res.";
+        d.name_short = "Fear Res";
         d.descr = "Unaffected by fear.";
         d.msg_start_player = "I cannot be swayed by fear.";
         d.msg_start_mon = "is resistant to fear.";
@@ -209,7 +238,7 @@ static void init_data_list()
         d.id = PropId::r_slow;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Slow Resistance";
-        d.name_short = "Slow Res.";
+        d.name_short = "Slow Res";
         d.descr = "Cannot be magically slowed.";
         d.msg_start_player = "I feel steadfast.";
         d.msg_end_player = "I feel more susceptible to time.";
@@ -221,7 +250,7 @@ static void init_data_list()
         d.id = PropId::r_conf;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Confusion Resistance";
-        d.name_short = "Confusion Res.";
+        d.name_short = "Conf Res";
         d.descr = "Cannot become confused.";
         d.msg_start_player = "I feel resistant to confusion.";
         d.msg_start_mon = "is resistant to confusion.";
@@ -235,7 +264,7 @@ static void init_data_list()
         d.id = PropId::r_disease;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Disease Resistance";
-        d.name_short = "Disease Res.";
+        d.name_short = "Disease Res";
         d.descr = "Cannot become diseased.";
         d.msg_start_player = "I feel resistant to disease.";
         d.msg_start_mon = "is resistant to disease.";
@@ -248,7 +277,7 @@ static void init_data_list()
 
         d.id = PropId::r_blind;
         d.name = "Blindness Resistance";
-        d.name_short = "Blindness Res.";
+        d.name_short = "Blind Res";
         d.descr = "Cannot be blinded.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
@@ -257,7 +286,7 @@ static void init_data_list()
 
         d.id = PropId::r_para;
         d.name = "Paralysis Resistance";
-        d.name_short = "Paralysis Res.";
+        d.name_short = "Paralys Res";
         d.descr = "Cannot be paralyzed.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
@@ -276,7 +305,7 @@ static void init_data_list()
 
         d.id = PropId::r_spell;
         d.name = "Spell Resistance";
-        d.name_short = "Spell Res.";
+        d.name_short = "Spell Res";
         d.descr = "Cannot be affected by harmful spells.";
         d.msg_start_player = "I defy harmful spells!";
         d.msg_start_mon = "is defying harmful spells.";
@@ -289,7 +318,7 @@ static void init_data_list()
         d.id = PropId::r_shock;
         d.std_rnd_turns = Range(8, 12);
         d.name = "Shock Resistance";
-        d.name_short = "Shock Res.";
+        d.name_short = "Shock Res";
         d.descr = "Unaffected by shocking events.";
         d.msg_start_player = "Nothing can disturb my mind!";
         d.msg_start_mon = "";
@@ -304,7 +333,7 @@ static void init_data_list()
         d.id = PropId::light_sensitive;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Light Sensitive";
-        d.name_short = "Lgt Sensitive";
+        d.name_short = "Lgt Sens";
         d.descr = "Is vulnerable to light.";
         d.msg_start_player = "I feel vulnerable to light!";
         d.msg_start_mon = "is vulnerable to light.";
@@ -464,7 +493,7 @@ static void init_data_list()
         d.id = PropId::hallucinating;
         d.std_rnd_turns = Range(75, 150);
         d.name = "Hallucinating";
-        d.name_short = "Halluc.";
+        d.name_short = "Halluc";
         d.descr = "The senses cannot always be trusted.";
         d.msg_start_player = "I am starting to doubt my senses.";
         d.msg_start_mon = "";
@@ -895,7 +924,7 @@ static void init_data_list()
         d.id = PropId::see_invis;
         d.std_rnd_turns = Range(50, 100);
         d.name = "See Invisible";
-        d.name_short = "See Invisible";
+        d.name_short = "See Invis";
         d.descr = "Can see invisible creatures, cannot be blinded.";
         d.msg_start_player = "My eyes perceive the invisible.";
         d.msg_start_mon = "seems very keen.";
@@ -918,7 +947,7 @@ static void init_data_list()
         d.id = PropId::tele_ctrl;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Teleport control";
-        d.name_short = "Teleport Ctrl";
+        d.name_short = "Tele Ctrl";
         d.descr = "Can control teleport destination.";
         d.msg_start_player = "I feel in control.";
         d.msg_end_player = "I feel less in control.";
@@ -957,7 +986,7 @@ static void init_data_list()
         d.id = PropId::aura_of_decay;
         d.std_rnd_turns = Range(6, 12);
         d.name = "Aura of Decay";
-        d.name_short = "Aura of Decay";
+        d.name_short = "Decay Aura";
         d.descr = "Adjacent creatures take damage.";
         d.msg_start_player = "Withering surrounds me.";
         d.msg_start_mon = "appears to exude death and decay.";

@@ -67,7 +67,7 @@ void init(const P& max_gui_dims)
                 panel = {0, 0, 0, 0};
         }
 
-        const int map_gui_stats_border_w = 22;
+        const int map_gui_stats_border_w = 23;
 
         const int map_gui_border_x0 = max_gui_dims.x - map_gui_stats_border_w;
         const int map_gui_border_y0 = 0;
