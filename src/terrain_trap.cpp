@@ -15,8 +15,6 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "attack.hpp"
@@ -1455,9 +1453,7 @@ void TrapWeb::trigger()
                                 continue;
                         }
 
-                        auto* const mon = static_cast<actor::Mon*>(actor);
-
-                        mon->become_aware_player(actor::AwareSource::other);
+                        actor->become_aware_player(actor::AwareSource::other);
                 }
         }
 

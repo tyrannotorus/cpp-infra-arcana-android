@@ -15,8 +15,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_hit.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "attack_data.hpp"
@@ -133,9 +132,10 @@ namespace throwing
 {
 void player_throw_lit_explosive(const P& aim_cell)
 {
-        ASSERT(map::g_player->m_active_explosive);
+        ASSERT(actor::player_state::g_active_explosive.get());
 
-        auto* const explosive = map::g_player->m_active_explosive;
+        item::Explosive* const explosive =
+                actor::player_state::g_active_explosive.get();
 
         const int max_range = explosive->data().ranged.max_range;
 
@@ -168,7 +168,7 @@ void player_throw_lit_explosive(const P& aim_cell)
 
         msg_log::add(explosive->str_on_player_throw());
 
-        // Render
+        // Draw
         if (path.size() > 1)
         {
                 const auto color = explosive->ignited_projectile_color();
@@ -201,9 +201,7 @@ void player_throw_lit_explosive(const P& aim_cell)
                 explosive->on_thrown_ignited_landing(end_pos);
         }
 
-        delete explosive;
-
-        map::g_player->m_active_explosive = nullptr;
+        actor::player_state::g_active_explosive.reset();
 
         // Attacking ends cloaking and sanctuary
         map::g_player->m_properties.end_prop(PropId::cloaked);
@@ -338,8 +336,7 @@ void throw_item(
                                                 hit_color);
                                 }
 
-                                static_cast<actor::Mon*>(actor_here)
-                                        ->make_player_aware_of_me();
+                                actor_here->make_player_aware_of_me();
 
                                 Snd snd(
                                         "A creature is hit.",
@@ -365,7 +362,7 @@ void throw_item(
                                                 item_thrown_data.ranged.dmg_type,
                                                 AllowWound::yes);
 
-                                        static_cast<actor::Mon*>(actor_here)
+                                        actor_here
                                                 ->become_aware_player(
                                                         actor::AwareSource::attacked);
                                 }

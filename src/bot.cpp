@@ -16,7 +16,6 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
 #include "config.hpp"

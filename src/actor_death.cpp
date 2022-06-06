@@ -11,8 +11,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
@@ -46,7 +45,7 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
         // Player has the Talisman of Resurrection, and died of physical damage?
         if (!actor::is_player(&actor) ||
             !actor.m_inv.has_item_in_backpack(artifact_id) ||
-            (map::g_player->ins() >= 100) ||
+            (map::g_player->insanity() >= 100) ||
             (actor.m_sp <= 0))
         {
                 return false;
@@ -73,10 +72,8 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
         {
                 if (!actor::is_player(a))
                 {
-                        auto* const mon = static_cast<actor::Mon*>(a);
-
-                        mon->m_mon_aware_state.aware_counter = 0;
-                        mon->m_mon_aware_state.wary_counter = 0;
+                        a->m_mon_aware_state.aware_counter = 0;
+                        a->m_mon_aware_state.wary_counter = 0;
                 }
         }
 
@@ -158,9 +155,9 @@ void kill(
 
         if (!actor::is_player(&actor))
         {
-                if (map::g_player->m_tgt == &actor)
+                if (player_state::g_target == &actor)
                 {
-                        map::g_player->m_tgt = nullptr;
+                        actor::player_state::g_target = nullptr;
                 }
 
                 if (can_player_see_actor(actor))

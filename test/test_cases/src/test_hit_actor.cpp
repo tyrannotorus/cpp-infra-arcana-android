@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+#include "actor.hpp"
 #include "actor_hit.hpp"
-#include "actor_player.hpp"
 #include "catch.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"

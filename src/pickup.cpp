@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <string>
 
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"

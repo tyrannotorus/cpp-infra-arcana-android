@@ -12,7 +12,6 @@
 
 #include "actor.hpp"
 #include "actor_hit.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"

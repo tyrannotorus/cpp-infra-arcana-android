@@ -7,7 +7,7 @@
 #include "actor_cycle_graphics.hpp"
 
 #include "actor.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "colors.hpp"
 #include "io.hpp"
 #include "map.hpp"
@@ -24,13 +24,13 @@ void cycle_graphics(Actor& actor, const io::GraphicsCycle cycle)
                 switch (rnd::range(0, 1))
                 {
                 case 0:
-                        map::g_player->m_lantern_color =
+                        actor::player_state::g_lantern_color =
                                 colors::yellow().shaded(
                                         rnd::range(20, 40));
                         break;
 
                 default:
-                        map::g_player->m_lantern_color =
+                        actor::player_state::g_lantern_color =
                                 colors::yellow();
                         break;
                 }

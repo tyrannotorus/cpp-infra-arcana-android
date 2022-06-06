@@ -21,7 +21,6 @@ namespace actor
 {
 enum class Id;
 class Actor;
-class Mon;
 }  // namespace actor
 
 namespace terrain
@@ -141,7 +140,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const;
 
         virtual bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const
         {
                 (void)mon;
@@ -204,7 +203,7 @@ public:
         SpellCurse() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -263,7 +262,7 @@ public:
         SpellEnfeeble() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -320,7 +319,7 @@ public:
         SpellSlow() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -377,7 +376,7 @@ public:
         SpellTerrify() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -434,7 +433,7 @@ public:
         SpellAuraOfDecay() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -631,7 +630,7 @@ public:
         {}
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -701,7 +700,7 @@ public:
         SpellAzaGaze() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -783,7 +782,7 @@ public:
         SpellCataclysm() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         bool player_can_learn() const override
@@ -842,7 +841,7 @@ public:
         SpellPestilence() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1442,7 +1441,7 @@ public:
         SpellKnockBack() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1510,7 +1509,7 @@ public:
         SpellTeleport() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1577,7 +1576,7 @@ public:
         SpellSeeInvis() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1642,7 +1641,7 @@ public:
         SpellSpellShield() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1700,7 +1699,7 @@ public:
         SpellHaste() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -1908,7 +1907,7 @@ public:
         SpellResistance() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1973,7 +1972,7 @@ public:
         SpellDisease() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2041,7 +2040,7 @@ public:
         SpellSummonMon() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2116,7 +2115,7 @@ public:
         SpellSummonTentacles() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2184,7 +2183,7 @@ public:
         SpellHeal() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2251,7 +2250,7 @@ public:
         SpellMiGoHypno() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2319,7 +2318,7 @@ public:
         SpellBurn() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2387,7 +2386,7 @@ public:
         SpellDeafen() = default;
 
         bool allow_mon_cast_now(
-                actor::Mon& mon,
+                actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override

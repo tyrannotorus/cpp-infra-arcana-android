@@ -183,7 +183,7 @@ public:
 
         void on_pickup_hook() override;
 
-        LgtSize lgt_size() const override;
+        LightSize light_size() const override;
 
         void save_hook() const override;
         void load_hook() override;

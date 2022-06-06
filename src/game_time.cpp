@@ -17,7 +17,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_death.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "actor_start_turn.hpp"
 #include "actor_std_turn.hpp"
@@ -140,9 +140,9 @@ static void erase_destroyed_actor(
                 return;
         }
 
-        if (map::g_player->m_tgt == actor)
+        if (actor::player_state::g_target == actor)
         {
-                map::g_player->m_tgt = nullptr;
+                actor::player_state::g_target = nullptr;
         }
 
         delete actor;

@@ -19,7 +19,7 @@
 #include "SDL_events.h"
 #include "SDL_mixer.h"
 #include "SDL_timer.h"
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "audio_data.hpp"
 #include "config.hpp"
 #include "debug.hpp"

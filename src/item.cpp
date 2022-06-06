@@ -15,7 +15,7 @@
 #include "actor_eat.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
@@ -1223,7 +1223,7 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
         auto* const mon = m_actor_carrying;
 
-        if (map::g_player->ins() >= 50 ||
+        if (map::g_player->insanity() >= 50 ||
             map::g_player->m_properties.has(PropId::confused) ||
             map::g_player->m_properties.has(PropId::frenzied))
         {
@@ -1436,7 +1436,7 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
         }
 
         // Action can be done
-        map::g_player->m_active_medical_bag = this;
+        actor::player_state::g_active_medical_bag = this;
 
         m_nr_turns_left_action = tot_turns_for_action();
 
@@ -1540,7 +1540,7 @@ void MedicalBag::continue_action()
 
 void MedicalBag::finish_current_action()
 {
-        map::g_player->m_active_medical_bag = nullptr;
+        actor::player_state::g_active_medical_bag = nullptr;
 
         switch (m_current_action)
         {
@@ -1692,7 +1692,7 @@ void MedicalBag::stop_action()
         m_nr_turns_left_action = -1;
         m_current_action = MedBagAction::END;
 
-        map::g_player->m_active_medical_bag = nullptr;
+        actor::player_state::g_active_medical_bag = nullptr;
 }
 
 // -----------------------------------------------------------------------------
@@ -1747,7 +1747,7 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
         }
 
         const Explosive* const held_explosive =
-                map::g_player->m_active_explosive;
+                actor::player_state::g_active_explosive.get();
 
         if (held_explosive)
         {
@@ -1793,7 +1793,7 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
 
         cpy->m_fuse_turns = std_fuse_turns();
 
-        map::g_player->m_active_explosive = cpy;
+        actor::player_state::g_active_explosive.reset(cpy);
 
         cpy->on_player_ignite();
 
@@ -1841,13 +1841,11 @@ void Dynamite::on_std_turn_player_hold_ignited()
                 // Fuse has run out
                 msg_log::add("The dynamite explodes in my hand!");
 
-                map::g_player->m_active_explosive = nullptr;
+                actor::player_state::g_active_explosive.reset();
+
+                // NOTE: This object is now deleted.
 
                 explosion::run(map::g_player->m_pos, ExplType::expl);
-
-                m_fuse_turns = -1;
-
-                delete this;
         }
 }
 
@@ -1866,7 +1864,11 @@ void Dynamite::on_player_paralyzed()
 {
         msg_log::add("The lit Dynamite stick falls from my hand!");
 
-        map::g_player->m_active_explosive = nullptr;
+        const int fuse_turns = m_fuse_turns;
+
+        actor::player_state::g_active_explosive.reset();
+
+        // NOTE: This object is now deleted.
 
         const auto& p = map::g_player->m_pos;
 
@@ -1878,12 +1880,10 @@ void Dynamite::on_player_paralyzed()
                         static_cast<terrain::LitDynamite*>(
                                 terrain::make(terrain::Id::lit_dynamite, p));
 
-                t->set_nr_turns(m_fuse_turns);
+                t->set_nr_turns(fuse_turns);
 
                 game_time::add_mob(t);
         }
-
-        delete this;
 }
 
 // -----------------------------------------------------------------------------
@@ -1922,7 +1922,9 @@ void Molotov::on_std_turn_player_hold_ignited()
         {
                 msg_log::add("The Molotov Cocktail explodes in my hand!");
 
-                map::g_player->m_active_explosive = nullptr;
+                actor::player_state::g_active_explosive.reset();
+
+                // NOTE: This object is now deleted.
 
                 const P player_pos = map::g_player->m_pos;
 
@@ -1944,8 +1946,6 @@ void Molotov::on_std_turn_player_hold_ignited()
                         0,
                         ExplExclCenter::no,
                         {new PropBurning()});
-
-                delete this;
         }
 }
 
@@ -1975,7 +1975,9 @@ void Molotov::on_player_paralyzed()
 {
         msg_log::add("The lit Molotov Cocktail falls from my hand!");
 
-        map::g_player->m_active_explosive = nullptr;
+        actor::player_state::g_active_explosive.reset();
+
+        // NOTE: This object is now deleted.
 
         const P player_pos = map::g_player->m_pos;
 
@@ -1997,8 +1999,6 @@ void Molotov::on_player_paralyzed()
                 0,
                 ExplExclCenter::no,
                 {new PropBurning()});
-
-        delete this;
 }
 
 // -----------------------------------------------------------------------------
@@ -2019,9 +2019,7 @@ void Flare::on_std_turn_player_hold_ignited()
         {
                 msg_log::add("The flare is extinguished.");
 
-                map::g_player->m_active_explosive = nullptr;
-
-                delete this;
+                actor::player_state::g_active_explosive.reset();
         }
 }
 
@@ -2040,7 +2038,11 @@ void Flare::on_player_paralyzed()
 {
         msg_log::add("The lit Flare falls from my hand!");
 
-        map::g_player->m_active_explosive = nullptr;
+        actor::player_state::g_active_explosive.reset();
+
+        const int fuse_turns = m_fuse_turns;
+
+        // NOTE: This object is now deleted.
 
         const auto& p = map::g_player->m_pos;
 
@@ -2052,12 +2054,10 @@ void Flare::on_player_paralyzed()
                         static_cast<terrain::LitDynamite*>(
                                 terrain::make(terrain::Id::lit_flare, p));
 
-                t->set_nr_turns(m_fuse_turns);
+                t->set_nr_turns(fuse_turns);
 
                 game_time::add_mob(t);
         }
-
-        delete this;
 }
 
 // -----------------------------------------------------------------------------
@@ -2083,7 +2083,7 @@ void SmokeGrenade::on_std_turn_player_hold_ignited()
         {
                 msg_log::add("The smoke grenade is extinguished.");
 
-                map::g_player->m_active_explosive = nullptr;
+                actor::player_state::g_active_explosive.reset();
 
                 delete this;
         }
@@ -2098,7 +2098,7 @@ void SmokeGrenade::on_player_paralyzed()
 {
         msg_log::add("The ignited smoke grenade falls from my hand!");
 
-        map::g_player->m_active_explosive = nullptr;
+        actor::player_state::g_active_explosive.reset();
 
         const P& p = map::g_player->m_pos;
 

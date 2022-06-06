@@ -10,7 +10,7 @@
 #include <cstddef>
 
 #include "SDL_keycode.h"
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "game.hpp"
 #include "global.hpp"
 #include "insanity.hpp"
@@ -276,7 +276,7 @@ static void add_history_descr(std::vector<ColoredString>& lines)
 
         for (const auto& event : events)
         {
-                const int turn_w = std::to_string(event.turn).size();
+                const int turn_w = (int)std::to_string(event.turn).size();
 
                 longest_turn_w = std::max(turn_w, longest_turn_w);
         }
@@ -285,7 +285,7 @@ static void add_history_descr(std::vector<ColoredString>& lines)
         {
                 std::string ev_str = std::to_string(event.turn);
 
-                const int turn_w = ev_str.size();
+                const int turn_w = (int)ev_str.size();
 
                 ev_str.append(longest_turn_w - turn_w, ' ');
 

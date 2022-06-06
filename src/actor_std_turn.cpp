@@ -13,8 +13,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_hit.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "ai.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
@@ -156,7 +155,7 @@ static void player_regen_spell_shield()
                 // countdown to "uninitialized" while in this state, and do
                 // nothing else. This will trigger a reroll of the duration when
                 // the countdown can begin again.
-                player.m_nr_turns_until_r_spell = -1;
+                actor::player_state::g_nr_turns_until_r_spell = -1;
 
                 return;
         }
@@ -170,11 +169,11 @@ static void player_regen_spell_shield()
 
         // Player has at least stout spirit.
 
-        if (player.m_nr_turns_until_r_spell <= 0)
+        if (actor::player_state::g_nr_turns_until_r_spell <= 0)
         {
                 // Cooldown has finished, OR countdown not initialized.
 
-                if (player.m_nr_turns_until_r_spell == 0)
+                if (actor::player_state::g_nr_turns_until_r_spell == 0)
                 {
                         // Cooldown has finished
                         auto* prop = property_factory::make(PropId::r_spell);
@@ -186,17 +185,17 @@ static void player_regen_spell_shield()
                         msg_log::more_prompt();
                 }
 
-                player.m_nr_turns_until_r_spell =
+                actor::player_state::g_nr_turns_until_r_spell =
                         calc_nr_turns_range_to_recharge_spell_shield()
                                 .roll();
         }
 
         if (!player.m_properties.has(PropId::r_spell) &&
-            (player.m_nr_turns_until_r_spell > 0))
+            (actor::player_state::g_nr_turns_until_r_spell > 0))
         {
                 // Spell resistance is in cooldown state, decrement number of
                 // remaining turns.
-                --player.m_nr_turns_until_r_spell;
+                --actor::player_state::g_nr_turns_until_r_spell;
         }
 }
 
@@ -211,7 +210,7 @@ static void player_regen_meditative_focused()
                 // countdown to "uninitialized" while in this state, and do
                 // nothing else. This will trigger a reroll of the duration when
                 // the countdown can begin again.
-                player.m_nr_turns_until_meditative_focused = -1;
+                actor::player_state::g_nr_turns_until_meditative_focused = -1;
 
                 return;
         }
@@ -225,14 +224,17 @@ static void player_regen_meditative_focused()
 
         // Player has meditative trait.
 
-        if (player.m_nr_turns_until_meditative_focused <= 0)
+        int& nr_turns_until_focused =
+                actor::player_state::g_nr_turns_until_meditative_focused;
+
+        if (nr_turns_until_focused <= 0)
         {
                 // Cooldown has finished, OR countdown not initialized.
 
-                if (player.m_nr_turns_until_meditative_focused == 0)
+                if (nr_turns_until_focused == 0)
                 {
                         // Cooldown has finished
-                        auto* prop =
+                        Prop* prop =
                                 property_factory::make(
                                         PropId::meditative_focused);
 
@@ -243,16 +245,15 @@ static void player_regen_meditative_focused()
                         msg_log::more_prompt();
                 }
 
-                player.m_nr_turns_until_meditative_focused =
-                        rnd::range(125, 150);
+                nr_turns_until_focused = rnd::range(125, 150);
         }
 
         if (!player.m_properties.has(PropId::meditative_focused) &&
-            (player.m_nr_turns_until_meditative_focused > 0))
+            (nr_turns_until_focused > 0))
         {
                 // Meditative focused is in cooldown state, decrement number of
                 // remaining turns.
-                --player.m_nr_turns_until_meditative_focused;
+                --nr_turns_until_focused;
         }
 }
 
@@ -275,9 +276,10 @@ static void player_std_turn()
 
         player_regen_meditative_focused();
 
-        if (player.m_active_explosive)
+        if (actor::player_state::g_active_explosive)
         {
-                player.m_active_explosive->on_std_turn_player_hold_ignited();
+                actor::player_state::g_active_explosive
+                        ->on_std_turn_player_hold_ignited();
 
                 if (!map::g_player->is_alive())
                 {
@@ -288,7 +290,7 @@ static void player_std_turn()
         player_regen_hp();
 }
 
-static void mon_std_turn(actor::Mon& mon)
+static void mon_std_turn(actor::Actor& mon)
 {
         smell::put_smell_for_mon(mon);
 
@@ -404,8 +406,7 @@ void std_turn(Actor& actor)
         }
         else
         {
-                auto& mon = static_cast<Mon&>(actor);
-                mon_std_turn(mon);
+                mon_std_turn(actor);
         }
 }
 

@@ -4,20 +4,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
 #include <memory>
+#include <stddef.h>
 
+#include "actor.hpp"
 #include "catch.hpp"
-#include "actor_player.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
 #include "item_curse.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
+#include "property_data.hpp"
 #include "property_handler.hpp"
 #include "test_utils.hpp"
-#include "property_data.hpp"
 
 TEST_CASE("Activate curse")
 {

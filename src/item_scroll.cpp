@@ -13,7 +13,6 @@
 #include <string>
 
 #include "actor.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
@@ -41,7 +40,7 @@ static std::vector<std::string> s_fake_names;
 
 static SpellSkill player_skill_for_scroll(const SpellId spell_id)
 {
-        auto skill = map::g_player->spell_skill(spell_id);
+        SpellSkill skill = actor::spell_skill(*map::g_player, spell_id);
 
         const bool has_necronomicon =
                 map::g_player->m_inv.has_item_in_backpack(

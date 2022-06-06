@@ -13,8 +13,6 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
@@ -980,7 +978,7 @@ void MapBuilderBoss::on_template_built()
         {
                 if (!actor::is_player(actor) && (actor != high_priest))
                 {
-                        static_cast<actor::Mon*>(actor)->m_leader = high_priest;
+                        actor->m_leader = high_priest;
                 }
         }
 }

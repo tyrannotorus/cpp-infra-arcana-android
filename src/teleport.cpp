@@ -16,9 +16,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_mon.hpp"
 #include "actor_move.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "common_text.hpp"
@@ -379,7 +377,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                                 actor_name_a +
                                 " intercepts my teleportation!");
 
-                        static_cast<actor::Mon*>(other_actor)
+                        other_actor
                                 ->become_aware_player(
                                         actor::AwareSource::other);
 
@@ -406,7 +404,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         if (actor::is_player(&actor))
         {
-                static_cast<actor::Player&>(actor).update_tmp_shock();
+                actor.update_tmp_shock();
 
                 make_all_mon_not_seeing_player_unaware();
         }

@@ -19,8 +19,6 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_hit.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "attack_data.hpp"
@@ -1147,9 +1145,7 @@ static void hit_actor_with_projectile(
 
         if (actor::is_player(att_data.attacker))
         {
-                auto& mon = static_cast<actor::Mon&>(*att_data.defender);
-
-                mon.make_player_aware_of_me();
+                att_data.defender->make_player_aware_of_me();
         }
 
         if (projectile.dmg > 0)
@@ -1827,25 +1823,18 @@ static void bump_awareness_after_melee_attack(
         if (defender_is_player)
         {
                 // A monster attacked the player.
-                auto* const attacker_mon =
-                        static_cast<actor::Mon*>(
-                                att_data.attacker);
-
-                attacker_mon->make_player_aware_of_me();
+                att_data.attacker->make_player_aware_of_me();
         }
         else
         {
                 // A monster was attacked (by player or another monster).
-
-                auto& defender_mon = static_cast<actor::Mon&>(defender);
-
                 if (attacker_is_player ||
                     attacker.is_actor_my_leader(map::g_player))
                 {
                         // The player (or a monster allied to the player)
                         // attacked a monster. Make the defender monster aware
                         // of the player.
-                        defender_mon.become_aware_player(
+                        defender.become_aware_player(
                                 actor::AwareSource::attacked);
                 }
 
@@ -1853,7 +1842,7 @@ static void bump_awareness_after_melee_attack(
                 {
                         // Player attacked monster, make player aware of the
                         // monster.
-                        defender_mon.make_player_aware_of_me();
+                        defender.make_player_aware_of_me();
                 }
                 else
                 {
@@ -1865,12 +1854,8 @@ static void bump_awareness_after_melee_attack(
                                 // Player saw either the attacker or the
                                 // defender. Bump player awareness of both
                                 // monsters.
-                                auto& attacker_mon =
-                                        static_cast<actor::Mon&>(
-                                                attacker);
-
-                                attacker_mon.make_player_aware_of_me();
-                                defender_mon.make_player_aware_of_me();
+                                attacker.make_player_aware_of_me();
+                                defender.make_player_aware_of_me();
                         }
                 }
         }
@@ -1927,9 +1912,7 @@ void melee(
         if (attacker && !actor::is_player(attacker))
         {
                 // A monster attacked, bump monster awareness.
-                auto* const attacker_mon = static_cast<actor::Mon*>(attacker);
-
-                attacker_mon->become_aware_player(actor::AwareSource::other);
+                attacker->become_aware_player(actor::AwareSource::other);
         }
 
         map::update_vision();
@@ -2058,18 +2041,16 @@ DidAction ranged(
                                         continue;
                                 }
 
-                                static_cast<actor::Mon*>(actor)
-                                        ->become_aware_player(
-                                                actor::AwareSource::attacked);
+                                actor->become_aware_player(
+                                        actor::AwareSource::attacked);
                         }
                 }
 
                 if (!actor::is_player(attacker))
                 {
                         // A monster attacked, bump its awareness.
-                        static_cast<actor::Mon*>(attacker)
-                                ->become_aware_player(
-                                        actor::AwareSource::other);
+                        attacker->become_aware_player(
+                                actor::AwareSource::other);
                 }
 
                 game_time::tick();

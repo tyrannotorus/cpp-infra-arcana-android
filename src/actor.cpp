@@ -8,13 +8,13 @@
 
 #include <algorithm>
 #include <climits>
+#include <memory>
 #include <optional>
 
 #include "ability_values.hpp"
 #include "actor_data.hpp"
 #include "actor_items.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
@@ -23,10 +23,12 @@
 #include "inventory.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_device.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
+#include "player_spells.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
@@ -37,47 +39,252 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static Color color_player()
+{
+        if (!map::g_player->is_alive())
+        {
+                return colors::red();
+        }
+
+        if (actor::player_state::g_active_explosive)
+        {
+                return colors::yellow();
+        }
+
+        const std::optional<Color> color_override =
+                map::g_player->m_properties.override_actor_color();
+
+        if (color_override)
+        {
+                return color_override.value();
+        }
+
+        const auto* const lantern_item =
+                map::g_player->m_inv.item_in_backpack(item::Id::lantern);
+
+        if (lantern_item)
+        {
+                const auto* const lantern =
+                        static_cast<const device::Lantern*>(
+                                lantern_item);
+
+                if (lantern->is_activated())
+                {
+                        return actor::player_state::g_lantern_color;
+                }
+        }
+
+        if (map::g_player->shock_tot() >= 75)
+        {
+                return colors::magenta();
+        }
+
+        if (map::g_player->m_properties.has(PropId::invis) ||
+            map::g_player->m_properties.has(PropId::cloaked))
+        {
+                return colors::gray();
+        }
+
+        if (map::g_dark.at(map::g_player->m_pos))
+        {
+                Color tmp_color = map::g_player->m_data->color;
+
+                tmp_color = tmp_color.shaded(40);
+
+                tmp_color.set_rgb(
+                        tmp_color.r(),
+                        tmp_color.g(),
+                        std::min(255, tmp_color.b() + 20));
+
+                return tmp_color;
+        }
+
+        return map::g_player->m_data->color;
+}
+
+static Color color_monster(const actor::Actor& actor)
+{
+        if (!actor.is_alive())
+        {
+                return actor.m_data->color;
+        }
+
+        // TODO: Make this a property:
+        if ((actor.id() == actor::Id::ooze_lurking) && !actor.m_mimic_data)
+        {
+                return map::g_wall_color;
+        }
+
+        const std::optional<Color> color_override =
+                actor.m_properties.override_actor_color();
+
+        if (color_override)
+        {
+                return color_override.value();
+        }
+
+        const actor::ActorData* const data =
+                actor.m_mimic_data
+                ? actor.m_mimic_data
+                : actor.m_data;
+
+        return data->color;
+}
+
+static LightSize calc_light_size_player_specific()
+{
+        auto light_size = LightSize::none;
+
+        const item::Explosive* active_explosive =
+                actor::player_state::g_active_explosive.get();
+
+        if (active_explosive)
+        {
+                const item::Id id = active_explosive->data().id;
+
+                if (id == item::Id::flare)
+                {
+                        light_size = LightSize::fov;
+                }
+        }
+
+        for (auto* const item : map::g_player->m_inv.m_backpack)
+        {
+                const auto item_light_size = item->light_size();
+
+                if ((int)light_size < (int)item_light_size)
+                {
+                        light_size = std::max(light_size, item_light_size);
+                }
+        }
+
+        return light_size;
+}
+
+static LightSize calc_light_size(const actor::Actor& actor)
+{
+        bool do_radiant_self = false;
+        bool do_radiant_adj = false;
+        bool do_radiant_fov = false;
+
+        if (actor.is_alive())
+        {
+                do_radiant_self =
+                        actor.m_properties.has(PropId::radiant_self);
+
+                do_radiant_adj =
+                        actor.m_properties.has(PropId::radiant_adjacent);
+
+                do_radiant_fov =
+                        actor.m_properties.has(PropId::radiant_fov);
+        }
+
+        const bool is_burning = actor.m_properties.has(PropId::burning);
+
+        auto light_size = LightSize::none;
+
+        if (do_radiant_fov)
+        {
+                light_size = LightSize::fov;
+        }
+        else if (do_radiant_adj)
+        {
+                light_size = LightSize::small;
+        }
+        else if (is_burning || do_radiant_self)
+        {
+                light_size = LightSize::single;
+        }
+        else
+        {
+                light_size = LightSize::none;
+        }
+
+        if (actor::is_player(&actor))
+        {
+                light_size =
+                        std::max(
+                                light_size,
+                                calc_light_size_player_specific());
+        }
+
+        return light_size;
+}
+
+static void apply_light(
+        const LightSize light_size,
+        const P& origin,
+        Array2<bool>& light_map)
+{
+        switch (light_size)
+        {
+        case LightSize::none:
+        {
+        }
+        break;
+
+        case LightSize::single:
+        {
+                light_map.at(origin) = true;
+        }
+        break;
+
+        case LightSize::small:
+        {
+                for (const auto d : dir_utils::g_dir_list_w_center)
+                {
+                        light_map.at(origin + d) = true;
+                }
+        }
+        break;
+
+        case LightSize::fov:
+        {
+                const R fov_lmt = fov::fov_rect(origin, map::dims());
+
+                Array2<bool> blocked(map::dims());
+
+                map_parsers::BlocksLos()
+                        .run(
+                                blocked,
+                                fov_lmt,
+                                MapParseMode::overwrite);
+
+                FovMap fov_map;
+                fov_map.hard_blocked = &blocked;
+                fov_map.light = &map::g_light;
+                fov_map.dark = &map::g_dark;
+
+                const auto actor_fov = fov::run(origin, fov_map);
+
+                for (int x = fov_lmt.p0.x; x <= fov_lmt.p1.x; ++x)
+                {
+                        for (int y = fov_lmt.p0.y; y <= fov_lmt.p1.y; ++y)
+                        {
+                                if (!actor_fov.at(x, y).is_blocked_hard)
+                                {
+                                        light_map.at(x, y) = true;
+                                }
+                        }
+                }
+        }
+        break;
+        }
+}
 
 // -----------------------------------------------------------------------------
 // actor
 // -----------------------------------------------------------------------------
 namespace actor
 {
-int max_hp(const Actor& actor)
+void init_actor(Actor& actor, const P& pos, ActorData& data)
 {
-        int result = actor.m_base_max_hp;
-
-        result = actor.m_properties.affect_max_hp(result);
-
-        return std::max(1, result);
-}
-
-int max_sp(const Actor& actor)
-{
-        int result = actor.m_base_max_sp;
-
-        result = actor.m_properties.affect_max_spi(result);
-
-        return std::max(1, result);
-}
-
-bool is_player(const Actor* const actor)
-{
-        if (!actor)
-        {
-                return false;
-        }
-
-        return (actor->m_data->id == Id::player);
-}
-
-void init_actor(Actor& actor, const P& pos_, ActorData& data)
-{
-        actor.m_pos = pos_;
+        actor.m_pos = pos;
         actor.m_data = &data;
 
         if (is_player(&actor))
         {
+                player_state::init();
                 actor.m_base_max_hp = data.hp;
         }
         else
@@ -101,7 +308,30 @@ void init_actor(Actor& actor, const P& pos_, ActorData& data)
         }
 }
 
-void print_aware_invis_mon_msg(const Mon& mon)
+int max_hp(const Actor& actor)
+{
+        int result = actor.m_base_max_hp;
+
+        result = actor.m_properties.affect_max_hp(result);
+
+        return std::max(1, result);
+}
+
+int max_sp(const Actor& actor)
+{
+        int result = actor.m_base_max_sp;
+
+        result = actor.m_properties.affect_max_spi(result);
+
+        return std::max(1, result);
+}
+
+bool is_player(const Actor* const actor)
+{
+        return actor && (actor->m_data->id == Id::player);
+}
+
+void print_aware_invis_mon_msg(const Actor& mon)
 {
         std::string mon_ref;
 
@@ -135,7 +365,7 @@ void make_player_aware_mon(Actor& actor)
         }
 
         // NOTE: This will also "discover" the monster (give XP), if seen.
-        static_cast<actor::Mon&>(actor).make_player_aware_of_me();
+        actor.make_player_aware_of_me();
 }
 
 void make_player_aware_seen_monsters()
@@ -148,12 +378,41 @@ void make_player_aware_seen_monsters()
         }
 }
 
+void add_light(const Actor& actor, Array2<bool>& light_map)
+{
+        const LightSize light_size = calc_light_size(actor);
+
+        apply_light(light_size, actor.m_pos, light_map);
+}
+
+SpellSkill spell_skill(const actor::Actor& actor, SpellId id)
+{
+        if (is_player(&actor))
+        {
+                return player_spells::spell_skill(id);
+        }
+        else
+        {
+                for (const auto& spell : actor.m_mon_spells)
+                {
+                        if (spell.spell->id() == id)
+                        {
+                                return spell.skill;
+                        }
+                }
+
+                ASSERT(false);
+
+                return SpellSkill::basic;
+        }
+}
+
 // -----------------------------------------------------------------------------
 // Actor
 // -----------------------------------------------------------------------------
 Actor::~Actor()
 {
-        // Free all items owning actors
+        // Free all items owning actors.
         for (auto* item : m_inv.m_backpack)
         {
                 item->clear_actor_carrying();
@@ -166,11 +425,24 @@ Actor::~Actor()
                         slot.item->clear_actor_carrying();
                 }
         }
+
+        // Free monster spells.
+        for (auto& spell : m_mon_spells)
+        {
+                delete spell.spell;
+        }
 }
 
-int Actor::ability(const AbilityId id, const bool is_affected_by_props) const
+Color Actor::color() const
 {
-        return m_data->ability_values.val(id, is_affected_by_props, *this);
+        if (is_player(this))
+        {
+                return color_player();
+        }
+        else
+        {
+                return color_monster(*this);
+        }
 }
 
 gfx::TileId Actor::tile() const
@@ -302,6 +574,11 @@ std::string Actor::descr() const
         }
 
         return m_data->descr;
+}
+
+int Actor::ability(const AbilityId id, const bool is_affected_by_props) const
+{
+        return m_data->ability_values.val(id, is_affected_by_props, *this);
 }
 
 bool Actor::is_leader_of(const Actor* const actor) const
@@ -576,95 +853,6 @@ std::string Actor::death_msg() const
         }
 
         return actor_name_the + " " + msg_end;
-}
-
-void Actor::add_light(Array2<bool>& light_map) const
-{
-        bool do_radiant_self = false;
-        bool do_radiant_adj = false;
-        bool do_radiant_fov = false;
-
-        if (is_alive())
-        {
-                do_radiant_self = m_properties.has(PropId::radiant_self);
-                do_radiant_adj = m_properties.has(PropId::radiant_adjacent);
-                do_radiant_fov = m_properties.has(PropId::radiant_fov);
-        }
-
-        const bool is_burning = m_properties.has(PropId::burning);
-
-        auto lgt_size = LgtSize::none;
-
-        if (do_radiant_fov)
-        {
-                lgt_size = LgtSize::fov;
-        }
-        else if (do_radiant_adj)
-        {
-                lgt_size = LgtSize::small;
-        }
-        else if (is_burning || do_radiant_self)
-        {
-                lgt_size = LgtSize::single;
-        }
-
-        // TODO: This is exactly the same code as in actor_player.cpp
-        switch (lgt_size)
-        {
-        case LgtSize::single:
-        {
-                light_map.at(m_pos) = true;
-        }
-        break;
-
-        case LgtSize::small:
-        {
-                for (const auto d : dir_utils::g_dir_list_w_center)
-                {
-                        light_map.at(m_pos + d) = true;
-                }
-        }
-        break;
-
-        case LgtSize::fov:
-        {
-                const R fov_lmt = fov::fov_rect(m_pos, map::dims());
-
-                Array2<bool> blocked(map::dims());
-
-                map_parsers::BlocksLos()
-                        .run(
-                                blocked,
-                                fov_lmt,
-                                MapParseMode::overwrite);
-
-                FovMap fov_map;
-                fov_map.hard_blocked = &blocked;
-                fov_map.light = &map::g_light;
-                fov_map.dark = &map::g_dark;
-
-                const auto actor_fov = fov::run(m_pos, fov_map);
-
-                for (int x = fov_lmt.p0.x; x <= fov_lmt.p1.x; ++x)
-                {
-                        for (int y = fov_lmt.p0.y; y <= fov_lmt.p1.y; ++y)
-                        {
-                                if (!actor_fov.at(x, y).is_blocked_hard)
-                                {
-                                        light_map.at(x, y) = true;
-                                }
-                        }
-                }
-        }
-        break;
-
-        case LgtSize::none:
-        {
-        }
-        break;
-        }
-
-        add_light_hook(light_map);
 }
 
 }  // namespace actor

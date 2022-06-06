@@ -22,9 +22,8 @@ set(COMMON_SRC
         include/actor_hear_sound.hpp
         include/actor_hit.hpp
         include/actor_items.hpp
-        include/actor_mon.hpp
         include/actor_move.hpp
-        include/actor_player.hpp
+        include/actor_player_state.hpp
         include/actor_see.hpp
         include/actor_sneak.hpp
         include/actor_start_turn.hpp
@@ -162,6 +161,7 @@ set(COMMON_SRC
         src/actor_mon.cpp
         src/actor_move.cpp
         src/actor_player.cpp
+        src/actor_player_state.cpp
         src/actor_see.cpp
         src/actor_sneak.cpp
         src/actor_start_turn.cpp

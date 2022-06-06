@@ -13,8 +13,6 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "game_time.hpp"
@@ -53,7 +51,7 @@ static std::vector<P> free_spawn_positions(const R& area)
         return to_vec(blocked, false, area);
 }
 
-static actor::Mon* spawn_at(const P& pos, const actor::Id id)
+static actor::Actor* spawn_at(const P& pos, const actor::Id id)
 {
         if (!map::is_pos_inside_outer_walls(pos))
         {
@@ -70,11 +68,7 @@ static actor::Mon* spawn_at(const P& pos, const actor::Id id)
                 return nullptr;
         }
 
-        auto* const actor = actor::make(id, pos);
-
-        auto* const mon = static_cast<actor::Mon*>(actor);
-
-        return mon;
+        return actor::make(id, pos);
 }
 
 static actor::MonSpawnResult spawn_at_positions(
@@ -90,7 +84,7 @@ static actor::MonSpawnResult spawn_at_positions(
                 const auto& pos = positions[i];
                 const auto id = ids[i];
 
-                actor::Mon* const new_mon = spawn_at(pos, id);
+                actor::Actor* const new_mon = spawn_at(pos, id);
 
                 if (new_mon)
                 {
@@ -133,16 +127,7 @@ MonSpawnResult& MonSpawnResult::make_aware_of_player()
 
 Actor* make(const Id id, const P& pos)
 {
-        Actor* actor = nullptr;
-
-        if (id == Id::player)
-        {
-                actor = new Player();
-        }
-        else
-        {
-                actor = new Mon();
-        }
+        auto* actor = new Actor();
 
         init_actor(*actor, pos, g_data[(size_t)id]);
 

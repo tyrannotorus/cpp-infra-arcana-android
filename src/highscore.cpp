@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "SDL_keycode.h"
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "debug.hpp"
@@ -211,7 +211,7 @@ HighscoreEntry make_entry_from_current_game_data(
         e.lvl = game::clvl();
         e.dlvl = map::g_dlvl;
         e.turn_count = game_time::turn_nr();
-        e.ins = map::g_player->ins();
+        e.ins = map::g_player->insanity();
         e.is_win = is_win;
         e.bg = player_bon::bg();
         e.player_occultist_domain = player_bon::occultist_domain();

@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "array2.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"

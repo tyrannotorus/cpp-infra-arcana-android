@@ -12,7 +12,6 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_player.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
@@ -299,7 +298,7 @@ Array2<bool> g_terrain_blocks_small_crawling(0, 0);
 Array2<bool> g_terrain_blocks_burrowing(0, 0);
 Array2<bool> g_terrain_blocks_los(0, 0);
 
-actor::Player* g_player = nullptr;
+actor::Actor* g_player = nullptr;
 
 int g_dlvl = 0;
 
@@ -317,9 +316,7 @@ void init()
 
         g_room_list.clear();
 
-        actor::Actor* actor = actor::make(actor::Id::player, {0, 0});
-
-        g_player = static_cast<actor::Player*>(actor);
+        g_player = actor::make(actor::Id::player, {0, 0});
 }
 
 void cleanup()
@@ -668,14 +665,14 @@ void update_light_map()
 {
         Array2<bool> light_tmp(dims());
 
-        for (const auto* const a : game_time::g_actors)
+        for (const auto* const actor : game_time::g_actors)
         {
-                a->add_light(light_tmp);
+                actor::add_light(*actor, light_tmp);
         }
 
-        for (const auto* const m : game_time::g_mobs)
+        for (const auto* const mob : game_time::g_mobs)
         {
-                m->add_light(light_tmp);
+                mob->add_light(light_tmp);
         }
 
         for (auto* const terrain : map::g_terrain)

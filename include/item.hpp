@@ -65,9 +65,9 @@ public:
 
         gfx::TileId tile() const;
 
-        virtual LgtSize lgt_size() const
+        virtual LightSize light_size() const
         {
-                return LgtSize::none;
+                return LightSize::none;
         }
 
         std::string name(

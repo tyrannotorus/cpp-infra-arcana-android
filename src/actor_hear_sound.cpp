@@ -9,8 +9,6 @@
 #include <string>
 
 #include "actor.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "audio.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
@@ -59,8 +57,7 @@ void hear_sound_player(
 
                 if (actor_who_made_snd && !is_player(actor_who_made_snd))
                 {
-                        static_cast<Mon*>(actor_who_made_snd)
-                                ->make_player_aware_of_me();
+                        actor_who_made_snd->make_player_aware_of_me();
                 }
         }
 
@@ -92,8 +89,7 @@ void hear_sound_mon(Actor& actor, const Snd& snd)
 
         if (actor.is_alive() && snd.is_alerting_mon())
         {
-                static_cast<Mon&>(actor)
-                        .become_aware_player(AwareSource::heard_sound);
+                actor.become_aware_player(AwareSource::heard_sound);
         }
 }
 

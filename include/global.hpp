@@ -294,6 +294,16 @@ enum class MonShockLvl
         END
 };
 
+enum class ShockSrc
+{
+        see_mon,
+        use_strange_item,
+        cast_intr_spell,
+        time,
+        misc,
+        END
+};
+
 enum class MonRoamingAllowed
 {
         no,
@@ -354,11 +364,12 @@ enum class IsSubRoom
         yes
 };
 
-enum class LgtSize
+// NOTE: Order matters here, higher value --> bigger area.
+enum class LightSize
 {
         none,
         single,  // Single position
-        small,  // 3x3
+        small,  // Including adjacent positions, i.e. 3x3
         fov
 };
 

@@ -11,7 +11,7 @@
 #include <ostream>
 #include <vector>
 
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "map.hpp"

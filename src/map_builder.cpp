@@ -19,8 +19,6 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "debug.hpp"
 #include "game_time.hpp"
 #include "gods.hpp"

@@ -19,15 +19,20 @@
 #include "inventory.hpp"
 #include "pos.hpp"
 #include "property_handler.hpp"
+#include "sound.hpp"
 #include "spells.hpp"
 
 template <typename T>
 class Array2;
 
+namespace item
+{
+class Wpn;
+}  // namespace item
+
 namespace actor
 {
 class Actor;
-class Mon;
 
 struct AiState
 {
@@ -58,19 +63,49 @@ struct MonSpell
         int cooldown {-1};
 };
 
-int max_hp(const Actor& actor);
+struct AiAttData
+{
+        item::Wpn* wpn {nullptr};
+        bool is_melee {false};
+};
 
+struct AiAvailAttacksData
+{
+        std::vector<item::Wpn*> weapons = {};
+        bool should_reload = false;
+        bool is_melee = false;
+};
+
+enum class AwareSource
+{
+        seeing,
+        heard_sound,
+        attacked,
+        spell_victim,
+        other
+};
+
+void init_actor(Actor& actor, const P& pos, ActorData& data);
+
+int max_hp(const Actor& actor);
 int max_sp(const Actor& actor);
 
 bool is_player(const Actor* actor);
 
-void init_actor(Actor& actor, const P& pos_, ActorData& data);
-
-void print_aware_invis_mon_msg(const Mon& mon);
+void print_aware_invis_mon_msg(const Actor& mon);
 
 void make_player_aware_mon(Actor& actor);
 void make_player_aware_seen_monsters();
 
+void add_light(const Actor& actor, Array2<bool>& light_map);
+
+SpellSkill spell_skill(const Actor& actor, SpellId id);
+
+std::string get_cultist_phrase();
+std::string get_cultist_aware_msg_seen(const Actor& actor);
+std::string get_cultist_aware_msg_hidden();
+
+// TODO: This class has too many public functions, make it more minimal.
 class Actor
 {
 public:
@@ -81,7 +116,7 @@ public:
                 return m_data->id;
         }
 
-        virtual Color color() const = 0;
+        Color color() const;
         gfx::TileId tile() const;
         char character() const;
         std::string name_the() const;
@@ -92,9 +127,7 @@ public:
         bool is_actor_my_leader(const Actor* actor) const;
         bool is_in_same_group_as(const Actor* actor) const;
 
-        int ability(
-                AbilityId id,
-                bool is_affected_by_props) const;
+        int ability(AbilityId id, bool is_affected_by_props) const;
 
         bool restore_hp(
                 int hp_restored,
@@ -116,13 +149,6 @@ public:
 
         int armor_points() const;
 
-        void add_light(Array2<bool>& light_map) const;
-
-        virtual void add_light_hook(Array2<bool>& light) const
-        {
-                (void)light;
-        }
-
         bool is_alive() const
         {
                 return m_state == ActorState::alive;
@@ -134,18 +160,6 @@ public:
         }
 
         std::string death_msg() const;
-
-        virtual void on_hit(
-                const int dmg,
-                const DmgType dmg_type,
-                const AllowWound allow_wound)
-        {
-                (void)dmg;
-                (void)dmg_type;
-                (void)allow_wound;
-        }
-
-        virtual SpellSkill spell_skill(SpellId id) const = 0;
 
         bool is_aware_of_player() const
         {
@@ -162,7 +176,67 @@ public:
                 return m_mon_aware_state.player_aware_of_me_counter > 0;
         }
 
-        // Creature state
+        // ==================================================
+        // Player specific public functions
+        // TODO: Most/all of these should be free functions instead, refactor.
+        // ==================================================
+        void save() const;
+        void load();
+        void update_fov();
+        void update_mon_awareness() const;
+        void incr_shock(double shock, ShockSrc shock_src);
+        void restore_shock(int amount_restored, bool is_temp_shock_restored);
+        int shock_tot() const;
+        int insanity() const;
+        void auto_melee();
+        item::Wpn& unarmed_wpn() const;
+        void set_unarmed_wpn(item::Wpn* wpn) const;
+        void kick_mon(Actor& defender);
+        void hand_att(Actor& defender);
+        // Only interrupts repeated commands like waiting.
+        void on_log_msg_printed();
+        // Aborts e.g. healing. "is_forced" controlls if querying is allowed
+        // (for example if the player is seeing a monster, the game shall query
+        // the player to continue, but if the player is knocked back the healing
+        // should just be aborted).
+        void interrupt_actions(ForceInterruptActions is_forced);
+        int enc_percent() const;
+        int carry_weight_lmt() const;
+        void set_auto_move(Dir dir);
+        void on_new_dlvl_reached();
+        void update_tmp_shock();
+        void add_shock_from_seen_monsters();
+        void incr_insanity();
+        bool is_busy() const;
+        // Is the player busy with something that would result in a query on
+        // interruption? ("Do you want to continue?")
+        bool is_busy_queryable_action() const;
+        // Randomly prints a message such as "I sense an object of great power
+        // here" if there is a major treasure on the map (on the floor or in a
+        // container), and the player is a Rogue
+        void item_feeling();
+        // Randomly prints a message such as "A chill runs down my spine" if
+        // there are unique monsters on the map, and the player is a Rogue
+        void mon_feeling() const;
+
+        // ==================================================
+        // Monster specific public functions
+        // TODO: Most/all of these should be free functions instead, refactor.
+        // ==================================================
+        bool is_sneaking() const;
+        AiAvailAttacksData avail_attacks(Actor& defender) const;
+        AiAttData choose_attack(const AiAvailAttacksData& avail_attacks) const;
+        DidAction try_attack(Actor& defender);
+        void become_aware_player(AwareSource source, int factor = 1);
+        void become_wary_player();
+        void make_player_aware_of_me(int duration_factor = 1);
+        std::vector<Actor*> foes_aware_of() const;
+        std::string aware_msg_mon_seen() const;
+        std::string aware_msg_mon_hidden() const;
+        void speak_phrase(AlertsMon alerts_others);
+        void add_spell(SpellSkill skill, Spell* spell);
+
+        // Common creature state (for player and monsters)
         P m_pos {};
         ActorState m_state {ActorState::alive};
         int m_hp {-1};
@@ -175,7 +249,10 @@ public:
         int m_delay {0};
         P m_opening_door_pos {-1, -1};
 
-        // Monster specific data
+        // Monster specific state
+        //
+        // NOTE: PLAYER specific state is in "actor_player_state.hpp".
+        //
         AiState m_ai_state {};
         AwareState m_mon_aware_state {};
         bool m_give_hit_chance_penalty_vs_player {true};
@@ -183,7 +260,35 @@ public:
         std::vector<MonSpell> m_mon_spells {};
         const ActorData* m_mimic_data {nullptr};  // Hallucination
 
-protected:
+private:
+        // ==================================================
+        // Player specific private functions
+        // TODO: Most/all of these should be free functions instead, refactor.
+        // ==================================================
+        int shock_resistance(ShockSrc shock_src) const;
+        double shock_taken_after_mods(
+                double base_shock,
+                ShockSrc shock_src) const;
+        double increased_tmp_chock_on_blind() const;
+        double increased_tmp_shock_from_dark() const;
+        double reduced_tmp_shock_from_light() const;
+        double increased_tmp_shock_from_adjacent_terrain() const;
+        void fov_hack() const;
+
+        // ==================================================
+        // Monster specific private functions
+        // TODO: Most/all of these should be free functions instead, refactor.
+        // ==================================================
+        void print_player_see_mon_become_aware_msg() const;
+        void print_player_see_mon_become_wary_msg() const;
+        bool is_ranged_attack_blocked(const P& target_pos) const;
+        item::Wpn* avail_wielded_melee() const;
+        item::Wpn* avail_wielded_ranged() const;
+        std::vector<item::Wpn*> avail_intr_melee() const;
+        std::vector<item::Wpn*> avail_intr_ranged() const;
+        bool should_reload(const item::Wpn& wpn) const;
+        int nr_mon_in_group() const;
+
         // Damages worn armor, and returns damage after armor absorbs damage
         int hit_armor(int dmg);
 };

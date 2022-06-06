@@ -4,11 +4,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "actor_player.hpp"
+#include "actor.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <string>
@@ -17,8 +18,8 @@
 #include "ability_values.hpp"
 #include "actor_data.hpp"
 #include "actor_death.hpp"
-#include "actor_mon.hpp"
 #include "actor_move.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "attack.hpp"
@@ -26,15 +27,15 @@
 #include "common_text.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "direction.hpp"
 #include "fov.hpp"
-#include "game.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "init.hpp"
 #include "insanity.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
-#include "item_device.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -42,12 +43,10 @@
 #include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
-#include "player_spells.hpp"
 #include "popup.hpp"
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
-#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
 #include "random.hpp"
@@ -63,24 +62,6 @@ static const std::vector<std::string> m_item_feeling_messages = {
         "I feel like I should examine this place thoroughly.",
         "I feel like there is something of great interest here.",
         "I sense an object of great power here."};
-
-static int nr_wounds(const PropHandler& properties)
-{
-        if (properties.has(PropId::wound))
-        {
-                const auto* const prop =
-                        properties.prop(PropId::wound);
-
-                const auto* const wound =
-                        static_cast<const PropWound*>(prop);
-
-                return wound->nr_wounds();
-        }
-        else
-        {
-                return 0;
-        }
-}
 
 static double shock_taken_for_mon_shock_lvl(const MonShockLvl shock_lvl)
 {
@@ -123,7 +104,7 @@ static std::string make_continue_remove_armor_query_msg()
 
         const auto turns_left_str =
                 std::to_string(
-                        player.m_remove_armor_countdown);
+                        actor::player_state::g_remove_armor_countdown);
 
         const auto armor_name =
                 item->name(
@@ -141,14 +122,12 @@ static std::string make_continue_remove_armor_query_msg()
 
 static std::string make_continue_equip_armor_query_msg()
 {
-        const auto& player = *map::g_player;
-
         const auto turns_left_str =
                 std::to_string(
-                        player.m_equip_armor_countdown);
+                        actor::player_state::g_equip_armor_countdown);
 
         const auto armor_name =
-                player.m_item_equipping->name(
+                actor::player_state::g_item_equipping->name(
                         ItemNameType::a,
                         ItemNameInfo::yes);
 
@@ -163,14 +142,12 @@ static std::string make_continue_equip_armor_query_msg()
 
 static BinaryAnswer query_continue_equip_armor()
 {
-        const auto& player = *map::g_player;
-
-        ASSERT((player.m_remove_armor_countdown > 0) ||
-               (player.m_equip_armor_countdown > 0));
+        ASSERT((actor::player_state::g_remove_armor_countdown > 0) ||
+               (actor::player_state::g_equip_armor_countdown > 0));
 
         std::string msg;
 
-        if (player.m_remove_armor_countdown > 0)
+        if (actor::player_state::g_remove_armor_countdown > 0)
         {
                 msg = make_continue_remove_armor_query_msg();
         }
@@ -222,10 +199,10 @@ static void interrupt_equip_armor(ForceInterruptActions is_forced)
 
         if (!should_continue_handling_armor)
         {
-                player.m_remove_armor_countdown = 0;
-                player.m_equip_armor_countdown = 0;
-                player.m_item_equipping = nullptr;
-                player.m_is_dropping_armor_from_body_slot = false;
+                actor::player_state::g_remove_armor_countdown = 0;
+                actor::player_state::g_equip_armor_countdown = 0;
+                actor::player_state::g_item_equipping = nullptr;
+                actor::player_state::g_is_dropping_armor_from_body = false;
         }
 }
 
@@ -233,14 +210,12 @@ static void interrupt_equip_other_item(const ForceInterruptActions is_forced)
 {
         bool should_continue = true;
 
-        auto& player = *map::g_player;
-
         if (is_forced == ForceInterruptActions::no)
         {
                 // Query interruption.
 
                 const auto wpn_name =
-                        player.m_item_equipping->name(
+                        actor::player_state::g_item_equipping->name(
                                 ItemNameType::a,
                                 ItemNameInfo::yes);
 
@@ -276,20 +251,18 @@ static void interrupt_equip_other_item(const ForceInterruptActions is_forced)
 
         if (!should_continue)
         {
-                player.m_item_equipping = nullptr;
+                actor::player_state::g_item_equipping = nullptr;
         }
 }
 
 static void interrupt_equip(const ForceInterruptActions is_forced)
 {
-        auto& player = *map::g_player;
-
-        if ((player.m_remove_armor_countdown > 0) ||
-            (player.m_equip_armor_countdown > 0))
+        if ((actor::player_state::g_remove_armor_countdown > 0) ||
+            (actor::player_state::g_equip_armor_countdown > 0))
         {
                 interrupt_equip_armor(is_forced);
         }
-        else if (player.m_item_equipping)
+        else if (actor::player_state::g_item_equipping)
         {
                 interrupt_equip_other_item(is_forced);
         }
@@ -303,32 +276,24 @@ namespace actor
 // -----------------------------------------------------------------------------
 // Player
 // -----------------------------------------------------------------------------
-Player::Player() = default;
-
-Player::~Player()
-{
-        delete m_active_explosive;
-        delete m_unarmed_wpn;
-}
-
-void Player::save() const
+void Actor::save() const
 {
         m_properties.save();
 
-        saving::put_int(m_ins);
-        saving::put_int((int)m_shock);
+        saving::put_int(player_state::g_insanity);
+        saving::put_int((int)player_state::g_shock);
         saving::put_int(m_hp);
         saving::put_int(m_base_max_hp);
         saving::put_int(m_sp);
         saving::put_int(m_base_max_sp);
         saving::put_int(m_pos.x);
         saving::put_int(m_pos.y);
-        saving::put_int(m_nr_turns_until_r_spell);
-        saving::put_int(m_nr_turns_until_meditative_focused);
+        saving::put_int(player_state::g_nr_turns_until_r_spell);
+        saving::put_int(player_state::g_nr_turns_until_meditative_focused);
 
-        ASSERT(m_unarmed_wpn);
+        ASSERT(player_state::g_unarmed_wpn.get());
 
-        saving::put_int((int)m_unarmed_wpn->id());
+        saving::put_int((int)player_state::g_unarmed_wpn->id());
 
         for (int i = 0; i < (int)AbilityId::END; ++i)
         {
@@ -338,33 +303,31 @@ void Player::save() const
         }
 }
 
-void Player::load()
+void Actor::load()
 {
         m_properties.load();
 
-        m_ins = saving::get_int();
-        m_shock = double(saving::get_int());
+        player_state::g_insanity = saving::get_int();
+        player_state::g_shock = double(saving::get_int());
         m_hp = saving::get_int();
         m_base_max_hp = saving::get_int();
         m_sp = saving::get_int();
         m_base_max_sp = saving::get_int();
         m_pos.x = saving::get_int();
         m_pos.y = saving::get_int();
-        m_nr_turns_until_r_spell = saving::get_int();
-        m_nr_turns_until_meditative_focused = saving::get_int();
+        player_state::g_nr_turns_until_r_spell = saving::get_int();
+        player_state::g_nr_turns_until_meditative_focused = saving::get_int();
 
         const auto unarmed_wpn_id = (item::Id)saving::get_int();
 
         ASSERT(unarmed_wpn_id < item::Id::END);
 
-        delete m_unarmed_wpn;
-        m_unarmed_wpn = nullptr;
-
         auto* const unarmed_item = item::make(unarmed_wpn_id);
 
         ASSERT(unarmed_item);
 
-        m_unarmed_wpn = static_cast<item::Wpn*>(unarmed_item);
+        player_state::g_unarmed_wpn.reset(
+                static_cast<item::Wpn*>(unarmed_item));
 
         for (int i = 0; i < (int)AbilityId::END; ++i)
         {
@@ -374,63 +337,7 @@ void Player::load()
         }
 }
 
-void Player::on_hit(
-        const int dmg,
-        const DmgType dmg_type,
-        const AllowWound allow_wound)
-{
-        // NOTE: Interrupt player multi-turn actions, unless the damage is a
-        // small number of "pure" damage (i.e. not physical, electrical,
-        // etc). The idea is that something like taking a pistol shot should
-        // realistically stop you from treating wounds or handling equipment
-        // etc, while taking a minor hit by something like poison ticking would
-        // not necessarily stop you.
-        const bool is_small_pure_damage =
-                ((dmg_type == DmgType::pure) && (dmg <= 1));
-
-        if (!is_small_pure_damage)
-        {
-                map::g_player->interrupt_actions(ForceInterruptActions::yes);
-        }
-
-        incr_shock(1.0, ShockSrc::misc);
-
-        const bool is_enough_dmg_for_wound = (dmg >= g_min_dmg_to_wound);
-        const bool is_physical = is_physical_dmg_type(dmg_type);
-
-        // Ghoul trait Indomitable Fury grants immunity to wounds while frenzied
-        const bool is_ghoul_resist_wound =
-                player_bon::has_trait(Trait::indomitable_fury) &&
-                m_properties.has(PropId::frenzied);
-
-        const bool is_wounded =
-                (allow_wound == AllowWound::yes) &&
-                ((m_hp - dmg) > 0) &&
-                is_enough_dmg_for_wound &&
-                is_physical &&
-                !is_ghoul_resist_wound &&
-                !config::is_bot_playing();
-
-        if (is_wounded)
-        {
-                auto* const prop = property_factory::make(PropId::wound);
-
-                prop->set_indefinite();
-
-                const int nr_wounds_before = nr_wounds(m_properties);
-
-                m_properties.apply(prop);
-
-                const int nr_wounds_after = nr_wounds(m_properties);
-
-                if (nr_wounds_after > nr_wounds_before)
-                {
-                        game::add_history_event("Sustained a severe wound");
-                }
-        }
-}
-
-int Player::enc_percent() const
+int Actor::enc_percent() const
 {
         const int total_w = m_inv.total_item_weight();
         const int max_w = carry_weight_lmt();
@@ -438,7 +345,7 @@ int Player::enc_percent() const
         return (int)(((double)total_w / (double)max_w) * 100.0);
 }
 
-int Player::carry_weight_lmt() const
+int Actor::carry_weight_lmt() const
 {
         int carry_weight_mod = 0;
 
@@ -455,7 +362,7 @@ int Player::carry_weight_lmt() const
         return (g_player_carry_weight_base * (carry_weight_mod + 100)) / 100;
 }
 
-int Player::shock_resistance(const ShockSrc shock_src) const
+int Actor::shock_resistance(const ShockSrc shock_src) const
 {
         int res = 0;
 
@@ -500,7 +407,7 @@ int Player::shock_resistance(const ShockSrc shock_src) const
         return std::clamp(res, 0, 100);
 }
 
-double Player::shock_taken_after_mods(
+double Actor::shock_taken_after_mods(
         const double base_shock,
         const ShockSrc shock_src) const
 {
@@ -509,7 +416,7 @@ double Player::shock_taken_after_mods(
         return (base_shock * (100.0 - shock_res_db)) / 100.0;
 }
 
-void Player::incr_shock(double shock, ShockSrc shock_src)
+void Actor::incr_shock(double shock, ShockSrc shock_src)
 {
         if (m_properties.has(PropId::r_shock))
         {
@@ -519,24 +426,25 @@ void Player::incr_shock(double shock, ShockSrc shock_src)
 
         shock = shock_taken_after_mods(shock, shock_src);
 
-        m_shock += shock;
+        player_state::g_shock += shock;
 
-        m_shock = std::max(0.0, m_shock);
+        player_state::g_shock = std::max(0.0, player_state::g_shock);
 }
 
-void Player::restore_shock(
+void Actor::restore_shock(
         const int amount_restored,
         const bool is_temp_shock_restored)
 {
-        m_shock = std::max(0.0, m_shock - amount_restored);
+        player_state::g_shock =
+                std::max(0.0, player_state::g_shock - amount_restored);
 
         if (is_temp_shock_restored)
         {
-                m_shock_tmp = 0.0;
+                player_state::g_shock_tmp = 0.0;
         }
 }
 
-void Player::incr_insanity()
+void Actor::incr_insanity()
 {
         TRACE << "Increasing insanity" << std::endl;
 
@@ -544,10 +452,10 @@ void Player::incr_insanity()
         {
                 const int ins_incr = rnd::range(10, 15);
 
-                m_ins += ins_incr;
+                player_state::g_insanity += ins_incr;
         }
 
-        if (ins() >= 100)
+        if (insanity() >= 100)
         {
                 const std::string msg =
                         "My mind can no longer withstand what it has grasped. "
@@ -573,7 +481,7 @@ void Player::incr_insanity()
         restore_shock(999, true);
 }
 
-void Player::item_feeling()
+void Actor::item_feeling()
 {
         if ((player_bon::bg() != Bg::rogue) ||
             !rnd::percent(80))
@@ -631,7 +539,7 @@ void Player::item_feeling()
         }
 }
 
-void Player::on_new_dlvl_reached()
+void Actor::on_new_dlvl_reached()
 {
         mon_feeling();
 
@@ -653,7 +561,7 @@ void Player::on_new_dlvl_reached()
         m_properties.on_new_dlvl();
 }
 
-void Player::mon_feeling()
+void Actor::mon_feeling() const
 {
         if (player_bon::bg() != Bg::rogue)
         {
@@ -709,33 +617,32 @@ void Player::mon_feeling()
         }
 }
 
-void Player::set_auto_move(const Dir dir)
+void Actor::set_auto_move(const Dir dir)
 {
         ASSERT(dir != Dir::END);
 
-        m_auto_move_dir = dir;
-
-        m_has_taken_auto_move_step = false;
+        player_state::g_auto_move_dir = dir;
+        player_state::g_has_taken_auto_move_step = false;
 }
 
-bool Player::is_busy() const
+bool Actor::is_busy() const
 {
         return (
                 is_busy_queryable_action() ||
-                (m_wait_turns_left > 0) ||
-                (m_auto_move_dir != Dir::END));
+                (player_state::g_wait_turns_left > 0) ||
+                (player_state::g_auto_move_dir != Dir::END));
 }
 
-bool Player::is_busy_queryable_action() const
+bool Actor::is_busy_queryable_action() const
 {
         return (
-                m_active_medical_bag ||
-                (m_remove_armor_countdown > 0) ||
-                (m_equip_armor_countdown > 0) ||
-                m_item_equipping);
+                player_state::g_active_medical_bag ||
+                (player_state::g_remove_armor_countdown > 0) ||
+                (player_state::g_equip_armor_countdown > 0) ||
+                player_state::g_item_equipping);
 }
 
-void Player::add_shock_from_seen_monsters()
+void Actor::add_shock_from_seen_monsters()
 {
         if (!m_properties.allow_see())
         {
@@ -786,7 +693,7 @@ void Player::add_shock_from_seen_monsters()
         incr_shock(val, ShockSrc::see_mon);
 }
 
-double Player::increased_tmp_chock_on_blind() const
+double Actor::increased_tmp_chock_on_blind() const
 {
         auto* const blind = m_properties.prop(PropId::blind);
 
@@ -795,7 +702,7 @@ double Player::increased_tmp_chock_on_blind() const
         return shock_taken_after_mods((double)blind_shock, ShockSrc::misc);
 }
 
-double Player::increased_tmp_shock_from_dark() const
+double Actor::increased_tmp_shock_from_dark() const
 {
         if (!map::g_dark.at(m_pos) || map::g_light.at(m_pos))
         {
@@ -816,7 +723,7 @@ double Player::increased_tmp_shock_from_dark() const
         return shock_taken_after_mods(shock, ShockSrc::misc);
 }
 
-double Player::reduced_tmp_shock_from_light() const
+double Actor::reduced_tmp_shock_from_light() const
 {
         if (!map::g_light.at(m_pos))
         {
@@ -834,7 +741,7 @@ double Player::reduced_tmp_shock_from_light() const
         return reduced_shock;
 }
 
-double Player::increased_tmp_shock_from_adjacent_terrain() const
+double Actor::increased_tmp_shock_from_adjacent_terrain() const
 {
         double shock = 0.0;
 
@@ -855,7 +762,7 @@ double Player::increased_tmp_shock_from_adjacent_terrain() const
         return shock;
 }
 
-void Player::update_tmp_shock()
+void Actor::update_tmp_shock()
 {
         double increased_tmp_shock = 0.0;
         double reduced_tmp_shock = 0.0;
@@ -888,12 +795,14 @@ void Player::update_tmp_shock()
                 increased_tmp_shock = 0.0;
         }
 
-        m_shock_tmp = increased_tmp_shock - reduced_tmp_shock;
+        player_state::g_shock_tmp = increased_tmp_shock - reduced_tmp_shock;
 }
 
-int Player::shock_tot() const
+int Actor::shock_tot() const
 {
-        double shock_tot_db = m_shock + m_shock_tmp;
+        double shock_tot_db =
+                player_state::g_shock +
+                player_state::g_shock_tmp;
 
         shock_tot_db = std::max(0.0, shock_tot_db);
 
@@ -906,115 +815,52 @@ int Player::shock_tot() const
         return result;
 }
 
-int Player::ins() const
+int Actor::insanity() const
 {
-        int result = m_ins;
+        int result = player_state::g_insanity;
 
         result = std::min(100, result);
 
         return result;
 }
 
-void Player::on_log_msg_printed()
+void Actor::on_log_msg_printed()
 {
         // NOTE: There cannot be any calls to msg_log::add() in this function,
         // as that would cause infinite recursion!
 
         // All messages abort waiting
-        m_wait_turns_left = -1;
+        player_state::g_wait_turns_left = -1;
 
         // All messages abort quick move
-        m_auto_move_dir = Dir::END;
+        player_state::g_auto_move_dir = Dir::END;
 }
 
-void Player::interrupt_actions(const ForceInterruptActions is_forced)
+void Actor::interrupt_actions(const ForceInterruptActions is_forced)
 {
-        if (m_active_medical_bag)
+        if (player_state::g_active_medical_bag)
         {
-                m_active_medical_bag->interrupted(is_forced);
+                player_state::g_active_medical_bag->interrupted(is_forced);
         }
 
         interrupt_equip(is_forced);
 
-        m_wait_turns_left = -1;
+        player_state::g_wait_turns_left = -1;
 
-        m_auto_move_dir = Dir::END;
+        player_state::g_auto_move_dir = Dir::END;
 }
 
-Color Player::color() const
+void Actor::auto_melee()
 {
-        if (!is_alive())
+        if (player_state::g_target &&
+            player_state::g_target->is_alive() &&
+            is_pos_adj(m_pos, player_state::g_target->m_pos, false) &&
+            can_player_see_actor(*player_state::g_target))
         {
-                return colors::red();
-        }
+                const P delta = player_state::g_target->m_pos - m_pos;
+                const Dir dir = dir_utils::dir(delta);
 
-        if (m_active_explosive)
-        {
-                return colors::yellow();
-        }
-
-        auto color_override = m_properties.override_actor_color();
-
-        if (color_override)
-        {
-                return color_override.value();
-        }
-
-        const auto* const lantern_item =
-                m_inv.item_in_backpack(item::Id::lantern);
-
-        if (lantern_item)
-        {
-                const auto* const lantern =
-                        static_cast<const device::Lantern*>(lantern_item);
-
-                if (lantern->is_activated())
-                {
-                        return m_lantern_color;
-                }
-        }
-
-        if (shock_tot() >= 75)
-        {
-                return colors::magenta();
-        }
-
-        if (m_properties.has(PropId::invis) ||
-            m_properties.has(PropId::cloaked))
-        {
-                return colors::gray();
-        }
-
-        if (map::g_dark.at(m_pos))
-        {
-                Color tmp_color = m_data->color;
-
-                tmp_color = tmp_color.shaded(40);
-
-                tmp_color.set_rgb(
-                        tmp_color.r(),
-                        tmp_color.g(),
-                        std::min(255, tmp_color.b() + 20));
-
-                return tmp_color;
-        }
-
-        return m_data->color;
-}
-
-SpellSkill Player::spell_skill(const SpellId id) const
-{
-        return player_spells::spell_skill(id);
-}
-
-void Player::auto_melee()
-{
-        if (m_tgt &&
-            m_tgt->is_alive() &&
-            is_pos_adj(m_pos, m_tgt->m_pos, false) &&
-            can_player_see_actor(*m_tgt))
-        {
-                do_move_action(*this, dir_utils::dir(m_tgt->m_pos - m_pos));
+                do_move_action(*this, dir);
 
                 return;
         }
@@ -1029,7 +875,7 @@ void Player::auto_melee()
                     !is_leader_of(actor) &&
                     can_player_see_actor(*actor))
                 {
-                        m_tgt = actor;
+                        player_state::g_target = actor;
 
                         do_move_action(*this, dir_utils::dir(d));
 
@@ -1038,7 +884,7 @@ void Player::auto_melee()
         }
 }
 
-void Player::kick_mon(Actor& defender)
+void Actor::kick_mon(Actor& defender)
 {
         item::Wpn* kick_wpn = nullptr;
 
@@ -1073,101 +919,26 @@ void Player::kick_mon(Actor& defender)
         delete kick_wpn;
 }
 
-item::Wpn& Player::unarmed_wpn() const
+item::Wpn& Actor::unarmed_wpn() const
 {
-        ASSERT(m_unarmed_wpn);
+        ASSERT(player_state::g_unarmed_wpn.get());
 
-        return *m_unarmed_wpn;
+        return *player_state::g_unarmed_wpn;
 }
 
-void Player::hand_att(Actor& defender)
+void Actor::set_unarmed_wpn(item::Wpn* wpn) const
+{
+        player_state::g_unarmed_wpn.reset(wpn);
+}
+
+void Actor::hand_att(Actor& defender)
 {
         item::Wpn& wpn = unarmed_wpn();
 
         attack::melee(this, m_pos, defender, wpn);
 }
 
-void Player::add_light_hook(Array2<bool>& light_map) const
-{
-        auto lgt_size = LgtSize::none;
-
-        if (m_active_explosive)
-        {
-                if (m_active_explosive->data().id == item::Id::flare)
-                {
-                        lgt_size = LgtSize::fov;
-                }
-        }
-
-        if (lgt_size != LgtSize::fov)
-        {
-                for (auto* const item : m_inv.m_backpack)
-                {
-                        const auto item_lgt_size = item->lgt_size();
-
-                        if ((int)lgt_size < (int)item_lgt_size)
-                        {
-                                lgt_size = item_lgt_size;
-                        }
-                }
-        }
-
-        switch (lgt_size)
-        {
-        case LgtSize::single:
-        {
-                light_map.at(m_pos) = true;
-        }
-        break;
-
-        case LgtSize::small:
-        {
-                for (const auto d : dir_utils::g_dir_list_w_center)
-                {
-                        light_map.at(m_pos + d) = true;
-                }
-        }
-        break;
-
-        case LgtSize::fov:
-        {
-                Array2<bool> hard_blocked(map::dims());
-
-                const auto fov_lmt = fov::fov_rect(m_pos, hard_blocked.dims());
-
-                map_parsers::BlocksLos()
-                        .run(hard_blocked,
-                             fov_lmt,
-                             MapParseMode::overwrite);
-
-                FovMap fov_map;
-                fov_map.hard_blocked = &hard_blocked;
-                fov_map.light = &map::g_light;
-                fov_map.dark = &map::g_dark;
-
-                const auto actor_fov = fov::run(m_pos, fov_map);
-
-                for (int x = fov_lmt.p0.x; x <= fov_lmt.p1.x; ++x)
-                {
-                        for (int y = fov_lmt.p0.y; y <= fov_lmt.p1.y; ++y)
-                        {
-                                if (!actor_fov.at(x, y).is_blocked_hard)
-                                {
-                                        light_map.at(x, y) = true;
-                                }
-                        }
-                }
-        }
-        break;
-
-        case LgtSize::none:
-        {
-        }
-        break;
-        }
-}
-
-void Player::update_fov()
+void Actor::update_fov()
 {
         const size_t nr_map_positions = map::nr_positions();
 
@@ -1270,7 +1041,7 @@ void Player::update_fov()
         minimap::update();
 }
 
-void Player::fov_hack()
+void Actor::fov_hack() const
 {
         Array2<bool> blocked =
                 map::get_blocked_map_info_for_actor(
@@ -1340,13 +1111,13 @@ void Player::fov_hack()
         }
 }
 
-void Player::update_mon_awareness()
+void Actor::update_mon_awareness() const
 {
         const auto my_seen_actors = seen_actors(*this);
 
         for (auto* const actor : my_seen_actors)
         {
-                static_cast<Mon*>(actor)->make_player_aware_of_me();
+                actor->make_player_aware_of_me();
         }
 }
 

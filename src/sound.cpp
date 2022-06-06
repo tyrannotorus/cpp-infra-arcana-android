@@ -12,8 +12,6 @@
 
 #include "actor.hpp"
 #include "actor_hear_sound.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "debug.hpp"

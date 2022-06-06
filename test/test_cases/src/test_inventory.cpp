@@ -4,22 +4,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include <stddef.h>
+#include <cstddef>
 
+#include "actor.hpp"
+#include "array2.hpp"
 #include "catch.hpp"
-#include "actor_player.hpp"
 #include "drop.hpp"
 #include "explosion.hpp"
+#include "global.hpp"
 #include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "test_utils.hpp"
-#include "array2.hpp"
-#include "global.hpp"
-#include "item.hpp"
-#include "item_data.hpp"
 
 TEST_CASE("Properties from item applied and removed for actor")
 {

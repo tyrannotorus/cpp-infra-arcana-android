@@ -9,7 +9,6 @@
 #include <string>
 
 #include "actor.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "colors.hpp"

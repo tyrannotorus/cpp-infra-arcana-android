@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "actor.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "game_time.hpp"
 #include "global.hpp"

@@ -11,7 +11,6 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_player.hpp"
 #include "create_character.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"

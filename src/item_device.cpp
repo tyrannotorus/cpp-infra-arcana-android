@@ -14,7 +14,6 @@
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
@@ -659,9 +658,9 @@ void Lantern::on_std_turn_in_inv_hook(const InvType inv_type)
         }
 }
 
-LgtSize Lantern::lgt_size() const
+LightSize Lantern::light_size() const
 {
-        return m_is_activated ? LgtSize::fov : LgtSize::none;
+        return m_is_activated ? LightSize::fov : LightSize::none;
 }
 
 }  // namespace device

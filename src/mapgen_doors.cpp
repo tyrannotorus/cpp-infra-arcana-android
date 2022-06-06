@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "actor.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
 #include "flood.hpp"

@@ -13,8 +13,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "debug.hpp"
 #include "game.hpp"
 #include "global.hpp"
@@ -225,7 +224,7 @@ static void make_for_player_rogue()
 
         inv.put_in_backpack(throwing_knives);
 
-        map::g_player->m_last_thrown_item = throwing_knives;
+        actor::player_state::g_last_thrown_item = throwing_knives;
 }
 
 static void make_for_player_war_vet()
@@ -268,7 +267,7 @@ static void make_for_player_war_vet()
 
         inv.put_in_backpack(throwing_knives);
 
-        map::g_player->m_last_thrown_item = throwing_knives;
+        actor::player_state::g_last_thrown_item = throwing_knives;
 }
 
 static void make_for_player_ghoul()
@@ -769,8 +768,6 @@ static void make_monster_spells(actor::Actor& actor)
                 return;
         }
 
-        auto* const mon = static_cast<actor::Mon*>(&actor);
-
         for (auto& spell_data : actor.m_data->spells)
         {
                 if (!rnd::percent(spell_data.pct_chance_to_know))
@@ -778,9 +775,9 @@ static void make_monster_spells(actor::Actor& actor)
                         continue;
                 }
 
-                auto* const spell = spells::make(spell_data.spell_id);
+                Spell* const spell = spells::make(spell_data.spell_id);
 
-                mon->add_spell(spell_data.spell_skill, spell);
+                actor.add_spell(spell_data.spell_skill, spell);
         }
 }
 

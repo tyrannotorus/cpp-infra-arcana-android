@@ -10,8 +10,6 @@
 #include <iterator>
 
 #include "actor.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
@@ -267,9 +265,7 @@ bool can_player_see_actor(const Actor& other)
                 return false;
         }
 
-        const auto* const mon = static_cast<const actor::Mon*>(&other);
-
-        if (mon->is_sneaking() && !can_see_invis)
+        if (other.is_sneaking() && !can_see_invis)
         {
                 return false;
         }

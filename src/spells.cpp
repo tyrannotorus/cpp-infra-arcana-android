@@ -21,8 +21,6 @@
 #include "actor_death.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
@@ -1204,15 +1202,12 @@ void Spell::cast(
                 TRACE << "Monster casting spell" << std::endl;
 
                 // Make sound if noisy - casting from scrolls is always noisy.
-                if (is_noisy(skill) ||
-                    (spell_src == SpellSrc::manuscript))
+                if (is_noisy(skill) || (spell_src == SpellSrc::manuscript))
                 {
-                        auto* const mon = static_cast<actor::Mon*>(caster);
-
                         const bool is_mon_seen =
-                                actor::can_player_see_actor(*mon);
+                                actor::can_player_see_actor(*caster);
 
-                        std::string spell_msg = mon->m_data->spell_msg;
+                        std::string spell_msg = caster->m_data->spell_msg;
 
                         if (!spell_msg.empty())
                         {
@@ -1222,13 +1217,13 @@ void Spell::cast(
                                 {
                                         mon_name =
                                                 text_format::first_to_upper(
-                                                        mon->name_the());
+                                                        caster->name_the());
                                 }
                                 else
                                 {
                                         // Cannot see monster.
                                         mon_name =
-                                                mon->m_data->is_humanoid
+                                                caster->m_data->is_humanoid
                                                 ? "Someone"
                                                 : "Something";
                                 }
@@ -1511,7 +1506,7 @@ int SpellAuraOfDecay::mon_cooldown() const
 }
 
 bool SpellAuraOfDecay::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         return (
@@ -1780,9 +1775,7 @@ void SpellBolt::run_effect(
 
         if (!actor::is_player(target))
         {
-                static_cast<actor::Mon*>(target)
-                        ->become_aware_player(
-                                actor::AwareSource::spell_victim);
+                target->become_aware_player(actor::AwareSource::spell_victim);
         }
 }
 
@@ -1836,7 +1829,7 @@ void SpellBolt::draw_projectile_travel(
 }
 
 bool SpellBolt::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -1982,9 +1975,7 @@ void SpellAzaGaze::run_effect_on_target(
 
         if (!actor::is_player(&target))
         {
-                static_cast<actor::Mon&>(target)
-                        .become_aware_player(
-                                actor::AwareSource::spell_victim);
+                target.become_aware_player(actor::AwareSource::spell_victim);
         }
 
         apply_properties_on_target(target, skill);
@@ -2069,7 +2060,7 @@ std::vector<std::string> SpellAzaGaze::descr_specific(
 }
 
 bool SpellAzaGaze::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -2327,7 +2318,7 @@ std::vector<std::string> SpellCataclysm::descr_specific(
 }
 
 bool SpellCataclysm::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         // Always allow casting with a visible target.
@@ -2406,8 +2397,7 @@ void SpellPestilence::run_effect(
         else
         {
                 // Caster is monster
-                auto* const caster_leader =
-                        static_cast<actor::Mon*>(caster)->m_leader;
+                actor::Actor* const caster_leader = caster->m_leader;
 
                 leader =
                         caster_leader
@@ -2494,7 +2484,7 @@ std::vector<std::string> SpellPestilence::descr_specific(
 }
 
 bool SpellPestilence::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         // Always allow casting with a visible target.
@@ -3384,7 +3374,7 @@ std::vector<std::string> SpellSeeInvis::descr_specific(
 }
 
 bool SpellSeeInvis::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)seen_targets;
@@ -3433,7 +3423,7 @@ std::vector<std::string> SpellSpellShield::descr_specific(
 }
 
 bool SpellSpellShield::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)seen_targets;
@@ -3509,7 +3499,7 @@ int SpellHaste::mon_cooldown() const
 }
 
 bool SpellHaste::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         return (
@@ -3812,7 +3802,7 @@ void SpellTeleport::run_effect(
 }
 
 bool SpellTeleport::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         const bool is_low_hp = (mon.m_hp <= (actor::max_hp(mon) / 2));
@@ -3908,7 +3898,7 @@ std::vector<std::string> SpellResistance::descr_specific(
 }
 
 bool SpellResistance::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)seen_targets;
@@ -3990,14 +3980,12 @@ void SpellKnockBack::run_effect(
 
         if (!actor::is_player(target))
         {
-                static_cast<actor::Mon*>(target)
-                        ->become_aware_player(
-                                actor::AwareSource::spell_victim);
+                target->become_aware_player(actor::AwareSource::spell_victim);
         }
 }
 
 bool SpellKnockBack::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4093,15 +4081,14 @@ void SpellCurse::run_effect(
 
                 if (!actor::is_player(target))
                 {
-                        static_cast<actor::Mon*>(target)
-                                ->become_aware_player(
-                                        actor::AwareSource::spell_victim);
+                        target->become_aware_player(
+                                actor::AwareSource::spell_victim);
                 }
         }
 }
 
 bool SpellCurse::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4211,9 +4198,8 @@ void SpellEnfeeble::run_effect(
 
                 if (!actor::is_player(target))
                 {
-                        static_cast<actor::Mon*>(target)
-                                ->become_aware_player(
-                                        actor::AwareSource::spell_victim);
+                        target->become_aware_player(
+                                actor::AwareSource::spell_victim);
                 }
         }
 }
@@ -4249,7 +4235,7 @@ std::vector<std::string> SpellEnfeeble::descr_specific(
 }
 
 bool SpellEnfeeble::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4354,9 +4340,8 @@ void SpellSlow::run_effect(
 
                 if (!actor::is_player(target))
                 {
-                        static_cast<actor::Mon*>(target)
-                                ->become_aware_player(
-                                        actor::AwareSource::spell_victim);
+                        target->become_aware_player(
+                                actor::AwareSource::spell_victim);
                 }
         }
 }
@@ -4396,7 +4381,7 @@ int SpellSlow::mon_cooldown() const
 }
 
 bool SpellSlow::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4503,9 +4488,8 @@ void SpellTerrify::run_effect(
 
                 if (!actor::is_player(target))
                 {
-                        static_cast<actor::Mon*>(target)
-                                ->become_aware_player(
-                                        actor::AwareSource::spell_victim);
+                        target->become_aware_player(
+                                actor::AwareSource::spell_victim);
                 }
         }
 }
@@ -4541,7 +4525,7 @@ std::vector<std::string> SpellTerrify::descr_specific(
 }
 
 bool SpellTerrify::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4607,14 +4591,12 @@ void SpellDisease::run_effect(
 
         if (!actor::is_player(target))
         {
-                static_cast<actor::Mon*>(target)
-                        ->become_aware_player(
-                                actor::AwareSource::spell_victim);
+                target->become_aware_player(actor::AwareSource::spell_victim);
         }
 }
 
 bool SpellDisease::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4732,8 +4714,7 @@ std::vector<actor::Id> SpellSummonMon::make_summon_bucket(
 
 void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
 {
-        auto* const caster_leader =
-                static_cast<actor::Mon*>(caster)->m_leader;
+        auto* const caster_leader = caster->m_leader;
 
         auto* const leader =
                 caster_leader
@@ -4781,7 +4762,7 @@ void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
 }
 
 bool SpellSummonMon::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         // Always allow casting with a visible target.
@@ -4819,8 +4800,7 @@ void SpellSummonTentacles::run_effect(
         else
         {
                 // Caster is monster
-                auto* const caster_leader =
-                        static_cast<actor::Mon*>(caster)->m_leader;
+                actor::Actor* const caster_leader = caster->m_leader;
 
                 leader =
                         caster_leader
@@ -4867,7 +4847,7 @@ void SpellSummonTentacles::run_effect(
 }
 
 bool SpellSummonTentacles::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         // Always allow casting with a visible target.
@@ -4949,7 +4929,7 @@ void SpellHeal::run_effect(
 }
 
 bool SpellHeal::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)seen_targets;
@@ -5053,14 +5033,12 @@ void SpellMiGoHypno::run_effect(
 
         if (!actor::is_player(target))
         {
-                static_cast<actor::Mon*>(target)
-                        ->become_aware_player(
-                                actor::AwareSource::spell_victim);
+                target->become_aware_player(actor::AwareSource::spell_victim);
         }
 }
 
 bool SpellMiGoHypno::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -5123,14 +5101,12 @@ void SpellBurn::run_effect(
 
         if (!actor::is_player(target))
         {
-                static_cast<actor::Mon*>(target)
-                        ->become_aware_player(
-                                actor::AwareSource::spell_victim);
+                target->become_aware_player(actor::AwareSource::spell_victim);
         }
 }
 
 bool SpellBurn::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -5183,14 +5159,12 @@ void SpellDeafen::run_effect(
 
         if (!actor::is_player(target))
         {
-                static_cast<actor::Mon*>(target)
-                        ->become_aware_player(
-                                actor::AwareSource::spell_victim);
+                target->become_aware_player(actor::AwareSource::spell_victim);
         }
 }
 
 bool SpellDeafen::allow_mon_cast_now(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;

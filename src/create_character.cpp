@@ -12,8 +12,8 @@
 #include <memory>
 
 #include "SDL_keycode.h"
+#include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_player.hpp"
 #include "browser.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"

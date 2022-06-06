@@ -10,8 +10,6 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
@@ -66,9 +64,7 @@ void MapControllerBoss::on_start()
                         continue;
                 }
 
-                auto* const mon = static_cast<actor::Mon*>(actor);
-
-                mon->become_aware_player(actor::AwareSource::other);
+                actor->become_aware_player(actor::AwareSource::other);
         }
 }
 

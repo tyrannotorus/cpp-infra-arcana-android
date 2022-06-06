@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "browser.hpp"
@@ -96,7 +96,7 @@ static void try_cast(Spell* const spell)
 
         msg_log::clear();
 
-        const auto skill = map::g_player->spell_skill(spell->id());
+        const auto skill = actor::spell_skill(*map::g_player, spell->id());
 
         const auto spi_cost_range =
                 spell->spi_cost_range(

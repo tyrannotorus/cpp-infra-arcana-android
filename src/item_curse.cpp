@@ -11,9 +11,9 @@
 #include <iterator>
 #include <utility>
 
+#include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"

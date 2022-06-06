@@ -14,8 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_player.hpp"
 #include "colors.hpp"
 #include "game.hpp"
 #include "highscore.hpp"

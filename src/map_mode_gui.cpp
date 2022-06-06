@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "actor.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "colors.hpp"
 #include "config.hpp"
@@ -312,7 +311,7 @@ static void draw_shock(const int y, const Panel panel)
 
 static void draw_insanity(const int y, const Panel panel)
 {
-        const auto ins_pct = map::g_player->ins();
+        const auto ins_pct = map::g_player->insanity();
 
         // draw_bar(
         //         ins_pct,

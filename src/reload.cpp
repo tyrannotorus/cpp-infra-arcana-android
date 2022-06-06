@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "actor.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"

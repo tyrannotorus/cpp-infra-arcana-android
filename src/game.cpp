@@ -17,7 +17,7 @@
 #include "actor_cycle_graphics.hpp"
 #include "actor_data.hpp"
 #include "actor_items.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
@@ -337,7 +337,7 @@ void player_discover_monster(actor::Actor& actor)
 
         map::g_player->incr_shock(shock_value, ShockSrc::see_mon);
 
-        map::g_player->allow_print_mon_warning = false;
+        actor::player_state::g_allow_print_mon_warning = false;
 }
 
 void on_mon_killed(actor::Actor& actor)
@@ -351,8 +351,8 @@ void on_mon_killed(actor::Actor& actor)
         if (d.hp >= min_hp_for_sadism_bon &&
             insanity::has_sympt(InsSymptId::sadism))
         {
-                map::g_player->m_shock =
-                        std::max(0.0, map::g_player->m_shock - 3.0);
+                actor::player_state::g_shock =
+                        std::max(0.0, actor::player_state::g_shock - 3.0);
         }
 
         if (d.is_unique)

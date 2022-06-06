@@ -6,8 +6,8 @@
 
 #include "test_utils.hpp"
 
+#include "actor.hpp"
 #include "actor_move.hpp"
-#include "actor_player.hpp"
 #include "config.hpp"
 #include "init.hpp"
 #include "map.hpp"

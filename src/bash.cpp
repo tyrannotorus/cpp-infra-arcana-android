@@ -14,7 +14,6 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_hit.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"

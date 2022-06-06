@@ -8,7 +8,7 @@
 #include <iterator>
 #include <vector>
 
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "array2.hpp"
 #include "catch.hpp"
 #include "direction.hpp"

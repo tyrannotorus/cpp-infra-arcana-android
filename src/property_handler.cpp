@@ -15,8 +15,6 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "colors.hpp"
 #include "debug.hpp"

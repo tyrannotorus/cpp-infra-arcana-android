@@ -7,9 +7,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
 #include "actor_move.hpp"
-#include "actor_player.hpp"
 #include "catch.hpp"
 #include "direction.hpp"
 #include "game_time.hpp"
@@ -63,44 +61,43 @@ TEST_CASE("Spider web")
                         web->reveal(terrain::PrintRevealMsg::no);
                 }
 
-                auto* const actor = actor::make(actor::Id::zombie, pos_l);
-
-                auto* const mon = static_cast<actor::Mon*>(actor);
+                actor::Actor* const actor =
+                        actor::make(actor::Id::zombie, pos_l);
 
                 // Requirement for triggering traps
-                mon->m_ai_state.is_target_seen = true;
+                actor->m_ai_state.is_target_seen = true;
 
                 // Awareness > 0 required for triggering trap
-                mon->m_mon_aware_state.aware_counter = 42;
+                actor->m_mon_aware_state.aware_counter = 42;
 
                 // Move the monster into the trap, and back again
-                mon->m_pos = pos_l;
+                actor->m_pos = pos_l;
                 game_time::g_allow_tick = true;
-                actor::do_move_action(*mon, Dir::right);
+                actor::do_move_action(*actor, Dir::right);
 
                 // It should never be possible to move on the first try
-                REQUIRE(mon->m_pos == pos_r);
+                REQUIRE(actor->m_pos == pos_r);
 
-                REQUIRE(mon->m_properties.has(PropId::entangled));
+                REQUIRE(actor->m_properties.has(PropId::entangled));
 
                 // This may or may not unstuck the monster
                 game_time::g_allow_tick = true;
-                actor::do_move_action(*mon, Dir::left);
+                actor::do_move_action(*actor, Dir::left);
 
                 // If the move above did unstuck the monster, this command will
                 // move it one step to the left
                 game_time::g_allow_tick = true;
-                actor::do_move_action(*mon, Dir::left);
+                actor::do_move_action(*actor, Dir::left);
 
-                if (mon->m_pos == pos_r)
+                if (actor->m_pos == pos_r)
                 {
                         tested_stuck = true;
                 }
-                else if (mon->m_pos == pos_l)
+                else if (actor->m_pos == pos_l)
                 {
                         tested_unstuck = true;
 
-                        REQUIRE(!mon->m_properties.has(PropId::entangled));
+                        REQUIRE(!actor->m_properties.has(PropId::entangled));
                 }
 
                 test_utils::cleanup_all();

@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "SDL_keycode.h"
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
 #include "draw_box.hpp"

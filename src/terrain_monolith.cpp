@@ -7,7 +7,6 @@
 #include "terrain_monolith.hpp"
 
 #include "actor.hpp"
-#include "actor_player.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
 #include "common_text.hpp"

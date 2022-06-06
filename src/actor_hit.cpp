@@ -13,13 +13,13 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_death.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
+#include "game.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
 #include "map.hpp"
@@ -27,6 +27,7 @@
 #include "player_bon.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "sound.hpp"
@@ -316,6 +317,82 @@ static int absorb_dmg_for_prolonged_life_player(int dmg)
         return dmg;
 }
 
+static int nr_wounds(const PropHandler& properties)
+{
+        if (properties.has(PropId::wound))
+        {
+                const auto* const prop =
+                        properties.prop(PropId::wound);
+
+                const auto* const wound =
+                        static_cast<const PropWound*>(prop);
+
+                return wound->nr_wounds();
+        }
+        else
+        {
+                return 0;
+        }
+}
+
+static void on_player_hit(
+        const int dmg,
+        const DmgType dmg_type,
+        const AllowWound allow_wound)
+{
+        // NOTE: Interrupt player multi-turn actions, unless the damage is a
+        // small number of "pure" damage (i.e. not physical, electrical,
+        // etc). The idea is that something like taking a pistol shot should
+        // realistically stop you from treating wounds or handling equipment
+        // etc, while taking a minor hit by something like poison ticking would
+        // not necessarily stop you.
+        const bool is_small_pure_damage =
+                ((dmg_type == DmgType::pure) && (dmg <= 1));
+
+        if (!is_small_pure_damage)
+        {
+                map::g_player->interrupt_actions(ForceInterruptActions::yes);
+        }
+
+        map::g_player->incr_shock(1.0, ShockSrc::misc);
+
+        const bool is_enough_dmg_for_wound = (dmg >= g_min_dmg_to_wound);
+        const bool is_physical = is_physical_dmg_type(dmg_type);
+
+        // Ghoul trait Indomitable Fury grants immunity to wounds while frenzied
+        const bool is_ghoul_resist_wound =
+                player_bon::has_trait(Trait::indomitable_fury) &&
+                map::g_player->m_properties.has(PropId::frenzied);
+
+        const bool is_wounded =
+                (allow_wound == AllowWound::yes) &&
+                ((map::g_player->m_hp - dmg) > 0) &&
+                is_enough_dmg_for_wound &&
+                is_physical &&
+                !is_ghoul_resist_wound &&
+                !config::is_bot_playing();
+
+        if (is_wounded)
+        {
+                Prop* const prop = property_factory::make(PropId::wound);
+
+                prop->set_indefinite();
+
+                const int nr_wounds_before =
+                        nr_wounds(map::g_player->m_properties);
+
+                map::g_player->m_properties.apply(prop);
+
+                const int nr_wounds_after =
+                        nr_wounds(map::g_player->m_properties);
+
+                if (nr_wounds_after > nr_wounds_before)
+                {
+                        game::add_history_event("Sustained a severe wound");
+                }
+        }
+}
+
 // -----------------------------------------------------------------------------
 // actor
 // -----------------------------------------------------------------------------
@@ -400,13 +477,15 @@ void hit(
                 }
         }
 
-        actor.on_hit(dmg, dmg_type, allow_wound);
+        if (is_player(&actor))
+        {
+                on_player_hit(dmg, dmg_type, allow_wound);
+        }
 
         actor.m_properties.on_hit();
 
         if ((dmg > 0) &&
-            !(actor::is_player(&actor) &&
-              config::is_bot_playing()))
+            !(actor::is_player(&actor) && config::is_bot_playing()))
         {
                 actor.m_hp -= dmg;
         }

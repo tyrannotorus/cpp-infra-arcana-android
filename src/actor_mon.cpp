@@ -4,22 +4,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "actor_mon.hpp"
+#include "actor.hpp"
 
 #include <algorithm>
 #include <iterator>
-#include <optional>
+#include <string>
 #include <vector>
 
 #include "ability_values.hpp"
 #include "actor_data.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "attack.hpp"
-#include "debug.hpp"
 #include "direction.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "gods.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
@@ -36,8 +35,11 @@
 #include "random.hpp"
 #include "reload.hpp"
 #include "sound.hpp"
+#include "spells.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
+
+struct P;
 
 // -----------------------------------------------------------------------------
 // Private
@@ -124,15 +126,7 @@ std::string get_cultist_aware_msg_hidden()
 // -----------------------------------------------------------------------------
 // Monster
 // -----------------------------------------------------------------------------
-Mon::~Mon()
-{
-        for (auto& spell : m_mon_spells)
-        {
-                delete spell.spell;
-        }
-}
-
-std::vector<Actor*> Mon::foes_aware_of() const
+std::vector<Actor*> Actor::foes_aware_of() const
 {
         std::vector<Actor*> result;
 
@@ -169,7 +163,7 @@ std::vector<Actor*> Mon::foes_aware_of() const
         return result;
 }
 
-bool Mon::is_sneaking() const
+bool Actor::is_sneaking() const
 {
         // NOTE: We require a stealth ability greater than zero, both for the
         // basic skill value, AND when including properties properties -
@@ -187,52 +181,7 @@ bool Mon::is_sneaking() const
                 !is_actor_my_leader(map::g_player));
 }
 
-Color Mon::color() const
-{
-        if (!is_alive())
-        {
-                return m_data->color;
-        }
-
-        // TODO: Make this a property:
-        if ((id() == Id::ooze_lurking) && !m_mimic_data)
-        {
-                return map::g_wall_color;
-        }
-
-        auto color_override = m_properties.override_actor_color();
-
-        if (color_override)
-        {
-                return color_override.value();
-        }
-
-        const auto* const data =
-                m_mimic_data
-                ? m_mimic_data
-                : m_data;
-
-        return data->color;
-}
-
-SpellSkill Mon::spell_skill(const SpellId id) const
-{
-        (void)id;
-
-        for (const auto& spell : m_mon_spells)
-        {
-                if (spell.spell->id() == id)
-                {
-                        return spell.skill;
-                }
-        }
-
-        ASSERT(false);
-
-        return SpellSkill::basic;
-}
-
-void Mon::speak_phrase(AlertsMon alerts_others)
+void Actor::speak_phrase(AlertsMon alerts_others)
 {
         if (m_properties.has(PropId::always_aware))
         {
@@ -267,7 +216,7 @@ void Mon::speak_phrase(AlertsMon alerts_others)
         snd_emit::run(snd);
 }
 
-std::string Mon::aware_msg_mon_seen() const
+std::string Actor::aware_msg_mon_seen() const
 {
         if (m_data->use_cultist_aware_msg_mon_seen)
         {
@@ -286,7 +235,7 @@ std::string Mon::aware_msg_mon_seen() const
         return name + " " + msg_end;
 }
 
-std::string Mon::aware_msg_mon_hidden() const
+std::string Actor::aware_msg_mon_hidden() const
 {
         if (m_data->use_cultist_aware_msg_mon_hidden)
         {
@@ -296,7 +245,7 @@ std::string Mon::aware_msg_mon_hidden() const
         return m_data->aware_msg_mon_hidden;
 }
 
-void Mon::become_aware_player(const AwareSource source, const int factor)
+void Actor::become_aware_player(const AwareSource source, const int factor)
 {
         if (!is_alive() || is_actor_my_leader(map::g_player))
         {
@@ -385,7 +334,7 @@ void Mon::become_aware_player(const AwareSource source, const int factor)
         }
 }
 
-void Mon::become_wary_player()
+void Actor::become_wary_player()
 {
         if (!is_alive() || is_actor_my_leader(map::g_player))
         {
@@ -414,7 +363,7 @@ void Mon::become_wary_player()
         }
 }
 
-void Mon::print_player_see_mon_become_aware_msg() const
+void Actor::print_player_see_mon_become_aware_msg() const
 {
         std::string msg = text_format::first_to_upper(name_the()) + " sees me!";
 
@@ -426,7 +375,7 @@ void Mon::print_player_see_mon_become_aware_msg() const
         msg_log::add(msg);
 }
 
-void Mon::print_player_see_mon_become_wary_msg() const
+void Actor::print_player_see_mon_become_wary_msg() const
 {
         if (m_data->wary_msg.empty())
         {
@@ -444,7 +393,7 @@ void Mon::print_player_see_mon_become_wary_msg() const
         msg_log::add(msg);
 }
 
-void Mon::make_player_aware_of_me(int duration_factor)
+void Actor::make_player_aware_of_me(int duration_factor)
 {
         int nr_turns = 2 * duration_factor;
 
@@ -464,7 +413,7 @@ void Mon::make_player_aware_of_me(int duration_factor)
         }
 }
 
-DidAction Mon::try_attack(Actor& defender)
+DidAction Actor::try_attack(Actor& defender)
 {
         if (!is_alive())
         {
@@ -537,7 +486,7 @@ DidAction Mon::try_attack(Actor& defender)
         return DidAction::no;
 }
 
-bool Mon::is_ranged_attack_blocked(const P& target_pos) const
+bool Actor::is_ranged_attack_blocked(const P& target_pos) const
 {
         const auto line =
                 line_calc::calc_new_line(
@@ -584,7 +533,7 @@ bool Mon::is_ranged_attack_blocked(const P& target_pos) const
                         is_blocking_at));
 }
 
-AiAvailAttacksData Mon::avail_attacks(Actor& defender) const
+AiAvailAttacksData Actor::avail_attacks(Actor& defender) const
 {
         AiAvailAttacksData result;
 
@@ -634,7 +583,7 @@ AiAvailAttacksData Mon::avail_attacks(Actor& defender) const
         return result;
 }
 
-item::Wpn* Mon::avail_wielded_melee() const
+item::Wpn* Actor::avail_wielded_melee() const
 {
         auto* const item = m_inv.item_in_slot(SlotId::wpn);
 
@@ -651,7 +600,7 @@ item::Wpn* Mon::avail_wielded_melee() const
         return nullptr;
 }
 
-item::Wpn* Mon::avail_wielded_ranged() const
+item::Wpn* Actor::avail_wielded_ranged() const
 {
         auto* const item = m_inv.item_in_slot(SlotId::wpn);
 
@@ -668,7 +617,7 @@ item::Wpn* Mon::avail_wielded_ranged() const
         return nullptr;
 }
 
-std::vector<item::Wpn*> Mon::avail_intr_melee() const
+std::vector<item::Wpn*> Actor::avail_intr_melee() const
 {
         std::vector<item::Wpn*> result;
 
@@ -685,7 +634,7 @@ std::vector<item::Wpn*> Mon::avail_intr_melee() const
         return result;
 }
 
-std::vector<item::Wpn*> Mon::avail_intr_ranged() const
+std::vector<item::Wpn*> Actor::avail_intr_ranged() const
 {
         std::vector<item::Wpn*> result;
 
@@ -702,7 +651,7 @@ std::vector<item::Wpn*> Mon::avail_intr_ranged() const
         return result;
 }
 
-bool Mon::should_reload(const item::Wpn& wpn) const
+bool Actor::should_reload(const item::Wpn& wpn) const
 {
         // TODO: If the monster does not see any enemies it should reload even
         // if the weapon is not completely empty
@@ -714,7 +663,7 @@ bool Mon::should_reload(const item::Wpn& wpn) const
                 m_inv.has_ammo_for_firearm_in_inventory());
 }
 
-AiAttData Mon::choose_attack(const AiAvailAttacksData& avail_attacks) const
+AiAttData Actor::choose_attack(const AiAvailAttacksData& avail_attacks) const
 {
         AiAttData result;
 
@@ -730,7 +679,7 @@ AiAttData Mon::choose_attack(const AiAvailAttacksData& avail_attacks) const
         return result;
 }
 
-int Mon::nr_mon_in_group() const
+int Actor::nr_mon_in_group() const
 {
         const Actor* const group_leader = m_leader ? m_leader : this;
 
@@ -747,7 +696,7 @@ int Mon::nr_mon_in_group() const
         return ret;
 }
 
-void Mon::add_spell(SpellSkill skill, Spell* const spell)
+void Actor::add_spell(SpellSkill skill, Spell* const spell)
 {
         const auto search = std::find_if(
                 std::begin(m_mon_spells),

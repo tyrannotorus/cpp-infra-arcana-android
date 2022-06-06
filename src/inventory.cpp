@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "actor.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
 #include "drop.hpp"
@@ -206,9 +206,9 @@ bool Inventory::try_stack_in_backpack(item::Item* item)
                 m_backpack[i] = item;
 
                 if (actor::is_player(m_owning_actor) &&
-                    (map::g_player->m_last_thrown_item == other))
+                    (actor::player_state::g_last_thrown_item == other))
                 {
-                        map::g_player->m_last_thrown_item = item;
+                        actor::player_state::g_last_thrown_item = item;
                 }
 
                 return true;
@@ -356,9 +356,9 @@ item::Item* Inventory::remove_item_in_backpack_with_idx(
         auto* item = m_backpack[idx];
 
         if (actor::is_player(m_owning_actor) &&
-            (item == map::g_player->m_last_thrown_item))
+            (item == actor::player_state::g_last_thrown_item))
         {
-                map::g_player->m_last_thrown_item = nullptr;
+                actor::player_state::g_last_thrown_item = nullptr;
         }
 
         m_backpack.erase(std::begin(m_backpack) + (int)idx);

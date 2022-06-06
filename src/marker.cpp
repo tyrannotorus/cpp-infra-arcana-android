@@ -16,7 +16,7 @@
 #include "SDL_keycode.h"
 #include "ability_values.hpp"
 #include "actor.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "attack.hpp"
 #include "attack_data.hpp"
@@ -78,7 +78,7 @@ void MarkerState::on_start()
                         // If no target available, attempt to place marker at
                         // closest visible monster. This sets a new player
                         // target if successful.
-                        map::g_player->m_tgt = nullptr;
+                        actor::player_state::g_target = nullptr;
 
                         try_go_to_closest_enemy();
                 }
@@ -390,9 +390,7 @@ void MarkerState::move(const Dir dir, const int nr_steps)
 
 bool MarkerState::try_go_to_tgt()
 {
-        const auto* const tgt = map::g_player->m_tgt;
-
-        if (!tgt)
+        if (!actor::player_state::g_target)
         {
                 return false;
         }
@@ -403,7 +401,7 @@ bool MarkerState::try_go_to_tgt()
         {
                 for (auto* const actor : seen_foes)
                 {
-                        if (tgt == actor)
+                        if (actor::player_state::g_target == actor)
                         {
                                 m_pos = actor->m_pos;
 
@@ -433,7 +431,8 @@ void MarkerState::try_go_to_closest_enemy()
         {
                 m_pos = closest_pos(map::g_player->m_pos, seen_foes_positions);
 
-                map::g_player->m_tgt = map::living_actor_at(m_pos);
+                actor::player_state::g_target =
+                        map::living_actor_at(m_pos);
         }
 }
 
@@ -650,7 +649,7 @@ void Aiming::handle_input(const io::InputData& input)
 
                 if (actor && actor::can_player_see_actor(*actor))
                 {
-                        map::g_player->m_tgt = actor;
+                        actor::player_state::g_target = actor;
                 }
 
                 const P pos = m_pos;
@@ -800,7 +799,7 @@ void Throwing::handle_input(const io::InputData& input)
 
                 if (actor && actor::can_player_see_actor(*actor))
                 {
-                        map::g_player->m_tgt = actor;
+                        actor::player_state::g_target = actor;
                 }
 
                 auto* item_to_throw = item::copy_item(*m_inv_item);
@@ -811,7 +810,7 @@ void Throwing::handle_input(const io::InputData& input)
 
                 m_inv_item = map::g_player->m_inv.decr_item(m_inv_item);
 
-                map::g_player->m_last_thrown_item = m_inv_item;
+                actor::player_state::g_last_thrown_item = m_inv_item;
 
                 const auto pos = m_pos;
 

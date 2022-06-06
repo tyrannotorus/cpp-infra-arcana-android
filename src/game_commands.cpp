@@ -13,10 +13,11 @@
 #include <vector>
 
 #include "SDL_keycode.h"
+#include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_move.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
@@ -829,7 +830,8 @@ void handle(const GameCmd cmd)
                         // pressing 'wait')
                         const int turns_to_apply = 5;
 
-                        map::g_player->m_wait_turns_left = turns_to_apply - 1;
+                        actor::player_state::g_wait_turns_left =
+                                (turns_to_apply - 1);
 
                         game_time::tick();
                 }
@@ -971,7 +973,8 @@ void handle(const GameCmd cmd)
 
         case GameCmd::throw_item:
         {
-                const auto* explosive = map::g_player->m_active_explosive;
+                const item::Item* explosive =
+                        actor::player_state::g_active_explosive.get();
 
                 if (explosive)
                 {

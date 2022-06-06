@@ -10,7 +10,6 @@
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "actor_move.hpp"
-#include "actor_player.hpp"
 #include "audio_data.hpp"
 #include "catch.hpp"
 #include "direction.hpp"

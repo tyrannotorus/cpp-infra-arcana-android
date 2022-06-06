@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <initializer_list>
 #include <iterator>
 #include <optional>
 #include <ostream>
@@ -19,8 +20,7 @@
 #include "actor_eat.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
@@ -493,7 +493,7 @@ PropEnded PropInfected::on_actor_turn()
 
         if (actor::is_player(m_owner))
         {
-                if (map::g_player->m_active_medical_bag)
+                if (actor::player_state::g_active_medical_bag)
                 {
                         ++m_nr_turns_left;
 
@@ -1931,13 +1931,12 @@ void PropParalyzed::on_applied()
 {
         if (actor::is_player(m_owner))
         {
-                auto* const player = map::g_player;
+                item::Explosive* const explosive =
+                        actor::player_state::g_active_explosive.get();
 
-                auto* const active_explosive = player->m_active_explosive;
-
-                if (active_explosive)
+                if (explosive)
                 {
-                        active_explosive->on_player_paralyzed();
+                        explosive->on_player_paralyzed();
                 }
         }
 }
@@ -1958,7 +1957,7 @@ void PropRShock::on_applied()
 {
         if (actor::is_player(m_owner))
         {
-                map::g_player->m_nr_turns_until_ins = -1;
+                actor::player_state::g_nr_turns_until_insanity = -1;
         }
 }
 
@@ -2275,7 +2274,7 @@ PropActResult PropVortex::on_act()
                 << "Player pos: "
                 << player_pos.x << ", " << player_pos.y << std::endl;
 
-        static_cast<actor::Mon*>(m_owner)->make_player_aware_of_me();
+        m_owner->make_player_aware_of_me();
 
         if (actor::can_player_see_actor(*m_owner))
         {
@@ -2664,8 +2663,7 @@ PropActResult PropCorpseRises::on_act()
                 map::g_player->incr_shock(4.0, ShockSrc::see_mon);
         }
 
-        static_cast<actor::Mon*>(m_owner)
-                ->become_aware_player(actor::AwareSource::other);
+        m_owner->become_aware_player(actor::AwareSource::other);
 
         game_time::tick();
 
@@ -3092,9 +3090,8 @@ void PropAuraOfDecay::run_effect_on_actors() const
 
                 if (!actor::is_player(actor))
                 {
-                        static_cast<actor::Mon*>(actor)
-                                ->become_aware_player(
-                                        actor::AwareSource::other);
+                        actor->become_aware_player(
+                                actor::AwareSource::other);
                 }
         }
 }
@@ -3413,8 +3410,7 @@ PropEnded PropMagicSearching::on_actor_turn()
                                 continue;
                         }
 
-                        static_cast<actor::Mon*>(actor)
-                                ->make_player_aware_of_me(det_mon_multiplier);
+                        actor->make_player_aware_of_me(det_mon_multiplier);
                 }
         }
 

@@ -11,11 +11,12 @@
 
 #include "global.hpp"
 
-template <typename T> class Array2;
+template <typename T>
+class Array2;
 
 namespace actor
 {
-class Mon;
+class Actor;
 }  // namespace actor
 
 struct P;
@@ -27,21 +28,21 @@ namespace ai
 // -----------------------------------------------------------------------------
 namespace action
 {
-DidAction try_cast_random_spell(actor::Mon& mon);
+DidAction try_cast_random_spell(actor::Actor& mon);
 
-DidAction handle_closed_blocking_door(actor::Mon& mon, std::vector<P>& path);
+DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path);
 
-DidAction handle_inventory(actor::Mon& mon);
+DidAction handle_inventory(actor::Actor& mon);
 
-DidAction make_room_for_friend(actor::Mon& mon);
+DidAction make_room_for_friend(actor::Actor& mon);
 
-DidAction move_to_random_adj_cell(actor::Mon& mon);
+DidAction move_to_random_adj_cell(actor::Actor& mon);
 
-DidAction move_to_target_simple(actor::Mon& mon);
+DidAction move_to_target_simple(actor::Actor& mon);
 
-DidAction step_path(actor::Mon& mon, const std::vector<P>& path);
+DidAction step_path(actor::Actor& mon, const std::vector<P>& path);
 
-DidAction step_to_lair_if_los(actor::Mon& mon, const P& lair_p);
+DidAction step_to_lair_if_los(actor::Actor& mon, const P& lair_p);
 
 }  // namespace action
 
@@ -50,15 +51,15 @@ DidAction step_to_lair_if_los(actor::Mon& mon, const P& lair_p);
 // -----------------------------------------------------------------------------
 namespace info
 {
-bool look(actor::Mon& mon);
+bool look(actor::Actor& mon);
 
-std::vector<P> find_path_to_lair_if_no_los(actor::Mon& mon, const P& lair_p);
+std::vector<P> find_path_to_lair_if_no_los(actor::Actor& mon, const P& lair_p);
 
-std::vector<P> find_path_to_leader(actor::Mon& mon);
+std::vector<P> find_path_to_leader(actor::Actor& mon);
 
-std::vector<P> find_path_to_target(actor::Mon& mon);
+std::vector<P> find_path_to_target(actor::Actor& mon);
 
-void set_special_blocked_cells(actor::Mon& mon, Array2<bool>& a);
+void set_special_blocked_cells(actor::Actor& mon, Array2<bool>& a);
 
 }  // namespace info
 }  // namespace ai

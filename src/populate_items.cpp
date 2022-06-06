@@ -11,7 +11,7 @@
 #include <iterator>
 #include <vector>
 
-#include "actor_player.hpp"
+#include "actor.hpp"
 #include "array2.hpp"
 #include "global.hpp"
 #include "item_data.hpp"

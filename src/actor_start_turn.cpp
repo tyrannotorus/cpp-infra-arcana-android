@@ -13,8 +13,7 @@
 
 #include "ability_values.hpp"
 #include "actor.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "actor_sneak.hpp"
 #include "array2.hpp"
@@ -136,7 +135,7 @@ static bool can_detect_pos_by_vigilant(
 // Checks if the Vigilant trait should make the player aware of a monster which
 // cannot be seen (either due to invisibility, or being in an unseen position)
 static bool should_vigilant_make_aware_of_unseeable_mon(
-        const actor::Mon& mon,
+        const actor::Actor& mon,
         const Array2<int>& vigilant_flood)
 {
         if (!can_detect_pos_by_vigilant(mon.m_pos, vigilant_flood))
@@ -168,7 +167,7 @@ static bool should_vigilant_make_aware_of_unseeable_mon(
         return false;
 }
 
-static void make_aware_of_unseeable_mon_by_vigilant(actor::Mon& mon)
+static void make_aware_of_unseeable_mon_by_vigilant(actor::Actor& mon)
 {
         const bool is_cell_seen = map::g_seen.at(mon.m_pos);
 
@@ -186,14 +185,14 @@ static void make_aware_of_unseeable_mon_by_vigilant(actor::Mon& mon)
                         // Became aware of a monster in an unseen cell
 
                         // Abort quick move
-                        map::g_player->m_auto_move_dir = Dir::END;
+                        actor::player_state::g_auto_move_dir = Dir::END;
                 }
         }
 
         mon.make_player_aware_of_me();
 }
 
-static void on_player_spot_sneaking_mon(actor::Mon& mon)
+static void on_player_spot_sneaking_mon(actor::Actor& mon)
 {
         mon.make_player_aware_of_me();
 
@@ -209,10 +208,10 @@ static void on_player_spot_sneaking_mon(actor::Mon& mon)
 }
 
 static bool player_try_spot_sneaking_mon(
-        const actor::Mon& mon,
+        const actor::Actor& mon,
         const Array2<int>& vigilant_flood)
 {
-        ActionResult sneak_result;
+        ActionResult sneak_result = {};
 
         if (can_detect_pos_by_vigilant(mon.m_pos, vigilant_flood))
         {
@@ -278,11 +277,11 @@ static void warn_player_about_mon(const actor::Actor& actor)
         }
 }
 
-static void update_player_seen_monster(actor::Mon& mon)
+static void update_player_seen_monster(actor::Actor& mon)
 {
         if (mon.m_mon_aware_state.is_msg_mon_in_view_printed)
         {
-                map::g_player->allow_print_mon_warning = false;
+                actor::player_state::g_allow_print_mon_warning = false;
         }
 
         mon.m_mon_aware_state.is_msg_mon_in_view_printed = true;
@@ -290,24 +289,24 @@ static void update_player_seen_monster(actor::Mon& mon)
         const bool should_warn =
                 map::g_player->is_busy() ||
                 (config::always_warn_new_mon() &&
-                 map::g_player->allow_print_mon_warning);
+                 actor::player_state::g_allow_print_mon_warning);
 
         if (should_warn)
         {
-                map::g_player->seen_mon_to_warn_about = &mon;
+                actor::player_state::g_seen_mon_to_warn_about = &mon;
         }
         else
         {
                 // If we should not warn about this seen monster, it means we
                 // should not warn about any seen monster.
-                map::g_player->seen_mon_to_warn_about = nullptr;
+                actor::player_state::g_seen_mon_to_warn_about = nullptr;
         }
 
         mon.m_mon_aware_state.is_player_feeling_msg_allowed = false;
 }
 
 static void update_player_unseen_monster(
-        actor::Mon& mon,
+        actor::Actor& mon,
         const Array2<int>& vigilant_flood)
 {
         if (!mon.is_player_aware_of_me())
@@ -336,8 +335,8 @@ static void update_player_unseen_monster(
                 {
                         on_player_spot_sneaking_mon(mon);
 
-                        map::g_player->seen_mon_to_warn_about = nullptr;
-                        map::g_player->allow_print_mon_warning = false;
+                        actor::player_state::g_seen_mon_to_warn_about = nullptr;
+                        actor::player_state::g_allow_print_mon_warning = false;
                 }
         }
 }
@@ -353,26 +352,25 @@ static void update_player_monster_detection()
                         continue;
                 }
 
-                auto& mon = static_cast<actor::Mon&>(*actor);
-
                 if (can_player_see_actor(*actor))
                 {
-                        update_player_seen_monster(mon);
+                        update_player_seen_monster(*actor);
                 }
                 else
                 {
-                        update_player_unseen_monster(mon, vigilant_flood);
+                        update_player_unseen_monster(*actor, vigilant_flood);
                 }
 
-                if (mon.is_player_aware_of_me())
+                if (actor->is_player_aware_of_me())
                 {
-                        mon.m_give_hit_chance_penalty_vs_player = false;
+                        actor->m_give_hit_chance_penalty_vs_player = false;
                 }
         }
 
-        if (map::g_player->seen_mon_to_warn_about)
+        if (actor::player_state::g_seen_mon_to_warn_about)
         {
-                warn_player_about_mon(*map::g_player->seen_mon_to_warn_about);
+                warn_player_about_mon(
+                        *actor::player_state::g_seen_mon_to_warn_about);
         }
 }
 
@@ -388,16 +386,16 @@ static void on_player_shock_over_limit()
 
         hints::display(hints::Id::high_shock);
 
-        if (player.m_nr_turns_until_ins < 0)
+        if (actor::player_state::g_nr_turns_until_insanity < 0)
         {
-                player.m_nr_turns_until_ins = 3;
+                actor::player_state::g_nr_turns_until_insanity = 3;
         }
         else
         {
-                --player.m_nr_turns_until_ins;
+                --actor::player_state::g_nr_turns_until_insanity;
         }
 
-        if (player.m_nr_turns_until_ins > 0)
+        if (actor::player_state::g_nr_turns_until_insanity > 0)
         {
                 msg_log::add(
                         "I feel my sanity slipping...",
@@ -408,7 +406,7 @@ static void on_player_shock_over_limit()
         else
         {
                 // Time to go crazy!
-                player.m_nr_turns_until_ins = -1;
+                actor::player_state::g_nr_turns_until_insanity = -1;
 
                 player.incr_insanity();
         }
@@ -651,16 +649,16 @@ static void player_start_turn()
         else
         {
                 // Shock < 100%
-                player.m_nr_turns_until_ins = -1;
+                actor::player_state::g_nr_turns_until_insanity = -1;
         }
 
         insanity::on_new_player_turn(player_seen_actors);
 
-        player.seen_mon_to_warn_about = nullptr;
-        player.allow_print_mon_warning = true;
+        actor::player_state::g_seen_mon_to_warn_about = nullptr;
+        actor::player_state::g_allow_print_mon_warning = true;
 }
 
-static void mon_start_turn(actor::Mon& mon)
+static void mon_start_turn(actor::Actor& mon)
 {
         if (mon.is_aware_of_player())
         {
@@ -684,8 +682,7 @@ void start_turn(Actor& actor)
         }
         else
         {
-                auto& mon = static_cast<Mon&>(actor);
-                mon_start_turn(mon);
+                mon_start_turn(actor);
         }
 }
 

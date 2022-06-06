@@ -11,7 +11,6 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_player.hpp"
 #include "catch.hpp"
 #include "debug.hpp"
 #include "game.hpp"

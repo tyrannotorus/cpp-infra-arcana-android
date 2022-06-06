@@ -35,7 +35,6 @@ enum class Id;
 namespace actor
 {
 class Actor;
-class Player;
 }  // namespace actor
 
 namespace terrain
@@ -115,7 +114,7 @@ extern Array2<bool> g_terrain_blocks_small_crawling;
 extern Array2<bool> g_terrain_blocks_burrowing;
 extern Array2<bool> g_terrain_blocks_los;
 
-extern actor::Player* g_player;
+extern actor::Actor* g_player;
 
 extern int g_dlvl;
 

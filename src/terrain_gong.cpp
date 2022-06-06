@@ -15,8 +15,7 @@
 
 #include "actor.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
 #include "common_text.hpp"
@@ -420,14 +419,14 @@ void GainXp::run_effect()
 // -----------------------------------------------------------------------------
 bool RemoveInsanity::is_allowed() const
 {
-        return map::g_player->m_ins >= 25;
+        return actor::player_state::g_insanity >= 25;
 }
 
 void RemoveInsanity::run_effect()
 {
         msg_log::add("I feel more sane.");
 
-        map::g_player->m_ins -= 25;
+        actor::player_state::g_insanity -= 25;
 }
 
 // -----------------------------------------------------------------------------

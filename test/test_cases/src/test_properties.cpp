@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+#include "actor.hpp"
 #include "actor_factory.hpp"
 #include "actor_move.hpp"
-#include "actor_player.hpp"
 #include "catch.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"

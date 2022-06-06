@@ -14,8 +14,6 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
 #include "draw_blast.hpp"
@@ -208,7 +206,7 @@ void EventWallCrumble::on_new_turn()
 
         rnd::shuffle(m_inner_positions);
 
-        std::vector<actor::Mon*> mon_spawned;
+        std::vector<actor::Actor*> mon_spawned;
 
         for (const P& p : m_inner_positions)
         {
@@ -217,9 +215,7 @@ void EventWallCrumble::on_new_turn()
                 {
                         auto* const actor = actor::make(actor_id, p);
 
-                        auto* const mon = static_cast<actor::Mon*>(actor);
-
-                        mon_spawned.push_back(mon);
+                        mon_spawned.push_back(actor);
                 }
         }
 
@@ -449,9 +445,7 @@ void EventSnakeEmerge::on_new_turn()
 
                 actor->m_properties.apply(prop);
 
-                static_cast<actor::Mon*>(actor)
-                        ->become_aware_player(
-                                actor::AwareSource::other);
+                actor->become_aware_player(actor::AwareSource::other);
         }
 
         game_time::erase_mob(this, true);

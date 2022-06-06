@@ -15,7 +15,6 @@
 #include "ability_values.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_player.hpp"
 #include "actor_sneak.hpp"
 #include "attack_data.hpp"
 #include "colors.hpp"

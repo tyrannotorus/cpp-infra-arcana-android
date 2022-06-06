@@ -13,7 +13,8 @@
 #include <vector>
 
 #include "SDL_keycode.h"
-#include "actor_player.hpp"
+#include "actor.hpp"
+#include "actor_player_state.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
 #include "browser.hpp"
@@ -146,7 +147,8 @@ static void on_body_slot_item_selected()
                 return;
         }
 
-        map::g_player->m_remove_armor_countdown = s_nr_turns_to_handle_armor;
+        actor::player_state::g_remove_armor_countdown =
+                s_nr_turns_to_handle_armor;
 
         game_time::tick();
 }
@@ -166,7 +168,7 @@ static void on_equipable_backpack_item_selected(const size_t backpack_idx)
                 {
                         inv.unequip_slot(SlotId::wpn);
 
-                        map::g_player->m_item_equipping = item_to_equip;
+                        actor::player_state::g_item_equipping = item_to_equip;
                 }
                 else
                 {
@@ -181,7 +183,7 @@ static void on_equipable_backpack_item_selected(const size_t backpack_idx)
                 {
                         inv.unequip_slot(SlotId::head);
 
-                        map::g_player->m_item_equipping = item_to_equip;
+                        actor::player_state::g_item_equipping = item_to_equip;
                 }
                 else
                 {
@@ -201,13 +203,13 @@ static void on_equipable_backpack_item_selected(const size_t backpack_idx)
 
                 if (inv.has_item_in_slot(SlotId::body))
                 {
-                        map::g_player->m_remove_armor_countdown =
+                        actor::player_state::g_remove_armor_countdown =
                                 s_nr_turns_to_handle_armor;
                 }
 
-                map::g_player->m_item_equipping = item_to_equip;
+                actor::player_state::g_item_equipping = item_to_equip;
 
-                map::g_player->m_equip_armor_countdown =
+                actor::player_state::g_equip_armor_countdown =
                         s_nr_turns_to_handle_armor;
         }
         break;
@@ -1292,11 +1294,10 @@ void Drop::update()
                     (idx == (size_t)SlotId::body))
                 {
                         // Body slot marked, start dropping the armor
-                        map::g_player->m_remove_armor_countdown =
+                        actor::player_state::g_remove_armor_countdown =
                                 s_nr_turns_to_handle_armor;
 
-                        map::g_player
-                                ->m_is_dropping_armor_from_body_slot = true;
+                        actor::player_state::g_is_dropping_armor_from_body = true;
 
                         game_time::tick();
                 }
@@ -1554,10 +1555,10 @@ void Equip::update()
                         }
 
                         // Start putting on armor
-                        map::g_player->m_equip_armor_countdown =
+                        actor::player_state::g_equip_armor_countdown =
                                 s_nr_turns_to_handle_armor;
 
-                        map::g_player->m_item_equipping =
+                        actor::player_state::g_item_equipping =
                                 map::g_player->m_inv.m_backpack[idx];
                 }
                 else
@@ -1619,7 +1620,7 @@ void SelectThrow::on_start()
                         entry.relative_idx = i;
                         entry.is_slot = false;
 
-                        if (item == map::g_player->m_last_thrown_item)
+                        if (item == actor::player_state::g_last_thrown_item)
                         {
                                 // Last thrown item - show it at the top
                                 m_filtered_inv.insert(
@@ -1658,7 +1659,7 @@ void SelectThrow::on_start()
 
         m_browser.remove_key(throw_key);
 
-        if (map::g_player->m_last_thrown_item)
+        if (actor::player_state::g_last_thrown_item)
         {
                 // A "last thrown item" exists, re-insert the throw key at the
                 // beginning of the key list (so that it's currently selected)

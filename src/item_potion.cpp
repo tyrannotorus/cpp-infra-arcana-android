@@ -14,8 +14,6 @@
 #include <ostream>
 
 #include "actor.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
@@ -438,8 +436,7 @@ void Potion::on_collide(const P& pos, actor::Actor* const actor)
                                 actor_name +
                                 ".");
 
-                        static_cast<actor::Mon*>(actor)
-                                ->make_player_aware_of_me();
+                        actor->make_player_aware_of_me();
                 }
 
                 collide_hook(pos, actor);

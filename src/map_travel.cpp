@@ -12,7 +12,8 @@
 #include <string>
 #include <vector>
 
-#include "actor_player.hpp"
+#include "actor.hpp"
+#include "actor_player_state.hpp"
 #include "debug.hpp"
 #include "draw_map.hpp"
 #include "game.hpp"
@@ -153,7 +154,7 @@ void go_to_nxt()
 
         game_time::g_is_magic_descend_nxt_std_turn = false;
 
-        map::g_player->m_tgt = nullptr;
+        actor::player_state::g_target = nullptr;
 
         viewport::show(map::g_player->m_pos, viewport::ForceCentering::yes);
 

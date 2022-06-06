@@ -8,7 +8,6 @@
 
 #include "actor.hpp"
 #include "actor_factory.hpp"
-#include "actor_player.hpp"
 #include "attack.hpp"
 #include "catch.hpp"
 #include "game_time.hpp"

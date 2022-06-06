@@ -15,9 +15,8 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_mon.hpp"
 #include "actor_move.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "ai.hpp"
 #include "array2.hpp"
@@ -99,7 +98,7 @@ static void player_act()
 {
         game_time::g_is_player_acting = true;
 
-        actor::Player& player = *map::g_player;
+        actor::Actor& player = *map::g_player;
 
         if (!player.is_alive())
         {
@@ -111,34 +110,34 @@ static void player_act()
                 return;
         }
 
-        if (player.m_tgt && (player.m_tgt->m_state != ActorState::alive))
+        if (actor::player_state::g_target &&
+            (actor::player_state::g_target->m_state != ActorState::alive))
         {
-                player.m_tgt = nullptr;
+                actor::player_state::g_target = nullptr;
         }
 
-        if (player.m_active_medical_bag)
+        if (actor::player_state::g_active_medical_bag)
         {
-                player.m_active_medical_bag->continue_action();
+                actor::player_state::g_active_medical_bag->continue_action();
 
                 return;
         }
 
-        if (player.m_remove_armor_countdown > 0)
+        if (actor::player_state::g_remove_armor_countdown > 0)
         {
-                --player.m_remove_armor_countdown;
+                --actor::player_state::g_remove_armor_countdown;
 
                 // Done removing the armor now?
-                if (player.m_remove_armor_countdown == 0)
+                if (actor::player_state::g_remove_armor_countdown == 0)
                 {
-                        if (player.m_is_dropping_armor_from_body_slot)
+                        if (actor::player_state::g_is_dropping_armor_from_body)
                         {
                                 item_drop::drop_item_from_inv(
                                         *map::g_player,
                                         InvType::slots,
                                         (size_t)SlotId::body);
 
-                                player.m_is_dropping_armor_from_body_slot =
-                                        false;
+                                actor::player_state::g_is_dropping_armor_from_body = false;
                         }
                         else
                         {
@@ -155,24 +154,24 @@ static void player_act()
                 return;
         }
 
-        if (player.m_equip_armor_countdown > 0)
+        if (actor::player_state::g_equip_armor_countdown > 0)
         {
-                --player.m_equip_armor_countdown;
+                --actor::player_state::g_equip_armor_countdown;
 
                 // Done wearing armor now?
-                if (player.m_equip_armor_countdown == 0)
+                if (actor::player_state::g_equip_armor_countdown == 0)
                 {
-                        if (player.m_item_equipping)
+                        if (actor::player_state::g_item_equipping)
                         {
                                 // Putting on armor
-                                ASSERT(player.m_item_equipping->data().type ==
+                                ASSERT(actor::player_state::g_item_equipping->data().type ==
                                        ItemType::armor);
 
                                 player.m_inv.equip_backpack_item(
-                                        player.m_item_equipping,
+                                        actor::player_state::g_item_equipping,
                                         SlotId::body);
 
-                                player.m_item_equipping = nullptr;
+                                actor::player_state::g_item_equipping = nullptr;
                         }
                 }
                 else
@@ -184,12 +183,12 @@ static void player_act()
                 return;
         }
 
-        if (player.m_item_equipping)
+        if (actor::player_state::g_item_equipping)
         {
                 // NOTE: Armor is handled above - no need to consider that here
                 SlotId slot_id = SlotId::END;
 
-                switch (player.m_item_equipping->data().type)
+                switch (actor::player_state::g_item_equipping->data().type)
                 {
                 case ItemType::melee_wpn:
                 case ItemType::ranged_wpn:
@@ -206,19 +205,19 @@ static void player_act()
                 }
 
                 player.m_inv.equip_backpack_item(
-                        player.m_item_equipping,
+                        actor::player_state::g_item_equipping,
                         slot_id);
 
-                player.m_item_equipping = nullptr;
+                actor::player_state::g_item_equipping = nullptr;
 
                 game_time::tick();
 
                 return;
         }
 
-        if (player.m_wait_turns_left > 0)
+        if (actor::player_state::g_wait_turns_left > 0)
         {
-                --player.m_wait_turns_left;
+                --actor::player_state::g_wait_turns_left;
 
                 do_move_action(player, Dir::center);
 
@@ -226,11 +225,11 @@ static void player_act()
         }
 
         // Auto move
-        if (player.m_auto_move_dir != Dir::END)
+        if (actor::player_state::g_auto_move_dir != Dir::END)
         {
                 const auto target =
                         player.m_pos +
-                        dir_utils::offset(player.m_auto_move_dir);
+                        dir_utils::offset(actor::player_state::g_auto_move_dir);
 
                 bool is_target_adj_to_unseen_cell = false;
 
@@ -254,7 +253,7 @@ static void player_act()
                 // If this is not the first step of auto moving, stop before
                 // blocking terrains, fire, known traps, etc - otherwise allow
                 // bumping terrains as with normal movement
-                if (player.m_has_taken_auto_move_step)
+                if (actor::player_state::g_has_taken_auto_move_step)
                 {
                         bool should_abort = false;
 
@@ -288,7 +287,7 @@ static void player_act()
 
                         if (should_abort)
                         {
-                                player.m_auto_move_dir = Dir::END;
+                                actor::player_state::g_auto_move_dir = Dir::END;
 
                                 return;
                         }
@@ -297,13 +296,13 @@ static void player_act()
                 const auto adj_known_closed_doors_before =
                         adj_known_closed_doors(player.m_pos);
 
-                do_move_action(player, player.m_auto_move_dir);
+                do_move_action(player, actor::player_state::g_auto_move_dir);
 
-                player.m_has_taken_auto_move_step = true;
+                actor::player_state::g_has_taken_auto_move_step = true;
 
                 player.update_fov();
 
-                if (player.m_auto_move_dir == Dir::END)
+                if (actor::player_state::g_auto_move_dir == Dir::END)
                 {
                         return;
                 }
@@ -331,7 +330,7 @@ static void player_act()
                 if (is_target_adj_to_unseen_cell ||
                     is_new_known_adj_closed_door)
                 {
-                        player.m_auto_move_dir = Dir::END;
+                        actor::player_state::g_auto_move_dir = Dir::END;
                 }
 
                 return;
@@ -353,7 +352,7 @@ static void player_act()
         }
 }
 
-static void mon_act(actor::Mon& mon)
+static void mon_act(actor::Actor& mon)
 {
         const bool is_player_leader = mon.is_actor_my_leader(map::g_player);
 
@@ -442,9 +441,7 @@ static void mon_act(actor::Mon& mon)
                         // There are no seen foes
                         mon.m_ai_state.is_target_seen = false;
 
-                        target_bucket =
-                                static_cast<actor::Mon&>(mon)
-                                        .foes_aware_of();
+                        target_bucket = mon.foes_aware_of();
 
                         remove_player_with_sanctuary(target_bucket);
                 }
@@ -694,8 +691,7 @@ void act(Actor& actor)
         }
         else
         {
-                auto& mon = static_cast<Mon&>(actor);
-                mon_act(mon);
+                mon_act(actor);
         }
 }
 

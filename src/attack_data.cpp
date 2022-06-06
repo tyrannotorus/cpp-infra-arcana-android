@@ -12,7 +12,7 @@
 #include "ability_values.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "config.hpp"
@@ -171,8 +171,8 @@ static bool is_reduced_pierce_dmg(
 static bool is_player_handling_armor()
 {
         return (
-                (map::g_player->m_equip_armor_countdown > 0) ||
-                (map::g_player->m_remove_armor_countdown));
+                (actor::player_state::g_equip_armor_countdown > 0) ||
+                (actor::player_state::g_remove_armor_countdown));
 }
 
 static bool is_player_wielding_pitchfork()

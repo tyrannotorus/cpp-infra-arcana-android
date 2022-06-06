@@ -8,7 +8,6 @@
 #include "actor_data.hpp"
 #include "actor_death.hpp"
 #include "actor_factory.hpp"
-#include "actor_player.hpp"
 #include "array2.hpp"
 #include "catch.hpp"
 #include "colors.hpp"

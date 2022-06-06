@@ -171,23 +171,11 @@ void CharacterDrawObj::draw() const {}
 
 void MapDrawObj::draw() const {}
 
-void draw_blast_at_cells(
-        const std::vector<P>&,
-        const Color&) {}
-
-void draw_blast_at_seen_cells(
-        const std::vector<P>&,
-        const Color&) {}
-
-void draw_blast_at_seen_actors(
-        const std::vector<actor::Actor*>&,
-        const Color&) {}
-
 void draw_logo() {}
 
 void flush_input() {}
 
-InputData get()
+InputData read_input()
 {
         InputData d = {};
 
@@ -200,6 +188,16 @@ int graphics_cycle_nr(const GraphicsCycle)
 {
         return 0;
 }
+
+void flash_at_actor(const actor::Actor& actor, const Color& color)
+{
+        (void)actor;
+        (void)color;
+}
+
+void draw_flash_animations() {}
+
+void clear_all_flash_animations() {}
 
 std::string sdl_pref_dir()
 {

@@ -12,8 +12,8 @@
 #include <iterator>
 #include <vector>
 
+#include "actor.hpp"
 #include "actor_data.hpp"
-#include "actor_player.hpp"
 #include "debug.hpp"
 #include "game.hpp"
 #include "game_time.hpp"

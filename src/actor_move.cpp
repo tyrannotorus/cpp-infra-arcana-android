@@ -13,8 +13,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_eat.hpp"
-#include "actor_mon.hpp"
-#include "actor_player.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "attack.hpp"
@@ -47,7 +46,7 @@
 // -----------------------------------------------------------------------------
 static BinaryAnswer query_player_attack_mon_with_ranged_wpn(
         const item::Wpn& wpn,
-        const actor::Mon& mon)
+        const actor::Actor& mon)
 {
         const std::string wpn_name = wpn.name(ItemNameType::a);
 
@@ -78,7 +77,7 @@ static BinaryAnswer query_player_attack_mon_with_ranged_wpn(
         return answer;
 }
 
-static void player_bump_known_hostile_mon(actor::Mon& mon)
+static void player_bump_known_hostile_mon(actor::Actor& mon)
 {
         auto& player = *map::g_player;
 
@@ -116,12 +115,12 @@ static void player_bump_known_hostile_mon(actor::Mon& mon)
                 }
         }
 
-        player.m_tgt = &mon;
+        actor::player_state::g_target = &mon;
 
         attack::melee(&player, player.m_pos, mon, wpn);
 }
 
-static void player_bump_unkown_hostile_mon(actor::Mon& mon)
+static void player_bump_unkown_hostile_mon(actor::Actor& mon)
 {
         actor::print_aware_invis_mon_msg(mon);
 
@@ -130,7 +129,7 @@ static void player_bump_unkown_hostile_mon(actor::Mon& mon)
         map::update_vision();
 }
 
-static void player_displace_allied_mon(actor::Mon& mon, const P& new_mon_pos)
+static void player_displace_allied_mon(actor::Actor& mon, const P& new_mon_pos)
 {
         if (mon.is_player_aware_of_me())
         {
@@ -235,8 +234,11 @@ static void print_ooze_enter_terrain_msg(
         const actor::Actor& actor,
         const terrain::Terrain& terrain)
 {
-        const auto mon_name = text_format::first_to_upper(actor.name_the());
-        const auto ter_name = terrain.name(Article::the);
+        const auto mon_name =
+                text_format::first_to_upper(actor.name_the());
+
+        const auto ter_name =
+                terrain.name(Article::the);
 
         std::string preposition = "through";
 
@@ -264,8 +266,11 @@ static void print_small_creature_enter_terrain_msg(
         const actor::Actor& actor,
         const terrain::Terrain& terrain)
 {
-        const auto mon_name = text_format::first_to_upper(actor.name_the());
-        const auto ter_name = terrain.name(Article::the);
+        const auto mon_name =
+                text_format::first_to_upper(actor.name_the());
+
+        const auto ter_name =
+                terrain.name(Article::the);
 
         msg_log::add(mon_name + " squirms through " + ter_name + ".");
 }
@@ -367,9 +372,7 @@ static void move_player_non_center_direction(const P& target)
         const bool is_terrain_blocking_move =
                 !map::can_actor_move_into_terrain_at(player, target);
 
-        auto* const mon =
-                static_cast<actor::Mon*>(
-                        map::living_actor_at(target));
+        actor::Actor* const mon = map::living_actor_at(target);
 
         const auto is_aware_of_mon = (mon && mon->is_player_aware_of_me());
 
@@ -588,7 +591,7 @@ static void sanity_check_no_living_actor_at_target_pos(
 }
 #endif  // NDEBUG
 
-static void do_move_action_mon(actor::Mon& mon, Dir dir)
+static void do_move_action_mon(actor::Actor& mon, Dir dir)
 {
 #ifndef NDEBUG
         sanity_check_mon_direction(mon, dir);
@@ -641,7 +644,7 @@ void do_move_action(Actor& actor, const Dir dir)
         }
         else
         {
-                do_move_action_mon(static_cast<Mon&>(actor), dir);
+                do_move_action_mon(actor, dir);
         }
 }
 
