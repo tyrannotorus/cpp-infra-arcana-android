@@ -6,11 +6,11 @@
 
 #include <memory>
 
-#include "catch.hpp"
 #include "array2.hpp"
+#include "catch.hpp"
 #include "fov.hpp"
-#include "line_calc.hpp"
 #include "global.hpp"
+#include "line_calc.hpp"
 #include "pos.hpp"
 
 TEST_CASE("fov")

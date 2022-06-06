@@ -41,18 +41,15 @@ static std::vector<MapType> s_map_list;
 static void trigger_insanity_sympts_for_descent()
 {
         // Phobia of deep places
-        if (insanity::has_sympt(InsSymptId::phobia_deep))
-        {
+        if (insanity::has_sympt(InsSymptId::phobia_deep)) {
                 msg_log::add("I am plagued by my phobia of deep places!");
 
                 map::g_player->m_properties.apply(new PropTerrified());
         }
 
         // Babbling
-        for (const auto* const sympt : insanity::active_sympts())
-        {
-                if (sympt->id() == InsSymptId::babbling)
-                {
+        for (const auto* const sympt : insanity::active_sympts()) {
+                if (sympt->id() == InsSymptId::babbling) {
                         static_cast<const InsBabbling*>(sympt)->babble();
                 }
         }
@@ -70,8 +67,7 @@ void init()
 
         s_map_list = std::vector<MapType>(nr_lvl_tot, MapType::std);
 
-        if (rnd::one_in(3))
-        {
+        if (rnd::one_in(3)) {
                 const int deep_one_lvl_nr =
                         rnd::range(
                                 g_dlvl_first_mid_game,
@@ -80,8 +76,7 @@ void init()
                 s_map_list[deep_one_lvl_nr] = MapType::deep_one_lair;
         }
 
-        if (rnd::one_in(8))
-        {
+        if (rnd::one_in(8)) {
                 s_map_list[g_dlvl_first_late_game - 1] = MapType::rat_cave;
         }
 
@@ -99,8 +94,7 @@ void save()
 {
         saving::put_int((int)s_map_list.size());
 
-        for (const MapType type : s_map_list)
-        {
+        for (const MapType type : s_map_list) {
                 saving::put_int((int)type);
         }
 }
@@ -111,8 +105,7 @@ void load()
 
         s_map_list.resize((size_t)nr_maps);
 
-        for (auto& type : s_map_list)
-        {
+        for (auto& type : s_map_list) {
                 type = (MapType)saving::get_int();
         }
 }
@@ -140,8 +133,7 @@ void go_to_nxt()
 
         map_builder->build();
 
-        if (map::g_player->m_properties.has(PropId::descend))
-        {
+        if (map::g_player->m_properties.has(PropId::descend)) {
                 msg_log::add("My sinking feeling disappears.");
 
                 map::g_player->m_properties.end_prop(
@@ -179,8 +171,7 @@ void go_to_nxt()
 
         trigger_insanity_sympts_for_descent();
 
-        if (map_control::g_controller)
-        {
+        if (map_control::g_controller) {
                 map_control::g_controller->on_start();
         }
 

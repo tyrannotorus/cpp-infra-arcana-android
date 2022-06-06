@@ -45,8 +45,7 @@ void make_monoliths()
 
         blocked = map_parsers::expand(blocked, blocked.rect());
 
-        for (auto* const actor : game_time::g_actors)
-        {
+        for (auto* const actor : game_time::g_actors) {
                 blocked.at(actor->m_pos) = true;
         }
 
@@ -61,10 +60,8 @@ void make_monoliths()
                 std::min(map::w() - 1, player_p.x + r),
                 std::min(map::h() - 1, player_p.y + r));
 
-        for (int x = fov_r.p0.x; x <= fov_r.p1.x; ++x)
-        {
-                for (int y = fov_r.p0.y; y <= fov_r.p1.y; ++y)
-                {
+        for (int x = fov_r.p0.x; x <= fov_r.p1.x; ++x) {
+                for (int y = fov_r.p0.y; y <= fov_r.p1.y; ++y) {
                         blocked.at(x, y) = true;
                 }
         }
@@ -78,13 +75,11 @@ void make_monoliths()
                 spawn_weight_positions,
                 spawn_weights);
 
-        for (int monolith_idx = 0; monolith_idx < nr_monoliths; ++monolith_idx)
-        {
+        for (int monolith_idx = 0; monolith_idx < nr_monoliths; ++monolith_idx) {
                 // Store non-blocked (false) cells in a vector
                 const auto p_bucket = to_vec(blocked, false, blocked.rect());
 
-                if (p_bucket.empty())
-                {
+                if (p_bucket.empty()) {
                         // Unable to place Monolith
                         return;
                 }
@@ -96,19 +91,16 @@ void make_monoliths()
                 map::set_terrain(terrain::make(terrain::Id::monolith, p));
 
                 // Block this position and all adjacent positions
-                for (const P& d : dir_utils::g_cardinal_list_w_center)
-                {
+                for (const P& d : dir_utils::g_cardinal_list_w_center) {
                         const P p_adj(p + d);
 
                         blocked.at(p_adj) = true;
 
                         for (size_t spawn_weight_idx = 0;
                              spawn_weight_idx < spawn_weight_positions.size();
-                             ++spawn_weight_idx)
-                        {
+                             ++spawn_weight_idx) {
                                 if (spawn_weight_positions[spawn_weight_idx] !=
-                                    p_adj)
-                                {
+                                    p_adj) {
                                         continue;
                                 }
 

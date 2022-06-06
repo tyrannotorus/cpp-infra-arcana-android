@@ -58,25 +58,21 @@ static void show_map_and_freeze(const std::string& msg)
         TRACE_FUNC_BEGIN;
 
         const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
+        for (size_t i = 0; i < nr_positions; ++i) {
                 map::g_seen.at(i) = true;
         }
 
         map::update_player_memory();
 
-        for (auto* const actor : game_time::g_actors)
-        {
-                if (actor::is_player(actor))
-                {
+        for (auto* const actor : game_time::g_actors) {
+                if (actor::is_player(actor)) {
                         continue;
                 }
 
                 actor->m_mon_aware_state.player_aware_of_me_counter = 999;
         }
 
-        while (true)
-        {
+        while (true) {
                 io::draw_text(
                         "[" + msg + "]",
                         Panel::screen,
@@ -101,51 +97,40 @@ static void find_stair_path()
 
         P stair_p(-1, -1);
 
-        for (int x = 0; x < w; ++x)
-        {
-                for (int y = 0; y < h; ++y)
-                {
-                        switch (map::g_terrain.at(x, y)->id())
-                        {
-                        case terrain::Id::stairs:
-                        {
+        for (int x = 0; x < w; ++x) {
+                for (int y = 0; y < h; ++y) {
+                        switch (map::g_terrain.at(x, y)->id()) {
+                        case terrain::Id::stairs: {
                                 blocked.at(x, y) = false;
 
                                 stair_p.set(x, y);
-                        }
-                        break;
+                        } break;
 
                         case terrain::Id::door:
-                        case terrain::Id::force_field:
-                        {
+                        case terrain::Id::force_field: {
                                 blocked.at(x, y) = false;
-                        }
-                        break;
+                        } break;
 
                         default:
                         {
-                        }
-                        break;
+                        } break;
                         }
                 }
         }
 
-        if (stair_p.x == -1)
-        {
+        if (stair_p.x == -1) {
                 show_map_and_freeze("Could not find stairs");
         }
 
         const auto& player_p = map::g_player->m_pos;
 
-        if (blocked.at(player_p))
-        {
+        if (blocked.at(player_p)) {
                 show_map_and_freeze("Player on blocked position");
         }
 
         s_path = pathfind(player_p, stair_p, blocked);
 
-        if (s_path.empty())
-        {
+        if (s_path.empty()) {
                 show_map_and_freeze("Could not find path to stairs");
         }
 
@@ -158,19 +143,16 @@ static bool walk_to_adj_cell(const P& p)
 
         auto dir = Dir::END;
 
-        if (rnd::fraction(1, 4))
-        {
+        if (rnd::fraction(1, 4)) {
                 dir = (Dir)rnd::range(0, (int)Dir::END - 1);
         }
-        else
-        {
+        else {
                 dir = dir_utils::dir(p - map::g_player->m_pos);
         }
 
         GameCmd cmd = GameCmd::none;
 
-        switch (dir)
-        {
+        switch (dir) {
         case Dir::down_left:
                 cmd = GameCmd::down_left;
                 break;
@@ -225,27 +207,23 @@ static void bot_act()
 #ifndef NDEBUG
         for (size_t outer_idx = 0;
              outer_idx < game_time::g_actors.size();
-             ++outer_idx)
-        {
+             ++outer_idx) {
                 const auto* const actor = game_time::g_actors[outer_idx];
 
                 ASSERT(map::is_pos_inside_map(actor->m_pos));
 
-                if (!actor->is_alive())
-                {
+                if (!actor->is_alive()) {
                         continue;
                 }
 
                 for (size_t inner_idx = 0;
                      inner_idx < game_time::g_actors.size();
-                     ++inner_idx)
-                {
+                     ++inner_idx) {
                         const auto* const other_actor =
                                 game_time::g_actors[inner_idx];
 
                         if ((outer_idx == inner_idx) ||
-                            !other_actor->is_alive())
-                        {
+                            !other_actor->is_alive()) {
                                 continue;
                         }
 
@@ -265,8 +243,7 @@ static void bot_act()
         //    }
 
         // If we are finished with the current run, go back to dlvl 1
-        if (map::g_dlvl >= g_dlvl_last)
-        {
+        if (map::g_dlvl >= g_dlvl_last) {
                 TRACE << "Starting new run on first dungeon level" << std::endl;
                 map_travel::init();
 
@@ -279,8 +256,7 @@ static void bot_act()
 
         // If no armor, occasionally equip an asbesthos suite (helps not getting
         // stuck on e.g. Energy Hounds).
-        if (!inv.m_slots[(size_t)SlotId::body].item && rnd::one_in(20))
-        {
+        if (!inv.m_slots[(size_t)SlotId::body].item && rnd::one_in(20)) {
                 inv.put_in_slot(
                         SlotId::body,
                         item::make(item::Id::armor_asb_suit),
@@ -291,17 +267,14 @@ static void bot_act()
         // situations, and for some allied monster code exercise).
         bool has_allied_mon = false;
 
-        for (const auto* const actor : game_time::g_actors)
-        {
-                if (map::g_player->is_leader_of(actor))
-                {
+        for (const auto* const actor : game_time::g_actors) {
+                if (map::g_player->is_leader_of(actor)) {
                         has_allied_mon = true;
                         break;
                 }
         }
 
-        if (!has_allied_mon)
-        {
+        if (!has_allied_mon) {
                 actor::spawn(
                         map::g_player->m_pos, {actor::Id::mi_go}, map::rect())
                         .set_leader(map::g_player)
@@ -309,8 +282,7 @@ static void bot_act()
         }
 
         // Apply permanent paralysis resistance, to avoid getting stuck.
-        if (!map::g_player->m_properties.has(PropId::r_para))
-        {
+        if (!map::g_player->m_properties.has(PropId::r_para)) {
                 auto* prop = new PropRPara();
 
                 prop->set_indefinite();
@@ -319,8 +291,7 @@ static void bot_act()
         }
 
         // Apply fear resistance to avoid getting stuck.
-        if (rnd::one_in(7))
-        {
+        if (rnd::one_in(7)) {
                 auto* prop = new PropRFear();
 
                 prop->set_duration(4);
@@ -329,48 +300,41 @@ static void bot_act()
         }
 
         // Apply burning to a random actor (to avoid getting stuck).
-        if (rnd::one_in(10))
-        {
+        if (rnd::one_in(10)) {
                 const auto element =
                         rnd::range(0, (int)game_time::g_actors.size() - 1);
 
                 auto* const actor = game_time::g_actors[element];
 
-                if (!actor::is_player(actor))
-                {
+                if (!actor::is_player(actor)) {
                         actor->m_properties.apply(new PropBurning());
                 }
         }
 
         // Teleport (to avoid getting stuck).
-        if (rnd::one_in(200))
-        {
+        if (rnd::one_in(200)) {
                 teleport(*map::g_player);
         }
 
         // Send a TAB command to attack nearby monsters.
-        if (rnd::coin_toss())
-        {
+        if (rnd::coin_toss()) {
                 game_commands::handle(GameCmd::auto_melee);
 
                 return;
         }
 
         // Send a 'wait 5 turns' command (just code exercise).
-        if (rnd::one_in(50))
-        {
+        if (rnd::one_in(50)) {
                 game_commands::handle(GameCmd::wait_long);
 
                 return;
         }
 
         // Fire at a random position.
-        if (rnd::one_in(20))
-        {
+        if (rnd::one_in(20)) {
                 auto* wpn_item = map::g_player->m_inv.item_in_slot(SlotId::wpn);
 
-                if (wpn_item && wpn_item->data().ranged.is_ranged_wpn)
-                {
+                if (wpn_item && wpn_item->data().ranged.is_ranged_wpn) {
                         auto* wpn = static_cast<item::Wpn*>(wpn_item);
 
                         wpn->m_ammo_loaded = wpn->data().ranged.max_ammo;
@@ -382,14 +346,11 @@ static void bot_act()
         }
 
         // Apply a random property (to exercise the prop code).
-        if (rnd::one_in(30))
-        {
+        if (rnd::one_in(30)) {
                 std::vector<PropId> prop_bucket;
 
-                for (size_t i = 0; i < (size_t)PropId::END; ++i)
-                {
-                        if (property_data::g_data[i].allow_test_on_bot)
-                        {
+                for (size_t i = 0; i < (size_t)PropId::END; ++i) {
+                        if (property_data::g_data[i].allow_test_on_bot) {
                                 prop_bucket.push_back(PropId(i));
                         }
                 }
@@ -404,24 +365,21 @@ static void bot_act()
 
         // End a random property (helps clearing out properties that cause
         // spammy or interrupting effects like mind sapping).
-        if (rnd::one_in(100))
-        {
+        if (rnd::one_in(100)) {
                 const auto id = (PropId)rnd::range(0, (int)PropId::END - 1);
 
                 map::g_player->m_properties.end_prop(id);
         }
 
         // Swap weapon (just some code exercise).
-        if (rnd::one_in(50))
-        {
+        if (rnd::one_in(50)) {
                 game_commands::handle(GameCmd::swap_weapon);
 
                 return;
         }
 
         // Cause shock spikes (code exercise).
-        if (rnd::one_in(100))
-        {
+        if (rnd::one_in(100)) {
                 map::g_player->incr_shock(200.0, ShockSrc::misc);
 
                 return;
@@ -429,25 +387,21 @@ static void bot_act()
 
         // Run an explosion around the player (code exercise, and to avoid
         // getting stuck).
-        if (rnd::one_in(50))
-        {
+        if (rnd::one_in(50)) {
                 explosion::run(map::g_player->m_pos, ExplType::expl);
 
                 return;
         }
 
         // Run the effect of a random "strange device".
-        if (rnd::one_in(50))
-        {
+        if (rnd::one_in(50)) {
                 std::vector<item::Id> id_bucket;
 
-                for (size_t i = 0; i < (size_t)item::Id::END; ++i)
-                {
+                for (size_t i = 0; i < (size_t)item::Id::END; ++i) {
                         item::ItemData& d = item::g_data[i];
 
                         if ((d.type == ItemType::device) &&
-                            (d.id != item::Id::lantern))
-                        {
+                            (d.id != item::Id::lantern)) {
                                 d.is_identified = true;
                                 id_bucket.push_back((item::Id)i);
                         }
@@ -464,23 +418,19 @@ static void bot_act()
         }
 
         // Handle blocking door.
-        for (const P& d : dir_utils::g_dir_list)
-        {
+        for (const P& d : dir_utils::g_dir_list) {
                 const auto p = map::g_player->m_pos + d;
 
                 auto* const t = map::g_terrain.at(p);
 
-                if (t->id() == terrain::Id::door)
-                {
+                if (t->id() == terrain::Id::door) {
                         auto* const door = static_cast<terrain::Door*>(t);
 
-                        if (door->is_hidden())
-                        {
+                        if (door->is_hidden()) {
                                 door->reveal(terrain::PrintRevealMsg::no);
                         }
 
-                        if (door->is_stuck())
-                        {
+                        if (door->is_stuck()) {
                                 t->hit(DmgType::blunt, map::g_player);
 
                                 return;
@@ -489,10 +439,8 @@ static void bot_act()
         }
 
         // If we are terrified, wait in place.
-        if (map::g_player->m_properties.has(PropId::terrified))
-        {
-                if (walk_to_adj_cell(map::g_player->m_pos))
-                {
+        if (map::g_player->m_properties.has(PropId::terrified)) {
+                if (walk_to_adj_cell(map::g_player->m_pos)) {
                         return;
                 }
         }
@@ -513,8 +461,7 @@ static void stress_test_act()
         map::g_player->m_properties.end_prop(PropId::frenzied);
         map::g_player->m_properties.end_prop(PropId::confused);
 
-        if ((stress_test_step % 150) == 0)
-        {
+        if ((stress_test_step % 150) == 0) {
                 auto* const leader = is_rats_hostile ? nullptr : map::g_player;
 
                 actor::spawn(
@@ -535,26 +482,21 @@ static void stress_test_act()
 
         if ((terrain_id == terrain::Id::wall) ||
             (terrain_id == terrain::Id::rubble_high) ||
-            (terrain_id == terrain::Id::tree))
-        {
+            (terrain_id == terrain::Id::tree)) {
                 move_right = !move_right;
         }
 
-        if (move_right)
-        {
+        if (move_right) {
                 game_commands::handle(GameCmd::right);
         }
-        else
-        {
+        else {
                 game_commands::handle(GameCmd::left);
         }
 
-        if (stress_test_step == 1000)
-        {
+        if (stress_test_step == 1000) {
                 states::pop_all();
         }
-        else
-        {
+        else {
                 ++stress_test_step;
         }
 }
@@ -571,12 +513,10 @@ void init()
 
 void act()
 {
-        if (config::is_stress_test())
-        {
+        if (config::is_stress_test()) {
                 stress_test_act();
         }
-        else
-        {
+        else {
                 bot_act();
         }
 }

@@ -41,8 +41,7 @@ static SDL_Surface* load_surface(const std::string& path)
 {
         auto* const surface = IMG_Load(path.c_str());
 
-        if (!surface)
-        {
+        if (!surface) {
                 TRACE_ERROR_RELEASE
                         << "Failed to load surface from path '"
                         << path
@@ -61,16 +60,13 @@ static void swap_surface_color(
         const Color& color_before,
         const Color& color_after)
 {
-        for (int x = 0; x < surface.w; ++x)
-        {
-                for (int y = 0; y < surface.h; ++y)
-                {
+        for (int x = 0; x < surface.w; ++x) {
+                for (int y = 0; y < surface.h; ++y) {
                         const P p(x, y);
 
                         const auto color = io::read_px_on_surface(surface, p);
 
-                        if (color == color_before)
-                        {
+                        if (color == color_before) {
                                 io::put_px_on_surface(surface, p, color_after);
                         }
                 }
@@ -92,11 +88,9 @@ static bool should_put_contour_at(
                                 surface,
                                 surface_px_pos);
 
-                if (color != bg_color)
-                {
+                if (color != bg_color) {
 #ifndef NDEBUG
-                        if (color != Color(255, 255, 255))
-                        {
+                        if (color != Color(255, 255, 255)) {
                                 TRACE
                                         << "Found color other than "
                                            "background color or full white: "
@@ -133,8 +127,7 @@ static bool should_put_contour_at(
         auto pred = [&](const auto d) {
                 const auto adj_p = surface_px_pos + d;
 
-                if (!surface_px_rect.is_pos_inside(adj_p))
-                {
+                if (!surface_px_rect.is_pos_inside(adj_p)) {
                         return false;
                 }
 
@@ -161,8 +154,7 @@ static void draw_black_contour_for_surface(
 
         const auto contour_color = colors::black();
 
-        for (const auto& surface_px_pos : surface_px_rect.positions())
-        {
+        for (const auto& surface_px_pos : surface_px_rect.positions()) {
                 const bool should_put_contour =
                         should_put_contour_at(
                                 surface,
@@ -171,8 +163,7 @@ static void draw_black_contour_for_surface(
                                 bg_color,
                                 contour_color);
 
-                if (should_put_contour)
-                {
+                if (should_put_contour) {
                         io::put_px_on_surface(
                                 surface,
                                 surface_px_pos,
@@ -191,8 +182,7 @@ static void verify_texture_size(
         SDL_QueryTexture(texture, nullptr, nullptr, &size.x, &size.y);
 
         // Verify width and height of loaded image
-        if (size != expected_size)
-        {
+        if (size != expected_size) {
                 TRACE_ERROR_RELEASE
                         << "Tile image at \""
                         << img_path
@@ -217,8 +207,7 @@ static SDL_Texture* create_texture_from_surface(SDL_Surface& surface)
                         io::g_sdl_renderer,
                         &surface);
 
-        if (!texture)
-        {
+        if (!texture) {
                 TRACE_ERROR_RELEASE
                         << "Failed to create texture from surface: "
                         << IMG_GetError()
@@ -267,8 +256,7 @@ static SDL_Renderer* create_renderer()
                         -1,
                         SDL_RENDERER_SOFTWARE);
 
-        if (!renderer)
-        {
+        if (!renderer) {
                 TRACE_ERROR_RELEASE
                         << "Failed to create SDL renderer"
                         << std::endl
@@ -285,8 +273,7 @@ static SDL_Renderer* create_renderer()
 
 static void cleanup_sdl()
 {
-        if (!SDL_WasInit(SDL_INIT_EVERYTHING))
-        {
+        if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
                 return;
         }
 
@@ -310,8 +297,7 @@ static void init_sdl()
                 SDL_INIT_AUDIO |
                 SDL_INIT_EVENTS;
 
-        if (SDL_Init(sdl_init_flags) == -1)
-        {
+        if (SDL_Init(sdl_init_flags) == -1) {
                 TRACE_ERROR_RELEASE
                         << "Failed to init SDL"
                         << std::endl
@@ -323,8 +309,7 @@ static void init_sdl()
 
         const uint32_t sdl_img_flags = IMG_INIT_PNG;
 
-        if (IMG_Init(sdl_img_flags) == -1)
-        {
+        if (IMG_Init(sdl_img_flags) == -1) {
                 TRACE_ERROR_RELEASE
                         << "Failed to init SDL_image"
                         << std::endl
@@ -346,8 +331,7 @@ static void init_sdl()
                         audio_channels,
                         audio_buffers);
 
-        if (result == -1)
-        {
+        if (result == -1) {
                 TRACE_ERROR_RELEASE
                         << "Failed to init SDL_mixer"
                         << std::endl
@@ -366,8 +350,7 @@ static void init_renderer()
 {
         TRACE_FUNC_BEGIN;
 
-        if (io::g_sdl_renderer)
-        {
+        if (io::g_sdl_renderer) {
                 SDL_DestroyRenderer(io::g_sdl_renderer);
         }
 
@@ -461,8 +444,7 @@ static void load_tiles()
                 config::map_cell_px_w(),
                 config::map_cell_px_h());
 
-        for (size_t i = 0; i < (size_t)gfx::TileId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)gfx::TileId::END; ++i) {
                 load_tile((gfx::TileId)i, cell_px_dims);
         }
 
@@ -496,8 +478,7 @@ void init()
 
         load_font();
 
-        if (config::is_tiles_mode())
-        {
+        if (config::is_tiles_mode()) {
                 load_tiles();
 
                 load_logo();
@@ -513,14 +494,12 @@ void cleanup()
 {
         TRACE_FUNC_BEGIN;
 
-        if (g_sdl_renderer)
-        {
+        if (g_sdl_renderer) {
                 SDL_DestroyRenderer(g_sdl_renderer);
                 g_sdl_renderer = nullptr;
         }
 
-        if (g_sdl_window)
-        {
+        if (g_sdl_window) {
                 SDL_DestroyWindow(g_sdl_window);
                 g_sdl_window = nullptr;
         }
@@ -558,8 +537,7 @@ void set_clip_rect_to_panel(const Panel panel)
 {
         auto px_area = gui_to_px_rect(panels::area(panel));
 
-        if (config::is_2x_scale_enabled())
-        {
+        if (config::is_2x_scale_enabled()) {
                 px_area = px_area.scaled_up(2);
         }
 
@@ -592,8 +570,7 @@ void draw_character_at_px(
 
         P gui_cell_px_dims(config::gui_cell_px_w(), config::gui_cell_px_h());
 
-        if (draw_bg == io::DrawBg::yes)
-        {
+        if (draw_bg == io::DrawBg::yes) {
                 // NOTE: No rendering offsets or scaling calculated yet, the
                 // rectangle function performs its own offsets and scaling.
                 io::draw_rectangle_filled(
@@ -618,8 +595,7 @@ void draw_character_at_px(
         // * Now apply offset and scaling, if needed *
 
         // Scaling
-        if (config::is_2x_scale_enabled())
-        {
+        if (config::is_2x_scale_enabled()) {
                 px_pos = px_pos.scaled_up(2);
                 gui_cell_px_dims = gui_cell_px_dims.scaled_up(2);
         }
@@ -639,12 +615,10 @@ void draw_character_at_px(
         // TODO: If black foreground will not be allowed, the contour version
         // can probably always be used
         if (/* (color == colors::black()) || */
-            (bg_color == colors::black()))
-        {
+            (bg_color == colors::black())) {
                 texture = g_font_texture;
         }
-        else
-        {
+        else {
                 texture = g_font_texture_with_contours;
         }
 
@@ -674,8 +648,7 @@ void draw_tile(const TileDrawObj& obj)
 
         P map_cell_px_dims(config::map_cell_px_w(), config::map_cell_px_h());
 
-        if (obj.draw_bg == DrawBg::yes)
-        {
+        if (obj.draw_bg == DrawBg::yes) {
                 // NOTE: No rendering offsets or scaling calculated yet, the
                 // rectangle function performs its own offsets and scaling
                 draw_rectangle_filled(
@@ -686,8 +659,7 @@ void draw_tile(const TileDrawObj& obj)
         // * Now apply offset and scaling, if needed *
 
         // Scaling
-        if (config::is_2x_scale_enabled())
-        {
+        if (config::is_2x_scale_enabled()) {
                 // We are running fullscreen 2x scale - scale up the position
                 // and rendering size
                 px_pos = px_pos.scaled_up(2);
@@ -707,13 +679,11 @@ void draw_tile(const TileDrawObj& obj)
         SDL_Texture* texture = nullptr;
 
         if ((obj.color == colors::black()) ||
-            (obj.bg_color == colors::black()))
-        {
+            (obj.bg_color == colors::black())) {
                 // Foreground or background is black - no contours
                 texture = g_tile_textures[(size_t)obj.tile];
         }
-        else
-        {
+        else {
                 // Both foreground and background are non-black - use contours
                 texture = g_tile_textures_with_contours[(size_t)obj.tile];
         }
@@ -789,8 +759,7 @@ void draw_logo()
         // * Now apply offset and scaling, if needed *
 
         // Scaling
-        if (config::is_2x_scale_enabled())
-        {
+        if (config::is_2x_scale_enabled()) {
                 // We are running fullscreen 2x scale - scale up the position
                 // and rendering size
                 px_pos = px_pos.scaled_up(2);
@@ -826,8 +795,7 @@ std::string sdl_pref_dir()
 
         const auto sha1_result = version_info::read_git_sha1_str_from_file();
 
-        if (sha1_result)
-        {
+        if (sha1_result) {
                 subdir_str += "_" + sha1_result.value();
         }
 
@@ -848,21 +816,17 @@ std::string sdl_pref_dir()
 
 void sleep(const uint32_t duration)
 {
-        if ((duration == 0) || config::is_bot_playing())
-        {
+        if ((duration == 0) || config::is_bot_playing()) {
                 return;
         }
-        else if (duration == 1)
-        {
+        else if (duration == 1) {
                 SDL_Delay(duration);
         }
-        else
-        {
+        else {
                 // Duration longer than 1 ms
                 const auto wait_until = SDL_GetTicks() + duration;
 
-                while (SDL_GetTicks() < wait_until)
-                {
+                while (SDL_GetTicks() < wait_until) {
                         SDL_PumpEvents();
                 }
         }

@@ -30,8 +30,7 @@
 // -----------------------------------------------------------------------------
 static void print_player_memory_at(const P& p)
 {
-        if (!map::is_pos_inside_map(p))
-        {
+        if (!map::is_pos_inside_map(p)) {
                 return;
         }
 
@@ -45,8 +44,7 @@ static void print_player_memory_at(const P& p)
                         std::end(memory_list),
                         [](const auto& m) { return m.is_defined(); });
 
-        if (!has_any_memory)
-        {
+        if (!has_any_memory) {
                 return;
         }
 
@@ -57,10 +55,8 @@ static void print_player_memory_at(const P& p)
                 MorePromptOnMsg::no,
                 CopyToMsgHistory::no);
 
-        for (const auto& m : memory_list)
-        {
-                if (!m.is_defined())
-                {
+        for (const auto& m : memory_list) {
+                if (!m.is_defined()) {
                         continue;
                 }
 
@@ -82,13 +78,11 @@ void print_location_info_msgs(const P& pos)
 {
         bool is_cell_seen = false;
 
-        if (map::is_pos_inside_map(pos))
-        {
+        if (map::is_pos_inside_map(pos)) {
                 is_cell_seen = map::g_seen.at(pos);
         }
 
-        if (is_cell_seen)
-        {
+        if (is_cell_seen) {
                 // Describe terrain
                 const auto* const terrain = map::g_terrain.at(pos);
 
@@ -103,17 +97,14 @@ void print_location_info_msgs(const P& pos)
                         CopyToMsgHistory::no);
 
                 // Describe mobile terrains
-                for (auto* mob : game_time::g_mobs)
-                {
-                        if (mob->pos() != pos)
-                        {
+                for (auto* mob : game_time::g_mobs) {
+                        if (mob->pos() != pos) {
                                 continue;
                         }
 
                         str = mob->name(Article::a);
 
-                        if (str.empty())
-                        {
+                        if (str.empty()) {
                                 continue;
                         }
 
@@ -128,8 +119,7 @@ void print_location_info_msgs(const P& pos)
                 }
 
                 // Describe darkness
-                if (map::g_dark.at(pos) && !map::g_light.at(pos))
-                {
+                if (map::g_dark.at(pos) && !map::g_light.at(pos)) {
                         msg_log::add(
                                 "It is very dark here.",
                                 colors::text(),
@@ -141,8 +131,7 @@ void print_location_info_msgs(const P& pos)
                 // Describe item
                 const auto* item = map::g_items.at(pos);
 
-                if (item)
-                {
+                if (item) {
                         str =
                                 item->name(
                                         ItemNameType::plural,
@@ -160,10 +149,8 @@ void print_location_info_msgs(const P& pos)
                 }
 
                 // Describe dead actors
-                for (auto* actor : game_time::g_actors)
-                {
-                        if (actor->is_corpse() && actor->m_pos == pos)
-                        {
+                for (auto* actor : game_time::g_actors) {
+                        if (actor->is_corpse() && actor->m_pos == pos) {
                                 ASSERT(!actor->m_data->corpse_name_a.empty());
 
                                 str = text_format::first_to_upper(
@@ -181,8 +168,7 @@ void print_location_info_msgs(const P& pos)
 
         print_living_actor_info_msg(pos);
 
-        if (!is_cell_seen)
-        {
+        if (!is_cell_seen) {
                 print_player_memory_at(pos);
         }
 }
@@ -193,13 +179,11 @@ void print_living_actor_info_msg(const P& pos)
 
         if (!actor ||
             actor::is_player(actor) ||
-            !actor->is_alive())
-        {
+            !actor->is_alive()) {
                 return;
         }
 
-        if (actor::can_player_see_actor(*actor))
-        {
+        if (actor::can_player_see_actor(*actor)) {
                 const std::string str =
                         text_format::first_to_upper(
                                 actor->name_a());
@@ -211,11 +195,9 @@ void print_living_actor_info_msg(const P& pos)
                         MorePromptOnMsg::no,
                         CopyToMsgHistory::no);
         }
-        else
-        {
+        else {
                 // Cannot see actor
-                if (actor->is_player_aware_of_me())
-                {
+                if (actor->is_player_aware_of_me()) {
                         msg_log::add(
                                 "There is a creature here.",
                                 colors::text(),

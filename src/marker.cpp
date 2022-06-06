@@ -68,13 +68,11 @@ void MarkerState::on_start()
 {
         m_pos = map::g_player->m_pos;
 
-        if (use_player_tgt())
-        {
+        if (use_player_tgt()) {
                 // First, attempt to place marker at player target.
                 const bool did_go_to_tgt = try_go_to_tgt();
 
-                if (!did_go_to_tgt)
-                {
+                if (!did_go_to_tgt) {
                         // If no target available, attempt to place marker at
                         // closest visible monster. This sets a new player
                         // target if successful.
@@ -105,13 +103,11 @@ void MarkerState::on_popped()
 
 void MarkerState::draw()
 {
-        if (!m_allow_draw)
-        {
+        if (!m_allow_draw) {
                 return;
         }
 
-        if (!viewport::is_in_view(m_pos))
-        {
+        if (!viewport::is_in_view(m_pos)) {
                 viewport::show(m_pos, viewport::ForceCentering::yes);
         }
 
@@ -124,8 +120,7 @@ void MarkerState::draw()
                         true);  // Allow outside map
 
         // Remove origin position
-        if (!line.empty())
-        {
+        if (!line.empty()) {
                 line.erase(std::begin(line));
         }
 
@@ -147,19 +142,15 @@ void MarkerState::draw()
 
         auto blocked_parser = map_parsers::BlocksProjectiles();
 
-        if (show_blocked())
-        {
-                for (size_t i = 0; i < line.size(); ++i)
-                {
+        if (show_blocked()) {
+                for (size_t i = 0; i < line.size(); ++i) {
                         const P& p = line[i];
 
-                        if (!map::is_pos_inside_map(p))
-                        {
+                        if (!map::is_pos_inside_map(p)) {
                                 break;
                         }
 
-                        if (map::g_seen.at(p) && blocked_parser.run(p))
-                        {
+                        if (map::g_seen.at(p) && blocked_parser.run(p)) {
                                 red_from_idx = (int)i;
                                 break;
                         }
@@ -182,20 +173,17 @@ void MarkerState::update()
 
         io::InputData input;
 
-        if (!config::is_bot_playing())
-        {
+        if (!config::is_bot_playing()) {
                 input = io::read_input();
         }
 
         const auto game_cmd = game_commands::to_cmd(input);
 
-        if (game_cmd != GameCmd::none)
-        {
+        if (game_cmd != GameCmd::none) {
                 msg_log::clear();
         }
 
-        switch (game_cmd)
-        {
+        switch (game_cmd) {
         case GameCmd::right:
                 move(Dir::right);
                 break;
@@ -280,12 +268,10 @@ void MarkerState::draw_marker(
         // NOTE: We include the head index in this loop, so that we can set up
         // which color it should be drawn with, but we do the actual drawing of
         // the head after the loop
-        for (size_t line_idx = 0; line_idx < line.size(); ++line_idx)
-        {
+        for (size_t line_idx = 0; line_idx < line.size(); ++line_idx) {
                 const P& line_pos = line[line_idx];
 
-                if (!viewport::is_in_view(line_pos))
-                {
+                if (!viewport::is_in_view(line_pos)) {
                         continue;
                 }
 
@@ -308,24 +294,20 @@ void MarkerState::draw_marker(
                         ((int)line_idx >= red_from_idx);
 
                 // NOTE: Final color is stored for drawing the head
-                if (is_red_by_idx || is_red_by_dist)
-                {
+                if (is_red_by_idx || is_red_by_dist) {
                         color = colors::light_red();
                 }
-                else if (is_near_orange || is_far_orange)
-                {
+                else if (is_near_orange || is_far_orange) {
                         color = colors::orange();
                 }
-                else
-                {
+                else {
                         color = colors::light_green();
                 }
 
                 // Do not draw the head yet
                 const int tail_size_int = (int)line.size() - 1;
 
-                if ((int)line_idx < tail_size_int)
-                {
+                if ((int)line_idx < tail_size_int) {
                         const P view_pos = viewport::to_view_pos(line_pos);
 
                         io::MapDrawObj draw_obj;
@@ -346,14 +328,12 @@ void MarkerState::draw_marker(
                 ? m_origin
                 : line.back();
 
-        if (viewport::is_in_view(head_pos))
-        {
+        if (viewport::is_in_view(head_pos)) {
                 // If we are currently only drawing the head and the line is
                 // empty, draw the head as orange if the aiming has a defined
                 // minimum effective range (if the line is non-empty, the head
                 // color would be set by the line drawing above)
-                if (line.empty() && (orange_until_including_king_dist >= 0))
-                {
+                if (line.empty() && (orange_until_including_king_dist >= 0)) {
                         color = colors::orange();
                 }
 
@@ -380,8 +360,7 @@ void MarkerState::move(const Dir dir, const int nr_steps)
         // The limit is an arbitrary big number, larger than any map should be
         const int max_dist_from_player = 300;
 
-        if (king_dist(map::g_player->m_pos, new_pos) <= max_dist_from_player)
-        {
+        if (king_dist(map::g_player->m_pos, new_pos) <= max_dist_from_player) {
                 m_pos = new_pos;
 
                 on_moved();
@@ -390,19 +369,15 @@ void MarkerState::move(const Dir dir, const int nr_steps)
 
 bool MarkerState::try_go_to_tgt()
 {
-        if (!actor::player_state::g_target)
-        {
+        if (!actor::player_state::g_target) {
                 return false;
         }
 
         const auto seen_foes = actor::seen_foes(*map::g_player);
 
-        if (!seen_foes.empty())
-        {
-                for (auto* const actor : seen_foes)
-                {
-                        if (actor::player_state::g_target == actor)
-                        {
+        if (!seen_foes.empty()) {
+                for (auto* const actor : seen_foes) {
+                        if (actor::player_state::g_target == actor) {
                                 m_pos = actor->m_pos;
 
                                 return true;
@@ -421,14 +396,12 @@ void MarkerState::try_go_to_closest_enemy()
 
         seen_foes_positions.reserve(seen_foes.size());
 
-        for (const auto* const actor : seen_foes)
-        {
+        for (const auto* const actor : seen_foes) {
                 seen_foes_positions.push_back(actor->m_pos);
         }
 
         // If player sees enemies, suggest one for targeting
-        if (!seen_foes_positions.empty())
-        {
+        if (!seen_foes_positions.empty()) {
                 m_pos = closest_pos(map::g_player->m_pos, seen_foes_positions);
 
                 actor::player_state::g_target =
@@ -449,8 +422,7 @@ void Viewing::on_moved()
 
         if (actor &&
             !actor::is_player(actor) &&
-            actor::can_player_see_actor(*actor))
-        {
+            actor::can_player_see_actor(*actor)) {
                 // TODO: This should not be specified here
                 const auto view_key = 'v';
 
@@ -493,14 +465,12 @@ void Viewing::handle_input(const io::InputData& input)
 {
         const auto game_cmd = game_commands::to_cmd(input);
 
-        if (game_cmd == GameCmd::look)
-        {
+        if (game_cmd == GameCmd::look) {
                 auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor &&
                     !actor::is_player(actor) &&
-                    actor::can_player_see_actor(*actor))
-                {
+                    actor::can_player_see_actor(*actor)) {
                         msg_log::clear();
 
                         auto view_actor_descr =
@@ -509,8 +479,7 @@ void Viewing::handle_input(const io::InputData& input)
                         states::push(std::move(view_actor_descr));
                 }
         }
-        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE))
-        {
+        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
                 msg_log::clear();
 
                 states::pop();
@@ -529,14 +498,12 @@ void Aiming::on_moved()
         const bool is_in_max_range =
                 (dist <= max_king_dist());
 
-        if (is_in_max_range)
-        {
+        if (is_in_max_range) {
                 auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor &&
                     !actor::is_player(actor) &&
-                    actor::can_player_see_actor(*actor))
-                {
+                    actor::can_player_see_actor(*actor)) {
                         RangedAttData att_data(
                                 map::g_player,
                                 m_origin,
@@ -591,8 +558,7 @@ void Aiming::handle_input(const io::InputData& input)
 {
         auto game_cmd = GameCmd::undefined;
 
-        if (config::is_bot_playing())
-        {
+        if (config::is_bot_playing()) {
                 // Bot is playing, fire at a random position
                 game_cmd = GameCmd::fire;
 
@@ -600,16 +566,13 @@ void Aiming::handle_input(const io::InputData& input)
                         rnd::range(0, map::w() - 1),
                         rnd::range(0, map::h() - 1));
         }
-        else
-        {
+        else {
                 // Human player
                 game_cmd = game_commands::to_cmd(input);
         }
 
-        if ((game_cmd == GameCmd::fire) || (input.key == SDLK_RETURN))
-        {
-                if (m_pos == map::g_player->m_pos)
-                {
+        if ((game_cmd == GameCmd::fire) || (input.key == SDLK_RETURN)) {
+                if (m_pos == map::g_player->m_pos) {
                         return;
                 }
 
@@ -626,8 +589,7 @@ void Aiming::handle_input(const io::InputData& input)
 
                 if (!is_in_effective_range &&
                     is_in_max_range &&
-                    (m_wpn.data().ranged.effective_range.max > 0))
-                {
+                    (m_wpn.data().ranged.effective_range.max > 0)) {
                         const std::string msg =
                                 "Aiming outside effective weapon range "
                                 "(50% damage) fire anyway? " +
@@ -639,16 +601,14 @@ void Aiming::handle_input(const io::InputData& input)
 
                         msg_log::clear();
 
-                        if (answer == BinaryAnswer::no)
-                        {
+                        if (answer == BinaryAnswer::no) {
                                 return;
                         }
                 }
 
                 auto* const actor = map::living_actor_at(m_pos);
 
-                if (actor && actor::can_player_see_actor(*actor))
-                {
+                if (actor && actor::can_player_see_actor(*actor)) {
                         actor::player_state::g_target = actor;
                 }
 
@@ -666,8 +626,7 @@ void Aiming::handle_input(const io::InputData& input)
                         pos,
                         *wpn);
         }
-        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE))
-        {
+        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
                 states::pop();
         }
 }
@@ -693,14 +652,12 @@ void Throwing::on_moved()
                 king_dist(m_origin, m_pos) <=
                 max_king_dist();
 
-        if (is_in_range)
-        {
+        if (is_in_range) {
                 auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor &&
                     !actor::is_player(actor) &&
-                    actor::can_player_see_actor(*actor))
-                {
+                    actor::can_player_see_actor(*actor)) {
                         ThrowAttData att_data(
                                 map::g_player,
                                 m_origin,
@@ -756,10 +713,8 @@ void Throwing::handle_input(const io::InputData& input)
         const auto game_cmd = game_commands::to_cmd(input);
 
         if ((game_cmd == GameCmd::throw_item) ||
-            (input.key == SDLK_RETURN))
-        {
-                if (m_pos == map::g_player->m_pos)
-                {
+            (input.key == SDLK_RETURN)) {
+                if (m_pos == map::g_player->m_pos) {
                         return;
                 }
 
@@ -776,8 +731,7 @@ void Throwing::handle_input(const io::InputData& input)
 
                 if (!is_in_effective_range &&
                     is_in_max_range &&
-                    (m_inv_item->data().ranged.effective_range.max > 0))
-                {
+                    (m_inv_item->data().ranged.effective_range.max > 0)) {
                         const std::string msg =
                                 "Aiming outside effective weapon range "
                                 "(50% damage) throw anyway? " +
@@ -789,16 +743,14 @@ void Throwing::handle_input(const io::InputData& input)
 
                         msg_log::clear();
 
-                        if (answer == BinaryAnswer::no)
-                        {
+                        if (answer == BinaryAnswer::no) {
                                 return;
                         }
                 }
 
                 auto* const actor = map::living_actor_at(m_pos);
 
-                if (actor && actor::can_player_see_actor(*actor))
-                {
+                if (actor && actor::can_player_see_actor(*actor)) {
                         actor::player_state::g_target = actor;
                 }
 
@@ -824,8 +776,7 @@ void Throwing::handle_input(const io::InputData& input)
                         pos,
                         *item_to_throw);
         }
-        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE))
-        {
+        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
                 states::pop();
         }
 }
@@ -849,8 +800,7 @@ void ThrowingExplosive::on_draw()
 
         if ((id != item::Id::dynamite) &&
             (id != item::Id::molotov) &&
-            (id != item::Id::smoke_grenade))
-        {
+            (id != item::Id::smoke_grenade)) {
                 return;
         }
 
@@ -862,14 +812,11 @@ void ThrowingExplosive::on_draw()
         const Color color = colors::red();
 
         // Draw explosion radius area overlay
-        for (int y = expl_area.p0.y; y <= expl_area.p1.y; ++y)
-        {
-                for (int x = expl_area.p0.x; x <= expl_area.p1.x; ++x)
-                {
+        for (int y = expl_area.p0.y; y <= expl_area.p1.y; ++y) {
+                for (int x = expl_area.p0.x; x <= expl_area.p1.x; ++x) {
                         const P p(x, y);
 
-                        if (!viewport::is_in_view(p))
-                        {
+                        if (!viewport::is_in_view(p)) {
                                 continue;
                         }
 
@@ -927,8 +874,7 @@ void ThrowingExplosive::handle_input(const io::InputData& input)
 {
         const auto game_cmd = game_commands::to_cmd(input);
 
-        if ((game_cmd == GameCmd::throw_item) || (input.key == SDLK_RETURN))
-        {
+        if ((game_cmd == GameCmd::throw_item) || (input.key == SDLK_RETURN)) {
                 msg_log::clear();
 
                 const P pos = m_pos;
@@ -939,8 +885,7 @@ void ThrowingExplosive::handle_input(const io::InputData& input)
 
                 throwing::player_throw_lit_explosive(pos);
         }
-        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE))
-        {
+        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
                 states::pop();
         }
 }
@@ -965,13 +910,11 @@ int CtrlTele::chance_of_success_pct() const
 {
         const int dist = king_dist(map::g_player->m_pos, m_pos);
 
-        if ((m_max_dist > 0) && (dist > m_max_dist))
-        {
+        if ((m_max_dist > 0) && (dist > m_max_dist)) {
                 // Target is too far away
                 return 0;
         }
-        else
-        {
+        else {
                 return std::clamp(100 - dist, 25, 95);
         }
 }
@@ -990,8 +933,7 @@ void CtrlTele::on_moved()
 {
         view::print_location_info_msgs(m_pos);
 
-        if (m_pos != map::g_player->m_pos)
-        {
+        if (m_pos != map::g_player->m_pos) {
                 const int chance_pct = chance_of_success_pct();
 
                 msg_log::add(
@@ -1012,8 +954,7 @@ void CtrlTele::on_moved()
 
 void CtrlTele::handle_input(const io::InputData& input)
 {
-        if ((input.key != SDLK_RETURN) || (m_pos == map::g_player->m_pos))
-        {
+        if ((input.key != SDLK_RETURN) || (m_pos == map::g_player->m_pos)) {
                 return;
         }
 
@@ -1033,13 +974,11 @@ void CtrlTele::handle_input(const io::InputData& input)
 
         // NOTE: This object is now destroyed
 
-        if (is_success)
-        {
+        if (is_success) {
                 // Teleport to this exact destination
                 teleport(*map::g_player, tgt_p, m_blocked);
         }
-        else
-        {
+        else {
                 // Failed to teleport (blocked or roll failed)
                 msg_log::add(
                         "I failed to go there...",
@@ -1060,51 +999,38 @@ bool CtrlObjOpen::can_control(
         const terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
-        switch (terrain.id())
-        {
-        case terrain::Id::chest:
-        {
+        switch (terrain.id()) {
+        case terrain::Id::chest: {
                 return !static_cast<const terrain::Chest&>(terrain).is_open();
-        }
-        break;
+        } break;
 
-        case terrain::Id::cabinet:
-        {
+        case terrain::Id::cabinet: {
                 return !static_cast<const terrain::Cabinet&>(terrain).is_open();
-        }
-        break;
+        } break;
 
-        case terrain::Id::tomb:
-        {
+        case terrain::Id::tomb: {
                 return !static_cast<const terrain::Tomb&>(terrain).is_open();
-        }
-        break;
+        } break;
 
-        case terrain::Id::door:
-        {
+        case terrain::Id::door: {
                 const auto& door = static_cast<const terrain::Door&>(terrain);
                 const bool is_metal = door.type() == terrain::DoorType::metal;
                 const bool is_basic_skill = skill == SpellSkill::basic;
 
-                if (door.is_open() || door.is_hidden())
-                {
+                if (door.is_open() || door.is_hidden()) {
                         return false;
                 }
-                else if (is_metal)
-                {
+                else if (is_metal) {
                         return !is_basic_skill;
                 }
-                else
-                {
+                else {
                         return !door.is_known_stuck();
                 }
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 
         return false;
@@ -1114,13 +1040,11 @@ DidAction CtrlObjOpen::run(
         terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
-        if (terrain.id() == terrain::Id::door)
-        {
+        if (terrain.id() == terrain::Id::door) {
                 auto& door = static_cast<terrain::Door&>(terrain);
                 const bool is_metal = door.type() == terrain::DoorType::metal;
 
-                if (door.is_stuck() && !is_metal)
-                {
+                if (door.is_stuck() && !is_metal) {
                         ASSERT(!door.is_known_stuck());
 
                         door.reveal_stuck_status();
@@ -1150,28 +1074,24 @@ bool CtrlObjCloseDoor::can_control(
         const terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
-        if (terrain.id() != terrain::Id::door)
-        {
+        if (terrain.id() != terrain::Id::door) {
                 return false;
         }
 
         const auto& door = static_cast<const terrain::Door&>(terrain);
 
-        if (!door.is_open())
-        {
+        if (!door.is_open()) {
                 return false;
         }
 
-        if (door.is_hidden())
-        {
+        if (door.is_hidden()) {
                 return false;
         }
 
         const bool is_metal = door.type() == terrain::DoorType::metal;
         const bool is_basic_skill = skill == SpellSkill::basic;
 
-        if (is_metal && is_basic_skill)
-        {
+        if (is_metal && is_basic_skill) {
                 return false;
         }
 
@@ -1184,18 +1104,15 @@ DidAction CtrlObjCloseDoor::run(
 {
         const auto* const actor_here = map::living_actor_at(terrain.pos());
 
-        if (actor_here)
-        {
+        if (actor_here) {
                 std::string actor_name;
 
-                if (actor::can_player_see_actor(*actor_here))
-                {
+                if (actor::can_player_see_actor(*actor_here)) {
                         actor_name =
                                 text_format::first_to_upper(
                                         actor_here->name_the());
                 }
-                else
-                {
+                else {
                         actor_name = "Something";
                 }
 
@@ -1233,8 +1150,7 @@ bool CtrlObjJamDoor::can_control(
 {
         (void)skill;
 
-        if (terrain.id() != terrain::Id::door)
-        {
+        if (terrain.id() != terrain::Id::door) {
                 return false;
         }
 
@@ -1326,8 +1242,7 @@ bool CtrlObjActivatePylon::can_control(
 {
         (void)skill;
 
-        if (terrain.id() != terrain::Id::pylon)
-        {
+        if (terrain.id() != terrain::Id::pylon) {
                 return false;
         }
 
@@ -1368,28 +1283,22 @@ bool CtrlObjStrike::can_control(
 {
         (void)skill;
 
-        switch (terrain.id())
-        {
-        case terrain::Id::door:
-        {
+        switch (terrain.id()) {
+        case terrain::Id::door: {
                 const auto& door = static_cast<const terrain::Door&>(terrain);
                 const bool is_metal = door.type() == terrain::DoorType::metal;
 
                 return !door.is_open() && !door.is_hidden() && !is_metal;
-        }
-        break;
+        } break;
 
         case terrain::Id::brazier:
-        case terrain::Id::statue:
-        {
+        case terrain::Id::statue: {
                 return true;
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 
         return false;
@@ -1401,10 +1310,8 @@ DidAction CtrlObjStrike::run(
 {
         (void)skill;
 
-        switch (terrain.id())
-        {
-        case terrain::Id::door:
-        {
+        switch (terrain.id()) {
+        case terrain::Id::door: {
                 const int dmg = 15;
 
                 terrain.hit(
@@ -1414,12 +1321,10 @@ DidAction CtrlObjStrike::run(
                         dmg);
 
                 return DidAction::yes;
-        }
-        break;
+        } break;
 
         case terrain::Id::brazier:
-        case terrain::Id::statue:
-        {
+        case terrain::Id::statue: {
                 const std::string query_msg =
                         common_text::g_direction_query +
                         " " +
@@ -1434,8 +1339,7 @@ DidAction CtrlObjStrike::run(
 
                 const auto input_dir = query::dir(AllowCenter::no);
 
-                if (input_dir == Dir::END)
-                {
+                if (input_dir == Dir::END) {
                         return DidAction::no;
                 }
 
@@ -1450,13 +1354,11 @@ DidAction CtrlObjStrike::run(
                         dmg);
 
                 return DidAction::yes;
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 
         ASSERT(false);
@@ -1480,24 +1382,19 @@ bool CtrlObjDestrWall::can_control(
         const terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
-        if (skill != SpellSkill::transcendent)
-        {
+        if (skill != SpellSkill::transcendent) {
                 return false;
         }
 
-        switch (terrain.id())
-        {
+        switch (terrain.id()) {
         case terrain::Id::wall:
-        case terrain::Id::rubble_high:
-        {
+        case terrain::Id::rubble_high: {
                 return true;
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 
         return false;
@@ -1509,27 +1406,22 @@ DidAction CtrlObjDestrWall::run(
 {
         (void)skill;
 
-        if (!map::is_pos_inside_outer_walls(terrain.pos()))
-        {
+        if (!map::is_pos_inside_outer_walls(terrain.pos())) {
                 msg_log::add("Nothing happens.");
 
                 return DidAction::yes;
         }
 
-        switch (terrain.id())
-        {
-        case terrain::Id::door:
-        {
+        switch (terrain.id()) {
+        case terrain::Id::door: {
                 // NOTE: The door is hidden.
                 msg_log::add("Nothing happens.");
 
                 return DidAction::yes;
-        }
-        break;
+        } break;
 
         case terrain::Id::wall:
-        case terrain::Id::rubble_high:
-        {
+        case terrain::Id::rubble_high: {
                 terrain.hit(DmgType::pure, map::g_player);
 
                 return DidAction::yes;
@@ -1537,8 +1429,7 @@ DidAction CtrlObjDestrWall::run(
 
         default:
         {
-        }
-        break;
+        } break;
         }
 
         ASSERT(false);
@@ -1619,8 +1510,7 @@ void CtrlObj::on_moved()
                 MorePromptOnMsg::no,
                 CopyToMsgHistory::no);
 
-        if (is_allowed_at_dist() && !m_possible_actions.empty())
-        {
+        if (is_allowed_at_dist() && !m_possible_actions.empty()) {
                 const auto* const terrain = map::g_terrain.at(m_pos);
                 const auto name_the = terrain->name(Article::the);
 
@@ -1645,20 +1535,17 @@ void CtrlObj::on_moved()
 
 void CtrlObj::handle_input(const io::InputData& input)
 {
-        if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE))
-        {
+        if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
                 msg_log::clear();
 
                 states::pop();
         }
 
-        if (input.key != SDLK_RETURN)
-        {
+        if (input.key != SDLK_RETURN) {
                 return;
         }
 
-        if (!map::g_seen.at(m_pos))
-        {
+        if (!map::g_seen.at(m_pos)) {
                 msg_log::add(
                         "I have no vision here.",
                         colors::white(),
@@ -1669,8 +1556,7 @@ void CtrlObj::handle_input(const io::InputData& input)
                 return;
         }
 
-        if (!is_allowed_at_dist())
-        {
+        if (!is_allowed_at_dist()) {
                 const std::string msg =
                         (current_dist() == 0)
                         ? "The distance is too small."
@@ -1686,8 +1572,7 @@ void CtrlObj::handle_input(const io::InputData& input)
                 return;
         }
 
-        if (m_possible_actions.empty())
-        {
+        if (m_possible_actions.empty()) {
                 msg_log::add(
                         "I cannot control any object here.",
                         colors::white(),
@@ -1700,8 +1585,7 @@ void CtrlObj::handle_input(const io::InputData& input)
 
         const auto action = query_control();
 
-        if (!action)
-        {
+        if (!action) {
                 return;
         }
 
@@ -1709,8 +1593,7 @@ void CtrlObj::handle_input(const io::InputData& input)
         const auto did_action = action->run(*m_terrain, m_skill);
         m_allow_draw = true;
 
-        if (did_action == DidAction::yes)
-        {
+        if (did_action == DidAction::yes) {
                 states::pop();
         }
 }
@@ -1779,8 +1662,7 @@ CtrlObjActionPtr CtrlObj::query_control() const
         menu_keys.reserve(m_possible_actions.size());
         menu_labels.reserve(m_possible_actions.size());
 
-        for (const auto& action : m_possible_actions)
-        {
+        for (const auto& action : m_possible_actions) {
                 menu_keys.push_back(action->menu_key());
                 menu_labels.push_back(action->menu_label(*m_terrain));
         }
@@ -1796,12 +1678,10 @@ CtrlObjActionPtr CtrlObj::query_control() const
 
         popup.run();
 
-        if ((choice == -1) || (choice == (int)m_possible_actions.size()))
-        {
+        if ((choice == -1) || (choice == (int)m_possible_actions.size())) {
                 return {};
         }
-        else
-        {
+        else {
                 return m_possible_actions[choice];
         }
 }

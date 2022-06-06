@@ -73,12 +73,10 @@ TEST_CASE("Throw potion at monster")
 
         // Throw potions at the monster until it is killed, plus one more throw
         // at the corpse
-        while (true)
-        {
+        while (true) {
                 bool is_dead = false;
 
-                if (mon->m_state != ActorState::alive)
-                {
+                if (mon->m_state != ActorState::alive) {
                         is_dead = true;
 
                         // Clear fire resistance, throwing at the corpse should
@@ -93,23 +91,19 @@ TEST_CASE("Throw potion at monster")
                         {6, 7},
                         *item::make(item::Id::potion_r_fire));
 
-                if (is_dead)
-                {
+                if (is_dead) {
                         REQUIRE(!mon->m_properties.has(PropId::r_fire));
                 }
-                else
-                {
+                else {
                         // Not dead
-                        if (mon->m_hp < actor::max_hp(*mon))
-                        {
+                        if (mon->m_hp < actor::max_hp(*mon)) {
                                 did_test_r_fire = true;
 
                                 REQUIRE(mon->m_properties.has(PropId::r_fire));
                         }
                 }
 
-                if (is_dead)
-                {
+                if (is_dead) {
                         break;
                 }
         }

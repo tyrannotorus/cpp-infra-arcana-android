@@ -57,8 +57,7 @@ static int s_turn_nr = 0;
 
 static int speed_to_pct(const actor::Speed speed)
 {
-        switch (speed)
-        {
+        switch (speed) {
         case actor::Speed::slow:
                 return 50;
 
@@ -79,8 +78,7 @@ static int speed_to_pct(const actor::Speed speed)
 
 static actor::Speed incr_speed_category(actor::Speed speed)
 {
-        if (speed < actor::Speed::very_fast)
-        {
+        if (speed < actor::Speed::very_fast) {
                 speed = (actor::Speed)((int)speed + 1);
         }
 
@@ -89,8 +87,7 @@ static actor::Speed incr_speed_category(actor::Speed speed)
 
 static actor::Speed decr_speed_category(actor::Speed speed)
 {
-        if ((int)speed > 0)
-        {
+        if ((int)speed > 0) {
                 speed = (actor::Speed)((int)speed - 1);
         }
 
@@ -101,30 +98,25 @@ static actor::Speed current_actor_speed(const actor::Actor& actor)
 {
         // Paralyzed actors always act at normal speed (otherwise paralysis will
         // barely affect super fast monsters at all)
-        if (actor.m_properties.has(PropId::paralyzed))
-        {
+        if (actor.m_properties.has(PropId::paralyzed)) {
                 return actor::Speed::normal;
         }
 
-        if (actor.m_properties.has(PropId::extra_hasted))
-        {
+        if (actor.m_properties.has(PropId::extra_hasted)) {
                 return actor::Speed::very_fast;
         }
 
         auto speed = actor.m_data->speed;
 
-        if (actor.m_properties.has(PropId::slowed))
-        {
+        if (actor.m_properties.has(PropId::slowed)) {
                 speed = decr_speed_category(speed);
         }
 
-        if (actor.m_properties.has(PropId::hasted))
-        {
+        if (actor.m_properties.has(PropId::hasted)) {
                 speed = incr_speed_category(speed);
         }
 
-        if (actor.m_properties.has(PropId::frenzied))
-        {
+        if (actor.m_properties.has(PropId::frenzied)) {
                 speed = incr_speed_category(speed);
         }
 
@@ -135,13 +127,11 @@ static void erase_destroyed_actor(
         const actor::Actor* const actor,
         const size_t actor_idx)
 {
-        if (actor::is_player(actor))
-        {
+        if (actor::is_player(actor)) {
                 return;
         }
 
-        if (actor::player_state::g_target == actor)
-        {
+        if (actor::player_state::g_target == actor) {
                 actor::player_state::g_target = nullptr;
         }
 
@@ -153,16 +143,14 @@ static void erase_destroyed_actor(
 
         actor::unset_actor_as_leader_and_target_for_all_mon(actor);
 
-        if (s_current_actor_idx >= game_time::g_actors.size())
-        {
+        if (s_current_actor_idx >= game_time::g_actors.size()) {
                 s_current_actor_idx = 0;
         }
 }
 
 static void run_std_turn_events()
 {
-        if (game_time::g_is_magic_descend_nxt_std_turn)
-        {
+        if (game_time::g_is_magic_descend_nxt_std_turn) {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
 
                 const PropEndConfig prop_end_config(
@@ -194,24 +182,19 @@ static void run_std_turn_events()
         // NOTE: Iteration must be done by index, since new monsters may be
         // spawned inside the loop when the standard turn hook is called (e.g.
         // from the 'breeding' property)
-        for (size_t i = 0; i < game_time::g_actors.size(); /* No increment */)
-        {
+        for (size_t i = 0; i < game_time::g_actors.size(); /* No increment */) {
                 auto* const actor = game_time::g_actors[i];
 
                 // Delete destroyed actors
-                if (actor->m_state == ActorState::destroyed)
-                {
+                if (actor->m_state == ActorState::destroyed) {
                         erase_destroyed_actor(actor, i);
                 }
-                else
-                {
+                else {
                         // Actor not destroyed
-                        if (!actor::is_player(actor))
-                        {
+                        if (!actor::is_player(actor)) {
                                 // Count down player awareness of the monster
                                 if (actor->is_player_aware_of_me() &&
-                                    !actor::can_player_see_actor(*actor))
-                                {
+                                    !actor::can_player_see_actor(*actor)) {
                                         --actor->m_mon_aware_state
                                                   .player_aware_of_me_counter;
                                 }
@@ -227,41 +210,33 @@ static void run_std_turn_events()
         }  // Actor loop
 
         // Allow already burning terrains to damage stuff, spread fire, etc.
-        for (auto* const terrain : map::g_terrain)
-        {
-                if (terrain->is_burning())
-                {
+        for (auto* const terrain : map::g_terrain) {
+                if (terrain->is_burning()) {
                         terrain->m_started_burning_this_turn = false;
                 }
         }
 
-        for (auto* const terrain : map::g_terrain)
-        {
+        for (auto* const terrain : map::g_terrain) {
                 terrain->on_new_turn();
         }
 
         const std::vector<terrain::Terrain*> mobs_cpy = game_time::g_mobs;
 
-        for (auto* terrain : mobs_cpy)
-        {
+        for (auto* terrain : mobs_cpy) {
                 terrain->on_new_turn();
         }
 
-        if (map_control::g_controller)
-        {
+        if (map_control::g_controller) {
                 map_control::g_controller->on_std_turn();
         }
 
         // Run new turn events on all player items
-        for (auto* const item : map::g_player->m_inv.m_backpack)
-        {
+        for (auto* const item : map::g_player->m_inv.m_backpack) {
                 item->on_std_turn_in_inv(InvType::backpack);
         }
 
-        for (InvSlot& slot : map::g_player->m_inv.m_slots)
-        {
-                if (slot.item)
-                {
+        for (InvSlot& slot : map::g_player->m_inv.m_slots) {
+                if (slot.item) {
                         slot.item->on_std_turn_in_inv(InvType::slots);
                 }
         }
@@ -271,8 +246,7 @@ static void run_std_turn_events()
         snd_emit::reset_nr_snd_msg_printed_current_turn();
 
         if ((map::g_dlvl > 0) &&
-            !map::g_player->m_properties.has(PropId::deaf))
-        {
+            !map::g_player->m_properties.has(PropId::deaf)) {
                 const int play_one_in_n = 200;
 
                 audio::try_play_ambient(play_one_in_n);
@@ -282,14 +256,12 @@ static void run_std_turn_events()
 static void run_atomic_turn_events()
 {
         // Stop burning for any actor standing in liquid
-        for (auto* const actor : game_time::g_actors)
-        {
+        for (auto* const actor : game_time::g_actors) {
                 auto& props = actor->m_properties;
 
                 if (props.has(PropId::flying) ||
                     props.has(PropId::tiny_flying) ||
-                    !props.has(PropId::burning))
-                {
+                    !props.has(PropId::burning)) {
                         continue;
                 }
 
@@ -297,8 +269,7 @@ static void run_atomic_turn_events()
 
                 const auto* const terrain = map::g_terrain.at(p);
 
-                if (terrain->m_data->matl_type == Matl::fluid)
-                {
+                if (terrain->m_data->matl_type == Matl::fluid) {
                         // TODO: Add a message here.
 
                         actor->m_properties.end_prop(PropId::burning);
@@ -351,15 +322,13 @@ void init()
 
 void cleanup()
 {
-        for (auto* a : g_actors)
-        {
+        for (auto* a : g_actors) {
                 delete a;
         }
 
         g_actors.clear();
 
-        for (auto* t : g_mobs)
-        {
+        for (auto* t : g_mobs) {
                 delete t;
         }
 
@@ -388,10 +357,8 @@ std::vector<terrain::Terrain*> mobs_at(const P& p)
 {
         std::vector<terrain::Terrain*> mobs;
 
-        for (auto* m : mobs)
-        {
-                if (m->pos() == p)
-                {
+        for (auto* m : mobs) {
+                if (m->pos() == p) {
                         mobs.push_back(m);
                 }
         }
@@ -412,14 +379,11 @@ void erase_mob(
         const terrain::Terrain* const terrain,
         const bool destroy_object)
 {
-        for (auto it = std::begin(g_mobs); it != std::end(g_mobs); ++it)
-        {
-                if (*it == terrain)
-                {
+        for (auto it = std::begin(g_mobs); it != std::end(g_mobs); ++it) {
+                if (*it == terrain) {
                         const P pos = terrain->pos();
 
-                        if (destroy_object)
-                        {
+                        if (destroy_object) {
                                 delete terrain;
                         }
 
@@ -448,8 +412,7 @@ void erase_mob(
 
 void erase_all_mobs()
 {
-        for (auto* m : g_mobs)
-        {
+        for (auto* m : g_mobs) {
                 delete m;
         }
 
@@ -462,12 +425,10 @@ void add_actor(actor::Actor* actor)
         // ASSERT(map::is_pos_inside_map(actor->m_pos));
 
 #ifndef NDEBUG
-        for (actor::Actor* const existing_actor : g_actors)
-        {
+        for (actor::Actor* const existing_actor : g_actors) {
                 ASSERT(actor != existing_actor);
 
-                if (actor->is_alive() && existing_actor->is_alive())
-                {
+                if (actor->is_alive() && existing_actor->is_alive()) {
                         const P& new_actor_p = actor->m_pos;
                         const P& existing_actor_p = existing_actor->m_pos;
 
@@ -497,8 +458,7 @@ void tick()
         {
                 auto* actor = current_actor();
 
-                if (actor::is_player(actor))
-                {
+                if (actor::is_player(actor)) {
                         msg_log::newline();
                 }
 
@@ -508,22 +468,18 @@ void tick()
         }
 
         // Find next actor who can act
-        while (true)
-        {
-                if (g_actors.empty())
-                {
+        while (true) {
+                if (g_actors.empty()) {
                         return;
                 }
 
                 ++s_current_actor_idx;
 
-                if (s_current_actor_idx == g_actors.size())
-                {
+                if (s_current_actor_idx == g_actors.size()) {
                         --s_std_turn_delay;
 
                         // New standard turn?
-                        if (s_std_turn_delay == 0)
-                        {
+                        if (s_std_turn_delay == 0) {
                                 // Increment the turn counter, and run standard
                                 // turn events.
                                 //
@@ -542,8 +498,7 @@ void tick()
 
                 --actor->m_delay;
 
-                if (actor->m_delay <= 0)
-                {
+                if (actor->m_delay <= 0) {
                         // This actor is ready to go.
                         break;
                 }
@@ -554,16 +509,13 @@ void tick()
         auto* const actor = current_actor();
 
         // Clear flag that this actor is opening a door
-        if (map::rect().is_pos_inside(actor->m_opening_door_pos))
-        {
+        if (map::rect().is_pos_inside(actor->m_opening_door_pos)) {
                 auto* const t = map::g_terrain.at(actor->m_opening_door_pos);
 
-                if (t->id() == terrain::Id::door)
-                {
+                if (t->id() == terrain::Id::door) {
                         auto* const door = static_cast<terrain::Door*>(t);
 
-                        if (door->actor_currently_opening() == actor)
-                        {
+                        if (door->actor_currently_opening() == actor) {
                                 door->clear_actor_currently_opening();
                         }
 

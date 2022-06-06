@@ -35,8 +35,7 @@ static void finalize_screen_dims()
 {
         R& screen = s_panels[(size_t)Panel::screen];
 
-        for (const R& panel : s_panels)
-        {
+        for (const R& panel : s_panels) {
                 screen.p1.x = std::max(screen.p1.x, panel.p1.x);
                 screen.p1.y = std::max(screen.p1.y, panel.p1.y);
         }
@@ -62,8 +61,7 @@ void init(const P& max_gui_dims)
               << max_gui_dims.x << "x" << max_gui_dims.y
               << std::endl;
 
-        for (auto& panel : s_panels)
-        {
+        for (auto& panel : s_panels) {
                 panel = {0, 0, 0, 0};
         }
 

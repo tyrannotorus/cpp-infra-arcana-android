@@ -58,25 +58,21 @@ static void adapt_color_for_light_level(const size_t pos_idx, Color& color)
 
         if (!map::g_seen.at(pos_idx) ||
             !t->is_los_passable() ||
-            (t->id() == terrain::Id::chasm))
-        {
+            (t->id() == terrain::Id::chasm)) {
                 return;
         }
 
-        if (map::g_light.at(pos_idx))
-        {
+        if (map::g_light.at(pos_idx)) {
                 adapt_color_for_lit_pos(color);
         }
-        else if (map::g_dark.at(pos_idx))
-        {
+        else if (map::g_dark.at(pos_idx)) {
                 adapt_color_for_dark_pos(color);
         }
 }
 
 static void adapt_color_for_distance_to_player(const P& pos, Color& color)
 {
-        if (map::g_light.at(pos))
-        {
+        if (map::g_light.at(pos)) {
                 return;
         }
 
@@ -84,8 +80,7 @@ static void adapt_color_for_distance_to_player(const P& pos, Color& color)
 
         const int k = std::clamp(dist - 1, 0, 4);
 
-        if (k > 0)
-        {
+        if (k > 0) {
                 color = color.shaded(k * 15);
         }
 }
@@ -99,10 +94,8 @@ static void draw_terrains()
 {
         const size_t nr_positions = map::nr_positions();
 
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
-                if (!map::g_seen.at(i))
-                {
+        for (size_t i = 0; i < nr_positions; ++i) {
+                if (!map::g_seen.at(i)) {
                         continue;
                 }
 
@@ -115,20 +108,17 @@ static void draw_terrains()
                 auto gore_tile = gfx::TileId::END;
                 char gore_character = 0;
 
-                if (t->can_have_gore())
-                {
+                if (t->can_have_gore()) {
                         gore_tile = t->gore_tile();
                         gore_character = t->gore_character();
                 }
 
-                if (gore_tile == gfx::TileId::END)
-                {
+                if (gore_tile == gfx::TileId::END) {
                         draw_obj.tile = t->tile();
                         draw_obj.character = t->character();
                         draw_obj.color = t->color();
                 }
-                else
-                {
+                else {
                         draw_obj.tile = gore_tile;
                         draw_obj.character = gore_character;
                         draw_obj.color = colors::red();
@@ -136,14 +126,12 @@ static void draw_terrains()
 
                 const auto terrain_color_bg = t->color_bg();
 
-                if (terrain_color_bg != colors::black())
-                {
+                if (terrain_color_bg != colors::black()) {
                         draw_obj.color_bg = terrain_color_bg;
                 }
 
                 if ((t->id() == terrain::Id::wall) &&
-                    config::text_mode_filled_walls())
-                {
+                    config::text_mode_filled_walls()) {
                         draw_obj.character = io::g_filled_rect_char;
                 }
 
@@ -157,12 +145,10 @@ static void draw_terrains()
 
 static void draw_dead_actors()
 {
-        for (auto* actor : game_time::g_actors)
-        {
+        for (auto* actor : game_time::g_actors) {
                 const auto& p = actor->m_pos;
 
-                if (!map::g_seen.at(p) || !actor->is_corpse())
-                {
+                if (!map::g_seen.at(p) || !actor->is_corpse()) {
                         continue;
                 }
 
@@ -183,21 +169,17 @@ static void draw_items()
 {
         const auto map_dims = map::dims();
 
-        for (int x = 0; x < map_dims.x; ++x)
-        {
-                for (int y = 0; y < map_dims.y; ++y)
-                {
+        for (int x = 0; x < map_dims.x; ++x) {
+                for (int y = 0; y < map_dims.y; ++y) {
                         const P p(x, y);
 
-                        if (!map::g_seen.at(p))
-                        {
+                        if (!map::g_seen.at(p)) {
                                 continue;
                         }
 
                         const auto* const item = map::g_items.at(p);
 
-                        if (!item)
-                        {
+                        if (!item) {
                                 continue;
                         }
 
@@ -217,8 +199,7 @@ static void draw_items()
 
 static void draw_mobiles()
 {
-        for (auto* mob : game_time::g_mobs)
-        {
+        for (auto* mob : game_time::g_mobs) {
                 const auto& p = mob->pos();
                 const auto mob_tile = mob->tile();
                 const auto mob_character = mob->character();
@@ -226,8 +207,7 @@ static void draw_mobiles()
                 if (!map::g_seen.at(p) ||
                     (mob_tile == gfx::TileId::END) ||
                     (mob_character == 0) ||
-                    (mob_character == ' '))
-                {
+                    (mob_character == ' ')) {
                         continue;
                 }
 
@@ -251,8 +231,7 @@ static void draw_living_seen_monster(const actor::Actor& mon)
 
         if ((mon_tile == gfx::TileId::END) ||
             (mon_char == 0) ||
-            (mon_char == ' '))
-        {
+            (mon_char == ' ')) {
                 return;
         }
 
@@ -263,29 +242,24 @@ static void draw_living_seen_monster(const actor::Actor& mon)
         draw_obj.tile = mon.tile();
         draw_obj.character = mon.character();
 
-        if (map::g_player->is_leader_of(&mon))
-        {
+        if (map::g_player->is_leader_of(&mon)) {
                 // The monster is player-friendly
                 draw_obj.color_bg = colors::mon_allied();
         }
-        else
-        {
+        else {
                 // The monster is hostile
-                if (mon.is_aware_of_player())
-                {
+                if (mon.is_aware_of_player()) {
                         // Monster is aware of player
                         const bool has_temporary_negative_prop =
                                 mon.m_properties
                                         .has_temporary_negative_prop_mon();
 
-                        if (has_temporary_negative_prop)
-                        {
+                        if (has_temporary_negative_prop) {
                                 draw_obj.color_bg =
                                         colors::mon_temp_property();
                         }
                 }
-                else
-                {
+                else {
                         // Monster is not aware of the player
                         draw_obj.color_bg = colors::mon_unaware();
                 }
@@ -298,8 +272,7 @@ static void draw_living_seen_monster(const actor::Actor& mon)
 
 static void draw_living_hidden_monster(const actor::Actor& mon)
 {
-        if (!mon.is_player_aware_of_me())
-        {
+        if (!mon.is_player_aware_of_me()) {
                 return;
         }
 
@@ -323,19 +296,15 @@ static void draw_living_hidden_monster(const actor::Actor& mon)
 
 static void draw_living_monsters()
 {
-        for (auto* actor : game_time::g_actors)
-        {
-                if (actor::is_player(actor) || !actor->is_alive())
-                {
+        for (auto* actor : game_time::g_actors) {
+                if (actor::is_player(actor) || !actor->is_alive()) {
                         continue;
                 }
 
-                if (can_player_see_actor(*actor))
-                {
+                if (can_player_see_actor(*actor)) {
                         draw_living_seen_monster(*actor);
                 }
-                else
-                {
+                else {
                         draw_living_hidden_monster(*actor);
                 }
         }
@@ -358,19 +327,15 @@ static void draw_unseen_cells_from_player_memory()
 {
         const auto view = viewport::get_map_view_area();
 
-        for (int x = view.p0.x; x < view.p1.x; ++x)
-        {
-                for (int y = view.p0.y; y < view.p1.y; ++y)
-                {
+        for (int x = view.p0.x; x < view.p1.x; ++x) {
+                for (int y = view.p0.y; y < view.p1.y; ++y) {
                         const P p(x, y);
 
-                        if (!map::is_pos_inside_map(p))
-                        {
+                        if (!map::is_pos_inside_map(p)) {
                                 continue;
                         }
 
-                        if (map::g_seen.at(p))
-                        {
+                        if (map::g_seen.at(p)) {
                                 continue;
                         }
 
@@ -382,15 +347,13 @@ static void draw_unseen_cells_from_player_memory()
                         const auto& item_memory =
                                 map::g_item_memory.at(p);
 
-                        if (terrain_memory.appearance.is_defined())
-                        {
+                        if (terrain_memory.appearance.is_defined()) {
                                 draw_obj =
                                         player_memory_to_draw_obj(
                                                 terrain_memory.appearance);
                         }
 
-                        if (item_memory.appearance.is_defined())
-                        {
+                        if (item_memory.appearance.is_defined()) {
                                 draw_obj =
                                         player_memory_to_draw_obj(
                                                 item_memory.appearance);
@@ -409,8 +372,7 @@ static void draw_player_character()
 {
         const auto& player = *map::g_player;
 
-        if (!viewport::is_in_view(player.m_pos))
-        {
+        if (!viewport::is_in_view(player.m_pos)) {
                 return;
         }
 
@@ -419,24 +381,19 @@ static void draw_player_character()
 
         auto tile = gfx::TileId::END;
 
-        if (player_bon::is_bg(Bg::ghoul))
-        {
+        if (player_bon::is_bg(Bg::ghoul)) {
                 tile = gfx::TileId::ghoul;
         }
-        else
-        {
+        else {
                 auto* item = player.m_inv.item_in_slot(SlotId::wpn);
 
-                if (item && item->data().ranged.is_ranged_wpn)
-                {
+                if (item && item->data().ranged.is_ranged_wpn) {
                         tile = gfx::TileId::player_firearm;
                 }
-                else if (item)
-                {
+                else if (item) {
                         tile = gfx::TileId::player_melee;
                 }
-                else
-                {
+                else {
                         tile = gfx::TileId::player_unarmed;
                 }
         }

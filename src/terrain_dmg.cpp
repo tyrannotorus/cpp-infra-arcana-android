@@ -30,18 +30,15 @@ namespace terrain
 {
 void destr_all_adj_doors(const P p)
 {
-        for (const P& d : dir_utils::g_cardinal_list)
-        {
+        for (const P& d : dir_utils::g_cardinal_list) {
                 const auto p_adj = p + d;
 
-                if (!map::is_pos_inside_map(p_adj))
-                {
+                if (!map::is_pos_inside_map(p_adj)) {
                         continue;
                 }
 
                 if (map::g_terrain.at(p_adj)->id() !=
-                    terrain::Id::door)
-                {
+                    terrain::Id::door) {
                         continue;
                 }
 
@@ -56,8 +53,7 @@ void destr_stone_wall(const P p)
 {
         map::update_terrain(terrain::make(terrain::Id::rubble_low, p));
 
-        if (rnd::one_in(4))
-        {
+        if (rnd::one_in(4)) {
                 item::make_item_on_floor(item::Id::rock, p);
         }
 }

@@ -19,10 +19,8 @@ namespace actor
 void cycle_graphics(Actor& actor, const io::GraphicsCycle cycle)
 {
         if (actor::is_player(&actor) &&
-            (cycle == io::GraphicsCycle::fast))
-        {
-                switch (rnd::range(0, 1))
-                {
+            (cycle == io::GraphicsCycle::fast)) {
+                switch (rnd::range(0, 1)) {
                 case 0:
                         actor::player_state::g_lantern_color =
                                 colors::yellow().shaded(

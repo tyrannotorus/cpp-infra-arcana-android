@@ -31,8 +31,7 @@ static std::vector<std::string> read_manual_file()
 
         std::ifstream file("manual.txt");
 
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
                 TRACE_ERROR_RELEASE
                         << "Could not open manual file"
                         << std::endl;
@@ -42,8 +41,7 @@ static std::vector<std::string> read_manual_file()
 
         std::string current_line;
 
-        while (getline(file, current_line))
-        {
+        while (getline(file, current_line)) {
                 lines.push_back(current_line);
         }
 
@@ -57,26 +55,22 @@ static std::vector<std::string> format_lines(
 {
         std::vector<std::string> formatted_lines;
 
-        for (auto& raw_line : raw_lines)
-        {
+        for (auto& raw_line : raw_lines) {
                 // Format the line if it does not start with a space
                 const bool should_format_line =
                         !raw_line.empty() &&
                         raw_line[0] != ' ';
 
-                if (should_format_line)
-                {
+                if (should_format_line) {
                         const auto split_line = text_format::split(
                                 raw_line,
                                 panels::w(Panel::info_screen_content));
 
-                        for (const auto& line : split_line)
-                        {
+                        for (const auto& line : split_line) {
                                 formatted_lines.push_back(line);
                         }
                 }
-                else
-                {
+                else {
                         // Do not format line
                         formatted_lines.push_back(raw_line);
                 }
@@ -97,12 +91,9 @@ static std::vector<ManualPage> init_pages(
         // Sort the parsed lines into different pages
         for (size_t line_idx = 0;
              line_idx < formatted_lines.size();
-             ++line_idx)
-        {
-                if (formatted_lines[line_idx] == delim)
-                {
-                        if (!current_page.lines.empty())
-                        {
+             ++line_idx) {
+                if (formatted_lines[line_idx] == delim) {
+                        if (!current_page.lines.empty()) {
                                 pages.push_back(current_page);
 
                                 current_page.lines.clear();
@@ -169,8 +160,7 @@ void BrowseManual::draw()
 
         const int labels_y0 = 1;
 
-        for (int idx = 0; idx < (int)nr_pages; ++idx)
-        {
+        for (int idx = 0; idx < (int)nr_pages; ++idx) {
                 const bool is_marked = m_browser.y() == idx;
 
                 const int y = labels_y0 + idx;
@@ -222,25 +212,20 @@ void BrowseManual::update()
                         input,
                         MenuInputMode::scrolling_and_letters);
 
-        switch (action)
-        {
-        case MenuAction::selected:
-        {
+        switch (action) {
+        case MenuAction::selected: {
                 const auto& page = m_pages[m_browser.y()];
 
                 std::unique_ptr<State> browse_page(
                         new BrowseManualPage(page));
 
                 states::push(std::move(browse_page));
-        }
-        break;
+        } break;
 
         case MenuAction::esc:
-        case MenuAction::space:
-        {
+        case MenuAction::space: {
                 states::pop();
-        }
-        break;
+        } break;
 
         default:
                 break;
@@ -268,8 +253,7 @@ void BrowseManualPage::draw()
 
         int screen_y = 1;
 
-        for (int i = m_top_idx; i <= btm_nr; ++i)
-        {
+        for (int i = m_top_idx; i <= btm_nr; ++i) {
                 io::draw_text(
                         m_page.lines[i],
                         Panel::screen,
@@ -288,47 +272,37 @@ void BrowseManualPage::update()
 
         const auto input = io::read_input();
 
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_KP_2:
-        case SDLK_DOWN:
-        {
+        case SDLK_DOWN: {
                 m_top_idx += line_jump;
 
                 const int panel_h = panels::h(Panel::info_screen_content);
 
-                if (nr_lines_tot <= panel_h)
-                {
+                if (nr_lines_tot <= panel_h) {
                         m_top_idx = 0;
                 }
-                else
-                {
+                else {
                         m_top_idx = std::min(
                                 nr_lines_tot - panel_h,
                                 m_top_idx);
                 }
-        }
-        break;
+        } break;
 
         case SDLK_KP_8:
-        case SDLK_UP:
-        {
+        case SDLK_UP: {
                 m_top_idx = std::max(0, m_top_idx - line_jump);
-        }
-        break;
+        } break;
 
         case SDLK_SPACE:
-        case SDLK_ESCAPE:
-        {
+        case SDLK_ESCAPE: {
                 // Exit screen
                 states::pop();
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 }
 

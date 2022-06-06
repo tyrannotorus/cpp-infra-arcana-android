@@ -32,8 +32,7 @@ static Fraction chance_for_trapped_room(const RoomType type)
 {
         Fraction chance(-1, -1);
 
-        switch (type)
-        {
+        switch (type) {
         case RoomType::plain:
                 chance = {1, 30};
                 break;
@@ -100,16 +99,13 @@ static std::vector<P> find_allowed_cells_in_room(
 
         positions.reserve(r.area());
 
-        for (int x = r.p0.x; x <= r.p1.x; ++x)
-        {
-                for (int y = r.p0.y; y <= r.p1.y; ++y)
-                {
+        for (int x = r.p0.x; x <= r.p1.x; ++x) {
+                for (int y = r.p0.y; y <= r.p1.y; ++y) {
                         const P p(x, y);
 
                         if (!blocked.at(p) &&
                             map::g_terrain.at(p)->can_have_trap() &&
-                            (map::g_room_map.at(p) == &room))
-                        {
+                            (map::g_room_map.at(p) == &room)) {
                                 positions.push_back(p);
                         }
                 }
@@ -122,8 +118,7 @@ static terrain::Trap* try_make_trap(const terrain::TrapId id, const P& pos)
 {
         const auto* const t = map::g_terrain.at(pos);
 
-        if (!t->can_have_trap())
-        {
+        if (!t->can_have_trap()) {
                 TRACE << "Cannot place trap on terrain id: "
                       << (int)t->id() << std::endl
                       << "Trap id: "
@@ -144,8 +139,7 @@ static terrain::Trap* try_make_trap(const terrain::TrapId id, const P& pos)
 
         const bool is_trap_ok = trap->try_init_type(id);
 
-        if (!is_trap_ok)
-        {
+        if (!is_trap_ok) {
                 delete trap;
 
                 return nullptr;
@@ -172,13 +166,11 @@ void populate_std_lvl()
 
         blocked.at(player_p) = true;
 
-        for (auto* const room : map::g_room_list)
-        {
+        for (auto* const room : map::g_room_list) {
                 const auto chance_trapped =
                         chance_for_trapped_room(room->m_type);
 
-                if ((chance_trapped.num == -1) || !chance_trapped.roll())
-                {
+                if ((chance_trapped.num == -1) || !chance_trapped.roll()) {
                         continue;
                 }
 
@@ -194,8 +186,7 @@ void populate_std_lvl()
                                 rnd::range(1, 3),
                                 (int)trap_pos_bucket.size());
 
-                for (int i = 0; i < nr_traps; ++i)
-                {
+                for (int i = 0; i < nr_traps; ++i) {
                         const terrain::TrapId trap_type =
                                 (room->m_type == RoomType::spider)
                                 ? terrain::TrapId::web
@@ -205,8 +196,7 @@ void populate_std_lvl()
 
                         auto* const trap = try_make_trap(trap_type, pos);
 
-                        if (trap)
-                        {
+                        if (trap) {
                                 map::set_terrain(trap);
                         }
                 }

@@ -38,20 +38,17 @@ void Monolith::on_hit(
         (void)from_pos;
         (void)dmg;
 
-        switch (dmg_type)
-        {
+        switch (dmg_type) {
         case DmgType::explosion:
         case DmgType::pure:
-                if (map::g_seen.at(m_pos))
-                {
+                if (map::g_seen.at(m_pos)) {
                         msg_log::add("The monolith is destroyed.");
                 }
 
                 map::update_terrain(make(Id::rubble_low, m_pos));
                 map::update_vision();
 
-                if (player_bon::is_bg(Bg::exorcist))
-                {
+                if (player_bon::is_bg(Bg::exorcist)) {
                         const auto msg =
                                 rnd::element(
                                         common_text::g_exorcist_purge_phrases);
@@ -89,23 +86,20 @@ Color Monolith::color_default() const
 
 void Monolith::bump(actor::Actor& actor_bumping)
 {
-        if (!actor::is_player(&actor_bumping))
-        {
+        if (!actor::is_player(&actor_bumping)) {
                 return;
         }
 
         map::memorize_terrain_at(m_pos);
         map::update_vision();
 
-        if (!map::g_player->m_properties.allow_see())
-        {
+        if (!map::g_player->m_properties.allow_see()) {
                 msg_log::add("There is a carved rock here.");
 
                 return;
         }
 
-        if (player_bon::is_bg(Bg::exorcist))
-        {
+        if (player_bon::is_bg(Bg::exorcist)) {
                 msg_log::add(
                         "This rock is defiled with blasphemous carvings, "
                         "it must be destroyed!");
@@ -115,12 +109,10 @@ void Monolith::bump(actor::Actor& actor_bumping)
 
         msg_log::add("I recite the inscriptions on the Monolith...");
 
-        if (m_is_activated)
-        {
+        if (m_is_activated) {
                 msg_log::add("Nothing happens.");
         }
-        else
-        {
+        else {
                 activate();
 
                 map::memorize_terrain_at(m_pos);

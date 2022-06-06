@@ -43,8 +43,7 @@ public:
 
         bool is_active() const
         {
-                if (!m_curse_impl)
-                {
+                if (!m_curse_impl) {
                         return false;
                 }
 

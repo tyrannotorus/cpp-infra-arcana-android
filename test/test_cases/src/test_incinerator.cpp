@@ -22,10 +22,8 @@ TEST_CASE("Incinerator projectile explodes on hitting creature")
 {
         test_utils::init_all();
 
-        for (int x = 1; x < (map::w() - 1); ++x)
-        {
-                for (int y = 1; y < (map::h() - 1); ++y)
-                {
+        for (int x = 1; x < (map::w() - 1); ++x) {
+                for (int y = 1; y < (map::h() - 1); ++y) {
                         map::update_terrain(
                                 terrain::make(terrain::Id::floor, {x, y}));
                 }
@@ -65,10 +63,8 @@ TEST_CASE("Incinerator projectile explodes on hitting floor")
 {
         test_utils::init_all();
 
-        for (int x = 1; x < (map::w() - 1); ++x)
-        {
-                for (int y = 1; y < (map::h() - 1); ++y)
-                {
+        for (int x = 1; x < (map::w() - 1); ++x) {
+                for (int y = 1; y < (map::h() - 1); ++y) {
                         map::update_terrain(
                                 terrain::make(terrain::Id::floor, {x, y}));
                 }

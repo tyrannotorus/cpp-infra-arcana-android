@@ -23,8 +23,7 @@ void merge_regions(Region regions[3][3])
 
         const int nr_merges_to_make = rnd::range_binom(0, 3, 0.5);
 
-        if (nr_merges_to_make == 0)
-        {
+        if (nr_merges_to_make == 0) {
                 return;
         }
 
@@ -40,23 +39,18 @@ void merge_regions(Region regions[3][3])
         // The elements of this vector corresponds to sets of region indexes
         std::vector<R> merge_idx_bucket;
 
-        for (int idx_w = idx_w_min; idx_w <= idx_w_max; ++idx_w)
-        {
-                for (int idx_h = idx_h_min; idx_h <= idx_h_max; ++idx_h)
-                {
+        for (int idx_w = idx_w_min; idx_w <= idx_w_max; ++idx_w) {
+                for (int idx_h = idx_h_min; idx_h <= idx_h_max; ++idx_h) {
                         // Avoid merging 1x1
-                        if (idx_w == 1 && idx_h == 1)
-                        {
+                        if (idx_w == 1 && idx_h == 1) {
                                 continue;
                         }
 
                         const int check_start_x1 = 3 - idx_w;
                         const int check_start_y1 = 3 - idx_h;
 
-                        for (int start_x = 0; start_x <= check_start_x1; ++start_x)
-                        {
-                                for (int start_y = 0; start_y <= check_start_y1; ++start_y)
-                                {
+                        for (int start_x = 0; start_x <= check_start_x1; ++start_x) {
+                                for (int start_y = 0; start_y <= check_start_y1; ++start_y) {
                                         const P start_p(start_x, start_y);
 
                                         const P dim(idx_w, idx_h);
@@ -74,12 +68,9 @@ void merge_regions(Region regions[3][3])
         // Make merges
 
         auto is_regions_free = [&regions](const R& r) {
-                for (int x = r.p0.x; x <= r.p1.x; ++x)
-                {
-                        for (int y = r.p0.y; y <= r.p1.y; ++y)
-                        {
-                                if (!regions[x][y].is_free)
-                                {
+                for (int x = r.p0.x; x <= r.p1.x; ++x) {
+                        for (int y = r.p0.y; y <= r.p1.y; ++y) {
+                                if (!regions[x][y].is_free) {
                                         return false;
                                 }
                         }
@@ -88,10 +79,8 @@ void merge_regions(Region regions[3][3])
                 return true;
         };
 
-        for (int merge_nr = 0; merge_nr < nr_merges_to_make; /* No increment */)
-        {
-                if (merge_idx_bucket.empty())
-                {
+        for (int merge_nr = 0; merge_nr < nr_merges_to_make; /* No increment */) {
+                if (merge_idx_bucket.empty()) {
                         // No more merges possible
                         return;
                 }
@@ -104,8 +93,7 @@ void merge_regions(Region regions[3][3])
                 // If the regions are not free (could be because it was blocked
                 // before we started, or because we have blocked it with another
                 // merge), discard it from the bucket
-                if (!is_regions_free(idx_r))
-                {
+                if (!is_regions_free(idx_r)) {
                         merge_idx_bucket.erase(
                                 std::begin(merge_idx_bucket) + bucket_idx);
 
@@ -128,16 +116,13 @@ void merge_regions(Region regions[3][3])
                 region_0.r = R(region_0.r.p0, region_1.r.p1);
 
                 // Set all other regions to blocked, ant to cover no space on the map
-                for (int x = idx_r.p0.x; x <= idx_r.p1.x; ++x)
-                {
-                        for (int y = idx_r.p0.y; y <= idx_r.p1.y; ++y)
-                        {
+                for (int x = idx_r.p0.x; x <= idx_r.p1.x; ++x) {
+                        for (int y = idx_r.p0.y; y <= idx_r.p1.y; ++y) {
                                 const P idx_p(x, y);
 
                                 auto& reg = regions[idx_p.x][idx_p.y];
 
-                                if (idx_p != idx_r.p0)
-                                {
+                                if (idx_p != idx_r.p0) {
                                         reg.is_free = false;
 
                                         reg.r = R(-1, -1, -1, -1);

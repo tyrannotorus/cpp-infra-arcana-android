@@ -106,15 +106,13 @@ static std::string get_mon_memory_turns_descr(
 {
         const int nr_turns_aware = actor_data.nr_turns_aware;
 
-        if (nr_turns_aware <= 0)
-        {
+        if (nr_turns_aware <= 0) {
                 return "";
         }
 
         const std::string name_a = text_format::first_to_upper(actor.name_a());
 
-        if (nr_turns_aware < 50)
-        {
+        if (nr_turns_aware < 50) {
                 const std::string nr_turns_aware_str =
                         std::to_string(nr_turns_aware);
 
@@ -124,8 +122,7 @@ static std::string get_mon_memory_turns_descr(
                         nr_turns_aware_str +
                         "{_}turns{reset_color}.";
         }
-        else
-        {
+        else {
                 // Very high number of turns awareness
                 return (
                         name_a +
@@ -136,8 +133,7 @@ static std::string get_mon_memory_turns_descr(
 
 static std::string mon_speed_type_to_str(const actor::Speed speed)
 {
-        switch (speed)
-        {
+        switch (speed) {
         case actor::Speed::slow:
                 return "slowly";
 
@@ -164,21 +160,18 @@ static std::string get_mon_speed_descr(
                 mon_speed_type_to_str(
                         actor_data.speed);
 
-        if (speed_type_str.empty())
-        {
+        if (speed_type_str.empty()) {
                 return "";
         }
 
-        if (actor_data.is_unique)
-        {
+        if (actor_data.is_unique) {
                 return (
                         actor.name_the() +
                         " appears to move{_}" +
                         speed_type_str +
                         ".");
         }
-        else
-        {
+        else {
                 return (
                         "They appear to move{_}" +
                         speed_type_str +
@@ -190,8 +183,7 @@ static MonShockStrings mon_shock_lvl_to_strings(const MonShockLvl shock_lvl)
 {
         MonShockStrings result;
 
-        switch (shock_lvl)
-        {
+        switch (shock_lvl) {
         case MonShockLvl::unsettling:
                 result.color_fmt_str = "{dark_brown}";
                 result.shock_str = "unsettling";
@@ -232,8 +224,7 @@ static std::string get_mon_shock_descr(
                 mon_shock_lvl_to_strings(
                         actor_data.mon_shock_lvl);
 
-        if (shock_strings.shock_str.empty())
-        {
+        if (shock_strings.shock_str.empty()) {
                 return "";
         }
 
@@ -257,8 +248,7 @@ static std::string get_mon_wielded_wpn_str(
 {
         const auto* const wpn = actor.m_inv.item_in_slot(SlotId::wpn);
 
-        if (!wpn)
-        {
+        if (!wpn) {
                 return "";
         }
 
@@ -286,8 +276,7 @@ static std::string get_melee_hit_chance_descr(actor::Actor& actor)
                 ? static_cast<const item::Wpn*>(wielded_item)
                 : &map::g_player->unarmed_wpn();
 
-        if (!player_wpn)
-        {
+        if (!player_wpn) {
                 ASSERT(false);
 
                 return "";
@@ -306,8 +295,7 @@ static std::string get_melee_hit_chance_descr(actor::Actor& actor)
                 std::to_string(hit_chance) +
                 "%{reset_color}";
 
-        if (att_data.is_backstab)
-        {
+        if (att_data.is_backstab) {
                 descr += " (because they are unaware)";
         }
 
@@ -349,17 +337,14 @@ static void add_or_list_to_sentence(
 {
         const auto nr_names = names.size();
 
-        for (size_t i = 0; i < nr_names; ++i)
-        {
-                if ((nr_names > 2) && (i > 0))
-                {
+        for (size_t i = 0; i < nr_names; ++i) {
+                if ((nr_names > 2) && (i > 0)) {
                         base_str += ",";
                 }
 
                 base_str += " ";
 
-                if ((nr_names >= 2) && (i == (nr_names - 1)))
-                {
+                if ((nr_names >= 2) && (i == (nr_names - 1))) {
                         base_str += "or ";
                 }
 
@@ -379,65 +364,50 @@ static std::string get_mon_natural_properties_descr(
         std::vector<std::string> can_names;
         std::vector<std::string> custom_entries;
 
-        for (const auto& p : s_cannot_be_harmed_by_props)
-        {
-                if (has_natural_property(actor_data, p.first))
-                {
+        for (const auto& p : s_cannot_be_harmed_by_props) {
+                if (has_natural_property(actor_data, p.first)) {
                         cannot_be_harmed_by_names.push_back(p.second);
                 }
         }
 
-        for (const auto& p : s_unaffected_by_props)
-        {
-                if (has_natural_property(actor_data, p.first))
-                {
+        for (const auto& p : s_unaffected_by_props) {
+                if (has_natural_property(actor_data, p.first)) {
                         unaffected_by_names.push_back(p.second);
                 }
         }
 
-        for (const auto& p : s_cannot_be_props)
-        {
-                if (has_natural_property(actor_data, p.first))
-                {
+        for (const auto& p : s_cannot_be_props) {
+                if (has_natural_property(actor_data, p.first)) {
                         cannot_be_names.push_back(p.second);
                 }
         }
 
-        for (const auto& p : s_cannot_props)
-        {
-                if (has_natural_property(actor_data, p.first))
-                {
+        for (const auto& p : s_cannot_props) {
+                if (has_natural_property(actor_data, p.first)) {
                         cannot_names.push_back(p.second);
                 }
         }
 
-        for (const auto& p : s_can_props)
-        {
-                if (has_natural_property(actor_data, p.first))
-                {
+        for (const auto& p : s_can_props) {
+                if (has_natural_property(actor_data, p.first)) {
                         can_names.push_back(p.second);
                 }
         }
 
-        for (const auto& p : s_custom_props)
-        {
-                if (has_natural_property(actor_data, p.first))
-                {
+        for (const auto& p : s_custom_props) {
+                if (has_natural_property(actor_data, p.first)) {
                         custom_entries.push_back(p.second);
                 }
         }
 
-        if (!cannot_be_harmed_by_names.empty())
-        {
+        if (!cannot_be_harmed_by_names.empty()) {
                 descr += s_cannot_be_harmed_by_start;
                 add_or_list_to_sentence(descr, cannot_be_harmed_by_names);
                 descr += ".";
         }
 
-        if (!unaffected_by_names.empty())
-        {
-                if (!descr.empty())
-                {
+        if (!unaffected_by_names.empty()) {
+                if (!descr.empty()) {
                         descr += " ";
                 }
 
@@ -446,10 +416,8 @@ static std::string get_mon_natural_properties_descr(
                 descr += ".";
         }
 
-        if (!cannot_be_names.empty())
-        {
-                if (!descr.empty())
-                {
+        if (!cannot_be_names.empty()) {
+                if (!descr.empty()) {
                         descr += " ";
                 }
 
@@ -458,10 +426,8 @@ static std::string get_mon_natural_properties_descr(
                 descr += ".";
         }
 
-        if (!cannot_names.empty())
-        {
-                if (!descr.empty())
-                {
+        if (!cannot_names.empty()) {
+                if (!descr.empty()) {
                         descr += " ";
                 }
 
@@ -470,10 +436,8 @@ static std::string get_mon_natural_properties_descr(
                 descr += ".";
         }
 
-        if (!can_names.empty())
-        {
-                if (!descr.empty())
-                {
+        if (!can_names.empty()) {
+                if (!descr.empty()) {
                         descr += " ";
                 }
 
@@ -482,10 +446,8 @@ static std::string get_mon_natural_properties_descr(
                 descr += ".";
         }
 
-        for (const auto& entry : custom_entries)
-        {
-                if (!descr.empty())
-                {
+        for (const auto& entry : custom_entries) {
+                if (!descr.empty()) {
                         descr += " ";
                 }
 
@@ -504,8 +466,7 @@ static std::string auto_description_str(actor::Actor& actor)
                 ? *actor.m_mimic_data
                 : *actor.m_data;
 
-        if (!actor.is_actor_my_leader(map::g_player))
-        {
+        if (!actor.is_actor_my_leader(map::g_player)) {
                 text_format::append_with_space(
                         str,
                         get_melee_hit_chance_descr(actor));
@@ -516,29 +477,25 @@ static std::string auto_description_str(actor::Actor& actor)
 
         if (!actor.is_aware_of_player() &&
             !actor.is_actor_my_leader(map::g_player) &&
-            looks)
-        {
+            looks) {
                 text_format::append_with_space(
                         str,
                         get_sneak_chance_descr(actor));
         }
 
-        if (actor_data.allow_speed_descr)
-        {
+        if (actor_data.allow_speed_descr) {
                 text_format::append_with_space(
                         str,
                         get_mon_speed_descr(actor_data, actor));
         }
 
-        if (!actor.is_actor_my_leader(map::g_player))
-        {
+        if (!actor.is_actor_my_leader(map::g_player)) {
                 text_format::append_with_space(
                         str,
                         get_mon_memory_turns_descr(actor_data, actor));
         }
 
-        if (!looks)
-        {
+        if (!looks) {
                 text_format::append_with_space(
                         str,
                         "They cannot visually detect other creatures");
@@ -547,30 +504,26 @@ static std::string auto_description_str(actor::Actor& actor)
                         ai[(size_t)actor::AiId::moves_to_target_when_los] ||
                         ai[(size_t)actor::AiId::paths_to_target_when_aware];
 
-                if (pursues)
-                {
+                if (pursues) {
                         str += " (but will pursue any threat once aware)";
                 }
 
                 str += ".";
         }
 
-        if (actor_data.is_undead)
-        {
+        if (actor_data.is_undead) {
                 text_format::append_with_space(
                         str,
                         "{magenta}This creature is undead.{reset_color}");
         }
 
-        if (!actor.is_actor_my_leader(map::g_player))
-        {
+        if (!actor.is_actor_my_leader(map::g_player)) {
                 text_format::append_with_space(
                         str,
                         get_mon_shock_descr(actor_data, actor));
         }
 
-        if (actor_data.allow_wielded_wpn_descr)
-        {
+        if (actor_data.allow_wielded_wpn_descr) {
                 text_format::append_with_space(
                         str,
                         get_mon_wielded_wpn_str(actor_data, actor));
@@ -579,10 +532,8 @@ static std::string auto_description_str(actor::Actor& actor)
         const auto natural_properties_descr =
                 get_mon_natural_properties_descr(actor_data);
 
-        if (!natural_properties_descr.empty())
-        {
-                if (!str.empty())
-                {
+        if (!natural_properties_descr.empty()) {
+                if (!str.empty()) {
                         str += "\n\n";
                 }
 
@@ -599,24 +550,19 @@ static std::string temporary_negative_properties_str(actor::Actor& actor)
         // Properties
         auto prop_list = actor.m_properties.temporary_negative_properties();
 
-        for (const auto& entry : prop_list)
-        {
-                if (!str.empty())
-                {
+        for (const auto& entry : prop_list) {
+                if (!str.empty()) {
                         str += "\n";
                 }
 
                 // TODO: This is VERY hacky (maybe Text should support RGB?):
-                if (entry.title.color == colors::msg_good())
-                {
+                if (entry.title.color == colors::msg_good()) {
                         str += "{light_green}";
                 }
-                else if (entry.title.color == colors::msg_bad())
-                {
+                else if (entry.title.color == colors::msg_bad()) {
                         str += "{light_red}";
                 }
-                else
-                {
+                else {
                         str += "{white}";
                 }
 
@@ -662,8 +608,7 @@ void ViewActorDescr::draw()
                 const std::string auto_descr_str =
                         auto_description_str(m_actor);
 
-                if (!auto_descr_str.empty())
-                {
+                if (!auto_descr_str.empty()) {
                         ++y;
 
                         Text text;
@@ -696,20 +641,16 @@ void ViewActorDescr::update()
 {
         const auto input = io::read_input();
 
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_SPACE:
-        case SDLK_ESCAPE:
-        {
+        case SDLK_ESCAPE: {
                 // Exit screen
                 states::pop();
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 }
 

@@ -64,8 +64,7 @@ static bool is_pos_on_line(const P& p, const P& line_p0, const P& line_p1)
                 std::max(line_p0.x, line_p1.x),
                 std::max(line_p0.y, line_p1.y));
 
-        if (!r.is_pos_inside(p))
-        {
+        if (!r.is_pos_inside(p)) {
                 return false;
         }
 
@@ -95,13 +94,11 @@ static std::vector<P> move_bucket(actor::Actor& mon)
         const auto& mon_p = mon.m_pos;
         const auto& player_p = map::g_player->m_pos;
 
-        for (const P& d : dir_utils::g_dir_list)
-        {
+        for (const P& d : dir_utils::g_dir_list) {
                 const auto target_p = mon_p + d;
 
                 if (!map::can_actor_move_into_terrain_at(mon, target_p) ||
-                    map::living_actor_at(target_p))
-                {
+                    map::living_actor_at(target_p)) {
                         // Impossible to move here.
                         continue;
                 }
@@ -110,8 +107,7 @@ static std::vector<P> move_bucket(actor::Actor& mon)
 
                 const int target_dist_to_player = king_dist(target_p, player_p);
 
-                if (target_dist_to_player > current_dist_to_player)
-                {
+                if (target_dist_to_player > current_dist_to_player) {
                         // Not closer to the player.
                         continue;
                 }
@@ -136,13 +132,11 @@ static DidAction try_cast_spell(
         actor::MonSpell& spell,
         std::vector<actor::Actor*>& seen_targets)
 {
-        if (spell.cooldown > 0)
-        {
+        if (spell.cooldown > 0) {
                 return DidAction::no;
         }
 
-        if (!spell.spell->allow_mon_cast_now(mon, seen_targets))
-        {
+        if (!spell.spell->allow_mon_cast_now(mon, seen_targets)) {
                 return DidAction::no;
         }
 
@@ -151,22 +145,18 @@ static DidAction try_cast_spell(
         const auto cost = spell.spell->spi_cost_range(spell.skill, &mon);
         const bool has_spi = cost.max < mon.m_sp;
 
-        if (!has_spi)
-        {
+        if (!has_spi) {
                 const bool is_hostile = !map::g_player->is_leader_of(&mon);
                 const int max_hp = actor::max_hp(mon);
                 const bool is_low_hp = mon.m_hp < (max_hp / 3);
                 const bool is_desperate = is_hostile && is_low_hp;
 
-                if (is_desperate && rnd::one_in(20))
-                {
-                        if (actor::can_player_see_actor(mon))
-                        {
+                if (is_desperate && rnd::one_in(20)) {
+                        if (actor::can_player_see_actor(mon)) {
                                 print_mon_desperate_cast_msg(mon);
                         }
                 }
-                else
-                {
+                else {
                         return DidAction::no;
                 }
         }
@@ -180,17 +170,14 @@ static DidAction try_cast_spell(
 
 static void remove_player_with_sanctuary(std::vector<actor::Actor*>& actors)
 {
-        if (!map::g_player->m_properties.has(PropId::sanctuary))
-        {
+        if (!map::g_player->m_properties.has(PropId::sanctuary)) {
                 return;
         }
 
-        for (auto it = std::begin(actors); it != std::end(actors); ++it)
-        {
+        for (auto it = std::begin(actors); it != std::end(actors); ++it) {
                 auto* const actor = *it;
 
-                if (actor::is_player(actor))
-                {
+                if (actor::is_player(actor)) {
                         actors.erase(it);
 
                         return;
@@ -207,18 +194,15 @@ namespace action
 {
 DidAction try_cast_random_spell(actor::Actor& mon)
 {
-        if (!mon.is_alive())
-        {
+        if (!mon.is_alive()) {
                 return DidAction::no;
         }
 
-        if (mon.m_mon_spells.empty())
-        {
+        if (mon.m_mon_spells.empty()) {
                 return DidAction::no;
         }
 
-        if (!mon.m_properties.allow_cast_intr_spell_absolute(Verbose::no))
-        {
+        if (!mon.m_properties.allow_cast_intr_spell_absolute(Verbose::no)) {
                 return DidAction::no;
         }
 
@@ -228,16 +212,14 @@ DidAction try_cast_random_spell(actor::Actor& mon)
 
         remove_player_with_sanctuary(seen_targets);
 
-        for (auto& spell : mon.m_mon_spells)
-        {
+        for (auto& spell : mon.m_mon_spells) {
                 const auto did_cast =
                         try_cast_spell(
                                 mon,
                                 spell,
                                 seen_targets);
 
-                if (did_cast == DidAction::yes)
-                {
+                if (did_cast == DidAction::yes) {
                         return did_cast;
                 }
         }
@@ -247,8 +229,7 @@ DidAction try_cast_random_spell(actor::Actor& mon)
 
 DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path)
 {
-        if (!mon.is_alive() || path.empty())
-        {
+        if (!mon.is_alive() || path.empty()) {
                 return DidAction::no;
         }
 
@@ -257,8 +238,7 @@ DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path)
         auto* const terrain = map::g_terrain.at(p);
 
         if ((terrain->id() != terrain::Id::door) ||
-            map::can_actor_move_into_terrain_at(mon, p))
-        {
+            map::can_actor_move_into_terrain_at(mon, p)) {
                 return DidAction::no;
         }
 
@@ -269,8 +249,7 @@ DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path)
         // There should never be a path past metal doors
         ASSERT(door->type() != terrain::DoorType::metal);
 
-        if (door->type() == terrain::DoorType::metal)
-        {
+        if (door->type() == terrain::DoorType::metal) {
                 return DidAction::no;
         }
 
@@ -284,34 +263,29 @@ DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path)
         // bash nor open
         ASSERT(mon_can_bash || mon_can_open);
 
-        if (!mon_can_bash && !mon_can_open)
-        {
+        if (!mon_can_bash && !mon_can_open) {
                 return DidAction::no;
         }
 
         // Open the door?
-        if (mon_can_open && !is_stuck)
-        {
+        if (mon_can_open && !is_stuck) {
                 door->actor_try_open(mon);
 
                 return DidAction::yes;
         }
 
         // Bash the door?
-        if (mon_can_bash && (is_stuck || !mon_can_open))
-        {
+        if (mon_can_bash && (is_stuck || !mon_can_open)) {
                 // When bashing doors, give the bashing monster some bonus
                 // awareness time (because monsters trying to bash down doors is
                 // a pretty central part of the game, and they should not give
                 // up so easily)
                 if (!mon.is_actor_my_leader(map::g_player) &&
-                    rnd::fraction(3, 5))
-                {
+                    rnd::fraction(3, 5)) {
                         ++mon.m_mon_aware_state.aware_counter;
                 }
 
-                if (actor::can_player_see_actor(mon))
-                {
+                if (actor::can_player_see_actor(mon)) {
                         const std::string mon_name_the =
                                 text_format::first_to_upper(
                                         mon.name_the());
@@ -346,26 +320,22 @@ DidAction make_room_for_friend(actor::Actor& mon)
 {
         // TODO: Refactor this function
 
-        if (!mon.is_alive())
-        {
+        if (!mon.is_alive()) {
                 return DidAction::no;
         }
 
-        if (!can_mon_see_actor(mon, *map::g_player, map::g_terrain_blocks_los))
-        {
+        if (!can_mon_see_actor(mon, *map::g_player, map::g_terrain_blocks_los)) {
                 return DidAction::no;
         }
 
         const auto& player_p = map::g_player->m_pos;
 
         // Check if there is an allied monster that we should move away for.
-        for (auto* other_actor : game_time::g_actors)
-        {
+        for (auto* other_actor : game_time::g_actors) {
                 if (other_actor == &mon ||
                     !other_actor->is_alive() ||
                     actor::is_player(other_actor) ||
-                    map::g_player->is_leader_of(other_actor))
-                {
+                    map::g_player->is_leader_of(other_actor)) {
                         continue;
                 }
 
@@ -399,8 +369,7 @@ DidAction make_room_for_friend(actor::Actor& mon)
                                 player_p);
 
                 if ((is_other_seeing_player && is_between) ||
-                    is_other_adj_with_no_player_los)
-                {
+                    is_other_adj_with_no_player_los) {
                         // We are blocking a friend! Try to find an adjacent
                         // free cell, which:
                         // * Is NOT further away from the player than our
@@ -423,20 +392,17 @@ DidAction make_room_for_friend(actor::Actor& mon)
 
                         // Try to find a position not blocking a third
                         // allied monster
-                        for (const auto& target_p : pos_bucket)
-                        {
+                        for (const auto& target_p : pos_bucket) {
                                 bool is_p_ok = true;
 
-                                for (auto* actor3 : game_time::g_actors)
-                                {
+                                for (auto* actor3 : game_time::g_actors) {
                                         // NOTE: The third actor here can include the original
                                         // blocked "other" actor, since we must also check if we
                                         // block that actor from the target position
                                         if (actor3 != &mon &&
                                             actor3->is_alive() &&
                                             !actor::is_player(actor3) &&
-                                            !map::g_player->is_leader_of(actor3))
-                                        {
+                                            !map::g_player->is_leader_of(actor3)) {
                                                 const bool other_is_seeing_player =
                                                         actor::can_mon_see_actor(
                                                                 *actor3,
@@ -451,16 +417,14 @@ DidAction make_room_for_friend(actor::Actor& mon)
                                                 // another in the same way.
 
                                                 if (other_is_seeing_player &&
-                                                    is_pos_on_line(target_p, actor3->m_pos, player_p))
-                                                {
+                                                    is_pos_on_line(target_p, actor3->m_pos, player_p)) {
                                                         is_p_ok = false;
                                                         break;
                                                 }
                                         }
                                 }
 
-                                if (is_p_ok)
-                                {
+                                if (is_p_ok) {
                                         const P offset = target_p - mon.m_pos;
 
                                         actor::do_move_action(mon, dir_utils::dir(offset));
@@ -476,14 +440,12 @@ DidAction make_room_for_friend(actor::Actor& mon)
 
 DidAction move_to_random_adj_cell(actor::Actor& mon)
 {
-        if (!mon.is_alive())
-        {
+        if (!mon.is_alive()) {
                 return DidAction::no;
         }
 
         if ((mon.m_ai_state.is_roaming_allowed == MonRoamingAllowed::no) &&
-            !mon.is_aware_of_player())
-        {
+            !mon.is_aware_of_player()) {
                 return DidAction::no;
         }
 
@@ -494,38 +456,32 @@ DidAction move_to_random_adj_cell(actor::Actor& mon)
 
         const Dir last_dir_moved = mon.m_ai_state.last_dir_moved;
 
-        if ((last_dir_moved != Dir::center) && (last_dir_moved != Dir::END))
-        {
+        if ((last_dir_moved != Dir::center) && (last_dir_moved != Dir::END)) {
                 // Try the same direction as last travelled.
                 const auto target_p =
                         mon.m_pos +
                         dir_utils::offset(last_dir_moved);
 
-                if (can_move_into_pos(mon, target_p, area_allowed))
-                {
+                if (can_move_into_pos(mon, target_p, area_allowed)) {
                         dir = last_dir_moved;
                 }
         }
 
-        if (dir == Dir::END)
-        {
+        if (dir == Dir::END) {
                 // Valid direction not found yet - attempt to find a random
                 // non-blocked adjacent cell.
                 std::vector<Dir> dir_bucket;
                 dir_bucket.clear();
 
-                for (const P& d : dir_utils::g_dir_list)
-                {
+                for (const P& d : dir_utils::g_dir_list) {
                         const auto target_p = mon.m_pos + d;
 
-                        if (can_move_into_pos(mon, target_p, area_allowed))
-                        {
+                        if (can_move_into_pos(mon, target_p, area_allowed)) {
                                 dir_bucket.push_back(dir_utils::dir(d));
                         }
                 }
 
-                if (!dir_bucket.empty())
-                {
+                if (!dir_bucket.empty()) {
                         const auto idx =
                                 rnd::range(0, (int)dir_bucket.size() - 1);
 
@@ -533,8 +489,7 @@ DidAction move_to_random_adj_cell(actor::Actor& mon)
                 }
         }
 
-        if (dir != Dir::END)
-        {
+        if (dir != Dir::END) {
                 // Valid direction found
                 actor::do_move_action(mon, dir);
 
@@ -548,8 +503,7 @@ DidAction move_to_target_simple(actor::Actor& mon)
 {
         if (!mon.is_alive() ||
             !mon.m_ai_state.target ||
-            !mon.m_ai_state.is_target_seen)
-        {
+            !mon.m_ai_state.is_target_seen) {
                 return DidAction::no;
         }
 
@@ -558,22 +512,19 @@ DidAction move_to_target_simple(actor::Actor& mon)
         const auto new_pos = mon.m_pos + signs;
 
         if (map::can_actor_move_into_terrain_at(mon, new_pos) &&
-            !map::living_actor_at(new_pos))
-        {
+            !map::living_actor_at(new_pos)) {
                 actor::do_move_action(mon, dir_utils::dir(signs));
 
                 return DidAction::yes;
         }
-        else
-        {
+        else {
                 return DidAction::no;
         }
 }
 
 DidAction step_path(actor::Actor& mon, const std::vector<P>& path)
 {
-        if (!mon.is_alive() || path.empty())
-        {
+        if (!mon.is_alive() || path.empty()) {
                 return DidAction::no;
         }
 
@@ -586,8 +537,7 @@ DidAction step_path(actor::Actor& mon, const std::vector<P>& path)
 
 DidAction step_to_lair_if_los(actor::Actor& mon, const P& lair_p)
 {
-        if (!mon.is_alive())
-        {
+        if (!mon.is_alive()) {
                 return DidAction::no;
         }
 
@@ -598,8 +548,7 @@ DidAction step_to_lair_if_los(actor::Actor& mon, const P& lair_p)
 
         const auto los = fov::check_cell(mon.m_pos, lair_p, fov_map);
 
-        if (los.is_blocked_hard)
-        {
+        if (los.is_blocked_hard) {
                 return DidAction::no;
         }
 
@@ -607,14 +556,12 @@ DidAction step_to_lair_if_los(actor::Actor& mon, const P& lair_p)
         const auto target_p = mon.m_pos + d;
 
         if (map::can_actor_move_into_terrain_at(mon, target_p) &&
-            !map::living_actor_at(target_p))
-        {
+            !map::living_actor_at(target_p)) {
                 actor::do_move_action(mon, dir_utils::dir(d));
 
                 return DidAction::yes;
         }
-        else
-        {
+        else {
                 return DidAction::no;
         }
 }
@@ -628,29 +575,24 @@ namespace info
 {
 bool look(actor::Actor& mon)
 {
-        if (!mon.is_alive())
-        {
+        if (!mon.is_alive()) {
                 return false;
         }
 
         const auto seeable_foes = actor::seeable_foes_for_mon(mon);
 
-        if (seeable_foes.empty())
-        {
+        if (seeable_foes.empty()) {
                 return false;
         }
 
-        if (mon.is_aware_of_player())
-        {
+        if (mon.is_aware_of_player()) {
                 mon.become_aware_player(actor::AwareSource::other);
 
                 return false;
         }
 
-        for (auto* actor : seeable_foes)
-        {
-                if (actor::is_player(actor))
-                {
+        for (auto* actor : seeable_foes) {
+                if (actor::is_player(actor)) {
                         actor::SneakParameters p;
 
                         p.actor_sneaking = actor;
@@ -670,23 +612,20 @@ bool look(actor::Actor& mon)
                                 (is_non_critical_fail &&
                                  mon.is_wary_of_player());
 
-                        if (become_aware)
-                        {
+                        if (become_aware) {
                                 map::update_vision();
 
                                 mon.become_aware_player(
                                         actor::AwareSource::seeing);
                         }
                         // Not aware, just become wary if non-critical fail
-                        else if (is_non_critical_fail)
-                        {
+                        else if (is_non_critical_fail) {
                                 map::update_vision();
 
                                 mon.become_wary_player();
                         }
                 }
-                else
-                {
+                else {
                         // Other actor is monster
                         map::update_vision();
 
@@ -694,8 +633,7 @@ bool look(actor::Actor& mon)
                 }
 
                 // Did the monster become aware?
-                if (mon.is_aware_of_player())
-                {
+                if (mon.is_aware_of_player()) {
                         return true;
                 }
         }
@@ -705,8 +643,7 @@ bool look(actor::Actor& mon)
 
 std::vector<P> find_path_to_lair_if_no_los(actor::Actor& mon, const P& lair_p)
 {
-        if (!mon.is_alive())
-        {
+        if (!mon.is_alive()) {
                 return {};
         }
 
@@ -717,8 +654,7 @@ std::vector<P> find_path_to_lair_if_no_los(actor::Actor& mon, const P& lair_p)
 
         const LosResult los = fov::check_cell(mon.m_pos, lair_p, fov_map);
 
-        if (!los.is_blocked_hard)
-        {
+        if (!los.is_blocked_hard) {
                 return {};
         }
 
@@ -732,15 +668,13 @@ std::vector<P> find_path_to_lair_if_no_los(actor::Actor& mon, const P& lair_p)
 
 std::vector<P> find_path_to_leader(actor::Actor& mon)
 {
-        if (!mon.is_alive())
-        {
+        if (!mon.is_alive()) {
                 return {};
         }
 
         auto* leader = mon.m_leader;
 
-        if (!leader || !leader->is_alive())
-        {
+        if (!leader || !leader->is_alive()) {
                 return {};
         }
 
@@ -751,8 +685,7 @@ std::vector<P> find_path_to_leader(actor::Actor& mon)
 
         const auto los = fov::check_cell(mon.m_pos, leader->m_pos, fov_map);
 
-        if (!los.is_blocked_hard)
-        {
+        if (!los.is_blocked_hard) {
                 return {};
         }
 
@@ -766,8 +699,7 @@ std::vector<P> find_path_to_leader(actor::Actor& mon)
 
 std::vector<P> find_path_to_target(actor::Actor& mon)
 {
-        if (!mon.is_alive() || !mon.m_ai_state.target)
-        {
+        if (!mon.is_alive() || !mon.m_ai_state.target) {
                 return {};
         }
 
@@ -789,8 +721,7 @@ std::vector<P> find_path_to_target(actor::Actor& mon)
         fov_map.light = &map::g_light;
         fov_map.dark = &map::g_dark;
 
-        if (!mon.m_ai_state.is_target_seen)
-        {
+        if (!mon.m_ai_state.is_target_seen) {
                 LosResult los_result =
                         fov::check_cell(
                                 mon.m_pos,
@@ -798,8 +729,7 @@ std::vector<P> find_path_to_target(actor::Actor& mon)
                                 fov_map);
 
                 if (!los_result.is_blocked_hard &&
-                    !los_result.is_blocked_by_dark)
-                {
+                    !los_result.is_blocked_by_dark) {
                         return {};
                 }
         }
@@ -815,43 +745,36 @@ std::vector<P> find_path_to_target(actor::Actor& mon)
         const int h = map::h();
 
         // Set all doors to free that the actor could handle (e.g. open them).
-        for (int x = 0; x < w; ++x)
-        {
-                for (int y = 0; y < h; ++y)
-                {
+        for (int x = 0; x < w; ++x) {
+                for (int y = 0; y < h; ++y) {
                         const P p(x, y);
 
-                        if (!blocked.at(p))
-                        {
+                        if (!blocked.at(p)) {
                                 continue;
                         }
 
                         const auto* const t = map::g_terrain.at(p);
 
-                        if (t->id() != terrain::Id::door)
-                        {
+                        if (t->id() != terrain::Id::door) {
                                 continue;
                         }
 
                         const auto* const door =
                                 static_cast<const terrain::Door*>(t);
 
-                        if (door->type() == terrain::DoorType::metal)
-                        {
+                        if (door->type() == terrain::DoorType::metal) {
                                 // Metal door - none shall pass!
                                 continue;
                         }
 
-                        if (door->is_stuck() && !mon.m_data->can_bash_doors)
-                        {
+                        if (door->is_stuck() && !mon.m_data->can_bash_doors) {
                                 // Stuck non-metal door, and the actor cannot
                                 // bash doors.
                                 continue;
                         }
 
                         if (!mon.m_data->can_bash_doors &&
-                            !mon.m_data->can_open_doors)
-                        {
+                            !mon.m_data->can_open_doors) {
                                 // Non-stuck, non-metal door, but the actor
                                 // cannot handle doors at all.
                                 continue;

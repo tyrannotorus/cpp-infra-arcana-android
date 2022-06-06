@@ -29,8 +29,7 @@ std::optional<std::string> read_git_sha1_str_from_file()
 
         std::ifstream file(sha1_file_path);
 
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
                 TRACE << "Failed to open git sha1 file at "
                       << sha1_file_path
                       << std::endl;
@@ -44,8 +43,7 @@ std::optional<std::string> read_git_sha1_str_from_file()
 
         file.close();
 
-        if (sha1.empty())
-        {
+        if (sha1.empty()) {
                 return {};
         }
 

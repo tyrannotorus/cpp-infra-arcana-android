@@ -49,8 +49,7 @@ void InsSympt::on_start()
 
         ASSERT(!heading.empty() && !msg.empty());
 
-        if (!heading.empty() && !msg.empty())
-        {
+        if (!heading.empty() && !msg.empty()) {
                 popup::Popup(popup::AddToMsgHistory::yes)
                         .set_title(heading)
                         .set_msg(msg)
@@ -62,8 +61,7 @@ void InsSympt::on_start()
 
         ASSERT(!history_event_msg.empty());
 
-        if (!history_event_msg.empty())
-        {
+        if (!history_event_msg.empty()) {
                 game::add_history_event(history_event_msg);
         }
 
@@ -76,8 +74,7 @@ void InsSympt::on_end()
 
         ASSERT(!msg.empty());
 
-        if (!msg.empty())
-        {
+        if (!msg.empty()) {
                 msg_log::add(msg);
         }
 
@@ -85,8 +82,7 @@ void InsSympt::on_end()
 
         ASSERT(!history_event_msg.empty());
 
-        if (!history_event_msg.empty())
-        {
+        if (!history_event_msg.empty()) {
                 game::add_history_event(history_event_msg);
         }
 }
@@ -127,12 +123,10 @@ void InsScream::on_start_hook()
 
 std::string InsScream::start_msg() const
 {
-        if (rnd::coin_toss())
-        {
+        if (rnd::coin_toss()) {
                 return "I let out a terrified shriek.";
         }
-        else
-        {
+        else {
                 return "I scream in terror.";
         }
 }
@@ -141,8 +135,7 @@ void InsBabbling::babble() const
 {
         const std::string player_name = map::g_player->name_the();
 
-        for (int i = rnd::range(1, 3); i > 0; --i)
-        {
+        for (int i = rnd::range(1, 3); i > 0; --i) {
                 msg_log::add(player_name + ": " + actor::get_cultist_phrase());
         }
 
@@ -169,8 +162,7 @@ void InsBabbling::on_new_player_turn(
 
         const int babble_on_in_n = 200;
 
-        if (rnd::one_in(babble_on_in_n))
-        {
+        if (rnd::one_in(babble_on_in_n)) {
                 babble();
         }
 }
@@ -210,15 +202,12 @@ bool InsPhobiaRat::is_allowed() const
 void InsPhobiaRat::on_new_player_turn(
         const std::vector<actor::Actor*>& seen_actors)
 {
-        if (!rnd::one_in(10))
-        {
+        if (!rnd::one_in(10)) {
                 return;
         }
 
-        for (auto* const actor : seen_actors)
-        {
-                if (actor->m_data->is_rat)
-                {
+        for (auto* const actor : seen_actors) {
+                if (actor->m_data->is_rat) {
                         msg_log::add("I am plagued by my phobia of rats!");
 
                         map::g_player->m_properties.apply(
@@ -245,15 +234,12 @@ bool InsPhobiaSpider::is_allowed() const
 void InsPhobiaSpider::on_new_player_turn(
         const std::vector<actor::Actor*>& seen_actors)
 {
-        if (!rnd::one_in(10))
-        {
+        if (!rnd::one_in(10)) {
                 return;
         }
 
-        for (auto* const actor : seen_actors)
-        {
-                if (actor->m_data->is_spider)
-                {
+        for (auto* const actor : seen_actors) {
+                if (actor->m_data->is_spider) {
                         msg_log::add("I am plagued by my phobia of spiders!");
 
                         map::g_player->m_properties.apply(
@@ -280,8 +266,7 @@ bool InsPhobiaReptileAndAmph::is_allowed() const
 void InsPhobiaReptileAndAmph::on_new_player_turn(
         const std::vector<actor::Actor*>& seen_actors)
 {
-        if (!rnd::one_in(10))
-        {
+        if (!rnd::one_in(10)) {
                 return;
         }
 
@@ -289,10 +274,8 @@ void InsPhobiaReptileAndAmph::on_new_player_turn(
 
         std::string animal_str;
 
-        for (auto* const actor : seen_actors)
-        {
-                if (actor->m_data->is_reptile)
-                {
+        for (auto* const actor : seen_actors) {
+                if (actor->m_data->is_reptile) {
                         animal_str = "reptiles";
 
                         is_triggered = true;
@@ -300,8 +283,7 @@ void InsPhobiaReptileAndAmph::on_new_player_turn(
                         break;
                 }
 
-                if (actor->m_data->is_amphibian)
-                {
+                if (actor->m_data->is_amphibian) {
                         animal_str = "amphibians";
 
                         is_triggered = true;
@@ -310,8 +292,7 @@ void InsPhobiaReptileAndAmph::on_new_player_turn(
                 }
         }
 
-        if (is_triggered)
-        {
+        if (is_triggered) {
                 msg_log::add("I am plagued by my phobia of " + animal_str + "!");
 
                 map::g_player->m_properties.apply(
@@ -335,15 +316,12 @@ bool InsPhobiaCanine::is_allowed() const
 void InsPhobiaCanine::on_new_player_turn(
         const std::vector<actor::Actor*>& seen_actors)
 {
-        if (!rnd::one_in(10))
-        {
+        if (!rnd::one_in(10)) {
                 return;
         }
 
-        for (auto* const actor : seen_actors)
-        {
-                if (actor->m_data->is_canine)
-                {
+        for (auto* const actor : seen_actors) {
+                if (actor->m_data->is_canine) {
                         msg_log::add("I am plagued by my phobia of canines!");
 
                         map::g_player->m_properties.apply(
@@ -370,15 +348,12 @@ bool InsPhobiaDead::is_allowed() const
 void InsPhobiaDead::on_new_player_turn(
         const std::vector<actor::Actor*>& seen_actors)
 {
-        if (!rnd::one_in(10))
-        {
+        if (!rnd::one_in(10)) {
                 return;
         }
 
-        for (auto* const actor : seen_actors)
-        {
-                if (actor->m_data->is_undead)
-                {
+        for (auto* const actor : seen_actors) {
+                if (actor->m_data->is_undead) {
                         msg_log::add("I am plagued by my phobia of the dead!");
 
                         map::g_player->m_properties.apply(
@@ -408,8 +383,7 @@ void InsPhobiaDeep::on_new_player_turn(
 {
         (void)seen_actors;
 
-        if (!rnd::one_in(10))
-        {
+        if (!rnd::one_in(10)) {
                 return;
         }
 
@@ -420,8 +394,7 @@ void InsPhobiaDeep::on_new_player_turn(
                 map_parsers::AnyAdjIsAnyOfTerrains(
                         deep_terrains);
 
-        if (parser.run(map::g_player->m_pos))
-        {
+        if (parser.run(map::g_player->m_pos)) {
                 msg_log::add("I am plagued by my phobia of deep places!");
 
                 map::g_player->m_properties.apply(
@@ -450,14 +423,12 @@ void InsPhobiaDark::on_new_player_turn(
 {
         (void)seen_actors;
 
-        if (rnd::one_in(10))
-        {
+        if (rnd::one_in(10)) {
                 const P p(map::g_player->m_pos);
                 const PropHandler& props = map::g_player->m_properties;
 
                 if ((props.allow_act() && !props.allow_see()) ||
-                    (map::g_dark.at(p) && !map::g_light.at(p)))
-                {
+                    (map::g_dark.at(p) && !map::g_light.at(p))) {
                         msg_log::add("I am plagued by my phobia of the dark!");
 
                         map::g_player->m_properties.apply(
@@ -520,8 +491,7 @@ void InsParanoia::on_start_hook()
 {
         // Flip a coint to decide if we should spawn a stalker or not
         // (Maybe it's just paranoia, or maybe it's real)
-        if (rnd::coin_toss())
-        {
+        if (rnd::coin_toss()) {
                 return;
         }
 
@@ -581,8 +551,7 @@ InsSympt* s_sympts[(size_t)InsSymptId::END];
 
 InsSympt* make_sympt(const InsSymptId id)
 {
-        switch (id)
-        {
+        switch (id) {
         case InsSymptId::reduce_xp:
                 return new InsReduceXp();
 
@@ -650,16 +619,14 @@ InsSympt* make_sympt(const InsSymptId id)
 
 void init()
 {
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 s_sympts[i] = nullptr;
         }
 }
 
 void cleanup()
 {
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 delete s_sympts[i];
 
                 s_sympts[i] = nullptr;
@@ -668,14 +635,12 @@ void cleanup()
 
 void save()
 {
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 const auto* const sympt = s_sympts[i];
 
                 saving::put_bool(sympt != nullptr);
 
-                if (sympt)
-                {
+                if (sympt) {
                         sympt->save();
                 }
         }
@@ -683,12 +648,10 @@ void save()
 
 void load()
 {
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 const bool has_symptom = saving::get_bool();
 
-                if (has_symptom)
-                {
+                if (has_symptom) {
                         auto* const sympt = make_sympt((InsSymptId)i);
 
                         s_sympts[i] = sympt;
@@ -702,30 +665,25 @@ void run_sympt()
 {
         std::vector<InsSympt*> sympt_bucket;
 
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 const auto* const active_sympt = s_sympts[i];
 
                 // Symptoms are only allowed if not already active
-                if (!active_sympt)
-                {
+                if (!active_sympt) {
                         InsSympt* const new_sympt = make_sympt(InsSymptId(i));
 
                         const bool is_allowed = new_sympt->is_allowed();
 
-                        if (is_allowed)
-                        {
+                        if (is_allowed) {
                                 sympt_bucket.push_back(new_sympt);
                         }
-                        else
-                        {
+                        else {
                                 delete new_sympt;
                         }
                 }
         }
 
-        if (sympt_bucket.empty())
-        {
+        if (sympt_bucket.empty()) {
                 // This should never happen, since there are symptoms which can
                 // occur repeatedly unconditionally - but we do a check anyway
                 // for robustness.
@@ -739,15 +697,13 @@ void run_sympt()
         sympt_bucket.erase(std::begin(sympt_bucket) + bucket_idx);
 
         // Delete the remaining symptoms in the bucket
-        for (auto* const other_sympt : sympt_bucket)
-        {
+        for (auto* const other_sympt : sympt_bucket) {
                 delete other_sympt;
         }
 
         // If the symptom is permanent (i.e. not a one-shot thing like
         // screaming), set it as active in the symptoms list
-        if (sympt->is_permanent())
-        {
+        if (sympt->is_permanent()) {
                 const auto sympt_idx = size_t(sympt->id());
 
                 ASSERT(!s_sympts[sympt_idx]);
@@ -767,12 +723,10 @@ bool has_sympt(const InsSymptId id)
 
 bool has_sympt_type(const InsSymptType type)
 {
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 const InsSympt* const s = s_sympts[i];
 
-                if (s && s->type() == type)
-                {
+                if (s && s->type() == type) {
                         return true;
                 }
         }
@@ -784,12 +738,10 @@ std::vector<const InsSympt*> active_sympts()
 {
         std::vector<const InsSympt*> out;
 
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 const auto* const sympt = s_sympts[i];
 
-                if (sympt)
-                {
+                if (sympt) {
                         out.push_back(sympt);
                 }
         }
@@ -799,12 +751,10 @@ std::vector<const InsSympt*> active_sympts()
 
 void on_new_player_turn(const std::vector<actor::Actor*>& seen_actors)
 {
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 auto* const sympt = s_sympts[i];
 
-                if (sympt)
-                {
+                if (sympt) {
                         sympt->on_new_player_turn(seen_actors);
                 }
         }
@@ -812,12 +762,10 @@ void on_new_player_turn(const std::vector<actor::Actor*>& seen_actors)
 
 void on_permanent_rfear()
 {
-        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)InsSymptId::END; ++i) {
                 auto* const sympt = s_sympts[i];
 
-                if (sympt)
-                {
+                if (sympt) {
                         sympt->on_permanent_rfear();
                 }
         }

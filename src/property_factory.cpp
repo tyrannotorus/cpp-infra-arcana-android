@@ -15,8 +15,7 @@ Prop* make(const PropId id)
 {
         ASSERT(id != PropId::END);
 
-        switch (id)
-        {
+        switch (id) {
         case PropId::nailed:
                 return new PropNailed();
 

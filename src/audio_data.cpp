@@ -276,12 +276,10 @@ SfxId str_to_sfx_id(const std::string& str)
 {
         const auto result = s_str_to_sfx_id_map.find(str);
 
-        if (result == std::end(s_str_to_sfx_id_map))
-        {
+        if (result == std::end(s_str_to_sfx_id_map)) {
                 return SfxId::END;
         }
-        else
-        {
+        else {
                 return result->second;
         }
 }
@@ -290,12 +288,10 @@ std::string sfx_id_to_str(SfxId id)
 {
         const auto result = s_sfx_id_to_str_map.find(id);
 
-        if (result == std::end(s_sfx_id_to_str_map))
-        {
+        if (result == std::end(s_sfx_id_to_str_map)) {
                 return {};
         }
-        else
-        {
+        else {
                 return result->second;
         }
 }

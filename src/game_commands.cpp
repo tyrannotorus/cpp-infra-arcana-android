@@ -82,8 +82,7 @@ static void query_quit()
                         &choice)
                 .run();
 
-        if (choice == 1)
-        {
+        if (choice == 1) {
                 // Choosing to quit the game deletes the save
                 saving::erase_save();
 
@@ -98,12 +97,10 @@ static bool allow_player_fire_mi_go_gun()
         const bool has_enough_hp =
                 (map::g_player->m_hp > g_mi_go_gun_hp_drained);
 
-        if (has_enough_hp)
-        {
+        if (has_enough_hp) {
                 return true;
         }
-        else
-        {
+        else {
                 // Not enough HP - allow firing the gun if player has the
                 // Prolonged Life trait and enough SP instead
                 const bool has_prolonged_life =
@@ -121,15 +118,13 @@ static bool allow_player_fire_mi_go_gun()
 
 static void handle_fire_command()
 {
-        if (!map::g_player->m_properties.allow_attack_ranged(Verbose::yes))
-        {
+        if (!map::g_player->m_properties.allow_attack_ranged(Verbose::yes)) {
                 return;
         }
 
         auto* const item = map::g_player->m_inv.item_in_slot(SlotId::wpn);
 
-        if (!item)
-        {
+        if (!item) {
                 msg_log::add("I am not wielding a weapon.");
 
                 return;
@@ -137,8 +132,7 @@ static void handle_fire_command()
 
         const auto& item_data = item->data();
 
-        if (!item_data.ranged.is_ranged_wpn)
-        {
+        if (!item_data.ranged.is_ranged_wpn) {
                 msg_log::add("I am not wielding a firearm.");
 
                 return;
@@ -147,15 +141,12 @@ static void handle_fire_command()
         auto* wpn = static_cast<item::Wpn*>(item);
 
         if ((wpn->m_ammo_loaded <= 0) &&
-            !item_data.ranged.has_infinite_ammo)
-        {
+            !item_data.ranged.has_infinite_ammo) {
                 // Not enough ammo loaded - auto reload?
-                if (config::is_ranged_wpn_auto_reload())
-                {
+                if (config::is_ranged_wpn_auto_reload()) {
                         reload::try_reload(*map::g_player, item);
                 }
-                else
-                {
+                else {
                         msg_log::add("There is no ammo loaded.");
                 }
 
@@ -163,8 +154,7 @@ static void handle_fire_command()
         }
 
         if ((wpn->data().id == item::Id::mi_go_gun) &&
-            !allow_player_fire_mi_go_gun())
-        {
+            !allow_player_fire_mi_go_gun()) {
                 msg_log::add("Firing the gun now would destroy me.");
 
                 return;
@@ -181,22 +171,18 @@ static void handle_toggle_lantern_command()
 {
         item::Item* lantern = nullptr;
 
-        for (auto* const item : map::g_player->m_inv.m_backpack)
-        {
-                if (item->id() == item::Id::lantern)
-                {
+        for (auto* const item : map::g_player->m_inv.m_backpack) {
+                if (item->id() == item::Id::lantern) {
                         lantern = item;
 
                         break;
                 }
         }
 
-        if (lantern)
-        {
+        if (lantern) {
                 lantern->activate(map::g_player);
         }
-        else
-        {
+        else {
                 std::unique_ptr<item::Item> tmp_lantern(
                         item::make(item::Id::lantern));
 
@@ -228,18 +214,15 @@ static void handle_game_menu_command()
                         &choice)
                 .run();
 
-        if (choice == 0)
-        {
+        if (choice == 0) {
                 // Manual
                 states::push(std::make_unique<BrowseManual>());
         }
-        else if (choice == 1)
-        {
+        else if (choice == 1) {
                 // Options
                 states::push(std::make_unique<ConfigState>());
         }
-        else if (choice == 2)
-        {
+        else if (choice == 2) {
                 // Quit
                 query_quit();
         }
@@ -250,8 +233,7 @@ static void handle_swap_weapon_command()
         auto* const wielded = map::g_player->m_inv.item_in_slot(SlotId::wpn);
         auto* const alt = map::g_player->m_inv.item_in_slot(SlotId::wpn_alt);
 
-        if (!wielded && !alt)
-        {
+        if (!wielded && !alt) {
                 // No wielded weapon and no alt weapon
                 msg_log::add("I have neither a wielded nor a prepared weapon.");
 
@@ -262,8 +244,7 @@ static void handle_swap_weapon_command()
 
         std::string alt_name;
 
-        if (alt)
-        {
+        if (alt) {
                 alt_name =
                         alt->name(
                                 ItemNameType::a,
@@ -276,8 +257,7 @@ static void handle_swap_weapon_command()
 
         const std::string swift_str = is_instant ? "swiftly " : "";
 
-        if (wielded && alt)
-        {
+        if (wielded && alt) {
                 msg_log::add(
                         "I " +
                         swift_str +
@@ -285,8 +265,7 @@ static void handle_swap_weapon_command()
                         alt_name +
                         ".");
         }
-        else if (wielded && !alt)
-        {
+        else if (wielded && !alt) {
                 const std::string name = wielded->name(ItemNameType::plain);
 
                 msg_log::add(
@@ -296,8 +275,7 @@ static void handle_swap_weapon_command()
                         name +
                         ".");
         }
-        else
-        {
+        else {
                 // No weapon wielded.
                 msg_log::add(
                         "I " +
@@ -309,8 +287,7 @@ static void handle_swap_weapon_command()
 
         map::g_player->m_inv.swap_wielded_and_prepared();
 
-        if (!is_instant)
-        {
+        if (!is_instant) {
                 game_time::tick();
         }
 }
@@ -321,39 +298,32 @@ static void handle_auto_move_command(const Dir dir)
 
         std::string prevent_msg;
 
-        if (actor::is_player_seeing_burning_terrain())
-        {
+        if (actor::is_player_seeing_burning_terrain()) {
                 is_allowed = false;
                 prevent_msg = common_text::g_fire_prevent_cmd;
         }
-        else if (!actor::seen_foes(*map::g_player).empty())
-        {
+        else if (!actor::seen_foes(*map::g_player).empty()) {
                 is_allowed = false;
                 prevent_msg = common_text::g_mon_prevent_cmd;
         }
-        else if (!map::g_player->m_properties.allow_see())
-        {
+        else if (!map::g_player->m_properties.allow_see()) {
                 is_allowed = false;
                 prevent_msg = "Not while blind.";
         }
-        else if (map::g_player->m_properties.has(PropId::poisoned))
-        {
+        else if (map::g_player->m_properties.has(PropId::poisoned)) {
                 is_allowed = false;
                 prevent_msg = "Not while poisoned.";
         }
-        else if (map::g_player->m_properties.has(PropId::confused))
-        {
+        else if (map::g_player->m_properties.has(PropId::confused)) {
                 is_allowed = false;
                 prevent_msg = "Not while confused.";
         }
-        else if (map::g_player->m_properties.has(PropId::infected))
-        {
+        else if (map::g_player->m_properties.has(PropId::infected)) {
                 is_allowed = false;
                 prevent_msg = "Not while infected.";
         }
 
-        if (!is_allowed)
-        {
+        if (!is_allowed) {
                 msg_log::add(
                         prevent_msg,
                         colors::text(),
@@ -373,90 +343,72 @@ static GameCmd to_cmd_default(const io::InputData& input)
         // yields two input events - one for the keypad key, and one as a number
         // key. This seems to be due to a bug in SDL (or maybe it's just how it
         // works on windows). As a workaround, we skip numerical keys here.
-        if (input.key >= '0' && input.key <= '9')
-        {
+        if (input.key >= '0' && input.key <= '9') {
                 return GameCmd::none;
         }
 
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_KP_6:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::auto_move_right;
                 }
-                else
-                {
+                else {
                         return GameCmd::right;
                 }
 
         case SDLK_KP_4:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::auto_move_left;
                 }
-                else
-                {
+                else {
                         return GameCmd::left;
                 }
 
         case SDLK_KP_2:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::auto_move_down;
                 }
-                else
-                {
+                else {
                         return GameCmd::down;
                 }
 
         case SDLK_KP_8:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::auto_move_up;
                 }
-                else
-                {
+                else {
                         return GameCmd::up;
                 }
 
         case SDLK_KP_9:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::auto_move_up_right;
                 }
-                else
-                {
+                else {
                         return GameCmd::up_right;
                 }
 
         case SDLK_KP_3:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::auto_move_down_right;
                 }
-                else
-                {
+                else {
                         return GameCmd::down_right;
                 }
 
         case SDLK_KP_1:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::auto_move_down_left;
                 }
-                else
-                {
+                else {
                         return GameCmd::down_left;
                 }
 
         case SDLK_KP_7:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::auto_move_up_left;
                 }
-                else
-                {
+                else {
                         return GameCmd::up_left;
                 }
 
@@ -465,30 +417,24 @@ static GameCmd to_cmd_default(const io::InputData& input)
                 return GameCmd::wait;
 
         case SDLK_RIGHT:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::up_right;
                 }
-                else if (input.is_ctrl_held)
-                {
+                else if (input.is_ctrl_held) {
                         return GameCmd::down_right;
                 }
-                else
-                {
+                else {
                         return GameCmd::right;
                 }
 
         case SDLK_LEFT:
-                if (input.is_shift_held)
-                {
+                if (input.is_shift_held) {
                         return GameCmd::up_left;
                 }
-                else if (input.is_ctrl_held)
-                {
+                else if (input.is_ctrl_held) {
                         return GameCmd::down_left;
                 }
-                else
-                {
+                else {
                         return GameCmd::left;
                 }
 
@@ -623,8 +569,7 @@ static GameCmd to_cmd_default(const io::InputData& input)
 static GameCmd to_cmd_vi(const io::InputData& input)
 {
         // Overriden keys for vi-mode
-        switch (input.key)
-        {
+        switch (input.key) {
         case 'l':
                 return GameCmd::right;
 
@@ -689,8 +634,7 @@ namespace game_commands
 {
 GameCmd to_cmd(const io::InputData& input)
 {
-        switch (config::input_mode())
-        {
+        switch (config::input_mode()) {
         case InputMode::standard:
                 return to_cmd_default(input);
 
@@ -708,79 +652,57 @@ GameCmd to_cmd(const io::InputData& input)
 
 void handle(const GameCmd cmd)
 {
-        if (cmd != GameCmd::none)
-        {
+        if (cmd != GameCmd::none) {
                 msg_log::clear();
         }
 
-        switch (cmd)
-        {
-        case GameCmd::undefined:
-        {
+        switch (cmd) {
+        case GameCmd::undefined: {
                 msg_log::add(
                         "Press [?] for help.",
                         colors::light_white(),
                         MsgInterruptPlayer::no,
                         MorePromptOnMsg::no,
                         CopyToMsgHistory::no);
-        }
-        break;
+        } break;
 
         case GameCmd::none:
                 break;
 
-        case GameCmd::right:
-        {
+        case GameCmd::right: {
                 actor::do_move_action(*map::g_player, Dir::right);
-        }
-        break;
+        } break;
 
-        case GameCmd::down:
-        {
+        case GameCmd::down: {
                 actor::do_move_action(*map::g_player, Dir::down);
-        }
-        break;
+        } break;
 
-        case GameCmd::left:
-        {
+        case GameCmd::left: {
                 actor::do_move_action(*map::g_player, Dir::left);
-        }
-        break;
+        } break;
 
-        case GameCmd::up:
-        {
+        case GameCmd::up: {
                 actor::do_move_action(*map::g_player, Dir::up);
-        }
-        break;
+        } break;
 
-        case GameCmd::up_right:
-        {
+        case GameCmd::up_right: {
                 actor::do_move_action(*map::g_player, Dir::up_right);
-        }
-        break;
+        } break;
 
-        case GameCmd::down_right:
-        {
+        case GameCmd::down_right: {
                 actor::do_move_action(*map::g_player, Dir::down_right);
-        }
-        break;
+        } break;
 
-        case GameCmd::down_left:
-        {
+        case GameCmd::down_left: {
                 actor::do_move_action(*map::g_player, Dir::down_left);
-        }
-        break;
+        } break;
 
-        case GameCmd::up_left:
-        {
+        case GameCmd::up_left: {
                 actor::do_move_action(*map::g_player, Dir::up_left);
-        }
-        break;
+        } break;
 
-        case GameCmd::wait:
-        {
-                if (player_bon::has_trait(Trait::steady_aimer))
-                {
+        case GameCmd::wait: {
+                if (player_bon::has_trait(Trait::steady_aimer)) {
                         auto* const aiming =
                                 property_factory::make(PropId::aiming);
 
@@ -790,36 +712,29 @@ void handle(const GameCmd cmd)
                 }
 
                 actor::do_move_action(*map::g_player, Dir::center);
-        }
-        break;
+        } break;
 
-        case GameCmd::wait_long:
-        {
+        case GameCmd::wait_long: {
                 bool is_allowed = true;
                 std::string prevent_msg;
-                if (actor::is_player_seeing_burning_terrain())
-                {
+                if (actor::is_player_seeing_burning_terrain()) {
                         is_allowed = false;
                         prevent_msg = common_text::g_fire_prevent_cmd;
                 }
-                else if (!actor::seen_foes(*map::g_player).empty())
-                {
+                else if (!actor::seen_foes(*map::g_player).empty()) {
                         is_allowed = false;
                         prevent_msg = common_text::g_mon_prevent_cmd;
                 }
-                else if (map::g_player->shock_tot() >= 100)
-                {
+                else if (map::g_player->shock_tot() >= 100) {
                         is_allowed = false;
                         prevent_msg = common_text::g_shock_prevent_cmd;
                 }
-                else if (map::g_player->m_properties.has(PropId::infected))
-                {
+                else if (map::g_player->m_properties.has(PropId::infected)) {
                         is_allowed = false;
                         prevent_msg = "Not while infected.";
                 }
 
-                if (is_allowed)
-                {
+                if (is_allowed) {
                         // NOTE: We should not print any "wait" message here,
                         // since it would look weird in some cases - e.g. when
                         // the waiting is immediately interrupted by a message
@@ -835,8 +750,7 @@ void handle(const GameCmd cmd)
 
                         game_time::tick();
                 }
-                else
-                {
+                else {
                         // Not allowed to long-wait
                         msg_log::add(
                                 prevent_msg,
@@ -845,210 +759,147 @@ void handle(const GameCmd cmd)
                                 MorePromptOnMsg::no,
                                 CopyToMsgHistory::no);
                 }
-        }
-        break;
+        } break;
 
-        case GameCmd::manual:
-        {
+        case GameCmd::manual: {
                 states::push(std::make_unique<BrowseManual>());
-        }
-        break;
+        } break;
 
-        case GameCmd::options:
-        {
+        case GameCmd::options: {
                 states::push(std::make_unique<ConfigState>());
-        }
-        break;
+        } break;
 
-        case GameCmd::reload:
-        {
+        case GameCmd::reload: {
                 auto* const wpn =
                         map::g_player->m_inv.item_in_slot(SlotId::wpn);
 
                 reload::try_reload(*map::g_player, wpn);
-        }
-        break;
+        } break;
 
-        case GameCmd::kick:
-        {
+        case GameCmd::kick: {
                 bash::run();
-        }
-        break;
+        } break;
 
-        case GameCmd::close:
-        {
+        case GameCmd::close: {
                 close::player_try_close_or_jam();
-        }
-        break;
+        } break;
 
-        case GameCmd::unload:
-        {
+        case GameCmd::unload: {
                 item_pickup::try_unload_or_pick();
-        }
-        break;
+        } break;
 
-        case GameCmd::fire:
-        {
+        case GameCmd::fire: {
                 handle_fire_command();
-        }
-        break;
+        } break;
 
-        case GameCmd::get:
-        {
+        case GameCmd::get: {
                 item_pickup::try_pick();
-        }
-        break;
+        } break;
 
-        case GameCmd::inventory:
-        {
+        case GameCmd::inventory: {
                 states::push(std::make_unique<BrowseInv>());
-        }
-        break;
+        } break;
 
-        case GameCmd::apply_item:
-        {
+        case GameCmd::apply_item: {
                 states::push(std::make_unique<Apply>());
-        }
-        break;
+        } break;
 
-        case GameCmd::drop_item:
-        {
+        case GameCmd::drop_item: {
                 states::push(std::make_unique<Drop>());
-        }
-        break;
+        } break;
 
-        case GameCmd::swap_weapon:
-        {
+        case GameCmd::swap_weapon: {
                 handle_swap_weapon_command();
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_move_right:
-        {
+        case GameCmd::auto_move_right: {
                 handle_auto_move_command(Dir::right);
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_move_down:
-        {
+        case GameCmd::auto_move_down: {
                 handle_auto_move_command(Dir::down);
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_move_left:
-        {
+        case GameCmd::auto_move_left: {
                 handle_auto_move_command(Dir::left);
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_move_up:
-        {
+        case GameCmd::auto_move_up: {
                 handle_auto_move_command(Dir::up);
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_move_up_right:
-        {
+        case GameCmd::auto_move_up_right: {
                 handle_auto_move_command(Dir::up_right);
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_move_down_right:
-        {
+        case GameCmd::auto_move_down_right: {
                 handle_auto_move_command(Dir::down_right);
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_move_down_left:
-        {
+        case GameCmd::auto_move_down_left: {
                 handle_auto_move_command(Dir::down_left);
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_move_up_left:
-        {
+        case GameCmd::auto_move_up_left: {
                 handle_auto_move_command(Dir::up_left);
-        }
-        break;
+        } break;
 
-        case GameCmd::throw_item:
-        {
+        case GameCmd::throw_item: {
                 const item::Item* explosive =
                         actor::player_state::g_active_explosive.get();
 
-                if (explosive)
-                {
+                if (explosive) {
                         states::push(
                                 std::make_unique<ThrowingExplosive>(
                                         map::g_player->m_pos, *explosive));
                 }
-                else
-                {
+                else {
                         // Not holding explosive - run throwing attack instead
                         const bool is_allowed =
                                 map::g_player->m_properties
                                         .allow_attack_ranged(Verbose::yes);
 
-                        if (is_allowed)
-                        {
+                        if (is_allowed) {
                                 states::push(std::make_unique<SelectThrow>());
                         }
                 }
-        }
-        break;
+        } break;
 
-        case GameCmd::toggle_lantern:
-        {
+        case GameCmd::toggle_lantern: {
                 handle_toggle_lantern_command();
-        }
-        break;
+        } break;
 
-        case GameCmd::look:
-        {
+        case GameCmd::look: {
                 states::push(
                         std::make_unique<Viewing>(
                                 map::g_player->m_pos));
-        }
-        break;
+        } break;
 
-        case GameCmd::auto_melee:
-        {
+        case GameCmd::auto_melee: {
                 map::g_player->auto_melee();
-        }
-        break;
+        } break;
 
-        case GameCmd::cast_spell:
-        {
+        case GameCmd::cast_spell: {
                 states::push(std::make_unique<BrowseSpell>());
-        }
-        break;
+        } break;
 
-        case GameCmd::char_descr:
-        {
+        case GameCmd::char_descr: {
                 states::push(std::make_unique<CharacterDescr>());
-        }
-        break;
+        } break;
 
-        case GameCmd::minimap:
-        {
+        case GameCmd::minimap: {
                 states::push(std::make_unique<ViewMinimap>());
-        }
-        break;
+        } break;
 
-        case GameCmd::msg_history:
-        {
+        case GameCmd::msg_history: {
                 states::push(std::make_unique<MsgHistoryState>());
-        }
-        break;
+        } break;
 
-        case GameCmd::make_noise:
-        {
-                if (player_bon::bg() == Bg::ghoul)
-                {
+        case GameCmd::make_noise: {
+                if (player_bon::bg() == Bg::ghoul) {
                         msg_log::add("I let out a chilling howl.");
                 }
-                else
-                {
+                else {
                         msg_log::add("I make some noise.");
                 }
 
@@ -1064,47 +915,33 @@ void handle(const GameCmd cmd)
                 snd_emit::run(snd);
 
                 game_time::tick();
-        }
-        break;
+        } break;
 
-        case GameCmd::disarm:
-        {
+        case GameCmd::disarm: {
                 disarm::player_disarm();
-        }
-        break;
+        } break;
 
-        case GameCmd::game_menu:
-        {
+        case GameCmd::game_menu: {
                 handle_game_menu_command();
-        }
-        break;
+        } break;
 
-        case GameCmd::quit:
-        {
+        case GameCmd::quit: {
                 query_quit();
-        }
-        break;
+        } break;
 
         // Some cheat commands enabled in debug builds
 #ifndef NDEBUG
-        case GameCmd::debug_f2:
-        {
+        case GameCmd::debug_f2: {
                 map_travel::go_to_nxt();
-        }
-        break;
+        } break;
 
-        case GameCmd::debug_f3:
-        {
+        case GameCmd::debug_f3: {
                 game::incr_player_xp(100, Verbose::no);
-        }
-        break;
+        } break;
 
-        case GameCmd::debug_f4:
-        {
-                if (init::g_is_cheat_vision_enabled)
-                {
-                        for (const auto& p : map::rect().positions())
-                        {
+        case GameCmd::debug_f4: {
+                if (init::g_is_cheat_vision_enabled) {
+                        for (const auto& p : map::rect().positions()) {
                                 map::g_seen.at(p) = false;
 
                                 map::clear_player_memory_at(p);
@@ -1112,51 +949,40 @@ void handle(const GameCmd cmd)
 
                         init::g_is_cheat_vision_enabled = false;
                 }
-                else
-                {
+                else {
                         // Cheat vision was not enabled
                         init::g_is_cheat_vision_enabled = true;
                 }
 
                 map::g_player->update_fov();
-        }
-        break;
+        } break;
 
-        case GameCmd::debug_f5:
-        {
+        case GameCmd::debug_f5: {
                 map::g_player->incr_shock(50.0, ShockSrc::misc);
-        }
-        break;
+        } break;
 
-        case GameCmd::debug_f6:
-        {
-                for (size_t i = 0; i < (size_t)item::Id::END; ++i)
-                {
+        case GameCmd::debug_f6: {
+                for (size_t i = 0; i < (size_t)item::Id::END; ++i) {
                         const auto& item_data = item::g_data[i];
 
                         if (!item_data.is_intr &&
-                            (item_data.tile != gfx::TileId::END))
-                        {
+                            (item_data.tile != gfx::TileId::END)) {
                                 item::make_item_on_floor(
                                         (item::Id)i,
                                         map::g_player->m_pos);
                         }
                 }
-        }
-        break;
+        } break;
 
-        case GameCmd::debug_f7:
-        {
+        case GameCmd::debug_f7: {
                 map::g_player->m_properties.apply(
                         property_factory::make(
                                 PropId::r_conf));
 
                 teleport(*map::g_player);
-        }
-        break;
+        } break;
 
-        case GameCmd::debug_f8:
-        {
+        case GameCmd::debug_f8: {
                 Prop* const prop = property_factory::make(PropId::r_conf);
 
                 prop->set_duration(2);
@@ -1164,15 +990,12 @@ void handle(const GameCmd cmd)
                 map::g_player->m_properties.apply(prop);
 
                 game_time::tick();
-        }
-        break;
+        } break;
 
-        case GameCmd::debug_f9:
-        {
+        case GameCmd::debug_f9: {
                 std::string msg = "Listing all monsters (ID#  Name):";
 
-                for (const auto& d : actor::g_data)
-                {
+                for (const auto& d : actor::g_data) {
                         msg +=
                                 "\n" +
                                 std::to_string((size_t)d.id) +
@@ -1195,8 +1018,7 @@ void handle(const GameCmd cmd)
                                 query_config,
                                 query_str);
 
-                if (idx == -1)
-                {
+                if (idx == -1) {
                         return;
                 }
 
@@ -1215,8 +1037,7 @@ void handle(const GameCmd cmd)
                                 query_config,
                                 query_str);
 
-                if (nr_to_spawn == -1)
-                {
+                if (nr_to_spawn == -1) {
                         return;
                 }
 
@@ -1226,11 +1047,9 @@ void handle(const GameCmd cmd)
                         map::g_player->m_pos.with_x_offset(2),
                         {(size_t)nr_to_spawn, mon_id},
                         map::rect());
-        }
-        break;
+        } break;
 
-        case GameCmd::debug_f10:
-        {
+        case GameCmd::debug_f10: {
                 // Unused
         }
 

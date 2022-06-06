@@ -78,12 +78,10 @@ static bool is_sound_origin_seen_by_player(
         // NOTE: If we have an actor as "originator" of the sound, then the
         // origin of the sound is considered seen if the player can see this
         // actor - otherwise the origin is seen if the origin position is seen.
-        if (actor_who_made_sound)
-        {
+        if (actor_who_made_sound) {
                 return actor::can_player_see_actor(*actor_who_made_sound);
         }
-        else
-        {
+        else {
                 return map::g_seen.at(origin);
         }
 }
@@ -100,16 +98,13 @@ static void send_sound_to_player(
                         snd.actor_who_made_sound(),
                         origin);
 
-        if (is_origin_seen && snd.is_msg_ignored_if_origin_seen())
-        {
+        if (is_origin_seen && snd.is_msg_ignored_if_origin_seen()) {
                 snd.clear_msg();
         }
 
-        if (!snd.msg().empty())
-        {
+        if (!snd.msg().empty()) {
                 // Add a direction to the message (i.e. "(NW)")
-                if (map::g_player->m_pos != origin)
-                {
+                if (map::g_player->m_pos != origin) {
                         const std::string dir_str =
                                 dir_utils::compass_dir_name(
                                         map::g_player->m_pos,
@@ -137,12 +132,10 @@ static void send_sound_to_actor(
         const int flood_val_at_actor,
         const int snd_max_dist)
 {
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 send_sound_to_player(snd, flood_val_at_actor, snd_max_dist);
         }
-        else
-        {
+        else {
                 send_sound_to_mon(actor, snd);
         }
 }
@@ -180,8 +173,7 @@ void Snd::run()
 
 void Snd::on_heard(actor::Actor& actor) const
 {
-        if (m_snd_heard_effect)
-        {
+        if (m_snd_heard_effect) {
                 m_snd_heard_effect->run(actor);
         }
 }
@@ -206,21 +198,18 @@ void run(Snd snd)
 
         const auto& origin = snd.origin();
 
-        for (auto* actor : game_time::g_actors)
-        {
+        for (auto* actor : game_time::g_actors) {
                 const auto& actor_pos = actor->m_pos;
 
                 const int flood_val_at_actor = flood.at(actor_pos);
 
                 // Can the sound be heard here?
 
-                if ((flood_val_at_actor == 0) && (actor_pos != origin))
-                {
+                if ((flood_val_at_actor == 0) && (actor_pos != origin)) {
                         continue;
                 }
 
-                if (!is_snd_heard_at_range(flood_val_at_actor, snd))
-                {
+                if (!is_snd_heard_at_range(flood_val_at_actor, snd)) {
                         continue;
                 }
 
@@ -228,8 +217,7 @@ void run(Snd snd)
                 const int max_dist_short_hearing_range = 2;
 
                 if (actor->m_properties.has(PropId::short_hearing_range) &&
-                    (flood_val_at_actor > max_dist_short_hearing_range))
-                {
+                    (flood_val_at_actor > max_dist_short_hearing_range)) {
                         continue;
                 }
 

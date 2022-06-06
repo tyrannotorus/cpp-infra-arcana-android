@@ -43,8 +43,7 @@ static void make_memorial_file(
         file.open(path.c_str(), std::ios::trunc);
 
         // Add info lines to file
-        for (const auto& line : lines)
-        {
+        for (const auto& line : lines) {
                 file << line.str << std::endl;
         }
 
@@ -63,14 +62,11 @@ static std::vector<ColoredString> make_game_summary_lines(
 
         int nr_kills_tot_all_mon = 0;
 
-        for (const auto& d : actor::g_data)
-        {
-                if ((d.id != actor::Id::player) && (d.nr_kills > 0))
-                {
+        for (const auto& d : actor::g_data) {
+                if ((d.id != actor::Id::player) && (d.nr_kills > 0)) {
                         nr_kills_tot_all_mon += d.nr_kills;
 
-                        if (d.is_unique)
-                        {
+                        if (d.is_unique) {
                                 unique_killed_names.push_back(d.name_a);
                         }
                 }
@@ -80,14 +76,12 @@ static std::vector<ColoredString> make_game_summary_lines(
 
         std::string bg_title;
 
-        if (highscore_entry.bg == Bg::occultist)
-        {
+        if (highscore_entry.bg == Bg::occultist) {
                 const auto domain = highscore_entry.player_occultist_domain;
 
                 bg_title = player_bon::occultist_profession_title(domain);
         }
-        else
-        {
+        else {
                 bg_title = player_bon::bg_title(highscore_entry.bg);
         }
 
@@ -97,14 +91,12 @@ static std::vector<ColoredString> make_game_summary_lines(
 
         const int dlvl = highscore_entry.dlvl;
 
-        if (dlvl == 0)
-        {
+        if (dlvl == 0) {
                 lines.emplace_back(
                         "Died before entering the dungeon",
                         color_info);
         }
-        else
-        {
+        else {
                 // DLVL is at least 1
                 lines.emplace_back(
                         "Explored to dungeon level " + std::to_string(dlvl),
@@ -142,14 +134,11 @@ static std::vector<ColoredString> make_game_summary_lines(
         const std::vector<const InsSympt*> sympts =
                 insanity::active_sympts();
 
-        if (!sympts.empty())
-        {
-                for (const InsSympt* const sympt : sympts)
-                {
+        if (!sympts.empty()) {
+                for (const InsSympt* const sympt : sympts) {
                         const std::string sympt_descr = sympt->postmortem_msg();
 
-                        if (!sympt_descr.empty())
-                        {
+                        if (!sympt_descr.empty()) {
                                 lines.emplace_back(sympt_descr, color_info);
                         }
                 }
@@ -163,12 +152,10 @@ static std::vector<ColoredString> make_game_summary_lines(
 
         const auto trait_log = player_bon::trait_log();
 
-        if (trait_log.empty())
-        {
+        if (trait_log.empty()) {
                 lines.emplace_back("None", color_info);
         }
-        else
-        {
+        else {
                 bool is_double_digit =
                         std::find_if(
                                 std::begin(trait_log),
@@ -177,12 +164,10 @@ static std::vector<ColoredString> make_game_summary_lines(
                                         return e.clvl >= 10;
                                 }) != std::end(trait_log);
 
-                for (const auto& e : trait_log)
-                {
+                for (const auto& e : trait_log) {
                         std::string clvl_str = std::to_string(e.clvl);
 
-                        if (is_double_digit)
-                        {
+                        if (is_double_digit) {
                                 clvl_str =
                                         text_format::pad_before(
                                                 std::to_string(e.clvl),
@@ -213,14 +198,11 @@ static std::vector<ColoredString> make_game_summary_lines(
                 "Unique monsters killed",
                 color_heading);
 
-        if (unique_killed_names.empty())
-        {
+        if (unique_killed_names.empty()) {
                 lines.emplace_back("None", color_info);
         }
-        else
-        {
-                for (std::string& monster_name : unique_killed_names)
-                {
+        else {
+                for (std::string& monster_name : unique_killed_names) {
                         lines.emplace_back(monster_name, color_info);
                 }
         }
@@ -236,15 +218,13 @@ static std::vector<ColoredString> make_game_summary_lines(
 
         int longest_turn_w = 0;
 
-        for (const auto& event : events)
-        {
+        for (const auto& event : events) {
                 const int turn_w = std::to_string(event.turn).size();
 
                 longest_turn_w = std::max(turn_w, longest_turn_w);
         }
 
-        for (const auto& event : events)
-        {
+        for (const auto& event : events) {
                 std::string ev_str = std::to_string(event.turn);
 
                 const int turn_w = ev_str.size();
@@ -272,8 +252,7 @@ static std::vector<ColoredString> make_game_summary_lines(
 
         for (size_t history_idx = history_start_idx;
              history_idx < msg_history.size();
-             ++history_idx)
-        {
+             ++history_idx) {
                 const auto& msg = msg_history[history_idx];
 
                 lines.emplace_back(msg.text_with_repeats(), color_info);

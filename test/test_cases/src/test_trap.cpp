@@ -38,8 +38,7 @@ TEST_CASE("Spider web")
         bool tested_stuck = false;
         bool tested_unstuck = false;
 
-        while (!(tested_stuck && tested_unstuck))
-        {
+        while (!(tested_stuck && tested_unstuck)) {
                 test_utils::init_all();
 
                 map::update_terrain(terrain::make(terrain::Id::floor, pos_l));
@@ -89,12 +88,10 @@ TEST_CASE("Spider web")
                 game_time::g_allow_tick = true;
                 actor::do_move_action(*actor, Dir::left);
 
-                if (actor->m_pos == pos_r)
-                {
+                if (actor->m_pos == pos_r) {
                         tested_stuck = true;
                 }
-                else if (actor->m_pos == pos_l)
-                {
+                else if (actor->m_pos == pos_l) {
                         tested_unstuck = true;
 
                         REQUIRE(!actor->m_properties.has(PropId::entangled));

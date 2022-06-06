@@ -243,17 +243,14 @@ void MainMenuState::draw()
 {
         io::clear_screen();
 
-        if (config::is_tiles_mode())
-        {
+        if (config::is_tiles_mode()) {
                 draw_box(panels::area(Panel::screen));
         }
 
-        if (config::is_tiles_mode())
-        {
+        if (config::is_tiles_mode()) {
                 io::draw_logo();
         }
-        else
-        {
+        else {
                 // Text mode
                 io::draw_text_center(
                         "I n f r a   A r c a n a",
@@ -263,8 +260,7 @@ void MainMenuState::draw()
                         colors::light_white());
         }
 
-        if (config::is_gj_mode())
-        {
+        if (config::is_gj_mode()) {
                 io::draw_text(
                         "### GJ MODE ENABLED ###",
                         Panel::screen,
@@ -272,8 +268,7 @@ void MainMenuState::draw()
                         colors::yellow());
         }
 #ifndef NDEBUG
-        else
-        {
+        else {
                 io::draw_text(
                         "### DEBUG ###",
                         Panel::screen,
@@ -302,8 +297,7 @@ void MainMenuState::draw()
 
         P pos = menu_pos;
 
-        for (size_t i = 0; i < labels.size(); ++i)
-        {
+        for (size_t i = 0; i < labels.size(); ++i) {
                 const std::string label = labels[i];
 
                 const bool is_marked = m_browser.is_at_idx((int)i);
@@ -338,8 +332,7 @@ void MainMenuState::draw()
 
         // Decrease quote width until we find a width that doesn't leave a
         // "tiny" string on the last line (looks very ugly),
-        while (quote_w != 0)
-        {
+        while (quote_w != 0) {
                 quote_lines =
                         text_format::split(
                                 "\"" + s_current_quote + "\"",
@@ -351,28 +344,23 @@ void MainMenuState::draw()
 
                 // Is the length of the current last line at least as long as
                 // the minimum required?
-                if (last_line.length() >= min_str_w_last_line)
-                {
+                if (last_line.length() >= min_str_w_last_line) {
                         break;
                 }
 
                 --quote_w;
         }
 
-        if (quote_w > 0)
-        {
+        if (quote_w > 0) {
                 int quote_y = 0;
 
-                if (quote_lines.size() < (labels.size() - 1))
-                {
+                if (quote_lines.size() < (labels.size() - 1)) {
                         quote_y = menu_pos.y + 1;
                 }
-                else if (quote_lines.size() > (labels.size() + 1))
-                {
+                else if (quote_lines.size() > (labels.size() + 1)) {
                         quote_y = menu_pos.y - 1;
                 }
-                else
-                {
+                else {
                         // Number of quote lines is within +/- 1 difference from
                         // number of main menu labels
                         quote_y = menu_pos.y;
@@ -387,8 +375,7 @@ void MainMenuState::draw()
                                 screen_dims.y - (int)quote_lines.size() - 1,
                                 pos.y);
 
-                for (const std::string& line : quote_lines)
-                {
+                for (const std::string& line : quote_lines) {
                         io::draw_text_center(
                                 line,
                                 Panel::screen,
@@ -401,8 +388,7 @@ void MainMenuState::draw()
 
         std::string build_str = version_info::g_version_str + " (";
 
-        if (!s_git_sha1_str.empty())
-        {
+        if (!s_git_sha1_str.empty()) {
                 build_str += s_git_sha1_str + ", ";
         }
 
@@ -432,8 +418,7 @@ void MainMenuState::update()
         auto action = MenuAction::selected;
 
 #ifndef NDEBUG
-        if (config::is_stress_test())
-        {
+        if (config::is_stress_test()) {
                 // Stress-test mode, we just want to run everything
                 // automatically without requiring manual input.
                 action = MenuAction::selected;
@@ -449,24 +434,19 @@ void MainMenuState::update()
                                 MenuInputMode::scrolling_and_letters);
         }
 
-        switch (action)
-        {
+        switch (action) {
         case MenuAction::selected:
-                switch (m_browser.y())
-                {
-                case 0:
-                {
+                switch (m_browser.y()) {
+                case 0: {
 #ifndef NDEBUG
                         if (!config::is_bot_playing())
 #endif  // NDEBUG
                         {
-                                if (saving::is_save_available())
-                                {
+                                if (saving::is_save_available()) {
                                         const bool should_proceed =
                                                 query_overwrite_savefile();
 
-                                        if (!should_proceed)
-                                        {
+                                        if (!should_proceed) {
                                                 return;
                                         }
                                 }
@@ -479,14 +459,11 @@ void MainMenuState::update()
                         auto new_game_state = std::make_unique<NewGameState>();
 
                         states::push(std::move(new_game_state));
-                }
-                break;
+                } break;
 
-                case 1:
-                {
+                case 1: {
                         // Load game
-                        if (saving::is_save_available())
-                        {
+                        if (saving::is_save_available()) {
                                 audio::fade_out_music();
 
                                 init::init_session();
@@ -498,51 +475,41 @@ void MainMenuState::update()
 
                                 states::push(std::move(game_state));
                         }
-                        else
-                        {
+                        else {
                                 // No save available
                                 popup::Popup(popup::AddToMsgHistory::no)
                                         .set_msg("No saved game found")
                                         .run();
                         }
-                }
-                break;
+                } break;
 
-                case 2:
-                {
+                case 2: {
                         // Manual
                         std::unique_ptr<State> browse_manual_state(
                                 new BrowseManual);
 
                         states::push(std::move(browse_manual_state));
-                }
-                break;
+                } break;
 
-                case 3:
-                {
+                case 3: {
                         // Options
                         std::unique_ptr<State> config_state(new ConfigState);
 
                         states::push(std::move(config_state));
-                }
-                break;
+                } break;
 
-                case 4:
-                {
+                case 4: {
                         // Highscores
                         std::unique_ptr<State> browse_highscore_state(
                                 new BrowseHighscore);
 
                         states::push(std::move(browse_highscore_state));
-                }
-                break;
+                } break;
 
-                case 5:
-                {
+                case 5: {
                         // Exit
                         states::pop();
-                }
-                break;
+                } break;
 
                 }  // switch
                 break;

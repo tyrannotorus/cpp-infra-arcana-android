@@ -24,15 +24,13 @@ static Axis random_child_layout(const P& parent_dims)
                 (parent_dims.x != parent_dims.y) &&
                 rnd::fraction(2, 3);
 
-        if (split_largest_dim)
-        {
+        if (split_largest_dim) {
                 return (
                         (parent_dims.x > parent_dims.y)
                                 ? Axis::hor
                                 : Axis::ver);
         }
-        else
-        {
+        else {
                 return (
                         rnd::coin_toss()
                                 ? Axis::hor
@@ -49,20 +47,16 @@ static std::optional<Axis> child_layout(
         const bool is_w_ok = parent_dims.x > parent_min_size;
         const bool is_h_ok = parent_dims.y > parent_min_size;
 
-        if (is_w_ok && is_h_ok)
-        {
+        if (is_w_ok && is_h_ok) {
                 return random_child_layout(parent_dims);
         }
-        else if (is_w_ok)
-        {
+        else if (is_w_ok) {
                 return Axis::hor;
         }
-        else if (is_h_ok)
-        {
+        else if (is_h_ok) {
                 return Axis::ver;
         }
-        else
-        {
+        else {
                 // No split possible
                 return {};
         }
@@ -74,16 +68,14 @@ static std::vector<int> split_pos_candidates(
 {
         std::vector<int> candidates;
 
-        for (int pos = pos_range.min; pos <= pos_range.max; ++pos)
-        {
+        for (int pos = pos_range.min; pos <= pos_range.max; ++pos) {
                 const auto is_free =
                         std::find(
                                 std::begin(blocked_positions),
                                 std::end(blocked_positions),
                                 pos) == std::end(blocked_positions);
 
-                if (is_free)
-                {
+                if (is_free) {
                         candidates.push_back(pos);
                 }
         }
@@ -103,8 +95,7 @@ std::vector<R> try_split(
 {
         const auto layout = child_layout(rect.dims(), child_min_size);
 
-        if (!layout)
-        {
+        if (!layout) {
                 // No splitting possible
                 return {};
         }
@@ -112,8 +103,7 @@ std::vector<R> try_split(
         auto child_rect_1 = rect;
         auto child_rect_2 = rect;
 
-        if (layout == Axis::hor)
-        {
+        if (layout == Axis::hor) {
                 // Horizontal split
                 const Range split_range(
                         rect.p0.x + child_min_size,
@@ -124,8 +114,7 @@ std::vector<R> try_split(
                                 split_range,
                                 blocked_split_positions.x);
 
-                if (pos_bucket.empty())
-                {
+                if (pos_bucket.empty()) {
                         return {};
                 }
 
@@ -134,8 +123,7 @@ std::vector<R> try_split(
                 child_rect_1.p1.x = split_pos - 1;
                 child_rect_2.p0.x = split_pos + 1;
         }
-        else
-        {
+        else {
                 // Vertical split
                 const Range split_range(
                         rect.p0.y + child_min_size,
@@ -146,8 +134,7 @@ std::vector<R> try_split(
                                 split_range,
                                 blocked_split_positions.y);
 
-                if (pos_bucket.empty())
-                {
+                if (pos_bucket.empty()) {
                         return {};
                 }
 

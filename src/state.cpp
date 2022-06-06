@@ -23,8 +23,7 @@ static void run_state_iteration()
 {
         states::start();
 
-        if (states::is_empty())
-        {
+        if (states::is_empty()) {
                 return;
         }
 
@@ -62,8 +61,7 @@ void run()
 {
         TRACE_FUNC_BEGIN;
 
-        while (!is_empty())
-        {
+        while (!is_empty()) {
                 run_state_iteration();
         }
 
@@ -78,8 +76,7 @@ void run_until_state_done(std::unique_ptr<State> state)
 
         push(std::move(state));
 
-        while (contains_state(state_addr))
-        {
+        while (contains_state(state_addr)) {
                 run_state_iteration();
         }
 
@@ -88,8 +85,7 @@ void run_until_state_done(std::unique_ptr<State> state)
 
 void start()
 {
-        while (!is_empty() && !s_current_states.back()->has_started())
-        {
+        while (!is_empty() && !s_current_states.back()->has_started()) {
                 auto& state = s_current_states.back();
 
                 state->set_started();
@@ -102,8 +98,7 @@ void start()
 
 void cycle_graphics(const io::GraphicsCycle cycle)
 {
-        if (is_empty())
-        {
+        if (is_empty()) {
                 return;
         }
 
@@ -112,8 +107,7 @@ void cycle_graphics(const io::GraphicsCycle cycle)
         // Find the first state from the end which is NOT drawn overlayed.
         auto cycle_from = std::end(s_current_states);
 
-        while (cycle_from != std::begin(s_current_states))
-        {
+        while (cycle_from != std::begin(s_current_states)) {
                 --cycle_from;
 
                 const auto& state_ptr = *cycle_from;
@@ -122,23 +116,20 @@ void cycle_graphics(const io::GraphicsCycle cycle)
                 // bottom layer (but only if the state has been started, see
                 // note below).
                 if (!state_ptr->draw_overlayed() &&
-                    state_ptr->has_started())
-                {
+                    state_ptr->has_started()) {
                         break;
                 }
         }
 
         // Cycle graphics in every state from this (non-overlayed) state onward.
-        for (; cycle_from != std::end(s_current_states); ++cycle_from)
-        {
+        for (; cycle_from != std::end(s_current_states); ++cycle_from) {
                 const auto& state_ptr = *cycle_from;
 
                 // Do NOT cycle graphics in states which are not yet started
                 // (they may need to set up menus etc in their start function,
                 // and expect the chance to do so before cycling is called).
 
-                if (state_ptr->has_started())
-                {
+                if (state_ptr->has_started()) {
                         state_ptr->cycle_graphics(cycle);
                 }
         }
@@ -146,16 +137,14 @@ void cycle_graphics(const io::GraphicsCycle cycle)
 
 void draw()
 {
-        if (is_empty())
-        {
+        if (is_empty()) {
                 return;
         }
 
         // Find the first state from the end which is NOT drawn overlayed.
         auto draw_from = std::end(s_current_states);
 
-        while (draw_from != std::begin(s_current_states))
-        {
+        while (draw_from != std::begin(s_current_states)) {
                 --draw_from;
 
                 const auto& state_ptr = *draw_from;
@@ -163,23 +152,20 @@ void draw()
                 // If not drawn overlayed, draw from this state as bottom layer
                 // (but only if the state has been started, see note below).
                 if (!state_ptr->draw_overlayed() &&
-                    state_ptr->has_started())
-                {
+                    state_ptr->has_started()) {
                         break;
                 }
         }
 
         // Draw every state from this (non-overlayed) state onward.
-        for (; draw_from != std::end(s_current_states); ++draw_from)
-        {
+        for (; draw_from != std::end(s_current_states); ++draw_from) {
                 const auto& state_ptr = *draw_from;
 
                 // Do NOT draw states which are not yet started (they may need
                 // to set up menus etc in their start function, and expect the
                 // chance to do so before drawing is called).
 
-                if (state_ptr->has_started())
-                {
+                if (state_ptr->has_started()) {
                         state_ptr->draw();
                 }
         }
@@ -187,16 +173,14 @@ void draw()
 
 void on_window_resized()
 {
-        for (auto& state : s_current_states)
-        {
+        for (auto& state : s_current_states) {
                 state->on_window_resized();
         }
 }
 
 void update()
 {
-        if (is_empty())
-        {
+        if (is_empty()) {
                 return;
         }
 
@@ -208,8 +192,7 @@ void push(std::unique_ptr<State> state)
         TRACE_FUNC_BEGIN;
 
         // Pause the current state
-        if (!is_empty())
-        {
+        if (!is_empty()) {
                 s_current_states.back()->on_pause();
         }
 
@@ -226,8 +209,7 @@ void pop()
 {
         TRACE_FUNC_BEGIN;
 
-        if (is_empty())
-        {
+        if (is_empty()) {
                 TRACE_FUNC_END;
 
                 return;
@@ -237,8 +219,7 @@ void pop()
 
         s_current_states.pop_back();
 
-        if (!is_empty())
-        {
+        if (!is_empty()) {
                 s_current_states.back()->on_resume();
         }
 
@@ -251,8 +232,7 @@ void pop_all()
 {
         TRACE_FUNC_BEGIN;
 
-        while (!is_empty())
-        {
+        while (!is_empty()) {
                 s_current_states.back()->on_popped();
 
                 s_current_states.pop_back();
@@ -287,15 +267,13 @@ void pop_until(const StateId id)
 {
         TRACE_FUNC_BEGIN;
 
-        if (is_empty() || !contains_state(id))
-        {
+        if (is_empty() || !contains_state(id)) {
                 ASSERT(false);
 
                 return;
         }
 
-        while (s_current_states.back().get()->id() != id)
-        {
+        while (s_current_states.back().get()->id() != id) {
                 pop();
         }
 
@@ -304,8 +282,7 @@ void pop_until(const StateId id)
 
 bool is_current_state(const State* const state)
 {
-        if (is_empty())
-        {
+        if (is_empty()) {
                 return false;
         }
 

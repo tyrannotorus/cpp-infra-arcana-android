@@ -33,8 +33,7 @@ void try_pick()
         const auto& pos = map::g_player->m_pos;
         auto* const item = map::g_items.at(pos);
 
-        if (!item)
-        {
+        if (!item) {
                 msg_log::add("I see nothing to pick up here.");
 
                 return;
@@ -42,10 +41,8 @@ void try_pick()
 
         const auto pre_pickup_result = item->pre_pickup_hook();
 
-        switch (pre_pickup_result)
-        {
-        case ItemPrePickResult::do_pickup:
-        {
+        switch (pre_pickup_result) {
+        case ItemPrePickResult::do_pickup: {
                 audio::play(audio::SfxId::pickup);
 
                 const std::string item_name = item->name(ItemNameType::plural);
@@ -56,26 +53,20 @@ void try_pick()
                 map::g_player->m_inv.put_in_backpack(item);
 
                 map::g_items.at(pos) = nullptr;
-        }
-        break;
+        } break;
 
-        case ItemPrePickResult::destroy_item:
-        {
+        case ItemPrePickResult::destroy_item: {
                 delete item;
                 map::g_items.at(pos) = nullptr;
-        }
-        break;
+        } break;
 
-        case ItemPrePickResult::do_nothing:
-        {
-        }
-        break;
+        case ItemPrePickResult::do_nothing: {
+        } break;
         }
 
         // NOTE: The player might have won the game by picking up the
         // Trapezohedron, if so do not tick time
-        if (states::contains_state(StateId::game))
-        {
+        if (states::contains_state(StateId::game)) {
                 game_time::tick();
         }
 }
@@ -86,8 +77,7 @@ item::Ammo* unload_ranged_wpn(item::Wpn& wpn)
 
         const int nr_ammo_loaded = wpn.m_ammo_loaded;
 
-        if (nr_ammo_loaded == 0)
-        {
+        if (nr_ammo_loaded == 0) {
                 return nullptr;
         }
 
@@ -97,14 +87,12 @@ item::Ammo* unload_ranged_wpn(item::Wpn& wpn)
 
         auto* spawned_ammo = item::make(ammo_id);
 
-        if (ammo_data.type == ItemType::ammo_mag)
-        {
+        if (ammo_data.type == ItemType::ammo_mag) {
                 // Unload a mag
                 static_cast<item::AmmoMag*>(spawned_ammo)->m_ammo =
                         nr_ammo_loaded;
         }
-        else
-        {
+        else {
                 // Unload loose ammo
                 spawned_ammo->m_nr_items = nr_ammo_loaded;
         }
@@ -120,14 +108,12 @@ void try_unload_or_pick()
 
         if (item &&
             item->data().ranged.is_ranged_wpn &&
-            !item->data().ranged.has_infinite_ammo)
-        {
+            !item->data().ranged.has_infinite_ammo) {
                 auto* const wpn = static_cast<item::Wpn*>(item);
 
                 auto* const spawned_ammo = unload_ranged_wpn(*wpn);
 
-                if (spawned_ammo)
-                {
+                if (spawned_ammo) {
                         audio::play(audio::SfxId::pickup);
 
                         const std::string name_a =

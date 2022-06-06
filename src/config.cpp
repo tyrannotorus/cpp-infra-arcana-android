@@ -99,8 +99,7 @@ static P parse_dims_from_font_name(std::string font_name)
 
         char ch = font_name.front();
 
-        while (ch < '0' || ch > '9')
-        {
+        while (ch < '0' || ch > '9') {
                 font_name.erase(std::begin(font_name));
 
                 ch = font_name.front();
@@ -110,8 +109,7 @@ static P parse_dims_from_font_name(std::string font_name)
 
         std::string w_str;
 
-        while (ch != 'x')
-        {
+        while (ch != 'x') {
                 font_name.erase(std::begin(font_name));
 
                 w_str += ch;
@@ -127,8 +125,7 @@ static P parse_dims_from_font_name(std::string font_name)
 
         std::string h_str;
 
-        while (ch != '_' && ch != '.')
-        {
+        while (ch != '_' && ch != '.') {
                 font_name.erase(std::begin(font_name));
 
                 h_str += ch;
@@ -154,8 +151,7 @@ static void update_render_dims()
 {
         TRACE_FUNC_BEGIN;
 
-        if (s_is_tiles_mode)
-        {
+        if (s_is_tiles_mode) {
                 const auto font_dims = parse_dims_from_font_name(s_font_name);
 
                 s_gui_cell_px_w = font_dims.x;
@@ -163,8 +159,7 @@ static void update_render_dims()
                 s_map_cell_px_w = 20;
                 s_map_cell_px_h = 20;
         }
-        else
-        {
+        else {
                 const auto font_dims = parse_dims_from_font_name(s_font_name);
 
                 s_gui_cell_px_w = s_map_cell_px_w = font_dims.x;
@@ -234,8 +229,7 @@ static void set_default_variables()
         s_delay_explosion = 300;
         s_default_player_name = "";
 
-        for (size_t i = 0; i < (size_t)hints::Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
                 s_has_seen_hint_global[i] = false;
         }
 
@@ -246,10 +240,8 @@ static void player_sets_option(
         const MenuBrowser& browser,
         const OptionToggleDirecton direction)
 {
-        switch (browser.y())
-        {
-        case 0:
-        {
+        switch (browser.y()) {
+        case 0: {
                 // Audio master volume
 
                 audio::stop_ambient();
@@ -257,13 +249,11 @@ static void player_sets_option(
                 const int step = 10;
 
                 if ((direction == OptionToggleDirecton::enter) ||
-                    (direction == OptionToggleDirecton::right))
-                {
+                    (direction == OptionToggleDirecton::right)) {
                         // Enter or right
                         s_master_volume_pct_option += step;
                 }
-                else
-                {
+                else {
                         //Left
                         s_master_volume_pct_option -= step;
                 }
@@ -295,73 +285,57 @@ static void player_sets_option(
                 audio::set_music_volume(s_master_volume_pct_adjusted);
 
                 audio::play(audio::SfxId::menu_select);
-        }
-        break;
+        } break;
 
-        case 1:
-        {
+        case 1: {
                 // Ambient audio
                 s_is_ambient_audio_enabled = !s_is_ambient_audio_enabled;
 
                 audio::stop_ambient();
 
                 audio::play(audio::SfxId::menu_select);
-        }
-        break;
+        } break;
 
-        case 2:
-        {
+        case 2: {
                 // Ambient audio
                 s_is_ambient_audio_preloaded = !s_is_ambient_audio_preloaded;
-        }
-        break;
+        } break;
 
-        case 3:
-        {
+        case 3: {
                 // Input mode
                 auto input_mode_nr = (int)s_input_mode;
                 const auto nr_input_modes = (int)InputMode::END;
 
                 if ((direction == OptionToggleDirecton::enter) ||
-                    (direction == OptionToggleDirecton::right))
-                {
+                    (direction == OptionToggleDirecton::right)) {
                         // Enter or right
-                        if (input_mode_nr < (nr_input_modes - 1))
-                        {
+                        if (input_mode_nr < (nr_input_modes - 1)) {
                                 ++input_mode_nr;
                         }
-                        else
-                        {
+                        else {
                                 input_mode_nr = 0;
                         }
                 }
-                else
-                {
+                else {
                         // Left
-                        if (input_mode_nr > 0)
-                        {
+                        if (input_mode_nr > 0) {
                                 --input_mode_nr;
                         }
-                        else
-                        {
+                        else {
                                 input_mode_nr = nr_input_modes - 1;
                         }
                 }
 
                 s_input_mode = (InputMode)(input_mode_nr);
-        }
-        break;
+        } break;
 
-        case 4:
-        {
+        case 4: {
                 // Always center view_on_player
                 s_always_center_view_on_player =
                         !s_always_center_view_on_player;
-        }
-        break;
+        } break;
 
-        case 5:
-        {
+        case 5: {
                 // Tiles mode
                 s_is_tiles_mode = !s_is_tiles_mode;
 
@@ -370,11 +344,9 @@ static void player_sets_option(
 
                 update_render_dims();
                 io::init();
-        }
-        break;
+        } break;
 
-        case 6:
-        {
+        case 6: {
                 // Font
 
                 // Find current font index
@@ -382,36 +354,28 @@ static void player_sets_option(
 
                 const size_t nr_fonts = std::size(font_image_names);
 
-                for (; font_idx < nr_fonts; ++font_idx)
-                {
-                        if (font_image_names[font_idx] == s_font_name)
-                        {
+                for (; font_idx < nr_fonts; ++font_idx) {
+                        if (font_image_names[font_idx] == s_font_name) {
                                 break;
                         }
                 }
 
                 if ((direction == OptionToggleDirecton::enter) ||
-                    (direction == OptionToggleDirecton::right))
-                {
+                    (direction == OptionToggleDirecton::right)) {
                         // Enter or right
-                        if (font_idx < (nr_fonts - 1))
-                        {
+                        if (font_idx < (nr_fonts - 1)) {
                                 ++font_idx;
                         }
-                        else
-                        {
+                        else {
                                 font_idx = 0;
                         }
                 }
-                else
-                {
+                else {
                         // Left
-                        if (font_idx > 0)
-                        {
+                        if (font_idx > 0) {
                                 --font_idx;
                         }
-                        else
-                        {
+                        else {
                                 font_idx = nr_fonts - 1;
                         }
                 }
@@ -423,11 +387,9 @@ static void player_sets_option(
 
                 update_render_dims();
                 io::init();
-        }
-        break;
+        } break;
 
-        case 7:
-        {
+        case 7: {
                 // Fullscreen
                 config::set_fullscreen(!s_is_fullscreen);
 
@@ -435,11 +397,9 @@ static void player_sets_option(
                 s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
                 io::on_user_toggle_fullscreen();
-        }
-        break;
+        } break;
 
-        case 8:
-        {
+        case 8: {
                 // Scaling
                 s_is_2x_scale_requested = !s_is_2x_scale_requested;
 
@@ -447,39 +407,29 @@ static void player_sets_option(
                 s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
                 io::on_user_toggle_scaling();
-        }
-        break;
+        } break;
 
-        case 9:
-        {
+        case 9: {
                 // Draw walls as filled rectangle in text mode
                 s_text_mode_filled_walls = !s_text_mode_filled_walls;
-        }
-        break;
+        } break;
 
-        case 10:
-        {
+        case 10: {
                 // Skip intro level
                 s_is_intro_lvl_skipped = !s_is_intro_lvl_skipped;
-        }
-        break;
+        } break;
 
-        case 11:
-        {
+        case 11: {
                 // Skip intro popup
                 s_is_intro_popup_skipped = !s_is_intro_popup_skipped;
-        }
-        break;
+        } break;
 
-        case 12:
-        {
+        case 12: {
                 // Confirm "more" with any key
                 s_is_any_key_confirm_more = !s_is_any_key_confirm_more;
-        }
-        break;
+        } break;
 
-        case 13:
-        {
+        case 13: {
                 // Display hints
                 const auto current_idx = (int)s_hints_mode;
                 const auto nr_modes = (int)HintsMode::END;
@@ -487,58 +437,43 @@ static void player_sets_option(
                 s_hints_mode = (HintsMode)((current_idx + 1) % nr_modes);
 
                 hints::init();
-        }
-        break;
+        } break;
 
-        case 14:
-        {
+        case 14: {
                 // Always warn when a new monster appears
                 s_always_warn_new_mon = !s_always_warn_new_mon;
-        }
-        break;
+        } break;
 
-        case 15:
-        {
+        case 15: {
                 // Warn when throwing valuable items
                 s_warn_on_throw_valuable = !s_warn_on_throw_valuable;
-        }
-        break;
+        } break;
 
-        case 16:
-        {
+        case 16: {
                 // Warn when lighting explovies
                 s_warn_on_light_explosive = !s_warn_on_light_explosive;
-        }
-        break;
+        } break;
 
-        case 17:
-        {
+        case 17: {
                 // Warn when drinking known malign potions
                 s_warn_on_drink_malign_potion = !s_warn_on_drink_malign_potion;
-        }
-        break;
+        } break;
 
-        case 18:
-        {
+        case 18: {
                 // Print warning when melee attacking with ranged weapons
                 s_warn_on_ranged_wpn_melee = !s_warn_on_ranged_wpn_melee;
-        }
-        break;
+        } break;
 
-        case 19:
-        {
+        case 19: {
                 // Ranged weapon auto reload
                 s_is_ranged_wpn_auto_reload = !s_is_ranged_wpn_auto_reload;
-        }
-        break;
+        } break;
 
-        case 20:
-        {
+        case 20: {
                 // Projectile delay
                 const Range allowed_range(0, 900);
 
-                if (direction == OptionToggleDirecton::enter)
-                {
+                if (direction == OptionToggleDirecton::enter) {
                         // Enter
                         query::QueryNumberConfig query_config;
 
@@ -551,18 +486,15 @@ static void player_sets_option(
                                         query_config,
                                         "Projectile delay");
 
-                        if (nr != -1)
-                        {
+                        if (nr != -1) {
                                 s_delay_projectile_draw = nr;
                         }
                 }
-                else if (direction == OptionToggleDirecton::left)
-                {
+                else if (direction == OptionToggleDirecton::left) {
                         // Left
                         s_delay_projectile_draw -= 10;
                 }
-                else
-                {
+                else {
                         // Right
                         s_delay_projectile_draw += 10;
                 }
@@ -572,16 +504,13 @@ static void player_sets_option(
                                 s_delay_projectile_draw,
                                 allowed_range.min,
                                 allowed_range.max);
-        }
-        break;
+        } break;
 
-        case 21:
-        {
+        case 21: {
                 // Shotgun delay
                 const Range allowed_range(0, 900);
 
-                if (direction == OptionToggleDirecton::enter)
-                {
+                if (direction == OptionToggleDirecton::enter) {
                         // Enter
                         query::QueryNumberConfig query_config;
 
@@ -594,18 +523,15 @@ static void player_sets_option(
                                         query_config,
                                         "Shotgun delay");
 
-                        if (nr != -1)
-                        {
+                        if (nr != -1) {
                                 s_delay_shotgun = nr;
                         }
                 }
-                else if (direction == OptionToggleDirecton::left)
-                {
+                else if (direction == OptionToggleDirecton::left) {
                         // Left
                         s_delay_shotgun -= 10;
                 }
-                else
-                {
+                else {
                         // Right
                         s_delay_shotgun += 10;
                 }
@@ -615,16 +541,13 @@ static void player_sets_option(
                                 s_delay_shotgun,
                                 allowed_range.min,
                                 allowed_range.max);
-        }
-        break;
+        } break;
 
-        case 22:
-        {
+        case 22: {
                 // Explosion delay
                 const Range allowed_range(0, 900);
 
-                if (direction == OptionToggleDirecton::enter)
-                {
+                if (direction == OptionToggleDirecton::enter) {
                         // Enter
                         query::QueryNumberConfig query_config;
 
@@ -637,18 +560,15 @@ static void player_sets_option(
                                         query_config,
                                         "Explosion delay");
 
-                        if (nr != -1)
-                        {
+                        if (nr != -1) {
                                 s_delay_explosion = nr;
                         }
                 }
-                else if (direction == OptionToggleDirecton::left)
-                {
+                else if (direction == OptionToggleDirecton::left) {
                         // Left
                         s_delay_explosion -= 10;
                 }
-                else
-                {
+                else {
                         // Right
                         s_delay_explosion += 10;
                 }
@@ -658,14 +578,11 @@ static void player_sets_option(
                                 s_delay_explosion,
                                 allowed_range.min,
                                 allowed_range.max);
-        }
-        break;
+        } break;
 
-        case 23:
-        {
+        case 23: {
                 // Reset to defaults
-                if (direction == OptionToggleDirecton::enter)
-                {
+                if (direction == OptionToggleDirecton::enter) {
                         set_default_variables();
                         update_render_dims();
                         io::init();
@@ -673,14 +590,12 @@ static void player_sets_option(
                         states::draw();
                         io::update_screen();
                 }
-        }
-        break;
+        } break;
 
         default:
         {
                 ASSERT(false);
-        }
-        break;
+        } break;
         }
 }
 
@@ -689,12 +604,10 @@ static void read_file(std::vector<std::string>& lines)
         std::ifstream file;
         file.open(paths::config_file_path());
 
-        if (file.is_open())
-        {
+        if (file.is_open()) {
                 std::string line;
 
-                while (getline(file, line))
-                {
+                while (getline(file, line)) {
                         lines.push_back(line);
                 }
 
@@ -795,15 +708,13 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
 
         lines.erase(std::begin(lines));
 
-        if (has_default_name)
-        {
+        if (has_default_name) {
                 s_default_player_name = lines.front();
 
                 lines.erase(std::begin(lines));
         }
 
-        for (size_t i = 0; i < (size_t)hints::Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
                 s_has_seen_hint_global[i] = lines.front() == "1";
 
                 lines.erase(std::begin(lines));
@@ -819,12 +730,10 @@ static void write_lines_to_file(const std::vector<std::string>& lines)
         std::ofstream file;
         file.open(paths::config_file_path(), std::ios::trunc);
 
-        for (size_t i = 0; i < lines.size(); ++i)
-        {
+        for (size_t i = 0; i < lines.size(); ++i) {
                 file << lines[i];
 
-                if (i != (lines.size() - 1))
-                {
+                if (i != (lines.size() - 1)) {
                         file << std::endl;
                 }
         }
@@ -866,20 +775,17 @@ static std::vector<std::string> lines_from_variables()
         lines.push_back(std::to_string(s_delay_shotgun));
         lines.push_back(std::to_string(s_delay_explosion));
 
-        if (s_default_player_name.empty())
-        {
+        if (s_default_player_name.empty()) {
                 lines.emplace_back("0");
         }
-        else
-        {
+        else {
                 // Default player name has been set
                 lines.emplace_back("1");
 
                 lines.push_back(s_default_player_name);
         }
 
-        for (size_t i = 0; i < (size_t)hints::Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
                 lines.emplace_back(s_has_seen_hint_global[i] ? "1" : "0");
         }
 
@@ -907,15 +813,13 @@ void init()
         // Load config file, if it exists
         read_file(lines);
 
-        if (lines.empty())
-        {
+        if (lines.empty()) {
                 // No previous config file exists, create one.
                 lines = lines_from_variables();
 
                 write_lines_to_file(lines);
         }
-        else
-        {
+        else {
                 // A config file exists, set values from parsed config lines
                 set_variables_from_lines(lines);
         }
@@ -1108,8 +1012,7 @@ HintsMode hints_mode()
 
 bool has_seen_hint_global(const hints::Id id)
 {
-        if (id == hints::Id::END)
-        {
+        if (id == hints::Id::END) {
                 ASSERT(false);
 
                 return false;
@@ -1120,8 +1023,7 @@ bool has_seen_hint_global(const hints::Id id)
 
 void set_hint_seen_global(const hints::Id id)
 {
-        if (id == hints::Id::END)
-        {
+        if (id == hints::Id::END) {
                 ASSERT(false);
         }
 
@@ -1219,11 +1121,9 @@ void ConfigState::update()
 
         bool did_set_option = false;
 
-        switch (action)
-        {
+        switch (action) {
         case MenuAction::esc:
-        case MenuAction::space:
-        {
+        case MenuAction::space: {
                 // Since text mode wall symbol may have changed, we need to
                 // redefine the terrain data list
                 terrain::init();
@@ -1231,36 +1131,28 @@ void ConfigState::update()
                 states::pop();
 
                 return;
-        }
-        break;
+        } break;
 
-        case MenuAction::selected:
-        {
+        case MenuAction::selected: {
                 player_sets_option(m_browser, OptionToggleDirecton::enter);
                 did_set_option = true;
-        }
-        break;
+        } break;
 
-        case MenuAction::left:
-        {
+        case MenuAction::left: {
                 player_sets_option(m_browser, OptionToggleDirecton::left);
                 did_set_option = true;
-        }
-        break;
+        } break;
 
-        case MenuAction::right:
-        {
+        case MenuAction::right: {
                 player_sets_option(m_browser, OptionToggleDirecton::right);
                 did_set_option = true;
-        }
-        break;
+        } break;
 
         default:
                 break;
         }
 
-        if (did_set_option)
-        {
+        if (did_set_option) {
                 const auto lines = lines_from_variables();
 
                 write_lines_to_file(lines);
@@ -1300,8 +1192,7 @@ void ConfigState::draw()
 
         std::string input_mode_value_str;
 
-        switch (s_input_mode)
-        {
+        switch (s_input_mode) {
         case InputMode::standard:
                 input_mode_value_str = "Default (numpad or arrows)";
                 break;
@@ -1325,16 +1216,13 @@ void ConfigState::draw()
 
         std::string hints_mode_str;
 
-        if (s_hints_mode == HintsMode::once_per_game)
-        {
+        if (s_hints_mode == HintsMode::once_per_game) {
                 hints_mode_str = "Once per game";
         }
-        else if (s_hints_mode == HintsMode::once)
-        {
+        else if (s_hints_mode == HintsMode::once) {
                 hints_mode_str = "Once";
         }
-        else
-        {
+        else {
                 hints_mode_str = "Never";
         }
 
@@ -1444,13 +1332,11 @@ void ConfigState::draw()
 
         auto y = 0;
 
-        for (auto i = 0; i < (int)labels.size(); ++i)
-        {
+        for (auto i = 0; i < (int)labels.size(); ++i) {
                 const auto label = labels[i];
 
                 // Create some distance to "reset to defaults"
-                if (i == ((int)labels.size() - 1))
-                {
+                if (i == ((int)labels.size() - 1)) {
                         ++y;
                 }
 
@@ -1465,8 +1351,7 @@ void ConfigState::draw()
                         {0, y},
                         color);
 
-                if (!label.second.empty())
-                {
+                if (!label.second.empty()) {
                         io::draw_text(
                                 ":",
                                 Panel::info_screen_content,

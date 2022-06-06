@@ -42,8 +42,7 @@ static void decay(smell::Smell& smell, const int decay_value)
 {
         smell.strength_pct -= decay_value;
 
-        if (smell.strength_pct <= 0)
-        {
+        if (smell.strength_pct <= 0) {
                 smell = {};
         }
 }
@@ -52,12 +51,10 @@ static void decay_smells_for_new_turn()
 {
         const size_t nr_positions = map::nr_positions();
 
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
+        for (size_t i = 0; i < nr_positions; ++i) {
                 auto& smell = map::g_smell.at(i);
 
-                if (smell.msg_ptr)
-                {
+                if (smell.msg_ptr) {
                         decay(smell, s_strength_decay_per_turn);
                 }
         }
@@ -67,24 +64,20 @@ static void spread_smell_from_pos(const P& p, const Array2<bool>& blocked)
 {
         auto& src_smell = map::g_smell.at(p);
 
-        for (const auto& d : dir_utils::g_dir_list)
-        {
+        for (const auto& d : dir_utils::g_dir_list) {
                 const auto p_adj = p + d;
 
-                if (!map::is_pos_inside_outer_walls(p_adj))
-                {
+                if (!map::is_pos_inside_outer_walls(p_adj)) {
                         continue;
                 }
 
-                if (blocked.at(p_adj))
-                {
+                if (blocked.at(p_adj)) {
                         continue;
                 }
 
                 auto& dst_smell = map::g_smell_spread.at(p_adj);
 
-                if (src_smell.strength_pct <= dst_smell.strength_pct)
-                {
+                if (src_smell.strength_pct <= dst_smell.strength_pct) {
                         continue;
                 }
 
@@ -101,10 +94,8 @@ static void update_smell_spread_map(const Array2<bool>& blocked)
         const int y0 = 1;
         const int y1 = map::h() - 2;
 
-        for (int x = x0; x <= x1; ++x)
-        {
-                for (int y = y0; y <= y1; ++y)
-                {
+        for (int x = x0; x <= x1; ++x) {
+                for (int y = y0; y <= y1; ++y) {
                         spread_smell_from_pos({x, y}, blocked);
                 }
         }
@@ -155,8 +146,7 @@ void load()
 
 void on_std_turn()
 {
-        if (s_msg_countdown > 0)
-        {
+        if (s_msg_countdown > 0) {
                 --s_msg_countdown;
         }
 
@@ -182,22 +172,19 @@ void put_smell_for_mon(const actor::Actor& mon)
 {
         const std::string* const msg_ptr = &mon.m_data->smell_msg;
 
-        if (msg_ptr->empty() || !mon.is_alive())
-        {
+        if (msg_ptr->empty() || !mon.is_alive()) {
                 return;
         }
 
         const bool allow_corpse_smell =
                 mon.m_properties.has(PropId::corpse_rises);
 
-        if ((mon.m_state == ActorState::corpse) && !allow_corpse_smell)
-        {
+        if ((mon.m_state == ActorState::corpse) && !allow_corpse_smell) {
                 return;
         }
 
         // Ignore smells from ghoul monsters if player is ghoul
-        if ((mon.id() == actor::Id::ghoul) && player_bon::is_bg(Bg::ghoul))
-        {
+        if ((mon.id() == actor::Id::ghoul) && player_bon::is_bg(Bg::ghoul)) {
                 return;
         }
 
@@ -210,16 +197,14 @@ void put_smell_for_mon(const actor::Actor& mon)
 
         auto& current_smell = map::g_smell.at(mon.m_pos);
 
-        if (smell.strength_pct > current_smell.strength_pct)
-        {
+        if (smell.strength_pct > current_smell.strength_pct) {
                 current_smell = smell;
         }
 }
 
 void on_player_turn_start()
 {
-        if (is_seeing_mon_with_smell_msg())
-        {
+        if (is_seeing_mon_with_smell_msg()) {
                 // A smelly monster is currently seen, reset the smell message
                 // countdown (we don't want to print smell messages after just
                 // seeing a monster).
@@ -227,27 +212,23 @@ void on_player_turn_start()
                 return;
         }
 
-        if (s_msg_countdown > 0)
-        {
+        if (s_msg_countdown > 0) {
                 return;
         }
 
         const auto& smell = map::g_smell.at(map::g_player->m_pos);
 
-        if (!smell.msg_ptr)
-        {
+        if (!smell.msg_ptr) {
                 return;
         }
 
-        if (is_wearing_item_preventing_detecting_smell())
-        {
+        if (is_wearing_item_preventing_detecting_smell()) {
                 return;
         }
 
         ASSERT((smell.strength_pct > 0) && (smell.strength_pct <= 100));
 
-        if (!rnd::percent(smell.strength_pct))
-        {
+        if (!rnd::percent(smell.strength_pct)) {
                 return;
         }
 

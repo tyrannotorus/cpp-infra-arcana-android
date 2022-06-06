@@ -44,13 +44,11 @@ bool MapBuilderStd::build_specific()
         TRACE_FUNC_BEGIN;
 
         // TODO: Using hard coded values for now
-        if (map::g_dlvl >= g_dlvl_first_late_game)
-        {
+        if (map::g_dlvl >= g_dlvl_first_late_game) {
                 // Make late game levels slightly bigger
                 map::reset({54, 54});
         }
-        else
-        {
+        else {
                 map::reset({48, 48});
         }
 
@@ -94,13 +92,11 @@ bool MapBuilderStd::build_specific()
 
         Region regions[3][3];
 
-        for (int x_region = 0; x_region < 3; ++x_region)
-        {
+        for (int x_region = 0; x_region < 3; ++x_region) {
                 const int x0 = x0_list[x_region];
                 const int x1 = x1_list[x_region];
 
-                for (int y_region = 0; y_region < 3; ++y_region)
-                {
+                for (int y_region = 0; y_region < 3; ++y_region) {
                         const int y0 = y0_list[y_region];
                         const int y1 = y1_list[y_region];
 
@@ -108,8 +104,7 @@ bool MapBuilderStd::build_specific()
                 }
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -119,13 +114,11 @@ bool MapBuilderStd::build_specific()
         const int river_one_in_n = 12;
 
         if ((map::g_dlvl >= g_dlvl_first_mid_game) &&
-            rnd::one_in(river_one_in_n))
-        {
+            rnd::one_in(river_one_in_n)) {
                 mapgen::reserve_river(regions);
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -134,8 +127,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         mapgen::merge_regions(regions);
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -144,21 +136,17 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         TRACE << "Making main rooms" << std::endl;
 
-        for (int x = 0; x < 3; ++x)
-        {
-                for (int y = 0; y < 3; ++y)
-                {
+        for (int x = 0; x < 3; ++x) {
+                for (int y = 0; y < 3; ++y) {
                         auto& region = regions[x][y];
 
-                        if (!region.main_room && region.is_free)
-                        {
+                        if (!region.main_room && region.is_free) {
                                 mapgen::make_room(region);
                         }
                 }
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -167,8 +155,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         const size_t min_nr_rooms = 5;
 
-        if (map::g_room_list.size() < min_nr_rooms)
-        {
+        if (map::g_room_list.size() < min_nr_rooms) {
                 mapgen::g_is_map_valid = false;
 
                 return false;
@@ -179,27 +166,22 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         mapgen::make_aux_rooms(regions);
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
         // ---------------------------------------------------------------------
         // Set all floor and walls to cave in late game
         // ---------------------------------------------------------------------
-        if (map::g_dlvl >= g_dlvl_first_late_game)
-        {
-                for (const auto& p : map::rect().positions())
-                {
+        if (map::g_dlvl >= g_dlvl_first_late_game) {
+                for (const auto& p : map::rect().positions()) {
                         auto* const t = map::g_terrain.at(p);
 
-                        if (t->id() == terrain::Id::floor)
-                        {
+                        if (t->id() == terrain::Id::floor) {
                                 static_cast<terrain::Floor*>(t)->m_type =
                                         terrain::FloorType::cave;
                         }
-                        else if (t->id() == terrain::Id::wall)
-                        {
+                        else if (t->id() == terrain::Id::wall) {
                                 static_cast<terrain::Wall*>(t)->m_type =
                                         terrain::WallType::cave;
                         }
@@ -210,13 +192,11 @@ bool MapBuilderStd::build_specific()
         // BSP split rooms
         // ---------------------------------------------------------------------
         // TODO: Allow in late game as well?
-        if (map::g_dlvl <= g_dlvl_last_mid_game)
-        {
+        if (map::g_dlvl <= g_dlvl_last_mid_game) {
                 mapgen::bsp_split_rooms();
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -225,8 +205,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         mapgen::make_sub_rooms();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -248,13 +227,11 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         TRACE << "Running pre-connect for all rooms" << std::endl;
 
-        for (auto* const room : map::g_room_list)
-        {
+        for (auto* const room : map::g_room_list) {
                 room->on_pre_connect(mapgen::g_door_proposals);
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -263,8 +240,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         mapgen::connect_rooms();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -273,26 +249,22 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         TRACE << "Running post-connect for all rooms" << std::endl;
 
-        for (auto* const room : map::g_room_list)
-        {
+        for (auto* const room : map::g_room_list) {
                 room->on_post_connect(mapgen::g_door_proposals);
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
         // ---------------------------------------------------------------------
         // Place doors
         // ---------------------------------------------------------------------
-        if (map::g_dlvl <= g_dlvl_last_mid_game)
-        {
+        if (map::g_dlvl <= g_dlvl_last_mid_game) {
                 mapgen::make_doors();
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -305,8 +277,7 @@ bool MapBuilderStd::build_specific()
 
         mapgen::move_player_to_nearest_allowed_pos();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -315,8 +286,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         mapgen::decorate();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -329,8 +299,7 @@ bool MapBuilderStd::build_specific()
 
         stairs_pos = mapgen::make_stairs_at_random_pos();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -353,10 +322,8 @@ bool MapBuilderStd::build_specific()
         const auto is_free_terrain_parser =
                 map_parsers::IsAnyOfTerrains(free_terrains);
 
-        for (const auto& p : map::rect().positions())
-        {
-                if (is_free_terrain_parser.run(p))
-                {
+        for (const auto& p : map::rect().positions()) {
+                if (is_free_terrain_parser.run(p)) {
                         blocked.at(p) = false;
                 }
         }
@@ -365,36 +332,28 @@ bool MapBuilderStd::build_specific()
         // mode for if the map is connected (late in the generation process),
         // and in release mode we just invalidate the map and try again.
 #ifndef NDEBUG
-        if (!map_parsers::is_map_connected(blocked))
-        {
-                for (int y = 0; y < map::h(); ++y)
-                {
-                        for (int x = 0; x < map::w(); ++x)
-                        {
+        if (!map_parsers::is_map_connected(blocked)) {
+                for (int y = 0; y < map::h(); ++y) {
+                        for (int x = 0; x < map::w(); ++x) {
                                 const P print_pos(x, y);
 
                                 std::string sym = " ";
 
                                 const auto t_id = map::g_terrain.at(print_pos)->id();
 
-                                if (print_pos == map::g_player->m_pos)
-                                {
+                                if (print_pos == map::g_player->m_pos) {
                                         sym = "@";
                                 }
-                                else if (t_id == terrain::Id::stairs)
-                                {
+                                else if (t_id == terrain::Id::stairs) {
                                         sym = ">";
                                 }
-                                else if (t_id == terrain::Id::tree)
-                                {
+                                else if (t_id == terrain::Id::tree) {
                                         sym = "|";
                                 }
-                                else if (blocked.at(print_pos))
-                                {
+                                else if (blocked.at(print_pos)) {
                                         sym = "#";
                                 }
-                                else
-                                {
+                                else {
                                         sym = ".";
                                 }
 
@@ -408,10 +367,8 @@ bool MapBuilderStd::build_specific()
         }
 #endif  // NDEBUG
 
-        for (const auto& p : map::rect().positions())
-        {
-                if (blocked.at(p) || !mapgen::g_door_proposals.at(p))
-                {
+        for (const auto& p : map::rect().positions()) {
+                if (blocked.at(p) || !mapgen::g_door_proposals.at(p)) {
                         continue;
                 }
 
@@ -419,30 +376,24 @@ bool MapBuilderStd::build_specific()
                 const bool is_choke = mapgen::is_choke_point(p, blocked, &d);
 
                 // 'is_choke_point' called above may invalidate the map
-                if (!mapgen::g_is_map_valid)
-                {
+                if (!mapgen::g_is_map_valid) {
                         return false;
                 }
 
-                if (!is_choke)
-                {
+                if (!is_choke) {
                         continue;
                 }
 
                 // Find player and stair side
-                for (size_t side_idx = 0; side_idx < 2; ++side_idx)
-                {
-                        for (const auto& side_p : d.sides[side_idx])
-                        {
-                                if (side_p == map::g_player->m_pos)
-                                {
+                for (size_t side_idx = 0; side_idx < 2; ++side_idx) {
+                        for (const auto& side_p : d.sides[side_idx]) {
+                                if (side_p == map::g_player->m_pos) {
                                         ASSERT(d.player_side == -1);
 
                                         d.player_side = (int)side_idx;
                                 }
 
-                                if (side_p == stairs_pos)
-                                {
+                                if (side_p == stairs_pos) {
                                         ASSERT(d.stairs_side == -1);
 
                                         d.stairs_side = (int)side_idx;
@@ -451,8 +402,7 @@ bool MapBuilderStd::build_specific()
                 }
 
                 if ((d.player_side != 0 && d.player_side != 1) ||
-                    (d.stairs_side != 0 && d.stairs_side != 1))
-                {
+                    (d.stairs_side != 0 && d.stairs_side != 1)) {
                         TRACE
                                 << "d.player_side: "
                                 << d.player_side
@@ -476,8 +426,7 @@ bool MapBuilderStd::build_specific()
                 << "Found " << map::g_choke_point_data.size()
                 << " choke points" << std::endl;
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -486,43 +435,36 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         mapgen::make_metal_doors_and_levers();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
         // ---------------------------------------------------------------------
         // Make some doors leading to "optional" areas secret or stuck
         // ---------------------------------------------------------------------
-        for (const auto& choke_point : map::g_choke_point_data)
-        {
-                if (choke_point.player_side != choke_point.stairs_side)
-                {
+        for (const auto& choke_point : map::g_choke_point_data) {
+                if (choke_point.player_side != choke_point.stairs_side) {
                         continue;
                 }
 
                 auto* const terrain = map::g_terrain.at(choke_point.p);
 
-                if (terrain->id() == terrain::Id::door)
-                {
+                if (terrain->id() == terrain::Id::door) {
                         auto* const door = static_cast<terrain::Door*>(terrain);
 
                         if ((door->type() != terrain::DoorType::gate) &&
                             (door->type() != terrain::DoorType::metal) &&
-                            rnd::one_in(6))
-                        {
+                            rnd::one_in(6)) {
                                 door->set_secret();
                         }
 
-                        if (rnd::one_in(6))
-                        {
+                        if (rnd::one_in(6)) {
                                 door->set_stuck();
                         }
                 }
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -533,8 +475,7 @@ bool MapBuilderStd::build_specific()
         // (including player side and stairs side)
         mapgen::make_monoliths();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -543,23 +484,20 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         mapgen::make_pylons();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
         // ---------------------------------------------------------------------
         // Populate the map with monsters
         // ---------------------------------------------------------------------
-        for (const auto* const room : map::g_room_list)
-        {
+        for (const auto* const room : map::g_room_list) {
                 room->populate_monsters();
         }
 
         populate_mon::populate_std_lvl();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -568,8 +506,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         populate_traps::populate_std_lvl();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -578,8 +515,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         populate_items::make_items_on_floor();
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
@@ -593,54 +529,44 @@ bool MapBuilderStd::build_specific()
                 ? 1
                 : 0;
 
-        for (int i = 0; i < nr_snake_emerge_events_to_try; ++i)
-        {
+        for (int i = 0; i < nr_snake_emerge_events_to_try; ++i) {
                 auto* const event =
                         static_cast<terrain::EventSnakeEmerge*>(
                                 terrain::make(
                                         terrain::Id::event_snake_emerge,
                                         {-1, -1}));
 
-                if (event->try_find_p())
-                {
+                if (event->try_find_p()) {
                         game_time::add_mob(event);
                 }
-                else
-                {
+                else {
                         delete event;
                 }
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
         // ---------------------------------------------------------------------
         // Occasionally make the whole level dark
         // ---------------------------------------------------------------------
-        if (map::g_dlvl > 1)
-        {
+        if (map::g_dlvl > 1) {
                 int make_drk_pct = 0;
 
-                if (map::g_dlvl <= g_dlvl_last_early_game)
-                {
+                if (map::g_dlvl <= g_dlvl_last_early_game) {
                         make_drk_pct = 1;
                 }
-                else if (map::g_dlvl <= g_dlvl_last_mid_game)
-                {
+                else if (map::g_dlvl <= g_dlvl_last_mid_game) {
                         make_drk_pct = 2;
                 }
-                else
-                {
+                else {
                         make_drk_pct = 15;
                 }
 
-                if (rnd::percent(make_drk_pct))
-                {
+                if (rnd::percent(make_drk_pct)) {
                         const size_t nr_positions = map::nr_positions();
-                        for (size_t i = 0; i < nr_positions; ++i)
-                        {
+                        for (size_t i = 0; i < nr_positions; ++i) {
                                 map::g_dark.at(i) = true;
                         }
                 }
@@ -649,15 +575,12 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Sanity check room sizes
         // ---------------------------------------------------------------------
-        for (auto* const room : map::g_room_list)
-        {
-                if (room->m_type >= RoomType::END_OF_STD_ROOMS)
-                {
+        for (auto* const room : map::g_room_list) {
+                if (room->m_type >= RoomType::END_OF_STD_ROOMS) {
                         continue;
                 }
 
-                if (room->m_r.min_dim() <= 1)
-                {
+                if (room->m_r.min_dim() <= 1) {
                         ASSERT(false);
 
                         // Invalidate the map
@@ -665,13 +588,11 @@ bool MapBuilderStd::build_specific()
                 }
         }
 
-        if (!mapgen::g_is_map_valid)
-        {
+        if (!mapgen::g_is_map_valid) {
                 return false;
         }
 
-        for (auto* const room : map::g_room_list)
-        {
+        for (auto* const room : map::g_room_list) {
                 delete room;
         }
 

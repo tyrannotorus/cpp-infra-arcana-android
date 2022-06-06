@@ -50,10 +50,8 @@ static R get_map_area_explored()
 
         const auto& map_dims = s_minimap.dims();
 
-        for (int x = 0; x < map_dims.x; ++x)
-        {
-                for (int y = 0; y < map_dims.y; ++y)
-                {
+        for (int x = 0; x < map_dims.x; ++x) {
+                for (int y = 0; y < map_dims.y; ++y) {
                         const bool has_vision = map::g_seen.at(x, y);
 
                         const auto terrain_memory =
@@ -64,8 +62,7 @@ static R get_map_area_explored()
 
                         if (!has_vision &&
                             !terrain_memory.appearance.is_defined() &&
-                            !item_memory.appearance.is_defined())
-                        {
+                            !item_memory.appearance.is_defined()) {
                                 // Nothing seen or remembered here.
                                 continue;
                         }
@@ -134,10 +131,8 @@ void ViewMinimap::draw()
 
         const R minimap_px_rect = get_minimap_px_rect_on_screen(area_explored);
 
-        for (int x = area_explored.p0.x; x <= area_explored.p1.x; ++x)
-        {
-                for (int y = area_explored.p0.y; y <= area_explored.p1.y; ++y)
-                {
+        for (int x = area_explored.p0.x; x <= area_explored.p1.x; ++x) {
+                for (int y = area_explored.p0.y; y <= area_explored.p1.y; ++y) {
                         const P pos_relative_to_explored_area =
                                 P(x, y) - area_explored.p0;
 
@@ -152,12 +147,10 @@ void ViewMinimap::draw()
 
                         Color color;
 
-                        if (map::g_player->m_pos == P(x, y))
-                        {
+                        if (map::g_player->m_pos == P(x, y)) {
                                 color = colors::light_green();
                         }
-                        else
-                        {
+                        else {
                                 color = s_minimap.at(x, y);
                         }
 
@@ -170,8 +163,7 @@ void ViewMinimap::update()
 {
         const auto input = io::read_input();
 
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_SPACE:
         case SDLK_ESCAPE:
         case 'm':
@@ -196,30 +188,25 @@ void clear()
 
 void update()
 {
-        if (s_minimap.dims() != map::dims())
-        {
+        if (s_minimap.dims() != map::dims()) {
                 s_minimap.resize(map::dims());
 
-                for (auto& color : s_minimap)
-                {
+                for (auto& color : s_minimap) {
                         color = colors::black();
                 }
         }
 
         const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
+        for (size_t i = 0; i < nr_positions; ++i) {
                 auto& minimap_color = s_minimap.at(i);
 
                 const auto& terrain_memory = map::g_terrain_memory.at(i);
                 const auto& item_memory = map::g_item_memory.at(i);
 
-                if (item_memory.appearance.is_defined())
-                {
+                if (item_memory.appearance.is_defined()) {
                         minimap_color = item_memory.appearance.minimap_color;
                 }
-                else
-                {
+                else {
                         minimap_color = terrain_memory.appearance.minimap_color;
                 }
         }

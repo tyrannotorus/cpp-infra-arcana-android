@@ -70,8 +70,7 @@ static void update_flash_with_seen_actor(io::FlashData& flash)
         // Update rectangle to this actor's position.
         flash.px_rect = map_pos_to_px_rect(flash.actor_flashed_at->m_pos);
 
-        if (!flash.actor_flashed_at->is_alive())
-        {
+        if (!flash.actor_flashed_at->is_alive()) {
                 // The actor is dead - fade out faster.
                 flash.alpha_pct -= s_flash_alpha_decr;
         }
@@ -79,12 +78,10 @@ static void update_flash_with_seen_actor(io::FlashData& flash)
 
 static void update_flash_with_existing_actor(io::FlashData& flash)
 {
-        if (actor::can_player_see_actor(*flash.actor_flashed_at))
-        {
+        if (actor::can_player_see_actor(*flash.actor_flashed_at)) {
                 update_flash_with_seen_actor(flash);
         }
-        else
-        {
+        else {
                 // The actor's position is not seeen by the player -
                 // stop drawing a flash here.
                 flash.alpha_pct = 0;
@@ -93,12 +90,10 @@ static void update_flash_with_existing_actor(io::FlashData& flash)
 
 static void update_flash_with_actor(io::FlashData& flash)
 {
-        if (does_actor_exist(flash.actor_flashed_at))
-        {
+        if (does_actor_exist(flash.actor_flashed_at)) {
                 update_flash_with_existing_actor(flash);
         }
-        else
-        {
+        else {
                 // Actor no longer exists - fade out faster.
                 flash.alpha_pct -= s_flash_alpha_decr;
         }
@@ -106,14 +101,11 @@ static void update_flash_with_actor(io::FlashData& flash)
 
 static void erase_finished_flahes()
 {
-        for (auto it = std::begin(s_flashes); it != std::end(s_flashes);)
-        {
-                if (it->alpha_pct <= 0)
-                {
+        for (auto it = std::begin(s_flashes); it != std::end(s_flashes);) {
+                if (it->alpha_pct <= 0) {
                         s_flashes.erase(it);
                 }
-                else
-                {
+                else {
                         ++it;
                 }
         }
@@ -121,14 +113,11 @@ static void erase_finished_flahes()
 
 static void erase_flahes_with_actor(const actor::Actor* const actor)
 {
-        for (auto it = std::begin(s_flashes); it != std::end(s_flashes);)
-        {
-                if (it->actor_flashed_at == actor)
-                {
+        for (auto it = std::begin(s_flashes); it != std::end(s_flashes);) {
+                if (it->actor_flashed_at == actor) {
                         s_flashes.erase(it);
                 }
-                else
-                {
+                else {
                         ++it;
                 }
         }
@@ -141,14 +130,12 @@ namespace io
 {
 void init_animation()
 {
-        for (size_t i = 0; i < (size_t)GraphicsCycle::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)GraphicsCycle::END; ++i) {
                 auto& delay = s_graphics_cycle_delay_ms[i];
 
                 const auto cycle = (GraphicsCycle)i;
 
-                switch (cycle)
-                {
+                switch (cycle) {
                 case GraphicsCycle::fast:
                         delay = 350;
                         break;
@@ -177,12 +164,10 @@ bool step_graphics_cycling()
 
         const auto current_time_ms = SDL_GetTicks();
 
-        for (size_t i = 0; i < (size_t)io::GraphicsCycle::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)io::GraphicsCycle::END; ++i) {
                 const auto d = current_time_ms - s_last_graphics_cycle_ms[i];
 
-                if (d < s_graphics_cycle_delay_ms[i])
-                {
+                if (d < s_graphics_cycle_delay_ms[i]) {
                         continue;
                 }
 
@@ -202,8 +187,7 @@ bool step_graphics_cycling()
 
 int graphics_cycle_nr(const GraphicsCycle cycle_type)
 {
-        if (cycle_type == GraphicsCycle::END)
-        {
+        if (cycle_type == GraphicsCycle::END) {
                 ASSERT(false);
 
                 return 0;
@@ -232,8 +216,7 @@ bool step_flash_animations()
 
         const auto d = current_time_ms - s_last_flash_animation_step_ms;
 
-        if (d < s_flash_animation_delay_ms)
-        {
+        if (d < s_flash_animation_delay_ms) {
                 return false;
         }
 
@@ -241,8 +224,7 @@ bool step_flash_animations()
 
         bool should_redraw = false;
 
-        for (FlashData& flash : s_flashes)
-        {
+        for (FlashData& flash : s_flashes) {
                 should_redraw = true;
 
                 flash.alpha_pct -= s_flash_alpha_decr;
@@ -262,8 +244,7 @@ void draw_flash_animations()
         // elements (like flashing text):
         set_clip_rect_to_panel(Panel::map);
 
-        for (const FlashData& flash : s_flashes)
-        {
+        for (const FlashData& flash : s_flashes) {
                 const auto a = (uint8_t)((255 * flash.alpha_pct) / 100);
 
                 // Use color modulation if living actor (do not change color of
@@ -271,8 +252,7 @@ void draw_flash_animations()
                 // otherwise just draw a blended rectangle.
                 if (flash.actor_flashed_at &&
                     does_actor_exist(flash.actor_flashed_at) &&
-                    flash.actor_flashed_at->is_alive())
-                {
+                    flash.actor_flashed_at->is_alive()) {
                         // NOTE: The alpha value doesn't seem to affect anything
                         // when using color modulation (i.e. SDL_BLENDMODE_MOD),
                         // so the color is shaded here instead (achieves a
@@ -284,8 +264,7 @@ void draw_flash_animations()
                                 flash.color.shaded(shade_pct),
                                 a);
                 }
-                else
-                {
+                else {
                         draw_rectangle_filled(
                                 flash.px_rect,
                                 flash.color,

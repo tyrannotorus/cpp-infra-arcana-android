@@ -65,8 +65,7 @@ static const std::vector<std::string> m_item_feeling_messages = {
 
 static double shock_taken_for_mon_shock_lvl(const MonShockLvl shock_lvl)
 {
-        switch (shock_lvl)
-        {
+        switch (shock_lvl) {
         case MonShockLvl::unsettling:
                 return 0.04;
                 break;
@@ -147,12 +146,10 @@ static BinaryAnswer query_continue_equip_armor()
 
         std::string msg;
 
-        if (actor::player_state::g_remove_armor_countdown > 0)
-        {
+        if (actor::player_state::g_remove_armor_countdown > 0) {
                 msg = make_continue_remove_armor_query_msg();
         }
-        else
-        {
+        else {
                 msg = make_continue_equip_armor_query_msg();
         }
 
@@ -177,28 +174,24 @@ static void interrupt_equip_armor(ForceInterruptActions is_forced)
 
         auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::burning))
-        {
+        if (player.m_properties.has(PropId::burning)) {
                 is_forced = ForceInterruptActions::yes;
         }
 
-        if (is_forced == ForceInterruptActions::no)
-        {
+        if (is_forced == ForceInterruptActions::no) {
                 const auto answer = query_continue_equip_armor();
 
                 should_continue_handling_armor = (answer == BinaryAnswer::yes);
 
                 msg_log::clear();
         }
-        else
-        {
+        else {
                 // TODO: Print message here (see MedicalBag)
 
                 should_continue_handling_armor = false;
         }
 
-        if (!should_continue_handling_armor)
-        {
+        if (!should_continue_handling_armor) {
                 actor::player_state::g_remove_armor_countdown = 0;
                 actor::player_state::g_equip_armor_countdown = 0;
                 actor::player_state::g_item_equipping = nullptr;
@@ -210,8 +203,7 @@ static void interrupt_equip_other_item(const ForceInterruptActions is_forced)
 {
         bool should_continue = true;
 
-        if (is_forced == ForceInterruptActions::no)
-        {
+        if (is_forced == ForceInterruptActions::no) {
                 // Query interruption.
 
                 const auto wpn_name =
@@ -240,8 +232,7 @@ static void interrupt_equip_other_item(const ForceInterruptActions is_forced)
 
                 msg_log::clear();
         }
-        else
-        {
+        else {
                 // Forced interruption.
 
                 // TODO: Print message here (see MedicalBag)
@@ -249,8 +240,7 @@ static void interrupt_equip_other_item(const ForceInterruptActions is_forced)
                 should_continue = false;
         }
 
-        if (!should_continue)
-        {
+        if (!should_continue) {
                 actor::player_state::g_item_equipping = nullptr;
         }
 }
@@ -258,12 +248,10 @@ static void interrupt_equip_other_item(const ForceInterruptActions is_forced)
 static void interrupt_equip(const ForceInterruptActions is_forced)
 {
         if ((actor::player_state::g_remove_armor_countdown > 0) ||
-            (actor::player_state::g_equip_armor_countdown > 0))
-        {
+            (actor::player_state::g_equip_armor_countdown > 0)) {
                 interrupt_equip_armor(is_forced);
         }
-        else if (actor::player_state::g_item_equipping)
-        {
+        else if (actor::player_state::g_item_equipping) {
                 interrupt_equip_other_item(is_forced);
         }
 }
@@ -295,8 +283,7 @@ void Actor::save() const
 
         saving::put_int((int)player_state::g_unarmed_wpn->id());
 
-        for (int i = 0; i < (int)AbilityId::END; ++i)
-        {
+        for (int i = 0; i < (int)AbilityId::END; ++i) {
                 const int v = m_data->ability_values.raw_val((AbilityId)i);
 
                 saving::put_int(v);
@@ -329,8 +316,7 @@ void Actor::load()
         player_state::g_unarmed_wpn.reset(
                 static_cast<item::Wpn*>(unarmed_item));
 
-        for (int i = 0; i < (int)AbilityId::END; ++i)
-        {
+        for (int i = 0; i < (int)AbilityId::END; ++i) {
                 const int v = saving::get_int();
 
                 m_data->ability_values.set_val((AbilityId)i, v);
@@ -349,13 +335,11 @@ int Actor::carry_weight_lmt() const
 {
         int carry_weight_mod = 0;
 
-        if (player_bon::has_trait(Trait::strong_backed))
-        {
+        if (player_bon::has_trait(Trait::strong_backed)) {
                 carry_weight_mod += 50;
         }
 
-        if (m_properties.has(PropId::weakened))
-        {
+        if (m_properties.has(PropId::weakened)) {
                 carry_weight_mod -= 15;
         }
 
@@ -366,34 +350,28 @@ int Actor::shock_resistance(const ShockSrc shock_src) const
 {
         int res = 0;
 
-        if (player_bon::has_trait(Trait::cool_headed))
-        {
+        if (player_bon::has_trait(Trait::cool_headed)) {
                 res += 20;
         }
 
-        if (player_bon::has_trait(Trait::courageous))
-        {
+        if (player_bon::has_trait(Trait::courageous)) {
                 res += 20;
         }
 
-        if (player_bon::has_trait(Trait::fearless))
-        {
+        if (player_bon::has_trait(Trait::fearless)) {
                 res += 10;
         }
 
-        switch (shock_src)
-        {
+        switch (shock_src) {
         case ShockSrc::use_strange_item:
         case ShockSrc::cast_intr_spell:
-                if (player_bon::bg() == Bg::occultist)
-                {
+                if (player_bon::bg() == Bg::occultist) {
                         res += 50;
                 }
                 break;
 
         case ShockSrc::see_mon:
-                if (player_bon::bg() == Bg::ghoul)
-                {
+                if (player_bon::bg() == Bg::ghoul) {
                         res += 50;
                 }
                 break;
@@ -418,8 +396,7 @@ double Actor::shock_taken_after_mods(
 
 void Actor::incr_shock(double shock, ShockSrc shock_src)
 {
-        if (m_properties.has(PropId::r_shock))
-        {
+        if (m_properties.has(PropId::r_shock)) {
                 // Player is shock resistant
                 return;
         }
@@ -438,8 +415,7 @@ void Actor::restore_shock(
         player_state::g_shock =
                 std::max(0.0, player_state::g_shock - amount_restored);
 
-        if (is_temp_shock_restored)
-        {
+        if (is_temp_shock_restored) {
                 player_state::g_shock_tmp = 0.0;
         }
 }
@@ -448,15 +424,13 @@ void Actor::incr_insanity()
 {
         TRACE << "Increasing insanity" << std::endl;
 
-        if (!config::is_bot_playing())
-        {
+        if (!config::is_bot_playing()) {
                 const int ins_incr = rnd::range(10, 15);
 
                 player_state::g_insanity += ins_incr;
         }
 
-        if (insanity() >= 100)
-        {
+        if (insanity() >= 100) {
                 const std::string msg =
                         "My mind can no longer withstand what it has grasped. "
                         "I am hopelessly lost.";
@@ -484,8 +458,7 @@ void Actor::incr_insanity()
 void Actor::item_feeling()
 {
         if ((player_bon::bg() != Bg::rogue) ||
-            !rnd::percent(80))
-        {
+            !rnd::percent(80)) {
                 return;
         }
 
@@ -496,14 +469,12 @@ void Actor::item_feeling()
         };
 
         const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
+        for (size_t i = 0; i < nr_positions; ++i) {
                 // Nice item on the floor, which is not seen by the player?
                 const auto* const floor_item = map::g_items.at(i);
                 const bool is_seen = map::g_seen.at(i);
 
-                if (floor_item && is_nice(*floor_item) && !is_seen)
-                {
+                if (floor_item && is_nice(*floor_item) && !is_seen) {
                         print_feeling = true;
 
                         break;
@@ -513,10 +484,8 @@ void Actor::item_feeling()
                 const auto* const terrain = map::g_terrain.at(i);
                 const auto& items = terrain->m_item_container.items();
 
-                for (const auto* const item : items)
-                {
-                        if (is_nice(*item))
-                        {
+                for (const auto* const item : items) {
+                        if (is_nice(*item)) {
                                 print_feeling = true;
 
                                 break;
@@ -524,8 +493,7 @@ void Actor::item_feeling()
                 }
         }
 
-        if (print_feeling)
-        {
+        if (print_feeling) {
                 const std::string msg =
                         rnd::element(m_item_feeling_messages);
 
@@ -545,16 +513,13 @@ void Actor::on_new_dlvl_reached()
 
         item_feeling();
 
-        for (auto& slot : m_inv.m_slots)
-        {
-                if (slot.item)
-                {
+        for (auto& slot : m_inv.m_slots) {
+                if (slot.item) {
                         slot.item->on_player_reached_new_dlvl();
                 }
         }
 
-        for (auto* const item : m_inv.m_backpack)
-        {
+        for (auto* const item : m_inv.m_backpack) {
                 item->on_player_reached_new_dlvl();
         }
 
@@ -563,19 +528,16 @@ void Actor::on_new_dlvl_reached()
 
 void Actor::mon_feeling() const
 {
-        if (player_bon::bg() != Bg::rogue)
-        {
+        if (player_bon::bg() != Bg::rogue) {
                 return;
         }
 
         bool print_unique_mon_feeling = false;
 
-        for (Actor* actor : game_time::g_actors)
-        {
+        for (Actor* actor : game_time::g_actors) {
                 if (actor::is_player(actor) ||
                     map::g_player->is_leader_of(actor) ||
-                    !actor->is_alive())
-                {
+                    !actor->is_alive()) {
                         // Not a hostile living monster
                         continue;
                 }
@@ -584,8 +546,7 @@ void Actor::mon_feeling() const
                 // (We do the actual printing once, after the loop, so that we
                 // don't print something like "A chill runs down my spine (x2)")
                 if (actor->m_data->is_unique &&
-                    actor->m_mon_aware_state.is_player_feeling_msg_allowed)
-                {
+                    actor->m_mon_aware_state.is_player_feeling_msg_allowed) {
                         print_unique_mon_feeling = true;
 
                         actor->m_mon_aware_state
@@ -593,8 +554,7 @@ void Actor::mon_feeling() const
                 }
         }
 
-        if (print_unique_mon_feeling && rnd::percent(80))
-        {
+        if (print_unique_mon_feeling && rnd::percent(80)) {
                 std::vector<std::string> msg_bucket {
                         "A chill runs down my spine.",
                         "I sense a great danger.",
@@ -602,8 +562,7 @@ void Actor::mon_feeling() const
 
                 // This message only makes sense if the player is fearful
                 if (!player_bon::has_trait(Trait::fearless) &&
-                    !m_properties.has(PropId::frenzied))
-                {
+                    !m_properties.has(PropId::frenzied)) {
                         msg_bucket.emplace_back("I feel anxious.");
                 }
 
@@ -644,35 +603,29 @@ bool Actor::is_busy_queryable_action() const
 
 void Actor::add_shock_from_seen_monsters()
 {
-        if (!m_properties.allow_see())
-        {
+        if (!m_properties.allow_see()) {
                 return;
         }
 
         double val = 0.0;
 
-        for (Actor* actor : game_time::g_actors)
-        {
+        for (Actor* actor : game_time::g_actors) {
                 if (actor::is_player(actor) ||
                     !actor->is_alive() ||
-                    (is_leader_of(actor)))
-                {
+                    (is_leader_of(actor))) {
                         continue;
                 }
 
-                if (!actor->is_player_aware_of_me())
-                {
+                if (!actor->is_player_aware_of_me()) {
                         continue;
                 }
 
                 auto shock_lvl = MonShockLvl::none;
 
-                if (can_player_see_actor(*actor))
-                {
+                if (can_player_see_actor(*actor)) {
                         shock_lvl = actor->m_data->mon_shock_lvl;
                 }
-                else if (map::g_seen.at(actor->m_pos))
-                {
+                else if (map::g_seen.at(actor->m_pos)) {
                         // Player is aware of the monster, and the map position
                         // is seen - this is an invisible monster, how spooky!
                         shock_lvl = MonShockLvl::terrifying;
@@ -704,8 +657,7 @@ double Actor::increased_tmp_chock_on_blind() const
 
 double Actor::increased_tmp_shock_from_dark() const
 {
-        if (!map::g_dark.at(m_pos) || map::g_light.at(m_pos))
-        {
+        if (!map::g_dark.at(m_pos) || map::g_light.at(m_pos)) {
                 return 0.0;
         }
 
@@ -715,8 +667,7 @@ double Actor::increased_tmp_shock_from_dark() const
                 : 20.0;
 
         // Ghoul characters take half shock from darkness.
-        if (player_bon::is_bg(Bg::ghoul))
-        {
+        if (player_bon::is_bg(Bg::ghoul)) {
                 shock /= 2.0;
         }
 
@@ -725,16 +676,14 @@ double Actor::increased_tmp_shock_from_dark() const
 
 double Actor::reduced_tmp_shock_from_light() const
 {
-        if (!map::g_light.at(m_pos))
-        {
+        if (!map::g_light.at(m_pos)) {
                 return 0.0;
         }
 
         double reduced_shock = 20.0;
 
         // Ghoul characters have halved shock reduction from light.
-        if (player_bon::is_bg(Bg::ghoul))
-        {
+        if (player_bon::is_bg(Bg::ghoul)) {
                 reduced_shock /= 2.0;
         }
 
@@ -745,8 +694,7 @@ double Actor::increased_tmp_shock_from_adjacent_terrain() const
 {
         double shock = 0.0;
 
-        for (const auto& d : dir_utils::g_dir_list_w_center)
-        {
+        for (const auto& d : dir_utils::g_dir_list_w_center) {
                 const auto p = m_pos + d;
 
                 const auto* const t = map::g_terrain.at(p);
@@ -767,21 +715,18 @@ void Actor::update_tmp_shock()
         double increased_tmp_shock = 0.0;
         double reduced_tmp_shock = 0.0;
 
-        if (insanity::has_sympt(InsSymptId::sadism))
-        {
+        if (insanity::has_sympt(InsSymptId::sadism)) {
                 increased_tmp_shock += (double)g_shock_from_obsession;
         }
 
-        if (m_properties.has(PropId::blind))
-        {
+        if (m_properties.has(PropId::blind)) {
                 // NOTE: Here we assume that blindness is the ONLY property that
                 // prevents the player from seeing, that should cause shock
                 // (fainting also prevents seeing, but should not cause shock).
 
                 increased_tmp_shock += increased_tmp_chock_on_blind();
         }
-        else if (m_properties.allow_see())
-        {
+        else if (m_properties.allow_see()) {
                 increased_tmp_shock += increased_tmp_shock_from_dark();
                 reduced_tmp_shock += reduced_tmp_shock_from_light();
 
@@ -789,8 +734,7 @@ void Actor::update_tmp_shock()
                         increased_tmp_shock_from_adjacent_terrain();
         }
 
-        if (m_properties.has(PropId::r_shock))
-        {
+        if (m_properties.has(PropId::r_shock)) {
                 // Player is shock resistant, only allow reducing shock.
                 increased_tmp_shock = 0.0;
         }
@@ -838,8 +782,7 @@ void Actor::on_log_msg_printed()
 
 void Actor::interrupt_actions(const ForceInterruptActions is_forced)
 {
-        if (player_state::g_active_medical_bag)
-        {
+        if (player_state::g_active_medical_bag) {
                 player_state::g_active_medical_bag->interrupted(is_forced);
         }
 
@@ -855,8 +798,7 @@ void Actor::auto_melee()
         if (player_state::g_target &&
             player_state::g_target->is_alive() &&
             is_pos_adj(m_pos, player_state::g_target->m_pos, false) &&
-            can_player_see_actor(*player_state::g_target))
-        {
+            can_player_see_actor(*player_state::g_target)) {
                 const P delta = player_state::g_target->m_pos - m_pos;
                 const Dir dir = dir_utils::dir(delta);
 
@@ -867,14 +809,12 @@ void Actor::auto_melee()
 
         // If this line reached, there is no adjacent current target.
 
-        for (const auto& d : dir_utils::g_dir_list)
-        {
+        for (const auto& d : dir_utils::g_dir_list) {
                 auto* const actor = map::living_actor_at(m_pos + d);
 
                 if (actor &&
                     !is_leader_of(actor) &&
-                    can_player_see_actor(*actor))
-                {
+                    can_player_see_actor(*actor)) {
                         player_state::g_target = actor;
 
                         do_move_action(*this, dir_utils::dir(d));
@@ -901,14 +841,12 @@ void Actor::kick_mon(Actor& defender)
              (d.id == Id::mind_worm) ||
              (d.id == Id::crawling_intestines) ||
              (d.id == Id::crawling_hand) ||
-             (d.id == Id::thing)))
-        {
+             (d.id == Id::thing))) {
                 kick_wpn =
                         static_cast<item::Wpn*>(
                                 item::make(item::Id::player_stomp));
         }
-        else
-        {
+        else {
                 kick_wpn =
                         static_cast<item::Wpn*>(
                                 item::make(item::Id::player_kick));
@@ -942,8 +880,7 @@ void Actor::update_fov()
 {
         const size_t nr_map_positions = map::nr_positions();
 
-        for (size_t i = 0; i < nr_map_positions; ++i)
-        {
+        for (size_t i = 0; i < nr_map_positions; ++i) {
                 map::g_seen.at(i) = false;
 
                 auto& los = map::g_los.at(i);
@@ -955,8 +892,7 @@ void Actor::update_fov()
 
         Array2<bool> blocked_los(map::dims());
 
-        if (m_properties.allow_see())
-        {
+        if (m_properties.allow_see()) {
                 const auto fov_lmt = fov::fov_rect(m_pos, map::dims());
 
                 map_parsers::BlocksLos()
@@ -969,10 +905,8 @@ void Actor::update_fov()
 
                 const auto fov_result = fov::run(m_pos, fov_map);
 
-                for (int x = fov_lmt.p0.x; x <= fov_lmt.p1.x; ++x)
-                {
-                        for (int y = fov_lmt.p0.y; y <= fov_lmt.p1.y; ++y)
-                        {
+                for (int x = fov_lmt.p0.x; x <= fov_lmt.p1.x; ++x) {
+                        for (int y = fov_lmt.p0.y; y <= fov_lmt.p1.y; ++y) {
                                 const auto& los_result = fov_result.at(x, y);
 
                                 auto& los_to_update = map::g_los.at(x, y);
@@ -989,8 +923,7 @@ void Actor::update_fov()
                                 // darkness (i.e. not by a wall or other
                                 // blocking terrain), it should NOT be lit
                                 if (!los_result.is_blocked_hard &&
-                                    los_result.is_blocked_by_dark)
-                                {
+                                    los_result.is_blocked_by_dark) {
                                         ASSERT(!map::g_light.at(x, y));
                                 }
 #endif  // NDEBUG
@@ -1004,8 +937,7 @@ void Actor::update_fov()
         map::g_seen.at(m_pos) = true;
 
         // Cheat vision
-        if (init::g_is_cheat_vision_enabled)
-        {
+        if (init::g_is_cheat_vision_enabled) {
                 Array2<bool> blocked_projectiles(map::dims());
 
                 // Show all cells adjacent to cells which can be shot through or
@@ -1019,8 +951,7 @@ void Actor::update_fov()
                                 blocked_projectiles.rect(),
                                 MapParseMode::append);
 
-                for (auto& reveal_cell : blocked_projectiles)
-                {
+                for (auto& reveal_cell : blocked_projectiles) {
                         reveal_cell = !reveal_cell;
                 }
 
@@ -1029,10 +960,8 @@ void Actor::update_fov()
                                 blocked_projectiles,
                                 blocked_projectiles.rect());
 
-                for (size_t i = 0; i < nr_map_positions; ++i)
-                {
-                        if (reveal_expanded.at(i))
-                        {
+                for (size_t i = 0; i < nr_map_positions; ++i) {
+                        if (reveal_expanded.at(i)) {
                                 map::g_seen.at(i) = true;
                         }
                 }
@@ -1053,14 +982,11 @@ void Actor::fov_hack() const
         const int w = blocked.w();
         const int h = blocked.h();
 
-        for (int x = 0; x < w; ++x)
-        {
-                for (int y = 0; y < h; ++y)
-                {
+        for (int x = 0; x < w; ++x) {
+                for (int y = 0; y < h; ++y) {
                         const P p(x, y);
 
-                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p))
-                        {
+                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
                                 blocked.at(p) = false;
                         }
                 }
@@ -1068,25 +994,20 @@ void Actor::fov_hack() const
 
         const bool has_darkvision = m_properties.has(PropId::darkvision);
 
-        for (int x = 0; x < w; ++x)
-        {
-                for (int y = 0; y < h; ++y)
-                {
+        for (int x = 0; x < w; ++x) {
+                for (int y = 0; y < h; ++y) {
                         if (!map::g_terrain_blocks_los.at(x, y) ||
-                            !blocked.at(x, y))
-                        {
+                            !blocked.at(x, y)) {
                                 continue;
                         }
 
                         const P p(x, y);
 
-                        for (const auto& d : dir_utils::g_dir_list)
-                        {
+                        for (const auto& d : dir_utils::g_dir_list) {
                                 const auto p_adj = p + d;
 
                                 if (!map::is_pos_inside_map(p_adj) ||
-                                    !map::g_seen.at(p_adj))
-                                {
+                                    !map::g_seen.at(p_adj)) {
                                         continue;
                                 }
 
@@ -1096,8 +1017,7 @@ void Actor::fov_hack() const
                                          has_darkvision) &&
                                         !blocked.at(p_adj);
 
-                                if (!allow_explore)
-                                {
+                                if (!allow_explore) {
                                         continue;
                                 }
 
@@ -1115,8 +1035,7 @@ void Actor::update_mon_awareness() const
 {
         const auto my_seen_actors = seen_actors(*this);
 
-        for (auto* const actor : my_seen_actors)
-        {
+        for (auto* const actor : my_seen_actors) {
                 actor->make_player_aware_of_me();
         }
 }

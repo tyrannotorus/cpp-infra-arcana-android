@@ -28,8 +28,7 @@ namespace item
 // -----------------------------------------------------------------------------
 void ZombieDust::on_ranged_hit(actor::Actor& actor_hit)
 {
-        if (actor_hit.is_alive() && !actor_hit.m_data->is_undead)
-        {
+        if (actor_hit.is_alive() && !actor_hit.m_data->is_undead) {
                 actor_hit.m_properties.apply(
                         property_factory::make(PropId::paralyzed));
         }
@@ -61,14 +60,12 @@ ConsumeItem WitchEye::activate(actor::Actor* actor)
 
         map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
-        if (rnd::one_in(3))
-        {
+        if (rnd::one_in(3)) {
                 msg_log::add("The eye decomposes.");
 
                 return ConsumeItem::yes;
         }
-        else
-        {
+        else {
                 return ConsumeItem::no;
         }
 }

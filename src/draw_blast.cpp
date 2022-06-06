@@ -39,10 +39,8 @@ void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
 
         states::draw();
 
-        for (const P& pos : positions)
-        {
-                if (!viewport::is_in_view(pos))
-                {
+        for (const P& pos : positions) {
+                if (!viewport::is_in_view(pos)) {
                         continue;
                 }
 
@@ -59,10 +57,8 @@ void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
 
         io::sleep(config::delay_explosion() / 2);
 
-        for (const P& pos : positions)
-        {
-                if (!viewport::is_in_view(pos))
-                {
+        for (const P& pos : positions) {
+                if (!viewport::is_in_view(pos)) {
                         continue;
                 }
 
@@ -93,16 +89,13 @@ void draw_blast_at_seen_cells(
 
         std::vector<P> positions_with_vision;
 
-        for (const P& p : positions)
-        {
-                if (map::g_seen.at(p))
-                {
+        for (const P& p : positions) {
+                if (map::g_seen.at(p)) {
                         positions_with_vision.push_back(p);
                 }
         }
 
-        if (!positions_with_vision.empty())
-        {
+        if (!positions_with_vision.empty()) {
                 draw_blast_at_cells(positions_with_vision, color);
         }
 }
@@ -120,8 +113,7 @@ void draw_blast_at_seen_actors(
 
         positions.reserve(actors.size());
 
-        for (auto* const actor : actors)
-        {
+        for (auto* const actor : actors) {
                 positions.push_back(actor->m_pos);
         }
 

@@ -56,8 +56,7 @@ void PostmortemInfo::draw()
 
         for (int i = m_top_idx;
              (i < nr_lines) && ((i - m_top_idx) < panel_h);
-             ++i)
-        {
+             ++i) {
                 const auto& line = m_lines[i];
 
                 io::draw_text(
@@ -80,39 +79,30 @@ void PostmortemInfo::update()
 
         const auto input = io::read_input();
 
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_DOWN:
-        case SDLK_KP_2:
-        {
+        case SDLK_KP_2: {
                 m_top_idx += line_jump;
 
                 const int panel_h = panels::h(Panel::info_screen_content);
 
-                if (nr_lines <= panel_h)
-                {
+                if (nr_lines <= panel_h) {
                         m_top_idx = 0;
                 }
-                else
-                {
+                else {
                         m_top_idx = std::min(nr_lines - panel_h, m_top_idx);
                 }
-        }
-        break;
+        } break;
 
         case SDLK_UP:
-        case SDLK_KP_8:
-        {
+        case SDLK_KP_8: {
                 m_top_idx = std::max(0, m_top_idx - line_jump);
-        }
-        break;
+        } break;
 
         case SDLK_SPACE:
-        case SDLK_ESCAPE:
-        {
+        case SDLK_ESCAPE: {
                 // Exit screen
                 states::pop();
-        }
-        break;
+        } break;
         }
 }

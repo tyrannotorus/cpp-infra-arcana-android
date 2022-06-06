@@ -70,12 +70,10 @@ static std::vector<P> get_free_positions_around_pos(
 {
         std::vector<P> free_positions;
 
-        for (const P& d : dir_utils::g_dir_list)
-        {
+        for (const P& d : dir_utils::g_dir_list) {
                 const P adj_p(p + d);
 
-                if (!blocked.at(adj_p))
-                {
+                if (!blocked.at(adj_p)) {
                         free_positions.push_back(adj_p);
                 }
         }
@@ -85,10 +83,8 @@ static std::vector<P> get_free_positions_around_pos(
 
 static void make_all_mon_not_seeing_player_unaware()
 {
-        for (auto* const mon : game_time::g_actors)
-        {
-                if (actor::is_player(mon))
-                {
+        for (auto* const mon : game_time::g_actors) {
+                if (actor::is_player(mon)) {
                         continue;
                 }
 
@@ -98,8 +94,7 @@ static void make_all_mon_not_seeing_player_unaware()
                                 *map::g_player,
                                 map::g_terrain_blocks_los);
 
-                if (!can_mon_see_player)
-                {
+                if (!can_mon_see_player) {
                         mon->m_mon_aware_state.aware_counter = 0;
                 }
         }
@@ -118,20 +113,16 @@ static void confuse_player()
 
 static bool should_player_ctrl_tele(const ShouldCtrlTele ctrl_tele)
 {
-        switch (ctrl_tele)
-        {
-        case ShouldCtrlTele::always:
-        {
+        switch (ctrl_tele) {
+        case ShouldCtrlTele::always: {
                 return true;
         }
 
-        case ShouldCtrlTele::never:
-        {
+        case ShouldCtrlTele::never: {
                 return false;
         }
 
-        case ShouldCtrlTele::if_tele_ctrl_prop:
-        {
+        case ShouldCtrlTele::if_tele_ctrl_prop: {
                 const bool has_tele_ctrl =
                         map::g_player->m_properties.has(PropId::tele_ctrl);
 
@@ -153,8 +144,7 @@ static void filter_out_near(const P& origin, std::vector<P>& positions)
         // highest possible minimum distance
         int furthest_dist = 0;
 
-        for (const auto& p : positions)
-        {
+        for (const auto& p : positions) {
                 const int d = king_dist(origin, p);
 
                 furthest_dist = std::max(d, furthest_dist);
@@ -169,18 +159,15 @@ static void filter_out_near(const P& origin, std::vector<P>& positions)
         }
 
         // Remove all positions close than the minimum distance
-        for (auto it = std::begin(positions); it != std::end(positions);)
-        {
+        for (auto it = std::begin(positions); it != std::end(positions);) {
                 const auto p = *it;
 
                 const int d = king_dist(origin, p);
 
-                if (d < min_dist)
-                {
+                if (d < min_dist) {
                         positions.erase(it);
                 }
-                else
-                {
+                else {
                         ++it;
                 }
         }
@@ -203,12 +190,10 @@ void teleport(
 
         // Allow teleporting past non-metal doors for the player, and past any
         // door for monsters
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
+        for (size_t i = 0; i < nr_positions; ++i) {
                 const auto* const r = map::g_terrain.at(i);
 
-                if (r->id() != terrain::Id::door)
-                {
+                if (r->id() != terrain::Id::door) {
                         // Not a door
                         continue;
                 }
@@ -216,8 +201,7 @@ void teleport(
                 const auto* const door = static_cast<const terrain::Door*>(r);
 
                 if ((door->type() == terrain::DoorType::metal) &&
-                    actor::is_player(&actor))
-                {
+                    actor::is_player(&actor)) {
                         // Metal door, player teleporting - keep it blocked
                         continue;
                 }
@@ -226,10 +210,8 @@ void teleport(
         }
 
         // Allow teleporting past Force Fields, since they are temporary
-        for (const auto* const mob : game_time::g_mobs)
-        {
-                if (mob->id() == terrain::Id::force_field)
-                {
+        for (const auto* const mob : game_time::g_mobs) {
+                if (mob->id() == terrain::Id::force_field) {
                         blocked.at(mob->pos()) = false;
                 }
         }
@@ -238,20 +220,16 @@ void teleport(
         // unreached or too far away.
         const auto flood = floodfill(actor.m_pos, blocked);
 
-        for (const auto p : map::rect().positions())
-        {
-                if (flood.at(p) <= 0)
-                {
+        for (const auto p : map::rect().positions()) {
+                if (flood.at(p) <= 0) {
                         // Unreached.
                         blocked.at(p) = true;
                 }
 
-                if (max_dist > 0)
-                {
+                if (max_dist > 0) {
                         const int dist = king_dist(actor.m_pos, p);
 
-                        if (dist > max_dist)
-                        {
+                        if (dist > max_dist) {
                                 // Too far away.
                                 blocked.at(p) = true;
                         }
@@ -266,19 +244,15 @@ void teleport(
         const auto blocked_for_actor =
                 map::get_blocked_map_info_for_actor(actor);
 
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
+        for (size_t i = 0; i < nr_positions; ++i) {
                 if (blocked_for_actor.at(i) ||
-                    map::g_terrain_blocks_walking.at(i))
-                {
+                    map::g_terrain_blocks_walking.at(i)) {
                         blocked.at(i) = true;
                 }
         }
 
-        for (const auto* const actor_found : game_time::g_actors)
-        {
-                if (actor_found->is_alive())
-                {
+        for (const auto* const actor_found : game_time::g_actors) {
+                if (actor_found->is_alive()) {
                         blocked.at(actor_found->m_pos) = true;
                 }
         }
@@ -286,8 +260,7 @@ void teleport(
         blocked.at(actor.m_pos) = false;
 
         // Teleport control?
-        if (actor::is_player(&actor) && should_player_ctrl_tele(ctrl_tele))
-        {
+        if (actor::is_player(&actor) && should_player_ctrl_tele(ctrl_tele)) {
                 auto tele_ctrl_state =
                         std::make_unique<CtrlTele>(
                                 actor.m_pos,
@@ -308,8 +281,7 @@ void teleport(
 
         filter_out_near(actor.m_pos, pos_bucket);
 
-        if (pos_bucket.empty())
-        {
+        if (pos_bucket.empty()) {
                 return;
         }
 
@@ -323,8 +295,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         const bool player_can_see_actor_before =
                 actor::can_player_see_actor(actor);
 
-        if (!actor::is_player(&actor))
-        {
+        if (!actor::is_player(&actor)) {
                 actor.m_mon_aware_state.player_aware_of_me_counter = 0;
         }
 
@@ -332,8 +303,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                 PropId::entangled,
                 PropId::nailed};
 
-        for (const auto id : props_ended)
-        {
+        for (const auto id : props_ended) {
                 const PropEndConfig cfg(
                         PropEndAllowCallEndHook::no,
                         PropEndAllowMsg::no,
@@ -346,13 +316,10 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         // the player to them
         bool is_affected_by_void_traveler = false;
 
-        if (actor::is_player(&actor))
-        {
-                for (auto* const other_actor : game_time::g_actors)
-                {
+        if (actor::is_player(&actor)) {
+                for (auto* const other_actor : game_time::g_actors) {
                         if (!is_void_traveler_affecting_player_teleport(
-                                    *other_actor))
-                        {
+                                    *other_actor)) {
                                 continue;
                         }
 
@@ -361,8 +328,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                                         other_actor->m_pos,
                                         blocked);
 
-                        if (p_bucket.empty())
-                        {
+                        if (p_bucket.empty()) {
                                 continue;
                         }
 
@@ -393,8 +359,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         // Update actor position to new position
         actor::set_position(actor, p);
 
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 viewport::show(
                         map::g_player->m_pos,
                         viewport::ForceCentering::yes);
@@ -402,19 +367,16 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         map::update_vision();
 
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 actor.update_tmp_shock();
 
                 make_all_mon_not_seeing_player_unaware();
         }
-        else if (player_can_see_actor_before)
-        {
+        else if (player_can_see_actor_before) {
                 const bool player_can_see_actor =
                         actor::can_player_see_actor(actor);
 
-                if (!player_can_see_actor)
-                {
+                if (!player_can_see_actor) {
                         actor.m_mon_aware_state.player_aware_of_me_counter = 0;
                 }
 
@@ -439,8 +401,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         if (actor::is_player(&actor) &&
             (!has_tele_ctrl ||
              is_confused ||
-             is_affected_by_void_traveler))
-        {
+             is_affected_by_void_traveler)) {
                 confuse_player();
         }
 

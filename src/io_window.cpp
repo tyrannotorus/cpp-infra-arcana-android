@@ -24,8 +24,7 @@ static P get_sdl_native_resolution()
 
         const auto result = SDL_GetDesktopDisplayMode(0, &display_mode);
 
-        if (result != 0)
-        {
+        if (result != 0) {
                 TRACE_ERROR_RELEASE
                         << "Failed to read native resolution"
                         << std::endl
@@ -56,8 +55,7 @@ static std::string make_window_title()
         const auto git_sha1_result =
                 version_info::read_git_sha1_str_from_file();
 
-        if (git_sha1_result)
-        {
+        if (git_sha1_result) {
                 title += " (" + git_sha1_result.value() + ")";
         }
 
@@ -66,12 +64,10 @@ static std::string make_window_title()
 
 static uint32_t get_sdl_window_flags(const IsFullscreen is_fullscreen)
 {
-        if (is_fullscreen == IsFullscreen::no)
-        {
+        if (is_fullscreen == IsFullscreen::no) {
                 return SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
         }
-        else
-        {
+        else {
                 return SDL_WINDOW_FULLSCREEN_DESKTOP;
         }
 }
@@ -100,8 +96,7 @@ static SDL_Window* create_sdl_window(
                         px_dims.y,
                         sdl_window_flags);
 
-        if (!window)
-        {
+        if (!window) {
                 TRACE << "Failed to create window: "
                       << std::endl
                       << SDL_GetError()
@@ -174,8 +169,7 @@ static SDL_Window* init_window_fullscreen()
 
         auto window_size = native_resolution;
 
-        if (config::is_2x_scale_enabled())
-        {
+        if (config::is_2x_scale_enabled()) {
                 window_size = window_size.scaled_down(2);
         }
 
@@ -229,8 +223,7 @@ SDL_Renderer* g_sdl_renderer = nullptr;
 
 void init_window()
 {
-        if (g_sdl_window)
-        {
+        if (g_sdl_window) {
                 SDL_DestroyWindow(g_sdl_window);
 
                 g_sdl_window = nullptr;
@@ -243,12 +236,10 @@ void init_window()
               << native_resolution.y
               << std::endl;
 
-        if (config::is_fullscreen())
-        {
+        if (config::is_fullscreen()) {
                 g_sdl_window = init_window_fullscreen();
 
-                if (!g_sdl_window)
-                {
+                if (!g_sdl_window) {
                         // Fullscreen failed, do windowed mode instead.
                         config::set_fullscreen(false);
                 }
@@ -257,13 +248,11 @@ void init_window()
         // NOTE: Fullscreen may have been disabled while attempting to set up a
         // fullscreen window (see above), so we check again here if fullscreen
         // is enabled.
-        if (!config::is_fullscreen())
-        {
+        if (!config::is_fullscreen()) {
                 g_sdl_window = init_window_windowed();
         }
 
-        if (!g_sdl_window)
-        {
+        if (!g_sdl_window) {
                 TRACE_ERROR_RELEASE
                         << "Failed to set up window"
                         << std::endl

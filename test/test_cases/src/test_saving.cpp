@@ -71,19 +71,16 @@ TEST_CASE("Saving and loading the game")
                 auto& inv = map::g_player->m_inv;
 
                 // First, remove all present items to get a clean state
-                for (auto* item : inv.m_backpack)
-                {
+                for (auto* item : inv.m_backpack) {
                         delete item;
                 }
 
                 inv.m_backpack.clear();
 
-                for (size_t i = 0; i < (size_t)SlotId::END; ++i)
-                {
+                for (size_t i = 0; i < (size_t)SlotId::END; ++i) {
                         auto& slot = inv.m_slots[i];
 
-                        if (slot.item)
-                        {
+                        if (slot.item) {
                                 delete slot.item;
                                 slot.item = nullptr;
                         }
@@ -153,13 +150,11 @@ TEST_CASE("Saving and loading the game")
 
                 inv.put_in_backpack(item);
 
-                for (int i = 0; i < 10; ++i)
-                {
+                for (int i = 0; i < 10; ++i) {
                         item->current_curse().on_player_reached_new_dlvl();
                 }
 
-                for (int i = 0; i < 5000; ++i)
-                {
+                for (int i = 0; i < 5000; ++i) {
                         item->current_curse().on_new_turn(*item);
                 }
 
@@ -319,15 +314,11 @@ TEST_CASE("Saving and loading the game")
                 bool is_horn_of_banishment_found = false;
                 bool is_shadow_dagger_found = false;
 
-                for (auto* item : inv.m_backpack)
-                {
-                        switch (item->id())
-                        {
-                        case item::Id::pistol_mag:
-                        {
+                for (auto* item : inv.m_backpack) {
+                        switch (item->id()) {
+                        case item::Id::pistol_mag: {
                                 switch (static_cast<item::AmmoMag*>(item)
-                                                ->m_ammo)
-                                {
+                                                ->m_ammo) {
                                 case 1:
                                         ++nr_mag_with_1;
                                         break;
@@ -343,11 +334,9 @@ TEST_CASE("Saving and loading the game")
                                 default:
                                         break;
                                 }
-                        }
-                        break;
+                        } break;
 
-                        case item::Id::device_blaster:
-                        {
+                        case item::Id::device_blaster: {
                                 is_sentry_device_found = true;
 
                                 const auto* const device =
@@ -355,11 +344,9 @@ TEST_CASE("Saving and loading the game")
                                                 item);
 
                                 REQUIRE(device->condition == Condition::shoddy);
-                        }
-                        break;
+                        } break;
 
-                        case item::Id::lantern:
-                        {
+                        case item::Id::lantern: {
                                 is_lantern_found = true;
 
                                 const auto* const lantern =
@@ -367,11 +354,9 @@ TEST_CASE("Saving and loading the game")
 
                                 REQUIRE(lantern->nr_turns_left() == 147);
                                 REQUIRE(lantern->is_activated());
-                        }
-                        break;
+                        } break;
 
-                        case item::Id::horn_of_malice:
-                        {
+                        case item::Id::horn_of_malice: {
                                 is_horn_of_malice_found = true;
 
                                 REQUIRE(
@@ -380,11 +365,9 @@ TEST_CASE("Saving and loading the game")
                                 REQUIRE(
                                         item->current_curse().id() ==
                                         item_curse::Id::cannot_read);
-                        }
-                        break;
+                        } break;
 
-                        case item::Id::horn_of_banishment:
-                        {
+                        case item::Id::horn_of_banishment: {
                                 is_horn_of_banishment_found = true;
 
                                 REQUIRE(
@@ -393,11 +376,9 @@ TEST_CASE("Saving and loading the game")
                                 REQUIRE(
                                         item->current_curse().id() ==
                                         item_curse::Id::hit_chance_penalty);
-                        }
-                        break;
+                        } break;
 
-                        case item::Id::shadow_dagger:
-                        {
+                        case item::Id::shadow_dagger: {
                                 is_shadow_dagger_found = true;
 
                                 REQUIRE(
@@ -406,14 +387,12 @@ TEST_CASE("Saving and loading the game")
                                 REQUIRE(
                                         item->current_curse().id() ==
                                         item_curse::Id::END);
-                        }
-                        break;
+                        } break;
 
                         default:
                         {
                                 ASSERT(false);
-                        }
-                        break;
+                        } break;
                         }
                 }
 

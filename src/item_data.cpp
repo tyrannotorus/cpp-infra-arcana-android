@@ -76,8 +76,7 @@ static void mod_spawn_chance(item::ItemData& data, const double factor)
 // Item archetypes (defaults)
 static void reset_data(item::ItemData& d, ItemType const item_type)
 {
-        switch (item_type)
-        {
+        switch (item_type) {
         case ItemType::general:
                 d = {};
                 break;
@@ -2211,8 +2210,7 @@ void cleanup()
 {
         TRACE_FUNC_BEGIN;
 
-        for (size_t i = 0; i < (size_t)Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Id::END; ++i) {
                 ItemData& d = g_data[i];
 
                 d.melee.prop_applied = ItemAttackProp();
@@ -2225,8 +2223,7 @@ void cleanup()
 
 void save()
 {
-        for (size_t i = 0; i < (size_t)Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Id::END; ++i) {
                 const ItemData& d = g_data[i];
 
                 saving::put_bool(d.is_identified);
@@ -2241,8 +2238,7 @@ void save()
 
 void load()
 {
-        for (size_t i = 0; i < (size_t)Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Id::END; ++i) {
                 ItemData& d = g_data[i];
 
                 d.is_identified = saving::get_bool();
@@ -2346,8 +2342,7 @@ ItemData::ItemData() :
         ranged(RangedData()),
         armor(ArmorData())
 {
-        for (size_t i = 0; i < (size_t)AbilityId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)AbilityId::END; ++i) {
                 ability_mods_while_equipped[i] = 0;
         }
 

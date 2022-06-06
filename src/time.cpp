@@ -29,28 +29,23 @@ std::string TimeData::time_str(
         const std::string second_str =
                 (second < 10 ? "0" : "") + std::to_string(second);
 
-        if (lowest >= TimeType::month)
-        {
+        if (lowest >= TimeType::month) {
                 ret += "-" + month_str;
         }
 
-        if (lowest >= TimeType::day)
-        {
+        if (lowest >= TimeType::day) {
                 ret += "-" + day_str;
         }
 
-        if (lowest >= TimeType::hour)
-        {
+        if (lowest >= TimeType::hour) {
                 ret += (add_separators ? " " : "_") + hour_str;
         }
 
-        if (lowest >= TimeType::minute)
-        {
+        if (lowest >= TimeType::minute) {
                 ret += (add_separators ? ":" : "-") + minute_str;
         }
 
-        if (lowest >= TimeType::second)
-        {
+        if (lowest >= TimeType::second) {
                 ret += (add_separators ? ":" : "-") + second_str;
         }
 

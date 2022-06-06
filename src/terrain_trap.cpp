@@ -68,8 +68,7 @@ bool Trap::try_init_type(const TrapId id)
 
         auto* const terrain_here = map::g_terrain.at(m_pos);
 
-        if (!terrain_here->can_have_trap())
-        {
+        if (!terrain_here->can_have_trap()) {
                 TRACE << "Cannot place trap on terrain id: "
                       << (int)terrain_here->id()
                       << std::endl
@@ -86,37 +85,31 @@ bool Trap::try_init_type(const TrapId id)
 
                 auto valid = impl->on_place();
 
-                if (valid == TrapPlacementValid::yes)
-                {
+                if (valid == TrapPlacementValid::yes) {
                         m_trap_impl = impl;
                 }
-                else
-                {
+                else {
                         // Placement not valid
                         delete impl;
                 }
         };
 
-        if (id == TrapId::any)
-        {
+        if (id == TrapId::any) {
                 // Attempt to set a trap implementation until succeeding
-                while (true)
-                {
+                while (true) {
                         const int last = (int)TrapId::END - 1;
 
                         const auto random_id = (TrapId)rnd::range(0, last);
 
                         try_make_impl(random_id);
 
-                        if (m_trap_impl)
-                        {
+                        if (m_trap_impl) {
                                 // Trap placement is good!
                                 break;
                         }
                 }
         }
-        else
-        {
+        else {
                 // Make a specific trap type
 
                 // NOTE: This may fail, in which case we have no trap
@@ -130,8 +123,7 @@ bool Trap::try_init_type(const TrapId id)
 
 TrapImpl* Trap::make_trap_impl_from_id(const TrapId trap_id)
 {
-        switch (trap_id)
-        {
+        switch (trap_id) {
         case TrapId::dart:
                 return new TrapDart(m_pos, this);
                 break;
@@ -240,15 +232,13 @@ bool Trap::is_magical() const
 
 void Trap::on_new_turn_hook()
 {
-        if (m_nr_turns_until_trigger > 0)
-        {
+        if (m_nr_turns_until_trigger > 0) {
                 --m_nr_turns_until_trigger;
 
                 TRACE_VERBOSE << "Number of turns until trigger: "
                               << m_nr_turns_until_trigger << std::endl;
 
-                if (m_nr_turns_until_trigger == 0)
-                {
+                if (m_nr_turns_until_trigger == 0) {
                         // NOTE: This will reset number of turns until triggered
                         trigger_trap(nullptr);
                 }
@@ -261,11 +251,9 @@ void Trap::trigger_start(const actor::Actor* actor)
 
         ASSERT(m_trap_impl);
 
-        if (actor::is_player(actor))
-        {
+        if (actor::is_player(actor)) {
                 // Reveal trap if triggered by player stepping on it
-                if (is_hidden())
-                {
+                if (is_hidden()) {
                         reveal(PrintRevealMsg::no);
                 }
 
@@ -274,19 +262,16 @@ void Trap::trigger_start(const actor::Actor* actor)
                 states::draw();
         }
 
-        if (is_magical())
-        {
+        if (is_magical()) {
                 // TODO: Play sfx for magic traps (if player)
         }
-        else if (type() != TrapId::web)
-        {
+        else if (type() != TrapId::web) {
                 // Not magical, not spider web
                 std::string msg = "I hear a click.";
 
                 auto alerts = AlertsMon::no;
 
-                if (actor::is_player(actor))
-                {
+                if (actor::is_player(actor)) {
                         alerts = AlertsMon::yes;
 
                         // If player triggering, use more foreboding message
@@ -304,14 +289,12 @@ void Trap::trigger_start(const actor::Actor* actor)
 
                 snd.run();
 
-                if (actor::is_player(actor))
-                {
+                if (actor::is_player(actor)) {
                         const bool is_deaf =
                                 map::g_player->m_properties.has(
                                         PropId::deaf);
 
-                        if (is_deaf)
-                        {
+                        if (is_deaf) {
                                 msg_log::add(
                                         "I feel the ground shifting "
                                         "slightly under my foot.");
@@ -329,16 +312,14 @@ void Trap::trigger_start(const actor::Actor* actor)
         // Set number of remaining turns to the randomized value if not set
         // already, or if the new value will make it trigger sooner
         if ((m_nr_turns_until_trigger == -1) ||
-            (rnd_nr_turns < m_nr_turns_until_trigger))
-        {
+            (rnd_nr_turns < m_nr_turns_until_trigger)) {
                 m_nr_turns_until_trigger = rnd_nr_turns;
         }
 
         ASSERT(m_nr_turns_until_trigger >= 0);
 
         // If number of remaining turns is zero, trigger immediately
-        if (m_nr_turns_until_trigger == 0)
-        {
+        if (m_nr_turns_until_trigger == 0) {
                 // NOTE: This will reset number of turns until triggered
                 trigger_trap(nullptr);
         }
@@ -349,8 +330,7 @@ void Trap::trigger_start(const actor::Actor* actor)
 AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
 {
         if (!actor::is_player(&actor_bumping) ||
-            actor_bumping.m_properties.has(PropId::confused))
-        {
+            actor_bumping.m_properties.has(PropId::confused)) {
                 return AllowAction::yes;
         }
 
@@ -360,8 +340,7 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
             !m_is_hidden &&
             !props.has(PropId::ethereal) &&
             !props.has(PropId::flying) &&
-            !props.has(PropId::tiny_flying))
-        {
+            !props.has(PropId::tiny_flying)) {
                 // The trap is known, and will be triggered by the player
 
                 const std::string name_the = name(Article::the);
@@ -388,8 +367,7 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
                                 ? AllowAction::no
                                 : AllowAction::yes);
         }
-        else
-        {
+        else {
                 // The trap is unknown, or will not be triggered by the player -
                 // delegate the question to the mimicked terrain
 
@@ -411,22 +389,19 @@ void Trap::bump(actor::Actor& actor_bumping)
             props.has(PropId::flying) ||
             props.has(PropId::tiny_flying) ||
             (d.actor_size < actor::Size::humanoid) ||
-            d.is_spider)
-        {
+            d.is_spider) {
                 TRACE_FUNC_END_VERBOSE;
 
                 return;
         }
 
-        if (!actor::is_player(&actor_bumping))
-        {
+        if (!actor::is_player(&actor_bumping)) {
                 // Put some extra restrictions on monsters triggering traps.
                 // This helps prevent stupid situations like a group of monsters
                 // in a small room repeatedly triggering a trap.
                 if (!actor_bumping.m_ai_state.is_target_seen ||
                     !actor_bumping.is_aware_of_player() ||
-                    is_hidden())
-                {
+                    is_hidden()) {
                         TRACE_FUNC_END_VERBOSE;
 
                         return;
@@ -442,8 +417,7 @@ void Trap::disarm()
 {
         const bool is_magic_trap = is_magical();
 
-        if (is_magic_trap && (player_bon::bg() != Bg::occultist))
-        {
+        if (is_magic_trap && (player_bon::bg() != Bg::occultist)) {
                 msg_log::add("I do not know how to dispel magic traps.");
 
                 return;
@@ -453,8 +427,7 @@ void Trap::disarm()
 
         destroy();
 
-        if (is_magic_trap)
-        {
+        if (is_magic_trap) {
                 map::g_player->restore_sp(
                         rnd::range(1, 6),
                         true);  // Can go above max
@@ -468,8 +441,7 @@ void Trap::destroy()
         // Magical traps and webs simply "dissapear" (place their mimic
         // terrain), and mechanical traps puts rubble.
 
-        if (is_magical() || type() == TrapId::web)
-        {
+        if (is_magical() || type() == TrapId::web) {
                 auto* const f_tmp = m_mimic_terrain;
 
                 m_mimic_terrain = nullptr;
@@ -477,8 +449,7 @@ void Trap::destroy()
                 // NOTE: This call destroys the object!
                 map::update_terrain(f_tmp);
         }
-        else
-        {
+        else {
                 // "Mechanical" trap
                 map::update_terrain(
                         terrain::make(terrain::Id::rubble_low, m_pos));
@@ -522,20 +493,17 @@ void Trap::reveal(const PrintRevealMsg print_reveal_msg)
                  map::g_seen.at(m_pos)) ||
                 (print_reveal_msg == PrintRevealMsg::yes);
 
-        if (is_hidden_before && allow_print)
-        {
+        if (is_hidden_before && allow_print) {
                 states::draw();
 
                 std::string msg;
 
                 const std::string trap_name_a = m_trap_impl->name(Article::a);
 
-                if (m_pos == map::g_player->m_pos)
-                {
+                if (m_pos == map::g_player->m_pos) {
                         msg = "There is " + trap_name_a + " here!";
                 }
-                else
-                {
+                else {
                         // Trap is not at player position
                         msg = "I spot " + trap_name_a + ".";
                 }
@@ -570,12 +538,10 @@ Color Trap::color_bg_default() const
         const auto* const item = map::g_items.at(m_pos);
         const auto* const corpse = map::first_corpse_at(m_pos);
 
-        if (!m_is_hidden && (item || corpse))
-        {
+        if (!m_is_hidden && (item || corpse)) {
                 return m_trap_impl->color();
         }
-        else
-        {
+        else {
                 // Is hidden, or nothing is over the trap
                 return colors::black();
         }
@@ -605,14 +571,12 @@ TrapPlacementValid MagicTrapImpl::on_place()
 {
         // Do not allow placing magic traps next to blocking terrains
         // (non-Occultist characters cannot disarm them)
-        for (const P& d : dir_utils::g_dir_list)
-        {
+        for (const P& d : dir_utils::g_dir_list) {
                 const P p(m_pos + d);
 
                 const auto* const t = map::g_terrain.at(p);
 
-                if (!t->is_walkable())
-                {
+                if (!t->is_walkable()) {
                         return TrapPlacementValid::no;
                 }
         }
@@ -638,12 +602,10 @@ TrapPlacementValid TrapDart::on_place()
 
         auto trap_plament_valid = TrapPlacementValid::no;
 
-        for (const P& d : offsets)
-        {
+        for (const P& d : offsets) {
                 P p = m_pos;
 
-                for (int i = 0; i <= nr_steps_max; ++i)
-                {
+                for (int i = 0; i <= nr_steps_max; ++i) {
                         p += d;
 
                         const auto* const terrain = map::g_terrain.at(p);
@@ -654,16 +616,14 @@ TrapPlacementValid TrapDart::on_place()
                                 terrain->is_projectile_passable();
 
                         if (!is_passable &&
-                            ((i < nr_steps_min) || !is_wall))
-                        {
+                            ((i < nr_steps_min) || !is_wall)) {
                                 // We are blocked too early - OR - blocked by a
                                 // terrain other than a wall. Give up on this
                                 // direction.
                                 break;
                         }
 
-                        if ((i >= nr_steps_min) && is_wall)
-                        {
+                        if ((i >= nr_steps_min) && is_wall) {
                                 // This is a good origin!
                                 m_dart_origin = p;
                                 trap_plament_valid = TrapPlacementValid::yes;
@@ -671,12 +631,10 @@ TrapPlacementValid TrapDart::on_place()
                         }
                 }
 
-                if (trap_plament_valid == TrapPlacementValid::yes)
-                {
+                if (trap_plament_valid == TrapPlacementValid::yes) {
                         // A valid origin has been found
 
-                        if (rnd::fraction(2, 3))
-                        {
+                        if (rnd::fraction(2, 3)) {
                                 terrain::make_gore(m_pos);
                                 terrain::make_blood(m_pos);
                         }
@@ -695,29 +653,25 @@ void TrapDart::trigger()
         ASSERT((m_dart_origin.x == m_pos.x) || (m_dart_origin.y == m_pos.y));
         ASSERT(m_dart_origin != m_pos);
 
-        if (map::g_terrain.at(m_dart_origin)->id() != terrain::Id::wall)
-        {
+        if (map::g_terrain.at(m_dart_origin)->id() != terrain::Id::wall) {
                 // NOTE: This is permanently set from now on
                 m_is_dart_origin_destroyed = true;
         }
 
-        if (m_is_dart_origin_destroyed)
-        {
+        if (m_is_dart_origin_destroyed) {
                 return;
         }
 
         // Aim target is the wall on the other side of the map
         P aim_pos = m_dart_origin;
 
-        if (m_dart_origin.x == m_pos.x)
-        {
+        if (m_dart_origin.x == m_pos.x) {
                 aim_pos.y =
                         (m_dart_origin.y > m_pos.y)
                         ? 0
                         : (map::h() - 1);
         }
-        else
-        {
+        else {
                 // Dart origin is on same vertial line as the trap
                 aim_pos.x =
                         (m_dart_origin.x > m_pos.x)
@@ -725,8 +679,7 @@ void TrapDart::trigger()
                         : (map::w() - 1);
         }
 
-        if (map::g_seen.at(m_dart_origin))
-        {
+        if (map::g_seen.at(m_dart_origin)) {
                 const std::string name =
                         map::g_terrain.at(m_dart_origin)
                                 ->name(Article::the);
@@ -737,13 +690,11 @@ void TrapDart::trigger()
         // Make a temporary dart weapon
         item::Wpn* wpn = nullptr;
 
-        if (m_is_poisoned)
-        {
+        if (m_is_poisoned) {
                 wpn = static_cast<item::Wpn*>(
                         item::make(item::Id::trap_dart_poison));
         }
-        else
-        {
+        else {
                 // Not poisoned
                 wpn = static_cast<item::Wpn*>(
                         item::make(item::Id::trap_dart));
@@ -776,8 +727,7 @@ TrapPlacementValid TrapSpear::on_place()
 
         auto trap_plament_valid = TrapPlacementValid::no;
 
-        for (const P& d : offsets)
-        {
+        for (const P& d : offsets) {
                 const P p = m_pos + d;
 
                 const auto* const terrain = map::g_terrain.at(p);
@@ -786,14 +736,12 @@ TrapPlacementValid TrapSpear::on_place()
 
                 const bool is_passable = terrain->is_projectile_passable();
 
-                if (is_wall && !is_passable)
-                {
+                if (is_wall && !is_passable) {
                         // This is a good origin!
                         m_spear_origin = p;
                         trap_plament_valid = TrapPlacementValid::yes;
 
-                        if (rnd::fraction(2, 3))
-                        {
+                        if (rnd::fraction(2, 3)) {
                                 terrain::make_gore(m_pos);
                                 terrain::make_blood(m_pos);
                         }
@@ -812,19 +760,16 @@ void TrapSpear::trigger()
         ASSERT(m_spear_origin.x == m_pos.x || m_spear_origin.y == m_pos.y);
         ASSERT(m_spear_origin != m_pos);
 
-        if (map::g_terrain.at(m_spear_origin)->id() != terrain::Id::wall)
-        {
+        if (map::g_terrain.at(m_spear_origin)->id() != terrain::Id::wall) {
                 // NOTE: This is permanently set from now on
                 m_is_spear_origin_destroyed = true;
         }
 
-        if (m_is_spear_origin_destroyed)
-        {
+        if (m_is_spear_origin_destroyed) {
                 return;
         }
 
-        if (map::g_seen.at(m_spear_origin))
-        {
+        if (map::g_seen.at(m_spear_origin)) {
                 const std::string name =
                         map::g_terrain.at(m_spear_origin)
                                 ->name(Article::the);
@@ -835,18 +780,15 @@ void TrapSpear::trigger()
         // Is anyone standing on the trap now?
         auto* const actor_on_trap = map::living_actor_at(m_pos);
 
-        if (actor_on_trap)
-        {
+        if (actor_on_trap) {
                 // Make a temporary spear weapon
                 item::Wpn* wpn = nullptr;
 
-                if (m_is_poisoned)
-                {
+                if (m_is_poisoned) {
                         wpn = static_cast<item::Wpn*>(
                                 item::make(item::Id::trap_spear_poison));
                 }
-                else
-                {
+                else {
                         // Not poisoned
                         wpn = static_cast<item::Wpn*>(
                                 item::make(item::Id::trap_spear));
@@ -869,8 +811,7 @@ void TrapGasConfusion::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 msg_log::add(
                         "A burst of gas is released from a vent in the floor!");
         }
@@ -903,8 +844,7 @@ void TrapGasParalyzation::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 msg_log::add(
                         "A burst of gas is released from a vent in the floor!");
         }
@@ -937,8 +877,7 @@ void TrapGasFear::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 msg_log::add(
                         "A burst of gas is released from a vent in the floor!");
         }
@@ -971,8 +910,7 @@ void TrapBlindingFlash::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 msg_log::add("There is an intense flash of light!");
         }
 
@@ -992,8 +930,7 @@ void TrapDeafening::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 msg_log::add(
                         "There is suddenly a crushing pressure in the air!");
         }
@@ -1018,8 +955,7 @@ void TrapTeleport::trigger()
 
         ASSERT(actor_here);
 
-        if (!actor_here)
-        {
+        if (!actor_here) {
                 // Should never happen
                 return;
         }
@@ -1030,16 +966,13 @@ void TrapTeleport::trigger()
         const auto actor_name = actor_here->name_the();
         const auto is_hidden = m_base_trap->is_hidden();
 
-        if (is_player)
-        {
+        if (is_player) {
                 map::update_vision();
 
-                if (can_see)
-                {
+                if (can_see) {
                         std::string msg = "A beam of light shoots out from";
 
-                        if (!is_hidden)
-                        {
+                        if (!is_hidden) {
                                 msg += " a curious shape on";
                         }
 
@@ -1047,17 +980,14 @@ void TrapTeleport::trigger()
 
                         msg_log::add(msg);
                 }
-                else
-                {
+                else {
                         // Cannot see
                         msg_log::add("I feel a peculiar energy around me!");
                 }
         }
-        else
-        {
+        else {
                 // Is a monster
-                if (player_sees_actor)
-                {
+                if (player_sees_actor) {
                         msg_log::add(
                                 "A beam shoots out under " + actor_name + ".");
                 }
@@ -1076,8 +1006,7 @@ void TrapSummonMon::trigger()
 
         ASSERT(actor_here);
 
-        if (!actor_here)
-        {
+        if (!actor_here) {
                 // Should never happen
                 return;
         }
@@ -1087,8 +1016,7 @@ void TrapSummonMon::trigger()
 
         TRACE_VERBOSE << "Is player: " << is_player << std::endl;
 
-        if (!is_player)
-        {
+        if (!is_player) {
                 TRACE_VERBOSE << "Not triggered by player" << std::endl;
                 TRACE_FUNC_END_VERBOSE;
                 return;
@@ -1102,12 +1030,10 @@ void TrapSummonMon::trigger()
 
         map::g_player->update_fov();
 
-        if (can_see)
-        {
+        if (can_see) {
                 std::string msg = "A beam of light shoots out from";
 
-                if (!is_hidden)
-                {
+                if (!is_hidden) {
                         msg += " a curious shape on";
                 }
 
@@ -1115,8 +1041,7 @@ void TrapSummonMon::trigger()
 
                 msg_log::add(msg);
         }
-        else
-        {
+        else {
                 // Cannot see
                 msg_log::add("I feel a peculiar energy around me!");
         }
@@ -1124,23 +1049,19 @@ void TrapSummonMon::trigger()
         TRACE << "Finding summon candidates" << std::endl;
         std::vector<actor::Id> summon_bucket;
 
-        for (size_t i = 0; i < (size_t)actor::Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)actor::Id::END; ++i) {
                 const auto& data = actor::g_data[i];
 
                 if (data.can_be_summoned_by_mon &&
-                    data.spawn_min_dlvl <= (map::g_dlvl + 2))
-                {
+                    data.spawn_min_dlvl <= (map::g_dlvl + 2)) {
                         summon_bucket.push_back((actor::Id)i);
                 }
         }
 
-        if (summon_bucket.empty())
-        {
+        if (summon_bucket.empty()) {
                 TRACE_VERBOSE << "No eligible candidates found" << std::endl;
         }
-        else
-        {
+        else {
                 // Eligible monsters found
                 const auto id_to_summon = rnd::element(summon_bucket);
 
@@ -1170,8 +1091,7 @@ void TrapSummonMon::trigger()
 
                                 mon->m_properties.apply(prop_waiting);
 
-                                if (actor::can_player_see_actor(*mon))
-                                {
+                                if (actor::can_player_see_actor(*mon)) {
                                         states::draw();
 
                                         const std::string name_a =
@@ -1194,8 +1114,7 @@ void TrapHpSap::trigger()
 
         ASSERT(actor_here);
 
-        if (!actor_here)
-        {
+        if (!actor_here) {
                 // Should never happen
                 return;
         }
@@ -1205,8 +1124,7 @@ void TrapHpSap::trigger()
 
         TRACE_VERBOSE << "Is player: " << is_player << std::endl;
 
-        if (!is_player)
-        {
+        if (!is_player) {
                 TRACE_VERBOSE << "Not triggered by player" << std::endl;
 
                 TRACE_FUNC_END_VERBOSE;
@@ -1222,12 +1140,10 @@ void TrapHpSap::trigger()
 
         TRACE_VERBOSE << "Actor name: " << actor_name << std::endl;
 
-        if (can_see)
-        {
+        if (can_see) {
                 std::string msg = "A beam of light shoots out from";
 
-                if (!is_hidden)
-                {
+                if (!is_hidden) {
                         msg += " a curious shape on";
                 }
 
@@ -1235,8 +1151,7 @@ void TrapHpSap::trigger()
 
                 msg_log::add(msg);
         }
-        else
-        {
+        else {
                 // Cannot see
                 msg_log::add("I feel a peculiar energy around me!");
         }
@@ -1258,8 +1173,7 @@ void TrapSpiSap::trigger()
 
         ASSERT(actor_here);
 
-        if (!actor_here)
-        {
+        if (!actor_here) {
                 // Should never happen
                 return;
         }
@@ -1269,8 +1183,7 @@ void TrapSpiSap::trigger()
 
         TRACE_VERBOSE << "Is player: " << is_player << std::endl;
 
-        if (!is_player)
-        {
+        if (!is_player) {
                 TRACE_VERBOSE << "Not triggered by player" << std::endl;
 
                 TRACE_FUNC_END_VERBOSE;
@@ -1286,12 +1199,10 @@ void TrapSpiSap::trigger()
 
         TRACE_VERBOSE << "Actor name: " << actor_name << std::endl;
 
-        if (can_see)
-        {
+        if (can_see) {
                 std::string msg = "A beam of light shoots out from";
 
-                if (!is_hidden)
-                {
+                if (!is_hidden) {
                         msg += " a curious shape on";
                 }
 
@@ -1299,8 +1210,7 @@ void TrapSpiSap::trigger()
 
                 msg_log::add(msg);
         }
-        else
-        {
+        else {
                 // Cannot see
                 msg_log::add("I feel a peculiar energy around me!");
         }
@@ -1318,8 +1228,7 @@ void TrapSmoke::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 msg_log::add(
                         "A burst of smoke is released from a vent in the "
                         "floor!");
@@ -1345,8 +1254,7 @@ void TrapFire::trigger()
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 msg_log::add("Flames burst out from a vent in the floor!");
         }
 
@@ -1398,30 +1306,24 @@ void TrapWeb::trigger()
 
         ASSERT(actor_here);
 
-        if (!actor_here)
-        {
+        if (!actor_here) {
                 return;
         }
 
-        if (actor::is_player(actor_here))
-        {
-                if (actor_here->m_properties.allow_see())
-                {
+        if (actor::is_player(actor_here)) {
+                if (actor_here->m_properties.allow_see()) {
                         msg_log::add(
                                 "I am entangled in a spider web!");
                 }
-                else
-                {
+                else {
                         // Cannot see
                         msg_log::add(
                                 "I am entangled in a sticky mass of threads!");
                 }
         }
-        else
-        {
+        else {
                 // Is a monster
-                if (actor::can_player_see_actor(*actor_here))
-                {
+                if (actor::can_player_see_actor(*actor_here)) {
                         const std::string actor_name =
                                 text_format::first_to_upper(
                                         actor_here->name_the());
@@ -1443,13 +1345,10 @@ void TrapWeb::trigger()
                 Verbose::no);
 
         // Players getting stuck in spider webs alerts all spiders
-        if (actor::is_player(actor_here))
-        {
-                for (auto* const actor : game_time::g_actors)
-                {
+        if (actor::is_player(actor_here)) {
+                for (auto* const actor : game_time::g_actors) {
                         if (actor::is_player(actor) ||
-                            !actor->m_data->is_spider)
-                        {
+                            !actor->m_data->is_spider) {
                                 continue;
                         }
 
@@ -1470,8 +1369,7 @@ void TrapSlow::trigger()
 
         ASSERT(actor_here);
 
-        if (!actor_here)
-        {
+        if (!actor_here) {
                 // Should never happen
                 return;
         }
@@ -1490,8 +1388,7 @@ void TrapCurse::trigger()
 
         ASSERT(actor_here);
 
-        if (!actor_here)
-        {
+        if (!actor_here) {
                 // Should never happen
                 return;
         }
@@ -1508,8 +1405,7 @@ void TrapUnlearnSpell::trigger()
 
         auto* const actor_here = map::living_actor_at(m_pos);
 
-        if (!actor_here)
-        {
+        if (!actor_here) {
                 // Should never happen
                 ASSERT(false);
 
@@ -1517,20 +1413,17 @@ void TrapUnlearnSpell::trigger()
         }
 
         // TODO: Monsters could unlearn spells too
-        if (!actor::is_player(actor_here))
-        {
+        if (!actor::is_player(actor_here)) {
                 return;
         }
 
         const bool can_see = actor_here->m_properties.allow_see();
         const bool is_hidden = m_base_trap->is_hidden();
 
-        if (can_see)
-        {
+        if (can_see) {
                 std::string msg = "A beam of light shoots out from";
 
-                if (!is_hidden)
-                {
+                if (!is_hidden) {
                         msg += " a curious shape on";
                 }
 
@@ -1538,8 +1431,7 @@ void TrapUnlearnSpell::trigger()
 
                 msg_log::add(msg);
         }
-        else
-        {
+        else {
                 // Cannot see
                 msg_log::add("I feel a peculiar energy around me!");
         }
@@ -1547,35 +1439,29 @@ void TrapUnlearnSpell::trigger()
         std::vector<SpellId> id_bucket;
 
         // Do not unlearn spells for the Exorcist
-        if (!player_bon::is_bg(Bg::exorcist))
-        {
+        if (!player_bon::is_bg(Bg::exorcist)) {
                 id_bucket.reserve((size_t)SpellId::END);
 
-                for (int i = 0; i < (int)SpellId::END; ++i)
-                {
+                for (int i = 0; i < (int)SpellId::END; ++i) {
                         const auto id = (SpellId)i;
 
                         // Only allow unlearning spells with scrolls
                         bool has_scroll = false;
 
-                        for (const auto& d : item::g_data)
-                        {
-                                if (d.spell_cast_from_scroll == id)
-                                {
+                        for (const auto& d : item::g_data) {
+                                if (d.spell_cast_from_scroll == id) {
                                         has_scroll = true;
                                         break;
                                 }
                         }
 
-                        if (player_spells::is_spell_learned(id) && has_scroll)
-                        {
+                        if (player_spells::is_spell_learned(id) && has_scroll) {
                                 id_bucket.push_back(id);
                         }
                 }
         }
 
-        if (id_bucket.empty())
-        {
+        if (id_bucket.empty()) {
                 msg_log::add("There is no apparent effect.");
 
                 return;

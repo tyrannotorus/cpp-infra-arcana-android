@@ -50,18 +50,15 @@
 // -----------------------------------------------------------------------------
 static bool is_hostile_living_mon(const actor::Actor& actor)
 {
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 return false;
         }
 
-        if (map::g_player->is_leader_of(&actor))
-        {
+        if (map::g_player->is_leader_of(&actor)) {
                 return false;
         }
 
-        if (!actor.is_alive())
-        {
+        if (!actor.is_alive()) {
                 return false;
         }
 
@@ -74,8 +71,7 @@ static Array2<int> calc_player_vigilant_flood()
 
         auto& player = *map::g_player;
 
-        if (player_bon::has_trait(Trait::vigilant))
-        {
+        if (player_bon::has_trait(Trait::vigilant)) {
                 const int d = 3;
 
                 const R area(
@@ -138,8 +134,7 @@ static bool should_vigilant_make_aware_of_unseeable_mon(
         const actor::Actor& mon,
         const Array2<int>& vigilant_flood)
 {
-        if (!can_detect_pos_by_vigilant(mon.m_pos, vigilant_flood))
-        {
+        if (!can_detect_pos_by_vigilant(mon.m_pos, vigilant_flood)) {
                 return false;
         }
 
@@ -152,14 +147,12 @@ static bool should_vigilant_make_aware_of_unseeable_mon(
         const bool can_player_see_invis =
                 map::g_player->m_properties.has(PropId::see_invis);
 
-        if (is_mon_invis && !can_player_see_invis)
-        {
+        if (is_mon_invis && !can_player_see_invis) {
                 // The monster is invisible, and player cannot see invisible
                 return true;
         }
 
-        if (!is_cell_seen)
-        {
+        if (!is_cell_seen) {
                 // The monster is in an unseen cell
                 return true;
         }
@@ -171,17 +164,14 @@ static void make_aware_of_unseeable_mon_by_vigilant(actor::Actor& mon)
 {
         const bool is_cell_seen = map::g_seen.at(mon.m_pos);
 
-        if (!mon.is_player_aware_of_me())
-        {
-                if (is_cell_seen)
-                {
+        if (!mon.is_player_aware_of_me()) {
+                if (is_cell_seen) {
                         // The cell is seen - the monster must be invisible
                         ASSERT(mon.m_properties.has(PropId::invis));
 
                         print_aware_invis_mon_msg(mon);
                 }
-                else
-                {
+                else {
                         // Became aware of a monster in an unseen cell
 
                         // Abort quick move
@@ -213,26 +203,22 @@ static bool player_try_spot_sneaking_mon(
 {
         ActionResult sneak_result = {};
 
-        if (can_detect_pos_by_vigilant(mon.m_pos, vigilant_flood))
-        {
+        if (can_detect_pos_by_vigilant(mon.m_pos, vigilant_flood)) {
                 // Sneaking monster is in a position covered by Vigilant
                 sneak_result = ActionResult::fail;
         }
-        else
-        {
+        else {
                 // Cannot be detected by Vigilant
                 const bool is_cell_seen = map::g_seen.at(mon.m_pos);
 
-                if (is_cell_seen)
-                {
+                if (is_cell_seen) {
                         actor::SneakParameters p;
                         p.actor_sneaking = &mon;
                         p.actor_searching = map::g_player;
 
                         sneak_result = roll_sneak(p);
                 }
-                else
-                {
+                else {
                         sneak_result = ActionResult::success;
                 }
         }
@@ -249,8 +235,7 @@ static void warn_player_about_mon(const actor::Actor& actor)
 
         const bool is_busy = map::g_player->is_busy_queryable_action();
 
-        if (msg_log::is_empty() || is_busy)
-        {
+        if (msg_log::is_empty() || is_busy) {
                 // The message log is empty, or player is busy with an action,
                 // print a warning with a message.
 
@@ -269,8 +254,7 @@ static void warn_player_about_mon(const actor::Actor& actor)
                         MsgInterruptPlayer::yes,
                         add_more_prompt);
         }
-        else
-        {
+        else {
                 // The message log contains messages, and player is not busy,
                 // just run a "more" prompt.
                 msg_log::more_prompt();
@@ -279,8 +263,7 @@ static void warn_player_about_mon(const actor::Actor& actor)
 
 static void update_player_seen_monster(actor::Actor& mon)
 {
-        if (mon.m_mon_aware_state.is_msg_mon_in_view_printed)
-        {
+        if (mon.m_mon_aware_state.is_msg_mon_in_view_printed) {
                 actor::player_state::g_allow_print_mon_warning = false;
         }
 
@@ -291,12 +274,10 @@ static void update_player_seen_monster(actor::Actor& mon)
                 (config::always_warn_new_mon() &&
                  actor::player_state::g_allow_print_mon_warning);
 
-        if (should_warn)
-        {
+        if (should_warn) {
                 actor::player_state::g_seen_mon_to_warn_about = &mon;
         }
-        else
-        {
+        else {
                 // If we should not warn about this seen monster, it means we
                 // should not warn about any seen monster.
                 actor::player_state::g_seen_mon_to_warn_about = nullptr;
@@ -309,8 +290,7 @@ static void update_player_unseen_monster(
         actor::Actor& mon,
         const Array2<int>& vigilant_flood)
 {
-        if (!mon.is_player_aware_of_me())
-        {
+        if (!mon.is_player_aware_of_me()) {
                 mon.m_mon_aware_state.is_msg_mon_in_view_printed = false;
         }
 
@@ -319,20 +299,17 @@ static void update_player_unseen_monster(
                         mon,
                         vigilant_flood);
 
-        if (is_vigilant_detect_unseeable)
-        {
+        if (is_vigilant_detect_unseeable) {
                 make_aware_of_unseeable_mon_by_vigilant(mon);
         }
-        else
-        {
+        else {
                 // Monster is seeable (in a seen cell and not invisible), or not
                 // detectable due to Vigilant.
                 const bool is_spotting_sneaking =
                         mon.is_sneaking() &&
                         player_try_spot_sneaking_mon(mon, vigilant_flood);
 
-                if (is_spotting_sneaking)
-                {
+                if (is_spotting_sneaking) {
                         on_player_spot_sneaking_mon(mon);
 
                         actor::player_state::g_seen_mon_to_warn_about = nullptr;
@@ -345,30 +322,24 @@ static void update_player_monster_detection()
 {
         const auto vigilant_flood = calc_player_vigilant_flood();
 
-        for (auto* const actor : game_time::g_actors)
-        {
-                if (!is_hostile_living_mon(*actor))
-                {
+        for (auto* const actor : game_time::g_actors) {
+                if (!is_hostile_living_mon(*actor)) {
                         continue;
                 }
 
-                if (can_player_see_actor(*actor))
-                {
+                if (can_player_see_actor(*actor)) {
                         update_player_seen_monster(*actor);
                 }
-                else
-                {
+                else {
                         update_player_unseen_monster(*actor, vigilant_flood);
                 }
 
-                if (actor->is_player_aware_of_me())
-                {
+                if (actor->is_player_aware_of_me()) {
                         actor->m_give_hit_chance_penalty_vs_player = false;
                 }
         }
 
-        if (actor::player_state::g_seen_mon_to_warn_about)
-        {
+        if (actor::player_state::g_seen_mon_to_warn_about) {
                 warn_player_about_mon(
                         *actor::player_state::g_seen_mon_to_warn_about);
         }
@@ -378,33 +349,28 @@ static void on_player_shock_over_limit()
 {
         auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::r_shock))
-        {
+        if (player.m_properties.has(PropId::r_shock)) {
                 // Player is shock resistant, pause the countdown
                 return;
         }
 
         hints::display(hints::Id::high_shock);
 
-        if (actor::player_state::g_nr_turns_until_insanity < 0)
-        {
+        if (actor::player_state::g_nr_turns_until_insanity < 0) {
                 actor::player_state::g_nr_turns_until_insanity = 3;
         }
-        else
-        {
+        else {
                 --actor::player_state::g_nr_turns_until_insanity;
         }
 
-        if (actor::player_state::g_nr_turns_until_insanity > 0)
-        {
+        if (actor::player_state::g_nr_turns_until_insanity > 0) {
                 msg_log::add(
                         "I feel my sanity slipping...",
                         colors::msg_note(),
                         MsgInterruptPlayer::yes,
                         MorePromptOnMsg::yes);
         }
-        else
-        {
+        else {
                 // Time to go crazy!
                 actor::player_state::g_nr_turns_until_insanity = -1;
 
@@ -414,12 +380,10 @@ static void on_player_shock_over_limit()
 
 static void player_incr_passive_shock()
 {
-        if (map::g_player->m_properties.allow_act())
-        {
+        if (map::g_player->m_properties.allow_act()) {
                 double passive_shock_taken = 0.095;
 
-                if (player_bon::bg() == Bg::rogue)
-                {
+                if (player_bon::bg() == Bg::rogue) {
                         passive_shock_taken *= 0.75;
                 }
 
@@ -431,15 +395,12 @@ static void player_items_start_turn()
 {
         auto& inv = map::g_player->m_inv;
 
-        for (auto* const item : inv.m_backpack)
-        {
+        for (auto* const item : inv.m_backpack) {
                 item->on_actor_turn_in_inv(InvType::backpack);
         }
 
-        for (InvSlot& slot : inv.m_slots)
-        {
-                if (!slot.item)
-                {
+        for (InvSlot& slot : inv.m_slots) {
+                if (!slot.item) {
                         continue;
                 }
 
@@ -465,8 +426,7 @@ static void player_try_spot_hidden_terrain()
         auto& player = *map::g_player;
 
         if (player.m_properties.has(PropId::confused) ||
-            !player.m_properties.allow_see())
-        {
+            !player.m_properties.allow_see()) {
                 return;
         }
 
@@ -477,17 +437,14 @@ static void player_try_spot_hidden_terrain()
                         true);
 
         const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
-                if (!map::g_seen.at(i))
-                {
+        for (size_t i = 0; i < nr_positions; ++i) {
+                if (!map::g_seen.at(i)) {
                         continue;
                 }
 
                 auto* t = map::g_terrain.at(i);
 
-                if (!t->is_hidden())
-                {
+                if (!t->is_hidden()) {
                         continue;
                 }
 
@@ -496,22 +453,19 @@ static void player_try_spot_hidden_terrain()
                 bool is_spotted = false;
 
                 if (p.is_adjacent(player.m_pos) &&
-                    (t->id() == terrain::Id::door))
-                {
+                    (t->id() == terrain::Id::door)) {
                         // Player is adjacent to a hidden door - detection is
                         // guaranteed.
                         is_spotted = true;
                 }
-                else
-                {
+                else {
                         // Not adjacent to hidden door, roll for success.
                         int skill_tot =
                                 calc_player_spot_terrain_tot_skill(
                                         p,
                                         player_search_skill);
 
-                        if (skill_tot <= 0)
-                        {
+                        if (skill_tot <= 0) {
                                 continue;
                         }
 
@@ -520,8 +474,7 @@ static void player_try_spot_hidden_terrain()
                         is_spotted = result >= ActionResult::success;
                 }
 
-                if (is_spotted)
-                {
+                if (is_spotted) {
                         t->reveal(terrain::PrintRevealMsg::if_seen);
 
                         t->on_revealed_from_searching();
@@ -535,21 +488,18 @@ static void player_try_spot_hidden_terrain()
 
 static void player_detect_stuck_doors()
 {
-        for (const auto& d : dir_utils::g_dir_list)
-        {
+        for (const auto& d : dir_utils::g_dir_list) {
                 const auto p = map::g_player->m_pos + d;
                 auto* const terrain = map::g_terrain.at(p);
 
-                if (terrain->id() != terrain::Id::door)
-                {
+                if (terrain->id() != terrain::Id::door) {
                         continue;
                 }
 
                 auto* const door = static_cast<terrain::Door*>(terrain);
 
                 if (door->is_hidden() ||
-                    (door->type() == terrain::DoorType::metal))
-                {
+                    (door->type() == terrain::DoorType::metal)) {
                         continue;
                 }
 
@@ -561,8 +511,7 @@ static bool should_print_unload_wpn_hint()
 {
         const auto* const item = map::g_items.at(map::g_player->m_pos);
 
-        if (!item)
-        {
+        if (!item) {
                 return false;
         }
 
@@ -573,12 +522,10 @@ static bool should_print_unload_wpn_hint()
                 !d.ranged.has_infinite_ammo &&
                 (d.ranged.max_ammo > 0);
 
-        if (is_ranged_wpn_using_ammo)
-        {
+        if (is_ranged_wpn_using_ammo) {
                 const auto* const wpn = static_cast<const item::Wpn*>(item);
 
-                if (wpn->m_ammo_loaded > 0)
-                {
+                if (wpn->m_ammo_loaded > 0) {
                         return true;
                 }
         }
@@ -595,8 +542,7 @@ static void player_start_turn()
         // Set current temporary shock from darkness etc
         player.update_tmp_shock();
 
-        if (should_burning_terrain_interrupt_player())
-        {
+        if (should_burning_terrain_interrupt_player()) {
                 interrupt_player_burning_terrain();
         }
 
@@ -609,8 +555,7 @@ static void player_start_turn()
 
         const auto player_seen_actors = actor::seen_actors(player);
 
-        for (auto* actor : player_seen_actors)
-        {
+        for (auto* actor : player_seen_actors) {
                 actor::make_player_aware_mon(*actor);
 
                 actor->m_properties.on_player_see();
@@ -626,28 +571,23 @@ static void player_start_turn()
 
         player_items_start_turn();
 
-        if (should_print_unload_wpn_hint())
-        {
+        if (should_print_unload_wpn_hint()) {
                 hints::display(hints::Id::unload_weapons);
         }
 
-        if (player.enc_percent() >= 100)
-        {
+        if (player.enc_percent() >= 100) {
                 hints::display(hints::Id::overburdened);
         }
 
-        if (player.shock_tot() >= 100)
-        {
+        if (player.shock_tot() >= 100) {
                 // NOTE: This may kill the player
                 on_player_shock_over_limit();
 
-                if (!player.is_alive())
-                {
+                if (!player.is_alive()) {
                         return;
                 }
         }
-        else
-        {
+        else {
                 // Shock < 100%
                 actor::player_state::g_nr_turns_until_insanity = -1;
         }
@@ -660,8 +600,7 @@ static void player_start_turn()
 
 static void mon_start_turn(actor::Actor& mon)
 {
-        if (mon.is_aware_of_player())
-        {
+        if (mon.is_aware_of_player()) {
                 --mon.m_mon_aware_state.aware_counter;
                 --mon.m_mon_aware_state.wary_counter;
         }
@@ -676,12 +615,10 @@ void start_turn(Actor& actor)
 {
         actor.m_properties.on_turn_begin();
 
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 player_start_turn();
         }
-        else
-        {
+        else {
                 mon_start_turn(actor);
         }
 }

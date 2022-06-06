@@ -25,50 +25,36 @@
 // -----------------------------------------------------------------------------
 static void put_templ_symbol_at(const P& p, const char c)
 {
-        switch (c)
-        {
-        case '.':
-        {
+        switch (c) {
+        case '.': {
                 map::set_terrain(terrain::make(terrain::Id::floor, p));
-        }
-        break;
+        } break;
 
-        case '#':
-        {
+        case '#': {
                 map::set_terrain(terrain::make(terrain::Id::wall, p));
-        }
-        break;
+        } break;
 
-        case '-':
-        {
+        case '-': {
                 map::set_terrain(terrain::make(terrain::Id::altar, p));
-        }
-        break;
+        } break;
 
-        case '~':
-        {
+        case '~': {
                 auto* const t = terrain::make(terrain::Id::liquid, p);
 
                 static_cast<terrain::Liquid*>(t)->m_type = LiquidType::water;
 
                 map::set_terrain(t);
-        }
-        break;
+        } break;
 
-        case '0':
-        {
+        case '0': {
                 map::set_terrain(terrain::make(terrain::Id::brazier, p));
-        }
-        break;
+        } break;
 
-        case 'P':
-        {
+        case 'P': {
                 map::set_terrain(terrain::make(terrain::Id::statue, p));
-        }
-        break;
+        } break;
 
-        case '+':
-        {
+        case '+': {
                 auto* mimic = terrain::make(terrain::Id::wall, p);
 
                 auto* const t =
@@ -79,11 +65,9 @@ static void put_templ_symbol_at(const P& p, const char c)
                 t->init_type_and_state(terrain::DoorType::wood);
 
                 map::set_terrain(t);
-        }
-        break;
+        } break;
 
-        case 'x':
-        {
+        case 'x': {
                 auto* const t =
                         static_cast<terrain::Door*>(
                                 terrain::make(terrain::Id::door, p));
@@ -91,33 +75,24 @@ static void put_templ_symbol_at(const P& p, const char c)
                 t->init_type_and_state(terrain::DoorType::gate);
 
                 map::set_terrain(t);
-        }
-        break;
+        } break;
 
-        case '=':
-        {
+        case '=': {
                 map::set_terrain(terrain::make(terrain::Id::grate, p));
-        }
-        break;
+        } break;
 
-        case '"':
-        {
+        case '"': {
                 map::set_terrain(terrain::make(terrain::Id::vines, p));
-        }
-        break;
+        } break;
 
-        case '*':
-        {
+        case '*': {
                 map::set_terrain(terrain::make(terrain::Id::chains, p));
-        }
-        break;
+        } break;
 
         // Space
-        case ' ':
-        {
+        case ' ': {
                 // Do nothing
-        }
-        break;
+        } break;
 
         default:
         {
@@ -133,16 +108,14 @@ static void put_templ_symbol_at(const P& p, const char c)
                 ASSERT(false);
 
                 return;
-        }
-        break;
+        } break;
 
         }  // switch
 }
 
 static bool is_symbol_room_cell(const char c)
 {
-        switch (c)
-        {
+        switch (c) {
         case '#':
         case ' ':
                 return false;
@@ -160,25 +133,21 @@ static void put_templ_terrains(
 
         const P dims(templ.dims());
 
-        for (int templ_x = 0; templ_x < dims.x; ++templ_x)
-        {
-                for (int templ_y = 0; templ_y < dims.y; ++templ_y)
-                {
+        for (int templ_x = 0; templ_x < dims.x; ++templ_x) {
+                for (int templ_y = 0; templ_y < dims.y; ++templ_y) {
                         const P templ_p(templ_x, templ_y);
 
                         const auto p = p0 + templ_p;
 
                         char c = templ.at(templ_p);
 
-                        if (c == '?')
-                        {
+                        if (c == '?') {
                                 c = generate_optional_walls ? '#' : '.';
                         }
 
                         put_templ_symbol_at(p, c);
 
-                        if (!is_symbol_room_cell(c))
-                        {
+                        if (!is_symbol_room_cell(c)) {
                                 map::g_room_map.at(p) = nullptr;
                         }
                 }
@@ -221,16 +190,14 @@ static Room* try_make_template_room(Region& region)
 
         const auto* templ = map_templates::random_room_templ(max_dims);
 
-        if (!templ)
-        {
+        if (!templ) {
                 return nullptr;
         }
 
         const auto& symbols = templ->symbols;
 
         if ((symbols.dims().x > max_dims.x) ||
-            (symbols.dims().y > max_dims.y))
-        {
+            (symbols.dims().y > max_dims.y)) {
                 ASSERT(false);
 
                 return nullptr;
@@ -258,12 +225,10 @@ Room* make_room(Region& region)
 
         // Make a templated room?
         if ((map::g_dlvl <= g_dlvl_last_mid_game) &&
-            rnd::one_in(templ_room_one_in_n))
-        {
+            rnd::one_in(templ_room_one_in_n)) {
                 auto* const room = try_make_template_room(region);
 
-                if (room)
-                {
+                if (room) {
                         return room;
                 }
 

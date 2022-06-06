@@ -43,8 +43,7 @@ void cleanup()
 
 void wait_for_key_press()
 {
-        if (s_is_inited && !config::is_bot_playing())
-        {
+        if (s_is_inited && !config::is_bot_playing()) {
                 io::update_screen();
 
                 io::read_input();
@@ -55,8 +54,7 @@ BinaryAnswer yes_or_no(
         std::optional<char> key_for_special_event,
         const AllowSpaceCancel allow_space_cancel)
 {
-        if (!s_is_inited || config::is_bot_playing())
-        {
+        if (!s_is_inited || config::is_bot_playing()) {
                 return BinaryAnswer::yes;
         }
 
@@ -64,8 +62,7 @@ BinaryAnswer yes_or_no(
 
         io::InputData input;
 
-        while (true)
-        {
+        while (true) {
                 input = io::read_input();
 
                 const bool is_special_key_pressed =
@@ -80,23 +77,19 @@ BinaryAnswer yes_or_no(
                     (input.key == 'n') ||
                     (input.key == SDLK_ESCAPE) ||
                     is_canceled_with_space ||
-                    is_special_key_pressed)
-                {
+                    is_special_key_pressed) {
                         break;
                 }
         }
 
         if (key_for_special_event.has_value() &&
-            (input.key == key_for_special_event.value()))
-        {
+            (input.key == key_for_special_event.value())) {
                 return BinaryAnswer::special;
         }
-        else if (input.key == 'y')
-        {
+        else if (input.key == 'y') {
                 return BinaryAnswer::yes;
         }
-        else
-        {
+        else {
                 return BinaryAnswer::no;
         }
 }
@@ -105,8 +98,7 @@ io::InputData letter(const bool accept_enter)
 {
         io::InputData input;
 
-        if (!s_is_inited || config::is_bot_playing())
-        {
+        if (!s_is_inited || config::is_bot_playing()) {
                 input.key = 'a';
 
                 return input;
@@ -114,16 +106,14 @@ io::InputData letter(const bool accept_enter)
 
         io::update_screen();
 
-        while (true)
-        {
+        while (true) {
                 input = io::read_input();
 
                 if ((accept_enter && (input.key == SDLK_RETURN)) ||
                     (input.key == SDLK_ESCAPE) ||
                     (input.key == SDLK_SPACE) ||
                     ((input.key >= 'a') && (input.key <= 'z')) ||
-                    ((input.key >= 'A') && (input.key <= 'Z')))
-                {
+                    ((input.key >= 'A') && (input.key <= 'Z'))) {
                         return input;
                 }
         }
@@ -137,8 +127,7 @@ int number(
         const std::string& title,
         const std::string& msg)
 {
-        if (!s_is_inited || config::is_bot_playing())
-        {
+        if (!s_is_inited || config::is_bot_playing()) {
                 return 0;
         }
 
@@ -158,30 +147,25 @@ int number(
 
 void wait_for_msg_more()
 {
-        if (!s_is_inited || config::is_bot_playing())
-        {
+        if (!s_is_inited || config::is_bot_playing()) {
                 return;
         }
 
         io::update_screen();
 
         // Determine criteria for confirming more prompt (decided by config)
-        if (config::is_any_key_confirm_more())
-        {
+        if (config::is_any_key_confirm_more()) {
                 wait_for_key_press();
         }
-        else
-        {
+        else {
                 // Only some keys confirm more prompts
-                while (true)
-                {
+                while (true) {
                         const auto input = io::read_input();
 
                         if ((input.key == SDLK_SPACE) ||
                             (input.key == SDLK_ESCAPE) ||
                             (input.key == SDLK_RETURN) ||
-                            (input.key == SDLK_TAB))
-                        {
+                            (input.key == SDLK_TAB)) {
                                 break;
                         }
                 }
@@ -190,21 +174,18 @@ void wait_for_msg_more()
 
 void wait_for_confirm()
 {
-        if (!s_is_inited || config::is_bot_playing())
-        {
+        if (!s_is_inited || config::is_bot_playing()) {
                 return;
         }
 
         io::update_screen();
 
-        while (true)
-        {
+        while (true) {
                 const auto input = io::read_input();
 
                 if ((input.key == SDLK_SPACE) ||
                     (input.key == SDLK_ESCAPE) ||
-                    (input.key == SDLK_RETURN))
-                {
+                    (input.key == SDLK_RETURN)) {
                         break;
                 }
         }
@@ -212,21 +193,18 @@ void wait_for_confirm()
 
 Dir dir(const AllowCenter allow_center)
 {
-        if (!s_is_inited || config::is_bot_playing())
-        {
+        if (!s_is_inited || config::is_bot_playing()) {
                 return Dir::END;
         }
 
         io::update_screen();
 
-        while (true)
-        {
+        while (true) {
                 const auto input = io::read_input();
 
                 const auto game_cmd = game_commands::to_cmd(input);
 
-                switch (game_cmd)
-                {
+                switch (game_cmd) {
                 case GameCmd::right:
                         return Dir::right;
 
@@ -252,8 +230,7 @@ Dir dir(const AllowCenter allow_center)
                         return Dir::up_left;
 
                 case GameCmd::wait:
-                        if (allow_center == AllowCenter::yes)
-                        {
+                        if (allow_center == AllowCenter::yes) {
                                 return Dir::center;
                         }
                         break;
@@ -262,8 +239,7 @@ Dir dir(const AllowCenter allow_center)
                         break;
                 }
 
-                if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE))
-                {
+                if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE)) {
                         return Dir::END;
                 }
         }

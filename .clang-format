@@ -21,9 +21,9 @@ AllowShortLambdasOnASingleLine: true
 BinPackArguments: false
 BinPackParameters: false
 BraceWrapping:
-  AfterCaseLabel: true
+  AfterCaseLabel: false
   AfterClass: true
-  AfterControlStatement: true
+  AfterControlStatement: false
   AfterEnum: true
   AfterFunction: true
   AfterNamespace: true
@@ -31,10 +31,10 @@ BraceWrapping:
   AfterStruct: true
   AfterUnion: true
   AfterExternBlock: true
-  BeforeCatch: true
+  BeforeCatch: false
   BeforeElse: true
   # TODO: This is available in clang-format >= 12.0
-  # BeforeLambdaBody: true
+  # BeforeLambdaBody: false
   IndentBraces: false
   SplitEmptyFunction: false
   SplitEmptyRecord: false

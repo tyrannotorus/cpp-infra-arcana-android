@@ -42,20 +42,17 @@ static int calc_player_turns_per_hp_regen_rate()
         int nr_turns_per_hp = 0;
 
         // Rapid Recoverer trait affects hp regen?
-        if (player_bon::has_trait(Trait::rapid_recoverer))
-        {
+        if (player_bon::has_trait(Trait::rapid_recoverer)) {
                 nr_turns_per_hp = 2;
         }
-        else
-        {
+        else {
                 nr_turns_per_hp = 20;
         }
 
         // Wounds affect hp regen?
         int nr_wounds = 0;
 
-        if (player.m_properties.has(PropId::wound))
-        {
+        if (player.m_properties.has(PropId::wound)) {
                 auto* const wound =
                         static_cast<PropWound*>(
                                 player.m_properties.prop(PropId::wound));
@@ -65,26 +62,22 @@ static int calc_player_turns_per_hp_regen_rate()
 
         int wound_turns_penalty = nr_wounds * 4;
 
-        if (player_bon::has_trait(Trait::survivalist))
-        {
+        if (player_bon::has_trait(Trait::survivalist)) {
                 wound_turns_penalty /= 2;
         }
 
         nr_turns_per_hp += wound_turns_penalty;
 
         // Items affect hp regen?
-        for (const auto& slot : player.m_inv.m_slots)
-        {
-                if (slot.item)
-                {
+        for (const auto& slot : player.m_inv.m_slots) {
+                if (slot.item) {
                         nr_turns_per_hp +=
                                 slot.item->hp_regen_change(
                                         InvType::slots);
                 }
         }
 
-        for (const auto* const item : player.m_inv.m_backpack)
-        {
+        for (const auto* const item : player.m_inv.m_backpack) {
                 nr_turns_per_hp +=
                         item->hp_regen_change(InvType::backpack);
         }
@@ -102,16 +95,14 @@ static void player_regen_hp()
             (game_time::turn_nr() <= 1) ||
             player.m_properties.has(PropId::poisoned) ||
             player.m_properties.has(PropId::disabled_hp_regen) ||
-            (player_bon::bg() == Bg::ghoul))
-        {
+            (player_bon::bg() == Bg::ghoul)) {
                 return;
         }
 
         const int nr_turns_per_hp = calc_player_turns_per_hp_regen_rate();
         const int turn = game_time::turn_nr();
 
-        if ((turn % nr_turns_per_hp) != 0)
-        {
+        if ((turn % nr_turns_per_hp) != 0) {
                 return;
         }
 
@@ -122,22 +113,18 @@ static Range calc_nr_turns_range_to_recharge_spell_shield()
 {
         Range range;
 
-        if (player_bon::has_trait(Trait::mighty_spirit))
-        {
+        if (player_bon::has_trait(Trait::mighty_spirit)) {
                 range = {25, 50};
         }
-        else if (player_bon::has_trait(Trait::strong_spirit))
-        {
+        else if (player_bon::has_trait(Trait::strong_spirit)) {
                 range = {75, 100};
         }
-        else
-        {
+        else {
                 range = {125, 150};
         }
 
         // Halved number of turns due to the Talisman of Reflection?
-        if (map::g_player->m_inv.has_item_in_backpack(item::Id::refl_talisman))
-        {
+        if (map::g_player->m_inv.has_item_in_backpack(item::Id::refl_talisman)) {
                 range.min /= 2;
                 range.max /= 2;
         }
@@ -149,8 +136,7 @@ static void player_regen_spell_shield()
 {
         auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::r_spell))
-        {
+        if (player.m_properties.has(PropId::r_spell)) {
                 // Player already has spell resistance. Keep resetting the
                 // countdown to "uninitialized" while in this state, and do
                 // nothing else. This will trigger a reroll of the duration when
@@ -162,19 +148,16 @@ static void player_regen_spell_shield()
 
         // Spell shield not currently active.
 
-        if (!player_bon::has_trait(Trait::stout_spirit))
-        {
+        if (!player_bon::has_trait(Trait::stout_spirit)) {
                 return;
         }
 
         // Player has at least stout spirit.
 
-        if (actor::player_state::g_nr_turns_until_r_spell <= 0)
-        {
+        if (actor::player_state::g_nr_turns_until_r_spell <= 0) {
                 // Cooldown has finished, OR countdown not initialized.
 
-                if (actor::player_state::g_nr_turns_until_r_spell == 0)
-                {
+                if (actor::player_state::g_nr_turns_until_r_spell == 0) {
                         // Cooldown has finished
                         auto* prop = property_factory::make(PropId::r_spell);
 
@@ -191,8 +174,7 @@ static void player_regen_spell_shield()
         }
 
         if (!player.m_properties.has(PropId::r_spell) &&
-            (actor::player_state::g_nr_turns_until_r_spell > 0))
-        {
+            (actor::player_state::g_nr_turns_until_r_spell > 0)) {
                 // Spell resistance is in cooldown state, decrement number of
                 // remaining turns.
                 --actor::player_state::g_nr_turns_until_r_spell;
@@ -204,8 +186,7 @@ static void player_regen_meditative_focused()
         auto& player = *map::g_player;
 
         if (player.m_properties.has(PropId::meditative_focused) ||
-            player.m_properties.has(PropId::frenzied))
-        {
+            player.m_properties.has(PropId::frenzied)) {
                 // Player is already focused, or is frenzied. Keep resetting the
                 // countdown to "uninitialized" while in this state, and do
                 // nothing else. This will trigger a reroll of the duration when
@@ -217,8 +198,7 @@ static void player_regen_meditative_focused()
 
         // Meditative focused not currently active.
 
-        if (!player_bon::has_trait(Trait::meditative))
-        {
+        if (!player_bon::has_trait(Trait::meditative)) {
                 return;
         }
 
@@ -227,12 +207,10 @@ static void player_regen_meditative_focused()
         int& nr_turns_until_focused =
                 actor::player_state::g_nr_turns_until_meditative_focused;
 
-        if (nr_turns_until_focused <= 0)
-        {
+        if (nr_turns_until_focused <= 0) {
                 // Cooldown has finished, OR countdown not initialized.
 
-                if (nr_turns_until_focused == 0)
-                {
+                if (nr_turns_until_focused == 0) {
                         // Cooldown has finished
                         Prop* prop =
                                 property_factory::make(
@@ -249,8 +227,7 @@ static void player_regen_meditative_focused()
         }
 
         if (!player.m_properties.has(PropId::meditative_focused) &&
-            (nr_turns_until_focused > 0))
-        {
+            (nr_turns_until_focused > 0)) {
                 // Meditative focused is in cooldown state, decrement number of
                 // remaining turns.
                 --nr_turns_until_focused;
@@ -267,8 +244,7 @@ static void player_std_turn()
                !player.m_properties.has(PropId::infected));
 #endif  // NDEBUG
 
-        if (!player.is_alive())
-        {
+        if (!player.is_alive()) {
                 return;
         }
 
@@ -276,13 +252,11 @@ static void player_std_turn()
 
         player_regen_meditative_focused();
 
-        if (actor::player_state::g_active_explosive)
-        {
+        if (actor::player_state::g_active_explosive) {
                 actor::player_state::g_active_explosive
                         ->on_std_turn_player_hold_ignited();
 
-                if (!map::g_player->is_alive())
-                {
+                if (!map::g_player->is_alive()) {
                         return;
                 }
         }
@@ -295,12 +269,10 @@ static void mon_std_turn(actor::Actor& mon)
         smell::put_smell_for_mon(mon);
 
         // Countdown all spell cooldowns
-        for (auto& spell : mon.m_mon_spells)
-        {
+        for (auto& spell : mon.m_mon_spells) {
                 int& cooldown = spell.cooldown;
 
-                if (cooldown > 0)
-                {
+                if (cooldown > 0) {
                         --cooldown;
                 }
         }
@@ -312,8 +284,7 @@ static void mon_std_turn(actor::Actor& mon)
             !actor::is_player(mon.m_leader) &&
             !map::g_player->m_properties.has(PropId::sanctuary) &&
             (actor::is_player(mon.m_ai_state.target) ||
-             !mon.m_ai_state.target))
-        {
+             !mon.m_ai_state.target)) {
                 ai::info::look(mon);
         }
 }
@@ -321,13 +292,11 @@ static void mon_std_turn(actor::Actor& mon)
 static void std_turn_common(actor::Actor& actor)
 {
         // Do light damage if in lit cell
-        if (map::g_light.at(actor.m_pos))
-        {
+        if (map::g_light.at(actor.m_pos)) {
                 actor::hit(actor, 1, DmgType::light);
         }
 
-        if (!actor.is_alive())
-        {
+        if (!actor.is_alive()) {
                 return;
         }
 
@@ -339,8 +308,7 @@ static void std_turn_common(actor::Actor& actor)
 
         const bool is_hp_above_max = (actor.m_hp > actor::max_hp(actor));
 
-        if (is_hp_above_max && decr_this_turn)
-        {
+        if (is_hp_above_max && decr_this_turn) {
                 --actor.m_hp;
         }
 
@@ -348,33 +316,27 @@ static void std_turn_common(actor::Actor& actor)
 
         const bool is_exorcist = player_bon::is_bg(Bg::exorcist);
 
-        if (!is_exorcist && is_sp_above_max && decr_this_turn)
-        {
+        if (!is_exorcist && is_sp_above_max && decr_this_turn) {
                 --actor.m_sp;
         }
 
         // Regenerate spirit
         int regen_sp_n_turns = 18;
 
-        if (actor::is_player(&actor))
-        {
-                if (player_bon::has_trait(Trait::stout_spirit))
-                {
+        if (actor::is_player(&actor)) {
+                if (player_bon::has_trait(Trait::stout_spirit)) {
                         regen_sp_n_turns -= 4;
                 }
 
-                if (player_bon::has_trait(Trait::strong_spirit))
-                {
+                if (player_bon::has_trait(Trait::strong_spirit)) {
                         regen_sp_n_turns -= 4;
                 }
 
-                if (player_bon::has_trait(Trait::mighty_spirit))
-                {
+                if (player_bon::has_trait(Trait::mighty_spirit)) {
                         regen_sp_n_turns -= 4;
                 }
         }
-        else
-        {
+        else {
                 // Is monster
 
                 // Monsters regen spirit very quickly, so spell casters
@@ -385,8 +347,7 @@ static void std_turn_common(actor::Actor& actor)
         const bool regen_sp_this_turn =
                 ((game_time::turn_nr() % regen_sp_n_turns) == 0);
 
-        if (regen_sp_this_turn)
-        {
+        if (regen_sp_this_turn) {
                 actor.restore_sp(1, false, Verbose::no);
         }
 }
@@ -400,12 +361,10 @@ void std_turn(Actor& actor)
 {
         std_turn_common(actor);
 
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 player_std_turn();
         }
-        else
-        {
+        else {
                 mon_std_turn(actor);
         }
 }

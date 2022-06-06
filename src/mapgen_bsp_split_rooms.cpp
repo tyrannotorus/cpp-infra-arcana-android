@@ -38,20 +38,16 @@ static bsp::BlockedSplitPositions find_blocked_split_positions(
 {
         bsp::BlockedSplitPositions blocked;
 
-        for (int x = (room.m_r.p0.x - 1); x <= (room.m_r.p1.x + 1); ++x)
-        {
+        for (int x = (room.m_r.p0.x - 1); x <= (room.m_r.p1.x + 1); ++x) {
                 if (is_floor({x, room.m_r.p0.y - 1}) ||
-                    is_floor({x, room.m_r.p1.y + 1}))
-                {
+                    is_floor({x, room.m_r.p1.y + 1})) {
                         blocked.x.push_back(x);
                 }
         }
 
-        for (int y = (room.m_r.p0.y - 1); y <= (room.m_r.p1.y + 1); ++y)
-        {
+        for (int y = (room.m_r.p0.y - 1); y <= (room.m_r.p1.y + 1); ++y) {
                 if (is_floor({room.m_r.p0.x - 1, y}) ||
-                    is_floor({room.m_r.p1.x + 1, y}))
-                {
+                    is_floor({room.m_r.p1.x + 1, y})) {
                         blocked.y.push_back(y);
                 }
         }
@@ -73,13 +69,11 @@ static std::vector<Room*> try_bsp_split_room(Room& room)
 {
         // Abort if any cell in the room rectangle belongs to another room, or
         // contains something other than floor
-        for (const P& pos : room.m_r.positions())
-        {
+        for (const P& pos : room.m_r.positions()) {
                 const bool is_this_room =
                         (map::g_room_map.at(pos) == &room);
 
-                if (!is_this_room)
-                {
+                if (!is_this_room) {
                         return {};
                 }
 
@@ -87,8 +81,7 @@ static std::vector<Room*> try_bsp_split_room(Room& room)
                         map::g_terrain.at(pos)->id() ==
                         terrain::Id::floor;
 
-                if (!is_floor)
-                {
+                if (!is_floor) {
                         return {};
                 }
         }
@@ -101,20 +94,17 @@ static std::vector<Room*> try_bsp_split_room(Room& room)
                         child_room_min_size,
                         blocked_positions);
 
-        if (child_rects.size() != 2)
-        {
+        if (child_rects.size() != 2) {
                 return {};
         }
 
-        for (const auto pos : room.m_r.positions())
-        {
+        for (const auto pos : room.m_r.positions()) {
                 map::set_terrain(terrain::make(terrain::Id::wall, pos));
         }
 
         std::vector<Room*> new_rooms;
 
-        for (const auto& child_rect : child_rects)
-        {
+        for (const auto& child_rect : child_rects) {
                 auto* const sub_room =
                         mapgen::make_room(child_rect, IsSubRoom::yes);
 
@@ -137,8 +127,7 @@ static std::vector<P> find_edge(
 
         R edge_rect;
 
-        if (r1.p0.x == r2.p0.x)
-        {
+        if (r1.p0.x == r2.p0.x) {
                 // The rooms are on the same x position, i.e. they have a
                 // vertical layout
                 ASSERT(r1.p1.x == r2.p1.x);
@@ -155,8 +144,7 @@ static std::vector<P> find_edge(
 
                 ASSERT(edge_rect.h() == 1);
         }
-        else
-        {
+        else {
                 // The rooms are on different x position, i.e. they have a
                 // horizontal layout
                 ASSERT(r1.p1.y == r2.p1.y);
@@ -176,8 +164,7 @@ static std::vector<P> find_edge(
 
         std::vector<P> edge_positions;
 
-        for (const auto& pos : edge_rect.positions())
-        {
+        for (const auto& pos : edge_rect.positions()) {
                 ASSERT(map::g_room_map.at(pos) != &room_1);
                 ASSERT(map::g_room_map.at(pos) != &room_2);
                 ASSERT(map::g_room_map.at(pos) != nullptr);
@@ -196,24 +183,20 @@ static auto split_original_rooms(
 {
         std::vector<std::vector<P>> edges;
 
-        for (size_t i = 0; i < nr_original_rooms; ++i)
-        {
-                if (!chance_to_split_room.roll())
-                {
+        for (size_t i = 0; i < nr_original_rooms; ++i) {
+                if (!chance_to_split_room.roll()) {
                         continue;
                 }
 
                 auto& room = *map::g_room_list[i];
 
-                if (!allow_split_room_size(room.m_r))
-                {
+                if (!allow_split_room_size(room.m_r)) {
                         continue;
                 }
 
                 const auto new_rooms = try_bsp_split_room(room);
 
-                if (new_rooms.size() != 2)
-                {
+                if (new_rooms.size() != 2) {
                         continue;
                 }
 
@@ -241,10 +224,8 @@ static auto split_new_rooms(
 {
         std::vector<std::vector<P>> edges;
 
-        for (size_t i = nr_original_rooms; i < map::g_room_list.size(); ++i)
-        {
-                if (!chance_to_split_room.roll())
-                {
+        for (size_t i = nr_original_rooms; i < map::g_room_list.size(); ++i) {
+                if (!chance_to_split_room.roll()) {
                         continue;
                 }
 
@@ -252,8 +233,7 @@ static auto split_new_rooms(
 
                 const auto new_rooms = try_bsp_split_room(room);
 
-                if (new_rooms.size() != 2)
-                {
+                if (new_rooms.size() != 2) {
                         continue;
                 }
 
@@ -269,10 +249,8 @@ static bool is_valid_entrance(const P& pos)
 {
         Array2<bool> walls_around_pos(3, 3);
 
-        for (int x = 0; x < 3; ++x)
-        {
-                for (int y = 0; y < 3; ++y)
-                {
+        for (int x = 0; x < 3; ++x) {
+                for (int y = 0; y < 3; ++y) {
                         const P map_p = pos.with_offsets(x - 1, y - 1);
 
                         const auto t_id = map::g_terrain.at(map_p)->id();
@@ -281,8 +259,7 @@ static bool is_valid_entrance(const P& pos)
                                 (t_id == terrain::Id::wall) ||
                                 (t_id == terrain::Id::grate);
 
-                        if (is_wall)
-                        {
+                        if (is_wall) {
                                 walls_around_pos.at(x, y) = true;
                         }
                 }
@@ -295,20 +272,17 @@ static bool is_valid_entrance(const P& pos)
 
 static std::vector<P> valid_entrances(const std::vector<P>& edge)
 {
-        if (edge.size() < 3)
-        {
+        if (edge.size() < 3) {
                 return {};
         }
 
         std::vector<P> entrances;
 
         // Do not use the first and last position of the edge (looks ugly)
-        for (size_t i = 1; i < (edge.size() - 1); ++i)
-        {
+        for (size_t i = 1; i < (edge.size() - 1); ++i) {
                 const auto pos = edge[i];
 
-                if (is_valid_entrance(pos))
-                {
+                if (is_valid_entrance(pos)) {
                         entrances.push_back(pos);
                 }
         }
@@ -318,12 +292,10 @@ static std::vector<P> valid_entrances(const std::vector<P>& edge)
 
 static void make_entrances(const std::vector<std::vector<P>>& edges)
 {
-        for (const auto& edge : edges)
-        {
+        for (const auto& edge : edges) {
                 const auto entrance_bucket = valid_entrances(edge);
 
-                if (entrance_bucket.empty())
-                {
+                if (entrance_bucket.empty()) {
                         // No entrance could be found on this edge - the map
                         // will be unconnected, discard it!
                         mapgen::g_is_map_valid = false;
@@ -340,8 +312,7 @@ static void make_entrances(const std::vector<std::vector<P>>& edges)
 
                 // NOTE: This may occasionally place entrances on the same
                 // position twice, or on two adjacent positions - this is OK.
-                for (int i = 0; i < nr_edge_entrances; ++i)
-                {
+                for (int i = 0; i < nr_edge_entrances; ++i) {
                         const P entr_pos = rnd::element(entrance_bucket);
 
                         map::set_terrain(
@@ -355,8 +326,7 @@ static void make_entrances(const std::vector<std::vector<P>>& edges)
                         // doors on the same edge, as it can create a
                         // nonsensical layout
                         if (rnd::coin_toss() &&
-                            (nr_edge_entrances == 1))
-                        {
+                            (nr_edge_entrances == 1)) {
                                 mapgen::g_door_proposals.at(entr_pos) = true;
                         }
                 }
@@ -376,17 +346,13 @@ static void make_grates(const std::vector<std::vector<P>>& edges)
 
         const Fraction chance_to_make_grates_for_edge(1, 2);
 
-        for (const auto& edge : edges)
-        {
-                if (!chance_to_make_grates_for_edge.roll())
-                {
+        for (const auto& edge : edges) {
+                if (!chance_to_make_grates_for_edge.roll()) {
                         continue;
                 }
 
-                for (const auto& p : edge)
-                {
-                        if (!mapgen::allow_make_grate_at(p, blocked))
-                        {
+                for (const auto& p : edge) {
+                        if (!mapgen::allow_make_grate_at(p, blocked)) {
                                 continue;
                         }
 

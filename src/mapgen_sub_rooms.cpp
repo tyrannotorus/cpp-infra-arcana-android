@@ -44,8 +44,7 @@ static bool is_large_room(const R& area)
 
 static void put_inner_wall(const P& pos)
 {
-        if (map::g_dlvl >= g_dlvl_first_late_game)
-        {
+        if (map::g_dlvl >= g_dlvl_first_late_game) {
                 std::vector<int> terrain_weights = {
                         3,  // Wall
                         1,  // High rubble
@@ -55,47 +54,36 @@ static void put_inner_wall(const P& pos)
 
                 terrain::Terrain* terrain = nullptr;
 
-                switch (rnd::weighted_choice(terrain_weights))
-                {
-                case 0:
-                {
+                switch (rnd::weighted_choice(terrain_weights)) {
+                case 0: {
                         terrain = terrain::make(terrain::Id::wall, pos);
-                }
-                break;
+                } break;
 
-                case 1:
-                {
+                case 1: {
                         terrain = terrain::make(terrain::Id::rubble_high, pos);
-                }
-                break;
+                } break;
 
-                case 2:
-                {
+                case 2: {
                         terrain = terrain::make(terrain::Id::rubble_low, pos);
-                }
-                break;
+                } break;
 
-                case 3:
-                {
+                case 3: {
                         terrain = terrain::make(terrain::Id::floor, pos);
 
                         static_cast<terrain::Floor*>(terrain)->m_type =
                                 terrain::FloorType::cave;
-                }
-                break;
+                } break;
 
                 default:
                 {
                         ASSERT(false);
                         terrain = terrain::make(terrain::Id::wall, pos);
-                }
-                break;
+                } break;
                 }
 
                 map::set_terrain(terrain);
         }
-        else
-        {
+        else {
                 // Not late game
                 auto* const t = terrain::make(terrain::Id::wall, pos);
 
@@ -174,10 +162,8 @@ static bool allow_put_inner_walls(
                 inner_walls_area.p0 - 1,
                 inner_walls_area.p1 + 1);
 
-        for (const auto& p : expanded_area.positions())
-        {
-                if (!map::is_pos_inside_map(p))
-                {
+        for (const auto& p : expanded_area.positions()) {
+                if (!map::is_pos_inside_map(p)) {
                         return false;
                 }
 
@@ -186,8 +172,7 @@ static bool allow_put_inner_walls(
                 const bool is_outer_oom = (room == &outer_room);
 
                 if ((is_outer_oom && (f_id != terrain::Id::floor)) ||
-                    (!is_outer_oom && (f_id != terrain::Id::wall)))
-                {
+                    (!is_outer_oom && (f_id != terrain::Id::wall))) {
                         return false;
                 }
         }
@@ -209,8 +194,7 @@ static bool try_make_inner_room(
         ASSERT(map::is_pos_inside_map(inner_walls_area.p0));
         ASSERT(map::is_pos_inside_map(inner_walls_area.p1));
 
-        if (!allow_put_inner_walls(inner_walls_area, outer_room))
-        {
+        if (!allow_put_inner_walls(inner_walls_area, outer_room)) {
                 return false;
         }
 
@@ -230,10 +214,8 @@ static bool try_make_inner_room(
         // Make walls and entrance(s) for our new room
         std::vector<P> entrance_bucket;
 
-        for (const auto& p : inner_walls_area.positions())
-        {
-                if (!is_pos_on_edge(p, inner_walls_area))
-                {
+        for (const auto& p : inner_walls_area.positions()) {
+                if (!is_pos_on_edge(p, inner_walls_area)) {
                         // Position is not on the inner walls, do not put a wall
                         // or entrance here.
                         continue;
@@ -241,8 +223,7 @@ static bool try_make_inner_room(
 
                 put_inner_wall(p);
 
-                if (is_pos_on_corner(p, inner_walls_area))
-                {
+                if (is_pos_on_corner(p, inner_walls_area)) {
                         // Position is on a corner of the inner walls, do not
                         // put an entrance here.
                         continue;
@@ -251,8 +232,7 @@ static bool try_make_inner_room(
                 entrance_bucket.push_back(p);
         }
 
-        if (entrance_bucket.empty())
-        {
+        if (entrance_bucket.empty()) {
                 // Not possible to place an entrance to the inner room, Discard
                 // this map.
                 mapgen::g_is_map_valid = false;
@@ -263,8 +243,7 @@ static bool try_make_inner_room(
         // Sometimes place one entrance, which may have a door (always do this
         // if there are very few possible entries), and sometimes place multiple
         // entrances without doors.
-        if (rnd::coin_toss() || entrance_bucket.size() <= 4)
-        {
+        if (rnd::coin_toss() || entrance_bucket.size() <= 4) {
                 // One entrance that may have a door.
                 const auto door_pos = rnd::element(entrance_bucket);
 
@@ -274,30 +253,25 @@ static bool try_make_inner_room(
 
                 mapgen::g_door_proposals.at(door_pos) = true;
         }
-        else
-        {
+        else {
                 // Place multiple "doorless" entrances.
                 std::vector<P> positions_placed;
                 const int nr_tries = rnd::range(1, 10);
 
-                for (int i = 0; i < nr_tries; ++i)
-                {
+                for (int i = 0; i < nr_tries; ++i) {
                         const auto try_p = rnd::element(entrance_bucket);
 
                         bool is_pos_ok = true;
 
                         // Never make two adjacent entrances.
-                        for (P& prev_pos : positions_placed)
-                        {
-                                if (is_pos_adj(try_p, prev_pos, true))
-                                {
+                        for (P& prev_pos : positions_placed) {
+                                if (is_pos_adj(try_p, prev_pos, true)) {
                                         is_pos_ok = false;
                                         break;
                                 }
                         }
 
-                        if (is_pos_ok)
-                        {
+                        if (is_pos_ok) {
                                 auto* const t =
                                         terrain::make(
                                                 terrain::Id::floor,
@@ -316,8 +290,7 @@ static bool try_make_inner_room(
 
 static void make_sub_rooms_for(Room& outer_room)
 {
-        if (!outer_room.allow_sub_rooms())
-        {
+        if (!outer_room.allow_sub_rooms()) {
                 return;
         }
 
@@ -332,8 +305,7 @@ static void make_sub_rooms_for(Room& outer_room)
                 outer_room_dims - (s_min_outer_wall_gap * 2);
 
         if (((inner_walls_max_dims.x < s_walls_min_dims.x)) ||
-            ((inner_walls_max_dims.y < s_walls_min_dims.y)))
-        {
+            ((inner_walls_max_dims.y < s_walls_min_dims.y))) {
                 // We cannot even build the smallest possible inner room
                 // inside this outer room - no point in trying.
                 return;
@@ -350,8 +322,7 @@ static void make_sub_rooms_for(Room& outer_room)
         // To build a room inside a room, the outer room shall:
         // * Be a standard room, and
         // * Be a "big room" - but we occasionally allow "small rooms"
-        if (!is_outer_std_room /* || (!is_outer_big && !rnd::one_in(4)) */)
-        {
+        if (!is_outer_std_room /* || (!is_outer_big && !rnd::one_in(4)) */) {
                 // Outer room does not meet dimensions criteria - next room.
                 return;
         }
@@ -360,25 +331,21 @@ static void make_sub_rooms_for(Room& outer_room)
 
         for (int inner_nr = 0;
              inner_nr < max_nr_sub_rooms;
-             ++inner_nr)
-        {
+             ++inner_nr) {
                 for (
                         int try_count = 0;
                         try_count < s_nr_tries_to_make_room;
-                        ++try_count)
-                {
+                        ++try_count) {
                         const bool did_build =
                                 try_make_inner_room(
                                         outer_room,
                                         inner_walls_max_dims);
 
-                        if (!mapgen::g_is_map_valid)
-                        {
+                        if (!mapgen::g_is_map_valid) {
                                 return;
                         }
 
-                        if (did_build)
-                        {
+                        if (did_build) {
                                 break;
                         }
                 }
@@ -398,8 +365,7 @@ void make_sub_rooms()
         const bool is_late_game = (map::g_dlvl >= g_dlvl_first_late_game);
 
         // NOTE: We must iterate by index here since new rooms may be added.
-        for (size_t i = 0; i < map::g_room_list.size(); ++i)
-        {
+        for (size_t i = 0; i < map::g_room_list.size(); ++i) {
                 auto* const outer_room = map::g_room_list[i];
 
                 // Put fewer sub rooms late game; If the outer room is not a
@@ -411,8 +377,7 @@ void make_sub_rooms()
                 if (is_late_game &&
                     !outer_room->m_is_sub_room &&
                     !is_large_room(outer_room->m_r) &&
-                    !rnd::one_in(3))
-                {
+                    !rnd::one_in(3)) {
                         continue;
                 }
 

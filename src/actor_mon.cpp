@@ -80,8 +80,7 @@ std::string get_cultist_phrase()
                 "Prostragaranar malachtose!",
                 "Apigami!"};
 
-        if (rnd::one_in(4))
-        {
+        if (rnd::one_in(4)) {
                 const God& god = gods::current_god();
 
                 const std::vector<std::string> god_phrases = {
@@ -130,31 +129,25 @@ std::vector<Actor*> Actor::foes_aware_of() const
 {
         std::vector<Actor*> result;
 
-        if (is_actor_my_leader(map::g_player))
-        {
+        if (is_actor_my_leader(map::g_player)) {
                 // Player allied monster - add all player hostile monsters which
                 // the player is aware of.
-                for (auto* const actor : game_time::g_actors)
-                {
+                for (auto* const actor : game_time::g_actors) {
                         if (!actor::is_player(actor) &&
                             !actor->is_actor_my_leader(map::g_player) &&
-                            actor->is_player_aware_of_me())
-                        {
+                            actor->is_player_aware_of_me()) {
                                 result.push_back(actor);
                         }
                 }
         }
-        else if (is_aware_of_player())
-        {
+        else if (is_aware_of_player()) {
                 // Player-hostile monster aware of the player - add the player,
                 // and all creatures allied to the player.
                 result.push_back(map::g_player);
 
-                for (auto* const actor : game_time::g_actors)
-                {
+                for (auto* const actor : game_time::g_actors) {
                         if (!actor::is_player(actor) &&
-                            actor->is_actor_my_leader(map::g_player))
-                        {
+                            actor->is_actor_my_leader(map::g_player)) {
                                 result.push_back(actor);
                         }
                 }
@@ -183,8 +176,7 @@ bool Actor::is_sneaking() const
 
 void Actor::speak_phrase(AlertsMon alerts_others)
 {
-        if (m_properties.has(PropId::always_aware))
-        {
+        if (m_properties.has(PropId::always_aware)) {
                 // This monster is always aware of the player - avoid
                 // continuously alerting other mosnters.
                 alerts_others = AlertsMon::no;
@@ -218,15 +210,13 @@ void Actor::speak_phrase(AlertsMon alerts_others)
 
 std::string Actor::aware_msg_mon_seen() const
 {
-        if (m_data->use_cultist_aware_msg_mon_seen)
-        {
+        if (m_data->use_cultist_aware_msg_mon_seen) {
                 return get_cultist_aware_msg_seen(*this);
         }
 
         std::string msg_end = m_data->aware_msg_mon_seen;
 
-        if (msg_end.empty())
-        {
+        if (msg_end.empty()) {
                 return "";
         }
 
@@ -237,8 +227,7 @@ std::string Actor::aware_msg_mon_seen() const
 
 std::string Actor::aware_msg_mon_hidden() const
 {
-        if (m_data->use_cultist_aware_msg_mon_hidden)
-        {
+        if (m_data->use_cultist_aware_msg_mon_hidden) {
                 return get_cultist_aware_msg_hidden();
         }
 
@@ -247,8 +236,7 @@ std::string Actor::aware_msg_mon_hidden() const
 
 void Actor::become_aware_player(const AwareSource source, const int factor)
 {
-        if (!is_alive() || is_actor_my_leader(map::g_player))
-        {
+        if (!is_alive() || is_actor_my_leader(map::g_player)) {
                 return;
         }
 
@@ -265,8 +253,7 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
         bool do_reaction_time = false;
         bool allow_speak_phrase = false;
 
-        switch (source)
-        {
+        switch (source) {
         case AwareSource::attacked:
                 do_reaction_time = false;
                 allow_speak_phrase = true;
@@ -293,8 +280,7 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
                 break;
         }
 
-        if (!do_reaction_time)
-        {
+        if (!do_reaction_time) {
                 // No reaction time - clear any waiting status. The monster may
                 // for example have become aware through an attack sound before
                 // the actual attack is executed, which would apply a waiting
@@ -303,26 +289,21 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
                 m_properties.end_prop(PropId::waiting);
         }
 
-        if (!was_aware_before)
-        {
+        if (!was_aware_before) {
                 // Monster became aware now
 
                 if ((source == AwareSource::seeing) &&
-                    can_player_see_actor(*this))
-                {
+                    can_player_see_actor(*this)) {
                         print_player_see_mon_become_aware_msg();
                 }
 
-                if (allow_speak_phrase && rnd::coin_toss())
-                {
+                if (allow_speak_phrase && rnd::coin_toss()) {
                         speak_phrase(AlertsMon::yes);
                 }
 
-                if (do_reaction_time)
-                {
+                if (do_reaction_time) {
                         // Give the monster some reaction time
-                        if (!is_actor_my_leader(map::g_player))
-                        {
+                        if (!is_actor_my_leader(map::g_player)) {
                                 auto* const prop =
                                         property_factory::make(PropId::waiting);
 
@@ -336,8 +317,7 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
 
 void Actor::become_wary_player()
 {
-        if (!is_alive() || is_actor_my_leader(map::g_player))
-        {
+        if (!is_alive() || is_actor_my_leader(map::g_player)) {
                 return;
         }
 
@@ -349,15 +329,12 @@ void Actor::become_wary_player()
         m_mon_aware_state.wary_counter =
                 std::max(nr_turns, wary_counter_before);
 
-        if (wary_counter_before <= 0)
-        {
-                if (can_player_see_actor(*this))
-                {
+        if (wary_counter_before <= 0) {
+                if (can_player_see_actor(*this)) {
                         print_player_see_mon_become_wary_msg();
                 }
 
-                if (rnd::one_in(4))
-                {
+                if (rnd::one_in(4)) {
                         speak_phrase(AlertsMon::no);
                 }
         }
@@ -377,8 +354,7 @@ void Actor::print_player_see_mon_become_aware_msg() const
 
 void Actor::print_player_see_mon_become_wary_msg() const
 {
-        if (m_data->wary_msg.empty())
-        {
+        if (m_data->wary_msg.empty()) {
                 return;
         }
 
@@ -397,8 +373,7 @@ void Actor::make_player_aware_of_me(int duration_factor)
 {
         int nr_turns = 2 * duration_factor;
 
-        if (player_bon::bg() == Bg::rogue)
-        {
+        if (player_bon::bg() == Bg::rogue) {
                 nr_turns *= 8;
         }
 
@@ -407,21 +382,18 @@ void Actor::make_player_aware_of_me(int duration_factor)
                         nr_turns,
                         m_mon_aware_state.player_aware_of_me_counter);
 
-        if (is_alive() && can_player_see_actor(*this))
-        {
+        if (is_alive() && can_player_see_actor(*this)) {
                 game::player_discover_monster(*this);
         }
 }
 
 DidAction Actor::try_attack(Actor& defender)
 {
-        if (!is_alive())
-        {
+        if (!is_alive()) {
                 return DidAction::no;
         }
 
-        if (!is_aware_of_player() && !actor::is_player(m_leader))
-        {
+        if (!is_aware_of_player() && !actor::is_player(m_leader)) {
                 return DidAction::no;
         }
 
@@ -431,15 +403,12 @@ DidAction Actor::try_attack(Actor& defender)
 
         const auto att = choose_attack(my_avail_attacks);
 
-        if (!att.wpn)
-        {
+        if (!att.wpn) {
                 return DidAction::no;
         }
 
-        if (att.is_melee)
-        {
-                if (att.wpn->data().melee.is_melee_wpn)
-                {
+        if (att.is_melee) {
+                if (att.wpn->data().melee.is_melee_wpn) {
                         attack::melee(this, m_pos, defender, *att.wpn);
 
                         return DidAction::yes;
@@ -448,22 +417,18 @@ DidAction Actor::try_attack(Actor& defender)
                 return DidAction::no;
         }
 
-        if (att.wpn->data().ranged.is_ranged_wpn)
-        {
-                if (my_avail_attacks.should_reload)
-                {
+        if (att.wpn->data().ranged.is_ranged_wpn) {
+                if (my_avail_attacks.should_reload) {
                         reload::try_reload(*this, att.wpn);
 
                         return DidAction::yes;
                 }
 
-                if (is_ranged_attack_blocked(defender.m_pos))
-                {
+                if (is_ranged_attack_blocked(defender.m_pos)) {
                         return DidAction::no;
                 }
 
-                if (m_data->ranged_cooldown_turns > 0)
-                {
+                if (m_data->ranged_cooldown_turns > 0) {
                         auto* prop =
                                 property_factory::make(
                                         PropId::disabled_ranged);
@@ -499,27 +464,23 @@ bool Actor::is_ranged_attack_blocked(const P& target_pos) const
         const bool ignore_blocking_friend = rnd::one_in(20);
 
         auto is_blocking_at = [&](const auto& p) {
-                if ((p == m_pos) || (p == target_pos))
-                {
+                if ((p == m_pos) || (p == target_pos)) {
                         return false;
                 }
 
-                if (!ignore_blocking_friend)
-                {
+                if (!ignore_blocking_friend) {
                         // TODO: This does not consider allies/hostiles.
                         const auto* const actor = map::living_actor_at(p);
 
                         if (actor &&
-                            (actor->m_data->actor_size != actor::Size::floor))
-                        {
+                            (actor->m_data->actor_size != actor::Size::floor)) {
                                 return true;
                         }
                 }
 
                 const terrain::Terrain* const terrain = map::g_terrain.at(p);
 
-                if (!terrain->is_projectile_passable())
-                {
+                if (!terrain->is_projectile_passable()) {
                         return true;
                 }
 
@@ -537,17 +498,14 @@ AiAvailAttacksData Actor::avail_attacks(Actor& defender) const
 {
         AiAvailAttacksData result;
 
-        if (!m_properties.allow_attack(Verbose::no))
-        {
+        if (!m_properties.allow_attack(Verbose::no)) {
                 return result;
         }
 
         result.is_melee = is_pos_adj(m_pos, defender.m_pos, false);
 
-        if (result.is_melee)
-        {
-                if (!m_properties.allow_attack_melee(Verbose::no))
-                {
+        if (result.is_melee) {
+                if (!m_properties.allow_attack_melee(Verbose::no)) {
                         return result;
                 }
 
@@ -555,16 +513,13 @@ AiAvailAttacksData Actor::avail_attacks(Actor& defender) const
 
                 auto* wielded_wpn = avail_wielded_melee();
 
-                if (wielded_wpn)
-                {
+                if (wielded_wpn) {
                         result.weapons.push_back(wielded_wpn);
                 }
         }
-        else
-        {
+        else {
                 // Ranged attack
-                if (!m_properties.allow_attack_ranged(Verbose::no))
-                {
+                if (!m_properties.allow_attack_ranged(Verbose::no)) {
                         return result;
                 }
 
@@ -572,8 +527,7 @@ AiAvailAttacksData Actor::avail_attacks(Actor& defender) const
 
                 auto* const wielded_wpn = avail_wielded_ranged();
 
-                if (wielded_wpn)
-                {
+                if (wielded_wpn) {
                         result.weapons.push_back(wielded_wpn);
 
                         result.should_reload = should_reload(*wielded_wpn);
@@ -587,12 +541,10 @@ item::Wpn* Actor::avail_wielded_melee() const
 {
         auto* const item = m_inv.item_in_slot(SlotId::wpn);
 
-        if (item)
-        {
+        if (item) {
                 auto* const wpn = static_cast<item::Wpn*>(item);
 
-                if (wpn->data().melee.is_melee_wpn)
-                {
+                if (wpn->data().melee.is_melee_wpn) {
                         return wpn;
                 }
         }
@@ -604,12 +556,10 @@ item::Wpn* Actor::avail_wielded_ranged() const
 {
         auto* const item = m_inv.item_in_slot(SlotId::wpn);
 
-        if (item)
-        {
+        if (item) {
                 auto* const wpn = static_cast<item::Wpn*>(item);
 
-                if (wpn->data().ranged.is_ranged_wpn)
-                {
+                if (wpn->data().ranged.is_ranged_wpn) {
                         return wpn;
                 }
         }
@@ -621,12 +571,10 @@ std::vector<item::Wpn*> Actor::avail_intr_melee() const
 {
         std::vector<item::Wpn*> result;
 
-        for (auto* const item : m_inv.m_intrinsics)
-        {
+        for (auto* const item : m_inv.m_intrinsics) {
                 auto* wpn = static_cast<item::Wpn*>(item);
 
-                if (wpn->data().melee.is_melee_wpn)
-                {
+                if (wpn->data().melee.is_melee_wpn) {
                         result.push_back(wpn);
                 }
         }
@@ -638,12 +586,10 @@ std::vector<item::Wpn*> Actor::avail_intr_ranged() const
 {
         std::vector<item::Wpn*> result;
 
-        for (auto* const item : m_inv.m_intrinsics)
-        {
+        for (auto* const item : m_inv.m_intrinsics) {
                 auto* const wpn = static_cast<item::Wpn*>(item);
 
-                if (wpn->data().ranged.is_ranged_wpn)
-                {
+                if (wpn->data().ranged.is_ranged_wpn) {
                         result.push_back(wpn);
                 }
         }
@@ -669,8 +615,7 @@ AiAttData Actor::choose_attack(const AiAvailAttacksData& avail_attacks) const
 
         result.is_melee = avail_attacks.is_melee;
 
-        if (avail_attacks.weapons.empty())
-        {
+        if (avail_attacks.weapons.empty()) {
                 return result;
         }
 
@@ -685,10 +630,8 @@ int Actor::nr_mon_in_group() const
 
         int ret = 1;  // Starting at one to include leader
 
-        for (const Actor* const actor : game_time::g_actors)
-        {
-                if (actor->is_actor_my_leader(group_leader))
-                {
+        for (const Actor* const actor : game_time::g_actors) {
+                if (actor->is_actor_my_leader(group_leader)) {
                         ++ret;
                 }
         }
@@ -705,8 +648,7 @@ void Actor::add_spell(SpellSkill skill, Spell* const spell)
                         return spell_entry.spell->id() == spell->id();
                 });
 
-        if (search != std::end(m_mon_spells))
-        {
+        if (search != std::end(m_mon_spells)) {
                 delete spell;
 
                 return;

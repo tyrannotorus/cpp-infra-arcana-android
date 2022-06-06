@@ -72,16 +72,14 @@ public:
         {
                 int new_min = m_min;
 
-                if (m_min > 0)
-                {
+                if (m_min > 0) {
                         new_min = (m_min * pct) / 100;
                         new_min = std::max(new_min, 1);
                 }
 
                 int new_max = m_max;
 
-                if (m_max > 0)
-                {
+                if (m_max > 0) {
                         new_max = (m_max * pct) / 100;
 
                         new_max = std::max(new_max, 1);

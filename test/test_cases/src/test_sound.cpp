@@ -27,10 +27,8 @@ TEST_CASE("Sound alerts monster")
 {
         test_utils::init_all();
 
-        for (int x = 0; x < map::w(); ++x)
-        {
-                for (int y = 0; y < map::h(); ++y)
-                {
+        for (int x = 0; x < map::w(); ++x) {
+                for (int y = 0; y < map::h(); ++y) {
                         map::update_terrain(
                                 terrain::make(terrain::Id::wall, {x, y}));
                 }
@@ -41,10 +39,8 @@ TEST_CASE("Sound alerts monster")
         const P mon_pos(7, 7);
 
         // Fill a 3x3 area with floor
-        for (int x = wall_pos.x - 1; x <= wall_pos.x + 1; ++x)
-        {
-                for (int y = wall_pos.y - 1; y <= wall_pos.y + 1; ++y)
-                {
+        for (int x = wall_pos.x - 1; x <= wall_pos.x + 1; ++x) {
+                for (int y = wall_pos.y - 1; y <= wall_pos.y + 1; ++y) {
                         map::update_terrain(
                                 terrain::make(terrain::Id::floor, {x, y}));
                 }

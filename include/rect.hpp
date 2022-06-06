@@ -117,10 +117,8 @@ public:
 
                 result.reserve(area());
 
-                for (int x = p0.x; x <= p1.x; ++x)
-                {
-                        for (int y = p0.y; y <= p1.y; ++y)
-                        {
+                for (int x = p0.x; x <= p1.x; ++x) {
+                        for (int y = p0.y; y <= p1.y; ++y) {
                                 result.emplace_back(x, y);
                         }
                 }

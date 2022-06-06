@@ -32,8 +32,7 @@ public:
 
         Color& operator=(const Color& other)
         {
-                if (&other == this)
-                {
+                if (&other == this) {
                         return *this;
                 }
 

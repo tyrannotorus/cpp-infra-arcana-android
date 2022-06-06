@@ -32,8 +32,7 @@ TEST_CASE("Test light map")
 
         auto* const burn_terrain = map::g_terrain.at(burn_pos);
 
-        while (!burn_terrain->is_burning())
-        {
+        while (!burn_terrain->is_burning()) {
                 burn_terrain->hit(DmgType::fire, nullptr);
         }
 
@@ -41,8 +40,7 @@ TEST_CASE("Test light map")
 
         map::g_player->update_fov();
 
-        for (const auto& d : dir_utils::g_dir_list_w_center)
-        {
+        for (const auto& d : dir_utils::g_dir_list_w_center) {
                 const P p = burn_pos + d;
 
                 // The cells around the burning floor should be lit

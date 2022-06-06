@@ -251,8 +251,7 @@ struct ItemName
 
         ItemName()
         {
-                for (size_t i = 0; i < (size_t)ItemNameType::END; ++i)
-                {
+                for (size_t i = 0; i < (size_t)ItemNameType::END; ++i) {
                         names[i] = "";
                 }
         }

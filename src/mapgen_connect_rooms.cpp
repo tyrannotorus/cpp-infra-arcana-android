@@ -36,15 +36,13 @@ void connect_rooms()
 
         int nr_tries_left = 5000;
 
-        while (true)
-        {
+        while (true) {
                 // NOTE: Keep this counter at the top of the loop, since
                 // otherwise a continue statement could bypass it so we get
                 // stuck in the loop.
                 --nr_tries_left;
 
-                if (nr_tries_left == 0)
-                {
+                if (nr_tries_left == 0) {
                         mapgen::g_is_map_valid = false;
 
                         break;
@@ -63,8 +61,7 @@ void connect_rooms()
 
                 // Room 0 must be a connectable room, or a corridor link
                 if (!is_connectable_room(*room0) &&
-                    room0->m_type != RoomType::corr_link)
-                {
+                    room0->m_type != RoomType::corr_link) {
                         continue;
                 }
 
@@ -75,8 +72,7 @@ void connect_rooms()
                 // connectable room (connections are only allowed between two
                 // standard rooms, or from a corridor link to a standard room -
                 // never between two corridor links)
-                while ((room1 == room0) || !is_connectable_room(*room1))
-                {
+                while ((room1 == room0) || !is_connectable_room(*room1)) {
                         room1 = rnd_room();
                 }
 
@@ -85,8 +81,7 @@ void connect_rooms()
 
                 if (find(room0_connections.begin(),
                          room0_connections.end(),
-                         room1) != room0_connections.end())
-                {
+                         room1) != room0_connections.end()) {
                         // Rooms are already connected, trying other combination
                         continue;
                 }
@@ -104,31 +99,26 @@ void connect_rooms()
                 const int x1 = std::max(c0.x, c1.x);
                 const int y1 = std::max(c0.y, c1.y);
 
-                for (int x = x0; x <= x1; ++x)
-                {
-                        for (int y = y0; y <= y1; ++y)
-                        {
+                for (int x = x0; x <= x1; ++x) {
+                        for (int y = y0; y <= y1; ++y) {
                                 const Room* const room_here =
                                         map::g_room_map.at(x, y);
 
                                 if (room_here &&
                                     room_here != room0 &&
                                     room_here != room1 &&
-                                    !room_here->m_is_sub_room)
-                                {
+                                    !room_here->m_is_sub_room) {
                                         is_other_room_in_way = true;
                                         break;
                                 }
                         }
 
-                        if (is_other_room_in_way)
-                        {
+                        if (is_other_room_in_way) {
                                 break;
                         }
                 }
 
-                if (is_other_room_in_way)
-                {
+                if (is_other_room_in_way) {
                         // Blocked by room between, trying other combination
                         continue;
                 }
@@ -146,19 +136,16 @@ void connect_rooms()
 
                 // Do not consider doors blocking
                 const size_t nr_positions = map::nr_positions();
-                for (size_t i = 0; i < nr_positions; ++i)
-                {
+                for (size_t i = 0; i < nr_positions; ++i) {
                         const auto id = map::g_terrain.at(i)->id();
 
-                        if (id == terrain::Id::door)
-                        {
+                        if (id == terrain::Id::door) {
                                 blocked.at(i) = false;
                         }
                 }
 
                 if ((nr_tries_left <= 2 || rnd::one_in(4)) &&
-                    map_parsers::is_map_connected(blocked))
-                {
+                    map_parsers::is_map_connected(blocked)) {
                         break;
                 }
         }

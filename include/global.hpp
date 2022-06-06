@@ -222,8 +222,7 @@ enum class ForceInterruptActions
 
 constexpr bool is_physical_dmg_type(const DmgType type)
 {
-        switch (type)
-        {
+        switch (type) {
         case DmgType::piercing:
                 return true;
 

@@ -45,12 +45,10 @@ static int hit_armor(actor::Actor& actor, int dmg)
         const int ap = actor.armor_points();
 
         // Danage worn armor
-        if (actor.m_data->is_humanoid)
-        {
+        if (actor.m_data->is_humanoid) {
                 auto* const item = actor.m_inv.item_in_slot(SlotId::body);
 
-                if (item)
-                {
+                if (item) {
                         TRACE_VERBOSE << "Has armor, running hit on armor"
                                       << std::endl;
 
@@ -58,12 +56,10 @@ static int hit_armor(actor::Actor& actor, int dmg)
 
                         armor->hit(dmg);
 
-                        if (armor->is_destroyed())
-                        {
+                        if (armor->is_destroyed()) {
                                 TRACE << "Armor was destroyed" << std::endl;
 
-                                if (actor::is_player(&actor))
-                                {
+                                if (actor::is_player(&actor)) {
                                         const std::string armor_name =
                                                 armor->name(
                                                         ItemNameType::plain,
@@ -98,8 +94,7 @@ static void hit_corpse_destroy_success(
         if ((dmg_type == DmgType::kicking) ||
             (dmg_type == DmgType::blunt) ||
             (dmg_type == DmgType::slashing) ||
-            (dmg_type == DmgType::piercing))
-        {
+            (dmg_type == DmgType::piercing)) {
                 Snd snd(
                         "*Crack!*",
                         audio::SfxId::hit_corpse_break,
@@ -116,14 +111,12 @@ static void hit_corpse_destroy_success(
 
         actor.m_properties.on_destroyed_corpse();
 
-        if (actor.m_data->is_humanoid)
-        {
+        if (actor.m_data->is_humanoid) {
                 terrain::make_blood(actor.m_pos);
                 terrain::make_gore(actor.m_pos);
         }
 
-        if (map::g_seen.at(actor.m_pos))
-        {
+        if (map::g_seen.at(actor.m_pos)) {
                 const auto name =
                         text_format::first_to_upper(
                                 actor.m_data->corpse_name_the);
@@ -139,17 +132,14 @@ static void hit_corpse_destroy_fail(
         if ((dmg_type == DmgType::kicking) ||
             (dmg_type == DmgType::blunt) ||
             (dmg_type == DmgType::slashing) ||
-            (dmg_type == DmgType::piercing))
-        {
+            (dmg_type == DmgType::piercing)) {
                 std::string msg;
 
                 if ((dmg_type == DmgType::blunt) ||
-                    (dmg_type == DmgType::kicking))
-                {
+                    (dmg_type == DmgType::kicking)) {
                         msg = "*Thud!*";
                 }
-                else
-                {
+                else {
                         msg = "*Chop!*";
                 }
 
@@ -180,12 +170,10 @@ static void hit_corpse(
         const int den = actor::max_hp(actor);
         const int num = std::min(dmg * 4, den);
 
-        if (rnd::fraction(num, den))
-        {
+        if (rnd::fraction(num, den)) {
                 hit_corpse_destroy_success(actor, dmg_type);
         }
-        else
-        {
+        else {
                 hit_corpse_destroy_fail(actor, dmg_type);
         }
 }
@@ -238,8 +226,7 @@ static void on_actor_not_killed_by_hit(
         actor::Actor& actor,
         const int hp_pct_before)
 {
-        if (!actor::is_player(&actor))
-        {
+        if (!actor::is_player(&actor)) {
                 return;
         }
 
@@ -247,8 +234,7 @@ static void on_actor_not_killed_by_hit(
         const int hp_warn_lvl = 25;
 
         if (((hp_pct_before > hp_warn_lvl)) &&
-            ((hp_pct_after <= hp_warn_lvl)))
-        {
+            ((hp_pct_after <= hp_warn_lvl))) {
                 msg_log::more_prompt();
 
                 msg_log::add(
@@ -274,14 +260,12 @@ static int calc_new_dmg_for_light_sensitive(
         // modifier, not the player light sensitive curse.
         auto* const prop = actor.m_properties.prop(PropId::light_sensitive);
 
-        if (prop)
-        {
+        if (prop) {
                 auto* const lgt_sens = static_cast<PropLgtSens*>(prop);
 
                 return dmg + lgt_sens->get_extra_damage();
         }
-        else
-        {
+        else {
                 return dmg;
         }
 }
@@ -302,8 +286,7 @@ static int absorb_dmg_for_prolonged_life_player(int dmg)
         // reduce SP below 1).
         const int missing_hp = (dmg - map::g_player->m_hp) + 1;
 
-        if (missing_hp > 0)
-        {
+        if (missing_hp > 0) {
                 const int sp_dmg =
                         std::min(
                                 missing_hp,
@@ -319,8 +302,7 @@ static int absorb_dmg_for_prolonged_life_player(int dmg)
 
 static int nr_wounds(const PropHandler& properties)
 {
-        if (properties.has(PropId::wound))
-        {
+        if (properties.has(PropId::wound)) {
                 const auto* const prop =
                         properties.prop(PropId::wound);
 
@@ -329,8 +311,7 @@ static int nr_wounds(const PropHandler& properties)
 
                 return wound->nr_wounds();
         }
-        else
-        {
+        else {
                 return 0;
         }
 }
@@ -349,8 +330,7 @@ static void on_player_hit(
         const bool is_small_pure_damage =
                 ((dmg_type == DmgType::pure) && (dmg <= 1));
 
-        if (!is_small_pure_damage)
-        {
+        if (!is_small_pure_damage) {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
         }
 
@@ -372,8 +352,7 @@ static void on_player_hit(
                 !is_ghoul_resist_wound &&
                 !config::is_bot_playing();
 
-        if (is_wounded)
-        {
+        if (is_wounded) {
                 Prop* const prop = property_factory::make(PropId::wound);
 
                 prop->set_indefinite();
@@ -386,8 +365,7 @@ static void on_player_hit(
                 const int nr_wounds_after =
                         nr_wounds(map::g_player->m_properties);
 
-                if (nr_wounds_after > nr_wounds_before)
-                {
+                if (nr_wounds_after > nr_wounds_before) {
                         game::add_history_event("Sustained a severe wound");
                 }
         }
@@ -404,20 +382,16 @@ void hit(
         const DmgType dmg_type,
         const AllowWound allow_wound)
 {
-        if (actor.m_state == ActorState::destroyed)
-        {
+        if (actor.m_state == ActorState::destroyed) {
                 return;
         }
 
-        if (dmg_type == DmgType::light)
-        {
-                if (!is_light_sensitive(actor))
-                {
+        if (dmg_type == DmgType::light) {
+                if (!is_light_sensitive(actor)) {
                         return;
                 }
 
-                if (actor::is_player(&actor))
-                {
+                if (actor::is_player(&actor)) {
                         on_light_sensitive_player_hit_by_light();
                 }
 
@@ -426,15 +400,13 @@ void hit(
 
         const int hp_pct_before = (actor.m_hp * 100) / max_hp(actor);
 
-        if (actor.is_corpse() && !actor::is_player(&actor))
-        {
+        if (actor.is_corpse() && !actor::is_player(&actor)) {
                 hit_corpse(actor, dmg, dmg_type);
 
                 return;
         }
 
-        if (dmg_type == DmgType::spirit)
-        {
+        if (dmg_type == DmgType::spirit) {
                 hit_sp(actor, dmg);
 
                 return;
@@ -448,27 +420,22 @@ void hit(
                         dmg_type,
                         verbose);
 
-        if (is_dmg_resisted)
-        {
+        if (is_dmg_resisted) {
                 return;
         }
 
-        if ((dmg > 0))
-        {
-                if (is_physical_dmg_type(dmg_type))
-                {
+        if ((dmg > 0)) {
+                if (is_physical_dmg_type(dmg_type)) {
                         // NOTE: Armor never reduces damage to zero.
                         dmg = hit_armor(actor, dmg);
                 }
 
                 // Soaking up damage with SP instead due to Prolonged Life?
                 if (actor::is_player(&actor) &&
-                    player_bon::has_trait(Trait::prolonged_life))
-                {
+                    player_bon::has_trait(Trait::prolonged_life)) {
                         dmg = absorb_dmg_for_prolonged_life_player(dmg);
 
-                        if (dmg <= 0)
-                        {
+                        if (dmg <= 0) {
                                 map::g_player->interrupt_actions(
                                         ForceInterruptActions::no);
 
@@ -477,27 +444,23 @@ void hit(
                 }
         }
 
-        if (is_player(&actor))
-        {
+        if (is_player(&actor)) {
                 on_player_hit(dmg, dmg_type, allow_wound);
         }
 
         actor.m_properties.on_hit();
 
         if ((dmg > 0) &&
-            !(actor::is_player(&actor) && config::is_bot_playing()))
-        {
+            !(actor::is_player(&actor) && config::is_bot_playing())) {
                 actor.m_hp -= dmg;
         }
 
-        if (actor.m_hp <= 0)
-        {
+        if (actor.m_hp <= 0) {
                 kill_actor_by_hit(actor, dmg);
 
                 return;
         }
-        else
-        {
+        else {
                 on_actor_not_killed_by_hit(actor, hp_pct_before);
 
                 return;
@@ -509,10 +472,8 @@ void hit_sp(
         const int dmg,
         const Verbose verbose)
 {
-        if (verbose == Verbose::yes)
-        {
-                if (actor::is_player(&actor))
-                {
+        if (verbose == Verbose::yes) {
+                if (actor::is_player(&actor)) {
                         msg_log::add(
                                 "My spirit is drained!",
                                 colors::msg_bad());
@@ -521,15 +482,12 @@ void hit_sp(
 
         actor.m_properties.on_hit();
 
-        if (!actor::is_player(&actor) || !config::is_bot_playing())
-        {
+        if (!actor::is_player(&actor) || !config::is_bot_playing()) {
                 actor.m_sp = std::max(0, actor.m_sp - dmg);
         }
 
-        if (actor.m_sp > 0)
-        {
-                if (actor::is_player(&actor))
-                {
+        if (actor.m_sp > 0) {
+                if (actor::is_player(&actor)) {
                         map::g_player->interrupt_actions(
                                 ForceInterruptActions::no);
                 }
@@ -539,14 +497,12 @@ void hit_sp(
 
         // Spirit is zero or lower
 
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 msg_log::add(
                         "All my spirit is depleted, I am devoid of life!",
                         colors::msg_bad());
         }
-        else if (can_player_see_actor(actor))
-        {
+        else if (can_player_see_actor(actor)) {
                 const std::string actor_name_the =
                         text_format::first_to_upper(
                                 actor.name_the());

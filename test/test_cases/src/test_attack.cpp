@@ -31,15 +31,13 @@ static void init_terrain()
 {
         int x = 7;
 
-        for (int y = 5; y <= 9; ++y)
-        {
+        for (int y = 5; y <= 9; ++y) {
                 map::update_terrain(terrain::make(terrain::Id::floor, {x, y}));
         }
 
         x = 8;
 
-        for (int y = 5; y <= 8; ++y)
-        {
+        for (int y = 5; y <= 8; ++y) {
                 map::update_terrain(terrain::make(terrain::Id::wall, {x, y}));
         }
 
@@ -47,8 +45,7 @@ static void init_terrain()
 
         x = 9;
 
-        for (int y = 5; y <= 9; ++y)
-        {
+        for (int y = 5; y <= 9; ++y) {
                 map::update_terrain(terrain::make(terrain::Id::floor, {x, 9}));
         }
 }
@@ -451,8 +448,7 @@ TEST_CASE("Test player killing invisible monster")
         REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter <= 0);
         REQUIRE(!mon->m_data->has_player_seen);
 
-        while (true)
-        {
+        while (true) {
                 attack::melee(map::g_player, map::g_player->m_pos, *mon, *wpn);
 
                 game_time::g_allow_tick = true;
@@ -463,8 +459,7 @@ TEST_CASE("Test player killing invisible monster")
                                 std::end(game_time::g_actors),
                                 mon) != std::end(game_time::g_actors);
 
-                if (!exists || !mon->is_alive())
-                {
+                if (!exists || !mon->is_alive()) {
                         break;
                 }
         }

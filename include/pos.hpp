@@ -186,8 +186,7 @@ public:
         bool is_adjacent(const P& p) const
         {
                 // Do not count the same position as adjacent
-                if (p == *this)
-                {
+                if (p == *this) {
                         return false;
                 }
 

@@ -24,30 +24,25 @@
 #ifndef NDEBUG
 static void handle_args(int argc, char** argv)
 {
-        for (int arg_nr = 0; arg_nr < argc; ++arg_nr)
-        {
+        for (int arg_nr = 0; arg_nr < argc; ++arg_nr) {
                 const std::string arg_str = std::string(argv[arg_nr]);
 
-                if (arg_str == "--demo-mapgen")
-                {
+                if (arg_str == "--demo-mapgen") {
                         init::g_is_demo_mapgen = true;
                 }
 
-                if (arg_str == "--bot")
-                {
+                if (arg_str == "--bot") {
                         config::enable_bot_playing();
                 }
 
-                if (arg_str == "--stress-test")
-                {
+                if (arg_str == "--stress-test") {
                         rnd::seed(0);
                         config::enable_stress_test();
                         config::enable_bot_playing();
                 }
 
                 // Extra challenge for user "GJ" from the Discord chat ;-)
-                if (arg_str == "--gj")
-                {
+                if (arg_str == "--gj") {
                         config::toggle_gj_mode();
                 }
         }

@@ -6,8 +6,8 @@
 
 #include <climits>
 
-#include "catch.hpp"
 #include "array2.hpp"
+#include "catch.hpp"
 #include "flood.hpp"
 #include "pos.hpp"
 
@@ -18,13 +18,11 @@ TEST_CASE("Floodfill")
         Array2<bool> blocked(map_dims);
 
         // Set the edge of the map as blocking
-        for (int y = 0; y < map_dims.y; ++y)
-        {
+        for (int y = 0; y < map_dims.y; ++y) {
                 blocked.at(0, y) = blocked.at(map_dims.x - 1, y) = true;
         }
 
-        for (int x = 0; x < map_dims.x; ++x)
-        {
+        for (int x = 0; x < map_dims.x; ++x) {
                 blocked.at(x, 0) = blocked.at(x, map_dims.y - 1) = true;
         }
 

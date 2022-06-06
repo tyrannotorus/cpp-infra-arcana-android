@@ -33,8 +33,7 @@ void draw_text_at_px(
         const io::DrawBg draw_bg,
         const Color& bg_color)
 {
-        if ((px_pos.y < 0) || (px_pos.y >= panel_px_h(Panel::screen)))
-        {
+        if ((px_pos.y < 0) || (px_pos.y >= panel_px_h(Panel::screen))) {
                 return;
         }
 
@@ -57,10 +56,8 @@ void draw_text_at_px(
         size_t dots_idx = 0;
         const int px_x_dots = screen_px_w - (cell_px_w * 5);
 
-        for (int i = 0; i < msg_w; ++i)
-        {
-                if (px_pos.x < 0 || px_pos.x >= screen_px_w)
-                {
+        for (int i = 0; i < msg_w; ++i) {
+                if (px_pos.x < 0 || px_pos.x >= screen_px_w) {
                         return;
                 }
 
@@ -68,8 +65,7 @@ void draw_text_at_px(
                         !msg_w_fit_on_screen &&
                         (px_pos.x >= px_x_dots);
 
-                if (draw_dots)
-                {
+                if (draw_dots) {
                         draw_character_at_px(
                                 dots[dots_idx],
                                 px_pos,
@@ -79,8 +75,7 @@ void draw_text_at_px(
 
                         ++dots_idx;
                 }
-                else
-                {
+                else {
                         // Whole message fits, or we are not yet near the edge
                         draw_character_at_px(
                                 str[i],
@@ -106,12 +101,9 @@ void draw_text(
 
         auto origin_pos = pos;
 
-        for (const auto& action : text.actions())
-        {
-                switch (action.id)
-                {
-                case TextActionId::write_str:
-                {
+        for (const auto& action : text.actions()) {
+                switch (action.id) {
+                case TextActionId::write_str: {
                         const auto px_pos = gui_to_px_coords(panel, pos);
 
                         draw_text_at_px(
@@ -122,27 +114,20 @@ void draw_text(
                                 bg_color);
 
                         pos.x += (int)action.str.length();
-                }
-                break;
+                } break;
 
-                case TextActionId::newline:
-                {
+                case TextActionId::newline: {
                         ++pos.y;
                         pos.x = origin_pos.x;
-                }
-                break;
+                } break;
 
-                case TextActionId::change_color:
-                {
+                case TextActionId::change_color: {
                         color = action.color;
-                }
-                break;
+                } break;
 
-                case TextActionId::done:
-                {
+                case TextActionId::done: {
                         return;
-                }
-                break;
+                } break;
                 }
         }
 }
@@ -165,8 +150,7 @@ void draw_text_center(
                         panel,
                         P(x_pos_left, pos.y));
 
-        if (is_pixel_pos_adj_allowed)
-        {
+        if (is_pixel_pos_adj_allowed) {
                 const int pixel_x_adj =
                         ((len_half * 2) == len)
                         ? (config::gui_cell_px_w() / 2)

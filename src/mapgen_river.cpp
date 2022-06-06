@@ -62,8 +62,7 @@ void reserve_river(Region regions[3][3])
 
         const Axis axis = rnd::coin_toss() ? Axis::hor : Axis::ver;
 
-        if (axis == Axis::hor)
-        {
+        if (axis == Axis::hor) {
                 // Horizontal
                 init_room_rect(
                         room_rect.p0.x,
@@ -73,8 +72,7 @@ void reserve_river(Region regions[3][3])
                         P(0, 1),
                         P(2, 1));
         }
-        else
-        {
+        else {
                 // Vertical
                 init_room_rect(
                         room_rect.p0.y,
@@ -95,13 +93,11 @@ void reserve_river(Region regions[3][3])
 
         river_region->is_free = false;
 
-        if (axis == Axis::hor)
-        {
+        if (axis == Axis::hor) {
                 // Horizontal
                 regions[1][1] = regions[2][1] = *river_region;
         }
-        else
-        {
+        else {
                 // Vertical
                 regions[1][1] = regions[1][2] = *river_region;
         }
@@ -120,10 +116,8 @@ void reserve_river(Region regions[3][3])
                               << " y1: " << y1
                               << std::endl;
 
-                for (int x = x0; x <= x1; ++x)
-                {
-                        for (int y = y0; y <= y1; ++y)
-                        {
+                for (int x = x0; x <= x1; ++x) {
+                        for (int y = y0; y <= y1; ++y) {
                                 // Just put floor for now, river terrain will be
                                 // placed later
                                 auto* const t =
@@ -138,16 +132,14 @@ void reserve_river(Region regions[3][3])
                 }
         };
 
-        if (axis == Axis::hor)
-        {
+        if (axis == Axis::hor) {
                 // Horizontal
                 make(room_rect.p0.x + 1,
                      room_rect.p1.x - 1,
                      room_rect.p0.y,
                      room_rect.p1.y);
         }
-        else
-        {
+        else {
                 // Vertical
                 make(room_rect.p0.x,
                      room_rect.p1.x,

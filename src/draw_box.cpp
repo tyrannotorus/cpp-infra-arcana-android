@@ -228,8 +228,7 @@ void draw_box(R border, const Color& color)
 
         const P cell_dims(cell_w, cell_h);
 
-        if ((cell_w <= 8) || (cell_h <= 8))
-        {
+        if ((cell_w <= 8) || (cell_h <= 8)) {
                 // GUI cells too small to draw a box properly with fancy
                 // graphics, draw a simple rectangle box instead
                 const auto cell_dims_half = cell_dims.scaled_down(2);

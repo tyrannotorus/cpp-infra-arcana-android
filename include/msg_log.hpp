@@ -52,8 +52,7 @@ public:
         {
                 std::string result_str = m_text;
 
-                if (m_nr_repeats > 1)
-                {
+                if (m_nr_repeats > 1) {
                         result_str += m_repeats_str;
                 }
 

@@ -106,10 +106,8 @@ void init()
         s_rod_looks.push_back(
                 {"Magnesium", "a Magnesium", colors::white()});
 
-        for (auto& d : item::g_data)
-        {
-                if (d.type == ItemType::rod)
-                {
+        for (auto& d : item::g_data) {
+                if (d.type == ItemType::rod) {
                         // Color and false name
                         const size_t idx =
                                 rnd::range(0, (int)s_rod_looks.size() - 1);
@@ -163,12 +161,10 @@ void init()
 
 void save()
 {
-        for (int i = 0; i < (int)item::Id::END; ++i)
-        {
+        for (int i = 0; i < (int)item::Id::END; ++i) {
                 auto& d = item::g_data[i];
 
-                if (d.type == ItemType::rod)
-                {
+                if (d.type == ItemType::rod) {
                         saving::put_str(
                                 d.base_name_un_id
                                         .names[(size_t)ItemNameType::plain]);
@@ -188,12 +184,10 @@ void save()
 
 void load()
 {
-        for (int i = 0; i < (int)item::Id::END; ++i)
-        {
+        for (int i = 0; i < (int)item::Id::END; ++i) {
                 auto& d = item::g_data[i];
 
-                if (d.type == ItemType::rod)
-                {
+                if (d.type == ItemType::rod) {
                         d.base_name_un_id.names[(size_t)ItemNameType::plain] =
                                 saving::get_str();
 
@@ -224,8 +218,7 @@ void Rod::set_max_charge_turns_left()
 {
         m_nr_charge_turns_left = nr_turns_to_recharge();
 
-        if (player_bon::has_trait(Trait::elec_incl))
-        {
+        if (player_bon::has_trait(Trait::elec_incl)) {
                 m_nr_charge_turns_left /= 2;
         }
 }
@@ -236,8 +229,7 @@ ConsumeItem Rod::activate(actor::Actor* const actor)
 
         // Prevent using it if still charging, and identified (player character
         // knows that it's useless)
-        if ((m_nr_charge_turns_left > 0) && m_data->is_identified)
-        {
+        if ((m_nr_charge_turns_left > 0) && m_data->is_identified) {
                 const std::string rod_name =
                         name(
                                 ItemNameType::plain,
@@ -259,25 +251,21 @@ ConsumeItem Rod::activate(actor::Actor* const actor)
 
         msg_log::add("I activate " + rod_name_a + "...");
 
-        if (m_nr_charge_turns_left == 0)
-        {
+        if (m_nr_charge_turns_left == 0) {
                 run_effect();
 
                 set_max_charge_turns_left();
         }
 
-        if (m_data->is_identified)
-        {
+        if (m_data->is_identified) {
                 map::g_player->incr_shock(8.0, ShockSrc::use_strange_item);
         }
-        else
-        {
+        else {
                 // Not identified
                 msg_log::add("Nothing happens.");
         }
 
-        if (map::g_player->is_alive())
-        {
+        if (map::g_player->is_alive()) {
                 game_time::tick();
         }
 
@@ -289,8 +277,7 @@ void Rod::on_std_turn_in_inv_hook(const InvType inv_type)
         (void)inv_type;
 
         // Already fully charged?
-        if (m_nr_charge_turns_left == 0)
-        {
+        if (m_nr_charge_turns_left == 0) {
                 return;
         }
 
@@ -301,8 +288,7 @@ void Rod::on_std_turn_in_inv_hook(const InvType inv_type)
         --m_nr_charge_turns_left;
 
         if ((m_nr_charge_turns_left == 0) &&
-            m_data->is_identified)
-        {
+            m_data->is_identified) {
                 const std::string my_name =
                         name(
                                 ItemNameType::plain,
@@ -314,12 +300,10 @@ void Rod::on_std_turn_in_inv_hook(const InvType inv_type)
 
 std::vector<std::string> Rod::descr_hook() const
 {
-        if (m_data->is_identified)
-        {
+        if (m_data->is_identified) {
                 return {descr_identified()};
         }
-        else
-        {
+        else {
                 // Not identified
                 return m_data->base_descr;
         }
@@ -327,15 +311,13 @@ std::vector<std::string> Rod::descr_hook() const
 
 void Rod::identify(const Verbose verbose)
 {
-        if (m_data->is_identified)
-        {
+        if (m_data->is_identified) {
                 return;
         }
 
         m_data->is_identified = true;
 
-        if (verbose == Verbose::yes)
-        {
+        if (verbose == Verbose::yes) {
                 const std::string name_after =
                         name(
                                 ItemNameType::a,
@@ -349,22 +331,18 @@ void Rod::identify(const Verbose verbose)
 
 std::string Rod::name_info_str() const
 {
-        if (m_data->is_identified)
-        {
-                if (m_nr_charge_turns_left > 0)
-                {
+        if (m_data->is_identified) {
+                if (m_nr_charge_turns_left > 0) {
                         const auto turns_left_str =
                                 std::to_string(m_nr_charge_turns_left);
 
                         return "(" + turns_left_str + " turns)";
                 }
-                else
-                {
+                else {
                         return "";
                 }
         }
-        else
-        {
+        else {
                 // Not identified
                 return m_data->is_tried ? "(Tried)" : "";
         }
@@ -385,21 +363,17 @@ void Curing::run_effect()
 
         bool is_something_healed = false;
 
-        for (PropId prop_id : props_can_heal)
-        {
-                if (player.m_properties.end_prop(prop_id))
-                {
+        for (PropId prop_id : props_can_heal) {
+                if (player.m_properties.end_prop(prop_id)) {
                         is_something_healed = true;
                 }
         }
 
-        if (player.restore_hp(3, false))
-        {
+        if (player.restore_hp(3, false)) {
                 is_something_healed = true;
         }
 
-        if (!is_something_healed)
-        {
+        if (!is_something_healed) {
                 msg_log::add("I feel fine.");
         }
 
@@ -410,10 +384,8 @@ void Opening::run_effect()
 {
         bool is_any_opened = false;
 
-        for (const auto& p : map::rect().positions())
-        {
-                if (!map::g_seen.at(p))
-                {
+        for (const auto& p : map::rect().positions()) {
+                if (!map::g_seen.at(p)) {
                         continue;
                 }
 
@@ -422,14 +394,12 @@ void Opening::run_effect()
                                 p,
                                 SpellSkill::master);
 
-                if (did_open == terrain::DidOpen::yes)
-                {
+                if (did_open == terrain::DidOpen::yes) {
                         is_any_opened = true;
                 }
         }
 
-        if (is_any_opened)
-        {
+        if (is_any_opened) {
                 identify(Verbose::yes);
         }
 }
@@ -451,10 +421,8 @@ void CloudMinds::run_effect()
 {
         msg_log::add("I vanish from the minds of my enemies.");
 
-        for (auto* actor : game_time::g_actors)
-        {
-                if (actor::is_player(actor))
-                {
+        for (auto* actor : game_time::g_actors) {
+                if (actor::is_player(actor)) {
                         continue;
                 }
 
@@ -471,8 +439,7 @@ void Shockwave::run_effect()
 
         const P& player_pos = map::g_player->m_pos;
 
-        for (const P& d : dir_utils::g_dir_list)
-        {
+        for (const P& d : dir_utils::g_dir_list) {
                 const P p(player_pos + d);
 
                 auto* const terrain = map::g_terrain.at(p);
@@ -480,11 +447,9 @@ void Shockwave::run_effect()
                 terrain->hit(DmgType::explosion, nullptr);
         }
 
-        for (actor::Actor* actor : game_time::g_actors)
-        {
+        for (actor::Actor* actor : game_time::g_actors) {
                 if (actor::is_player(actor) ||
-                    !actor->is_alive())
-                {
+                    !actor->is_alive()) {
                         continue;
                 }
 
@@ -492,13 +457,11 @@ void Shockwave::run_effect()
 
                 const bool is_adj = is_pos_adj(player_pos, other_pos, false);
 
-                if (!is_adj)
-                {
+                if (!is_adj) {
                         continue;
                 }
 
-                if (actor::can_player_see_actor(*actor))
-                {
+                if (actor::can_player_see_actor(*actor)) {
                         std::string msg =
                                 text_format::first_to_upper(actor->name_the()) +
                                 " is hit!";
@@ -511,8 +474,7 @@ void Shockwave::run_effect()
                 actor::hit(*actor, rnd::range(1, 6), DmgType::explosion);
 
                 // Surived the damage? Knock the monster back
-                if (actor->is_alive())
-                {
+                if (actor->is_alive()) {
                         knockback::run(
                                 *actor,
                                 player_pos,

@@ -40,10 +40,8 @@ static std::vector<P> free_spawn_positions(const R& area)
 
         Array2<bool> blocked = map::g_terrain_blocks_walking;
 
-        for (const actor::Actor* const actor : game_time::g_actors)
-        {
-                if (actor->is_alive())
-                {
+        for (const actor::Actor* const actor : game_time::g_actors) {
+                if (actor->is_alive()) {
                         blocked.at(actor->m_pos) = true;
                 }
         }
@@ -53,8 +51,7 @@ static std::vector<P> free_spawn_positions(const R& area)
 
 static actor::Actor* spawn_at(const P& pos, const actor::Id id)
 {
-        if (!map::is_pos_inside_outer_walls(pos))
-        {
+        if (!map::is_pos_inside_outer_walls(pos)) {
                 TRACE
                         << ("Attempted to spawn monster at position not "
                             "completely inside the outer walls: ")
@@ -79,15 +76,13 @@ static actor::MonSpawnResult spawn_at_positions(
 
         const size_t nr_to_spawn = std::min(positions.size(), ids.size());
 
-        for (size_t i = 0; i < nr_to_spawn; ++i)
-        {
+        for (size_t i = 0; i < nr_to_spawn; ++i) {
                 const auto& pos = positions[i];
                 const auto id = ids[i];
 
                 actor::Actor* const new_mon = spawn_at(pos, id);
 
-                if (new_mon)
-                {
+                if (new_mon) {
                         result.monsters.push_back(new_mon);
                 }
         }
@@ -131,8 +126,7 @@ Actor* make(const Id id, const P& pos)
 
         init_actor(*actor, pos, g_data[(size_t)id]);
 
-        if (actor->m_data->nr_left_allowed_to_spawn > 0)
-        {
+        if (actor->m_data->nr_left_allowed_to_spawn > 0) {
                 --actor->m_data->nr_left_allowed_to_spawn;
         }
 
@@ -141,12 +135,10 @@ Actor* make(const Id id, const P& pos)
         actor->m_properties.on_placed();
 
 #ifndef NDEBUG
-        if (map::nr_positions() != 0)
-        {
+        if (map::nr_positions() != 0) {
                 const auto* const t = map::g_terrain.at(pos);
 
-                if (t->id() == terrain::Id::door)
-                {
+                if (t->id() == terrain::Id::door) {
                         const auto* const door =
                                 static_cast<const terrain::Door*>(t);
 
@@ -165,16 +157,13 @@ void delete_all_mon()
 {
         std::vector<Actor*>& actors = game_time::g_actors;
 
-        for (auto it = std::begin(actors); it != std::end(actors);)
-        {
+        for (auto it = std::begin(actors); it != std::end(actors);) {
                 Actor* const actor = *it;
 
-                if (actor::is_player(actor))
-                {
+                if (actor::is_player(actor)) {
                         ++it;
                 }
-                else
-                {
+                else {
                         // Is monster
                         delete actor;
 
@@ -190,8 +179,7 @@ MonSpawnResult spawn(
 {
         auto free_positions = free_spawn_positions(area_allowed);
 
-        if (free_positions.empty())
-        {
+        if (free_positions.empty()) {
                 return {};
         }
 
@@ -209,8 +197,7 @@ MonSpawnResult spawn_random_position(
 {
         auto free_positions = free_spawn_positions(area_allowed);
 
-        if (free_positions.empty())
-        {
+        if (free_positions.empty()) {
                 return {};
         }
 

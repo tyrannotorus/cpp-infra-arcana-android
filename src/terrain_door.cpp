@@ -50,34 +50,27 @@ static terrain::DoorSpawnState get_random_spawn_state(
         const int pct_secret = 10 + (map::g_dlvl - 1);
         const int pct_stuck = 10;
 
-        if ((door_type != terrain::DoorType::gate) && rnd::percent(pct_secret))
-        {
+        if ((door_type != terrain::DoorType::gate) && rnd::percent(pct_secret)) {
                 // Secret
 
-                if (rnd::percent(pct_stuck))
-                {
+                if (rnd::percent(pct_stuck)) {
                         return terrain::DoorSpawnState::secret_and_stuck;
                 }
-                else
-                {
+                else {
                         return terrain::DoorSpawnState::secret;
                 }
         }
-        else
-        {
+        else {
                 // Not secret
 
-                if (rnd::coin_toss())
-                {
+                if (rnd::coin_toss()) {
                         // Open
                         return terrain::DoorSpawnState::open;
                 }
-                else if (rnd::percent(pct_stuck))
-                {
+                else if (rnd::percent(pct_stuck)) {
                         return terrain::DoorSpawnState::stuck;
                 }
-                else
-                {
+                else {
                         return terrain::DoorSpawnState::closed;
                 }
         }
@@ -91,20 +84,16 @@ namespace terrain
 Door::~Door()
 {
         // Unlink all levers
-        if (m_type == DoorType::metal)
-        {
+        if (m_type == DoorType::metal) {
                 const size_t nr_positions = map::nr_positions();
-                for (size_t i = 0; i < nr_positions; ++i)
-                {
+                for (size_t i = 0; i < nr_positions; ++i) {
                         auto* const terrain = map::g_terrain.at(i);
 
-                        if (terrain && (terrain->id() == terrain::Id::lever))
-                        {
+                        if (terrain && (terrain->id() == terrain::Id::lever)) {
                                 auto* const lever =
                                         static_cast<Lever*>(terrain);
 
-                                if (lever->is_linked_to(*this))
-                                {
+                                if (lever->is_linked_to(*this)) {
                                         lever->unlink();
                                 }
                         }
@@ -125,13 +114,11 @@ void Door::init_type_and_state(const DoorType type, DoorSpawnState spawn_state)
                   ((spawn_state == DoorSpawnState::secret) ||
                    (spawn_state == DoorSpawnState::secret_and_stuck))));
 
-        if (spawn_state == DoorSpawnState::any)
-        {
+        if (spawn_state == DoorSpawnState::any) {
                 spawn_state = get_random_spawn_state(m_type);
         }
 
-        switch (spawn_state)
-        {
+        switch (spawn_state) {
         case DoorSpawnState::open:
                 m_is_open = true;
                 m_is_stuck = false;
@@ -182,29 +169,21 @@ void Door::on_hit(
 {
         (void)from_pos;
 
-        switch (dmg_type)
-        {
-        case DmgType::pure:
-        {
+        switch (dmg_type) {
+        case DmgType::pure: {
                 map::update_terrain(make(Id::rubble_low, m_pos));
 
                 map::update_vision();
 
                 return;
-        }
-        break;
+        } break;
 
-        case DmgType::shotgun:
-        {
-                if (!m_is_open)
-                {
-                        switch (m_type)
-                        {
+        case DmgType::shotgun: {
+                if (!m_is_open) {
+                        switch (m_type) {
                         case DoorType::wood:
-                        case DoorType::gate:
-                        {
-                                if (map::g_seen.at(m_pos))
-                                {
+                        case DoorType::gate: {
+                                if (map::g_seen.at(m_pos)) {
                                         const std::string a =
                                                 m_is_hidden
                                                 ? "A "
@@ -221,50 +200,40 @@ void Door::on_hit(
                                 map::update_vision();
 
                                 return;
-                        }
-                        break;
+                        } break;
 
                         case DoorType::metal:
                                 break;
                         }
                 }
-        }
-        break;
+        } break;
 
-        case DmgType::explosion:
-        {
+        case DmgType::explosion: {
                 // TODO:
-        }
-        break;
+        } break;
 
         // Kicking, blunt (sledgehammers), slashing (axes), or the control
         // object spell.
         case DmgType::kicking:
         case DmgType::blunt:
         case DmgType::slashing:
-        case DmgType::control_object_spell:
-        {
+        case DmgType::control_object_spell: {
                 ASSERT(actor);
 
                 bash(dmg_type, *actor, dmg);
-        }
-        break;
+        } break;
 
-        case DmgType::fire:
-        {
-                if (matl() == Matl::wood)
-                {
+        case DmgType::fire: {
+                if (matl() == Matl::wood) {
                         reveal(PrintRevealMsg::if_seen);
 
                         try_start_burning(Verbose::yes);
                 }
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 
 }  // on_hit
@@ -277,8 +246,7 @@ void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
         if ((m_type == DoorType::metal) &&
             is_player &&
             is_cell_seen &&
-            !m_is_hidden)
-        {
+            !m_is_hidden) {
                 msg_log::add(
                         "It seems futile.",
                         colors::msg_note(),
@@ -288,12 +256,10 @@ void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
                 return;
         }
 
-        if (is_player)
-        {
+        if (is_player) {
                 player_bash(dmg_type, dmg);
         }
-        else
-        {
+        else {
                 mon_bash(actor);
         }
 }
@@ -307,35 +273,28 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 
         destr_chance_pct = std::max(1, destr_chance_pct);
 
-        if (dmg_type != DmgType::control_object_spell)
-        {
-                if (player_bon::has_trait(Trait::tough))
-                {
+        if (dmg_type != DmgType::control_object_spell) {
+                if (player_bon::has_trait(Trait::tough)) {
                         destr_chance_pct += 15;
                 }
 
-                if (player_bon::has_trait(Trait::rugged))
-                {
+                if (player_bon::has_trait(Trait::rugged)) {
                         destr_chance_pct += 15;
                 }
 
-                if (map::g_player->m_properties.has(PropId::frenzied))
-                {
+                if (map::g_player->m_properties.has(PropId::frenzied)) {
                         destr_chance_pct += 30;
                 }
 
-                if (is_weak || is_hidden())
-                {
+                if (is_weak || is_hidden()) {
                         destr_chance_pct = 0;
                 }
         }
 
         destr_chance_pct = std::min(100, destr_chance_pct);
 
-        if (destr_chance_pct > 0)
-        {
-                if (rnd::percent(destr_chance_pct))
-                {
+        if (destr_chance_pct > 0) {
+                if (rnd::percent(destr_chance_pct)) {
                         Snd snd(
                                 "",
                                 audio::SfxId::door_break,
@@ -347,25 +306,21 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 
                         snd.run();
 
-                        if (is_cell_seen)
-                        {
-                                if (m_is_hidden)
-                                {
+                        if (is_cell_seen) {
+                                if (m_is_hidden) {
                                         msg_log::add(
                                                 "A " +
                                                 base_name_short() +
                                                 " crashes open!");
                                 }
-                                else
-                                {
+                                else {
                                         msg_log::add(
                                                 "The " +
                                                 base_name_short() +
                                                 " crashes open!");
                                 }
                         }
-                        else
-                        {
+                        else {
                                 // Cell not seen
                                 msg_log::add("I feel a door crashing open!");
                         }
@@ -374,8 +329,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 
                         map::update_vision();
                 }
-                else
-                {
+                else {
                         // Not destroyed
                         const audio::SfxId sfx =
                                 m_is_hidden
@@ -394,11 +348,9 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                         snd.run();
                 }
         }
-        else
-        {
+        else {
                 // No chance of success
-                if (is_cell_seen && !m_is_hidden)
-                {
+                if (is_cell_seen && !m_is_hidden) {
                         Snd snd("",
                                 audio::SfxId::door_bang,
                                 IgnoreMsgIfOriginSeen::no,
@@ -423,13 +375,11 @@ void Door::mon_bash(actor::Actor& mon)
 
         destr_chance_pct = std::max(1, destr_chance_pct);
 
-        if (is_weak)
-        {
+        if (is_weak) {
                 destr_chance_pct = 0;
         }
 
-        if (rnd::percent(destr_chance_pct))
-        {
+        if (rnd::percent(destr_chance_pct)) {
                 // NOTE: When it's a monster bashing down the door, we make the
                 // sound alert other monsters since this causes nicer AI
                 // behavior (everyone near the door wants to run inside).
@@ -444,15 +394,13 @@ void Door::mon_bash(actor::Actor& mon)
 
                 snd.run();
 
-                if (actor::can_player_see_actor(mon))
-                {
+                if (actor::can_player_see_actor(mon)) {
                         msg_log::add(
                                 "The " +
                                 base_name_short() +
                                 " crashes open!");
                 }
-                else if (is_cell_seen)
-                {
+                else if (is_cell_seen) {
                         msg_log::add(
                                 "A " +
                                 base_name_short() +
@@ -463,8 +411,7 @@ void Door::mon_bash(actor::Actor& mon)
 
                 map::update_vision();
         }
-        else
-        {
+        else {
                 // Not destroyed
                 Snd snd(
                         "I hear a loud banging.",
@@ -481,8 +428,7 @@ void Door::mon_bash(actor::Actor& mon)
 
 WasDestroyed Door::on_finished_burning()
 {
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 msg_log::add("The door burns down.");
         }
 
@@ -505,8 +451,7 @@ bool Door::is_walkable() const
 bool Door::is_property_allowing_move(PropId id) const
 {
         // Can move through all door types
-        if ((id == PropId::ethereal) || (id == PropId::ooze))
-        {
+        if ((id == PropId::ethereal) || (id == PropId::ooze)) {
                 return true;
         }
 
@@ -518,8 +463,7 @@ bool Door::is_property_allowing_move(PropId id) const
                 (id == PropId::small_crawling) ||
                 (id == PropId::tiny_flying);
 
-        if (is_gate && is_small_creature)
-        {
+        if (is_gate && is_small_creature) {
                 return true;
         }
 
@@ -545,8 +489,7 @@ std::string Door::base_name() const
 {
         std::string ret;
 
-        switch (m_type)
-        {
+        switch (m_type) {
         case DoorType::wood:
                 ret = "wooden door";
                 break;
@@ -567,8 +510,7 @@ std::string Door::base_name_short() const
 {
         std::string ret;
 
-        switch (m_type)
-        {
+        switch (m_type) {
         case DoorType::wood:
                 ret = "door";
                 break;
@@ -587,8 +529,7 @@ std::string Door::base_name_short() const
 
 std::string Door::name(const Article article) const
 {
-        if (m_is_hidden)
-        {
+        if (m_is_hidden) {
                 ASSERT(m_type != DoorType::gate);
                 ASSERT(m_mimic_terrain);
 
@@ -598,8 +539,7 @@ std::string Door::name(const Article article) const
         std::string a;
         std::string mod;
 
-        if (m_burn_state == BurnState::burning)
-        {
+        if (m_burn_state == BurnState::burning) {
                 a =
                         (article == Article::a)
                         ? "a "
@@ -608,10 +548,8 @@ std::string Door::name(const Article article) const
                 mod = "burning ";
         }
 
-        if (m_is_open)
-        {
-                if (a.empty())
-                {
+        if (m_is_open) {
+                if (a.empty()) {
                         a =
                                 (article == Article::a)
                                 ? "an "
@@ -623,13 +561,11 @@ std::string Door::name(const Article article) const
 
         const bool is_metal = type() == DoorType::metal;
 
-        if (m_is_stuck && m_is_known_stuck && !is_metal)
-        {
+        if (m_is_stuck && m_is_known_stuck && !is_metal) {
                 mod = "stuck ";
         }
 
-        if (a.empty())
-        {
+        if (a.empty()) {
                 a =
                         (article == Article::a)
                         ? "a "
@@ -642,15 +578,13 @@ std::string Door::name(const Article article) const
 
 Color Door::color_default() const
 {
-        if (m_is_hidden)
-        {
+        if (m_is_hidden) {
                 return m_mimic_terrain->color();
         }
 
         Color color;
 
-        switch (m_type)
-        {
+        switch (m_type) {
         case DoorType::wood:
                 color = colors::dark_brown();
                 break;
@@ -664,8 +598,7 @@ Color Door::color_default() const
                 break;
         }
 
-        if (m_is_stuck && (m_type != DoorType::metal))
-        {
+        if (m_is_stuck && (m_type != DoorType::metal)) {
                 color = color.shaded(20);
         }
 
@@ -674,32 +607,27 @@ Color Door::color_default() const
 
 char Door::character() const
 {
-        if (m_is_hidden)
-        {
+        if (m_is_hidden) {
                 ASSERT(m_type != DoorType::gate);
                 ASSERT(m_mimic_terrain);
 
                 return m_mimic_terrain->character();
         }
 
-        if (m_is_open)
-        {
+        if (m_is_open) {
                 return 39;
         }
-        else if (m_is_stuck && (m_type != DoorType::metal))
-        {
+        else if (m_is_stuck && (m_type != DoorType::metal)) {
                 return 'X';
         }
-        else
-        {
+        else {
                 return '+';
         }
 }
 
 gfx::TileId Door::tile() const
 {
-        if (m_is_hidden)
-        {
+        if (m_is_hidden) {
                 ASSERT(m_type != DoorType::gate);
                 ASSERT(m_mimic_terrain);
 
@@ -708,54 +636,39 @@ gfx::TileId Door::tile() const
 
         // Not secret
 
-        switch (m_type)
-        {
-        case DoorType::wood:
-        {
-                if (m_is_open)
-                {
+        switch (m_type) {
+        case DoorType::wood: {
+                if (m_is_open) {
                         return gfx::TileId::door_open;
                 }
-                else if (m_is_stuck && m_is_known_stuck)
-                {
+                else if (m_is_stuck && m_is_known_stuck) {
                         return gfx::TileId::door_stuck;
                 }
-                else
-                {
+                else {
                         return gfx::TileId::door_closed;
                 }
-        }
-        break;
+        } break;
 
-        case DoorType::gate:
-        {
-                if (m_is_open)
-                {
+        case DoorType::gate: {
+                if (m_is_open) {
                         return gfx::TileId::gate_open;
                 }
-                else if (m_is_stuck && m_is_known_stuck)
-                {
+                else if (m_is_stuck && m_is_known_stuck) {
                         return gfx::TileId::gate_stuck;
                 }
-                else
-                {
+                else {
                         return gfx::TileId::gate_closed;
                 }
-        }
-        break;
+        } break;
 
-        case DoorType::metal:
-        {
-                if (m_is_open)
-                {
+        case DoorType::metal: {
+                if (m_is_open) {
                         return gfx::TileId::door_open;
                 }
-                else
-                {
+                else {
                         return gfx::TileId::door_closed;
                 }
-        }
-        break;
+        } break;
         }
 
         ASSERT(false);
@@ -765,8 +678,7 @@ gfx::TileId Door::tile() const
 
 Matl Door::matl() const
 {
-        switch (m_type)
-        {
+        switch (m_type) {
         case DoorType::wood:
                 return Matl::wood;
                 break;
@@ -784,19 +696,16 @@ Matl Door::matl() const
 
 void Door::bump(actor::Actor& actor_bumping)
 {
-        if (!actor::is_player(&actor_bumping))
-        {
+        if (!actor::is_player(&actor_bumping)) {
                 return;
         }
 
-        if (m_is_hidden)
-        {
+        if (m_is_hidden) {
                 ASSERT(m_type != DoorType::gate);
 
                 // Print messages as if this was a wall
 
-                if (map::g_seen.at(m_pos))
-                {
+                if (map::g_seen.at(m_pos)) {
                         TRACE << "Player bumped into secret door, "
                               << "with vision in cell" << std::endl;
 
@@ -804,8 +713,7 @@ void Door::bump(actor::Actor& actor_bumping)
                                 terrain::data(terrain::Id::wall)
                                         .msg_on_player_blocked);
                 }
-                else
-                {
+                else {
                         // Not seen by player
                         TRACE << "Player bumped into secret door, "
                               << "without vision in cell" << std::endl;
@@ -818,15 +726,13 @@ void Door::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        if (m_is_stuck && m_is_known_stuck)
-        {
+        if (m_is_stuck && m_is_known_stuck) {
                 bash::bash_terrain_at_pos(m_pos);
 
                 return;
         }
 
-        if (!m_is_open)
-        {
+        if (!m_is_open) {
                 map::memorize_terrain_at(m_pos);
                 map::update_vision();
 
@@ -848,8 +754,7 @@ void Door::reveal(const PrintRevealMsg print_reveal_msg)
                  map::g_seen.at(m_pos)) ||
                 (print_reveal_msg == PrintRevealMsg::yes);
 
-        if (is_hidden_before && allow_print)
-        {
+        if (is_hidden_before && allow_print) {
                 msg_log::add("A secret is revealed.");
         }
 
@@ -857,8 +762,7 @@ void Door::reveal(const PrintRevealMsg print_reveal_msg)
         // inconsistent state (the player standing next to a revealed door that
         // they don't know is stuck).
         if (m_pos.is_adjacent(map::g_player->m_pos) &&
-            (m_type != DoorType::metal))
-        {
+            (m_type != DoorType::metal)) {
                 reveal_stuck_status();
         }
 }
@@ -870,20 +774,17 @@ void Door::on_revealed_from_searching()
 
 void Door::reveal_stuck_status()
 {
-        if (m_is_hidden)
-        {
+        if (m_is_hidden) {
                 ASSERT(false);
                 return;
         }
 
-        if (m_type == DoorType::metal)
-        {
+        if (m_type == DoorType::metal) {
                 ASSERT(false);
                 return;
         }
 
-        if (!m_is_stuck)
-        {
+        if (!m_is_stuck) {
                 return;
         }
 
@@ -891,8 +792,7 @@ void Door::reveal_stuck_status()
 
         m_is_known_stuck = true;
 
-        if (!is_known_before && map::g_seen.at(m_pos))
-        {
+        if (!is_known_before && map::g_seen.at(m_pos)) {
                 const auto door_name = base_name_short();
 
                 msg_log::add("The " + door_name + " seems to be stuck.");
@@ -911,8 +811,7 @@ void Door::set_secret()
 
 bool Door::actor_try_jam(actor::Actor& actor_trying)
 {
-        if (m_is_hidden || m_is_open || (type() == DoorType::metal))
-        {
+        if (m_is_hidden || m_is_open || (type() == DoorType::metal)) {
                 return false;
         }
 
@@ -923,8 +822,7 @@ bool Door::actor_try_jam(actor::Actor& actor_trying)
         ++m_jam_level;
         m_is_stuck = true;
 
-        if (is_player)
-        {
+        if (is_player) {
                 m_is_known_stuck = true;
 
                 std::string a =
@@ -950,15 +848,12 @@ void Door::actor_try_close(actor::Actor& actor_trying)
         const bool is_player = actor::is_player(&actor_trying);
         const bool tryer_is_blind = !actor_trying.m_properties.allow_see();
 
-        if (is_player && (m_type == DoorType::metal))
-        {
-                if (tryer_is_blind)
-                {
+        if (is_player && (m_type == DoorType::metal)) {
+                if (tryer_is_blind) {
                         msg_log::add(
                                 "There is a metal door here, but it's stuck.");
                 }
-                else
-                {
+                else {
                         msg_log::add("The door is stuck.");
                 }
 
@@ -973,16 +868,12 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 : actor::can_player_see_actor(actor_trying);
 
         // Already closed?
-        if (!m_is_open)
-        {
-                if (is_player)
-                {
-                        if (tryer_is_blind)
-                        {
+        if (!m_is_open) {
+                if (is_player) {
+                        if (tryer_is_blind) {
                                 msg_log::add("I find nothing there to close.");
                         }
-                        else
-                        {
+                        else {
                                 // Can see
                                 msg_log::add("I see nothing there to close.");
                         }
@@ -993,8 +884,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
         // Currently being opened by another actor?
         if (m_actor_currently_opening &&
-            (m_actor_currently_opening != &actor_trying))
-        {
+            (m_actor_currently_opening != &actor_trying)) {
                 TRACE
                         << "Door marked as currently being opened, checking if "
                            "opening actor still exists and is alive"
@@ -1002,23 +892,19 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
                 bool is_opening_actor_alive = false;
 
-                for (const auto* const actor : game_time::g_actors)
-                {
+                for (const auto* const actor : game_time::g_actors) {
                         if ((actor == m_actor_currently_opening) &&
-                            actor->is_alive())
-                        {
+                            actor->is_alive()) {
                                 is_opening_actor_alive = true;
                         }
                 }
 
-                if (is_opening_actor_alive)
-                {
+                if (is_opening_actor_alive) {
                         TRACE
                                 << "Opening actor exists and is alive"
                                 << std::endl;
 
-                        if (is_player)
-                        {
+                        if (is_player) {
                                 msg_log::add(
                                         "The door is currently being opened, "
                                         "and cannot be closed.");
@@ -1026,8 +912,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
                         return;
                 }
-                else
-                {
+                else {
                         TRACE
                                 << "Opening actor no longer exists, or is dead"
                                 << std::endl;
@@ -1039,29 +924,23 @@ void Door::actor_try_close(actor::Actor& actor_trying)
         // Blocked?
         bool is_blocked_by_actor = false;
 
-        for (auto* actor : game_time::g_actors)
-        {
+        for (auto* actor : game_time::g_actors) {
                 if ((actor->m_state != ActorState::destroyed) &&
-                    (actor->m_pos == m_pos))
-                {
+                    (actor->m_pos == m_pos)) {
                         is_blocked_by_actor = true;
                         break;
                 }
         }
 
-        if (is_blocked_by_actor || map::g_items.at(m_pos))
-        {
-                if (is_player)
-                {
-                        if (tryer_is_blind)
-                        {
+        if (is_blocked_by_actor || map::g_items.at(m_pos)) {
+                if (is_player) {
+                        if (tryer_is_blind) {
                                 msg_log::add(
                                         "Something is blocking the " +
                                         base_name_short() +
                                         ".");
                         }
-                        else
-                        {
+                        else {
                                 // Can see
                                 msg_log::add(
                                         "The " +
@@ -1075,17 +954,14 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
         // Door can be closed
 
-        if (tryer_is_blind)
-        {
-                if (rnd::coin_toss())
-                {
+        if (tryer_is_blind) {
+                if (rnd::coin_toss()) {
                         m_is_open = false;
 
                         map::update_map_info_for_terrain_at(m_pos);
                         map::update_vision();
 
-                        if (is_player)
-                        {
+                        if (is_player) {
                                 Snd snd(
                                         "",
                                         audio::SfxId::door_close,
@@ -1102,8 +978,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                                         base_name_short() +
                                         ", but manage to close it.");
                         }
-                        else
-                        {
+                        else {
                                 // Monster closing
                                 Snd snd(
                                         "I hear a door closing.",
@@ -1116,8 +991,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
                                 snd.run();
 
-                                if (player_see_tryer)
-                                {
+                                if (player_see_tryer) {
                                         const std::string actor_name_the =
                                                 text_format::first_to_upper(
                                                         actor_trying.name_the());
@@ -1132,21 +1006,17 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
                         game_time::tick();
                 }
-                else
-                {
+                else {
                         // Failed to close
-                        if (is_player)
-                        {
+                        if (is_player) {
                                 msg_log::add(
                                         "I fumble blindly with a " +
                                         base_name_short() +
                                         ", and fail to close it.");
                         }
-                        else
-                        {
+                        else {
                                 // Monster failing to close
-                                if (player_see_tryer)
-                                {
+                                if (player_see_tryer) {
                                         const std::string actor_name_the =
                                                 text_format::first_to_upper(
                                                         actor_trying.name_the());
@@ -1172,10 +1042,8 @@ void Door::actor_try_close(actor::Actor& actor_trying)
         map::update_map_info_for_terrain_at(m_pos);
         map::update_vision();
 
-        if (is_player)
-        {
-                if (!player_bon::has_trait(Trait::silent))
-                {
+        if (is_player) {
+                if (!player_bon::has_trait(Trait::silent)) {
                         Snd snd(
                                 "",
                                 audio::SfxId::door_close,
@@ -1193,8 +1061,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                         base_name_short() +
                         ".");
         }
-        else
-        {
+        else {
                 // Monster closing
                 Snd snd(
                         "I hear a door closing.",
@@ -1207,8 +1074,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
                 snd.run();
 
-                if (player_see_tryer)
-                {
+                if (player_see_tryer) {
                         const std::string actor_name_the =
                                 text_format::first_to_upper(
                                         actor_trying.name_the());
@@ -1237,10 +1103,8 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                 ? true
                 : actor::can_player_see_actor(actor_trying);
 
-        if (is_player && (m_type == DoorType::metal))
-        {
-                if (!player_see_door)
-                {
+        if (is_player && (m_type == DoorType::metal)) {
+                if (!player_see_door) {
                         msg_log::add("There is a closed metal door here.");
                 }
 
@@ -1251,35 +1115,29 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                 return;
         }
 
-        if (m_is_stuck)
-        {
+        if (m_is_stuck) {
                 TRACE << "Is stuck" << std::endl;
 
-                if (is_player)
-                {
+                if (is_player) {
                         msg_log::add(
                                 "The " +
                                 base_name_short() +
                                 " seems to be stuck.");
                 }
         }
-        else
-        {
+        else {
                 // Not stuck
                 TRACE << "Is not stuck" << std::endl;
 
                 const bool tryer_can_see =
                         actor_trying.m_properties.allow_see();
 
-                if (tryer_can_see)
-                {
+                if (tryer_can_see) {
                         TRACE << "Tryer can see, opening" << std::endl;
                         m_is_open = true;
 
-                        if (is_player)
-                        {
-                                if (!player_bon::has_trait(Trait::silent))
-                                {
+                        if (is_player) {
+                                if (!player_bon::has_trait(Trait::silent)) {
                                         Snd snd(
                                                 "",
                                                 audio::SfxId::door_open,
@@ -1297,8 +1155,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                         base_name_short() +
                                         ".");
                         }
-                        else
-                        {
+                        else {
                                 // Is monster
                                 Snd snd(
                                         "I hear a door open.",
@@ -1311,8 +1168,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                                 snd.run();
 
-                                if (player_see_tryer)
-                                {
+                                if (player_see_tryer) {
                                         const std::string actor_name_the =
                                                 text_format::first_to_upper(
                                                         actor_trying.name_the());
@@ -1323,8 +1179,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                                 base_name_short() +
                                                 ".");
                                 }
-                                else if (player_see_door)
-                                {
+                                else if (player_see_door) {
                                         msg_log::add(
                                                 "I see a " +
                                                 base_name_short() +
@@ -1332,18 +1187,15 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                 }
                         }
                 }
-                else
-                {
+                else {
                         // Tryer is blind
-                        if (rnd::coin_toss())
-                        {
+                        if (rnd::coin_toss()) {
                                 TRACE << "Tryer is blind, but open succeeded anyway"
                                       << std::endl;
 
                                 m_is_open = true;
 
-                                if (is_player)
-                                {
+                                if (is_player) {
                                         Snd snd(
                                                 "",
                                                 audio::SfxId::door_open,
@@ -1360,8 +1212,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                                 base_name_short() +
                                                 ", but manage to open it.");
                                 }
-                                else
-                                {
+                                else {
                                         // Is monster
                                         Snd snd(
                                                 "I hear something open a door awkwardly.",
@@ -1374,8 +1225,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                                         snd.run();
 
-                                        if (player_see_tryer)
-                                        {
+                                        if (player_see_tryer) {
                                                 const std::string actor_name_the =
                                                         text_format::first_to_upper(
                                                                 actor_trying.name_the());
@@ -1386,8 +1236,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                                         base_name_short() +
                                                         ".");
                                         }
-                                        else if (player_see_door)
-                                        {
+                                        else if (player_see_door) {
                                                 msg_log::add(
                                                         "I see a " +
                                                         base_name_short() +
@@ -1395,13 +1244,11 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                         }
                                 }
                         }
-                        else
-                        {
+                        else {
                                 // Failed to open
                                 TRACE << "Tryer is blind, and open failed" << std::endl;
 
-                                if (is_player)
-                                {
+                                if (is_player) {
                                         Snd snd(
                                                 "",
                                                 audio::SfxId::END,
@@ -1418,8 +1265,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                                 base_name_short() +
                                                 ", and fail to open it.");
                                 }
-                                else
-                                {
+                                else {
                                         // Is monster
 
                                         // Emitting the sound from the actor instead of the door,
@@ -1436,8 +1282,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                                         snd.run();
 
-                                        if (player_see_tryer)
-                                        {
+                                        if (player_see_tryer) {
                                                 const std::string actor_name_the =
                                                         text_format::first_to_upper(
                                                                 actor_trying.name_the());
@@ -1455,12 +1300,10 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                 }
         }
 
-        if (m_is_open)
-        {
+        if (m_is_open) {
                 TRACE << "Open was successful" << std::endl;
 
-                if (m_is_hidden)
-                {
+                if (m_is_hidden) {
                         TRACE << "Was secret, now revealing" << std::endl;
 
                         reveal(terrain::PrintRevealMsg::if_seen);
@@ -1482,12 +1325,10 @@ void Door::on_lever_pulled(Lever* const lever)
 {
         (void)lever;
 
-        if (m_is_open)
-        {
+        if (m_is_open) {
                 close(nullptr);
         }
-        else
-        {
+        else {
                 open(nullptr);
         }
 }
@@ -1503,21 +1344,18 @@ DidOpen Door::open(actor::Actor* const actor_opening)
 
         ASSERT(!map::g_terrain_blocks_walking.at(m_pos));
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 const std::string name = base_name();
 
                 msg_log::add("The " + name + " opens.");
         }
 
-        if (actor_opening)
-        {
+        if (actor_opening) {
                 m_actor_currently_opening = actor_opening;
                 actor_opening->m_opening_door_pos = m_pos;
         }
 
-        if (m_type == DoorType::metal)
-        {
+        if (m_type == DoorType::metal) {
                 Snd snd(
                         "",
                         audio::SfxId::END,
@@ -1541,15 +1379,13 @@ DidClose Door::close(actor::Actor* const actor_closing)
 
         map::update_map_info_for_terrain_at(m_pos);
 
-        if (map::g_seen.at(m_pos))
-        {
+        if (map::g_seen.at(m_pos)) {
                 const std::string name = base_name();
 
                 msg_log::add("The " + name + " closes.");
         }
 
-        if (m_type == DoorType::metal)
-        {
+        if (m_type == DoorType::metal) {
                 Snd snd(
                         "",
                         audio::SfxId::END,
@@ -1567,8 +1403,7 @@ DidClose Door::close(actor::Actor* const actor_closing)
 
 void Door::jam(actor::Actor* const actor_jamming)
 {
-        if (m_is_open || (m_type == DoorType::metal))
-        {
+        if (m_is_open || (m_type == DoorType::metal)) {
                 ASSERT(false);
 
                 return;
@@ -1577,8 +1412,7 @@ void Door::jam(actor::Actor* const actor_jamming)
         ++m_jam_level;
         m_is_stuck = true;
 
-        if (actor_jamming && actor::is_player(actor_jamming))
-        {
+        if (actor_jamming && actor::is_player(actor_jamming)) {
                 m_is_known_stuck = true;
         }
 }

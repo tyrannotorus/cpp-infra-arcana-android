@@ -40,22 +40,19 @@ void drop_item_from_inv(
 {
         item::Item* item_to_drop = nullptr;
 
-        if (inv_type == InvType::slots)
-        {
+        if (inv_type == InvType::slots) {
                 ASSERT(idx != (size_t)SlotId::END);
 
                 item_to_drop = actor.m_inv.m_slots[idx].item;
         }
-        else
-        {
+        else {
                 // Backpack item
                 ASSERT(idx < actor.m_inv.m_backpack.size());
 
                 item_to_drop = actor.m_inv.m_backpack[idx];
         }
 
-        if (!item_to_drop)
-        {
+        if (!item_to_drop) {
                 return;
         }
 
@@ -74,14 +71,12 @@ void drop_item_from_inv(
 
         item::Item* item_to_keep = nullptr;
 
-        if (is_whole_stack_dropped)
-        {
+        if (is_whole_stack_dropped) {
                 item_ref = item_to_drop->name(ItemNameType::plural);
 
                 item_to_drop = actor.m_inv.remove_item(item_to_drop, false);
         }
-        else
-        {
+        else {
                 // Only some items are dropped from a stack
 
                 // Drop a copy of the selected item
@@ -99,25 +94,21 @@ void drop_item_from_inv(
                         nr_items_before_drop - nr_items_to_drop;
         }
 
-        if (!item_to_drop)
-        {
+        if (!item_to_drop) {
                 return;
         }
 
         // Print message
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 msg_log::add(
                         "I drop " + item_ref + ".",
                         colors::text(),
                         MsgInterruptPlayer::no,
                         MorePromptOnMsg::yes);
         }
-        else
-        {
+        else {
                 // Monster is dropping item
-                if (can_player_see_actor(actor))
-                {
+                if (can_player_see_actor(actor)) {
                         const std::string mon_name_the =
                                 text_format::first_to_upper(
                                         actor.name_the());
@@ -138,8 +129,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
         // If target cell is bottomless, just destroy the item
         const auto* const tgt_f = map::g_terrain.at(intended_pos);
 
-        if (tgt_f->id() == terrain::Id::chasm)
-        {
+        if (tgt_f->id() == terrain::Id::chasm) {
                 delete &item;
 
                 TRACE_FUNC_END_VERBOSE;
@@ -151,8 +141,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
         Array2<bool> free_cell_array(map::dims());
 
         const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i)
-        {
+        for (size_t i = 0; i < nr_positions; ++i) {
                 auto* const t = map::g_terrain.at(i);
 
                 free_cell_array.at(i) = t->can_have_item();
@@ -164,8 +153,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
                         true,
                         free_cell_array.rect());
 
-        if (free_cells.empty())
-        {
+        if (free_cells.empty()) {
                 // No cells found were items could be placed - too bad!
                 delete &item;
 
@@ -191,8 +179,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
         // In other words, try to drop as near as possible, but prefer stacking.
         for (auto outer_it = std::begin(free_cells);
              outer_it != std::end(free_cells);
-             ++outer_it)
-        {
+             ++outer_it) {
                 const P& p = *outer_it;
 
                 const int dist = king_dist(intended_pos, p);
@@ -200,14 +187,12 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
                 ASSERT(dist >= dist_searched_stackable);
 
                 if (is_stackable_type &&
-                    (dist > dist_searched_stackable))
-                {
+                    (dist > dist_searched_stackable)) {
                         // Search each cell with equal distance to the
                         // current distance
                         for (auto stack_it = outer_it;
                              stack_it != end(free_cells);
-                             ++stack_it)
-                        {
+                             ++stack_it) {
                                 const P& stack_p = *stack_it;
 
                                 const int stack_dist =
@@ -215,16 +200,14 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
 
                                 ASSERT(stack_dist >= dist);
 
-                                if (stack_dist > dist)
-                                {
+                                if (stack_dist > dist) {
                                         break;
                                 }
 
                                 auto* item_on_floor = map::g_items.at(stack_p);
 
                                 if (item_on_floor &&
-                                    item_on_floor->data().id == item.data().id)
-                                {
+                                    item_on_floor->data().id == item.data().id) {
                                         TRACE_VERBOSE
                                                 << "Stacking item on floor"
                                                 << std::endl;
@@ -236,8 +219,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
 
                                         map::g_items.at(stack_p) = &item;
 
-                                        if (map::g_player->m_pos == stack_p)
-                                        {
+                                        if (map::g_player->m_pos == stack_p) {
                                                 item.on_player_found();
                                         }
 
@@ -251,13 +233,11 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
 
                 // Item has not been stacked at this distance
 
-                if (!map::g_items.at(p))
-                {
+                if (!map::g_items.at(p)) {
                         // Alright, this cell is empty, let's put the item here
                         map::g_items.at(p) = &item;
 
-                        if (map::g_player->m_pos == p)
-                        {
+                        if (map::g_player->m_pos == p) {
                                 item.on_player_found();
                         }
 

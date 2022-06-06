@@ -59,8 +59,7 @@ void PharaohStaff::on_std_turn_in_inv_hook(const InvType inv_type)
 {
         (void)inv_type;
 
-        if (!actor::is_player(actor_carrying()))
-        {
+        if (!actor::is_player(actor_carrying())) {
                 return;
         }
 
@@ -71,15 +70,12 @@ void PharaohStaff::on_std_turn_in_inv_hook(const InvType inv_type)
                      fov::fov_rect(map::g_player->m_pos, map::dims()),
                      MapParseMode::overwrite);
 
-        for (auto* const actor : game_time::g_actors)
-        {
-                if (actor::is_player(actor) || !actor->is_alive())
-                {
+        for (auto* const actor : game_time::g_actors) {
+                if (actor::is_player(actor) || !actor->is_alive()) {
                         continue;
                 }
 
-                if (!actor->is_aware_of_player())
-                {
+                if (!actor->is_aware_of_player()) {
                         continue;
                 }
 
@@ -89,8 +85,7 @@ void PharaohStaff::on_std_turn_in_inv_hook(const InvType inv_type)
                                 *map::g_player,
                                 blocked_los);
 
-                if (!mon_see_player)
-                {
+                if (!mon_see_player) {
                         continue;
                 }
 
@@ -102,24 +97,20 @@ void PharaohStaff::on_mon_see_player_carrying(actor::Actor& mon) const
 {
         // TODO: Consider an "is_mummy" actor data field
         if ((mon.id() != actor::Id::mummy) &&
-            (mon.id() != actor::Id::croc_head_mummy))
-        {
+            (mon.id() != actor::Id::croc_head_mummy)) {
                 return;
         }
 
-        if (mon.is_actor_my_leader(map::g_player))
-        {
+        if (mon.is_actor_my_leader(map::g_player)) {
                 return;
         }
 
         const int convert_pct_chance = 10;
 
-        if (rnd::percent(convert_pct_chance))
-        {
+        if (rnd::percent(convert_pct_chance)) {
                 mon.m_leader = map::g_player;
 
-                if (actor::can_player_see_actor(mon))
-                {
+                if (actor::can_player_see_actor(mon)) {
                         const auto name_the =
                                 text_format::first_to_upper(
                                         mon.name_the());
@@ -133,15 +124,13 @@ void PharaohStaff::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (!actor_hit.is_alive())
-        {
+        if (!actor_hit.is_alive()) {
                 return;
         }
 
         const int doomed_pct = 50;
 
-        if (rnd::percent(doomed_pct))
-        {
+        if (rnd::percent(doomed_pct)) {
                 auto* prop = property_factory::make(PropId::doomed);
 
                 prop->set_duration(rnd::range(3, 4));
@@ -207,8 +196,7 @@ void TeleCtrlTalisman::on_removed_from_inv_hook()
 // -----------------------------------------------------------------------------
 void HornOfMaliceHeard::run(actor::Actor& actor) const
 {
-        if (!actor::is_player(&actor))
-        {
+        if (!actor::is_player(&actor)) {
                 actor.m_properties.apply(
                         property_factory::make(PropId::conflict));
         }
@@ -239,8 +227,7 @@ ConsumeItem HornOfMalice::activate(actor::Actor* const actor)
 {
         (void)actor;
 
-        if (m_charges <= 0)
-        {
+        if (m_charges <= 0) {
                 msg_log::add("It makes no sound.");
 
                 return ConsumeItem::no;
@@ -274,10 +261,8 @@ ConsumeItem HornOfMalice::activate(actor::Actor* const actor)
 // -----------------------------------------------------------------------------
 void HornOfBanishmentHeard::run(actor::Actor& actor) const
 {
-        if (actor.m_properties.has(PropId::summoned))
-        {
-                if (actor::can_player_see_actor(actor))
-                {
+        if (actor.m_properties.has(PropId::summoned)) {
+                if (actor::can_player_see_actor(actor)) {
                         const std::string name_the =
                                 text_format::first_to_upper(
                                         actor.name_the());
@@ -317,8 +302,7 @@ ConsumeItem HornOfBanishment::activate(actor::Actor* const actor)
 {
         (void)actor;
 
-        if (m_charges <= 0)
-        {
+        if (m_charges <= 0) {
                 msg_log::add("It makes no sound.");
 
                 return ConsumeItem::no;
@@ -358,13 +342,11 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
 {
         (void)actor;
 
-        if (!map::g_player->m_properties.allow_pray(Verbose::yes))
-        {
+        if (!map::g_player->m_properties.allow_pray(Verbose::yes)) {
                 return ConsumeItem::no;
         }
 
-        if (m_has_failed_attempt)
-        {
+        if (m_has_failed_attempt) {
                 msg_log::add(
                         "I have no faith that this would help me at "
                         "the moment.");
@@ -381,8 +363,7 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
 
         std::string pray_msg;
 
-        if (map::g_player->m_properties.has(PropId::terrified))
-        {
+        if (map::g_player->m_properties.has(PropId::terrified)) {
                 pray_msg = "With trembling hands ";
         }
 
@@ -395,8 +376,7 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
                 MorePromptOnMsg::yes);
 
         // If the item is still charging, roll for success
-        if ((m_nr_charge_turns_left > 0) && !rnd::percent(25))
-        {
+        if ((m_nr_charge_turns_left > 0) && !rnd::percent(25)) {
                 // Failed!
                 m_has_failed_attempt = true;
 
@@ -433,8 +413,7 @@ void HolySymbol::on_std_turn_in_inv_hook(InvType inv_type)
         (void)inv_type;
 
         // Already fully charged?
-        if (m_nr_charge_turns_left == 0)
-        {
+        if (m_nr_charge_turns_left == 0) {
                 return;
         }
 
@@ -442,8 +421,7 @@ void HolySymbol::on_std_turn_in_inv_hook(InvType inv_type)
 
         --m_nr_charge_turns_left;
 
-        if (m_nr_charge_turns_left == 0)
-        {
+        if (m_nr_charge_turns_left == 0) {
                 m_has_failed_attempt = false;
 
                 const std::string my_name =
@@ -460,8 +438,7 @@ void HolySymbol::on_std_turn_in_inv_hook(InvType inv_type)
 
 std::string HolySymbol::name_info_str() const
 {
-        if (m_nr_charge_turns_left <= 0)
-        {
+        if (m_nr_charge_turns_left <= 0) {
                 return "";
         }
 
@@ -469,8 +446,7 @@ std::string HolySymbol::name_info_str() const
 
         std::string str = "(" + turns_left_str + " turns";
 
-        if (m_has_failed_attempt)
-        {
+        if (m_has_failed_attempt) {
                 str += ", failed";
         }
 
@@ -540,15 +516,13 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
 {
         (void)actor;
 
-        if (m_charges <= 0)
-        {
+        if (m_charges <= 0) {
                 msg_log::add("Nothing happens.");
 
                 return ConsumeItem::no;
         }
 
-        if (map::g_player->m_properties.has(PropId::extra_hasted))
-        {
+        if (map::g_player->m_properties.has(PropId::extra_hasted)) {
                 msg_log::add("It will not move.");
 
                 return ConsumeItem::no;
@@ -558,8 +532,7 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
 
         map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
-        if (!map::g_player->is_alive())
-        {
+        if (!map::g_player->is_alive()) {
                 return ConsumeItem::no;
         }
 
@@ -586,17 +559,14 @@ void ShadowDagger::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (actor_hit.m_state == ActorState::destroyed)
-        {
+        if (actor_hit.m_state == ActorState::destroyed) {
                 return;
         }
 
-        if (is_radiant_creature(actor_hit))
-        {
+        if (is_radiant_creature(actor_hit)) {
                 hit_radiant_creature(actor_hit);
         }
-        else
-        {
+        else {
                 hit_normal_creature(actor_hit);
         }
 }
@@ -640,8 +610,7 @@ void ShadowDagger::hit_normal_creature(actor::Actor& actor) const
                         actor.m_properties.prop(
                                 PropId::light_sensitive);
 
-                if (!prop)
-                {
+                if (!prop) {
                         ASSERT(false);
 
                         return;
@@ -655,13 +624,11 @@ void ShadowDagger::hit_normal_creature(actor::Actor& actor) const
 
 void ShadowDagger::hit_radiant_creature(actor::Actor& actor) const
 {
-        if (!actor.is_alive())
-        {
+        if (!actor.is_alive()) {
                 return;
         }
 
-        if (actor::can_player_see_actor(actor))
-        {
+        if (actor::can_player_see_actor(actor)) {
                 const auto actor_name =
                         text_format::first_to_upper(
                                 actor.name_the());
@@ -716,8 +683,7 @@ void Necronomicon::on_std_turn_in_inv_hook(const InvType inv_type)
 {
         (void)inv_type;
 
-        if (rnd::percent(2))
-        {
+        if (rnd::percent(2)) {
                 Snd snd(
                         "",
                         audio::SfxId::END,
@@ -733,8 +699,7 @@ void Necronomicon::on_std_turn_in_inv_hook(const InvType inv_type)
 
 ItemPrePickResult Necronomicon::pre_pickup_hook()
 {
-        if (!player_bon::is_bg(Bg::exorcist))
-        {
+        if (!player_bon::is_bg(Bg::exorcist)) {
                 return ItemPrePickResult::do_pickup;
         }
 

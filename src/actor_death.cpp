@@ -46,8 +46,7 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
         if (!actor::is_player(&actor) ||
             !actor.m_inv.has_item_in_backpack(artifact_id) ||
             (map::g_player->insanity() >= 100) ||
-            (actor.m_sp <= 0))
-        {
+            (actor.m_sp <= 0)) {
                 return false;
         }
 
@@ -68,10 +67,8 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
                 .set_title("Dead")
                 .run();
 
-        for (auto* const a : game_time::g_actors)
-        {
-                if (!actor::is_player(a))
-                {
+        for (auto* const a : game_time::g_actors) {
+                if (!actor::is_player(a)) {
                         a->m_mon_aware_state.aware_counter = 0;
                         a->m_mon_aware_state.wary_counter = 0;
                 }
@@ -86,13 +83,11 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
                         PropEndAllowMsg::no,
                         PropEndAllowHistoricMsg::no));
 
-        if (map::g_terrain.at(actor.m_pos)->id() == terrain::Id::chasm)
-        {
+        if (map::g_terrain.at(actor.m_pos)->id() == terrain::Id::chasm) {
                 // Player died due to falling down a chasm - go to next level
                 map_travel::go_to_nxt();
         }
-        else
-        {
+        else {
                 // Player died on current level - teleport the player so they
                 // don't just wake up in the same bad situation again
                 teleport(*map::g_player, ShouldCtrlTele::never);
@@ -109,17 +104,14 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
 
 static void move_actor_to_pos_can_have_corpse(actor::Actor& actor)
 {
-        if (map::g_terrain.at(actor.m_pos)->can_have_corpse())
-        {
+        if (map::g_terrain.at(actor.m_pos)->can_have_corpse()) {
                 return;
         }
 
-        for (const auto& d : dir_utils::g_dir_list_w_center)
-        {
+        for (const auto& d : dir_utils::g_dir_list_w_center) {
                 const auto p = actor.m_pos + d;
 
-                if (map::g_terrain.at(p)->can_have_corpse())
-                {
+                if (map::g_terrain.at(p)->can_have_corpse()) {
                         actor.m_pos = p;
 
                         break;
@@ -143,8 +135,7 @@ void kill(
         // Save player with Talisman of Resurrection?
         const bool did_use_talisman = try_use_talisman_of_resurrection(actor);
 
-        if (did_use_talisman)
-        {
+        if (did_use_talisman) {
                 return;
         }
 
@@ -153,21 +144,17 @@ void kill(
 
         unset_actor_as_leader_and_target_for_all_mon(&actor);
 
-        if (!actor::is_player(&actor))
-        {
-                if (player_state::g_target == &actor)
-                {
+        if (!actor::is_player(&actor)) {
+                if (player_state::g_target == &actor) {
                         actor::player_state::g_target = nullptr;
                 }
 
-                if (can_player_see_actor(actor))
-                {
+                if (can_player_see_actor(actor)) {
                         print_mon_death_msg(actor);
                 }
         }
 
-        if (!actor::is_player(&actor) && actor.m_data->is_humanoid)
-        {
+        if (!actor::is_player(&actor) && actor.m_data->is_humanoid) {
                 Snd snd(
                         "I hear agonized screaming.",
                         audio::SfxId::END,
@@ -180,25 +167,21 @@ void kill(
                 snd.run();
         }
 
-        if (is_destroyed == IsDestroyed::yes)
-        {
+        if (is_destroyed == IsDestroyed::yes) {
                 actor.m_state = ActorState::destroyed;
 
                 actor.m_properties.on_destroyed_alive();
 
-                if (actor.m_data->can_bleed && (allow_gore == AllowGore::yes))
-                {
+                if (actor.m_data->can_bleed && (allow_gore == AllowGore::yes)) {
                         terrain::make_gore(actor.m_pos);
                         terrain::make_blood(actor.m_pos);
                 }
         }
-        else
-        {
+        else {
                 // Not destroyed
                 actor.m_state = ActorState::corpse;
 
-                if (!actor::is_player(&actor))
-                {
+                if (!actor::is_player(&actor)) {
                         move_actor_to_pos_can_have_corpse(actor);
                 }
         }
@@ -206,10 +189,8 @@ void kill(
         actor.m_properties.on_death();
 
         if (!actor::is_player(&actor) &&
-            !actor.m_properties.has(PropId::shapeshifts))
-        {
-                if (allow_drop_items == AllowDropItems::yes)
-                {
+            !actor.m_properties.has(PropId::shapeshifts)) {
+                if (allow_drop_items == AllowDropItems::yes) {
                         actor.m_inv.drop_all_non_intrinsic(actor.m_pos);
                 }
 
@@ -225,8 +206,7 @@ void print_mon_death_msg(const actor::Actor& actor)
 {
         const std::string msg = actor.death_msg();
 
-        if (!msg.empty())
-        {
+        if (!msg.empty()) {
                 msg_log::add(msg);
         }
 }
@@ -234,15 +214,12 @@ void print_mon_death_msg(const actor::Actor& actor)
 void unset_actor_as_leader_and_target_for_all_mon(
         const actor::Actor* const actor)
 {
-        for (auto* const other : game_time::g_actors)
-        {
-                if (other->m_leader == actor)
-                {
+        for (auto* const other : game_time::g_actors) {
+                if (other->m_leader == actor) {
                         other->m_leader = nullptr;
                 }
 
-                if (other->m_ai_state.target == actor)
-                {
+                if (other->m_ai_state.target == actor) {
                         other->m_ai_state.target = nullptr;
                 }
         }

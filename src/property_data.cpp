@@ -111,8 +111,7 @@ static void add(PropData& d)
 
         const size_t panel_w = panels::w(Panel::map_gui_stats);
 
-        if (worst_case_w > panel_w)
-        {
+        if (worst_case_w > panel_w) {
                 TRACE
                         << "The string '"
                         << worst_case_str

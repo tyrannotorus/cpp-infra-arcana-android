@@ -23,8 +23,7 @@ Terrain* make(const Id id, const P& pos)
 {
         const auto* const d = &data(id);
 
-        switch (id)
-        {
+        switch (id) {
         case Id::floor:
                 return new Floor(pos, d);
                 break;

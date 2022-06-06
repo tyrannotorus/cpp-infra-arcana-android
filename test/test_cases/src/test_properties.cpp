@@ -47,8 +47,7 @@ TEST_CASE("Infection triggers disease")
 
         // Tick the infected property enough to no longer exist (could use
         // while-true loop, but this could cause a failing test to get stuck)
-        for (int i = 0; i < 100000; ++i)
-        {
+        for (int i = 0; i < 100000; ++i) {
                 properties.on_turn_begin();
         }
 

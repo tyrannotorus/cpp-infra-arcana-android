@@ -78,8 +78,7 @@ static std::string trait_descr_for_spell(
                 spell->name() +
                 "\"";
 
-        if (spell->can_be_improved_with_skill())
-        {
+        if (spell->can_be_improved_with_skill()) {
                 str +=
                         " at " +
                         spells::skill_to_str(skill) +
@@ -90,8 +89,7 @@ static std::string trait_descr_for_spell(
 
         const auto descr = spell->descr_specific(skill);
 
-        for (const auto& line : descr)
-        {
+        for (const auto& line : descr) {
                 str += " " + line;
         }
 
@@ -129,8 +127,7 @@ static void set_trait_data(TraitData& d)
 
 static void update_trait_data()
 {
-        for (auto& d : s_trait_data)
-        {
+        for (auto& d : s_trait_data) {
                 d = {};
         }
 
@@ -867,8 +864,7 @@ static bool is_trait_blocked_for_bg(
 
 static void incr_occultist_spells()
 {
-        for (int id = 0; id < (int)SpellId::END; ++id)
-        {
+        for (int id = 0; id < (int)SpellId::END; ++id) {
                 const std::unique_ptr<Spell>
                         spell(spells::make((SpellId)id));
 
@@ -878,8 +874,7 @@ static void incr_occultist_spells()
                 const bool is_matching_domain =
                         (spell->domain() == s_player_occultist_domain);
 
-                if (is_learnable && is_matching_domain)
-                {
+                if (is_learnable && is_matching_domain) {
                         player_spells::incr_spell_skill(
                                 (SpellId)id,
                                 Verbose::yes);
@@ -898,8 +893,7 @@ void init()
 
         s_player_occultist_domain = OccultistDomain::END;
 
-        for (size_t i = 0; i < (size_t)Trait::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Trait::END; ++i) {
                 s_traits_picked[i] = false;
         }
 
@@ -914,15 +908,13 @@ void save()
 
         saving::put_int((int)s_player_occultist_domain);
 
-        for (size_t i = 0; i < (size_t)Trait::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Trait::END; ++i) {
                 saving::put_bool(s_traits_picked[i]);
         }
 
         saving::put_int((int)s_trait_log.size());
 
-        for (const auto& e : s_trait_log)
-        {
+        for (const auto& e : s_trait_log) {
                 saving::put_int(e.clvl);
 
                 saving::put_int((int)e.trait_id);
@@ -937,8 +929,7 @@ void load()
 
         s_player_occultist_domain = (OccultistDomain)saving::get_int();
 
-        for (size_t i = 0; i < (size_t)Trait::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Trait::END; ++i) {
                 s_traits_picked[i] = saving::get_bool();
         }
 
@@ -946,8 +937,7 @@ void load()
 
         s_trait_log.resize(nr_trait_log_entries);
 
-        for (auto& e : s_trait_log)
-        {
+        for (auto& e : s_trait_log) {
                 e.clvl = saving::get_int();
 
                 e.trait_id = (Trait)saving::get_int();
@@ -958,8 +948,7 @@ void load()
 
 std::string bg_title(const Bg id)
 {
-        switch (id)
-        {
+        switch (id) {
         case Bg::exorcist:
                 return "Exorcist";
 
@@ -986,8 +975,7 @@ std::string bg_title(const Bg id)
 
 std::string spell_domain_title(const OccultistDomain domain)
 {
-        switch (domain)
-        {
+        switch (domain) {
         case OccultistDomain::clairvoyant:
                 return "Clairvoyance";
 
@@ -1011,8 +999,7 @@ std::string spell_domain_title(const OccultistDomain domain)
 
 std::string occultist_profession_title(const OccultistDomain domain)
 {
-        switch (domain)
-        {
+        switch (domain) {
         case OccultistDomain::clairvoyant:
                 return "Clairvoyant";
 
@@ -1056,8 +1043,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                         colors::gray());
         };
 
-        switch (id)
-        {
+        switch (id) {
         case Bg::exorcist:
                 put("Starts with a Holy Symbol, which can restore "
                     "spirit points and grant resistance against "
@@ -1172,8 +1158,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
 
 std::string occultist_domain_descr(const OccultistDomain domain)
 {
-        switch (domain)
-        {
+        switch (domain) {
         case OccultistDomain::clairvoyant:
                 return "Specializes in detection and learning. "
                        "Has an intrinsic ability to detect doors, traps, "
@@ -1220,14 +1205,11 @@ TraitPrereqData trait_prereqs(
         // Remove traits which are blocked for this background (prerequisites
         // are considered fulfilled)
         for (auto it = std::begin(result.traits);
-             it != std::end(result.traits);)
-        {
-                if (is_trait_blocked_for_bg(*it, bg, occultist_domain))
-                {
+             it != std::end(result.traits);) {
+                if (is_trait_blocked_for_bg(*it, bg, occultist_domain)) {
                         it = result.traits.erase(it);
                 }
-                else
-                {
+                else {
                         // Not blocked
                         ++it;
                 }
@@ -1274,8 +1256,7 @@ std::vector<Bg> pickable_bgs()
 
         result.reserve((int)Bg::END);
 
-        for (int i = 0; i < (int)Bg::END; ++i)
-        {
+        for (int i = 0; i < (int)Bg::END; ++i) {
                 result.push_back((Bg)i);
         }
 
@@ -1298,8 +1279,7 @@ std::vector<OccultistDomain> pickable_occultist_domains()
 
         result.reserve((int)OccultistDomain::END);
 
-        for (int i = 0; i < (int)OccultistDomain::END; ++i)
-        {
+        for (int i = 0; i < (int)OccultistDomain::END; ++i) {
                 result.push_back((OccultistDomain)i);
         }
 
@@ -1326,10 +1306,8 @@ UnpickedTraitsData unpicked_traits(
 
         UnpickedTraitsData result;
 
-        for (const auto& d : s_trait_data)
-        {
-                if (s_traits_picked[(size_t)d.id])
-                {
+        for (const auto& d : s_trait_data) {
+                if (s_traits_picked[(size_t)d.id]) {
                         continue;
                 }
 
@@ -1340,8 +1318,7 @@ UnpickedTraitsData unpicked_traits(
                                 bg,
                                 occultist_domain);
 
-                if (is_blocked_for_bg)
-                {
+                if (is_blocked_for_bg) {
                         continue;
                 }
 
@@ -1359,28 +1336,23 @@ UnpickedTraitsData unpicked_traits(
                         (s_player_bg == prereq_data.bg) ||
                         (prereq_data.bg == Bg::END);
 
-                if (!is_bg_ok)
-                {
+                if (!is_bg_ok) {
                         continue;
                 }
 
                 bool is_trait_prereqs_ok = true;
 
-                for (const auto& prereq : prereq_data.traits)
-                {
-                        if (!s_traits_picked[(size_t)prereq])
-                        {
+                for (const auto& prereq : prereq_data.traits) {
+                        if (!s_traits_picked[(size_t)prereq]) {
                                 is_trait_prereqs_ok = false;
                                 break;
                         }
                 }
 
-                if (is_trait_prereqs_ok)
-                {
+                if (is_trait_prereqs_ok) {
                         result.traits_can_be_picked.push_back(d.id);
                 }
-                else
-                {
+                else {
                         result.traits_prereqs_not_met.push_back(d.id);
                 }
 
@@ -1414,19 +1386,15 @@ std::vector<Trait> traits_can_be_removed()
 
         std::vector<Trait> result;
 
-        for (const auto& d : s_trait_data)
-        {
-                if (!s_traits_picked[(size_t)d.id])
-                {
+        for (const auto& d : s_trait_data) {
+                if (!s_traits_picked[(size_t)d.id]) {
                         continue;
                 }
 
                 bool is_blocking_other_trait = false;
 
-                for (const auto& d_other : s_trait_data)
-                {
-                        if (!s_traits_picked[(size_t)d_other.id])
-                        {
+                for (const auto& d_other : s_trait_data) {
+                        if (!s_traits_picked[(size_t)d_other.id]) {
                                 continue;
                         }
 
@@ -1436,15 +1404,13 @@ std::vector<Trait> traits_can_be_removed()
                                         std::end(d_other.trait_prereqs),
                                         d.id);
 
-                        if (match != std::end(d_other.trait_prereqs))
-                        {
+                        if (match != std::end(d_other.trait_prereqs)) {
                                 is_blocking_other_trait = true;
                                 break;
                         }
                 }
 
-                if (is_blocking_other_trait)
-                {
+                if (is_blocking_other_trait) {
                         continue;
                 }
 
@@ -1460,26 +1426,20 @@ void pick_bg(const Bg bg)
 
         s_player_bg = bg;
 
-        switch (s_player_bg)
-        {
-        case Bg::exorcist:
-        {
+        switch (s_player_bg) {
+        case Bg::exorcist: {
                 pick_trait(Trait::stout_spirit);
                 pick_trait(Trait::undead_bane);
 
                 // Mark all scrolls as found, so they do not yield XP
-                for (auto& d : item::g_data)
-                {
-                        if (d.type == ItemType::scroll)
-                        {
+                for (auto& d : item::g_data) {
+                        if (d.type == ItemType::scroll) {
                                 d.is_found = true;
                         }
                 }
-        }
-        break;
+        } break;
 
-        case Bg::ghoul:
-        {
+        case Bg::ghoul: {
                 auto* prop_r_disease =
                         property_factory::make(PropId::r_disease);
 
@@ -1505,31 +1465,24 @@ void pick_bg(const Bg bg)
                 player_spells::learn_spell(SpellId::frenzy, Verbose::no);
 
                 map::g_player->change_max_hp(8, Verbose::no);
-        }
-        break;
+        } break;
 
-        case Bg::occultist:
-        {
+        case Bg::occultist: {
                 pick_trait(Trait::stout_spirit);
 
                 map::g_player->change_max_sp(3, Verbose::no);
-        }
-        break;
+        } break;
 
-        case Bg::rogue:
-        {
+        case Bg::rogue: {
                 pick_trait(Trait::stealthy);
-        }
-        break;
+        } break;
 
-        case Bg::war_vet:
-        {
+        case Bg::war_vet: {
                 pick_trait(Trait::adept_marksman);
                 pick_trait(Trait::adept_melee);
                 pick_trait(Trait::tough);
                 pick_trait(Trait::healer);
-        }
-        break;
+        } break;
 
         case Bg::END:
                 break;
@@ -1542,10 +1495,8 @@ void pick_occultist_domain(const OccultistDomain domain)
 
         s_player_occultist_domain = domain;
 
-        switch (domain)
-        {
-        case OccultistDomain::clairvoyant:
-        {
+        switch (domain) {
+        case OccultistDomain::clairvoyant: {
                 auto* prop =
                         static_cast<PropMagicSearching*>(
                                 property_factory::make(
@@ -1560,72 +1511,53 @@ void pick_occultist_domain(const OccultistDomain domain)
                         PropSrc::intr,
                         true,
                         Verbose::no);
-        }
-        break;
+        } break;
 
-        case OccultistDomain::enchanter:
-        {
-        }
-        break;
+        case OccultistDomain::enchanter: {
+        } break;
 
-        case OccultistDomain::invoker:
-        {
-        }
-        break;
+        case OccultistDomain::invoker: {
+        } break;
 
-        case OccultistDomain::transmuter:
-        {
-        }
-        break;
+        case OccultistDomain::transmuter: {
+        } break;
 
-        case OccultistDomain::END:
-        {
+        case OccultistDomain::END: {
                 ASSERT(false);
-        }
-        break;
+        } break;
         }
 }
 
 void on_player_gained_lvl(const int new_lvl)
 {
-        switch (s_player_bg)
-        {
-        case Bg::exorcist:
-        {
+        switch (s_player_bg) {
+        case Bg::exorcist: {
                 const bool is_exorcist_extra_trait =
                         (new_lvl == s_exorcist_bon_trait_lvl_1) ||
                         (new_lvl == s_exorcist_bon_trait_lvl_2) ||
                         (new_lvl == s_exorcist_bon_trait_lvl_3);
 
-                if (is_exorcist_extra_trait)
-                {
+                if (is_exorcist_extra_trait) {
                         states::push(
                                 std::make_unique<PickTraitState>(
                                         "You gain an extra trait!"));
                 }
-        }
-        break;
+        } break;
 
-        case Bg::ghoul:
-        {
-        }
-        break;
+        case Bg::ghoul: {
+        } break;
 
-        case Bg::occultist:
-        {
+        case Bg::occultist: {
                 const bool is_occultist_spell_incr_lvl =
                         (new_lvl == s_occultist_upgrade_lvl_1) ||
                         (new_lvl == s_occultist_upgrade_lvl_2);
 
-                if (is_occultist_spell_incr_lvl)
-                {
+                if (is_occultist_spell_incr_lvl) {
                         incr_occultist_spells();
                 }
 
-                switch (s_player_occultist_domain)
-                {
-                case OccultistDomain::clairvoyant:
-                {
+                switch (s_player_occultist_domain) {
+                case OccultistDomain::clairvoyant: {
                         auto* const prop =
                                 map::g_player->m_properties.prop(
                                         PropId::magic_searching);
@@ -1635,63 +1567,44 @@ void on_player_gained_lvl(const int new_lvl)
                         auto* const searching =
                                 static_cast<PropMagicSearching*>(prop);
 
-                        if (new_lvl == s_occultist_upgrade_lvl_1)
-                        {
+                        if (new_lvl == s_occultist_upgrade_lvl_1) {
                                 searching->set_allow_reveal_items();
                         }
-                        else if (new_lvl == s_occultist_upgrade_lvl_2)
-                        {
+                        else if (new_lvl == s_occultist_upgrade_lvl_2) {
                                 searching->set_allow_reveal_creatures();
                         }
-                }
-                break;
+                } break;
 
-                case OccultistDomain::enchanter:
-                {
-                }
-                break;
+                case OccultistDomain::enchanter: {
+                } break;
 
-                case OccultistDomain::invoker:
-                {
-                }
-                break;
+                case OccultistDomain::invoker: {
+                } break;
 
-                case OccultistDomain::transmuter:
-                {
-                }
-                break;
+                case OccultistDomain::transmuter: {
+                } break;
 
-                case OccultistDomain::END:
-                {
+                case OccultistDomain::END: {
                         ASSERT(false);
+                } break;
                 }
-                break;
-                }
-        }
-        break;
+        } break;
 
-        case Bg::rogue:
-        {
-        }
-        break;
+        case Bg::rogue: {
+        } break;
 
-        case Bg::war_vet:
-        {
-        }
-        break;
+        case Bg::war_vet: {
+        } break;
 
-        case Bg::END:
-        {
+        case Bg::END: {
                 ASSERT(false);
-        }
-        break;
+        } break;
         }
 }
 
 void set_all_traits_to_picked()
 {
-        for (size_t i = 0; i < (size_t)Trait::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Trait::END; ++i) {
                 s_traits_picked[i] = true;
         }
 }
@@ -1712,8 +1625,7 @@ void pick_trait(const Trait id)
 
         const auto& d = trait_data(id);
 
-        if (d.on_picked)
-        {
+        if (d.on_picked) {
                 // Has trait pick function
                 trait_data(id).on_picked();
         }
@@ -1738,8 +1650,7 @@ void remove_trait(const Trait id)
         // If the trait applies effects when picked, it must also revert those
         ASSERT(!(d.on_picked && !d.on_removed));
 
-        if (d.on_removed)
-        {
+        if (d.on_removed) {
                 // Has trait removal function
                 trait_data(id).on_removed();
         }

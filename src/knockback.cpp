@@ -61,8 +61,7 @@ void run(
 
         if (actor.m_data->prevent_knockback ||
             (actor.m_data->actor_size >= actor::Size::giant) ||
-            (is_player && config::is_bot_playing()))
-        {
+            (is_player && config::is_bot_playing())) {
                 TRACE_FUNC_END;
 
                 return;
@@ -76,23 +75,20 @@ void run(
                                 return actor.m_properties.has(id);
                         });
 
-        if (prop_prevents_knockback)
-        {
+        if (prop_prevents_knockback) {
                 TRACE_FUNC_END;
 
                 return;
         }
 
-        if (is_player)
-        {
+        if (is_player) {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
         }
 
         const auto d = (actor.m_pos - attacked_from_pos).signs();
         const auto new_pos = actor.m_pos + d;
 
-        if (map::living_actor_at(new_pos))
-        {
+        if (map::living_actor_at(new_pos)) {
                 // Target position is occupied by another actor
                 return;
         }
@@ -111,13 +107,10 @@ void run(
 
         if (!actor_can_move_into_tgt_pos &&
             !is_tgt_pos_deep &&
-            !actor.m_properties.has(PropId::r_phys))
-        {
+            !actor.m_properties.has(PropId::r_phys)) {
                 // Actor nailed to a wall from a spike gun?
-                if (source == KnockbackSource::spike_gun)
-                {
-                        if (!tgt_terrain->is_projectile_passable())
-                        {
+                if (source == KnockbackSource::spike_gun) {
+                        if (!tgt_terrain->is_projectile_passable()) {
                                 auto* prop =
                                         property_factory::make(
                                                 PropId::nailed);
@@ -140,8 +133,7 @@ void run(
 
         bool player_is_aware_of_actor = true;
 
-        if (!is_player)
-        {
+        if (!is_player) {
                 player_is_aware_of_actor = actor.is_player_aware_of_me();
         }
 
@@ -150,14 +142,11 @@ void run(
                 ? text_format::first_to_upper(actor.name_the())
                 : "It";
 
-        if ((verbose == Verbose::yes) && player_is_aware_of_actor)
-        {
-                if (is_player)
-                {
+        if ((verbose == Verbose::yes) && player_is_aware_of_actor) {
+                if (is_player) {
                         msg_log::add("I am knocked back!");
                 }
-                else
-                {
+                else {
                         msg_log::add(actor_name + " is knocked back!");
                 }
         }
@@ -167,23 +156,19 @@ void run(
 
         actor::set_position(actor, new_pos);
 
-        if (!is_player && player_can_see_actor)
-        {
+        if (!is_player && player_can_see_actor) {
                 actor::make_player_aware_mon(actor);
         }
 
-        if (!actor_can_move_into_tgt_pos && is_tgt_pos_deep)
-        {
-                if (is_player)
-                {
+        if (!actor_can_move_into_tgt_pos && is_tgt_pos_deep) {
+                if (is_player) {
                         msg_log::add(
                                 "I perish in the depths!",
                                 colors::msg_bad());
                 }
                 else if (
                         player_is_aware_of_actor &&
-                        map::g_seen.at(new_pos))
-                {
+                        map::g_seen.at(new_pos)) {
                         msg_log::add(
                                 actor_name + " perishes in the depths.",
                                 colors::msg_good());
@@ -211,13 +196,11 @@ void run(
         // Bump target cell
         const auto mobs = game_time::mobs_at(actor.m_pos);
 
-        for (auto* const mob : mobs)
-        {
+        for (auto* const mob : mobs) {
                 mob->bump(actor);
         }
 
-        if (!actor.is_alive())
-        {
+        if (!actor.is_alive()) {
                 TRACE_FUNC_END;
                 return;
         }

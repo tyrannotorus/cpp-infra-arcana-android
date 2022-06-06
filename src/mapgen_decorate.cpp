@@ -23,12 +23,10 @@
 // -----------------------------------------------------------------------------
 static void decorate_walls()
 {
-        for (const auto& p : map::rect().positions())
-        {
+        for (const auto& p : map::rect().positions()) {
                 auto* const terrain = map::g_terrain.at(p);
 
-                if (terrain->id() != terrain::Id::wall)
-                {
+                if (terrain->id() != terrain::Id::wall) {
                         continue;
                 }
 
@@ -39,29 +37,24 @@ static void decorate_walls()
                 const bool is_common_wall =
                         wall->m_type == terrain::WallType::common;
 
-                if (is_common_wall && (map::g_dlvl >= g_dlvl_first_late_game))
-                {
+                if (is_common_wall && (map::g_dlvl >= g_dlvl_first_late_game)) {
                         // Late game common wall, put a lot of rubble to make it
                         // look more old and ruined.
                         rubble_one_in_n = 3;
                 }
 
-                if (rnd::one_in(rubble_one_in_n))
-                {
+                if (rnd::one_in(rubble_one_in_n)) {
                         auto* const t =
                                 terrain::make(terrain::Id::rubble_high, p);
 
                         map::set_terrain(t);
                 }
-                else
-                {
-                        if (is_common_wall)
-                        {
+                else {
+                        if (is_common_wall) {
                                 wall->set_rnd_common_wall();
                         }
 
-                        if (rnd::one_in(40))
-                        {
+                        if (rnd::one_in(40)) {
                                 wall->set_moss_grown();
                         }
                 }
@@ -74,12 +67,10 @@ static bool is_cave_floor(const P& p)
 
         // TODO: Consider traps mimicking cave floor
 
-        if (t.id() == terrain::Id::floor)
-        {
+        if (t.id() == terrain::Id::floor) {
                 const auto* floor = static_cast<const terrain::Floor*>(&t);
 
-                if (floor->m_type == terrain::FloorType::cave)
-                {
+                if (floor->m_type == terrain::FloorType::cave) {
                         return true;
                 }
         }
@@ -114,17 +105,14 @@ static bool should_convert_wall_to_cave_mid_game(const P& p)
 
         bool is_adj_to_cave_floor = false;
 
-        for (const P& d : dir_utils::g_dir_list)
-        {
+        for (const P& d : dir_utils::g_dir_list) {
                 const P p_adj(p + d);
 
-                if (!map::is_pos_inside_map(p_adj))
-                {
+                if (!map::is_pos_inside_map(p_adj)) {
                         continue;
                 }
 
-                if (is_cave_floor(p_adj))
-                {
+                if (is_cave_floor(p_adj)) {
                         is_adj_to_cave_floor = true;
 
                         break;
@@ -136,16 +124,13 @@ static bool should_convert_wall_to_cave_mid_game(const P& p)
 
 static bool should_convert_wall_to_cave(const P& p)
 {
-        if (map::g_dlvl <= g_dlvl_last_early_game)
-        {
+        if (map::g_dlvl <= g_dlvl_last_early_game) {
                 return should_convert_wall_to_cave_early_game(p);
         }
-        else if (map::g_dlvl <= g_dlvl_last_mid_game)
-        {
+        else if (map::g_dlvl <= g_dlvl_last_mid_game) {
                 return should_convert_wall_to_cave_mid_game(p);
         }
-        else
-        {
+        else {
                 // Not needed late game, this is done elsewhere.
                 return false;
         }
@@ -153,17 +138,14 @@ static bool should_convert_wall_to_cave(const P& p)
 
 static void convert_walls_to_cave()
 {
-        for (int x = 0; x < map::w(); ++x)
-        {
-                for (int y = 0; y < map::h(); ++y)
-                {
+        for (int x = 0; x < map::w(); ++x) {
+                for (int y = 0; y < map::h(); ++y) {
                         const P p(x, y);
 
                         auto& t = *map::g_terrain.at(p);
 
                         if ((t.id() != terrain::Id::wall) ||
-                            !should_convert_wall_to_cave(p))
-                        {
+                            !should_convert_wall_to_cave(p)) {
                                 continue;
                         }
 
@@ -176,20 +158,17 @@ static void convert_walls_to_cave()
 
 static void put_a_bunch_of_vines_at(const P& p)
 {
-        for (const auto& d : dir_utils::g_dir_list_w_center)
-        {
+        for (const auto& d : dir_utils::g_dir_list_w_center) {
                 const auto adj_p = p + d;
 
-                if (!map::is_pos_inside_outer_walls(adj_p))
-                {
+                if (!map::is_pos_inside_outer_walls(adj_p)) {
                         continue;
                 }
 
                 const auto& id = map::g_terrain.at(adj_p)->id();
                 const bool is_floor = (id == terrain::Id::floor);
 
-                if (is_floor && ((p == adj_p) || rnd::one_in(3)))
-                {
+                if (is_floor && ((p == adj_p) || rnd::one_in(3))) {
                         auto* const t =
                                 terrain::make(terrain::Id::vines, adj_p);
 
@@ -200,30 +179,25 @@ static void put_a_bunch_of_vines_at(const P& p)
 
 static void decorate_floor_at(const P& p)
 {
-        if (map::g_terrain.at(p)->id() != terrain::Id::floor)
-        {
+        if (map::g_terrain.at(p)->id() != terrain::Id::floor) {
                 return;
         }
 
-        if (rnd::one_in(100))
-        {
+        if (rnd::one_in(100)) {
                 auto* const t = terrain::make(terrain::Id::rubble_low, p);
 
                 map::set_terrain(t);
         }
 
-        if (rnd::one_in(150))
-        {
+        if (rnd::one_in(150)) {
                 put_a_bunch_of_vines_at(p);
         }
 }
 
 static void decorate_floor()
 {
-        for (int x = 1; x < map::w() - 1; ++x)
-        {
-                for (int y = 1; y < map::h() - 1; ++y)
-                {
+        for (int x = 1; x < map::w() - 1; ++x) {
+                for (int y = 1; y < map::h() - 1; ++y) {
                         const P pos(x, y);
 
                         decorate_floor_at(pos);
@@ -235,22 +209,18 @@ static void decorate_door_proposals()
 {
         const auto dims = mapgen::g_door_proposals.dims();
 
-        for (int x = 0; x < dims.x; ++x)
-        {
-                for (int y = 0; y < dims.y; ++y)
-                {
+        for (int x = 0; x < dims.x; ++x) {
+                for (int y = 0; y < dims.y; ++y) {
                         const P p(x, y);
 
                         const auto id = map::g_terrain.at(p)->id();
 
                         if (!mapgen::g_door_proposals.at(p) ||
-                            (id == terrain::Id::door))
-                        {
+                            (id == terrain::Id::door)) {
                                 continue;
                         }
 
-                        if (rnd::one_in(30))
-                        {
+                        if (rnd::one_in(30)) {
                                 put_a_bunch_of_vines_at(p);
                         }
                 }
@@ -261,13 +231,11 @@ static void try_make_grate_at(const P& pos, const Array2<bool>& blocked)
 {
         const int convert_to_grate_one_in_n = 4;
 
-        if (!rnd::one_in(convert_to_grate_one_in_n))
-        {
+        if (!rnd::one_in(convert_to_grate_one_in_n)) {
                 return;
         }
 
-        if (!mapgen::allow_make_grate_at(pos, blocked))
-        {
+        if (!mapgen::allow_make_grate_at(pos, blocked)) {
                 return;
         }
 
@@ -283,10 +251,8 @@ static void make_grates()
         map_parsers::BlocksWalking(ParseActors::no)
                 .run(blocked, blocked.rect());
 
-        for (int x = 1; x < map::w() - 1; ++x)
-        {
-                for (int y = 1; y < map::h() - 1; ++y)
-                {
+        for (int x = 1; x < map::w() - 1; ++x) {
+                for (int y = 1; y < map::h() - 1; ++y) {
                         try_make_grate_at({x, y}, blocked);
                 }
         }
@@ -315,8 +281,7 @@ bool allow_make_grate_at(const P& pos, const Array2<bool>& blocked)
         const auto t_id = map::g_terrain.at(pos)->id();
         const bool is_wall = (t_id == terrain::Id::wall);
 
-        if (!is_wall)
-        {
+        if (!is_wall) {
                 return false;
         }
 

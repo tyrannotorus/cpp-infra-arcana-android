@@ -51,8 +51,7 @@ LosResult check_cell(
         los_result.is_blocked_by_dark = false;
 
         if (!is_in_fov_range(p0, p1) ||
-            !map.hard_blocked->rect().is_pos_inside(p1))
-        {
+            !map.hard_blocked->rect().is_pos_inside(p1)) {
                 // Target too far away, return the hard blocked result
                 return los_result;
         }
@@ -62,8 +61,7 @@ LosResult check_cell(
         const std::vector<P>* path_deltas_ptr =
                 line_calc::fov_delta_line(delta, g_fov_radi_db);
 
-        if (!path_deltas_ptr)
-        {
+        if (!path_deltas_ptr) {
                 // No valid line to target, return the hard blocked result
                 return los_result;
         }
@@ -80,12 +78,10 @@ LosResult check_cell(
 
         const size_t path_size = path_deltas.size();
 
-        for (size_t i = 0; i < path_size; ++i)
-        {
+        for (size_t i = 0; i < path_size; ++i) {
                 current_p.set(p0 + path_deltas[i]);
 
-                if (i > 1)
-                {
+                if (i > 1) {
                         // Check if we are blocked by darkness
 
                         pre_p.set(p0 + path_deltas[i - 1]);
@@ -101,19 +97,16 @@ LosResult check_cell(
 
                         if (!tgt_is_lgt &&
                             !current_cell_light &&
-                            (current_cell_dark || prev_cell_dark))
-                        {
+                            (current_cell_dark || prev_cell_dark)) {
                                 los_result.is_blocked_by_dark = true;
                         }
                 }
 
-                if (current_p == p1)
-                {
+                if (current_p == p1) {
                         break;
                 }
 
-                if ((i > 0) && map.hard_blocked->at(current_p))
-                {
+                if ((i > 0) && map.hard_blocked->at(current_p)) {
                         los_result.is_blocked_hard = true;
                         break;
                 }
@@ -130,18 +123,15 @@ Array2<LosResult> run(const P& p0, const FovMap& map)
 
         Array2<LosResult> result(map.hard_blocked->dims());
 
-        for (auto& los : result)
-        {
+        for (auto& los : result) {
                 los.is_blocked_hard = true;
                 los.is_blocked_by_dark = false;
         }
 
         const auto r = fov_rect(p0, map.hard_blocked->dims());
 
-        for (int x = r.p0.x; x <= r.p1.x; ++x)
-        {
-                for (int y = r.p0.y; y <= r.p1.y; ++y)
-                {
+        for (int x = r.p0.x; x <= r.p1.x; ++x) {
+                for (int y = r.p0.y; y <= r.p1.y; ++y) {
                         result.at(x, y) = check_cell(p0, P(x, y), map);
                 }
         }

@@ -66,23 +66,20 @@ void draw_map_obj(const MapDrawObj& obj)
                 (obj.character != 0) &&
                 (obj.character != ' ');
 
-        if (!is_drawable)
-        {
+        if (!is_drawable) {
                 return;
         }
 
         set_clip_rect_to_panel(Panel::map);
 
         if (!config::is_tiles_mode() &&
-            (obj.character == g_filled_rect_char))
-        {
+            (obj.character == g_filled_rect_char)) {
                 draw_filled_rect(obj.pos, obj.color);
 
                 return;
         }
 
-        if (config::is_tiles_mode())
-        {
+        if (config::is_tiles_mode()) {
                 TileDrawObj tile_obj;
 
                 tile_obj.tile = obj.tile;
@@ -94,8 +91,7 @@ void draw_map_obj(const MapDrawObj& obj)
 
                 tile_obj.draw();
         }
-        else
-        {
+        else {
                 CharacterDrawObj char_obj;
 
                 char_obj.character = obj.character;

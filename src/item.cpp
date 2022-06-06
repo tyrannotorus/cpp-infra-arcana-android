@@ -59,8 +59,7 @@ struct ItemAttProp;
 // -----------------------------------------------------------------------------
 static ItemNameAttackInfo att_mode_to_name_att_info(AttackMode att_mode)
 {
-        switch (att_mode)
-        {
+        switch (att_mode) {
         case AttackMode::melee:
                 return ItemNameAttackInfo::melee;
 
@@ -96,8 +95,7 @@ Item::Item(ItemData* item_data) :
 
 Item& Item::operator=(const Item& other)
 {
-        if (&other == this)
-        {
+        if (&other == this) {
                 return *this;
         }
 
@@ -113,8 +111,7 @@ Item& Item::operator=(const Item& other)
 
 Item::~Item()
 {
-        for (auto* prop : m_carrier_props)
-        {
+        for (auto* prop : m_carrier_props) {
                 delete prop;
         }
 }
@@ -162,8 +159,7 @@ std::vector<std::string> Item::descr() const
 {
         auto full_descr = descr_hook();
 
-        if (m_curse.is_active())
-        {
+        if (m_curse.is_active()) {
                 full_descr.push_back(m_curse.descr());
         }
 
@@ -179,46 +175,37 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
 {
         auto range = m_base_melee_dmg;
 
-        if (range.total_range().max == 0)
-        {
+        if (range.total_range().max == 0) {
                 return range;
         }
 
-        if (actor::is_player(attacker))
-        {
-                if (player_bon::has_trait(Trait::adept_melee))
-                {
+        if (actor::is_player(attacker)) {
+                if (player_bon::has_trait(Trait::adept_melee)) {
                         range.set_plus(range.plus() + 1);
                 }
 
-                if (player_bon::has_trait(Trait::expert_melee))
-                {
+                if (player_bon::has_trait(Trait::expert_melee)) {
                         range.set_plus(range.plus() + 1);
                 }
 
-                if (player_bon::has_trait(Trait::master_melee))
-                {
+                if (player_bon::has_trait(Trait::master_melee)) {
                         range.set_plus(range.plus() + 1);
                 }
 
                 // TODO: This should be handled via the 'specific_dmg_mod' hook
-                if (id() == Id::player_ghoul_claw)
-                {
-                        if (player_bon::has_trait(Trait::foul))
-                        {
+                if (id() == Id::player_ghoul_claw) {
+                        if (player_bon::has_trait(Trait::foul)) {
                                 range.set_plus(range.plus() + 1);
                         }
 
-                        if (player_bon::has_trait(Trait::toxic))
-                        {
+                        if (player_bon::has_trait(Trait::toxic)) {
                                 range.set_plus(range.plus() + 1);
                         }
                 }
         }
 
         // Bonus damage from being frenzied?
-        if (attacker && attacker->m_properties.has(PropId::frenzied))
-        {
+        if (attacker && attacker->m_properties.has(PropId::frenzied)) {
                 range.set_plus(range.plus() + 1);
         }
 
@@ -244,8 +231,7 @@ WpnDmg Item::thrown_dmg(const actor::Actor* const attacker) const
                 ? m_base_melee_dmg
                 : m_base_ranged_dmg;
 
-        if (range.total_range().max == 0)
-        {
+        if (range.total_range().max == 0) {
                 return range;
         }
 
@@ -259,8 +245,7 @@ ItemAttackProp& Item::prop_applied_on_melee(
 {
         auto* const intr = prop_applied_intr_attack(attacker);
 
-        if (intr)
-        {
+        if (intr) {
                 return *intr;
         }
 
@@ -272,8 +257,7 @@ ItemAttackProp& Item::prop_applied_on_ranged(
 {
         auto* const intr = prop_applied_intr_attack(attacker);
 
-        if (intr)
-        {
+        if (intr) {
                 return *intr;
         }
 
@@ -283,14 +267,11 @@ ItemAttackProp& Item::prop_applied_on_ranged(
 ItemAttackProp* Item::prop_applied_intr_attack(
         const actor::Actor* const attacker) const
 {
-        if (attacker)
-        {
+        if (attacker) {
                 const auto& intr_attacks = attacker->m_data->intr_attacks;
 
-                for (const auto& att : intr_attacks)
-                {
-                        if (att->item_id == id())
-                        {
+                for (const auto& att : intr_attacks) {
+                        if (att->item_id == id()) {
                                 return &att->prop_applied;
                         }
                 }
@@ -303,8 +284,7 @@ int Item::weight() const
 {
         auto w = (int)m_data->weight * m_nr_items;
 
-        if (m_curse.is_active())
-        {
+        if (m_curse.is_active()) {
                 w = m_curse.affect_weight(w);
         }
 
@@ -315,18 +295,15 @@ std::string Item::weight_str() const
 {
         const int wgt = weight();
 
-        if (wgt <= ((int)Weight::extra_light + (int)Weight::light) / 2)
-        {
+        if (wgt <= ((int)Weight::extra_light + (int)Weight::light) / 2) {
                 return "very light";
         }
 
-        if (wgt <= ((int)Weight::light + (int)Weight::medium) / 2)
-        {
+        if (wgt <= ((int)Weight::light + (int)Weight::medium) / 2) {
                 return "light";
         }
 
-        if (wgt <= ((int)Weight::medium + (int)Weight::heavy) / 2)
-        {
+        if (wgt <= ((int)Weight::medium + (int)Weight::heavy) / 2) {
                 return "a bit heavy";
         }
 
@@ -346,8 +323,7 @@ void Item::on_std_turn_in_inv(const InvType inv_type)
 {
         ASSERT(m_actor_carrying);
 
-        if (actor::is_player(m_actor_carrying))
-        {
+        if (actor::is_player(m_actor_carrying)) {
                 m_curse.on_new_turn(*this);
         }
 
@@ -367,8 +343,7 @@ void Item::on_pickup(actor::Actor& actor)
 
         m_actor_carrying = &actor;
 
-        if (actor::is_player(m_actor_carrying))
-        {
+        if (actor::is_player(m_actor_carrying)) {
                 on_player_found();
         }
 
@@ -402,8 +377,7 @@ void Item::on_removed_from_inv()
 
 void Item::on_player_found()
 {
-        if ((m_data->xp_on_found > 0) && !m_data->is_found)
-        {
+        if ((m_data->xp_on_found > 0) && !m_data->is_found) {
                 const std::string item_name =
                         name(
                                 ItemNameType::a,
@@ -438,15 +412,13 @@ std::string Item::name(
         // If requested name type is "plural" and this is a single item, use
         // name type "a" instead.
         if ((name_type == ItemNameType::plural) &&
-            (!m_data->is_stackable || (m_nr_items == 1)))
-        {
+            (!m_data->is_stackable || (m_nr_items == 1))) {
                 name_type_used = ItemNameType::a;
         }
 
         std::string nr_str;
 
-        if (name_type_used == ItemNameType::plural)
-        {
+        if (name_type_used == ItemNameType::plural) {
                 nr_str = std::to_string(m_nr_items);
         }
 
@@ -455,8 +427,7 @@ std::string Item::name(
 
         std::string info_str;
 
-        if (info == ItemNameInfo::yes)
-        {
+        if (info == ItemNameInfo::yes) {
                 info_str = name_info_str();
         }
 
@@ -473,8 +444,7 @@ std::string Item::name(
         text_format::append_with_space(full_name, nr_str);
         text_format::append_with_space(full_name, base_name);
 
-        if (!dmg_str.empty() || !hit_str.empty())
-        {
+        if (!dmg_str.empty() || !hit_str.empty()) {
                 std::string plus_info = plus_str(attack_info);
 
                 text_format::append_with_space(full_name, plus_info);
@@ -503,15 +473,13 @@ std::string Item::hit_mod_str(
         auto get_hit_mod_str = [abbrev](const int hit_mod) {
                 std::string str;
 
-                if (hit_mod >= 0)
-                {
+                if (hit_mod >= 0) {
                         str = "+";
                 }
 
                 str += std::to_string(hit_mod) + "%";
 
-                if (abbrev == AbbrevItemAttackInfo::no)
-                {
+                if (abbrev == AbbrevItemAttackInfo::no) {
                         str += " hit";
                 }
 
@@ -522,10 +490,8 @@ std::string Item::hit_mod_str(
 
         // If caller requested attack info depending on main attack mode, set
         // the attack info used to a specific type
-        if (attack_info == ItemNameAttackInfo::main_attack_mode)
-        {
-                switch (m_data->main_attack_mode)
-                {
+        if (attack_info == ItemNameAttackInfo::main_attack_mode) {
+                switch (m_data->main_attack_mode) {
                 case AttackMode::melee:
                         attack_info_used = ItemNameAttackInfo::melee;
                         break;
@@ -544,8 +510,7 @@ std::string Item::hit_mod_str(
                 }
         }
 
-        switch (attack_info_used)
-        {
+        switch (attack_info_used) {
         case ItemNameAttackInfo::melee:
                 return get_hit_mod_str(m_data->melee.hit_chance_mod);
 
@@ -570,8 +535,7 @@ std::string Item::dmg_str(
         const ItemNameAttackInfo attack_info,
         const ItemNameDmg dmg_value) const
 {
-        if (!m_data->allow_display_dmg)
-        {
+        if (!m_data->allow_display_dmg) {
                 return "";
         }
 
@@ -579,49 +543,36 @@ std::string Item::dmg_str(
 
         auto att_inf_used = attack_info;
 
-        if (attack_info == ItemNameAttackInfo::main_attack_mode)
-        {
+        if (attack_info == ItemNameAttackInfo::main_attack_mode) {
                 att_inf_used =
                         att_mode_to_name_att_info(
                                 m_data->main_attack_mode);
         }
 
-        switch (att_inf_used)
-        {
-        case ItemNameAttackInfo::melee:
-        {
-                if (m_base_melee_dmg.total_range().max > 0)
-                {
+        switch (att_inf_used) {
+        case ItemNameAttackInfo::melee: {
+                if (m_base_melee_dmg.total_range().max > 0) {
                         const auto dmg_range = melee_dmg(map::g_player);
 
                         const auto str_avg = dmg_range.total_range().str_avg();
 
-                        switch (dmg_value)
-                        {
-                        case ItemNameDmg::average:
-                        {
+                        switch (dmg_value) {
+                        case ItemNameDmg::average: {
                                 dmg_str = str_avg;
-                        }
-                        break;
+                        } break;
 
-                        case ItemNameDmg::range:
-                        {
+                        case ItemNameDmg::range: {
                                 dmg_str = dmg_range.total_range().str();
-                        }
-                        break;
+                        } break;
                         }
                 }
-        }
-        break;
+        } break;
 
-        case ItemNameAttackInfo::ranged:
-        {
-                if (m_base_ranged_dmg.total_range().max > 0)
-                {
+        case ItemNameAttackInfo::ranged: {
+                if (m_base_ranged_dmg.total_range().max > 0) {
                         auto dmg_range = ranged_dmg(map::g_player);
 
-                        if (m_data->ranged.is_machine_gun)
-                        {
+                        if (m_data->ranged.is_machine_gun) {
                                 const int n = g_nr_mg_projectiles;
 
                                 const int min = n * dmg_range.base_min();
@@ -631,27 +582,22 @@ std::string Item::dmg_str(
                                 dmg_range = WpnDmg(min, max, plus);
                         }
 
-                        if (dmg_value == ItemNameDmg::average)
-                        {
+                        if (dmg_value == ItemNameDmg::average) {
                                 dmg_str = dmg_range.total_range().str_avg();
                         }
-                        else
-                        {
+                        else {
                                 dmg_str = dmg_range.total_range().str();
                         }
                 }
-        }
-        break;
+        } break;
 
-        case ItemNameAttackInfo::thrown:
-        {
+        case ItemNameAttackInfo::thrown: {
                 // Print damage if non-zero throwing damage, or melee weapon
                 // with non zero melee damage (melee weapons use melee damage
                 // when thrown)
                 if ((m_data->ranged.dmg.total_range().max > 0) ||
                     ((m_data->main_attack_mode == AttackMode::melee) &&
-                     (m_base_melee_dmg.total_range().max > 0)))
-                {
+                     (m_base_melee_dmg.total_range().max > 0))) {
                         // NOTE: "thrown_dmg" will return melee damage if this
                         // is primarily a melee weapon
                         const auto dmg_range = thrown_dmg(map::g_player);
@@ -659,23 +605,17 @@ std::string Item::dmg_str(
                         const std::string str_avg =
                                 dmg_range.total_range().str_avg();
 
-                        switch (dmg_value)
-                        {
-                        case ItemNameDmg::average:
-                        {
+                        switch (dmg_value) {
+                        case ItemNameDmg::average: {
                                 dmg_str = dmg_range.total_range().str_avg();
-                        }
-                        break;
+                        } break;
 
-                        case ItemNameDmg::range:
-                        {
+                        case ItemNameDmg::range: {
                                 dmg_str = dmg_range.total_range().str();
-                        }
-                        break;
+                        } break;
                         }
                 }
-        }
-        break;
+        } break;
 
         case ItemNameAttackInfo::none:
                 break;
@@ -690,8 +630,7 @@ std::string Item::dmg_str(
 
 std::string Item::plus_str(const ItemNameAttackInfo attack_info) const
 {
-        if (!m_data->allow_display_dmg)
-        {
+        if (!m_data->allow_display_dmg) {
                 return "";
         }
 
@@ -699,34 +638,27 @@ std::string Item::plus_str(const ItemNameAttackInfo attack_info) const
 
         auto att_inf_used = attack_info;
 
-        if (attack_info == ItemNameAttackInfo::main_attack_mode)
-        {
+        if (attack_info == ItemNameAttackInfo::main_attack_mode) {
                 att_inf_used =
                         att_mode_to_name_att_info(
                                 m_data->main_attack_mode);
         }
 
-        switch (att_inf_used)
-        {
-        case ItemNameAttackInfo::melee:
-        {
-                if (m_base_melee_dmg.total_range().max > 0)
-                {
+        switch (att_inf_used) {
+        case ItemNameAttackInfo::melee: {
+                if (m_base_melee_dmg.total_range().max > 0) {
                         return m_base_melee_dmg.str_plus();
                 }
-        }
-        break;
+        } break;
 
         // "Plus" damage as a stat on non-melee_weapons is currently not
         // supported (they can do extra damage with traits, but the weapon
         // itself cannot have a "plus" damage).
         case ItemNameAttackInfo::ranged:
         case ItemNameAttackInfo::thrown:
-        case ItemNameAttackInfo::none:
-        {
+        case ItemNameAttackInfo::none: {
                 return "";
-        }
-        break;
+        } break;
 
         case ItemNameAttackInfo::main_attack_mode:
                 break;
@@ -802,23 +734,19 @@ int Armor::armor_points() const
 
         const int ap_max = m_data->armor.armor_points;
 
-        if (m_dur > 60)
-        {
+        if (m_dur > 60) {
                 return ap_max;
         }
 
-        if (m_dur > 40)
-        {
+        if (m_dur > 40) {
                 return std::max(0, ap_max - 1);
         }
 
-        if (m_dur > 25)
-        {
+        if (m_dur > 25) {
                 return std::max(0, ap_max - 2);
         }
 
-        if (m_dur > 15)
-        {
+        if (m_dur > 15) {
                 return std::max(0, ap_max - 3);
         }
 
@@ -844,8 +772,7 @@ void Armor::hit(const int dmg)
         ASSERT(m_actor_carrying);
 
         if (actor::is_player(m_actor_carrying) &&
-            player_bon::is_bg(Bg::war_vet))
-        {
+            player_bon::is_bg(Bg::war_vet)) {
                 war_vet_k = 0.5;
         }
 
@@ -856,8 +783,7 @@ void Armor::hit(const int dmg)
         const int ap_after = armor_points();
 
         if ((ap_after < ap_before) &&
-            (ap_after != 0))
-        {
+            (ap_after != 0)) {
                 const std::string armor_name = name(ItemNameType::plain);
 
                 msg_log::add(
@@ -899,8 +825,7 @@ void ArmorAsbSuit::on_unequip_hook()
 
 void ArmorMiGo::on_equip_hook(const Verbose verbose)
 {
-        if (verbose == Verbose::yes)
-        {
+        if (verbose == Verbose::yes) {
                 msg_log::add(
                         "The armor joins with my skin!",
                         colors::text(),
@@ -921,8 +846,7 @@ Wpn::Wpn(ItemData* const item_data) :
 {
         const auto ammo_item_id = m_data->ranged.ammo_item_id;
 
-        if (ammo_item_id != Id::END)
-        {
+        if (ammo_item_id != Id::END) {
                 m_ammo_data = &item::g_data[(size_t)ammo_item_id];
                 m_ammo_loaded = m_data->ranged.max_ammo;
         }
@@ -958,8 +882,7 @@ Color Wpn::color() const
 {
         if (m_data->ranged.is_ranged_wpn &&
             !m_data->ranged.has_infinite_ammo &&
-            (m_ammo_loaded == 0))
-        {
+            (m_ammo_loaded == 0)) {
                 return m_data->color.shaded(50);
         }
 
@@ -969,8 +892,7 @@ Color Wpn::color() const
 std::string Wpn::name_info_str() const
 {
         if (!m_data->ranged.is_ranged_wpn ||
-            m_data->ranged.has_infinite_ammo)
-        {
+            m_data->ranged.has_infinite_ammo) {
                 return "";
         }
 
@@ -989,15 +911,13 @@ void SpikedMace::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (!actor_hit.is_alive())
-        {
+        if (!actor_hit.is_alive()) {
                 return;
         }
 
         const int stun_pct = 25;
 
-        if (rnd::percent(stun_pct))
-        {
+        if (rnd::percent(stun_pct)) {
                 auto* prop = new PropParalyzed();
 
                 prop->set_duration(2);
@@ -1041,8 +961,7 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
             d.can_bleed &&
             player_bon::has_trait(Trait::ravenous) &&
             is_feed_needed &&
-            rnd::one_in(6))
-        {
+            rnd::one_in(6)) {
                 Snd snd(
                         "",
                         audio::SfxId::bite,
@@ -1057,19 +976,16 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 actor::heal_from_eating(*map::g_player);
         }
 
-        if (actor_hit.is_alive())
-        {
+        if (actor_hit.is_alive()) {
                 // Poison victim from Ghoul Toxic trait?
                 if (player_bon::has_trait(Trait::toxic) &&
-                    rnd::fraction(3, 4))
-                {
+                    rnd::fraction(3, 4)) {
                         actor_hit.m_properties.apply(new PropPoisoned());
                 }
 
                 // Terrify victim from Ghoul Indomitable Fury trait?
                 if (player_bon::has_trait(Trait::indomitable_fury) &&
-                    map::g_player->m_properties.has(PropId::frenzied))
-                {
+                    map::g_player->m_properties.has(PropId::frenzied)) {
                         actor_hit.m_properties.apply(new PropTerrified());
                 }
         }
@@ -1088,8 +1004,7 @@ void PlayerGhoulClaw::on_melee_kill(actor::Actor& actor_killed)
         if (player_bon::has_trait(Trait::foul) &&
             !is_ethereal &&
             d.can_leave_corpse &&
-            rnd::one_in(3))
-        {
+            rnd::one_in(3)) {
                 actor::spawn(
                         actor_killed.m_pos,
                         {1, actor::Id::worm_mass},
@@ -1110,16 +1025,14 @@ void MiGoGun::specific_dmg_mod(
         const actor::Actor* const actor) const
 {
         if (actor::is_player(actor) &&
-            player_bon::has_trait(Trait::elec_incl))
-        {
+            player_bon::has_trait(Trait::elec_incl)) {
                 range.set_plus(range.plus() + 1);
         }
 }
 
 void MiGoGun::pre_ranged_attack()
 {
-        if (!actor::is_player(m_actor_carrying))
-        {
+        if (!actor::is_player(m_actor_carrying)) {
                 return;
         }
 
@@ -1167,8 +1080,7 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (!actor_hit.is_alive())
-        {
+        if (!actor_hit.is_alive()) {
                 return;
         }
 
@@ -1177,13 +1089,11 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
         if ((head_item && head_item->id() == Id::gas_mask) ||
-            (body_item && body_item->id() == Id::armor_asb_suit))
-        {
+            (body_item && body_item->id() == Id::armor_asb_suit)) {
                 return;
         }
 
-        if (rnd::coin_toss())
-        {
+        if (rnd::coin_toss()) {
                 auto* const prop = property_factory::make(PropId::blind);
 
                 prop->set_duration(2);
@@ -1197,8 +1107,7 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 // -----------------------------------------------------------------------------
 void VampiricBite::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
-        if (!actor_hit.is_alive())
-        {
+        if (!actor_hit.is_alive()) {
                 return;
         }
 
@@ -1216,8 +1125,7 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         (void)dmg;
 
         if (!actor_hit.is_alive() ||
-            !actor::is_player(&actor_hit))
-        {
+            !actor::is_player(&actor_hit)) {
                 return;
         }
 
@@ -1225,12 +1133,10 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
         if (map::g_player->insanity() >= 50 ||
             map::g_player->m_properties.has(PropId::confused) ||
-            map::g_player->m_properties.has(PropId::frenzied))
-        {
+            map::g_player->m_properties.has(PropId::frenzied)) {
                 const bool player_see_mon = actor::can_player_see_actor(*mon);
 
-                if (player_see_mon)
-                {
+                if (player_see_mon) {
                         const std::string mon_name_the =
                                 text_format::first_to_upper(mon->name_the());
 
@@ -1239,15 +1145,13 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
                 actor::hit(*mon, rnd::range(3, 15), DmgType::pure);
 
-                if (mon->is_alive())
-                {
+                if (mon->is_alive()) {
                         mon->m_properties.apply(new PropConfused());
 
                         mon->m_properties.apply(new PropTerrified());
                 }
         }
-        else
-        {
+        else {
                 // Player mind can be eaten
                 auto* prop_mind_sap = new PropMindSap();
 
@@ -1271,8 +1175,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (!actor_hit.is_alive())
-        {
+        if (!actor_hit.is_alive()) {
                 return;
         }
 
@@ -1281,8 +1184,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
         if ((head_item && head_item->id() == Id::gas_mask) ||
-            (body_item && body_item->id() == Id::armor_asb_suit))
-        {
+            (body_item && body_item->id() == Id::armor_asb_suit)) {
                 return;
         }
 
@@ -1296,8 +1198,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 // -----------------------------------------------------------------------------
 void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
 {
-        if (!actor_hit.is_alive())
-        {
+        if (!actor_hit.is_alive()) {
                 return;
         }
 
@@ -1306,8 +1207,7 @@ void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
         if ((head_item && head_item->id() == Id::gas_mask) ||
-            (body_item && body_item->id() == Id::armor_asb_suit))
-        {
+            (body_item && body_item->id() == Id::armor_asb_suit)) {
                 return;
         }
 
@@ -1375,17 +1275,14 @@ void MedicalBag::on_pickup_hook()
 {
         ASSERT(m_actor_carrying);
 
-        if (!actor::is_player(m_actor_carrying))
-        {
+        if (!actor::is_player(m_actor_carrying)) {
                 return;
         }
 
         // Check for existing medical bag in inventory
-        for (Item* const other : m_actor_carrying->m_inv.m_backpack)
-        {
+        for (Item* const other : m_actor_carrying->m_inv.m_backpack) {
                 if ((other != this) &&
-                    (other->id() == id()))
-                {
+                    (other->id() == id())) {
                         static_cast<MedicalBag*>(other)->m_nr_supplies +=
                                 m_nr_supplies;
 
@@ -1401,8 +1298,7 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
 {
         (void)actor;
 
-        if (player_bon::bg() == Bg::ghoul)
-        {
+        if (player_bon::bg() == Bg::ghoul) {
                 msg_log::add("It is of no use to me.");
 
                 m_current_action = MedBagAction::END;
@@ -1414,8 +1310,7 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
 
         m_current_action = choose_action();
 
-        if (m_current_action == MedBagAction::END)
-        {
+        if (m_current_action == MedBagAction::END) {
                 msg_log::clear();
 
                 msg_log::add("I have no wounds to treat.");
@@ -1426,8 +1321,7 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
         const int nr_supplies_needed = tot_suppl_for_action(m_current_action);
         const bool is_enough_supplies = m_nr_supplies >= nr_supplies_needed;
 
-        if (!is_enough_supplies)
-        {
+        if (!is_enough_supplies) {
                 msg_log::add("I do not have enough medical supplies.");
 
                 m_current_action = MedBagAction::END;
@@ -1442,8 +1336,7 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
 
         std::string start_msg;
 
-        switch (m_current_action)
-        {
+        switch (m_current_action) {
         case MedBagAction::treat_wound:
                 start_msg = "I start treating a wound";
                 break;
@@ -1472,14 +1365,12 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
 MedBagAction MedicalBag::choose_action() const
 {
         // Infection?
-        if (map::g_player->m_properties.has(PropId::infected))
-        {
+        if (map::g_player->m_properties.has(PropId::infected)) {
                 return MedBagAction::sanitize_infection;
         }
 
         // Wound?
-        if (map::g_player->m_properties.has(PropId::wound))
-        {
+        if (map::g_player->m_properties.has(PropId::wound)) {
                 return MedBagAction::treat_wound;
         }
 
@@ -1491,48 +1382,37 @@ void MedicalBag::continue_action()
         ASSERT(m_current_action != MedBagAction::END);
 
         // Check if current action should be stopped.
-        switch (m_current_action)
-        {
-        case MedBagAction::treat_wound:
-        {
-                if (!map::g_player->m_properties.has(PropId::wound))
-                {
+        switch (m_current_action) {
+        case MedBagAction::treat_wound: {
+                if (!map::g_player->m_properties.has(PropId::wound)) {
                         // Player is no longer wounded, presumably it was healed
                         // by something else.
                         stop_action();
 
                         return;
                 }
-        }
-        break;
+        } break;
 
-        case MedBagAction::sanitize_infection:
-        {
-                if (!map::g_player->m_properties.has(PropId::infected))
-                {
+        case MedBagAction::sanitize_infection: {
+                if (!map::g_player->m_properties.has(PropId::infected)) {
                         // Player is no longer infected, presumably it was
                         // healed by something else.
                         stop_action();
 
                         return;
                 }
-        }
-        break;
+        } break;
 
-        case MedBagAction::END:
-        {
-        }
-        break;
+        case MedBagAction::END: {
+        } break;
         }
 
         --m_nr_turns_left_action;
 
-        if (m_nr_turns_left_action <= 0)
-        {
+        if (m_nr_turns_left_action <= 0) {
                 finish_current_action();
         }
-        else
-        {
+        else {
                 // Time still remaining on the current action
                 game_time::tick();
         }
@@ -1542,16 +1422,13 @@ void MedicalBag::finish_current_action()
 {
         actor::player_state::g_active_medical_bag = nullptr;
 
-        switch (m_current_action)
-        {
-        case MedBagAction::treat_wound:
-        {
+        switch (m_current_action) {
+        case MedBagAction::treat_wound: {
                 auto* const prop =
                         map::g_player->m_properties.prop(
                                 PropId::wound);
 
-                if (!prop)
-                {
+                if (!prop) {
                         ASSERT(false);
 
                         stop_action();
@@ -1562,13 +1439,10 @@ void MedicalBag::finish_current_action()
                 auto* const wound = static_cast<PropWound*>(prop);
 
                 wound->heal_one_wound();
-        }
-        break;
+        } break;
 
-        case MedBagAction::sanitize_infection:
-        {
-                if (!map::g_player->m_properties.has(PropId::infected))
-                {
+        case MedBagAction::sanitize_infection: {
+                if (!map::g_player->m_properties.has(PropId::infected)) {
                         ASSERT(false);
 
                         stop_action();
@@ -1577,8 +1451,7 @@ void MedicalBag::finish_current_action()
                 }
 
                 map::g_player->m_properties.end_prop(PropId::infected);
-        }
-        break;
+        } break;
 
         case MedBagAction::END:
                 ASSERT(false);
@@ -1589,8 +1462,7 @@ void MedicalBag::finish_current_action()
 
         m_current_action = MedBagAction::END;
 
-        if (m_nr_supplies <= 0)
-        {
+        if (m_nr_supplies <= 0) {
                 map::g_player->m_inv
                         .remove_item_in_backpack_with_ptr(this, true);
 
@@ -1602,8 +1474,7 @@ void MedicalBag::interrupted(const ForceInterruptActions is_forced)
 {
         bool should_continue = true;
 
-        if (is_forced == ForceInterruptActions::no)
-        {
+        if (is_forced == ForceInterruptActions::no) {
                 // Query interruption.
                 const std::string item_name =
                         name(
@@ -1633,16 +1504,14 @@ void MedicalBag::interrupted(const ForceInterruptActions is_forced)
 
                 msg_log::clear();
         }
-        else
-        {
+        else {
                 // Forced interruption.
                 msg_log::add("My healing is disrupted.");
 
                 should_continue = false;
         }
 
-        if (!should_continue)
-        {
+        if (!should_continue) {
                 stop_action();
         }
 }
@@ -1653,8 +1522,7 @@ int MedicalBag::tot_suppl_for_action(const MedBagAction action) const
 
         const int div = is_healer ? 2 : 1;
 
-        switch (action)
-        {
+        switch (action) {
         case MedBagAction::treat_wound:
                 return 8 / div;
 
@@ -1674,8 +1542,7 @@ int MedicalBag::tot_turns_for_action() const
 {
         int nr_turns = 10;
 
-        if (player_bon::has_trait(Trait::healer))
-        {
+        if (player_bon::has_trait(Trait::healer)) {
                 nr_turns /= 2;
         }
 
@@ -1712,8 +1579,7 @@ void GasMask::decr_turns_left(Inventory& carrier_inv)
 {
         --m_nr_turns_left;
 
-        if (m_nr_turns_left <= 0)
-        {
+        if (m_nr_turns_left <= 0) {
                 const std::string item_name =
                         name(ItemNameType::plain, ItemNameInfo::none);
 
@@ -1739,8 +1605,7 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
 {
         (void)actor;
 
-        if (map::g_player->m_properties.has(PropId::burning))
-        {
+        if (map::g_player->m_properties.has(PropId::burning)) {
                 msg_log::add("Not while burning.");
 
                 return ConsumeItem::no;
@@ -1749,8 +1614,7 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
         const Explosive* const held_explosive =
                 actor::player_state::g_active_explosive.get();
 
-        if (held_explosive)
-        {
+        if (held_explosive) {
                 const std::string name_held =
                         held_explosive->name(
                                 ItemNameType::a,
@@ -1761,8 +1625,7 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
                 return ConsumeItem::no;
         }
 
-        if (config::warn_on_light_explosive())
-        {
+        if (config::warn_on_light_explosive()) {
                 const std::string name = this->name(ItemNameType::a);
 
                 const std::string msg =
@@ -1782,8 +1645,7 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
 
                 msg_log::clear();
 
-                if (result == BinaryAnswer::no)
-                {
+                if (result == BinaryAnswer::no) {
                         return ConsumeItem::no;
                 }
         }
@@ -1814,12 +1676,10 @@ void Dynamite::on_std_turn_player_hold_ignited()
 {
         --m_fuse_turns;
 
-        if (m_fuse_turns > 0)
-        {
+        if (m_fuse_turns > 0) {
                 std::string fuse_msg = "***F";
 
-                for (int i = 0; i < m_fuse_turns; ++i)
-                {
+                for (int i = 0; i < m_fuse_turns; ++i) {
                         fuse_msg += "Z";
                 }
 
@@ -1836,8 +1696,7 @@ void Dynamite::on_std_turn_player_hold_ignited()
                         MsgInterruptPlayer::yes,
                         more_prompt);
         }
-        else
-        {
+        else {
                 // Fuse has run out
                 msg_log::add("The dynamite explodes in my hand!");
 
@@ -1874,8 +1733,7 @@ void Dynamite::on_player_paralyzed()
 
         const auto t_id = map::g_terrain.at(p)->id();
 
-        if (t_id != terrain::Id::chasm)
-        {
+        if (t_id != terrain::Id::chasm) {
                 auto* const t =
                         static_cast<terrain::LitDynamite*>(
                                 terrain::make(terrain::Id::lit_dynamite, p));
@@ -1900,8 +1758,7 @@ void Molotov::on_std_turn_player_hold_ignited()
 {
         --m_fuse_turns;
 
-        if (m_fuse_turns == 2)
-        {
+        if (m_fuse_turns == 2) {
                 msg_log::add(
                         "The Molotov Cocktail will soon explode.",
                         colors::text(),
@@ -1909,8 +1766,7 @@ void Molotov::on_std_turn_player_hold_ignited()
                         MorePromptOnMsg::yes);
         }
 
-        if (m_fuse_turns == 1)
-        {
+        if (m_fuse_turns == 1) {
                 msg_log::add(
                         "The Molotov Cocktail is about to explode!",
                         colors::text(),
@@ -1918,8 +1774,7 @@ void Molotov::on_std_turn_player_hold_ignited()
                         MorePromptOnMsg::yes);
         }
 
-        if (m_fuse_turns <= 0)
-        {
+        if (m_fuse_turns <= 0) {
                 msg_log::add("The Molotov Cocktail explodes in my hand!");
 
                 actor::player_state::g_active_explosive.reset();
@@ -2015,8 +1870,7 @@ void Flare::on_std_turn_player_hold_ignited()
 {
         --m_fuse_turns;
 
-        if (m_fuse_turns <= 0)
-        {
+        if (m_fuse_turns <= 0) {
                 msg_log::add("The flare is extinguished.");
 
                 actor::player_state::g_active_explosive.reset();
@@ -2048,8 +1902,7 @@ void Flare::on_player_paralyzed()
 
         const auto t_id = map::g_terrain.at(p)->id();
 
-        if (t_id != terrain::Id::chasm)
-        {
+        if (t_id != terrain::Id::chasm) {
                 auto* const t =
                         static_cast<terrain::LitDynamite*>(
                                 terrain::make(terrain::Id::lit_flare, p));
@@ -2072,15 +1925,13 @@ void SmokeGrenade::on_player_ignite() const
 
 void SmokeGrenade::on_std_turn_player_hold_ignited()
 {
-        if (m_fuse_turns < std_fuse_turns() && rnd::coin_toss())
-        {
+        if (m_fuse_turns < std_fuse_turns() && rnd::coin_toss()) {
                 explosion::run_smoke_explosion_at(map::g_player->m_pos);
         }
 
         --m_fuse_turns;
 
-        if (m_fuse_turns <= 0)
-        {
+        if (m_fuse_turns <= 0) {
                 msg_log::add("The smoke grenade is extinguished.");
 
                 actor::player_state::g_active_explosive.reset();
@@ -2104,8 +1955,7 @@ void SmokeGrenade::on_player_paralyzed()
 
         const auto t_id = map::g_terrain.at(p)->id();
 
-        if (t_id != terrain::Id::chasm)
-        {
+        if (t_id != terrain::Id::chasm) {
                 explosion::run_smoke_explosion_at(map::g_player->m_pos);
         }
 

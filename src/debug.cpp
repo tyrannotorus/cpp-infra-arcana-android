@@ -46,8 +46,7 @@ void assert_impl(
         const int line,
         const char* const func)
 {
-        if (!check)
-        {
+        if (!check) {
                 on_assert_failed(check_str, file, line, func);
         }
 }

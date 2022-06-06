@@ -33,8 +33,7 @@ void load_file(const std::string& path, Doc& to_doc)
 
         const auto load_result = to_doc.LoadFile(path.c_str());
 
-        if (load_result != tinyxml2::XML_SUCCESS)
-        {
+        if (load_result != tinyxml2::XML_SUCCESS) {
                 TRACE_ERROR_RELEASE << "Failed to find or read xml file at: "
                                     << path
                                     << std::endl
@@ -72,8 +71,7 @@ std::string get_text_str(const Element* const e)
 
         const char* c_str = e->GetText();
 
-        if (c_str)
-        {
+        if (c_str) {
                 str = c_str;
         }
 
@@ -86,8 +84,7 @@ bool get_text_bool(const Element* const e)
 
         const auto result = e->QueryBoolText(&value);
 
-        if (result != tinyxml2::XML_SUCCESS)
-        {
+        if (result != tinyxml2::XML_SUCCESS) {
                 TRACE_ERROR_RELEASE
                         << "While parsing boolean value from "
                         << "xml element \""
@@ -107,8 +104,7 @@ int get_text_int(const Element* const e)
 
         const auto result = e->QueryIntText(&value);
 
-        if (result != tinyxml2::XML_SUCCESS)
-        {
+        if (result != tinyxml2::XML_SUCCESS) {
                 TRACE_ERROR_RELEASE
                         << "While parsing integer value from "
                         << "xml element \""
@@ -134,8 +130,7 @@ int get_attribute_int(const Element* const e, const std::string& name)
         const auto conv_result =
                 e->QueryAttribute(to_c_str(name), &result);
 
-        if (conv_result != tinyxml2::XML_SUCCESS)
-        {
+        if (conv_result != tinyxml2::XML_SUCCESS) {
                 TRACE_ERROR_RELEASE
                         << "While parsing integer value from "
                         << "xml element \""
@@ -158,8 +153,7 @@ bool try_get_attribute_str(
 {
         const auto* str = e->Attribute(name.c_str());
 
-        if (str)
-        {
+        if (str) {
                 result = str;
 
                 return true;

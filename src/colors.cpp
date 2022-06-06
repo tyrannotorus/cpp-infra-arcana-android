@@ -129,8 +129,7 @@ static std::vector<std::pair<std::string, Color>> s_str_color_pairs;
 
 static SDL_Color rgb_hex_str_to_sdl_color(const std::string& str)
 {
-        if (str.size() != 6)
-        {
+        if (str.size() != 6) {
                 TRACE_ERROR_RELEASE
                         << "Invalid rgb hex string: '"
                         << str
@@ -142,8 +141,7 @@ static SDL_Color rgb_hex_str_to_sdl_color(const std::string& str)
 
         uint8_t rgb[3] = {};
 
-        for (int i = 0; i < 3; ++i)
-        {
+        for (int i = 0; i < 3; ++i) {
                 const std::string hex8_str = str.substr(2 * i, 2);
 
                 rgb[i] = (uint8_t)std::stoi(hex8_str, nullptr, 16);
@@ -161,13 +159,11 @@ static void load_color(
 {
         for (auto* e = xml::first_child(colors_e);
              e;
-             e = xml::next_sibling(e))
-        {
+             e = xml::next_sibling(e)) {
                 const std::string current_name =
                         xml::get_attribute_str(e, "name");
 
-                if (current_name != name)
-                {
+                if (current_name != name) {
                         continue;
                 }
 
@@ -201,13 +197,11 @@ static void load_gui_color(
 {
         for (auto* e = xml::first_child(gui_e);
              e;
-             e = xml::next_sibling(e))
-        {
+             e = xml::next_sibling(e)) {
                 const std::string current_type =
                         xml::get_attribute_str(e, "type");
 
-                if (current_type != type)
-                {
+                if (current_type != type) {
                         continue;
                 }
 
@@ -451,8 +445,7 @@ std::optional<Color> name_to_color(const std::string& name)
                         return str_color.first == name;
                 });
 
-        if (search == std::end(s_str_color_pairs))
-        {
+        if (search == std::end(s_str_color_pairs)) {
                 TRACE
                         << "WARNING: No color defined for name: " << name
                         << std::endl;
@@ -472,8 +465,7 @@ std::string color_to_name(const Color& color)
                         return str_color.second == color;
                 });
 
-        if (search == std::end(s_str_color_pairs))
-        {
+        if (search == std::end(s_str_color_pairs)) {
 #ifndef NDEBUG
                 const auto sdl_color = color.sdl_color();
 

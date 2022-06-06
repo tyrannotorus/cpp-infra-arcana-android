@@ -32,21 +32,17 @@ static void make_crumble_room(const R& room_area_incl_walls, const P& event_pos)
 
         const R& a = room_area_incl_walls;  // Abbreviation
 
-        for (int x = a.p0.x; x <= a.p1.x; ++x)
-        {
-                for (int y = a.p0.y; y <= a.p1.y; ++y)
-                {
+        for (int x = a.p0.x; x <= a.p1.x; ++x) {
+                for (int y = a.p0.y; y <= a.p1.y; ++y) {
                         const P p(x, y);
 
                         if (x == a.p0.x ||
                             x == a.p1.x ||
                             y == a.p0.y ||
-                            y == a.p1.y)
-                        {
+                            y == a.p1.y) {
                                 wall_cells.push_back(p);
                         }
-                        else
-                        {
+                        else {
                                 // Is inner cell
                                 inner_cells.push_back(p);
                         }
@@ -87,29 +83,23 @@ static bool try_make_aux_room(
 
         ASSERT(aux_rect_with_border.is_pos_inside(door_p));
 
-        if (map::is_area_inside_map(aux_rect_with_border))
-        {
+        if (map::is_area_inside_map(aux_rect_with_border)) {
                 // Check if area is blocked
                 for (int x = aux_rect_with_border.p0.x;
                      x <= aux_rect_with_border.p1.x;
-                     ++x)
-                {
+                     ++x) {
                         for (int y = aux_rect_with_border.p0.y;
                              y <= aux_rect_with_border.p1.y;
-                             ++y)
-                        {
-                                if (blocked.at(x, y))
-                                {
+                             ++y) {
+                                if (blocked.at(x, y)) {
                                         // Can't build here, bye...
                                         return false;
                                 }
                         }
                 }
 
-                for (int x = aux_rect.p0.x; x <= aux_rect.p1.x; ++x)
-                {
-                        for (int y = aux_rect.p0.y; y <= aux_rect.p1.y; ++y)
-                        {
+                for (int x = aux_rect.p0.x; x <= aux_rect.p1.x; ++x) {
+                        for (int y = aux_rect.p0.y; y <= aux_rect.p1.y; ++y) {
                                 blocked.at(x, y) = true;
 
                                 ASSERT(!map::g_room_map.at(x, y));
@@ -117,8 +107,7 @@ static bool try_make_aux_room(
                 }
 
                 // Make a "crumble room"?
-                if (rnd::one_in(30))
-                {
+                if (rnd::one_in(30)) {
                         Room* const room =
                                 room_factory::make(
                                         RoomType::crumble_room,
@@ -128,8 +117,7 @@ static bool try_make_aux_room(
 
                         make_crumble_room(aux_rect_with_border, door_p);
                 }
-                else
-                {
+                else {
                         // Not "crumble room"
                         mapgen::make_room(aux_rect, IsSubRoom::no);
                 }
@@ -165,26 +153,20 @@ void make_aux_rooms(Region regions[3][3])
         // cells immediately
 
         // Flip the values so that we get free cells
-        for (auto& is_floor : floor_cells)
-        {
+        for (auto& is_floor : floor_cells) {
                 is_floor = !is_floor;
         }
 
-        for (int region_x = 0; region_x < 3; region_x++)
-        {
-                for (int region_y = 0; region_y < 3; region_y++)
-                {
+        for (int region_x = 0; region_x < 3; region_x++) {
+                for (int region_y = 0; region_y < 3; region_y++) {
                         const Region& region = regions[region_x][region_y];
 
-                        if (region.main_room)
-                        {
+                        if (region.main_room) {
                                 Room& main_r = *region.main_room;
 
                                 // Right
-                                if (rnd::fraction(3, 4))
-                                {
-                                        for (int i = 0; i < nr_tries_per_side; ++i)
-                                        {
+                                if (rnd::fraction(3, 4)) {
+                                        for (int i = 0; i < nr_tries_per_side; ++i) {
                                                 const P con_p(
                                                         main_r.m_r.p1.x + 1,
                                                         rnd::range(
@@ -199,8 +181,7 @@ void make_aux_rooms(Region regions[3][3])
                                                                 con_p.y - aux_d.y + 1,
                                                                 con_p.y));
 
-                                                if (floor_cells.at(con_p.x - 1, con_p.y))
-                                                {
+                                                if (floor_cells.at(con_p.x - 1, con_p.y)) {
                                                         const bool did_place_room =
                                                                 try_make_aux_room(
                                                                         aux_p,
@@ -208,8 +189,7 @@ void make_aux_rooms(Region regions[3][3])
                                                                         floor_cells,
                                                                         con_p);
 
-                                                        if (did_place_room)
-                                                        {
+                                                        if (did_place_room) {
                                                                 TRACE_VERBOSE << "Aux room placed right"
                                                                               << std::endl;
                                                                 break;
@@ -219,10 +199,8 @@ void make_aux_rooms(Region regions[3][3])
                                 }
 
                                 // Up
-                                if (rnd::fraction(3, 4))
-                                {
-                                        for (int i = 0; i < nr_tries_per_side; ++i)
-                                        {
+                                if (rnd::fraction(3, 4)) {
+                                        for (int i = 0; i < nr_tries_per_side; ++i) {
                                                 const P con_p(
                                                         rnd::range(
                                                                 main_r.m_r.p0.x + 1,
@@ -233,13 +211,11 @@ void make_aux_rooms(Region regions[3][3])
 
                                                 const P aux_p(rnd::range(con_p.x - aux_d.x + 1, con_p.x), con_p.y - 1);
 
-                                                if (floor_cells.at(con_p.x, con_p.y + 1))
-                                                {
+                                                if (floor_cells.at(con_p.x, con_p.y + 1)) {
                                                         const bool did_place_room =
                                                                 try_make_aux_room(aux_p, aux_d, floor_cells, con_p);
 
-                                                        if (did_place_room)
-                                                        {
+                                                        if (did_place_room) {
                                                                 TRACE_VERBOSE << "Aux room placed up"
                                                                               << std::endl;
                                                                 break;
@@ -249,10 +225,8 @@ void make_aux_rooms(Region regions[3][3])
                                 }
 
                                 // Left
-                                if (rnd::fraction(3, 4))
-                                {
-                                        for (int i = 0; i < nr_tries_per_side; ++i)
-                                        {
+                                if (rnd::fraction(3, 4)) {
+                                        for (int i = 0; i < nr_tries_per_side; ++i) {
                                                 const P con_p(
                                                         main_r.m_r.p0.x - 1,
                                                         rnd::range(
@@ -263,13 +237,11 @@ void make_aux_rooms(Region regions[3][3])
 
                                                 const P aux_p(con_p.x - 1, rnd::range(con_p.y - aux_d.y + 1, con_p.y));
 
-                                                if (floor_cells.at(con_p.x + 1, con_p.y))
-                                                {
+                                                if (floor_cells.at(con_p.x + 1, con_p.y)) {
                                                         const bool did_place_room =
                                                                 try_make_aux_room(aux_p, aux_d, floor_cells, con_p);
 
-                                                        if (did_place_room)
-                                                        {
+                                                        if (did_place_room) {
                                                                 TRACE_VERBOSE << "Aux room placed left"
                                                                               << std::endl;
                                                                 break;
@@ -279,10 +251,8 @@ void make_aux_rooms(Region regions[3][3])
                                 }
 
                                 // Down
-                                if (rnd::fraction(3, 4))
-                                {
-                                        for (int i = 0; i < nr_tries_per_side; ++i)
-                                        {
+                                if (rnd::fraction(3, 4)) {
+                                        for (int i = 0; i < nr_tries_per_side; ++i) {
                                                 const P con_p(
                                                         rnd::range(
                                                                 main_r.m_r.p0.x + 1,
@@ -293,13 +263,11 @@ void make_aux_rooms(Region regions[3][3])
 
                                                 const P aux_p(rnd::range(con_p.x - aux_d.x + 1, con_p.x), con_p.y + 1);
 
-                                                if (floor_cells.at(con_p.x, con_p.y - 1))
-                                                {
+                                                if (floor_cells.at(con_p.x, con_p.y - 1)) {
                                                         const bool did_place_room =
                                                                 try_make_aux_room(aux_p, aux_d, floor_cells, con_p);
 
-                                                        if (did_place_room)
-                                                        {
+                                                        if (did_place_room) {
                                                                 TRACE_VERBOSE << "Aux room placed down"
                                                                               << std::endl;
                                                                 break;

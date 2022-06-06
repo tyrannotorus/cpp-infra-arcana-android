@@ -31,12 +31,10 @@ std::string Range::str() const
         const int min_actual = std::min(min, max);
         const int max_actual = std::max(min, max);
 
-        if (min_actual == max_actual)
-        {
+        if (min_actual == max_actual) {
                 return std::to_string(min_actual);
         }
-        else
-        {
+        else {
                 return (
                         std::to_string(min_actual) +
                         "-" +
@@ -127,13 +125,11 @@ bool fraction(const int num, const int den)
 
         // NOTE: A numerator of 0 is allowed (it simply means "no chance")
 
-        if ((num <= 0) || (den <= 0))
-        {
+        if ((num <= 0) || (den <= 0)) {
                 return false;
         }
 
-        if ((num >= den) || (den == 1))
-        {
+        if ((num >= den) || (den == 1)) {
                 return true;
         }
 
@@ -155,8 +151,7 @@ int weighted_choice(const std::vector<int>& weights)
         ASSERT(!weights.empty());
 
 #ifndef NDEBUG
-        for (const int weight : weights)
-        {
+        for (const int weight : weights) {
                 ASSERT(weight > 0);
         }
 #endif  // NDEBUG
@@ -169,12 +164,10 @@ int weighted_choice(const std::vector<int>& weights)
 
         int rnd = rnd::range(0, sum - 1);
 
-        for (size_t i = 0; i < weights.size(); ++i)
-        {
+        for (size_t i = 0; i < weights.size(); ++i) {
                 const int weight = weights[i];
 
-                if (rnd < weight)
-                {
+                if (rnd < weight) {
                         return (int)i;
                 }
 

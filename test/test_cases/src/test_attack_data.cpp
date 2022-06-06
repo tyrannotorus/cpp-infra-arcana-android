@@ -203,10 +203,8 @@ TEST_CASE("Ranged attack data")
         const P p2(22, 11);  // Distance 2
         const P p3(21, 13);  // Distance 3
 
-        for (int x = 1; x < map::w() - 1; ++x)
-        {
-                for (int y = 1; y < map::h() - 1; ++y)
-                {
+        for (int x = 1; x < map::w() - 1; ++x) {
+                for (int y = 1; y < map::h() - 1; ++y) {
                         map::update_terrain(
                                 terrain::make(terrain::Id::floor, {x, y}));
                 }
@@ -309,10 +307,8 @@ TEST_CASE("Throwing attack data")
         const P p2(22, 11);  // Distance 2
         const P p3(21, 13);  // Distance 3
 
-        for (int x = 1; x < map::w() - 1; ++x)
-        {
-                for (int y = 1; y < map::h() - 1; ++y)
-                {
+        for (int x = 1; x < map::w() - 1; ++x) {
+                for (int y = 1; y < map::h() - 1; ++y) {
                         map::update_terrain(
                                 terrain::make(terrain::Id::floor, {x, y}));
                 }

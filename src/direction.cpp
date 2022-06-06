@@ -73,48 +73,36 @@ Dir dir(const P& offset)
 
         Dir dir = Dir::END;
 
-        if (offset.y == -1)
-        {
-                if (offset.x == -1)
-                {
+        if (offset.y == -1) {
+                if (offset.x == -1) {
                         dir = Dir::up_left;
                 }
-                else if (offset.x == 0)
-                {
+                else if (offset.x == 0) {
                         dir = Dir::up;
                 }
-                else if (offset.x == 1)
-                {
+                else if (offset.x == 1) {
                         dir = Dir::up_right;
                 }
         }
-        else if (offset.y == 0)
-        {
-                if (offset.x == -1)
-                {
+        else if (offset.y == 0) {
+                if (offset.x == -1) {
                         dir = Dir::left;
                 }
-                else if (offset.x == 0)
-                {
+                else if (offset.x == 0) {
                         dir = Dir::center;
                 }
-                else if (offset.x == 1)
-                {
+                else if (offset.x == 1) {
                         dir = Dir::right;
                 }
         }
-        else if (offset.y == 1)
-        {
-                if (offset.x == -1)
-                {
+        else if (offset.y == 1) {
+                if (offset.x == -1) {
                         dir = Dir::down_left;
                 }
-                else if (offset.x == 0)
-                {
+                else if (offset.x == 0) {
                         dir = Dir::down;
                 }
-                else if (offset.x == 1)
-                {
+                else if (offset.x == 1) {
                         dir = Dir::down_right;
                 }
         }
@@ -124,8 +112,7 @@ Dir dir(const P& offset)
 
 Dir reversed_dir(const Dir dir)
 {
-        switch (dir)
-        {
+        switch (dir) {
         case Dir::down_left:
                 return Dir::up_right;
 
@@ -166,8 +153,7 @@ P offset(const Dir dir)
 {
         ASSERT(dir != Dir::END);
 
-        switch (dir)
-        {
+        switch (dir) {
         case Dir::down_left:
                 return P(-1, 1);
 
@@ -206,12 +192,10 @@ P rnd_adj_pos(const P& origin, const bool is_center_allowed)
 {
         const std::vector<P>* vec = nullptr;
 
-        if (is_center_allowed)
-        {
+        if (is_center_allowed) {
                 vec = &g_dir_list_w_center;
         }
-        else
-        {
+        else {
                 // Center not allowed
                 vec = &g_dir_list;
         }
@@ -227,36 +211,28 @@ std::string compass_dir_name(const P& from_pos, const P& to_pos)
 
         const double angle_db = atan2(-offset.y, offset.x);
 
-        if (angle_db < -edge[2] && angle_db > -edge[3])
-        {
+        if (angle_db < -edge[2] && angle_db > -edge[3]) {
                 name = "SW";
         }
-        else if (angle_db <= -edge[1] && angle_db >= -edge[2])
-        {
+        else if (angle_db <= -edge[1] && angle_db >= -edge[2]) {
                 name = "S";
         }
-        else if (angle_db < -edge[0] && angle_db > -edge[1])
-        {
+        else if (angle_db < -edge[0] && angle_db > -edge[1]) {
                 name = "SE";
         }
-        else if (angle_db >= -edge[0] && angle_db <= edge[0])
-        {
+        else if (angle_db >= -edge[0] && angle_db <= edge[0]) {
                 name = "E";
         }
-        else if (angle_db > edge[0] && angle_db < edge[1])
-        {
+        else if (angle_db > edge[0] && angle_db < edge[1]) {
                 name = "NE";
         }
-        else if (angle_db >= edge[1] && angle_db <= edge[2])
-        {
+        else if (angle_db >= edge[1] && angle_db <= edge[2]) {
                 name = "N";
         }
-        else if (angle_db > edge[2] && angle_db < edge[3])
-        {
+        else if (angle_db > edge[2] && angle_db < edge[3]) {
                 name = "NW";
         }
-        else
-        {
+        else {
                 name = "W";
         }
 

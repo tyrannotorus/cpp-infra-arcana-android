@@ -392,8 +392,7 @@ public:
 
         int ability_mod(const AbilityId ability) const override
         {
-                switch (ability)
-                {
+                switch (ability) {
                 case AbilityId::dodging:
                         return 20;
 
@@ -529,12 +528,10 @@ public:
 
         int ability_mod(const AbilityId ability) const override
         {
-                if (ability == AbilityId::ranged)
-                {
+                if (ability == AbilityId::ranged) {
                         return 10;
                 }
-                else
-                {
+                else {
                         return 0;
                 }
         }
@@ -559,8 +556,7 @@ public:
 
         int ability_mod(const AbilityId ability) const override
         {
-                switch (ability)
-                {
+                switch (ability) {
                 case AbilityId::searching:
                         return -9999;
 
@@ -660,12 +656,10 @@ public:
         {
                 (void)ability;
 
-                if (ability == AbilityId::dodging)
-                {
+                if (ability == AbilityId::dodging) {
                         return 75;
                 }
-                else
-                {
+                else {
                         return 0;
                 }
         }
@@ -1072,12 +1066,10 @@ public:
 
         int ability_mod(const AbilityId ability) const override
         {
-                if (ability == AbilityId::dodging)
-                {
+                if (ability == AbilityId::dodging) {
                         return -999;
                 }
-                else
-                {
+                else {
                         return 0;
                 }
         }
@@ -1110,12 +1102,10 @@ public:
 
         int ability_mod(const AbilityId ability) const override
         {
-                if (ability == AbilityId::dodging)
-                {
+                if (ability == AbilityId::dodging) {
                         return -999;
                 }
-                else
-                {
+                else {
                         return 0;
                 }
         }
@@ -1611,8 +1601,7 @@ public:
 
         int ability_mod(const AbilityId ability) const override
         {
-                switch (ability)
-                {
+                switch (ability) {
                 case AbilityId::melee:
                 case AbilityId::ranged:
                         return -10;

@@ -51,58 +51,47 @@ static bool is_allowed_use_wpn_on_terrain(
 {
         bool allow_wpn_att_terrain = wpn.data().melee.attack_terrain;
 
-        if (!allow_wpn_att_terrain)
-        {
+        if (!allow_wpn_att_terrain) {
                 return false;
         }
 
         const auto wpn_dmg_type = wpn.data().melee.dmg_type;
 
-        switch (terrain.id())
-        {
-        case terrain::Id::door:
-        {
-                if (terrain.is_hidden())
-                {
+        switch (terrain.id()) {
+        case terrain::Id::door: {
+                if (terrain.is_hidden()) {
                         // Emulate walls
                         allow_wpn_att_terrain = true;
                 }
-                else
-                {
+                else {
                         // Revealed door
                         const auto& door =
                                 static_cast<const terrain::Door&>(terrain);
 
                         const auto door_type = door.type();
 
-                        if (door_type == terrain::DoorType::gate)
-                        {
+                        if (door_type == terrain::DoorType::gate) {
                                 // Only allow blunt weapons for gates
                                 // (feels weird to attack a barred gate
                                 // with an axe...)
                                 allow_wpn_att_terrain =
                                         (wpn_dmg_type == DmgType::blunt);
                         }
-                        else
-                        {
+                        else {
                                 // Not gate (i.e. wooden, metal)
                                 allow_wpn_att_terrain = true;
                         }
                 }
-        }
-        break;
+        } break;
 
-        case terrain::Id::wall:
-        {
+        case terrain::Id::wall: {
                 allow_wpn_att_terrain = true;
-        }
-        break;
+        } break;
 
         default:
         {
                 allow_wpn_att_terrain = false;
-        }
-        break;
+        } break;
         }  // Terrain id switch
 
         return allow_wpn_att_terrain;
@@ -121,8 +110,7 @@ static const item::Item* get_wielded_wpn_or_unarmed()
 {
         const auto* wpn = map::g_player->m_inv.item_in_slot(SlotId::wpn);
 
-        if (!wpn)
-        {
+        if (!wpn) {
                 wpn = &map::g_player->unarmed_wpn();
         }
 
@@ -137,8 +125,7 @@ static void try_kick_living_monster(actor::Actor& mon)
                 map::g_player->m_properties.allow_attack_melee(
                         Verbose::yes);
 
-        if (!melee_allowed)
-        {
+        if (!melee_allowed) {
                 return;
         }
 
@@ -187,31 +174,25 @@ static void bash_corpse_with_wpn(
 
         actor::hit(mon, dmg, wpn_used_att_corpse.data().melee.dmg_type);
 
-        if (&wpn_used_att_corpse == &kick_wpn)
-        {
+        if (&wpn_used_att_corpse == &kick_wpn) {
                 bash::try_sprain_player();
         }
 
-        if (mon.m_state == ActorState::destroyed)
-        {
+        if (mon.m_state == ActorState::destroyed) {
                 std::vector<actor::Actor*> corpses_here;
 
-                for (auto* const actor : game_time::g_actors)
-                {
+                for (auto* const actor : game_time::g_actors) {
                         if ((actor->m_pos == att_pos) &&
-                            actor->is_corpse())
-                        {
+                            actor->is_corpse()) {
                                 corpses_here.push_back(actor);
                         }
                 }
 
-                if (!corpses_here.empty())
-                {
+                if (!corpses_here.empty()) {
                         msg_log::more_prompt();
                 }
 
-                for (auto* const other_corpse : corpses_here)
-                {
+                for (auto* const other_corpse : corpses_here) {
                         const std::string name =
                                 text_format::first_to_upper(
                                         other_corpse
@@ -251,10 +232,8 @@ static void bash_terrain_with_wpn(
         const int dmg = dmg_range.total_range().roll();
         const auto dmg_type = wpn_used_att_terrain->data().melee.dmg_type;
 
-        switch (dmg_type)
-        {
-        case DmgType::kicking:
-        {
+        switch (dmg_type) {
+        case DmgType::kicking: {
                 const std::string terrain_name =
                         map::g_seen.at(att_pos)
                         ? terrain->name(Article::the)
@@ -266,20 +245,16 @@ static void bash_terrain_with_wpn(
                         "!");
 
                 bash::try_sprain_player();
-        }
-        break;
+        } break;
 
         case DmgType::blunt:
-        case DmgType::slashing:
-        {
+        case DmgType::slashing: {
                 msg_log::add("*WHAM!*");
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 
         terrain->hit(
@@ -307,8 +282,7 @@ static void bash_pos(const P& pos)
         // --- Kick living actor that the player is aware of? ---
         if ((pos != map::g_player->m_pos) &&
             living_actor &&
-            living_actor->is_player_aware_of_me())
-        {
+            living_actor->is_player_aware_of_me()) {
                 try_kick_living_monster(*living_actor);
 
                 return;
@@ -318,16 +292,14 @@ static void bash_pos(const P& pos)
         auto* const terrain = map::g_terrain.at(pos);
 
         if ((pos != map::g_player->m_pos) &&
-            allow_bash_terrain(terrain))
-        {
+            allow_bash_terrain(terrain)) {
                 bash_terrain_with_wpn(pos, *wpn, *kick_wpn);
 
                 return;
         }
 
         // --- Kick living actor that the player is unaware of? ---
-        if ((pos != map::g_player->m_pos) && living_actor)
-        {
+        if ((pos != map::g_player->m_pos) && living_actor) {
                 ASSERT(!living_actor->is_player_aware_of_me());
 
                 try_kick_living_monster(*living_actor);
@@ -340,22 +312,18 @@ static void bash_pos(const P& pos)
 
         // Check all corpses here, stop at any corpse which is prioritized for
         // bashing (Zombies)
-        for (auto* const actor : game_time::g_actors)
-        {
+        for (auto* const actor : game_time::g_actors) {
                 if ((actor->m_pos == pos) &&
-                    (actor->m_state == ActorState::corpse))
-                {
+                    (actor->m_state == ActorState::corpse)) {
                         corpse = actor;
 
-                        if (actor->m_data->prio_corpse_bash)
-                        {
+                        if (actor->m_data->prio_corpse_bash) {
                                 break;
                         }
                 }
         }
 
-        if (corpse)
-        {
+        if (corpse) {
                 bash_corpse_with_wpn(*corpse, pos, *wpn, *kick_wpn);
 
                 return;
@@ -379,28 +347,23 @@ void try_sprain_player()
 
         const bool is_player_ghoul = player_bon::bg() == Bg::ghoul;
 
-        if (is_player_ghoul || is_frenzied)
-        {
+        if (is_player_ghoul || is_frenzied) {
                 return;
         }
 
         int sprain_one_in_n = 0;
 
-        if (player_bon::has_trait(Trait::rugged))
-        {
+        if (player_bon::has_trait(Trait::rugged)) {
                 sprain_one_in_n = 12;
         }
-        else if (player_bon::has_trait(Trait::tough))
-        {
+        else if (player_bon::has_trait(Trait::tough)) {
                 sprain_one_in_n = 8;
         }
-        else
-        {
+        else {
                 sprain_one_in_n = 4;
         }
 
-        if (rnd::one_in(sprain_one_in_n))
-        {
+        if (rnd::one_in(sprain_one_in_n)) {
                 msg_log::add("I sprain myself.", colors::msg_bad());
 
                 const int dmg = rnd::range(1, 2);
@@ -430,8 +393,7 @@ void run()
 
         msg_log::clear();
 
-        if (input_dir == Dir::END)
-        {
+        if (input_dir == Dir::END) {
                 // Invalid direction
                 io::update_screen();
 
@@ -447,8 +409,7 @@ void run()
 
 void bash_terrain_at_pos(const P& pos)
 {
-        if (pos == map::g_player->m_pos)
-        {
+        if (pos == map::g_player->m_pos) {
                 return;
         }
 

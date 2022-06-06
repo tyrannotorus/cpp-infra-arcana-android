@@ -55,8 +55,7 @@ static void write_file(std::vector<HighscoreEntry>& entries)
 
         f.open(paths::highscores_file_path(), std::ios::trunc);
 
-        for (const auto& entry : entries)
-        {
+        for (const auto& entry : entries) {
                 const std::string win_str =
                         (entry.is_win == IsWin::yes) ? "1" : "0";
 
@@ -85,15 +84,13 @@ static std::vector<HighscoreEntry> read_highscores_file()
 
         file.open(paths::highscores_file_path());
 
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
                 return entries;
         }
 
         std::string line;
 
-        while (getline(file, line))
-        {
+        while (getline(file, line)) {
                 HighscoreEntry e;
 
                 e.game_summary_file_path = line;
@@ -245,8 +242,7 @@ std::vector<HighscoreEntry> entries_sorted()
 {
         auto entries = read_highscores_file();
 
-        if (!entries.empty())
-        {
+        if (!entries.empty()) {
                 sort_entries(entries);
         }
 
@@ -279,8 +275,7 @@ void BrowseHighscore::on_window_resized()
 
 void BrowseHighscore::draw()
 {
-        if (m_entries.empty())
-        {
+        if (m_entries.empty()) {
                 return;
         }
 
@@ -327,8 +322,7 @@ void BrowseHighscore::draw()
                 {"Win", x_win},
                 {"Score", x_score}};
 
-        for (const auto& label : labels)
-        {
+        for (const auto& label : labels) {
                 io::draw_text(
                         label.first,
                         Panel::info_screen_content,
@@ -340,8 +334,7 @@ void BrowseHighscore::draw()
 
         const Range idx_range_shown = m_browser.range_shown();
 
-        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i)
-        {
+        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
                 const auto& entry = m_entries[i];
 
                 const auto& date = entry.date;
@@ -349,13 +342,11 @@ void BrowseHighscore::draw()
 
                 std::string bg_title;
 
-                if (entry.bg == Bg::occultist)
-                {
+                if (entry.bg == Bg::occultist) {
                         bg_title = player_bon::occultist_profession_title(
                                 entry.player_occultist_domain);
                 }
-                else
-                {
+                else {
                         bg_title = player_bon::bg_title(entry.bg);
                 }
 
@@ -370,15 +361,13 @@ void BrowseHighscore::draw()
 
                 Color color;
 
-                if (entry.is_latest_entry)
-                {
+                if (entry.is_latest_entry) {
                         color =
                                 is_marked
                                 ? colors::light_green()
                                 : colors::green();
                 }
-                else
-                {
+                else {
                         color =
                                 is_marked
                                 ? colors::menu_highlight()
@@ -401,8 +390,7 @@ void BrowseHighscore::draw()
         }
 
         // Draw "more" labels
-        if (!m_browser.is_on_top_page())
-        {
+        if (!m_browser.is_on_top_page()) {
                 io::draw_text(
                         "(More - Page Up)",
                         Panel::screen,
@@ -410,8 +398,7 @@ void BrowseHighscore::draw()
                         colors::light_white());
         }
 
-        if (!m_browser.is_on_btm_page())
-        {
+        if (!m_browser.is_on_btm_page()) {
                 io::draw_text(
                         "(More - Page Down)",
                         Panel::screen,
@@ -422,8 +409,7 @@ void BrowseHighscore::draw()
 
 void BrowseHighscore::update()
 {
-        if (m_entries.empty())
-        {
+        if (m_entries.empty()) {
                 popup::Popup(popup::AddToMsgHistory::no)
                         .set_msg("No high score entries found.")
                         .run();
@@ -441,10 +427,8 @@ void BrowseHighscore::update()
                         input,
                         MenuInputMode::scrolling);
 
-        switch (action)
-        {
-        case MenuAction::selected:
-        {
+        switch (action) {
+        case MenuAction::selected: {
                 const int browser_y = m_browser.y();
 
                 ASSERT(browser_y < (int)m_entries.size());
@@ -456,16 +440,13 @@ void BrowseHighscore::update()
 
                 states::push(
                         std::make_unique<BrowseHighscoreEntry>(file_path));
-        }
-        break;
+        } break;
 
         case MenuAction::space:
-        case MenuAction::esc:
-        {
+        case MenuAction::esc: {
                 // Exit screen
                 states::pop();
-        }
-        break;
+        } break;
 
         default:
                 break;
@@ -510,8 +491,7 @@ void BrowseHighscoreEntry::draw()
 
         int y = 0;
 
-        for (int i = m_top_idx; i <= btm_nr; ++i)
-        {
+        for (int i = m_top_idx; i <= btm_nr; ++i) {
                 io::draw_text(
                         m_lines[i],
                         Panel::info_screen_content,
@@ -530,47 +510,37 @@ void BrowseHighscoreEntry::update()
 
         const auto input = io::read_input();
 
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_KP_2:
-        case SDLK_DOWN:
-        {
+        case SDLK_DOWN: {
                 m_top_idx += line_jump;
 
                 const int panel_h = panels::h(Panel::info_screen_content);
 
-                if (nr_lines_tot <= panel_h)
-                {
+                if (nr_lines_tot <= panel_h) {
                         m_top_idx = 0;
                 }
-                else
-                {
+                else {
                         m_top_idx = std::min(
                                 nr_lines_tot - panel_h,
                                 m_top_idx);
                 }
-        }
-        break;
+        } break;
 
         case SDLK_KP_8:
-        case SDLK_UP:
-        {
+        case SDLK_UP: {
                 m_top_idx = std::max(0, m_top_idx - line_jump);
-        }
-        break;
+        } break;
 
         case SDLK_SPACE:
-        case SDLK_ESCAPE:
-        {
+        case SDLK_ESCAPE: {
                 // Exit screen
                 states::pop();
-        }
-        break;
+        } break;
 
         default:
         {
-        }
-        break;
+        } break;
         }
 }
 
@@ -580,8 +550,7 @@ void BrowseHighscoreEntry::read_file()
 
         std::ifstream file(m_file_path);
 
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
                 popup::Popup(popup::AddToMsgHistory::no)
                         .set_title("Game summary file could not be opened")
                         .set_msg("Path: \"" + m_file_path + "\"")
@@ -596,8 +565,7 @@ void BrowseHighscoreEntry::read_file()
 
         std::vector<std::string> formatted;
 
-        while (getline(file, current_line))
-        {
+        while (getline(file, current_line)) {
                 m_lines.push_back(current_line);
         }
 

@@ -7,8 +7,6 @@
 #ifndef MAP_TRAVEL_HPP
 #define MAP_TRAVEL_HPP
 
-
-
 namespace map_travel
 {
 void init();

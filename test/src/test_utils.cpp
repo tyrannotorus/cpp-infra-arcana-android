@@ -20,20 +20,16 @@
 
 static void put_floor_and_walls_on_map()
 {
-        for (int x = 0; x < map::w(); ++x)
-        {
-                for (int y = 0; y < map::h(); ++y)
-                {
+        for (int x = 0; x < map::w(); ++x) {
+                for (int y = 0; y < map::h(); ++y) {
                         const P p(x, y);
 
                         terrain::Terrain* t = nullptr;
 
-                        if (map::is_pos_inside_outer_walls(p))
-                        {
+                        if (map::is_pos_inside_outer_walls(p)) {
                                 t = terrain::make(terrain::Id::floor, p);
                         }
-                        else
-                        {
+                        else {
                                 t = terrain::make(terrain::Id::wall, p);
                         }
 

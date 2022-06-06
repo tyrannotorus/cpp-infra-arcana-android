@@ -39,39 +39,33 @@ Inventory::Inventory(actor::Actor* const owning_actor) :
 
 Inventory::~Inventory()
 {
-        for (size_t i = 0; i < (size_t)SlotId::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)SlotId::END; ++i) {
                 auto& slot = m_slots[i];
 
                 delete slot.item;
         }
 
-        for (auto* item : m_backpack)
-        {
+        for (auto* item : m_backpack) {
                 delete item;
         }
 
-        for (auto* item : m_intrinsics)
-        {
+        for (auto* item : m_intrinsics) {
                 delete item;
         }
 }
 
 void Inventory::save() const
 {
-        for (const InvSlot& slot : m_slots)
-        {
+        for (const InvSlot& slot : m_slots) {
                 auto* const item = slot.item;
 
-                if (item)
-                {
+                if (item) {
                         saving::put_int((int)item->id());
                         saving::put_int(item->m_nr_items);
 
                         item->save();
                 }
-                else
-                {
+                else {
                         // No item in this slot
                         saving::put_int((int)item::Id::END);
                 }
@@ -79,8 +73,7 @@ void Inventory::save() const
 
         saving::put_int((int)m_backpack.size());
 
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
                 auto* const item = m_backpack[i];
 
                 saving::put_int((int)item->id());
@@ -92,8 +85,7 @@ void Inventory::save() const
 
 void Inventory::load()
 {
-        for (InvSlot& slot : m_slots)
-        {
+        for (InvSlot& slot : m_slots) {
                 // Any previous item is destroyed
                 auto* item = slot.item;
 
@@ -103,8 +95,7 @@ void Inventory::load()
 
                 const auto item_id = (item::Id)saving::get_int();
 
-                if (item_id != item::Id::END)
-                {
+                if (item_id != item::Id::END) {
                         item = item::make(item_id);
 
                         item->m_nr_items = saving::get_int();
@@ -121,15 +112,13 @@ void Inventory::load()
                 }
         }
 
-        while (!m_backpack.empty())
-        {
+        while (!m_backpack.empty()) {
                 remove_item_in_backpack_with_idx(0, true);
         }
 
         const int backpack_size = saving::get_int();
 
-        for (int i = 0; i < backpack_size; ++i)
-        {
+        for (int i = 0; i < backpack_size; ++i) {
                 const auto id = (item::Id)saving::get_int();
 
                 auto* item = item::make(id);
@@ -161,16 +150,12 @@ bool Inventory::has_item_in_backpack(const item::Id id) const
 
 int Inventory::item_stack_size_in_backpack(const item::Id id) const
 {
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
-                if (m_backpack[i]->data().id == id)
-                {
-                        if (m_backpack[i]->data().is_stackable)
-                        {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
+                if (m_backpack[i]->data().id == id) {
+                        if (m_backpack[i]->data().is_stackable) {
                                 return m_backpack[i]->m_nr_items;
                         }
-                        else
-                        {
+                        else {
                                 // Not stackable
                                 return 1;
                         }
@@ -183,17 +168,14 @@ int Inventory::item_stack_size_in_backpack(const item::Id id) const
 bool Inventory::try_stack_in_backpack(item::Item* item)
 {
         // If item stacks, see if there are other items of same type
-        if (!item->data().is_stackable)
-        {
+        if (!item->data().is_stackable) {
                 return false;
         }
 
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
                 auto* const other = m_backpack[i];
 
-                if (other->id() != item->id())
-                {
+                if (other->id() != item->id()) {
                         continue;
                 }
 
@@ -206,8 +188,7 @@ bool Inventory::try_stack_in_backpack(item::Item* item)
                 m_backpack[i] = item;
 
                 if (actor::is_player(m_owning_actor) &&
-                    (actor::player_state::g_last_thrown_item == other))
-                {
+                    (actor::player_state::g_last_thrown_item == other)) {
                         actor::player_state::g_last_thrown_item = item;
                 }
 
@@ -223,8 +204,7 @@ void Inventory::put_in_backpack(item::Item* item)
 
         bool is_stacked = try_stack_in_backpack(item);
 
-        if (!is_stacked)
-        {
+        if (!is_stacked) {
                 m_backpack.push_back(item);
 
                 sort_backpack();
@@ -239,19 +219,16 @@ void Inventory::drop_all_non_intrinsic(const P& pos)
         TRACE_FUNC_BEGIN_VERBOSE;
 
         // Drop from slots
-        for (InvSlot& slot : m_slots)
-        {
+        for (InvSlot& slot : m_slots) {
                 auto* const item = remove_item_in_slot(slot.id, false);
 
-                if (item)
-                {
+                if (item) {
                         item_drop::drop_item_on_map(pos, *item);
                 }
         }
 
         // Drop from backpack
-        while (!m_backpack.empty())
-        {
+        while (!m_backpack.empty()) {
                 auto* const item = remove_item_in_backpack_with_idx(0, false);
 
                 item_drop::drop_item_on_map(pos, *item);
@@ -265,23 +242,19 @@ bool Inventory::has_ammo_for_firearm_in_inventory() const
         auto* weapon = static_cast<item::Wpn*>(item_in_slot(SlotId::wpn));
 
         // If weapon found
-        if (weapon)
-        {
+        if (weapon) {
                 // Should not happen
                 ASSERT(!weapon->data().ranged.has_infinite_ammo);
 
                 // If weapon is a firearm
-                if (weapon->data().ranged.is_ranged_wpn)
-                {
+                if (weapon->data().ranged.is_ranged_wpn) {
                         // Get weapon ammo type
                         const auto ammo_id =
                                 weapon->data().ranged.ammo_item_id;
 
                         // Look for that ammo type in inventory
-                        for (size_t i = 0; i < m_backpack.size(); ++i)
-                        {
-                                if (m_backpack[i]->data().id == ammo_id)
-                                {
+                        for (size_t i = 0; i < m_backpack.size(); ++i) {
+                                if (m_backpack[i]->data().id == ammo_id) {
                                         return true;
                                 }
                         }
@@ -297,21 +270,18 @@ item::Item* Inventory::decr_item_in_slot(SlotId slot_id)
 
         auto delete_item = true;
 
-        if (item.data().is_stackable)
-        {
+        if (item.data().is_stackable) {
                 --item.m_nr_items;
 
                 delete_item = item.m_nr_items <= 0;
         }
 
-        if (delete_item)
-        {
+        if (delete_item) {
                 remove_item_in_slot(slot_id, true);
 
                 return nullptr;
         }
-        else
-        {
+        else {
                 return &item;
         }
 }
@@ -326,8 +296,7 @@ item::Item* Inventory::remove_item_in_slot(
 
         auto* item = slot.item;
 
-        if (!item)
-        {
+        if (!item) {
                 return nullptr;
         }
 
@@ -337,8 +306,7 @@ item::Item* Inventory::remove_item_in_slot(
 
         item->on_removed_from_inv();
 
-        if (delete_item)
-        {
+        if (delete_item) {
                 delete item;
 
                 item = nullptr;
@@ -356,8 +324,7 @@ item::Item* Inventory::remove_item_in_backpack_with_idx(
         auto* item = m_backpack[idx];
 
         if (actor::is_player(m_owning_actor) &&
-            (item == actor::player_state::g_last_thrown_item))
-        {
+            (item == actor::player_state::g_last_thrown_item)) {
                 actor::player_state::g_last_thrown_item = nullptr;
         }
 
@@ -365,8 +332,7 @@ item::Item* Inventory::remove_item_in_backpack_with_idx(
 
         item->on_removed_from_inv();
 
-        if (delete_item)
-        {
+        if (delete_item) {
                 delete item;
 
                 item = nullptr;
@@ -381,10 +347,8 @@ item::Item* Inventory::remove_item(
 {
         item::Item* item_returned = nullptr;
 
-        for (InvSlot& slot : m_slots)
-        {
-                if (slot.item == item)
-                {
+        for (InvSlot& slot : m_slots) {
+                if (slot.item == item) {
                         item_returned = remove_item_in_slot(
                                 slot.id, delete_item);
 
@@ -392,10 +356,8 @@ item::Item* Inventory::remove_item(
                 }
         }
 
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
-                if (m_backpack[i] == item)
-                {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
+                if (m_backpack[i] == item) {
                         item_returned = remove_item_in_backpack_with_idx(
                                 i, delete_item);
 
@@ -410,12 +372,10 @@ item::Item* Inventory::remove_item_in_backpack_with_ptr(
         item::Item* const item,
         const bool delete_item)
 {
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
                 const auto* const current_item = m_backpack[i];
 
-                if (current_item == item)
-                {
+                if (current_item == item) {
                         return remove_item_in_backpack_with_idx(i, delete_item);
                 }
         }
@@ -432,31 +392,26 @@ item::Item* Inventory::decr_item_in_backpack(const size_t idx)
 
         bool delete_item = true;
 
-        if (item.data().is_stackable)
-        {
+        if (item.data().is_stackable) {
                 --item.m_nr_items;
 
                 delete_item = item.m_nr_items <= 0;
         }
 
-        if (delete_item)
-        {
+        if (delete_item) {
                 remove_item_in_backpack_with_idx(idx, true);
 
                 return nullptr;
         }
-        else
-        {
+        else {
                 return &item;
         }
 }
 
 void Inventory::decr_item_type_in_backpack(const item::Id id)
 {
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
-                if (m_backpack[i]->data().id == id)
-                {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
+                if (m_backpack[i]->data().id == id) {
                         decr_item_in_backpack(i);
                 }
         }
@@ -464,20 +419,16 @@ void Inventory::decr_item_type_in_backpack(const item::Id id)
 
 item::Item* Inventory::decr_item(item::Item* const item)
 {
-        for (InvSlot& slot : m_slots)
-        {
-                if (slot.item == item)
-                {
+        for (InvSlot& slot : m_slots) {
+                if (slot.item == item) {
                         auto* const item_after = decr_item_in_slot(slot.id);
 
                         return item_after;
                 }
         }
 
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
-                if (m_backpack[i] == item)
-                {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
+                if (m_backpack[i] == item) {
                         auto* const item_after = decr_item_in_backpack(i);
 
                         return item_after;
@@ -495,26 +446,22 @@ size_t Inventory::move_from_slot_to_backpack(const SlotId id)
 
         auto* const item = slot.item;
 
-        if (item)
-        {
+        if (item) {
                 item->on_unequip();
 
                 slot.item = nullptr;
 
                 bool is_stacked = try_stack_in_backpack(item);
 
-                if (!is_stacked)
-                {
+                if (!is_stacked) {
                         m_backpack.push_back(item);
 
                         sort_backpack();
                 }
         }
 
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
-                if (item == m_backpack[i])
-                {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
+                if (item == m_backpack[i]) {
                         return i;
                 }
         }
@@ -534,8 +481,7 @@ void Inventory::equip_backpack_item(
 
         const bool backpack_slot_exists = backpack_idx < m_backpack.size();
 
-        if (!backpack_slot_exists)
-        {
+        if (!backpack_slot_exists) {
                 ASSERT(false);
 
                 return;
@@ -554,10 +500,8 @@ void Inventory::equip_backpack_item(
         const item::Item* const item,
         const SlotId slot_id)
 {
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
-                if (m_backpack[i] == item)
-                {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
+                if (m_backpack[i] == item) {
                         equip_backpack_item(i, slot_id);
 
                         return;
@@ -573,8 +517,7 @@ size_t Inventory::unequip_slot(const SlotId id)
 
         auto* item = slot.item;
 
-        if (!item)
-        {
+        if (!item) {
                 ASSERT(false);
 
                 return 0;
@@ -582,8 +525,7 @@ size_t Inventory::unequip_slot(const SlotId id)
 
         const size_t item_backpack_idx = move_from_slot_to_backpack(slot.id);
 
-        if (actor::is_player(m_owning_actor))
-        {
+        if (actor::is_player(m_owning_actor)) {
                 print_unequip_message(slot.id, *item);
         }
 
@@ -613,8 +555,7 @@ bool Inventory::has_item_in_slot(
         const SlotId slot_id,
         item::Id item_id) const
 {
-        if (!has_item_in_slot(slot_id))
-        {
+        if (!has_item_in_slot(slot_id)) {
                 return false;
         }
 
@@ -627,10 +568,8 @@ std::vector<item::Item*> Inventory::all_items() const
 {
         std::vector<item::Item*> items = m_backpack;
 
-        for (const auto& slot : m_slots)
-        {
-                if (slot.item)
-                {
+        for (const auto& slot : m_slots) {
+                if (slot.item) {
                         items.push_back(slot.item);
                 }
         }
@@ -648,8 +587,7 @@ item::Item* Inventory::item_in_backpack(const item::Id id) const
                                 return item->id() == id;
                         });
 
-        if (it == std::end(m_backpack))
-        {
+        if (it == std::end(m_backpack)) {
                 return nullptr;
         }
 
@@ -658,10 +596,8 @@ item::Item* Inventory::item_in_backpack(const item::Id id) const
 
 int Inventory::backpack_idx(const item::Id id) const
 {
-        for (size_t i = 0; i < m_backpack.size(); ++i)
-        {
-                if (m_backpack[i]->id() == id)
-                {
+        for (size_t i = 0; i < m_backpack.size(); ++i) {
+                if (m_backpack[i]->id() == id) {
                         return (int)i;
                 }
         }
@@ -678,8 +614,7 @@ item::Item* Inventory::item_in_slot(SlotId id) const
 
 item::Item* Inventory::intrinsic_in_element(int idx) const
 {
-        if (intrinsics_size() > idx)
-        {
+        if (intrinsics_size() > idx) {
                 return m_intrinsics[idx];
         }
 
@@ -705,23 +640,19 @@ void Inventory::equip(
 
         InvSlot* slot = nullptr;
 
-        for (InvSlot& current_slot : m_slots)
-        {
-                if (current_slot.id == id)
-                {
+        for (InvSlot& current_slot : m_slots) {
+                if (current_slot.id == id) {
                         slot = &current_slot;
                 }
         }
 
-        if (!slot)
-        {
+        if (!slot) {
                 ASSERT(false);
 
                 return;
         }
 
-        if (slot->item)
-        {
+        if (slot->item) {
                 ASSERT(false);
 
                 return;
@@ -730,8 +661,7 @@ void Inventory::equip(
         slot->item = item;
 
         if (actor::is_player(m_owning_actor) &&
-            (verbose == Verbose::yes))
-        {
+            (verbose == Verbose::yes)) {
                 print_equip_message(id, *item);
         }
 
@@ -756,8 +686,7 @@ void Inventory::print_equip_message(
 
         std::string msg;
 
-        switch (slot_id)
-        {
+        switch (slot_id) {
         case SlotId::wpn:
                 msg = "I am now wielding " + name + ".";
                 break;
@@ -777,10 +706,8 @@ void Inventory::print_equip_message(
                 msg = "I am now wearing " + name + ".";
                 break;
 
-        case SlotId::END:
-        {
-        }
-        break;
+        case SlotId::END: {
+        } break;
         }
 
         msg_log::add(
@@ -806,8 +733,7 @@ void Inventory::print_unequip_message(
 
         std::string msg;
 
-        switch (slot_id)
-        {
+        switch (slot_id) {
         case SlotId::wpn:
                 msg = "I put away my " + name + ".";
                 break;
@@ -839,16 +765,13 @@ int Inventory::total_item_weight() const
 {
         int weight = 0;
 
-        for (const auto& slot : m_slots)
-        {
-                if (slot.item)
-                {
+        for (const auto& slot : m_slots) {
+                if (slot.item) {
                         weight += slot.item->weight();
                 }
         }
 
-        for (auto* const item : m_backpack)
-        {
+        for (auto* const item : m_backpack) {
                 weight += item->weight();
         }
 
@@ -883,26 +806,22 @@ void Inventory::sort_backpack()
         // First, take out prioritized items
         std::vector<item::Item*> prio_items;
 
-        for (auto it = std::begin(m_backpack); it != std::end(m_backpack);)
-        {
+        for (auto it = std::begin(m_backpack); it != std::end(m_backpack);) {
                 auto* const item = *it;
 
-                if (item->data().is_prio_in_backpack_list)
-                {
+                if (item->data().is_prio_in_backpack_list) {
                         prio_items.push_back(item);
 
                         it = m_backpack.erase(it);
                 }
-                else
-                {
+                else {
                         // Item not prioritized
                         ++it;
                 }
         }
 
         // Sort the prioritized items lexicographically
-        if (!prio_items.empty())
-        {
+        if (!prio_items.empty()) {
                 std::sort(
                         std::begin(prio_items),
                         std::end(prio_items),
@@ -915,18 +834,15 @@ void Inventory::sort_backpack()
         // TODO: Sort according to item type, instead of color?
 
         // Sort according to item interface color first
-        for (auto* item : m_backpack)
-        {
+        for (auto* item : m_backpack) {
                 bool is_added_to_buffer = false;
 
                 // Check if item should be added to any existing color group
-                for (auto& group : sort_buffer)
-                {
+                for (auto& group : sort_buffer) {
                         const Color color_current_group =
                                 group[0]->interface_color();
 
-                        if (item->interface_color() == color_current_group)
-                        {
+                        if (item->interface_color() == color_current_group) {
                                 group.push_back(item);
 
                                 is_added_to_buffer = true;
@@ -935,8 +851,7 @@ void Inventory::sort_backpack()
                         }
                 }
 
-                if (is_added_to_buffer)
-                {
+                if (is_added_to_buffer) {
                         continue;
                 }
 
@@ -947,8 +862,7 @@ void Inventory::sort_backpack()
         }
 
         // Sort lexicographically secondarily
-        for (auto& group : sort_buffer)
-        {
+        for (auto& group : sort_buffer) {
                 std::sort(std::begin(group), std::end(group), lex_cmp);
         }
 
@@ -956,10 +870,8 @@ void Inventory::sort_backpack()
         // NOTE: prio_items may be empty
         m_backpack = prio_items;
 
-        for (size_t i = 0; i < sort_buffer.size(); ++i)
-        {
-                for (size_t ii = 0; ii < sort_buffer[i].size(); ii++)
-                {
+        for (size_t i = 0; i < sort_buffer.size(); ++i) {
+                for (size_t ii = 0; ii < sort_buffer[i].size(); ii++) {
                         m_backpack.push_back(sort_buffer[i][ii]);
                 }
         }

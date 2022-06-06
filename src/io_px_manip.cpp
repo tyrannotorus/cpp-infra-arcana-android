@@ -58,14 +58,12 @@ static void put_px24(
                 (px_pos.y * surface.pitch) +
                 (px_pos.x * surface.format->BytesPerPixel);
 
-        if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-        {
+        if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
                 p[0] = (px >> 16) & 0xff;
                 p[1] = (px >> 8) & 0xff;
                 p[2] = px & 0xff;
         }
-        else
-        {
+        else {
                 // Little endian
                 p[0] = px & 0xff;
                 p[1] = (px >> 8) & 0xff;
@@ -102,8 +100,7 @@ Color read_px_on_surface(const SDL_Surface& surface, const P& px_pos)
 
         int v = 0;
 
-        switch (surface.format->BytesPerPixel)
-        {
+        switch (surface.format->BytesPerPixel) {
         case 1:
                 v = *p;
                 break;
@@ -113,12 +110,10 @@ Color read_px_on_surface(const SDL_Surface& surface, const P& px_pos)
                 break;
 
         case 3:
-                if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-                {
+                if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
                         v = p[0] << 16 | p[1] << 8 | p[2];
                 }
-                else
-                {
+                else {
                         // Little endian
                         v = p[0] | p[1] << 8 | p[2] << 16;
                 }
@@ -165,8 +160,7 @@ void put_px_on_surface(
                         color.g(),
                         color.b());
 
-        switch (surface.format->BytesPerPixel)
-        {
+        switch (surface.format->BytesPerPixel) {
         case 1:
                 put_px8(surface, px_pos, v);
                 break;

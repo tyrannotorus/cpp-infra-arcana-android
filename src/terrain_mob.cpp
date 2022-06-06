@@ -41,23 +41,19 @@ void Smoke::on_placed()
 {
         // Expire any existing smoke in the current position, and set the
         // duration of the new smoke to whatever was higher
-        for (auto* const terrain : game_time::g_mobs)
-        {
+        for (auto* const terrain : game_time::g_mobs) {
                 if ((terrain == this) ||
                     (terrain->id() != Id::smoke) ||
-                    (terrain->pos() != m_pos))
-                {
+                    (terrain->pos() != m_pos)) {
                         continue;
                 }
 
                 auto* other_smoke = static_cast<Smoke*>(terrain);
 
-                if (other_smoke->m_nr_turns_left == -1)
-                {
+                if (other_smoke->m_nr_turns_left == -1) {
                         m_nr_turns_left = -1;
                 }
-                else if (m_nr_turns_left != -1)
-                {
+                else if (m_nr_turns_left != -1) {
                         m_nr_turns_left =
                                 std::max(
                                         m_nr_turns_left,
@@ -73,8 +69,7 @@ void Smoke::on_new_turn()
         // If smoke has turns left, or is permanent, harm the actor here
         auto* actor = map::living_actor_at(m_pos);
 
-        if (actor && ((m_nr_turns_left > 0) || (m_nr_turns_left == -1)))
-        {
+        if (actor && ((m_nr_turns_left > 0) || (m_nr_turns_left == -1))) {
                 const bool is_player = actor::is_player(actor);
 
                 // TODO: There needs to be some criteria here, so that e.g. a
@@ -85,8 +80,7 @@ void Smoke::on_new_turn()
 
                 bool allow_cough = !actor->m_properties.has(PropId::r_breath);
 
-                if (actor->m_properties.has(PropId::fainted))
-                {
+                if (actor->m_properties.has(PropId::fainted)) {
                         // A fainted creature supposedly has their eyes closed.
                         // Also, while a fainted creatures would still need to
                         // breathe, they at least should not cough.
@@ -94,8 +88,7 @@ void Smoke::on_new_turn()
                         allow_cough = false;
                 }
 
-                if (is_player)
-                {
+                if (is_player) {
                         auto* const head_item =
                                 map::g_player->m_inv
                                         .m_slots[(size_t)SlotId::head]
@@ -107,8 +100,7 @@ void Smoke::on_new_turn()
                                         .item;
 
                         if (head_item &&
-                            (head_item->data().id == item::Id::gas_mask))
-                        {
+                            (head_item->data().id == item::Id::gas_mask)) {
                                 allow_blind = false;
                                 allow_cough = false;
 
@@ -118,18 +110,15 @@ void Smoke::on_new_turn()
                         }
 
                         if (body_item &&
-                            (body_item->data().id == item::Id::armor_asb_suit))
-                        {
+                            (body_item->data().id == item::Id::armor_asb_suit)) {
                                 allow_blind = false;
                                 allow_cough = false;
                         }
                 }
 
                 // Blinded?
-                if (allow_blind && rnd::one_in(4))
-                {
-                        if (is_player)
-                        {
+                if (allow_blind && rnd::one_in(4)) {
+                        if (is_player) {
                                 msg_log::add("I am getting smoke in my eyes.");
                         }
 
@@ -142,19 +131,15 @@ void Smoke::on_new_turn()
                 }
 
                 // Coughing?
-                if (allow_cough && rnd::one_in(4))
-                {
+                if (allow_cough && rnd::one_in(4)) {
                         std::string snd_msg;
 
-                        if (is_player)
-                        {
+                        if (is_player) {
                                 msg_log::add("I cough.");
                         }
-                        else
-                        {
+                        else {
                                 // Is monster
-                                if (actor->m_data->is_humanoid)
-                                {
+                                if (actor->m_data->is_humanoid) {
                                         snd_msg = "I hear coughing.";
                                 }
                         }
@@ -178,12 +163,10 @@ void Smoke::on_new_turn()
         }
 
         // If not permanent, count down turns left and possibly erase self
-        if (m_nr_turns_left > -1)
-        {
+        if (m_nr_turns_left > -1) {
                 --m_nr_turns_left;
 
-                if (m_nr_turns_left <= 0)
-                {
+                if (m_nr_turns_left <= 0) {
                         game_time::erase_mob(this, true);
                 }
         }
@@ -193,8 +176,7 @@ std::string Smoke::name(const Article article) const
 {
         std::string name;
 
-        if (article == Article::the)
-        {
+        if (article == Article::the) {
                 name = "the ";
         }
 
@@ -212,15 +194,13 @@ Color Smoke::color() const
 void ForceField::on_new_turn()
 {
         // If not permanent, count down turns left and possibly erase self
-        if (m_nr_turns_left <= -1)
-        {
+        if (m_nr_turns_left <= -1) {
                 return;
         }
 
         --m_nr_turns_left;
 
-        if (m_nr_turns_left <= 0)
-        {
+        if (m_nr_turns_left <= 0) {
                 game_time::erase_mob(this, true);
         }
 }
@@ -249,8 +229,7 @@ void LitDynamite::on_new_turn()
 {
         --m_nr_turns_left;
 
-        if (m_nr_turns_left <= 0)
-        {
+        if (m_nr_turns_left <= 0) {
                 const P p(m_pos);
 
                 // Removing the dynamite before the explosion, so it can't be
@@ -286,8 +265,7 @@ void LitFlare::on_new_turn()
 {
         --m_nr_turns_left;
 
-        if (m_nr_turns_left <= 0)
-        {
+        if (m_nr_turns_left <= 0) {
                 game_time::erase_mob(this, true);
         }
 }
@@ -316,12 +294,9 @@ void LitFlare::add_light(Array2<bool>& light) const
 
         const auto light_fov = fov::run(m_pos, fov_map);
 
-        for (int y = p0.y; y <= p1.y; ++y)
-        {
-                for (int x = p0.x; x <= p1.x; ++x)
-                {
-                        if (!light_fov.at(x, y).is_blocked_hard)
-                        {
+        for (int y = p0.y; y <= p1.y; ++y) {
+                for (int x = p0.x; x <= p1.x; ++x) {
+                        if (!light_fov.at(x, y).is_blocked_hard) {
                                 light.at(x, y) = true;
                         }
                 }

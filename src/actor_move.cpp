@@ -81,15 +81,13 @@ static void player_bump_known_hostile_mon(actor::Actor& mon)
 {
         auto& player = *map::g_player;
 
-        if (!player.m_properties.allow_attack_melee(Verbose::yes))
-        {
+        if (!player.m_properties.allow_attack_melee(Verbose::yes)) {
                 return;
         }
 
         auto* const wpn_item = player.m_inv.item_in_slot(SlotId::wpn);
 
-        if (!wpn_item)
-        {
+        if (!wpn_item) {
                 player.hand_att(mon);
 
                 return;
@@ -100,8 +98,7 @@ static void player_bump_known_hostile_mon(actor::Actor& mon)
         // If this is also a ranged weapon, ask if player really
         // intended to use it as melee weapon
         if (wpn.data().ranged.is_ranged_wpn &&
-            config::warn_on_ranged_wpn_melee())
-        {
+            config::warn_on_ranged_wpn_melee()) {
                 const auto answer =
                         query_player_attack_mon_with_ranged_wpn(
                                 wpn,
@@ -109,8 +106,7 @@ static void player_bump_known_hostile_mon(actor::Actor& mon)
 
                 msg_log::clear();
 
-                if (answer == BinaryAnswer::no)
-                {
+                if (answer == BinaryAnswer::no) {
                         return;
                 }
         }
@@ -131,8 +127,7 @@ static void player_bump_unkown_hostile_mon(actor::Actor& mon)
 
 static void player_displace_allied_mon(actor::Actor& mon, const P& new_mon_pos)
 {
-        if (mon.is_player_aware_of_me())
-        {
+        if (mon.is_player_aware_of_me()) {
                 std::string mon_name =
                         can_player_see_actor(mon)
                         ? mon.name_a()
@@ -146,16 +141,14 @@ static void player_displace_allied_mon(actor::Actor& mon, const P& new_mon_pos)
 
 static void player_walk_on_item(item::Item* const item)
 {
-        if (!item)
-        {
+        if (!item) {
                 return;
         }
 
         // Only print the item name if the item will not be "found" by stepping
         // on it, otherwise there would be redundant messages, e.g. "A Muddy
         // Potion." --> "I have found a Muddy Potion!"
-        if ((item->data().xp_on_found <= 0) || item->data().is_found)
-        {
+        if ((item->data().xp_on_found <= 0) || item->data().is_found) {
                 std::string item_name =
                         item->name(
                                 ItemNameType::plural,
@@ -172,15 +165,12 @@ static void player_walk_on_item(item::Item* const item)
 
 static void print_corpses_at_player_msgs()
 {
-        for (auto* const actor : game_time::g_actors)
-        {
-                if (actor->m_pos != map::g_player->m_pos)
-                {
+        for (auto* const actor : game_time::g_actors) {
+                if (actor->m_pos != map::g_player->m_pos) {
                         continue;
                 }
 
-                if (actor->m_state != ActorState::corpse)
-                {
+                if (actor->m_state != ActorState::corpse) {
                         continue;
                 }
 
@@ -199,8 +189,7 @@ static bool is_player_staggering_from_wounds()
 
         int nr_wounds = 0;
 
-        if (wound_prop)
-        {
+        if (wound_prop) {
                 nr_wounds = static_cast<PropWound*>(wound_prop)->nr_wounds();
         }
 
@@ -215,12 +204,10 @@ static AllowAction pre_bump_terrains(
 {
         const auto mobs = game_time::mobs_at(target);
 
-        for (auto* mob : mobs)
-        {
+        for (auto* mob : mobs) {
                 const auto result = mob->pre_bump(actor);
 
-                if (result == AllowAction::no)
-                {
+                if (result == AllowAction::no) {
                         return result;
                 }
         }
@@ -242,13 +229,11 @@ static void print_ooze_enter_terrain_msg(
 
         std::string preposition = "through";
 
-        if (terrain.id() == terrain::Id::door)
-        {
+        if (terrain.id() == terrain::Id::door) {
                 const auto& door =
                         static_cast<const terrain::Door&>(terrain);
 
-                switch (door.type())
-                {
+                switch (door.type()) {
                 case terrain::DoorType::gate:
                         break;
 
@@ -287,12 +272,10 @@ static void print_mon_enter_non_walkable_terrain_msg(
                 props.has(PropId::small_crawling) ||
                 props.has(PropId::tiny_flying);
 
-        if (is_ooze)
-        {
+        if (is_ooze) {
                 print_ooze_enter_terrain_msg(actor, terrain);
         }
-        else if (is_small)
-        {
+        else if (is_small) {
                 print_small_creature_enter_terrain_msg(actor, terrain);
         }
 }
@@ -301,8 +284,7 @@ static void bump_terrains(actor::Actor& actor, const P& target)
 {
         const auto mobs = game_time::mobs_at(target);
 
-        for (auto* mob : mobs)
-        {
+        for (auto* mob : mobs) {
                 mob->bump(actor);
         }
 
@@ -311,8 +293,7 @@ static void bump_terrains(actor::Actor& actor, const P& target)
         if (!actor::is_player(&actor) &&
             !terrain->is_walkable() &&
             (terrain->m_data->matl_type != Matl::fluid) &&
-            can_player_see_actor(actor))
-        {
+            can_player_see_actor(actor)) {
                 print_mon_enter_non_walkable_terrain_msg(actor, *terrain);
         }
 
@@ -324,21 +305,18 @@ static void on_player_waiting()
         auto did_action = DidAction::no;
 
         // Ghoul feed on corpses?
-        if (player_bon::bg() == Bg::ghoul)
-        {
+        if (player_bon::bg() == Bg::ghoul) {
                 actor::try_eat_corpse(*map::g_player);
         }
 
-        if (did_action == DidAction::no)
-        {
+        if (did_action == DidAction::no) {
                 // Reorganize pistol magazines?
                 const auto seen_foes = actor::seen_foes(*map::g_player);
 
                 const bool is_burning =
                         map::g_player->m_properties.has(PropId::burning);
 
-                if (seen_foes.empty() && !is_burning)
-                {
+                if (seen_foes.empty() && !is_burning) {
                         reload::player_arrange_pistol_mags();
                 }
         }
@@ -355,12 +333,10 @@ static bool should_player_stagger(const P& target)
 
         const auto terrain_id = map::g_terrain.at(target)->id();
 
-        if (terrain_id == terrain::Id::liquid)
-        {
+        if (terrain_id == terrain::Id::liquid) {
                 return false;
         }
-        else
-        {
+        else {
                 return enc >= 100 || is_player_staggering_from_wounds();
         }
 }
@@ -376,8 +352,7 @@ static void move_player_non_center_direction(const P& target)
 
         const auto is_aware_of_mon = (mon && mon->is_player_aware_of_me());
 
-        if (mon && !player.is_leader_of(mon) && is_aware_of_mon)
-        {
+        if (mon && !player.is_leader_of(mon) && is_aware_of_mon) {
                 player_bump_known_hostile_mon(*mon);
 
                 return;
@@ -385,25 +360,21 @@ static void move_player_non_center_direction(const P& target)
 
         const auto pre_move_result = pre_bump_terrains(player, target);
 
-        if (pre_move_result == AllowAction::no)
-        {
+        if (pre_move_result == AllowAction::no) {
                 return;
         }
 
         if (mon &&
             !player.is_leader_of(mon) &&
             !is_terrain_blocking_move &&
-            !is_aware_of_mon)
-        {
+            !is_aware_of_mon) {
                 player_bump_unkown_hostile_mon(*mon);
 
                 return;
         }
 
-        if (!is_terrain_blocking_move)
-        {
-                if (should_player_be_immobile())
-                {
+        if (!is_terrain_blocking_move) {
+                if (should_player_be_immobile()) {
                         // TODO: Currently you can attempt to attack hidden
                         // adjacent monsters "for free" while you are too
                         // encumbered to move (very minor issue, but it's weird)
@@ -411,8 +382,7 @@ static void move_player_non_center_direction(const P& target)
 
                         return;
                 }
-                else if (should_player_stagger(target))
-                {
+                else if (should_player_stagger(target)) {
                         msg_log::add("I stagger.", colors::msg_note());
 
                         player.m_properties.apply(
@@ -420,8 +390,7 @@ static void move_player_non_center_direction(const P& target)
                                         PropId::waiting));
                 }
 
-                if (mon && player.is_leader_of(mon))
-                {
+                if (mon && player.is_leader_of(mon)) {
                         player_displace_allied_mon(*mon, map::g_player->m_pos);
                 }
 
@@ -444,13 +413,11 @@ static void do_move_action_player(Dir dir)
 {
         auto& player = *map::g_player;
 
-        if (!player.is_alive())
-        {
+        if (!player.is_alive()) {
                 return;
         }
 
-        if (!player.m_properties.allow_move_dir(dir))
-        {
+        if (!player.m_properties.allow_move_dir(dir)) {
                 return;
         }
 
@@ -460,20 +427,17 @@ static void do_move_action_player(Dir dir)
 
         const auto target = player.m_pos + dir_utils::offset(dir);
 
-        if (intended_dir == Dir::center)
-        {
+        if (intended_dir == Dir::center) {
                 on_player_waiting();
         }
-        else if (dir != Dir::center)
-        {
+        else if (dir != Dir::center) {
                 const int dlvl_before = map::g_dlvl;
 
                 // NOTE: The player might bump the stairs here and go to a new
                 // dungeon level:
                 move_player_non_center_direction(target);
 
-                if (map::g_dlvl != dlvl_before)
-                {
+                if (map::g_dlvl != dlvl_before) {
                         return;
                 }
 
@@ -481,8 +445,7 @@ static void do_move_action_player(Dir dir)
                 actor::make_player_aware_seen_monsters();
         }
 
-        if (player.m_pos == target)
-        {
+        if (player.m_pos == target) {
                 // We are at the target position, this means that either:
                 // * the player moved to a different position, or
                 // * the player waited in the current position on purpose, or
@@ -495,8 +458,7 @@ static void do_move_action_player(Dir dir)
 #ifndef NDEBUG
 static void sanity_check_mon_direction(const actor::Actor& mon, const Dir dir)
 {
-        if (dir != Dir::END)
-        {
+        if (dir != Dir::END) {
                 return;
         }
 
@@ -512,8 +474,7 @@ static void sanity_check_mon_direction(const actor::Actor& mon, const Dir dir)
 #ifndef NDEBUG
 static void sanity_check_mon_not_outside_map(const actor::Actor& mon)
 {
-        if (map::is_pos_inside_outer_walls(mon.m_pos))
-        {
+        if (map::is_pos_inside_outer_walls(mon.m_pos)) {
                 return;
         }
 
@@ -531,8 +492,7 @@ static void sanity_check_mon_can_move_into_terrain(
         const actor::Actor& mon,
         const P& target_pos)
 {
-        if (map::can_actor_move_into_terrain_at(mon, target_pos))
-        {
+        if (map::can_actor_move_into_terrain_at(mon, target_pos)) {
                 return;
         }
 
@@ -552,10 +512,8 @@ static void sanity_check_mon_can_move_into_terrain(
                     "target position:")
                 << std::endl;
 
-        for (terrain::Terrain* mob : game_time::g_mobs)
-        {
-                if (mob->pos() == target_pos)
-                {
+        for (terrain::Terrain* mob : game_time::g_mobs) {
+                if (mob->pos() == target_pos) {
                         TRACE
                                 << mob->name(Article::a)
                                 << std::endl;
@@ -573,8 +531,7 @@ static void sanity_check_no_living_actor_at_target_pos(
 {
         const actor::Actor* const mon_2 = map::living_actor_at(target_pos);
 
-        if (!mon_2)
-        {
+        if (!mon_2) {
                 return;
         }
 
@@ -606,15 +563,13 @@ static void do_move_action_mon(actor::Actor& mon, Dir dir)
         const auto target_p = mon.m_pos + dir_utils::offset(dir);
 
 #ifndef NDEBUG
-        if (target_p != mon.m_pos)
-        {
+        if (target_p != mon.m_pos) {
                 sanity_check_mon_can_move_into_terrain(mon, target_p);
                 sanity_check_no_living_actor_at_target_pos(mon, target_p);
         }
 #endif  // NDEBUG
 
-        if ((dir != Dir::center) && map::is_pos_inside_outer_walls(target_p))
-        {
+        if ((dir != Dir::center) && map::is_pos_inside_outer_walls(target_p)) {
                 // Leave current cell
                 map::g_terrain.at(mon.m_pos)->on_leave(mon);
 
@@ -622,8 +577,7 @@ static void do_move_action_mon(actor::Actor& mon, Dir dir)
 
                 bump_terrains(mon, mon.m_pos);
 
-                if (actor::can_player_see_actor(mon))
-                {
+                if (actor::can_player_see_actor(mon)) {
                         actor::make_player_aware_mon(mon);
                 }
         }
@@ -638,12 +592,10 @@ namespace actor
 {
 void do_move_action(Actor& actor, const Dir dir)
 {
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 do_move_action_player(dir);
         }
-        else
-        {
+        else {
                 do_move_action_mon(actor, dir);
         }
 }
@@ -663,8 +615,7 @@ void set_position(Actor& actor, const P& pos)
         if (is_player(&actor) ||
             props.has(PropId::radiant_self) ||
             props.has(PropId::radiant_adjacent) ||
-            props.has(PropId::radiant_fov))
-        {
+            props.has(PropId::radiant_fov)) {
                 map::update_light_map();
         }
 }

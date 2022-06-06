@@ -32,8 +32,7 @@ void draw_rectangle(R px_rect, const Color& color)
         // this is somewhat hacky, but it fulfills the purpose...
         int nr_rects = 1;
 
-        if (config::is_2x_scale_enabled())
-        {
+        if (config::is_2x_scale_enabled()) {
                 px_rect = px_rect.scaled_up(2);
 
                 nr_rects = 2;
@@ -41,8 +40,7 @@ void draw_rectangle(R px_rect, const Color& color)
 
         px_rect = px_rect.with_offset(g_rendering_px_offset);
 
-        for (int i = 0; i < nr_rects; ++i)
-        {
+        for (int i = 0; i < nr_rects; ++i) {
                 SDL_Rect rect;
 
                 rect.x = px_rect.p0.x;
@@ -69,8 +67,7 @@ void draw_rectangle_filled(
         const Color& color,
         const uint8_t alpha)
 {
-        if (config::is_2x_scale_enabled())
-        {
+        if (config::is_2x_scale_enabled()) {
                 px_rect = px_rect.scaled_up(2);
         }
 

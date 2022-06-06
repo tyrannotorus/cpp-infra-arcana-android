@@ -65,27 +65,22 @@ void show(const P& map_pos, const ForceCentering force_centering)
         const P p0_before = s_p0;
 
         if (config::always_center_view_on_player() ||
-            (force_centering == ForceCentering::yes))
-        {
+            (force_centering == ForceCentering::yes)) {
                 // Always center the view (both X/Y axis)
                 s_p0 = centered_pos;
         }
-        else
-        {
+        else {
                 // Only center if needed (for X/Y axis separately)
-                if (smallest_dist_hor < s_min_required_viewport_edge_dist)
-                {
+                if (smallest_dist_hor < s_min_required_viewport_edge_dist) {
                         s_p0.x = centered_pos.x;
                 }
 
-                if (smallest_dist_ver < s_min_required_viewport_edge_dist)
-                {
+                if (smallest_dist_ver < s_min_required_viewport_edge_dist) {
                         s_p0.y = centered_pos.y;
                 }
         }
 
-        if (s_p0 != p0_before)
-        {
+        if (s_p0 != p0_before) {
                 io::clear_all_flash_animations();
         }
 }

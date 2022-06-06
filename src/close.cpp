@@ -30,15 +30,12 @@ static void player_try_close_or_jam_terrain(terrain::Terrain* const terrain)
 {
         const bool can_see_terrain = map::g_seen.at(terrain->pos());
 
-        if (terrain->id() != terrain::Id::door)
-        {
-                if (can_see_terrain)
-                {
+        if (terrain->id() != terrain::Id::door) {
+                if (can_see_terrain) {
                         msg_log::add(
                                 "I see nothing there to close or jam shut.");
                 }
-                else
-                {
+                else {
                         msg_log::add(
                                 "I find nothing there to close or jam shut.");
                 }
@@ -50,8 +47,7 @@ static void player_try_close_or_jam_terrain(terrain::Terrain* const terrain)
 
         auto* const door = static_cast<terrain::Door*>(terrain);
 
-        if (door->is_open())
-        {
+        if (door->is_open()) {
                 door->actor_try_close(*map::g_player);
 
                 return;
@@ -59,14 +55,11 @@ static void player_try_close_or_jam_terrain(terrain::Terrain* const terrain)
 
         // Door is closed - try to jam it
 
-        if (door->type() == terrain::DoorType::metal)
-        {
-                if (can_see_terrain)
-                {
+        if (door->type() == terrain::DoorType::metal) {
+                if (can_see_terrain) {
                         msg_log::add("This door cannot be jammed.");
                 }
-                else
-                {
+                else {
                         msg_log::add(
                                 "I find nothing there to close or jam shut.");
                 }
@@ -78,8 +71,7 @@ static void player_try_close_or_jam_terrain(terrain::Terrain* const terrain)
                 map::g_player->m_inv.has_item_in_backpack(
                         item::Id::iron_spike);
 
-        if (!has_spike)
-        {
+        if (!has_spike) {
                 msg_log::add("I have nothing to jam the door with.");
 
                 return;
@@ -89,8 +81,7 @@ static void player_try_close_or_jam_terrain(terrain::Terrain* const terrain)
 
         const bool did_spike_door = door->actor_try_jam(*map::g_player);
 
-        if (!did_spike_door)
-        {
+        if (!did_spike_door) {
                 return;
         }
 
@@ -103,12 +94,10 @@ static void player_try_close_or_jam_terrain(terrain::Terrain* const terrain)
                         .item_stack_size_in_backpack(
                                 item::Id::iron_spike);
 
-        if (nr_spikes_left == 0)
-        {
+        if (nr_spikes_left == 0) {
                 msg_log::add("I have no iron spikes left.");
         }
-        else
-        {
+        else {
                 msg_log::add(
                         "I have " +
                         std::to_string(nr_spikes_left) +
@@ -141,8 +130,7 @@ void player_try_close_or_jam()
 
         msg_log::clear();
 
-        if ((input_dir != Dir::END) && (input_dir != Dir::center))
-        {
+        if ((input_dir != Dir::END) && (input_dir != Dir::center)) {
                 // Valid direction
                 const auto p =
                         map::g_player->m_pos +

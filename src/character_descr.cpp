@@ -52,19 +52,16 @@ static void add_properties_descr(std::vector<ColoredString>& lines)
                 map::g_player->m_properties
                         .property_names_and_descr();
 
-        if (prop_list.empty())
-        {
+        if (prop_list.empty()) {
                 lines.emplace_back(
                         "None",
                         colors::text());
 
                 lines.emplace_back("", colors::text());
         }
-        else
-        {
+        else {
                 // Has properties
-                for (const auto& e : prop_list)
-                {
+                for (const auto& e : prop_list) {
                         const auto& title = e.title;
 
                         lines.emplace_back(
@@ -76,8 +73,7 @@ static void add_properties_descr(std::vector<ColoredString>& lines)
                                         e.descr,
                                         max_descr_w());
 
-                        for (const auto& descr_line : descr_formatted)
-                        {
+                        for (const auto& descr_line : descr_formatted) {
                                 lines.emplace_back(
                                         descr_line,
                                         color_text_dark());
@@ -96,19 +92,15 @@ static void add_insanity_descr(std::vector<ColoredString>& lines)
 
         const std::vector<const InsSympt*> sympts = insanity::active_sympts();
 
-        if (sympts.empty())
-        {
+        if (sympts.empty()) {
                 lines.emplace_back("None", colors::text());
         }
-        else
-        {
+        else {
                 // Has insanity symptoms
-                for (const InsSympt* const sympt : sympts)
-                {
+                for (const InsSympt* const sympt : sympts) {
                         const auto sympt_descr = sympt->char_descr_msg();
 
-                        if (!sympt_descr.empty())
-                        {
+                        if (!sympt_descr.empty()) {
                                 lines.emplace_back(
                                         sympt_descr,
                                         colors::text());
@@ -127,14 +119,12 @@ static void add_potion_descr(std::vector<ColoredString>& lines)
 
         std::vector<ColoredString> potion_list;
 
-        for (int i = 0; i < (int)item::Id::END; ++i)
-        {
+        for (int i = 0; i < (int)item::Id::END; ++i) {
                 const auto& d = item::g_data[i];
 
                 if ((d.type != ItemType::potion) ||
                     (!d.is_tried &&
-                     !d.is_identified))
-                {
+                     !d.is_identified)) {
                         continue;
                 }
 
@@ -147,14 +137,12 @@ static void add_potion_descr(std::vector<ColoredString>& lines)
                 delete item;
         }
 
-        if (potion_list.empty())
-        {
+        if (potion_list.empty()) {
                 lines.emplace_back(
                         "No known potions",
                         colors::text());
         }
-        else
-        {
+        else {
                 sort(potion_list.begin(),
                      potion_list.end(),
                      [](const ColoredString& e1,
@@ -162,8 +150,7 @@ static void add_potion_descr(std::vector<ColoredString>& lines)
                              return e1.str < e2.str;
                      });
 
-                for (ColoredString& e : potion_list)
-                {
+                for (ColoredString& e : potion_list) {
                         lines.push_back(e);
                 }
         }
@@ -179,14 +166,12 @@ static void add_scroll_descr(std::vector<ColoredString>& lines)
 
         std::vector<ColoredString> manuscript_list;
 
-        for (int i = 0; i < (int)item::Id::END; ++i)
-        {
+        for (int i = 0; i < (int)item::Id::END; ++i) {
                 const auto& d = item::g_data[i];
 
                 if ((d.type != ItemType::scroll) ||
                     (!d.is_tried &&
-                     !d.is_identified))
-                {
+                     !d.is_identified)) {
                         continue;
                 }
 
@@ -201,14 +186,12 @@ static void add_scroll_descr(std::vector<ColoredString>& lines)
                 delete item;
         }
 
-        if (manuscript_list.empty())
-        {
+        if (manuscript_list.empty()) {
                 lines.emplace_back(
                         "No known manuscripts",
                         colors::text());
         }
-        else
-        {
+        else {
                 sort(manuscript_list.begin(),
                      manuscript_list.end(),
                      [](const ColoredString& e1,
@@ -216,8 +199,7 @@ static void add_scroll_descr(std::vector<ColoredString>& lines)
                              return e1.str < e2.str;
                      });
 
-                for (ColoredString& e : manuscript_list)
-                {
+                for (ColoredString& e : manuscript_list) {
                         lines.push_back(e);
                 }
         }
@@ -231,10 +213,8 @@ static void add_traits_descr(std::vector<ColoredString>& lines)
                 "Traits gained",
                 clr_heading());
 
-        for (size_t i = 0; i < (size_t)Trait::END; ++i)
-        {
-                if (player_bon::has_trait((Trait)i))
-                {
+        for (size_t i = 0; i < (size_t)Trait::END; ++i) {
+                if (player_bon::has_trait((Trait)i)) {
                         const auto trait = Trait(i);
 
                         const std::string title =
@@ -252,8 +232,7 @@ static void add_traits_descr(std::vector<ColoredString>& lines)
                                         descr,
                                         max_descr_w());
 
-                        for (const std::string& descr_line : descr_lines)
-                        {
+                        for (const std::string& descr_line : descr_lines) {
                                 lines.emplace_back(
                                         descr_line,
                                         color_text_dark());
@@ -274,15 +253,13 @@ static void add_history_descr(std::vector<ColoredString>& lines)
 
         int longest_turn_w = 0;
 
-        for (const auto& event : events)
-        {
+        for (const auto& event : events) {
                 const int turn_w = (int)std::to_string(event.turn).size();
 
                 longest_turn_w = std::max(turn_w, longest_turn_w);
         }
 
-        for (const auto& event : events)
-        {
+        for (const auto& event : events) {
                 std::string ev_str = std::to_string(event.turn);
 
                 const int turn_w = (int)ev_str.size();
@@ -334,8 +311,7 @@ void CharacterDescr::draw()
                 m_top_idx + panels::h(Panel::info_screen_content) - 1,
                 nr_lines_tot - 1);
 
-        for (int i = m_top_idx; i <= btm_nr; ++i)
-        {
+        for (int i = m_top_idx; i <= btm_nr; ++i) {
                 const ColoredString& line = m_lines[i];
 
                 io::draw_text(
@@ -355,42 +331,33 @@ void CharacterDescr::update()
 
         const auto input = io::read_input();
 
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_KP_2:
-        case SDLK_DOWN:
-        {
+        case SDLK_DOWN: {
                 m_top_idx += line_jump;
 
                 const int panel_h = panels::h(Panel::info_screen_content);
 
-                if (nr_lines_tot <= panel_h)
-                {
+                if (nr_lines_tot <= panel_h) {
                         m_top_idx = 0;
                 }
-                else
-                {
+                else {
                         m_top_idx = std::min(
                                 nr_lines_tot - panel_h,
                                 m_top_idx);
                 }
-        }
-        break;
+        } break;
 
         case SDLK_KP_8:
-        case SDLK_UP:
-        {
+        case SDLK_UP: {
                 m_top_idx = std::max(0, m_top_idx - line_jump);
-        }
-        break;
+        } break;
 
         case SDLK_SPACE:
-        case SDLK_ESCAPE:
-        {
+        case SDLK_ESCAPE: {
                 // Exit screen
                 states::pop();
-        }
-        break;
+        } break;
 
         default:
                 break;

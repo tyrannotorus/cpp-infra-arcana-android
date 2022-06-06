@@ -32,12 +32,10 @@ static bool can_heal_from_eating_now(const actor::Actor& actor)
 {
         PropWound* wound = nullptr;
 
-        if (is_player(&actor))
-        {
+        if (is_player(&actor)) {
                 auto* prop = actor.m_properties.prop(PropId::wound);
 
-                if (prop)
-                {
+                if (prop) {
                         wound = static_cast<PropWound*>(prop);
                 }
         }
@@ -51,17 +49,14 @@ static actor::Actor* find_corpse_at(const P& p)
 
         // Check all corpses here, if this is the player eating, stop at any
         // corpse which is prioritized for bashing (Zombies).
-        for (auto* const actor : game_time::g_actors)
-        {
+        for (auto* const actor : game_time::g_actors) {
                 if ((actor->m_pos == p) &&
-                    (actor->m_state == ActorState::corpse))
-                {
+                    (actor->m_state == ActorState::corpse)) {
                         corpse = actor;
 
                         // NOTE: Monsters will also use this priority, but this
                         // is fine.
-                        if (actor->m_data->prio_corpse_bash)
-                        {
+                        if (actor->m_data->prio_corpse_bash) {
                                 break;
                         }
                 }
@@ -98,14 +93,11 @@ static void print_feed_msg(
 {
         const std::string corpse_name_the = corpse.m_data->corpse_name_the;
 
-        if (actor::is_player(&actor))
-        {
+        if (actor::is_player(&actor)) {
                 msg_log::add("I feed on " + corpse_name_the + ".");
         }
-        else
-        {
-                if (can_player_see_actor(actor))
-                {
+        else {
+                if (can_player_see_actor(actor)) {
                         const std::string actor_name_the =
                                 text_format::first_to_upper(
                                         actor.name_the());
@@ -132,24 +124,20 @@ static void print_corpses_remaining(const P& p)
 {
         std::vector<actor::Actor*> corpses_here;
 
-        for (auto* const actor : game_time::g_actors)
-        {
+        for (auto* const actor : game_time::g_actors) {
                 if ((actor->m_pos == p) &&
-                    (actor->m_state == ActorState::corpse))
-                {
+                    (actor->m_state == ActorState::corpse)) {
                         corpses_here.push_back(actor);
                 }
         }
 
-        if (corpses_here.empty())
-        {
+        if (corpses_here.empty()) {
                 return;
         }
 
         msg_log::more_prompt();
 
-        for (auto* const other_corpse : corpses_here)
-        {
+        for (auto* const other_corpse : corpses_here) {
                 const std::string name =
                         text_format::first_to_upper(
                                 other_corpse->m_data
@@ -166,16 +154,14 @@ namespace actor
 {
 DidAction try_eat_corpse(actor::Actor& actor)
 {
-        if (!can_heal_from_eating_now(actor))
-        {
+        if (!can_heal_from_eating_now(actor)) {
                 // "Not hungry"
                 return DidAction::no;
         }
 
         Actor* corpse = find_corpse_at(actor.m_pos);
 
-        if (!corpse)
-        {
+        if (!corpse) {
                 return DidAction::no;
         }
 
@@ -185,15 +171,13 @@ DidAction try_eat_corpse(actor::Actor& actor)
 
         const bool is_destroyed = roll_corpse_destroyed(*corpse);
 
-        if (is_destroyed)
-        {
+        if (is_destroyed) {
                 corpse->m_state = ActorState::destroyed;
 
                 terrain::make_gore(actor.m_pos);
                 terrain::make_blood(actor.m_pos);
 
-                if (is_player(&actor))
-                {
+                if (is_player(&actor)) {
                         print_corpse_destroyed_msg(*corpse);
 
                         print_corpses_remaining(actor.m_pos);
@@ -211,12 +195,10 @@ void heal_from_eating(actor::Actor& actor)
 
         actor.restore_hp(hp_restored, false, Verbose::no);
 
-        if (is_player(&actor))
-        {
+        if (is_player(&actor)) {
                 auto* const prop = actor.m_properties.prop(PropId::wound);
 
-                if (prop && rnd::one_in(6))
-                {
+                if (prop && rnd::one_in(6)) {
                         auto* const wound = static_cast<PropWound*>(prop);
 
                         wound->heal_one_wound();

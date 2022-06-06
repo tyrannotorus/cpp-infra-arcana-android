@@ -31,8 +31,7 @@ static int nr_items()
 {
         int nr = rnd::range(4, 5);
 
-        if (player_bon::has_trait(Trait::treasure_hunter))
-        {
+        if (player_bon::has_trait(Trait::treasure_hunter)) {
                 nr += rnd::range(1, 2);
         }
 
@@ -44,15 +43,13 @@ static std::vector<item::Id> make_item_bucket()
         std::vector<item::Id> item_bucket;
         item_bucket.clear();
 
-        for (int i = 0; i < (int)item::Id::END; ++i)
-        {
+        for (int i = 0; i < (int)item::Id::END; ++i) {
                 const auto& data = item::g_data[i];
 
                 if (data.type < ItemType::END_OF_EXTRINSIC_ITEMS &&
                     data.spawn_std_range.is_in_range(map::g_dlvl) &&
                     data.allow_spawn &&
-                    rnd::percent(data.chance_to_incl_in_spawn_list))
-                {
+                    rnd::percent(data.chance_to_incl_in_spawn_list)) {
                         item_bucket.push_back(item::Id(i));
                 }
         }
@@ -107,10 +104,8 @@ void make_items_on_floor()
 
         const int nr = nr_items();
 
-        for (int i = 0; i < nr; ++i)
-        {
-                if (positions.empty() || item_bucket.empty())
-                {
+        for (int i = 0; i < nr; ++i) {
+                if (positions.empty() || item_bucket.empty()) {
                         break;
                 }
 
@@ -123,15 +118,13 @@ void make_items_on_floor()
 
                 const item::Id id = item_bucket[item_idx];
 
-                if (item::g_data[(size_t)id].allow_spawn)
-                {
+                if (item::g_data[(size_t)id].allow_spawn) {
                         item::make_item_on_floor(id, p);
 
                         positions.erase(begin(positions) + p_idx);
                         position_weights.erase(begin(position_weights) + p_idx);
                 }
-                else
-                {
+                else {
                         item_bucket.erase(begin(item_bucket) + item_idx);
                 }
         }

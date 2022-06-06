@@ -79,8 +79,7 @@ void PickBgState::update()
         auto action = MenuAction::selected;
 
 #ifndef NDEBUG
-        if (config::is_stress_test())
-        {
+        if (config::is_stress_test()) {
                 // Stress-test mode, we just want to run everything
                 // automatically without requiring manual input.
                 action = MenuAction::selected;
@@ -96,10 +95,8 @@ void PickBgState::update()
                                 MenuInputMode::scrolling_and_letters);
         }
 
-        switch (action)
-        {
-        case MenuAction::selected:
-        {
+        switch (action) {
+        case MenuAction::selected: {
                 const auto bg = m_bgs[m_browser.y()];
 
                 player_bon::pick_bg(bg);
@@ -110,18 +107,14 @@ void PickBgState::update()
                 states::pop();
 
                 // Occultists also pick a domain
-                if (bg == Bg::occultist)
-                {
+                if (bg == Bg::occultist) {
                         states::push(std::make_unique<PickOccultistState>());
                 }
-        }
-        break;
+        } break;
 
-        case MenuAction::esc:
-        {
+        case MenuAction::esc: {
                 states::pop_until(StateId::main_menu);
-        }
-        break;
+        } break;
 
         default:
                 break;
@@ -148,8 +141,7 @@ void PickBgState::draw()
         const auto bg_marked = m_bgs[m_browser.y()];
 
         // Backgrounds
-        for (const auto bg : m_bgs)
-        {
+        for (const auto bg : m_bgs) {
                 const auto key_str =
                         std::string("(") +
                         m_browser.menu_keys()[y] +
@@ -191,10 +183,8 @@ void PickBgState::draw()
 
         ASSERT(!descr.empty());
 
-        for (const auto& descr_entry : descr)
-        {
-                if (descr_entry.str.empty())
-                {
+        for (const auto& descr_entry : descr) {
+                if (descr_entry.str.empty()) {
                         ++y;
 
                         continue;
@@ -232,23 +222,18 @@ void PickOccultistState::update()
                         input,
                         MenuInputMode::scrolling_and_letters);
 
-        switch (action)
-        {
-        case MenuAction::selected:
-        {
+        switch (action) {
+        case MenuAction::selected: {
                 const auto domain = m_domains[m_browser.y()];
 
                 player_bon::pick_occultist_domain(domain);
 
                 states::pop();
-        }
-        break;
+        } break;
 
-        case MenuAction::esc:
-        {
+        case MenuAction::esc: {
                 states::pop_until(StateId::main_menu);
-        }
-        break;
+        } break;
 
         default:
                 break;
@@ -275,8 +260,7 @@ void PickOccultistState::draw()
         const auto domain_marked = m_domains[m_browser.y()];
 
         // Domains
-        for (const auto domain : m_domains)
-        {
+        for (const auto domain : m_domains) {
                 auto str =
                         std::string("(") +
                         m_browser.menu_keys()[y] +
@@ -318,8 +302,7 @@ void PickOccultistState::draw()
 
         ASSERT(!descr.empty());
 
-        if (descr.empty())
-        {
+        if (descr.empty()) {
                 return;
         }
 
@@ -327,8 +310,7 @@ void PickOccultistState::draw()
                 descr,
                 panels::w(Panel::create_char_descr));
 
-        for (const std::string& line : formatted_lines)
-        {
+        for (const std::string& line : formatted_lines) {
                 io::draw_text(
                         line,
                         Panel::create_char_descr,
@@ -378,8 +360,7 @@ void PickTraitState::init_browsers()
 
 void PickTraitState::update()
 {
-        if (config::is_bot_playing())
-        {
+        if (config::is_bot_playing()) {
                 states::pop();
 
                 return;
@@ -388,8 +369,7 @@ void PickTraitState::update()
         const auto input = io::read_input();
 
         // Switch trait screen mode?
-        if (input.key == SDLK_TAB)
-        {
+        if (input.key == SDLK_TAB) {
                 m_screen_mode =
                         (m_screen_mode == TraitScreenMode::pick_new)
                         ? TraitScreenMode::view_unavail
@@ -408,12 +388,9 @@ void PickTraitState::update()
                         input,
                         MenuInputMode::scrolling_and_letters);
 
-        switch (action)
-        {
-        case MenuAction::selected:
-        {
-                if (m_screen_mode == TraitScreenMode::pick_new)
-                {
+        switch (action) {
+        case MenuAction::selected: {
+                if (m_screen_mode == TraitScreenMode::pick_new) {
                         const Trait trait = m_traits_avail[browser.y()];
 
                         const std::string name =
@@ -424,8 +401,7 @@ void PickTraitState::update()
                         const bool is_character_creation =
                                 states::contains_state(StateId::pick_name);
 
-                        if (!is_character_creation)
-                        {
+                        if (!is_character_creation) {
                                 states::draw();
 
                                 const std::string title =
@@ -444,12 +420,10 @@ void PickTraitState::update()
                                 should_pick_trait = (choice == 0);
                         }
 
-                        if (should_pick_trait)
-                        {
+                        if (should_pick_trait) {
                                 player_bon::pick_trait(trait);
 
-                                if (!is_character_creation)
-                                {
+                                if (!is_character_creation) {
                                         game::add_history_event(
                                                 "Gained trait \"" +
                                                 name +
@@ -459,13 +433,10 @@ void PickTraitState::update()
                                 states::pop();
                         }
                 }
-        }
-        break;
+        } break;
 
-        case MenuAction::esc:
-        {
-                if (states::contains_state(StateId::pick_name))
-                {
+        case MenuAction::esc: {
+                if (states::contains_state(StateId::pick_name)) {
                         states::pop_until(StateId::main_menu);
                 }
         }
@@ -481,12 +452,10 @@ void PickTraitState::draw()
 
         std::string full_title;
 
-        if (m_screen_mode == TraitScreenMode::pick_new)
-        {
+        if (m_screen_mode == TraitScreenMode::pick_new) {
                 full_title = m_title + " [TAB] to view unavailable traits";
         }
-        else
-        {
+        else {
                 // Viewing unavailable traits
                 full_title =
                         "Currently unavailable traits "
@@ -508,13 +477,11 @@ void PickTraitState::draw()
 
         std::vector<Trait>* traits = nullptr;
 
-        if (m_screen_mode == TraitScreenMode::pick_new)
-        {
+        if (m_screen_mode == TraitScreenMode::pick_new) {
                 browser = &m_browser_traits_avail;
                 traits = &m_traits_avail;
         }
-        else
-        {
+        else {
                 // Viewing unavailable traits
                 browser = &m_browser_traits_unavail;
                 traits = &m_traits_unavail;
@@ -529,8 +496,7 @@ void PickTraitState::draw()
         int y = 0;
 
         // Traits
-        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i)
-        {
+        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
                 const auto trait = traits->at(i);
 
                 const bool is_idx_marked = (browser_y == i);
@@ -541,8 +507,7 @@ void PickTraitState::draw()
         }
 
         // Draw "more" labels
-        if (!browser->is_on_top_page())
-        {
+        if (!browser->is_on_top_page()) {
                 io::draw_text(
                         common_text::g_next_page_up_hint,
                         Panel::create_char_menu,
@@ -550,8 +515,7 @@ void PickTraitState::draw()
                         colors::light_white());
         }
 
-        if (!browser->is_on_btm_page())
-        {
+        if (!browser->is_on_btm_page()) {
                 io::draw_text(
                         common_text::g_next_page_down_hint,
                         Panel::create_char_menu,
@@ -569,8 +533,7 @@ void PickTraitState::draw()
                         descr,
                         panels::w(Panel::create_char_descr));
 
-        for (const std::string& str : formatted_descr)
-        {
+        for (const std::string& str : formatted_descr) {
                 io::draw_text(
                         str,
                         Panel::create_char_descr,
@@ -590,8 +553,7 @@ void PickTraitState::draw()
 
         y = y0_prereqs;
 
-        if (!prereq_data.traits.empty() || prereq_data.bg != Bg::END)
-        {
+        if (!prereq_data.traits.empty() || prereq_data.bg != Bg::END) {
                 int x = 0;
 
                 const std::string label = "Prerequisite(s):";
@@ -624,30 +586,24 @@ void PickTraitState::draw_trait_menu_item(
         Color color_key;
         Color color;
 
-        if (m_screen_mode == TraitScreenMode::pick_new)
-        {
-                if (is_marked)
-                {
+        if (m_screen_mode == TraitScreenMode::pick_new) {
+                if (is_marked) {
                         color_key = colors::menu_key_highlight();
                         color = colors::menu_highlight();
                 }
-                else
-                {
+                else {
                         // Not marked
                         color_key = colors::menu_key_dark();
                         color = colors::menu_dark();
                 }
         }
-        else
-        {
+        else {
                 // Viewing unavailable traits
-                if (is_marked)
-                {
+                if (is_marked) {
                         color_key = colors::menu_key_highlight();
                         color = colors::menu_highlight();
                 }
-                else
-                {
+                else {
                         // Not marked
                         color_key = colors::menu_key_dark();
                         color = colors::light_red();
@@ -677,8 +633,7 @@ void PickTraitState::draw_trait_prereq_info(
         const auto& clr_prereq_ok = colors::light_green();
         const auto& clr_prereq_not_ok = colors::light_red();
 
-        if (prereq_data.bg != Bg::END)
-        {
+        if (prereq_data.bg != Bg::END) {
                 const auto& color =
                         (player_bon::bg() == prereq_data.bg)
                         ? clr_prereq_ok
@@ -690,8 +645,7 @@ void PickTraitState::draw_trait_prereq_info(
                 prereq_titles.emplace_back(bg_title, color);
         }
 
-        for (const auto prereq_trait : prereq_data.traits)
-        {
+        for (const auto prereq_trait : prereq_data.traits) {
                 const bool is_picked =
                         player_bon::has_trait(prereq_trait);
 
@@ -710,8 +664,7 @@ void PickTraitState::draw_trait_prereq_info(
 
         for (size_t prereq_idx = 0;
              prereq_idx < nr_prereq_titles;
-             ++prereq_idx)
-        {
+             ++prereq_idx) {
                 const auto& prereq_title = prereq_titles[prereq_idx];
 
                 io::draw_text(
@@ -722,8 +675,7 @@ void PickTraitState::draw_trait_prereq_info(
 
                 x += prereq_title.str.length();
 
-                if (prereq_idx < (nr_prereq_titles - 1))
-                {
+                if (prereq_idx < (nr_prereq_titles - 1)) {
                         io::draw_text(
                                 ",",
                                 Panel::create_char_descr,
@@ -765,8 +717,7 @@ void RemoveTraitState::init_browser()
 
 void RemoveTraitState::update()
 {
-        if (config::is_bot_playing())
-        {
+        if (config::is_bot_playing()) {
                 states::pop();
 
                 return;
@@ -779,10 +730,8 @@ void RemoveTraitState::update()
                         input,
                         MenuInputMode::scrolling_and_letters);
 
-        switch (action)
-        {
-        case MenuAction::selected:
-        {
+        switch (action) {
+        case MenuAction::selected: {
                 const auto trait = m_traits_can_be_removed[m_browser.y()];
 
                 const auto name = player_bon::trait_title(trait);
@@ -805,8 +754,7 @@ void RemoveTraitState::update()
 
                 should_remove_trait = (choice == 0);
 
-                if (should_remove_trait)
-                {
+                if (should_remove_trait) {
                         player_bon::remove_trait(trait);
 
                         game::add_history_event(
@@ -816,8 +764,7 @@ void RemoveTraitState::update()
 
                         states::pop();
                 }
-        }
-        break;
+        } break;
 
         default:
                 break;
@@ -848,8 +795,7 @@ void RemoveTraitState::draw()
         int y = 0;
 
         // Traits
-        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i)
-        {
+        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
                 const auto trait = m_traits_can_be_removed[i];
 
                 const bool is_idx_marked = (browser_y == i);
@@ -860,8 +806,7 @@ void RemoveTraitState::draw()
         }
 
         // Draw "more" labels
-        if (!m_browser.is_on_top_page())
-        {
+        if (!m_browser.is_on_top_page()) {
                 io::draw_text(
                         common_text::g_next_page_up_hint,
                         Panel::create_char_menu,
@@ -869,8 +814,7 @@ void RemoveTraitState::draw()
                         colors::light_white());
         }
 
-        if (!m_browser.is_on_btm_page())
-        {
+        if (!m_browser.is_on_btm_page()) {
                 io::draw_text(
                         common_text::g_next_page_down_hint,
                         Panel::create_char_menu,
@@ -888,8 +832,7 @@ void RemoveTraitState::draw()
                         descr,
                         panels::w(Panel::create_char_descr));
 
-        for (const std::string& str : formatted_descr)
-        {
+        for (const std::string& str : formatted_descr) {
                 io::draw_text(
                         str,
                         Panel::create_char_descr,
@@ -915,13 +858,11 @@ void RemoveTraitState::draw_trait_menu_item(
         Color color_key;
         Color color;
 
-        if (is_marked)
-        {
+        if (is_marked) {
                 color_key = colors::menu_key_highlight();
                 color = colors::menu_highlight();
         }
-        else
-        {
+        else {
                 // Not marked
                 color_key = colors::menu_key_dark();
                 color = colors::menu_dark();
@@ -952,8 +893,7 @@ void EnterNameState::on_start()
 
 void EnterNameState::update()
 {
-        if (config::is_bot_playing())
-        {
+        if (config::is_bot_playing()) {
                 auto& d = *map::g_player->m_data;
 
                 d.name_a = d.name_the = "Bot";
@@ -965,20 +905,16 @@ void EnterNameState::update()
 
         const auto input = io::read_input();
 
-        if (input.key == SDLK_ESCAPE)
-        {
+        if (input.key == SDLK_ESCAPE) {
                 states::pop_until(StateId::main_menu);
                 return;
         }
 
-        if (input.key == SDLK_RETURN)
-        {
-                if (m_current_str.empty())
-                {
+        if (input.key == SDLK_RETURN) {
+                if (m_current_str.empty()) {
                         m_current_str = "Player";
                 }
-                else
-                {
+                else {
                         // Player has entered a string
                         config::set_default_player_name(m_current_str);
                 }
@@ -992,12 +928,10 @@ void EnterNameState::update()
                 return;
         }
 
-        if (m_current_str.size() < g_player_name_max_len)
-        {
+        if (m_current_str.size() < g_player_name_max_len) {
                 const bool is_space = input.key == SDLK_SPACE;
 
-                if (is_space)
-                {
+                if (is_space) {
                         m_current_str.push_back(' ');
 
                         return;
@@ -1008,18 +942,15 @@ void EnterNameState::update()
                         (input.key >= 'A' && input.key <= 'Z') ||
                         (input.key >= '0' && input.key <= '9');
 
-                if (is_valid_non_space_char)
-                {
+                if (is_valid_non_space_char) {
                         m_current_str.push_back(input.key);
 
                         return;
                 }
         }
 
-        if (!m_current_str.empty())
-        {
-                if (input.key == SDLK_BACKSPACE)
-                {
+        if (!m_current_str.empty()) {
+                if (input.key == SDLK_BACKSPACE) {
                         m_current_str.erase(m_current_str.end() - 1);
                 }
         }
@@ -1043,8 +974,7 @@ void EnterNameState::draw()
         std::string name_str = m_current_str;
 
         if ((m_current_str.size() < g_player_name_max_len) &&
-            ((io::graphics_cycle_nr(io::GraphicsCycle::fast) % 2) == 0))
-        {
+            ((io::graphics_cycle_nr(io::GraphicsCycle::fast) % 2) == 0)) {
                 name_str += "_";
         }
 

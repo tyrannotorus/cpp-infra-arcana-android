@@ -33,15 +33,13 @@ TEST_CASE("Test player acts twice compared to slow monster")
         // this it should always be player --> player --> monster.
         int expected_counter = 1;
 
-        for (int i = 0; i < 1000; ++i)
-        {
+        for (int i = 0; i < 1000; ++i) {
                 INFO("Iteration index: " + std::to_string(i));
                 INFO("Standard turn: " + std::to_string(game_time::turn_nr()));
 
                 std::string expected_name;
 
-                switch (expected_counter)
-                {
+                switch (expected_counter) {
                 case 0:
                 case 1:
                         expected_name = name_player;
@@ -54,8 +52,7 @@ TEST_CASE("Test player acts twice compared to slow monster")
 
                 ++expected_counter;
 
-                if (expected_counter == 3)
-                {
+                if (expected_counter == 3) {
                         expected_counter = 0;
                 }
 
@@ -79,8 +76,7 @@ TEST_CASE("Test standard turn incrementation with player only")
 
         map::g_player->m_data->name_a = name_player;
 
-        for (int i = 0; i < 1000; ++i)
-        {
+        for (int i = 0; i < 1000; ++i) {
                 INFO("Iteration index: " + std::to_string(i));
 
                 const int expected_turn_nr = i;
@@ -114,8 +110,7 @@ TEST_CASE("Test standard turn incrementation with player and monster")
 
         bool is_expected_player_is_current = true;
 
-        for (int i = 0; i < 1000; ++i)
-        {
+        for (int i = 0; i < 1000; ++i) {
                 INFO("Iteration index: " + std::to_string(i));
 
                 const int expected_turn_nr = (i / 2);

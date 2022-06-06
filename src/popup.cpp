@@ -77,22 +77,18 @@ static void draw_horizontal_line(const int line_w, const int line_y)
 
 static int find_key_str_len(const std::string& str)
 {
-        if (str.empty())
-        {
+        if (str.empty()) {
                 ASSERT(false);
 
                 return 0;
         }
 
-        if (str[0] != '(')
-        {
+        if (str[0] != '(') {
                 return 0;
         }
 
-        for (size_t i = 0; i < str.size(); ++i)
-        {
-                if (str[i] == ')')
-                {
+        for (size_t i = 0; i < str.size(); ++i) {
+                if (str[i] == ')') {
                         return (int)i + 1;
                 }
         }
@@ -198,27 +194,22 @@ PopupState::PopupState() = default;
 
 void PopupState::on_start()
 {
-        if (m_sfx != audio::SfxId::END)
-        {
+        if (m_sfx != audio::SfxId::END) {
                 audio::play(m_sfx);
         }
 
-        if (m_add_to_msg_history == AddToMsgHistory::yes)
-        {
-                if (!m_title.empty())
-                {
+        if (m_add_to_msg_history == AddToMsgHistory::yes) {
+                if (!m_title.empty()) {
                         msg_log::add_line_to_history(m_title);
                 }
 
-                if (!m_msg.empty())
-                {
+                if (!m_msg.empty()) {
                         const auto msg_lines =
                                 text_format::split(
                                         m_msg,
                                         io::g_min_nr_gui_cells_x - 2);
 
-                        for (const auto& line : msg_lines)
-                        {
+                        for (const auto& line : msg_lines) {
                                 msg_log::add_line_to_history(line);
                         }
                 }
@@ -279,8 +270,7 @@ void MsgPopupState::draw()
 
         draw_horizontal_line(horizontal_line_w, y);
 
-        if (!m_title.empty())
-        {
+        if (!m_title.empty()) {
                 io::draw_text_center(
                         " " + m_title + " ",
                         Panel::screen,
@@ -293,15 +283,13 @@ void MsgPopupState::draw()
 
         const bool show_msg_centered = msg_lines.size() == 1;
 
-        if (show_msg_centered)
-        {
+        if (show_msg_centered) {
                 // Centered one-liner message.
 
                 // NOTE: draw_text_center just takes a plain std::string -
                 // *FORMATTING NOT SUPPORTED!*
 
-                for (const std::string& line : msg_lines)
-                {
+                for (const std::string& line : msg_lines) {
                         ++y;
 
                         io::draw_text_center(
@@ -316,8 +304,7 @@ void MsgPopupState::draw()
 
                 y += 2;
         }
-        else
-        {
+        else {
                 // Multiline message, formatting supported here (draw_text takes
                 // a Text object).
 
@@ -352,8 +339,7 @@ void MsgPopupState::draw()
 
 void MsgPopupState::update()
 {
-        if (config::is_bot_playing())
-        {
+        if (config::is_bot_playing()) {
                 states::pop();
 
                 return;
@@ -361,8 +347,7 @@ void MsgPopupState::update()
 
         const auto input = io::read_input();
 
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_SPACE:
         case SDLK_ESCAPE:
         case SDLK_RETURN:
@@ -422,8 +407,7 @@ void MenuPopupState::draw()
 
         int horizontal_line_w = 0;
 
-        if (nr_msg_lines <= 1)
-        {
+        if (nr_msg_lines <= 1) {
                 const auto msg_line_w =
                         (nr_msg_lines == 0)
                         ? 0
@@ -444,8 +428,7 @@ void MenuPopupState::draw()
                 // ...but not wider than the maximum text width
                 horizontal_line_w = std::min(horizontal_line_w, text_max_w);
         }
-        else
-        {
+        else {
                 // More than one message line
                 horizontal_line_w = text_max_w;
         }
@@ -456,8 +439,7 @@ void MenuPopupState::draw()
 
         draw_horizontal_line(horizontal_line_w, y);
 
-        if (!m_title.empty())
-        {
+        if (!m_title.empty()) {
                 io::draw_text_center(
                         " " + m_title + " ",
                         Panel::screen,
@@ -472,10 +454,8 @@ void MenuPopupState::draw()
 
         const bool show_msg_centered = (msg_lines.size() == 1);
 
-        for (const std::string& line : msg_lines)
-        {
-                if (show_msg_centered)
-                {
+        for (const std::string& line : msg_lines) {
+                if (show_msg_centered) {
                         io::draw_text_center(
                                 line,
                                 Panel::screen,
@@ -485,8 +465,7 @@ void MenuPopupState::draw()
                                 colors::black(),
                                 true);  // Allow pixel-level adjustmet
                 }
-                else
-                {
+                else {
                         // Draw the message with left alignment
                         const auto text_x0 = get_x0(text_max_w);
 
@@ -501,8 +480,7 @@ void MenuPopupState::draw()
                 ++y;
         }
 
-        if (!msg_lines.empty() || !m_title.empty())
-        {
+        if (!msg_lines.empty() || !m_title.empty()) {
                 ++y;
         }
 
@@ -510,16 +488,14 @@ void MenuPopupState::draw()
                 panels::center_x(Panel::screen) -
                 (choice_lines_max_w / 2);
 
-        for (size_t i = 0; i < m_menu_choices.size(); ++i)
-        {
+        for (size_t i = 0; i < m_menu_choices.size(); ++i) {
                 const auto choice_str = m_menu_choices[i];
 
                 const int key_str_len = find_key_str_len(choice_str);
 
                 int draw_x_pos = choice_x_pos;
 
-                if (key_str_len > 0)
-                {
+                if (key_str_len > 0) {
                         const auto key_str = choice_str.substr(0, key_str_len);
 
                         const auto key_color =
@@ -566,8 +542,7 @@ void MenuPopupState::draw()
 
 void MenuPopupState::update()
 {
-        if (config::is_bot_playing())
-        {
+        if (config::is_bot_playing()) {
                 *m_menu_choice_result = 0;
 
                 states::pop();
@@ -582,8 +557,7 @@ void MenuPopupState::update()
                         input,
                         MenuInputMode::scrolling_and_letters);
 
-        switch (action)
-        {
+        switch (action) {
         case MenuAction::moved:
                 break;
 
@@ -635,8 +609,7 @@ void NumberQueryPopupState::update_input_str()
                 : "";
 
         if (m_has_player_entered_value &&
-            ((io::graphics_cycle_nr(io::GraphicsCycle::fast) % 2) == 0))
-        {
+            ((io::graphics_cycle_nr(io::GraphicsCycle::fast) % 2) == 0)) {
                 m_input_str += "_";
         }
 }
@@ -688,8 +661,7 @@ void NumberQueryPopupState::draw()
 
         draw_horizontal_line(horizontal_line_w, y);
 
-        if (!m_title.empty())
-        {
+        if (!m_title.empty()) {
                 io::draw_text_center(
                         " " + m_title + " ",
                         Panel::screen,
@@ -702,15 +674,13 @@ void NumberQueryPopupState::draw()
 
         const bool show_msg_centered = msg_lines.size() == 1;
 
-        if (show_msg_centered)
-        {
+        if (show_msg_centered) {
                 // Centered one-liner message.
 
                 // NOTE: draw_text_center just takes a plain std::string -
                 // *FORMATTING NOT SUPPORTED!*
 
-                for (const std::string& line : msg_lines)
-                {
+                for (const std::string& line : msg_lines) {
                         ++y;
 
                         io::draw_text_center(
@@ -725,8 +695,7 @@ void NumberQueryPopupState::draw()
 
                 y += 2;
         }
-        else
-        {
+        else {
                 // Multiline message, formatting supported here (draw_text takes
                 // a Text object).
 
@@ -753,12 +722,10 @@ void NumberQueryPopupState::draw()
         Color fg_color;
         Color bg_color;
 
-        if (m_has_player_entered_value)
-        {
+        if (m_has_player_entered_value) {
                 fg_color = colors::light_white();
         }
-        else
-        {
+        else {
                 fg_color = colors::gray();
         }
 
@@ -793,8 +760,7 @@ void NumberQueryPopupState::update()
         auto input = io::read_input();
 
         // Convert keypad keys to numbers.
-        switch (input.key)
-        {
+        switch (input.key) {
         case SDLK_KP_1:
                 input.key = '1';
                 break;
@@ -829,8 +795,7 @@ void NumberQueryPopupState::update()
                 break;
         }
 
-        if (input.key == SDLK_RETURN)
-        {
+        if (input.key == SDLK_RETURN) {
                 // Confirm entered.
                 *m_number_result =
                         std::clamp(
@@ -843,8 +808,7 @@ void NumberQueryPopupState::update()
                 return;
         }
 
-        if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE))
-        {
+        if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE)) {
                 // Cancel entered.
                 *m_number_result =
                         m_config.cancel_returns_default
@@ -856,8 +820,7 @@ void NumberQueryPopupState::update()
                 return;
         }
 
-        if (input.key == SDLK_BACKSPACE)
-        {
+        if (input.key == SDLK_BACKSPACE) {
                 // Backspace entered.
                 m_has_player_entered_value = true;
 
@@ -866,12 +829,10 @@ void NumberQueryPopupState::update()
                 return;
         }
 
-        if ((input.key >= '0') && (input.key <= '9'))
-        {
+        if ((input.key >= '0') && (input.key <= '9')) {
                 // Number entered.
 
-                if (!m_has_player_entered_value)
-                {
+                if (!m_has_player_entered_value) {
                         // Player has not yet modified the default value, clear
                         // the current value.
                         *m_number_result = 0;
@@ -884,8 +845,7 @@ void NumberQueryPopupState::update()
 
                 const int max_nr_digits = calc_max_nr_digits();
 
-                if (current_num_digits >= max_nr_digits)
-                {
+                if (current_num_digits >= max_nr_digits) {
                         // Not possible to add more digits.
                         return;
                 }

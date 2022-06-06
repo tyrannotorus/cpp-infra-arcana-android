@@ -49,8 +49,7 @@ static Array2<std::vector<actor::Actor*>> get_actor_array()
 {
         Array2<std::vector<actor::Actor*>> a(map::dims());
 
-        for (auto* actor : game_time::g_actors)
-        {
+        for (auto* actor : game_time::g_actors) {
                 const auto& p = actor->m_pos;
 
                 a.at(p).push_back(actor);
@@ -72,15 +71,13 @@ Device::Device(item::ItemData* const item_data) :
 
 void Device::identify(const Verbose verbose)
 {
-        if (m_data->is_identified)
-        {
+        if (m_data->is_identified) {
                 return;
         }
 
         m_data->is_identified = true;
 
-        if (verbose == Verbose::yes)
-        {
+        if (verbose == Verbose::yes) {
                 const std::string name_after =
                         name(
                                 ItemNameType::a,
@@ -115,16 +112,14 @@ void StrangeDevice::load_hook()
 
 std::vector<std::string> StrangeDevice::descr_hook() const
 {
-        if (m_data->is_identified)
-        {
+        if (m_data->is_identified) {
                 const std::string descr = descr_identified();
 
                 std::vector<std::string> out = {descr};
 
                 std::string cond_str = "It seems ";
 
-                switch (condition)
-                {
+                switch (condition) {
                 case Condition::fine:
                         cond_str += "to be in fine condition.";
                         break;
@@ -142,8 +137,7 @@ std::vector<std::string> StrangeDevice::descr_hook() const
 
                 return out;
         }
-        else
-        {
+        else {
                 // Not identified
                 return m_data->base_descr;
         }
@@ -153,8 +147,7 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
 {
         ASSERT(actor);
 
-        if (!m_data->is_identified)
-        {
+        if (!m_data->is_identified) {
                 msg_log::add(
                         "This device is completely alien to me, I could never "
                         "understand it through normal means.");
@@ -170,54 +163,42 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
         int max = 8;
 
         if (actor::is_player(actor) &&
-            player_bon::has_trait(Trait::elec_incl))
-        {
+            player_bon::has_trait(Trait::elec_incl)) {
                 max += 2;
         }
 
         const int rnd = rnd::range(1, max);
 
-        switch (condition)
-        {
-        case Condition::breaking:
-        {
+        switch (condition) {
+        case Condition::breaking: {
                 should_warn = (rnd == 7) || (rnd == 8);
                 should_hurt_user = (rnd == 5) || (rnd == 6);
                 should_fail = (rnd == 3) || (rnd == 4);
                 should_degrade = (rnd <= 2);
-        }
-        break;
+        } break;
 
-        case Condition::shoddy:
-        {
+        case Condition::shoddy: {
                 should_warn = (rnd == 5) || (rnd == 6);
                 should_hurt_user = (rnd == 4);
                 should_fail = (rnd == 3);
                 should_degrade = (rnd <= 2);
-        }
-        break;
+        } break;
 
-        case Condition::fine:
-        {
+        case Condition::fine: {
                 should_warn = (rnd == 5) || (rnd == 6);
                 should_degrade = (rnd <= 4);
-        }
-        break;
+        } break;
         }
 
-        if (!map::g_player->is_alive())
-        {
+        if (!map::g_player->is_alive()) {
                 return ConsumeItem::no;
         }
 
-        if (!should_fail)
-        {
-                if (should_degrade)
-                {
+        if (!should_fail) {
+                if (should_degrade) {
                         audio::play(audio::SfxId::strange_device_damaged);
                 }
-                else
-                {
+                else {
                         audio::play(audio::SfxId::strange_device_activate);
                 }
         }
@@ -236,8 +217,7 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
 
         ConsumeItem consumed = ConsumeItem::no;
 
-        if (should_hurt_user)
-        {
+        if (should_hurt_user) {
                 msg_log::add(
                         "It hits me with a jolt of electricity!",
                         colors::msg_bad());
@@ -245,27 +225,21 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
                 actor::hit(*actor, rnd::range(1, 3), DmgType::electric);
         }
 
-        if (should_fail)
-        {
+        if (should_fail) {
                 msg_log::add("It suddenly stops.");
         }
-        else
-        {
+        else {
                 consumed = run_effect();
         }
 
-        if (consumed == ConsumeItem::no)
-        {
-                if (should_degrade)
-                {
-                        if (condition == Condition::breaking)
-                        {
+        if (consumed == ConsumeItem::no) {
+                if (should_degrade) {
+                        if (condition == Condition::breaking) {
                                 msg_log::add("The " + item_name + " breaks!");
 
                                 consumed = ConsumeItem::yes;
                         }
-                        else
-                        {
+                        else {
                                 msg_log::add(
                                         "The " +
                                         item_name +
@@ -276,8 +250,7 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
                         }
                 }
 
-                if (should_warn)
-                {
+                if (should_warn) {
                         msg_log::add("The " + item_name + " hums ominously.");
                 }
         }
@@ -291,10 +264,8 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
 
 std::string StrangeDevice::name_info_str() const
 {
-        if (m_data->is_identified)
-        {
-                switch (condition)
-                {
+        if (m_data->is_identified) {
+                switch (condition) {
                 case Condition::breaking:
                         return "(breaking)";
 
@@ -316,8 +287,7 @@ ConsumeItem Blaster::run_effect()
 {
         const auto tgt_bucket = actor::seen_foes(*map::g_player);
 
-        if (tgt_bucket.empty())
-        {
+        if (tgt_bucket.empty()) {
                 msg_log::add("It seems to peruse area.");
 
                 return ConsumeItem::no;
@@ -361,8 +331,7 @@ ConsumeItem Rejuvenator::run_effect()
                 PropId::hp_sap,
                 PropId::wound};
 
-        for (PropId prop_id : props_can_heal)
-        {
+        for (PropId prop_id : props_can_heal) {
                 map::g_player->m_properties.end_prop(prop_id);
         }
 
@@ -388,15 +357,12 @@ ConsumeItem Translocator::run_effect()
 {
         const auto seen_foes = actor::seen_foes(*map::g_player);
 
-        if (seen_foes.empty())
-        {
+        if (seen_foes.empty()) {
                 msg_log::add("It seems to peruse area.");
         }
-        else
-        {
+        else {
                 // Seen targets are available
-                for (auto* actor : seen_foes)
-                {
+                for (auto* actor : seen_foes) {
                         msg_log::add(
                                 text_format::first_to_upper(actor->name_the()) +
                                 " is teleported.");
@@ -443,10 +409,8 @@ ConsumeItem Deafening::run_effect()
 {
         msg_log::add("The device emits a piercing resonance.");
 
-        for (auto* const actor : game_time::g_actors)
-        {
-                if (actor::is_player(actor))
-                {
+        for (auto* const actor : game_time::g_actors) {
+                if (actor::is_player(actor)) {
                         continue;
                 }
 
@@ -486,23 +450,19 @@ ConsumeItem ForceField::run_effect()
         const auto specific_allowed_terrains_parser =
                 map_parsers::IsAnyOfTerrains(specific_allowed_terrains);
 
-        for (const auto& d : dir_utils::g_dir_list)
-        {
+        for (const auto& d : dir_utils::g_dir_list) {
                 const auto p = map::g_player->m_pos + d;
 
                 if (blocked_parser.run(p) &&
-                    !specific_allowed_terrains_parser.run(p))
-                {
+                    !specific_allowed_terrains_parser.run(p)) {
                         continue;
                 }
 
                 auto actors_here = actors.at(p);
 
                 // Destroy corpses in cells with force fields
-                for (auto* const actor : actors_here)
-                {
-                        if (actor->is_corpse())
-                        {
+                for (auto* const actor : actors_here) {
+                        if (actor->is_corpse()) {
                                 actor->m_state = ActorState::destroyed;
 
                                 terrain::make_blood(p);
@@ -551,8 +511,7 @@ std::string Lantern::name_info_str() const
 {
         std::string inf = "(" + std::to_string(m_nr_turns_left) + " turns";
 
-        if (m_is_activated)
-        {
+        if (m_is_activated) {
                 inf += ", Lit";
         }
 
@@ -589,10 +548,8 @@ void Lantern::on_pickup_hook()
         ASSERT(m_actor_carrying);
 
         // Check for existing electric lantern in inventory
-        for (Item* const other : m_actor_carrying->m_inv.m_backpack)
-        {
-                if ((other == this) || (other->id() != id()))
-                {
+        for (Item* const other : m_actor_carrying->m_inv.m_backpack) {
+                if ((other == this) || (other->id() != id())) {
                         continue;
                 }
 
@@ -619,8 +576,7 @@ void Lantern::toggle()
         m_is_activated = !m_is_activated;
 
         // Discourage flipping on and off frequently
-        if (m_is_activated && (m_nr_turns_left >= 4))
-        {
+        if (m_is_activated && (m_nr_turns_left >= 4)) {
                 m_nr_turns_left -= 2;
         }
 
@@ -631,19 +587,16 @@ void Lantern::on_std_turn_in_inv_hook(const InvType inv_type)
 {
         (void)inv_type;
 
-        if (!m_is_activated)
-        {
+        if (!m_is_activated) {
                 return;
         }
 
         if (!(player_bon::has_trait(Trait::elec_incl) &&
-              ((game_time::turn_nr() % 2) == 0)))
-        {
+              ((game_time::turn_nr() % 2) == 0))) {
                 --m_nr_turns_left;
         }
 
-        if (m_nr_turns_left <= 0)
-        {
+        if (m_nr_turns_left <= 0) {
                 msg_log::add(
                         "My Electric Lantern has expired.",
                         colors::msg_note(),

@@ -125,14 +125,11 @@ static void write_file()
         // Current file content is discarded
         file.open(paths::save_file_path(), std::ios::trunc);
 
-        if (file.is_open())
-        {
-                for (size_t i = 0; i < s_lines.size(); ++i)
-                {
+        if (file.is_open()) {
+                for (size_t i = 0; i < s_lines.size(); ++i) {
                         file << s_lines[i];
 
-                        if (i != s_lines.size() - 1)
-                        {
+                        if (i != s_lines.size() - 1) {
                                 file << std::endl;
                         }
                 }
@@ -145,19 +142,16 @@ static void read_file()
 {
         std::ifstream file(paths::save_file_path());
 
-        if (file.is_open())
-        {
+        if (file.is_open()) {
                 std::string current_line;
 
-                while (getline(file, current_line))
-                {
+                while (getline(file, current_line)) {
                         s_lines.push_back(current_line);
                 }
 
                 file.close();
         }
-        else
-        {
+        else {
                 // Could not open save file
                 ASSERT(false && "Failed to open save file");
         }
@@ -227,8 +221,7 @@ bool is_save_available()
 {
         std::ifstream file(paths::save_file_path());
 
-        if (file.good())
-        {
+        if (file.good()) {
                 const bool is_empty =
                         file.peek() == std::ifstream::traits_type::eof();
 
@@ -236,8 +229,7 @@ bool is_save_available()
 
                 return !is_empty;
         }
-        else
-        {
+        else {
                 // Failed to open file
                 file.close();
 

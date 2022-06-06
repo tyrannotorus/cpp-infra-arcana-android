@@ -93,8 +93,7 @@ static std::string make_wpn_stats_str(const item::Item& wpn)
 
         std::string wpn_str;
 
-        if (!plus_str.empty())
-        {
+        if (!plus_str.empty()) {
                 text_format::append_with_space(wpn_str, "(" + plus_str + ")");
         }
 
@@ -118,8 +117,7 @@ static void draw_wielded_wpn(const int y, const Panel panel)
 
         const auto* item = map::g_player->m_inv.item_in_slot(SlotId::wpn);
 
-        if (!item)
-        {
+        if (!item) {
                 item = &map::g_player->unarmed_wpn();
         }
 
@@ -129,12 +127,10 @@ static void draw_wielded_wpn(const int y, const Panel panel)
 
         if (item->data().ranged.is_ranged_wpn &&
             !item->data().ranged.has_infinite_ammo &&
-            (item->data().ranged.max_ammo > 0))
-        {
+            (item->data().ranged.max_ammo > 0)) {
                 const auto* const wpn = static_cast<const item::Wpn*>(item);
 
-                if (wpn->m_ammo_loaded == 0)
-                {
+                if (wpn->m_ammo_loaded == 0) {
                         color = colors::yellow();
                 }
         }
@@ -160,8 +156,7 @@ static void draw_alt_wpn(const int y, const Panel panel)
 
         const auto* item = map::g_player->m_inv.item_in_slot(SlotId::wpn_alt);
 
-        if (!item)
-        {
+        if (!item) {
                 item = &map::g_player->unarmed_wpn();
         }
 
@@ -171,12 +166,10 @@ static void draw_alt_wpn(const int y, const Panel panel)
 
         if (item->data().ranged.is_ranged_wpn &&
             !item->data().ranged.has_infinite_ammo &&
-            (item->data().ranged.max_ammo > 0))
-        {
+            (item->data().ranged.max_ammo > 0)) {
                 const auto* const wpn = static_cast<const item::Wpn*>(item);
 
-                if (wpn->m_ammo_loaded == 0)
-                {
+                if (wpn->m_ammo_loaded == 0) {
                         color = colors::yellow();
                 }
         }
@@ -401,14 +394,12 @@ static void draw_class(const int y, const Panel panel)
 
         const auto bg = player_bon::bg();
 
-        if (bg == Bg::occultist)
-        {
+        if (bg == Bg::occultist) {
                 const auto domain = player_bon::occultist_domain();
 
                 bg_title = player_bon::occultist_profession_title(domain);
         }
-        else
-        {
+        else {
                 bg_title = player_bon::bg_title(bg);
         }
 
@@ -446,8 +437,7 @@ static void draw_char_lvl_and_xp(const int y, const Panel panel)
 
         std::string xp_str;
 
-        if (!is_max_lvl)
-        {
+        if (!is_max_lvl) {
                 xp_str = " (" + std::to_string(xp_pct) + "%)";
         }
 
@@ -463,8 +453,7 @@ static void draw_char_lvl_and_xp(const int y, const Panel panel)
                 info_color(),
                 io::DrawBg::no);
 
-        if (!is_max_lvl)
-        {
+        if (!is_max_lvl) {
                 io::draw_text(
                         xp_str,
                         panel,
@@ -515,13 +504,11 @@ static void draw_lantern(const int y, const Panel panel)
 
         std::string lantern_str = "None";
 
-        if (item)
-        {
+        if (item) {
                 const auto* const lantern =
                         static_cast<const device::Lantern*>(item);
 
-                if (lantern->is_activated())
-                {
+                if (lantern->is_activated()) {
                         color = colors::yellow();
                 }
 
@@ -550,8 +537,7 @@ static void draw_med_suppl(const int y, const Panel panel)
         const auto* const item =
                 map::g_player->m_inv.item_in_backpack(item::Id::medical_bag);
 
-        if (item)
-        {
+        if (item) {
                 const auto* const medical_bag =
                         static_cast<const item::MedicalBag*>(item);
 
@@ -572,8 +558,7 @@ static void draw_properties(int y, const Panel panel)
 
         auto property_names = properties.property_names_short();
 
-        if (map::g_dark.at(map::g_player->m_pos))
-        {
+        if (map::g_dark.at(map::g_player->m_pos)) {
                 const ColoredString dark = {
                         "DARK AREA",
                         colors::gray()};
@@ -581,10 +566,8 @@ static void draw_properties(int y, const Panel panel)
                 property_names.push_back(dark);
         }
 
-        for (const auto& name : property_names)
-        {
-                if (y == panels::y1(panel))
-                {
+        for (const auto& name : property_names) {
+                if (y == panels::y1(panel)) {
                         break;
                 }
 
@@ -654,8 +637,7 @@ void draw()
         // ++p.x;
         // io::draw_text(turn_nr_str, Panel::screen, p, colors::white());
 
-        if (config::is_gj_mode())
-        {
+        if (config::is_gj_mode()) {
                 draw_text_right(
                         "GJ MODE ENABLED",
                         Panel::screen,

@@ -27,8 +27,7 @@ static const std::string s_title_prefix = "Hint: ";
 
 static std::pair<std::string, std::string> id_to_text(const hints::Id id)
 {
-        switch (id)
-        {
+        switch (id) {
         case hints::Id::altars:
                 return {
                         "Altars",
@@ -101,8 +100,7 @@ static bool should_display_hint(const hints::Id id)
 {
         const auto hints_mode = config::hints_mode();
 
-        switch (hints_mode)
-        {
+        switch (hints_mode) {
         case HintsMode::once_per_game:
                 return !s_hints_displayed[(size_t)id];
 
@@ -133,24 +131,21 @@ void init()
 
 void save()
 {
-        for (size_t i = 0; i < (size_t)Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Id::END; ++i) {
                 saving::put_bool(s_hints_displayed[i]);
         }
 }
 
 void load()
 {
-        for (size_t i = 0; i < (size_t)Id::END; ++i)
-        {
+        for (size_t i = 0; i < (size_t)Id::END; ++i) {
                 s_hints_displayed[i] = saving::get_bool();
         }
 }
 
 void display(const Id id)
 {
-        if (!should_display_hint(id))
-        {
+        if (!should_display_hint(id)) {
                 return;
         }
 
@@ -164,8 +159,7 @@ void display(const Id id)
 
         const auto text = id_to_text(id);
 
-        if (text.second.empty())
-        {
+        if (text.second.empty()) {
                 ASSERT(false);
 
                 return;

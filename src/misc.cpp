@@ -26,12 +26,9 @@ std::vector<P> to_vec(
         // Reserve space for worst case of push-backs
         result.reserve(area_to_parse.area());
 
-        for (int x = area_to_parse.p0.x; x <= area_to_parse.p1.x; ++x)
-        {
-                for (int y = area_to_parse.p0.y; y <= area_to_parse.p1.y; ++y)
-                {
-                        if (a.at(x, y) == value_to_store)
-                        {
+        for (int x = area_to_parse.p0.x; x <= area_to_parse.p1.x; ++x) {
+                for (int y = area_to_parse.p0.y; y <= area_to_parse.p1.y; ++y) {
+                        if (a.at(x, y) == value_to_store) {
                                 result.emplace_back(P(x, y));
                         }
                 }
@@ -54,16 +51,14 @@ bool is_area_inside(
         const R& outer,
         const bool count_equal_as_inside)
 {
-        if (count_equal_as_inside)
-        {
+        if (count_equal_as_inside) {
                 return (
                         inner.p0.x >= outer.p0.x &&
                         inner.p1.x <= outer.p1.x &&
                         inner.p0.y >= outer.p0.y &&
                         inner.p1.y <= outer.p1.y);
         }
-        else
-        {
+        else {
                 return (
                         inner.p0.x > outer.p0.x &&
                         inner.p1.x < outer.p1.x &&
@@ -93,12 +88,10 @@ P closest_pos(const P& p, const std::vector<P>& positions)
 
         P closest_pos;
 
-        for (P p_cmp : positions)
-        {
+        for (P p_cmp : positions) {
                 const int dist = king_dist(p, p_cmp);
 
-                if (dist < dist_to_nearest)
-                {
+                if (dist < dist_to_nearest) {
                         dist_to_nearest = dist;
 
                         closest_pos = p_cmp;
@@ -113,12 +106,10 @@ bool is_pos_adj(const P& pos1, const P& pos2, const bool count_same_cell_as_adj)
         if (pos1.x < pos2.x - 1 ||
             pos1.x > pos2.x + 1 ||
             pos1.y < pos2.y - 1 ||
-            pos1.y > pos2.y + 1)
-        {
+            pos1.y > pos2.y + 1) {
                 return false;
         }
-        else if (pos1.x == pos2.x && pos1.y == pos2.y)
-        {
+        else if (pos1.x == pos2.x && pos1.y == pos2.y) {
                 return count_same_cell_as_adj;
         }
 

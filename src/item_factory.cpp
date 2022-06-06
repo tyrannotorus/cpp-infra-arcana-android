@@ -65,17 +65,14 @@ static void randomize_firearm_loaded_ammo(item::Wpn& wpn)
 {
         const auto& d = wpn.data();
 
-        if (wpn.data().ranged.max_ammo == 1)
-        {
+        if (wpn.data().ranged.max_ammo == 1) {
                 wpn.m_ammo_loaded = rnd::coin_toss() ? 1 : 0;
         }
-        else
-        {
+        else {
                 // Weapon ammo capacity > 1
                 const int ammo_cap = wpn.data().ranged.max_ammo;
 
-                if (d.ranged.is_machine_gun)
-                {
+                if (d.ranged.is_machine_gun) {
                         // Number of machine gun bullets loaded needs to
                         // be a multiple of the number of projectiles
                         // fired in each burst
@@ -90,8 +87,7 @@ static void randomize_firearm_loaded_ammo(item::Wpn& wpn)
                                 rnd::range(min_scaled, cap_scaled) *
                                 g_nr_mg_projectiles;
                 }
-                else
-                {
+                else {
                         // Not machinegun
                         wpn.m_ammo_loaded = rnd::range(ammo_cap / 4, ammo_cap);
                 }
@@ -122,8 +118,7 @@ Item* make(const Id item_id, const int nr_items)
         // Sanity check
         ASSERT(d->id == item_id);
 
-        switch (item_id)
-        {
+        switch (item_id) {
         case Id::trapez:
                 r = new Trapez(d);
                 break;
@@ -462,15 +457,13 @@ Item* make(const Id item_id, const int nr_items)
                 break;
         }
 
-        if (!r)
-        {
+        if (!r) {
                 return nullptr;
         }
 
         // Sanity check number of items (non-stackable items should never be set
         // to anything other than one item)
-        if (!r->data().is_stackable && (nr_items != 1))
-        {
+        if (!r->data().is_stackable && (nr_items != 1)) {
                 TRACE << "Specified number of items ("
                       << nr_items
                       << ") != 1 for "
@@ -484,8 +477,7 @@ Item* make(const Id item_id, const int nr_items)
 
         r->m_nr_items = nr_items;
 
-        if (d->is_unique)
-        {
+        if (d->is_unique) {
                 d->allow_spawn = false;
         }
 
@@ -500,42 +492,35 @@ void randomize_item_properties(Item& item)
                 (d.type != ItemType::melee_wpn_intr) &&
                 (d.type != ItemType::ranged_wpn_intr));
 
-        if (should_randomize_weapon_dmg(item))
-        {
+        if (should_randomize_weapon_dmg(item)) {
                 randomize_wpn_dmg(item);
         }
 
-        if (d.ranged.is_ranged_wpn && !d.ranged.has_infinite_ammo)
-        {
+        if (d.ranged.is_ranged_wpn && !d.ranged.has_infinite_ammo) {
                 auto& wpn = static_cast<Wpn&>(item);
                 randomize_firearm_loaded_ammo(wpn);
         }
 
-        if (d.is_stackable)
-        {
+        if (d.is_stackable) {
                 item.m_nr_items = rnd::range(1, d.max_stack_at_spawn);
         }
 
-        if (d.id == Id::medical_bag)
-        {
+        if (d.id == Id::medical_bag) {
                 auto& medbag = static_cast<MedicalBag&>(item);
                 randomize_medical_supplies(medbag);
         }
 
-        if (d.id == Id::lantern)
-        {
+        if (d.id == Id::lantern) {
                 auto& lantern = static_cast<device::Lantern&>(item);
                 randomize_lantern_duration(lantern);
         }
 
         const int cursed_one_in_n = 3;
 
-        if (d.allow_cursed && rnd::one_in(cursed_one_in_n))
-        {
+        if (d.allow_cursed && rnd::one_in(cursed_one_in_n)) {
                 auto curse = item_curse::try_make_random_free_curse(item);
 
-                if (curse.id() != item_curse::Id::END)
-                {
+                if (curse.id() != item_curse::Id::END) {
                         item.set_curse(std::move(curse));
                 }
         }
