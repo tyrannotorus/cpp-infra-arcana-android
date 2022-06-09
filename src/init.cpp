@@ -52,9 +52,10 @@ void init_io()
 {
         TRACE_FUNC_BEGIN;
 
+        io::init_sdl();
         config::init();
         colors::init();
-        io::init();
+        io::init_other();
 
         io::clear_screen();
 
@@ -79,7 +80,8 @@ void cleanup_io()
 
         audio::cleanup();
         query::cleanup();
-        io::cleanup();
+        io::cleanup_other();
+        io::cleanup_sdl();
 
         TRACE_FUNC_END;
 }

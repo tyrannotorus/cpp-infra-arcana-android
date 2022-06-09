@@ -116,7 +116,7 @@ void init(const P& max_gui_dims)
 
         finalize_screen_dims();
 
-        constexpr int create_char_tot_w = io::g_min_nr_gui_cells_x - 2;
+        constexpr int create_char_tot_w = 78;
 
         constexpr int create_char_menu_w = 26;
 
@@ -171,7 +171,7 @@ void init(const P& max_gui_dims)
                 max_gui_dims.x - 2,
                 max_gui_dims.y - 2);
 
-        constexpr int info_screen_w = io::g_min_nr_gui_cells_x - 2;
+        constexpr int info_screen_w = 78;
 
         const int info_screen_x0 =
                 screen_center_x - ((info_screen_w / 2) - 1);

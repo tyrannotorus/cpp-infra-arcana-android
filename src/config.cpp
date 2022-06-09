@@ -192,14 +192,10 @@ static void set_default_variables()
 
         update_render_dims();
 
-        const int default_nr_gui_cells_x = 90;
-        const int default_nr_gui_cells_y = 32;
+        const P native_res = io::get_native_resolution();
 
-        static_assert(default_nr_gui_cells_x >= io::g_min_nr_gui_cells_x);
-        static_assert(default_nr_gui_cells_y >= io::g_min_nr_gui_cells_y);
-
-        s_window_px_w = s_gui_cell_px_w * default_nr_gui_cells_x;
-        s_window_px_h = s_gui_cell_px_h * default_nr_gui_cells_y;
+        s_window_px_w = native_res.x;
+        s_window_px_h = native_res.y;
 
 #ifdef NDEBUG
         s_master_volume_pct_option = s_master_volume_pct_adjusted = 100;
@@ -343,7 +339,7 @@ static void player_sets_option(
                 s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
                 update_render_dims();
-                io::init();
+                io::init_other();
         } break;
 
         case 6: {
@@ -386,7 +382,7 @@ static void player_sets_option(
                 s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
                 update_render_dims();
-                io::init();
+                io::init_other();
         } break;
 
         case 7: {
@@ -585,7 +581,7 @@ static void player_sets_option(
                 if (direction == OptionToggleDirecton::enter) {
                         set_default_variables();
                         update_render_dims();
-                        io::init();
+                        io::init_other();
                         audio::init();
                         states::draw();
                         io::update_screen();

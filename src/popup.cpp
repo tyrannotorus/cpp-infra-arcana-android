@@ -51,7 +51,7 @@ static int get_title_y(const int text_h)
 
 static int max_msg_w()
 {
-        return io::g_min_nr_gui_cells_x - 6;
+        return 74;
 }
 
 static void draw_horizontal_line(const int line_w, const int line_y)
@@ -207,7 +207,7 @@ void PopupState::on_start()
                         const auto msg_lines =
                                 text_format::split(
                                         m_msg,
-                                        io::g_min_nr_gui_cells_x - 2);
+                                        78);
 
                         for (const auto& line : msg_lines) {
                                 msg_log::add_line_to_history(line);

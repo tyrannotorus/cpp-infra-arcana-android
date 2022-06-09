@@ -82,43 +82,41 @@ static bool should_put_contour_at(
 {
         // Only allow drawing a contour at pixels with the same color as the
         // background color parameter.
-        {
-                const auto color =
-                        io::read_px_on_surface(
-                                surface,
-                                surface_px_pos);
+        const auto color =
+                io::read_px_on_surface(
+                        surface,
+                        surface_px_pos);
 
-                if (color != bg_color) {
+        if (color != bg_color) {
 #ifndef NDEBUG
-                        if (color != Color(255, 255, 255)) {
-                                TRACE
-                                        << "Found color other than "
-                                           "background color or full white: "
-                                        << (int)color.r()
-                                        << ","
-                                        << (int)color.g()
-                                        << ","
-                                        << (int)color.b()
-                                        << " - at position: "
-                                        << surface_px_pos.x
-                                        << "x"
-                                        << surface_px_pos.y
-                                        << std::endl
-                                        << "(Background color is: "
-                                        << (int)bg_color.r()
-                                        << ","
-                                        << (int)bg_color.g()
-                                        << ","
-                                        << (int)bg_color.b()
-                                        << ")"
-                                        << std::endl;
+                if ((color.r() != color.g()) ||
+                    (color.r() != color.b())) {
+                        TRACE
+                                << "Found color other than grayscale color: "
+                                << (int)color.r()
+                                << ","
+                                << (int)color.g()
+                                << ","
+                                << (int)color.b()
+                                << " - at position: "
+                                << surface_px_pos.x
+                                << "x"
+                                << surface_px_pos.y
+                                << std::endl
+                                << "(Background color is: "
+                                << (int)bg_color.r()
+                                << ","
+                                << (int)bg_color.g()
+                                << ","
+                                << (int)bg_color.b()
+                                << ")"
+                                << std::endl;
 
-                                PANIC;
-                        }
+                        PANIC;
+                }
 #endif  // NDEBUG
 
-                        return false;
-                }
+                return false;
         }
 
         // Draw a contour here if it has a neighbour with different color than
@@ -271,81 +269,6 @@ static SDL_Renderer* create_renderer()
         return renderer;
 }
 
-static void cleanup_sdl()
-{
-        if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
-                return;
-        }
-
-        IMG_Quit();
-
-        Mix_AllocateChannels(0);
-
-        Mix_CloseAudio();
-
-        SDL_Quit();
-}
-
-static void init_sdl()
-{
-        TRACE_FUNC_BEGIN;
-
-        cleanup_sdl();
-
-        const uint32_t sdl_init_flags =
-                SDL_INIT_VIDEO |
-                SDL_INIT_AUDIO |
-                SDL_INIT_EVENTS;
-
-        if (SDL_Init(sdl_init_flags) == -1) {
-                TRACE_ERROR_RELEASE
-                        << "Failed to init SDL"
-                        << std::endl
-                        << SDL_GetError()
-                        << std::endl;
-
-                PANIC;
-        }
-
-        const uint32_t sdl_img_flags = IMG_INIT_PNG;
-
-        if (IMG_Init(sdl_img_flags) == -1) {
-                TRACE_ERROR_RELEASE
-                        << "Failed to init SDL_image"
-                        << std::endl
-                        << SDL_GetError()
-                        << std::endl;
-
-                PANIC;
-        }
-
-        const int audio_freq = 44100;
-        const Uint16 audio_format = MIX_DEFAULT_FORMAT;
-        const int audio_channels = MIX_DEFAULT_CHANNELS;
-        const int audio_buffers = 512;
-
-        const int result =
-                Mix_OpenAudio(
-                        audio_freq,
-                        audio_format,
-                        audio_channels,
-                        audio_buffers);
-
-        if (result == -1) {
-                TRACE_ERROR_RELEASE
-                        << "Failed to init SDL_mixer"
-                        << std::endl
-                        << SDL_GetError()
-                        << std::endl;
-
-                ASSERT(false);
-        }
-
-        Mix_AllocateChannels(audio::g_allocated_channels);
-
-        TRACE_FUNC_END;
-}
-
 static void init_renderer()
 {
         TRACE_FUNC_BEGIN;
@@ -464,13 +387,87 @@ SDL_Texture* g_logo_texture = nullptr;
 
 P g_rendering_px_offset = {};
 
-void init()
+void init_sdl()
 {
         TRACE_FUNC_BEGIN;
 
-        cleanup();
+        cleanup_sdl();
 
-        init_sdl();
+        const uint32_t sdl_init_flags =
+                SDL_INIT_VIDEO |
+                SDL_INIT_AUDIO |
+                SDL_INIT_EVENTS;
+
+        if (SDL_Init(sdl_init_flags) == -1) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to init SDL"
+                        << std::endl
+                        << SDL_GetError()
+                        << std::endl;
+
+                PANIC;
+        }
+
+        const uint32_t sdl_img_flags = IMG_INIT_PNG;
+
+        if (IMG_Init(sdl_img_flags) == -1) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to init SDL_image"
+                        << std::endl
+                        << SDL_GetError()
+                        << std::endl;
+
+                PANIC;
+        }
+
+        const int audio_freq = 44100;
+        const Uint16 audio_format = MIX_DEFAULT_FORMAT;
+        const int audio_channels = MIX_DEFAULT_CHANNELS;
+        const int audio_buffers = 512;
+
+        const int result =
+                Mix_OpenAudio(
+                        audio_freq,
+                        audio_format,
+                        audio_channels,
+                        audio_buffers);
+
+        if (result == -1) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to init SDL_mixer"
+                        << std::endl
+                        << SDL_GetError()
+                        << std::endl;
+
+                ASSERT(false);
+        }
+
+        Mix_AllocateChannels(audio::g_allocated_channels);
+
+        TRACE_FUNC_END;
+}
+
+void cleanup_sdl()
+{
+        if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
+                return;
+        }
+
+        IMG_Quit();
+
+        Mix_AllocateChannels(0);
+
+        Mix_CloseAudio();
+
+        SDL_Quit();
+}
+
+void init_other()
+{
+        TRACE_FUNC_BEGIN;
+
+        cleanup_other();
+
         init_window();
         init_renderer();
 
@@ -480,7 +477,6 @@ void init()
 
         if (config::is_tiles_mode()) {
                 load_tiles();
-
                 load_logo();
         }
 
@@ -490,7 +486,7 @@ void init()
         TRACE_FUNC_END;
 }
 
-void cleanup()
+void cleanup_other()
 {
         TRACE_FUNC_BEGIN;
 
@@ -504,8 +500,6 @@ void cleanup()
                 g_sdl_window = nullptr;
         }
 
-        cleanup_sdl();
-
         TRACE_FUNC_END;
 }
 
@@ -513,7 +507,7 @@ void on_user_toggle_fullscreen()
 {
         TRACE_FUNC_BEGIN;
 
-        init();
+        init_other();
 
         states::draw();
         update_screen();
@@ -525,7 +519,7 @@ void on_user_toggle_scaling()
 {
         TRACE_FUNC_BEGIN;
 
-        init();
+        init_other();
 
         states::draw();
         update_screen();

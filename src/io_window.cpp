@@ -18,25 +18,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static P get_sdl_native_resolution()
-{
-        SDL_DisplayMode display_mode;
-
-        const auto result = SDL_GetDesktopDisplayMode(0, &display_mode);
-
-        if (result != 0) {
-                TRACE_ERROR_RELEASE
-                        << "Failed to read native resolution"
-                        << std::endl
-                        << SDL_GetError()
-                        << std::endl;
-
-                PANIC;
-        }
-
-        return {display_mode.w, display_mode.h};
-}
-
 static P get_sdl_window_px_dims()
 {
         P px_dims;
@@ -165,7 +146,7 @@ static SDL_Window* init_window_fullscreen()
 {
         TRACE << "Initializing with fullscreen" << std::endl;
 
-        const auto native_resolution = get_sdl_native_resolution();
+        const auto native_resolution = io::get_native_resolution();
 
         auto window_size = native_resolution;
 
@@ -229,7 +210,7 @@ void init_window()
                 g_sdl_window = nullptr;
         }
 
-        const auto native_resolution = get_sdl_native_resolution();
+        const P native_resolution = get_native_resolution();
 
         TRACE << "Native resolution: "
               << native_resolution.x << "x"
@@ -342,6 +323,25 @@ void clear_screen()
         SDL_SetRenderDrawColor(g_sdl_renderer, 0U, 0U, 0U, 0xFFU);
 
         SDL_RenderClear(g_sdl_renderer);
+}
+
+P get_native_resolution()
+{
+        SDL_DisplayMode display_mode;
+
+        const auto result = SDL_GetDesktopDisplayMode(0, &display_mode);
+
+        if (result != 0) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to read native resolution"
+                        << std::endl
+                        << SDL_GetError()
+                        << std::endl;
+
+                PANIC;
+        }
+
+        return {display_mode.w, display_mode.h};
 }
 
 }  // namespace io

@@ -26,10 +26,6 @@ class Actor;
 
 namespace io
 {
-// Minimum required window size in gui cells
-inline constexpr int g_min_nr_gui_cells_x = 80;
-inline constexpr int g_min_nr_gui_cells_y = 27;
-
 // Character indicating a filled square
 inline constexpr char g_filled_rect_char = 1;
 
@@ -95,13 +91,18 @@ struct InputData
         bool is_alt_held {false};
 };
 
-void init();
-void cleanup();
+void init_sdl();
+void cleanup_sdl();
+void init_other();
+void cleanup_other();
 
 // Updates the sceen with what is currently drawn
 void update_screen();
 
 void clear_screen();
+
+// Actual user resolution (i.e. not logical size)
+P get_native_resolution();
 
 void on_user_toggle_fullscreen();
 void on_user_toggle_scaling();
