@@ -83,7 +83,7 @@ static void show_map_and_freeze(const std::string& msg)
 
                 io::sleep(1);
 
-                io::flush_input();
+                io::clear_input();
         }
 }  // show_map_and_freeze
 

@@ -200,7 +200,7 @@ void push(std::unique_ptr<State> state)
 
         s_current_states.back()->on_pushed();
 
-        io::flush_input();
+        io::clear_input();
 
         TRACE_FUNC_END;
 }
@@ -223,7 +223,7 @@ void pop()
                 s_current_states.back()->on_resume();
         }
 
-        io::flush_input();
+        io::clear_input();
 
         TRACE_FUNC_END;
 }

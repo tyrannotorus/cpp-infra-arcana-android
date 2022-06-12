@@ -1153,7 +1153,7 @@ void ConfigState::update()
 
                 write_lines_to_file(lines);
 
-                io::flush_input();
+                io::clear_input();
         }
 }
 

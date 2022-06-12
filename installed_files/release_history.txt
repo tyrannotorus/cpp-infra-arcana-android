@@ -3,12 +3,12 @@
 ============================================================
 
 ##############################
-# Gameplay changes
+# Gameplay
 ##############################
 * Status effects that will end immediately after the next action are shown as e.g. "Premonition (ending)" in the gui, so that it is possible to know whether it will last until the next player turn or not (previously seeing an active status effect listed could be misleading since it could end before any monster acts).
 
 ##############################
-# User interface changes
+# User interface
 ##############################
 * 2x scaled graphics is now also possible in windowed mode.
 * Changed the tile set size to 20x0 (from 24x24), most of the tiles are simply cropped since they had a lot of redundant black space around them, and a few tiles have been slightly reworked.
@@ -17,6 +17,7 @@
 * When the game asks for a number (e.g. number of items to drop) this is now done in a popup screen instead.
 * When entering text or numbers, the underscore cursor is blinking
 * The explosion area hint when aiming explosives is drawn as a blended overlay instead.
+* Made some changes to reduce the risk of registering key presses when the game window regains focus (e.g. accidentally doing a melee attack due to the game registering a tab press when alt-tabbing back to the game)
 
 ##############################
 # Fixes

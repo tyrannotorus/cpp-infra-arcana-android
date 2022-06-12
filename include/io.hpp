@@ -218,7 +218,7 @@ std::string sdl_pref_dir();
 
 void sleep(uint32_t duration);
 
-void flush_input();
+void clear_input();
 
 InputData read_input();
 

@@ -28,8 +28,8 @@ static io::InputData s_input;
 static bool s_is_done_reading_input = false;
 static bool s_is_window_resized = false;
 
-static const uint32_t s_window_resize_draw_delay_ms = 400;
-static uint32_t s_last_window_resize_ms = 0;
+static const uint32_t s_window_resize_draw_delay_ms = 400U;
+static uint32_t s_last_window_resize_ms = 0U;
 
 static void update_input_mod_key_status()
 {
@@ -45,7 +45,7 @@ static void on_window_resized_signalled()
         io::on_window_resized();
         io::clear_screen();
         io::update_screen();
-        io::flush_input();
+        io::clear_input();
 
         s_is_window_resized = false;
         s_last_window_resize_ms = SDL_GetTicks();
@@ -100,6 +100,13 @@ static bool is_printable_ascii_char(const char c)
         return (c >= 33) && (c < 126);
 }
 
+static bool window_has_input_focus()
+{
+        uint32_t window_flags = SDL_GetWindowFlags(io::g_sdl_window);
+
+        return (window_flags & SDL_WINDOW_INPUT_FOCUS);
+}
+
 static void on_shift_released()
 {
         // On Windows, when the user presses shift + a numpad key, a shift
@@ -148,29 +155,29 @@ static void handle_window_event()
 
         case SDL_WINDOWEVENT_RESTORED: {
                 TRACE << "Window restored" << std::endl;
-        }
-        // Fallthrough
+        } break;
+
+        case SDL_WINDOWEVENT_FOCUS_LOST: {
+        } break;
+
         case SDL_WINDOWEVENT_FOCUS_GAINED: {
                 TRACE << "Window gained focus" << std::endl;
 
-                // TODO: This is not actually stopping accidental game input
-                // commands when alt-tabbing or switching workspace. It is
-                // *very* easy to accidentally move or tab-attack a monster!
-                io::flush_input();
+                states::draw();
+                io::update_screen();
 
-                io::sleep(100);
-        }
-        // Fallthrough
+                io::clear_input();
+                io::sleep(200);
+        } break;
+
         case SDL_WINDOWEVENT_EXPOSED: {
                 TRACE << "Window exposed" << std::endl;
 
                 states::draw();
-
                 io::update_screen();
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 }
@@ -197,7 +204,7 @@ static void handle_keydown_enter_event()
                 // code, or an SDL bug.
                 SDL_SetModState(KMOD_NONE);
 
-                io::flush_input();
+                io::clear_input();
         }
         else {
                 // Alt is not held
@@ -298,7 +305,7 @@ static void handle_textinput_event()
         }
 
         if (is_printable_ascii_char(c)) {
-                io::flush_input();
+                io::clear_input();
 
                 s_input.key = (unsigned char)c;
 
@@ -329,7 +336,21 @@ static void run_handle_event_cycle()
         } break;
 
         case SDL_KEYDOWN: {
-                handle_keydown_event();
+                // NOTE: Apparently (surprisingly?) when the window regains
+                // focus (e.g. when alt-tabbing back to the game), SDL_KEYDOWN
+                // events can be received *before* SDL_WINDOWEVENT_FOCUS_GAINED.
+                // This can cause things like accidentally registering window
+                // manager commands like "alt-tab" as game input commands,
+                // resulting in game actions that the player never intended,
+                // like melee attacking a monster.
+                //
+                // Therefore we only handle keydown events as game commands if
+                // the window has input focus (meaning the window is fully
+                // restored and the restore event has been received).
+                //
+                if (window_has_input_focus()) {
+                        handle_keydown_event();
+                }
         } break;
 
         case SDL_KEYUP: {
@@ -355,9 +376,11 @@ void init_input()
 {
 }
 
-void flush_input()
+void clear_input()
 {
         SDL_PumpEvents();
+        SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+        s_input = {};
 }
 
 InputData read_input()
