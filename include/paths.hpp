@@ -26,6 +26,8 @@ std::string data_dir();
 
 std::string user_dir();
 
+std::string messages_dir();
+
 std::string save_file_path();
 
 std::string config_file_path();
