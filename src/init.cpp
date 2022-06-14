@@ -30,6 +30,7 @@
 #include "map.hpp"
 #include "map_templates.hpp"
 #include "map_travel.hpp"
+#include "messages.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
 #include "player_bon.hpp"
@@ -91,6 +92,7 @@ void init_game()
         TRACE_FUNC_BEGIN;
 
         saving::init();
+        messages::init();
         line_calc::init();
         map_templates::init();
 

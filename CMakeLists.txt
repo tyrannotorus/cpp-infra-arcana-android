@@ -95,6 +95,7 @@ set(COMMON_SRC
         include/map_travel.hpp
         include/mapgen.hpp
         include/marker.hpp
+        include/messages.hpp
         include/minimap.hpp
         include/misc.hpp
         include/msg_log.hpp
@@ -241,6 +242,7 @@ set(COMMON_SRC
         src/mapgen_sub_rooms.cpp
         src/mapgen_utils.cpp
         src/marker.cpp
+        src/messages.cpp
         src/minimap.cpp
         src/misc.cpp
         src/msg_log.cpp

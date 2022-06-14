@@ -53,6 +53,11 @@ std::string data_dir()
         return "data/";
 }
 
+std::string messages_dir()
+{
+        return data_dir() + "/messages/";
+}
+
 std::string user_dir()
 {
         auto path_str = io::sdl_pref_dir();
