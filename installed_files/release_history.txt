@@ -18,6 +18,7 @@
 * When entering text or numbers, the underscore cursor is blinking
 * The explosion area hint when aiming explosives is drawn as a blended overlay instead.
 * Made some changes to reduce the risk of registering key presses when the game window regains focus (e.g. accidentally doing a melee attack due to the game registering a tab press when alt-tabbing back to the game)
+* Changed color of grates to gray, to clarify that they are made of metal (and not wood)
 
 ##############################
 # Fixes

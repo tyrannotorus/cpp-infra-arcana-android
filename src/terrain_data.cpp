@@ -133,7 +133,7 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::grate;
-        d.character = '#';
+        d.character = ':';
         d.tile = gfx::TileId::grate;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::burrowing);
