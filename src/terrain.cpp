@@ -2307,7 +2307,7 @@ std::string Grate::name(const Article article) const
 
 Color Grate::color_default() const
 {
-        return colors::brown();
+        return colors::gray();
 }
 
 // -----------------------------------------------------------------------------
