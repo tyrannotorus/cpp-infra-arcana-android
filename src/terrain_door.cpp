@@ -614,10 +614,12 @@ char Door::character() const
                 return m_mimic_terrain->character();
         }
 
+        const bool is_metal = (m_type == DoorType::metal);
+
         if (m_is_open) {
                 return 39;
         }
-        else if (m_is_stuck && (m_type != DoorType::metal)) {
+        else if (m_is_stuck && m_is_known_stuck && !is_metal) {
                 return 'X';
         }
         else {

@@ -65,6 +65,7 @@
 #include "spells.hpp"
 #include "state.hpp"
 #include "teleport.hpp"
+#include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -983,13 +984,10 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f8: {
-                Prop* const prop = property_factory::make(PropId::r_conf);
-
-                prop->set_duration(2);
-
-                map::g_player->m_properties.apply(prop);
-
-                game_time::tick();
+                map::update_terrain(
+                        terrain::make(
+                                terrain::Id::chest,
+                                map::g_player->m_pos.with_x_offset(1)));
         } break;
 
         case GameCmd::debug_f9: {

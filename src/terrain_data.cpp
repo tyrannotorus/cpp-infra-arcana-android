@@ -63,7 +63,7 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::wall;
-        d.character = '#';
+        d.character = '#';  // NOTE: A filled rectangle may be used instead.
         d.tile = gfx::TileId::wall_top;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::burrowing);
@@ -133,7 +133,7 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::grate;
-        d.character = ':';
+        d.character = ':';  // NOTE: '#' may be automatically used instead.
         d.tile = gfx::TileId::grate;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::burrowing);
