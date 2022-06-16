@@ -293,11 +293,18 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 
         destr_chance_pct = std::min(100, destr_chance_pct);
 
+        auto sfx_door_bang = audio::SfxId::door_bang;
+        auto sfx_door_break = audio::SfxId::door_break;
+        if (m_type == DoorType::gate){
+                sfx_door_bang = audio::SfxId::door_bang_metallic;
+                sfx_door_break = audio::SfxId::door_break_metallic;
+        }
+
         if (destr_chance_pct > 0) {
                 if (rnd::percent(destr_chance_pct)) {
                         Snd snd(
                                 "",
-                                audio::SfxId::door_break,
+                                sfx_door_break,
                                 IgnoreMsgIfOriginSeen::yes,
                                 m_pos,
                                 map::g_player,
@@ -334,7 +341,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                         const audio::SfxId sfx =
                                 m_is_hidden
                                 ? audio::SfxId::END
-                                : audio::SfxId::door_bang;
+                                : sfx_door_bang;
 
                         Snd snd(
                                 "",
@@ -352,7 +359,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                 // No chance of success
                 if (is_cell_seen && !m_is_hidden) {
                         Snd snd("",
-                                audio::SfxId::door_bang,
+                                sfx_door_bang,
                                 IgnoreMsgIfOriginSeen::no,
                                 map::g_player->m_pos,
                                 map::g_player,
@@ -370,6 +377,13 @@ void Door::mon_bash(actor::Actor& mon)
 {
         const bool is_weak = map::g_player->m_properties.has(PropId::weakened);
         const bool is_cell_seen = map::g_seen.at(m_pos);
+        
+        auto sfx_door_bang = audio::SfxId::door_bang;
+        auto sfx_door_break = audio::SfxId::door_break;
+        if (m_type == DoorType::gate){
+                sfx_door_bang = audio::SfxId::door_bang_metallic;
+                sfx_door_break = audio::SfxId::door_break_metallic;
+        }
 
         int destr_chance_pct = 7 - (m_jam_level * 2);
 
@@ -385,7 +399,7 @@ void Door::mon_bash(actor::Actor& mon)
                 // behavior (everyone near the door wants to run inside).
                 Snd snd(
                         "I hear a door crashing open!",
-                        audio::SfxId::door_break,
+                        sfx_door_break,
                         IgnoreMsgIfOriginSeen::yes,
                         m_pos,
                         &mon,
@@ -415,7 +429,7 @@ void Door::mon_bash(actor::Actor& mon)
                 // Not destroyed
                 Snd snd(
                         "I hear a loud banging.",
-                        audio::SfxId::door_bang,
+                        sfx_door_bang,
                         IgnoreMsgIfOriginSeen::yes,
                         mon.m_pos,
                         &mon,
@@ -953,6 +967,10 @@ void Door::actor_try_close(actor::Actor& actor_trying)
         }
 
         // Door can be closed
+        auto sfx_door_close = audio::SfxId::door_close;
+        if (m_type == DoorType::gate){
+                sfx_door_close = audio::SfxId::door_close_metallic;
+        }
 
         if (tryer_is_blind) {
                 if (rnd::coin_toss()) {
@@ -964,7 +982,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                         if (is_player) {
                                 Snd snd(
                                         "",
-                                        audio::SfxId::door_close,
+                                        sfx_door_close,
                                         IgnoreMsgIfOriginSeen::yes,
                                         m_pos,
                                         &actor_trying,
@@ -982,7 +1000,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                                 // Monster closing
                                 Snd snd(
                                         "I hear a door closing.",
-                                        audio::SfxId::door_close,
+                                        sfx_door_close,
                                         IgnoreMsgIfOriginSeen::yes,
                                         m_pos,
                                         &actor_trying,
@@ -1046,7 +1064,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 if (!player_bon::has_trait(Trait::silent)) {
                         Snd snd(
                                 "",
-                                audio::SfxId::door_close,
+                                sfx_door_close,
                                 IgnoreMsgIfOriginSeen::yes,
                                 m_pos,
                                 &actor_trying,
@@ -1114,6 +1132,10 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                 return;
         }
+        auto sfx_door_open = audio::SfxId::door_open;
+        if (m_type == DoorType::gate){
+                sfx_door_open = audio::SfxId::door_open_metallic;
+        }
 
         if (m_is_stuck) {
                 TRACE << "Is stuck" << std::endl;
@@ -1140,7 +1162,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                 if (!player_bon::has_trait(Trait::silent)) {
                                         Snd snd(
                                                 "",
-                                                audio::SfxId::door_open,
+                                                sfx_door_open,
                                                 IgnoreMsgIfOriginSeen::yes,
                                                 m_pos,
                                                 &actor_trying,
@@ -1159,7 +1181,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                 // Is monster
                                 Snd snd(
                                         "I hear a door open.",
-                                        audio::SfxId::door_open,
+                                        sfx_door_open,
                                         IgnoreMsgIfOriginSeen::yes,
                                         m_pos,
                                         &actor_trying,
@@ -1198,7 +1220,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                 if (is_player) {
                                         Snd snd(
                                                 "",
-                                                audio::SfxId::door_open,
+                                                sfx_door_open,
                                                 IgnoreMsgIfOriginSeen::yes,
                                                 m_pos,
                                                 &actor_trying,
@@ -1216,7 +1238,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                                         // Is monster
                                         Snd snd(
                                                 "I hear something open a door awkwardly.",
-                                                audio::SfxId::door_open,
+                                                sfx_door_open,
                                                 IgnoreMsgIfOriginSeen::yes,
                                                 m_pos,
                                                 &actor_trying,

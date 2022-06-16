@@ -782,6 +782,38 @@ License:             Attribution 3.0 Unported (CC BY 3.0)
 Original title:      Splash, Jumping, C.wav
 Changes made:        Cut most of the sound, reduced the speed
 
+File:                sfx_door_bang_metallic.ogg
+Source:              https://freesound.org/people/mickyman5000/sounds/340575/
+Author:              mickyman5000 (username on freesound.org)
+Original title:      Scrap_Metal_Rummaging.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut most of the sound, reverb.
+
+File:                sfx_door_open_metallic.ogg
+Source:              https://freesound.org/people/kyles/sounds/637481/
+Author:              kyles (username on freesound.org)
+Original title:      door metal locker gate grill open.flac
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut most of the sound, reverb.
+
+File:                sfx_door_close_metallic.ogg
+Source:              https://freesound.org/people/Profispiesser/sounds/583059/
+Author:              Profispiesser (username on freesound.org)
+Original title:      FX SaSc Door 01 Metal Rattle Open Close 2 Versions.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut most of the sound, distort/amplify, reverb.
+
+File:                sfx_door_break_metallic.ogg
+Source:              https://freesound.org/people/mickyman5000/sounds/340563/
+Author:              mickyman5000 (username on freesound.org)
+Original title:      Metallic_Smash_2.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+Source:              https://freesound.org/people/JoelAudio/sounds/135452/
+Author:              JoelAudio (username on freesound.org)
+Original title:      HEAVY_SMASH_002.wav
+License:             Attribution 3.0 Unported (CC BY 3.0)
+Changes made:        Cut most of the sounds, mix, reverb.
+
 File:                musica_cthulhiana_fragment_madness.ogg
 Source:              Track "Madness" from music album "Fragment" (2010, Prowler/Ghost Records)
 Author:              Musica Cthulhiana
