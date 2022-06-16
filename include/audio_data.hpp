@@ -57,6 +57,9 @@ enum class SfxId
         darkbolt_release,
         aza_gaze,
 
+        // Artifact sounds
+        horn,
+
         // Environment action sounds
         metal_clank,
         ricochet,

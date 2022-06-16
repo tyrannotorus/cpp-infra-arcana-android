@@ -787,3 +787,10 @@ Source:              Track "Madness" from music album "Fragment" (2010, Prowler/
 Author:              Musica Cthulhiana
 Original title:      -
 Used with permission from Musica Cthulhiana
+
+File:                sfx_horn.ogg
+Source:              https://freesound.org/people/Kostrava/sounds/320789/
+Author:              Kostrava (username on freesound.org)
+License:             CC0 1.0 Universal (CC0 1.0)
+Original title:      horn 01
+Changes made:        Trim sound. Cubic distorion. Reverb.

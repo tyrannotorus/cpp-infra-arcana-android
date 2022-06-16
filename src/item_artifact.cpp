@@ -239,7 +239,7 @@ ConsumeItem HornOfMalice::activate(actor::Actor* const actor)
 
         Snd snd(
                 "The Horn of Malice resounds!",
-                audio::SfxId::END,  // TODO: Make a sound effect
+                audio::SfxId::horn,
                 IgnoreMsgIfOriginSeen::no,
                 map::g_player->m_pos,
                 map::g_player,
@@ -313,7 +313,7 @@ ConsumeItem HornOfBanishment::activate(actor::Actor* const actor)
 
         Snd snd(
                 "The Horn of Banishment resounds!",
-                audio::SfxId::END,  // TODO: Make a sound effect
+                audio::SfxId::horn,
                 IgnoreMsgIfOriginSeen::no,
                 map::g_player->m_pos,
                 map::g_player,
