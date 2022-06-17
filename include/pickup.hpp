@@ -9,7 +9,7 @@
 
 namespace item
 {
-class Ammo;
+class Item;
 class Wpn;
 }  // namespace item
 
@@ -22,7 +22,7 @@ void try_pick();
 
 void try_unload_or_pick();
 
-item::Ammo* unload_ranged_wpn(item::Wpn& wpn);
+item::Item* unload_ranged_wpn(item::Wpn& wpn);
 
 }  // namespace item_pickup
 

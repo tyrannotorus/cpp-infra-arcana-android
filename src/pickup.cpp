@@ -71,7 +71,7 @@ void try_pick()
         }
 }
 
-item::Ammo* unload_ranged_wpn(item::Wpn& wpn)
+item::Item* unload_ranged_wpn(item::Wpn& wpn)
 {
         ASSERT(!wpn.data().ranged.has_infinite_ammo);
 
@@ -99,7 +99,7 @@ item::Ammo* unload_ranged_wpn(item::Wpn& wpn)
 
         wpn.m_ammo_loaded = 0;
 
-        return static_cast<item::Ammo*>(spawned_ammo);
+        return spawned_ammo;
 }
 
 void try_unload_or_pick()
@@ -111,7 +111,7 @@ void try_unload_or_pick()
             !item->data().ranged.has_infinite_ammo) {
                 auto* const wpn = static_cast<item::Wpn*>(item);
 
-                auto* const spawned_ammo = unload_ranged_wpn(*wpn);
+                item::Item* const spawned_ammo = unload_ranged_wpn(*wpn);
 
                 if (spawned_ammo) {
                         audio::play(audio::SfxId::pickup);
