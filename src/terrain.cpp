@@ -4131,6 +4131,16 @@ void Cabinet::bump(actor::Actor& actor_bumping)
         }
 
         if (m_is_open) {
+                Snd snd(
+                        "",
+                        audio::SfxId::bookshelf_rummage,
+                        IgnoreMsgIfOriginSeen::yes,
+                        m_pos,
+                        &actor_bumping,
+                        SndVol::high,
+                        AlertsMon::no);
+
+                snd.run();  
                 player_loot();
         }
         else {
@@ -4164,6 +4174,16 @@ DidOpen Cabinet::open(actor::Actor* const actor_opening)
         }
         else {
                 // Was not already open
+                Snd snd(
+                        "",
+                        audio::SfxId::cabinet_open,
+                        IgnoreMsgIfOriginSeen::yes,
+                        m_pos,
+                        actor_opening,
+                        SndVol::high,
+                        AlertsMon::no);
+
+                snd.run(); 
                 m_is_open = true;
 
                 if (map::g_seen.at(m_pos)) {
@@ -4307,6 +4327,16 @@ void Bookshelf::bump(actor::Actor& actor_bumping)
         }
 
         if (!m_is_looted) {
+                Snd snd(
+                        "",
+                        audio::SfxId::bookshelf_rummage,
+                        IgnoreMsgIfOriginSeen::yes,
+                        m_pos,
+                        &actor_bumping,
+                        SndVol::high,
+                        AlertsMon::no);
+
+                snd.run();  
                 player_loot();
         }
 
@@ -4465,6 +4495,16 @@ void AlchemistBench::bump(actor::Actor& actor_bumping)
         }
 
         if (!m_is_looted) {
+                Snd snd(
+                        "",
+                        audio::SfxId::alchemy_rummage,
+                        IgnoreMsgIfOriginSeen::yes,
+                        m_pos,
+                        &actor_bumping,
+                        SndVol::high,
+                        AlertsMon::no);
+
+                snd.run();      
                 player_loot();
         }
 
