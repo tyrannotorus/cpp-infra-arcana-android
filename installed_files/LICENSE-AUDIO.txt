@@ -353,6 +353,12 @@ Author:              -
 Author:              Søren ("Lizzle Bizzle")
 License:             ???
 
+File:                sfx_alchemy_rummage.ogg
+Source:              https://freesound.org/people/danielad/sounds/529078/
+Author:              danielad (username on freesound.org)
+Original title:      Moving Bottles.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+
 File:                sfx_ape.ogg
 Source:              https://www.freesound.org/people/Mings/sounds/160380
 Author:              Mings (username on freesound.org)
@@ -372,6 +378,20 @@ Author:              CapsLok (username on freesound.org)
 Original title:      Crunchy Bites.wav
 License:             CC0 1.0 Universal (CC0 1.0)
 Changes made:        Cut most of the sound, lowered pitch
+
+File:                sfx_bookshelf_rummage.ogg
+Source:              https://freesound.org/people/minimumlabyrinth/sounds/612223/
+Author:              minimumlabyrinth (username on freesound.org)
+Original title:      Gingerly rummaging through an old box of papers – Bluebird 122.wav
+License:             Attribution 3.0 Unported (CC BY 3.0)
+Changes made:        Clip
+
+File:                sfx_cabinet_open.ogg
+Source:              https://freesound.org/people/kyles/sounds/629942/
+Author:              kyles (username on freesound.org)
+Original title:      wood creaks heavy deep old armoir wardrobe closet door open close.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Clip
 
 File:                sfx_boss_voice1.ogg
 Source:              Created for Infra Arcana

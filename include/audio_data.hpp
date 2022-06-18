@@ -80,6 +80,9 @@ enum class SfxId
         mechanical_trap_trigger,
         wade,
         swim,
+        alchemy_rummage,
+        bookshelf_rummage,
+        cabinet_open,
 
         // User interface sounds
         backpack,
