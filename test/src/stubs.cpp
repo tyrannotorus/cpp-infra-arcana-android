@@ -29,16 +29,25 @@ class Actor;
 // -----------------------------------------------------------------------------
 namespace io
 {
-void init()
+void init_sdl() {}
+
+void init_other()
 {
         panels::init({100, 100});
 }
 
-void cleanup() {}
+void cleanup_sdl() {}
+
+void cleanup_other() {}
 
 void update_screen() {}
 
 void clear_screen() {}
+
+P get_native_resolution()
+{
+        return {};
+}
 
 void on_user_toggle_fullscreen() {}
 void on_user_toggle_scaling() {}
@@ -173,7 +182,7 @@ void MapDrawObj::draw() const {}
 
 void draw_logo() {}
 
-void flush_input() {}
+void clear_input() {}
 
 InputData read_input()
 {
