@@ -824,14 +824,14 @@ License:             CC0 1.0 Universal (CC0 1.0)
 Changes made:        Cut most of the sound, distort/amplify, reverb.
 
 File:                sfx_door_break_metallic.ogg
-Source:              https://freesound.org/people/mickyman5000/sounds/340563/
-Author:              mickyman5000 (username on freesound.org)
-Original title:      Metallic_Smash_2.wav
+Source:              https://freesound.org/people/SamsterBirdies/sounds/587443/
+Author:              SamsterBirdies (username on freesound.org)
+Original title:      Scrap metal dropping / crashing
 License:             CC0 1.0 Universal (CC0 1.0)
-Source:              https://freesound.org/people/JoelAudio/sounds/135452/
-Author:              JoelAudio (username on freesound.org)
-Original title:      HEAVY_SMASH_002.wav
-License:             Attribution 3.0 Unported (CC BY 3.0)
+Source:              https://freesound.org/people/DJT4NN3R/sounds/449992/
+Author:              DJT4NN3R (username on freesound.org)
+Original title:      whoosh_short_low.wav
+License:             CC0 1.0 Universal (CC0 1.0
 Changes made:        Cut most of the sounds, mix, reverb.
 
 File:                musica_cthulhiana_fragment_madness.ogg
