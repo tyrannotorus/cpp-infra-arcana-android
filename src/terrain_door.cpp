@@ -231,8 +231,7 @@ void Door::on_hit(
                 }
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 
@@ -295,7 +294,9 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 
         auto sfx_door_bang = audio::SfxId::door_bang;
         auto sfx_door_break = audio::SfxId::door_break;
-        if (m_type == DoorType::gate){
+        std::string break_desc = " open!";
+        if (m_type == DoorType::gate) {
+                break_desc = " to the floor!";
                 sfx_door_bang = audio::SfxId::door_bang_metallic;
                 sfx_door_break = audio::SfxId::door_break_metallic;
         }
@@ -318,18 +319,20 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                                         msg_log::add(
                                                 "A " +
                                                 base_name_short() +
-                                                " crashes open!");
+                                                " crashes" +
+                                                break_desc);
                                 }
                                 else {
                                         msg_log::add(
                                                 "The " +
                                                 base_name_short() +
-                                                " crashes open!");
+                                                " crashes" +
+                                                break_desc);
                                 }
                         }
                         else {
                                 // Cell not seen
-                                msg_log::add("I feel a door crashing open!");
+                                msg_log::add("I feel a door crashing" + break_desc);
                         }
 
                         map::update_terrain(make(Id::rubble_low, m_pos));
@@ -377,10 +380,10 @@ void Door::mon_bash(actor::Actor& mon)
 {
         const bool is_weak = map::g_player->m_properties.has(PropId::weakened);
         const bool is_cell_seen = map::g_seen.at(m_pos);
-        
+
         auto sfx_door_bang = audio::SfxId::door_bang;
         auto sfx_door_break = audio::SfxId::door_break;
-        if (m_type == DoorType::gate){
+        if (m_type == DoorType::gate) {
                 sfx_door_bang = audio::SfxId::door_bang_metallic;
                 sfx_door_break = audio::SfxId::door_break_metallic;
         }
@@ -970,7 +973,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
         // Door can be closed
         auto sfx_door_close = audio::SfxId::door_close;
-        if (m_type == DoorType::gate){
+        if (m_type == DoorType::gate) {
                 sfx_door_close = audio::SfxId::door_close_metallic;
         }
 
@@ -1135,7 +1138,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                 return;
         }
         auto sfx_door_open = audio::SfxId::door_open;
-        if (m_type == DoorType::gate){
+        if (m_type == DoorType::gate) {
                 sfx_door_open = audio::SfxId::door_open_metallic;
         }
 
