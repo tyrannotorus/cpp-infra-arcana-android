@@ -452,7 +452,7 @@ target_include_directories(ia-debug PUBLIC
 target_include_directories(ia-test PUBLIC
         ${COMMON_INCLUDE_DIRS}
         test/include
-        test/Catch2-v2.4.0/include
+        test/Catch2-v2.13.9/include
         )
 
 # On Windows releases, remove the console window
