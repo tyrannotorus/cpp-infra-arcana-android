@@ -27,6 +27,7 @@
 * Attacking a monster that is delayed by moving into liquid no longer allows them to act immediately.
 * The names of some ambient sound clip files were calculated incorrectly, resulting in a few ambient sounds not being loaded/used.
 * Kicking locked wooden chests would print the message "I kick the locked wooden chest! I kick the lid. The lock resists." - removed the redundant part "I kick the lid".
+* Kicking chests caused extra rolls for sprains in some cases (so the risk of a sprain was doubled, and player could get double sprains).
 
 
 ============================================================

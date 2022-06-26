@@ -3442,8 +3442,6 @@ void Chest::on_player_kick()
 
         if (map::g_player->m_properties.has(PropId::weakened) ||
             (m_matl == ChestMatl::iron)) {
-                bash::try_sprain_player();
-
                 msg_log::add("It seems futile.");
 
                 snd.run();
@@ -3480,8 +3478,6 @@ void Chest::on_player_kick()
         }
         else {
                 msg_log::add("The lock resists.");
-
-                bash::try_sprain_player();
         }
 
         snd.run();
