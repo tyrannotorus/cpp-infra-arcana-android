@@ -1076,16 +1076,8 @@ public:
                 std::optional<P> from_pos = std::nullopt,
                 std::optional<int> dmg = std::nullopt) override;
 
-        WasDestroyed on_finished_burning() override;
-
 private:
         Color color_default() const override;
-
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
 
         void on_player_kick();
 

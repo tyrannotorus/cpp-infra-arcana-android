@@ -26,6 +26,7 @@
 * Fixed a problem with the game time system, that caused slow creatures to act slightly more often and fast/very fast creatures to act slightly less often than they were supposed to (especially noticeable when kiting a slow monster, since it would occasionally get unexpected extra moves).
 * Attacking a monster that is delayed by moving into liquid no longer allows them to act immediately.
 * The names of some ambient sound clip files were calculated incorrectly, resulting in a few ambient sounds not being loaded/used.
+* Kicking locked wooden chests would print the message "I kick the locked wooden chest! I kick the lid. The lock resists." - removed the redundant part "I kick the lid".
 
 
 ============================================================

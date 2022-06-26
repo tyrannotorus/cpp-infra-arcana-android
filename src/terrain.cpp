@@ -3274,19 +3274,13 @@ Chest::Chest(const P& p, const TerrainData* const data) :
         m_is_locked(false),
         m_matl(ChestMatl::wood)
 {
-        if (map::g_dlvl >= 3 &&
-            rnd::fraction(2, 3)) {
+        if ((map::g_dlvl >= 3) && rnd::fraction(2, 3)) {
                 m_matl = ChestMatl::iron;
         }
 
         // Contained items
-        const int nr_items_min =
-                rnd::one_in(4)
-                ? 0
-                : 1;
-
+        const int nr_items_min = rnd::one_in(4) ? 0 : 1;
         int nr_items_max = 2;
-
         int incr_max_items_one_in = 12;
 
         if (player_bon::has_trait(Trait::treasure_hunter)) {
@@ -3409,56 +3403,6 @@ void Chest::hit(
         }
 }
 
-void Chest::on_hit(
-        const DmgType dmg_type,
-        actor::Actor* const actor,
-        const P& from_pos,
-        int dmg)
-{
-        (void)actor;
-        (void)from_pos;
-        (void)dmg;
-
-        switch (dmg_type) {
-        case DmgType::explosion:
-        case DmgType::pure:
-                if (map::g_seen.at(m_pos)) {
-                        msg_log::add("The chest is destroyed.");
-                }
-
-                map::update_terrain(make(Id::rubble_low, m_pos));
-                map::update_vision();
-                break;
-
-        case DmgType::fire:
-                if (m_matl == ChestMatl::wood) {
-                        m_item_container.clear();
-                        try_start_burning(Verbose::yes);
-                }
-                break;
-
-        default:
-                break;
-        }
-}
-
-WasDestroyed Chest::on_finished_burning()
-{
-        if (map::g_seen.at(m_pos)) {
-                msg_log::add("The chest burns down.");
-        }
-
-        auto* const rubble = make(Id::rubble_low, m_pos);
-
-        rubble->m_burn_state = BurnState::has_burned;
-
-        map::update_terrain(rubble);
-
-        map::update_vision();
-
-        return WasDestroyed::yes;
-}
-
 void Chest::on_player_kick()
 {
         if (!map::g_seen.at(m_pos)) {
@@ -3485,6 +3429,7 @@ void Chest::on_player_kick()
                 AlertsMon::yes);
 
         // Is seen and closed
+
         if (!m_is_locked) {
                 msg_log::add("The lid slams open, then falls shut.");
 
@@ -3494,8 +3439,6 @@ void Chest::on_player_kick()
         }
 
         // Is locked
-
-        msg_log::add("I kick the lid.");
 
         if (map::g_player->m_properties.has(PropId::weakened) ||
             (m_matl == ChestMatl::iron)) {
@@ -4140,7 +4083,7 @@ void Cabinet::bump(actor::Actor& actor_bumping)
                         SndVol::high,
                         AlertsMon::no);
 
-                snd.run();  
+                snd.run();
                 player_loot();
         }
         else {
@@ -4183,7 +4126,7 @@ DidOpen Cabinet::open(actor::Actor* const actor_opening)
                         SndVol::high,
                         AlertsMon::no);
 
-                snd.run(); 
+                snd.run();
                 m_is_open = true;
 
                 if (map::g_seen.at(m_pos)) {
@@ -4336,7 +4279,7 @@ void Bookshelf::bump(actor::Actor& actor_bumping)
                         SndVol::high,
                         AlertsMon::no);
 
-                snd.run();  
+                snd.run();
                 player_loot();
         }
 
@@ -4504,7 +4447,7 @@ void AlchemistBench::bump(actor::Actor& actor_bumping)
                         SndVol::high,
                         AlertsMon::no);
 
-                snd.run();      
+                snd.run();
                 player_loot();
         }
 
