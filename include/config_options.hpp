@@ -27,6 +27,13 @@ public:
         virtual std::string name() const = 0;
 
         virtual std::string value_str() const = 0;
+
+        // Some options play a custom selection audio, so they must disable the
+        // one played by the menu browser.
+        virtual bool allow_browser_selection_audio() const
+        {
+                return true;
+        }
 };
 
 class MasterVolumeOption : public Option
@@ -37,6 +44,11 @@ public:
         std::string name() const override;
 
         std::string value_str() const override;
+
+        bool allow_browser_selection_audio() const override
+        {
+                return false;
+        }
 };
 
 class AmbientAudioEnabledOption : public Option
@@ -47,6 +59,11 @@ public:
         std::string name() const override;
 
         std::string value_str() const override;
+
+        bool allow_browser_selection_audio() const override
+        {
+                return false;
+        }
 };
 
 class PreloadAmbientAudioOption : public Option

@@ -1420,12 +1420,10 @@ StateId ConfigState::id() const
 
 void ConfigState::update()
 {
-        // Do not play selection audio if we are at the audio settings - these
-        // will play a custom audio when they are toggled.
-        //
-        // TODO: This is *very* hacky, rework:
-        //
-        const bool enable_selection_audio = (m_browser.y() >= 2);
+        // Some options play a custom selection audio, so they must disable the
+        // one played by the menu browser.
+        const bool enable_selection_audio =
+                s_options.at(m_browser.y())->allow_browser_selection_audio();
 
         m_browser.set_selection_audio_enabled(enable_selection_audio);
 
