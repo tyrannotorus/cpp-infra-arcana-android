@@ -43,6 +43,7 @@ set(COMMON_SRC
         include/colors.hpp
         include/common_text.hpp
         include/config.hpp
+        include/config_options.hpp
         include/create_character.hpp
         include/debug.hpp
         include/direction.hpp

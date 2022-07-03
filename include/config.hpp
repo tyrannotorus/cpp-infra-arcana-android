@@ -39,26 +39,19 @@ namespace config
 void init();
 
 InputMode input_mode();
-
 std::string font_name();
-
 bool always_center_view_on_player();
-
 bool is_tiles_mode();
-
 void set_fullscreen(bool value);
-
 bool is_fullscreen();
-
 bool is_2x_scale_requested();
-
 void set_2x_scale_enabled(bool value);
-
 bool is_2x_scale_enabled();
 
 // Actual window size (i.e. not logical size)
 void set_window_px_w(int w);
 void set_window_px_h(int h);
+
 int window_px_w();
 int window_px_h();
 
@@ -71,59 +64,32 @@ int map_cell_px_w();
 int map_cell_px_h();
 
 bool text_mode_filled_walls();
-
 int master_volume_pct();
-
 bool is_ambient_audio_enabled();
-
 bool is_ambient_audio_preloaded();
-
 bool is_bot_playing();
-
 void enable_bot_playing();
-
 void toggle_bot_playing();
-
 bool is_stress_test();
-
 void enable_stress_test();
-
 bool is_gj_mode();
-
 void toggle_gj_mode();
-
 bool warn_on_throw_valuable();
-
 bool warn_on_light_explosive();
-
 bool warn_on_drink_malign_potion();
-
 bool warn_on_ranged_wpn_melee();
-
 bool is_ranged_wpn_auto_reload();
-
 bool is_intro_lvl_skipped();
-
 bool is_intro_popup_skipped();
-
 bool is_any_key_confirm_more();
-
 HintsMode hints_mode();
-
 bool has_seen_hint_global(hints::Id id);
-
 void set_hint_seen_global(hints::Id id);
-
 bool always_warn_new_mon();
-
 int delay_projectile_draw();
-
 int delay_shotgun();
-
 int delay_explosion();
-
 void set_default_player_name(const std::string& name);
-
 std::string default_player_name();
 
 }  // namespace config
