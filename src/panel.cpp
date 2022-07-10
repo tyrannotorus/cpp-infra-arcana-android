@@ -48,24 +48,9 @@ static void finalize_screen_dims()
                 << std::endl;
 }
 
-// -----------------------------------------------------------------------------
-// panels
-// -----------------------------------------------------------------------------
-namespace panels
+static void set_game_state_panels(const P& max_gui_dims)
 {
-void init(const P& max_gui_dims)
-{
-        TRACE_FUNC_BEGIN;
-
-        TRACE << "Maximum allowed GUI size: "
-              << max_gui_dims.x << "x" << max_gui_dims.y
-              << std::endl;
-
-        for (auto& panel : s_panels) {
-                panel = {0, 0, 0, 0};
-        }
-
-        const int map_gui_stats_border_w = 23;
+        constexpr int map_gui_stats_border_w = 23;
 
         const int map_gui_border_x0 = max_gui_dims.x - map_gui_stats_border_w;
         const int map_gui_border_y0 = 0;
@@ -113,48 +98,82 @@ void init(const P& max_gui_dims)
                 map_gui_border_y0 + 1,
                 map_gui_border_x1 - 1,
                 map_gui_border_y1 - 1);
+}
 
-        finalize_screen_dims();
+static void set_create_char_state_panels(const P& max_gui_dims)
+{
+        constexpr int tot_w = 78;
+        constexpr int menu_w = 26;
+        constexpr int descr_w = tot_w - menu_w - 1;
 
-        constexpr int create_char_tot_w = 78;
+        const int screen_center_x = panels::center_x(Panel::screen);
 
-        constexpr int create_char_menu_w = 26;
+        const int menu_x0 = screen_center_x - ((tot_w / 2) - 1);
+        const int menu_x1 = menu_x0 + menu_w - 1;
 
-        constexpr int create_char_descr_w =
-                create_char_tot_w - create_char_menu_w - 1;
-
-        const int screen_center_x = center_x(Panel::screen);
-
-        const int create_char_menu_x0 =
-                screen_center_x - ((create_char_tot_w / 2) - 1);
-
-        const int create_char_menu_x1 =
-                create_char_menu_x0 + create_char_menu_w - 1;
-
-        const int create_char_descr_x0 =
-                create_char_menu_x1 + 2;
-
-        const int create_char_descr_x1 =
-                create_char_descr_x0 + create_char_descr_w - 1;
+        const int descr_x0 = menu_x1 + 2;
+        const int descr_x1 = descr_x0 + descr_w - 1;
 
         set_panel_area(
                 Panel::create_char_menu,
-                create_char_menu_x0,
+                menu_x0,
                 2,
-                create_char_menu_x1,
+                menu_x1,
                 max_gui_dims.y - 2);
 
         set_panel_area(
                 Panel::create_char_descr,
-                create_char_descr_x0,
+                descr_x0,
                 2,
-                create_char_descr_x1,
+                descr_x1,
+                max_gui_dims.y - 2);
+}
+
+static void set_options_state_panels(const P& max_gui_dims)
+{
+        constexpr int tot_w = 78;
+        constexpr int options_w = 29;
+        constexpr int values_w = 20;
+        constexpr int descr_w = tot_w - options_w - values_w - 2;
+
+        const int screen_center_x = panels::center_x(Panel::screen);
+
+        const int options_x0 = screen_center_x - ((tot_w / 2) - 1);
+        const int options_x1 = options_x0 + options_w - 1;
+
+        const int values_x0 = options_x1 + 2;
+        const int values_x1 = values_x0 + values_w - 1;
+
+        const int descr_x0 = values_x1 + 2;
+        const int descr_x1 = descr_x0 + descr_w - 1;
+
+        set_panel_area(
+                Panel::options,
+                options_x0,
+                2,
+                options_x1,
                 max_gui_dims.y - 2);
 
-        const int inventory_descr_w = 32;
+        set_panel_area(
+                Panel::options_values,
+                values_x0,
+                2,
+                values_x1,
+                max_gui_dims.y - 2);
+
+        set_panel_area(
+                Panel::options_descr,
+                descr_x0,
+                2,
+                descr_x1,
+                max_gui_dims.y - 2);
+}
+
+static void set_inventory_state_panels(const P& max_gui_dims)
+{
+        constexpr int inventory_descr_w = 32;
 
         const int inventory_descr_x0 = max_gui_dims.x - inventory_descr_w - 1;
-
         const int inventory_menu_x1 = inventory_descr_x0 - 2;
 
         set_panel_area(
@@ -170,14 +189,16 @@ void init(const P& max_gui_dims)
                 1,
                 max_gui_dims.x - 2,
                 max_gui_dims.y - 2);
+}
 
+static void set_info_scrreen_panel(const P& max_gui_dims)
+{
         constexpr int info_screen_w = 78;
 
-        const int info_screen_x0 =
-                screen_center_x - ((info_screen_w / 2) - 1);
+        const int screen_center_x = panels::center_x(Panel::screen);
 
-        const int info_screen_x1 =
-                info_screen_x0 + info_screen_w - 1;
+        const int info_screen_x0 = screen_center_x - ((info_screen_w / 2) - 1);
+        const int info_screen_x1 = info_screen_x0 + info_screen_w - 1;
 
         set_panel_area(
                 Panel::info_screen_content,
@@ -185,6 +206,31 @@ void init(const P& max_gui_dims)
                 1,
                 info_screen_x1,
                 max_gui_dims.y - 2);
+}
+
+// -----------------------------------------------------------------------------
+// panels
+// -----------------------------------------------------------------------------
+namespace panels
+{
+void init(const P& max_gui_dims)
+{
+        TRACE_FUNC_BEGIN;
+
+        TRACE << "Maximum allowed GUI size: "
+              << max_gui_dims.x << "x" << max_gui_dims.y
+              << std::endl;
+
+        for (R& panel : s_panels) {
+                panel = {0, 0, 0, 0};
+        }
+
+        set_game_state_panels(max_gui_dims);
+        finalize_screen_dims();
+        set_create_char_state_panels(max_gui_dims);
+        set_options_state_panels(max_gui_dims);
+        set_inventory_state_panels(max_gui_dims);
+        set_info_scrreen_panel(max_gui_dims);
 
         TRACE_FUNC_END;
 }

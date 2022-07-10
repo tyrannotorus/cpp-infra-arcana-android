@@ -26,6 +26,7 @@
 #include "hints.hpp"
 #include "io.hpp"
 #include "misc.hpp"
+#include "msg_log.hpp"
 #include "panel.hpp"
 #include "paths.hpp"
 #include "pos.hpp"
@@ -33,23 +34,31 @@
 #include "random.hpp"
 #include "rect.hpp"
 #include "terrain_data.hpp"
+#include "text.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+// Owning container of all available options (globally).
 static std::vector<std::unique_ptr<config::Option>> s_options {};
 
-static const std::vector<std::string> font_image_names = {
+// Options shown in the current submenu.
+static std::vector<config::Option*> s_current_options {};
+
+static config::OptionSubmenuType s_current_submenu =
+        config::OptionSubmenuType::END;
+
+// NOTE: Order is important, sort from smallest to largest!
+static const std::vector<std::string> s_font_image_names = {
         "7x13_uushi.png",
         "8x17_terminus.png",
-        "10x24_dejavu_sans_mono_book.png",
-        "12x22_monospace_medium.png",
-        "12x24_dejavu_sans_mono_book.png",
-        "13x24_dejavu_sans_mono_book.png",
-        "13x24_special_elite.png",
+        "10x24_dejavu.png",
+        "12x22_monospace.png",
+        "12x24_dejavu.png",
+        "13x24_dejavu.png",
+        "13x24_typewriter.png",
 };
-
-static const int s_opt_values_x_pos = 44;
 
 static InputMode s_input_mode = InputMode::standard;
 static std::string s_font_name;
@@ -71,7 +80,6 @@ static HintsMode s_hints_mode = HintsMode::once;
 static bool s_has_seen_hint_global[(size_t)hints::Id::END];
 static bool s_always_warn_new_mon = false;
 static int s_delay_projectile_draw = -1;
-static int s_delay_shotgun = -1;
 static int s_delay_explosion = -1;
 static std::string s_default_player_name;
 static bool s_is_bot_playing = false;
@@ -87,6 +95,66 @@ static int s_gui_cell_px_w = -1;
 static int s_gui_cell_px_h = -1;
 static int s_map_cell_px_w = -1;
 static int s_map_cell_px_h = -1;
+
+static std::string submenu_name(config::OptionSubmenuType submenu_type)
+{
+        switch (submenu_type) {
+        case config::OptionSubmenuType::video:
+                return "Video";
+
+        case config::OptionSubmenuType::audio:
+                return "Audio";
+
+        case config::OptionSubmenuType::input:
+                return "Input";
+
+        case config::OptionSubmenuType::gameplay:
+                return "Gameplay";
+
+        case config::OptionSubmenuType::END:
+                break;
+        }
+
+        PANIC;
+
+        return "";
+}
+
+static std::string submenu_name_with_key_shortcut(
+        config::OptionSubmenuType submenu_type)
+{
+        switch (submenu_type) {
+        case config::OptionSubmenuType::video:
+                return "(V)ideo";
+
+        case config::OptionSubmenuType::audio:
+                return "(A)udio";
+
+        case config::OptionSubmenuType::input:
+                return "(I)nput";
+
+        case config::OptionSubmenuType::gameplay:
+                return "(G)ameplay";
+
+        case config::OptionSubmenuType::END:
+                break;
+        }
+
+        PANIC;
+
+        return "";
+}
+
+static void filter_current_options(config::OptionSubmenuType submenu_type)
+{
+        s_current_options.clear();
+
+        for (const auto& option : s_options) {
+                if (option->submenu_type() == submenu_type) {
+                        s_current_options.push_back(option.get());
+                }
+        }
+}
 
 static P parse_dims_from_font_name(std::string font_name)
 {
@@ -181,7 +249,7 @@ static void set_default_variables()
         s_input_mode = InputMode::standard;
 
         // Use the smallest font
-        s_font_name = font_image_names[0];
+        s_font_name = s_font_image_names[0];
 
         s_always_center_view_on_player = true;
 
@@ -218,7 +286,6 @@ static void set_default_variables()
         s_warn_on_ranged_wpn_melee = true;
         s_is_ranged_wpn_auto_reload = false;
         s_delay_projectile_draw = 50;
-        s_delay_shotgun = 75;
         s_delay_explosion = 300;
         s_default_player_name = "";
 
@@ -326,9 +393,6 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_delay_projectile_draw = to_int(lines.front());
         lines.erase(std::begin(lines));
 
-        s_delay_shotgun = to_int(lines.front());
-        lines.erase(std::begin(lines));
-
         s_delay_explosion = to_int(lines.front());
         lines.erase(std::begin(lines));
 
@@ -402,7 +466,6 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(s_warn_on_ranged_wpn_melee ? "1" : "0");
         lines.emplace_back(s_is_ranged_wpn_auto_reload ? "1" : "0");
         lines.push_back(std::to_string(s_delay_projectile_draw));
-        lines.push_back(std::to_string(s_delay_shotgun));
         lines.push_back(std::to_string(s_delay_explosion));
 
         if (s_default_player_name.empty()) {
@@ -432,32 +495,46 @@ namespace config
 void init()
 {
         //
-        // Register options here (order matters):
+        // Register options here.
         //
-        s_options.emplace_back(std::make_unique<MasterVolumeOption>());
-        s_options.emplace_back(std::make_unique<AmbientAudioEnabledOption>());
-        s_options.emplace_back(std::make_unique<PreloadAmbientAudioOption>());
-        s_options.emplace_back(std::make_unique<InputModeOption>());
-        s_options.emplace_back(std::make_unique<AlwaysCenterViewOption>());
+        // NOTE: Options will appear in this order in the game!
+        //
+
+        // Video
         s_options.emplace_back(std::make_unique<TilesModeOption>());
         s_options.emplace_back(std::make_unique<FontOption>());
         s_options.emplace_back(std::make_unique<FullscreenOption>());
         s_options.emplace_back(std::make_unique<VideoScalingOption>());
         s_options.emplace_back(std::make_unique<TextModeFilledWallsOption>());
+
+        // Audio
+        s_options.emplace_back(std::make_unique<MasterVolumeOption>());
+        s_options.emplace_back(std::make_unique<AmbientAudioEnabledOption>());
+        s_options.emplace_back(std::make_unique<PreloadAmbientAudioOption>());
+
+        // Input
+        s_options.emplace_back(std::make_unique<InputModeOption>());
+        s_options.emplace_back(std::make_unique<AnyKeyConfirmMoreOption>());
+        s_options.emplace_back(std::make_unique<AutoReloadOption>());
+
+        // Gameplay
+        s_options.emplace_back(std::make_unique<AlwaysCenterViewOption>());
         s_options.emplace_back(std::make_unique<SkipIntroLevelOption>());
         s_options.emplace_back(std::make_unique<SkipIntroPopupOption>());
-        s_options.emplace_back(std::make_unique<AnyKeyConfirmMoreOption>());
         s_options.emplace_back(std::make_unique<DisplayHintsOption>());
         s_options.emplace_back(std::make_unique<AlwaysWarnMonsterOption>());
         s_options.emplace_back(std::make_unique<WarnThrowValuableOption>());
         s_options.emplace_back(std::make_unique<WarnLightExplosivesOption>());
         s_options.emplace_back(std::make_unique<WanDrinkMalignPotionOption>());
         s_options.emplace_back(std::make_unique<WarnRangedWeaponMeleeOption>());
-        s_options.emplace_back(std::make_unique<AutoReloadOption>());
         s_options.emplace_back(std::make_unique<ProjectileDelayOption>());
-        s_options.emplace_back(std::make_unique<ShotgunDelayOption>());
         s_options.emplace_back(std::make_unique<ExplosionDelayOption>());
-        s_options.emplace_back(std::make_unique<ResetDefaultsOption>());
+
+        // Reset to defaults
+        //
+        // TODO: Consider how to handle this. Should there be such an option?
+        //
+        // s_options.emplace_back(std::make_unique<ResetDefaultsOption>());
 
         s_font_name = "";
         s_is_bot_playing = false;
@@ -700,10 +777,6 @@ int delay_projectile_draw()
 {
         return s_delay_projectile_draw;
 }
-int delay_shotgun()
-{
-        return s_delay_shotgun;
-}
 
 int delay_explosion()
 {
@@ -745,6 +818,33 @@ void set_2x_scale_enabled(const bool value)
 // -----------------------------------------------------------------------------
 // User options
 // -----------------------------------------------------------------------------
+std::string MasterVolumeOption::name() const
+{
+        return "Audio volume level";
+}
+
+std::string MasterVolumeOption::descr() const
+{
+        return (
+                "Master volume control (0-100%).");
+}
+
+std::string MasterVolumeOption::value_str() const
+{
+        std::string str(11, '-');
+
+        str[s_master_volume_pct_option / 10] = '|';
+
+        str += " " + std::to_string(s_master_volume_pct_option) + "%";
+
+        return str;
+}
+
+OptionSubmenuType MasterVolumeOption::submenu_type() const
+{
+        return OptionSubmenuType::audio;
+}
+
 void MasterVolumeOption::change(const OptionChangeCommand command) const
 {
         audio::stop_ambient();
@@ -790,20 +890,26 @@ void MasterVolumeOption::change(const OptionChangeCommand command) const
         audio::play(audio::SfxId::menu_select);
 }
 
-std::string MasterVolumeOption::name() const
+std::string AmbientAudioEnabledOption::name() const
 {
-        return "Audio volume level";
+        return "Play ambient sounds";
 }
 
-std::string MasterVolumeOption::value_str() const
+std::string AmbientAudioEnabledOption::descr() const
 {
-        std::string str(11, '-');
+        return (
+                "If enabled, ambient sound effects such as howling wind or "
+                "dripping water will occasionally be played.");
+}
 
-        str[s_master_volume_pct_option / 10] = '|';
+std::string AmbientAudioEnabledOption::value_str() const
+{
+        return s_is_ambient_audio_enabled ? "Yes" : "No";
+}
 
-        str += " " + std::to_string(s_master_volume_pct_option) + "%";
-
-        return str;
+OptionSubmenuType AmbientAudioEnabledOption::submenu_type() const
+{
+        return OptionSubmenuType::audio;
 }
 
 void AmbientAudioEnabledOption::change(const OptionChangeCommand command) const
@@ -817,14 +923,27 @@ void AmbientAudioEnabledOption::change(const OptionChangeCommand command) const
         audio::play(audio::SfxId::menu_select);
 }
 
-std::string AmbientAudioEnabledOption::name() const
+std::string PreloadAmbientAudioOption::name() const
 {
-        return "Play ambient sounds";
+        return "Preload ambient sounds";
 }
 
-std::string AmbientAudioEnabledOption::value_str() const
+std::string PreloadAmbientAudioOption::descr() const
 {
-        return s_is_ambient_audio_enabled ? "Yes" : "No";
+        return (
+                "Load all ambient sound clips on game startup, otherwise load "
+                "each sound individually when played for the first time "
+                "(a small delay may occur when this happens).");
+}
+
+std::string PreloadAmbientAudioOption::value_str() const
+{
+        return s_is_ambient_audio_preloaded ? "Yes" : "No";
+}
+
+OptionSubmenuType PreloadAmbientAudioOption::submenu_type() const
+{
+        return OptionSubmenuType::audio;
 }
 
 void PreloadAmbientAudioOption::change(const OptionChangeCommand command) const
@@ -834,14 +953,39 @@ void PreloadAmbientAudioOption::change(const OptionChangeCommand command) const
         s_is_ambient_audio_preloaded = !s_is_ambient_audio_preloaded;
 }
 
-std::string PreloadAmbientAudioOption::name() const
+std::string InputModeOption::name() const
 {
-        return "Preload ambient sounds at game startup";
+        return "Input mode";
 }
 
-std::string PreloadAmbientAudioOption::value_str() const
+std::string InputModeOption::descr() const
 {
-        return s_is_ambient_audio_preloaded ? "Yes" : "No";
+        return (
+                "Use default input mode (numerical keypad or arrow keys), or "
+                "\"Vi-keys\". See the game manual for more information.");
+}
+
+std::string InputModeOption::value_str() const
+{
+        switch (s_input_mode) {
+        case InputMode::standard:
+                return "Default";
+
+        case InputMode::vi_keys:
+                return "Vi-keys";
+
+        case InputMode::END:
+                break;
+        }
+
+        return "";
+
+        ASSERT(false);
+}
+
+OptionSubmenuType InputModeOption::submenu_type() const
+{
+        return OptionSubmenuType::input;
 }
 
 void InputModeOption::change(const OptionChangeCommand command) const
@@ -872,27 +1016,26 @@ void InputModeOption::change(const OptionChangeCommand command) const
         s_input_mode = (InputMode)(input_mode_nr);
 }
 
-std::string InputModeOption::name() const
+std::string AlwaysCenterViewOption::name() const
 {
-        return "Input mode";
+        return "Always center view";
 }
 
-std::string InputModeOption::value_str() const
+std::string AlwaysCenterViewOption::descr() const
 {
-        switch (s_input_mode) {
-        case InputMode::standard:
-                return "Default (numpad or arrows)";
+        return (
+                "Keep the view centered on the player, otherwise only center "
+                "when the player is near the edge of the view.");
+}
 
-        case InputMode::vi_keys:
-                return "Vi-keys";
+std::string AlwaysCenterViewOption::value_str() const
+{
+        return s_always_center_view_on_player ? "Yes" : "No";
+}
 
-        case InputMode::END:
-                break;
-        }
-
-        return "";
-
-        ASSERT(false);
+OptionSubmenuType AlwaysCenterViewOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
 }
 
 void AlwaysCenterViewOption::change(OptionChangeCommand command) const
@@ -902,14 +1045,26 @@ void AlwaysCenterViewOption::change(OptionChangeCommand command) const
         s_always_center_view_on_player = !s_always_center_view_on_player;
 }
 
-std::string AlwaysCenterViewOption::name() const
+std::string TilesModeOption::name() const
 {
-        return "Always center view on player";
+        return "Use tile set";
 }
 
-std::string AlwaysCenterViewOption::value_str() const
+std::string TilesModeOption::descr() const
 {
-        return s_always_center_view_on_player ? "Yes" : "No";
+        return (
+                "Use tile graphics to represent the game environment, "
+                "otherwise use text symbols only.");
+}
+
+std::string TilesModeOption::value_str() const
+{
+        return s_is_tiles_mode ? "Yes" : "No";
+}
+
+OptionSubmenuType TilesModeOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
 }
 
 void TilesModeOption::change(OptionChangeCommand command) const
@@ -925,14 +1080,25 @@ void TilesModeOption::change(OptionChangeCommand command) const
         io::init_other();
 }
 
-std::string TilesModeOption::name() const
+std::string FontOption::name() const
 {
-        return "Use tile set";
+        return "Font";
 }
 
-std::string TilesModeOption::value_str() const
+std::string FontOption::descr() const
 {
-        return s_is_tiles_mode ? "Yes" : "No";
+        return (
+                "Font used for text.");
+}
+
+std::string FontOption::value_str() const
+{
+        return s_font_name;
+}
+
+OptionSubmenuType FontOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
 }
 
 void FontOption::change(OptionChangeCommand command) const
@@ -940,10 +1106,10 @@ void FontOption::change(OptionChangeCommand command) const
         // Find current font index
         size_t font_idx = 0;
 
-        const size_t nr_fonts = std::size(font_image_names);
+        const size_t nr_fonts = std::size(s_font_image_names);
 
         for (; font_idx < nr_fonts; ++font_idx) {
-                if (font_image_names[font_idx] == s_font_name) {
+                if (s_font_image_names[font_idx] == s_font_name) {
                         break;
                 }
         }
@@ -968,7 +1134,7 @@ void FontOption::change(OptionChangeCommand command) const
                 }
         }
 
-        s_font_name = font_image_names[font_idx];
+        s_font_name = s_font_image_names[font_idx];
 
         // Attempt to use 2x scaling if requested
         s_is_2x_scale_enabled = s_is_2x_scale_requested;
@@ -977,14 +1143,27 @@ void FontOption::change(OptionChangeCommand command) const
         io::init_other();
 }
 
-std::string FontOption::name() const
+std::string FullscreenOption::name() const
 {
-        return "Font";
+        return "Fullscreen";
 }
 
-std::string FontOption::value_str() const
+std::string FullscreenOption::descr() const
 {
-        return s_font_name;
+        return (
+                "Run in fullscreen mode (borderless fullscreen window) or "
+                "use resizable window. This can also be toggled by pressing "
+                "Alt-Enter.");
+}
+
+std::string FullscreenOption::value_str() const
+{
+        return s_is_fullscreen ? "Yes" : "No";
+}
+
+OptionSubmenuType FullscreenOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
 }
 
 void FullscreenOption::change(OptionChangeCommand command) const
@@ -999,14 +1178,27 @@ void FullscreenOption::change(OptionChangeCommand command) const
         io::on_user_toggle_fullscreen();
 }
 
-std::string FullscreenOption::name() const
+std::string VideoScalingOption::name() const
 {
-        return "Fullscreen";
+        return "Scale graphics 2x";
 }
 
-std::string FullscreenOption::value_str() const
+std::string VideoScalingOption::descr() const
 {
-        return s_is_fullscreen ? "Yes" : "No";
+        return (
+                "Scale all graphics to double size (a small font such as \"" +
+                s_font_image_names[0] +
+                "\" is recommended).");
+}
+
+std::string VideoScalingOption::value_str() const
+{
+        return s_is_2x_scale_requested ? "Yes" : "No";
+}
+
+OptionSubmenuType VideoScalingOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
 }
 
 void VideoScalingOption::change(OptionChangeCommand command) const
@@ -1021,14 +1213,26 @@ void VideoScalingOption::change(OptionChangeCommand command) const
         io::on_user_toggle_scaling();
 }
 
-std::string VideoScalingOption::name() const
+std::string TextModeFilledWallsOption::name() const
 {
-        return "Scale graphics 2x";
+        return "Text mode wall symbol";
 }
 
-std::string VideoScalingOption::value_str() const
+std::string TextModeFilledWallsOption::descr() const
 {
-        return s_is_2x_scale_requested ? "Yes" : "No";
+        return (
+                "Symbol used for representing walls in text mode "
+                "(when tiles are not used).");
+}
+
+std::string TextModeFilledWallsOption::value_str() const
+{
+        return s_text_mode_filled_walls ? "Filled rectangle" : "Hash sign";
+}
+
+OptionSubmenuType TextModeFilledWallsOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
 }
 
 void TextModeFilledWallsOption::change(OptionChangeCommand command) const
@@ -1036,16 +1240,33 @@ void TextModeFilledWallsOption::change(OptionChangeCommand command) const
         (void)command;
 
         s_text_mode_filled_walls = !s_text_mode_filled_walls;
+
+        // Redefine the terrain data list.
+        terrain::init();
 }
 
-std::string TextModeFilledWallsOption::name() const
+std::string SkipIntroLevelOption::name() const
 {
-        return "Text mode wall symbol";
+        return "Skip intro level";
 }
 
-std::string TextModeFilledWallsOption::value_str() const
+std::string SkipIntroLevelOption::descr() const
 {
-        return s_text_mode_filled_walls ? "Filled rectangle" : "Hash sign";
+        return (
+                "Skip the introduction level. This level merely serves to "
+                "provide a backstory and to set up the atmosphere, there are "
+                "no gameplay benefits such as items or experience points that "
+                "can be gained from playing through it.");
+}
+
+std::string SkipIntroLevelOption::value_str() const
+{
+        return s_is_intro_lvl_skipped ? "Yes" : "No";
+}
+
+OptionSubmenuType SkipIntroLevelOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
 }
 
 void SkipIntroLevelOption::change(OptionChangeCommand command) const
@@ -1055,14 +1276,25 @@ void SkipIntroLevelOption::change(OptionChangeCommand command) const
         s_is_intro_lvl_skipped = !s_is_intro_lvl_skipped;
 }
 
-std::string SkipIntroLevelOption::name() const
+std::string SkipIntroPopupOption::name() const
 {
-        return "Skip intro level";
+        return "Skip intro popup";
 }
 
-std::string SkipIntroLevelOption::value_str() const
+std::string SkipIntroPopupOption::descr() const
 {
-        return s_is_intro_lvl_skipped ? "Yes" : "No";
+        return (
+                "Skip the story popup on the introduction level.");
+}
+
+std::string SkipIntroPopupOption::value_str() const
+{
+        return s_is_intro_popup_skipped ? "Yes" : "No";
+}
+
+OptionSubmenuType SkipIntroPopupOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
 }
 
 void SkipIntroPopupOption::change(OptionChangeCommand command) const
@@ -1072,14 +1304,30 @@ void SkipIntroPopupOption::change(OptionChangeCommand command) const
         s_is_intro_popup_skipped = !s_is_intro_popup_skipped;
 }
 
-std::string SkipIntroPopupOption::name() const
+std::string AnyKeyConfirmMoreOption::name() const
 {
-        return "Skip intro popup";
+        return "Any key to proceed";
 }
 
-std::string SkipIntroPopupOption::value_str() const
+std::string AnyKeyConfirmMoreOption::descr() const
 {
-        return s_is_intro_popup_skipped ? "Yes" : "No";
+        return (
+                "Any key confirms \"" +
+                msg_log::g_more_str +
+                "\" prompts in the message log (which can happen for example "
+                "when a monster appears as a warning to the player), "
+                "otherwise only space (and a few other keys) confirms these "
+                "prompts. Keeping the option disabled is safer.");
+}
+
+std::string AnyKeyConfirmMoreOption::value_str() const
+{
+        return s_is_any_key_confirm_more ? "Yes" : "No";
+}
+
+OptionSubmenuType AnyKeyConfirmMoreOption::submenu_type() const
+{
+        return OptionSubmenuType::input;
 }
 
 void AnyKeyConfirmMoreOption::change(OptionChangeCommand command) const
@@ -1089,31 +1337,22 @@ void AnyKeyConfirmMoreOption::change(OptionChangeCommand command) const
         s_is_any_key_confirm_more = !s_is_any_key_confirm_more;
 }
 
-std::string AnyKeyConfirmMoreOption::name() const
-{
-        return "Any key confirms \"[space]\" prompts";
-}
-
-std::string AnyKeyConfirmMoreOption::value_str() const
-{
-        return s_is_any_key_confirm_more ? "Yes" : "No";
-}
-
-void DisplayHintsOption::change(OptionChangeCommand command) const
-{
-        (void)command;
-
-        const auto current_idx = (int)s_hints_mode;
-        const auto nr_modes = (int)HintsMode::END;
-
-        s_hints_mode = (HintsMode)((current_idx + 1) % nr_modes);
-
-        hints::init();
-}
-
 std::string DisplayHintsOption::name() const
 {
         return "Display hints";
+}
+
+std::string DisplayHintsOption::descr() const
+{
+        return (
+                "Controls when in-game hints should be displayed. "
+                "\n\n{light_white}Once per game:{color_reset} Show all hints "
+                "once in each game session (and repeat them again in "
+                "other sessions). "
+                "\n\n{light_white}Once:{color_reset} Only show each hint once "
+                "across all game sessions. "
+                "\n\n{light_white}Never:{color_reset} Completely "
+                "disable hints.");
 }
 
 std::string DisplayHintsOption::value_str() const
@@ -1137,6 +1376,46 @@ std::string DisplayHintsOption::value_str() const
         return "";
 }
 
+OptionSubmenuType DisplayHintsOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
+}
+
+void DisplayHintsOption::change(OptionChangeCommand command) const
+{
+        (void)command;
+
+        const auto current_idx = (int)s_hints_mode;
+        const auto nr_modes = (int)HintsMode::END;
+
+        s_hints_mode = (HintsMode)((current_idx + 1) % nr_modes);
+
+        hints::init();
+}
+
+std::string AlwaysWarnMonsterOption::name() const
+{
+        return "Always warn monster appears";
+}
+
+std::string AlwaysWarnMonsterOption::descr() const
+{
+        return (
+                "Always warn when a monster appears in view (and no other "
+                "monster is already seen), otherwise only warn while "
+                "performing long actions like treating wounds.");
+}
+
+std::string AlwaysWarnMonsterOption::value_str() const
+{
+        return s_always_warn_new_mon ? "Yes" : "No";
+}
+
+OptionSubmenuType AlwaysWarnMonsterOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
+}
+
 void AlwaysWarnMonsterOption::change(OptionChangeCommand command) const
 {
         (void)command;
@@ -1144,14 +1423,25 @@ void AlwaysWarnMonsterOption::change(OptionChangeCommand command) const
         s_always_warn_new_mon = !s_always_warn_new_mon;
 }
 
-std::string AlwaysWarnMonsterOption::name() const
+std::string WarnThrowValuableOption::name() const
 {
-        return "Always warn when new monster is seen";
+        return "Warn throwing valuable item";
 }
 
-std::string AlwaysWarnMonsterOption::value_str() const
+std::string WarnThrowValuableOption::descr() const
 {
-        return s_always_warn_new_mon ? "Yes" : "No";
+        return (
+                "Warn before throwing \"valuable\" items such as potions.");
+}
+
+std::string WarnThrowValuableOption::value_str() const
+{
+        return s_warn_on_throw_valuable ? "Yes" : "No";
+}
+
+OptionSubmenuType WarnThrowValuableOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
 }
 
 void WarnThrowValuableOption::change(OptionChangeCommand command) const
@@ -1161,14 +1451,25 @@ void WarnThrowValuableOption::change(OptionChangeCommand command) const
         s_warn_on_throw_valuable = !s_warn_on_throw_valuable;
 }
 
-std::string WarnThrowValuableOption::name() const
+std::string WarnLightExplosivesOption::name() const
 {
-        return "Warn when throwing \"valuable\" items";
+        return "Warn lighting explosive";
 }
 
-std::string WarnThrowValuableOption::value_str() const
+std::string WarnLightExplosivesOption::descr() const
 {
-        return s_warn_on_throw_valuable ? "Yes" : "No";
+        return (
+                "Warn before lighting explosives");
+}
+
+std::string WarnLightExplosivesOption::value_str() const
+{
+        return s_warn_on_light_explosive ? "Yes" : "No";
+}
+
+OptionSubmenuType WarnLightExplosivesOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
 }
 
 void WarnLightExplosivesOption::change(OptionChangeCommand command) const
@@ -1178,14 +1479,25 @@ void WarnLightExplosivesOption::change(OptionChangeCommand command) const
         s_warn_on_light_explosive = !s_warn_on_light_explosive;
 }
 
-std::string WarnLightExplosivesOption::name() const
+std::string WanDrinkMalignPotionOption::name() const
 {
-        return "Warn when lighting explosives";
+        return "Warn malign potion";
 }
 
-std::string WarnLightExplosivesOption::value_str() const
+std::string WanDrinkMalignPotionOption::descr() const
 {
-        return s_warn_on_light_explosive ? "Yes" : "No";
+        return (
+                "Warn before drinking potions that are known to be malignant.");
+}
+
+std::string WanDrinkMalignPotionOption::value_str() const
+{
+        return s_warn_on_drink_malign_potion ? "Yes" : "No";
+}
+
+OptionSubmenuType WanDrinkMalignPotionOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
 }
 
 void WanDrinkMalignPotionOption::change(OptionChangeCommand command) const
@@ -1195,14 +1507,27 @@ void WanDrinkMalignPotionOption::change(OptionChangeCommand command) const
         s_warn_on_drink_malign_potion = !s_warn_on_drink_malign_potion;
 }
 
-std::string WanDrinkMalignPotionOption::name() const
+std::string WarnRangedWeaponMeleeOption::name() const
 {
-        return "Warn when drinking malign potions";
+        return "Warn ranged weapon melee";
 }
 
-std::string WanDrinkMalignPotionOption::value_str() const
+std::string WarnRangedWeaponMeleeOption::descr() const
 {
-        return s_warn_on_drink_malign_potion ? "Yes" : "No";
+        return (
+                "Warn if attempting to perform a close combat melee attack "
+                "with a ranged weapon (such as a pistol), which is possible "
+                "but perhaps unintended.");
+}
+
+std::string WarnRangedWeaponMeleeOption::value_str() const
+{
+        return s_warn_on_ranged_wpn_melee ? "Yes" : "No";
+}
+
+OptionSubmenuType WarnRangedWeaponMeleeOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
 }
 
 void WarnRangedWeaponMeleeOption::change(OptionChangeCommand command) const
@@ -1212,14 +1537,26 @@ void WarnRangedWeaponMeleeOption::change(OptionChangeCommand command) const
         s_warn_on_ranged_wpn_melee = !s_warn_on_ranged_wpn_melee;
 }
 
-std::string WarnRangedWeaponMeleeOption::name() const
+std::string AutoReloadOption::name() const
 {
-        return "Ranged weapon melee attack warning";
+        return "Auto reload weapons";
 }
 
-std::string WarnRangedWeaponMeleeOption::value_str() const
+std::string AutoReloadOption::descr() const
 {
-        return s_warn_on_ranged_wpn_melee ? "Yes" : "No";
+        return (
+                "Automatically perform a reload action instead if attempting "
+                "to fire a ranged weapon with no ammo loaded.");
+}
+
+std::string AutoReloadOption::value_str() const
+{
+        return s_is_ranged_wpn_auto_reload ? "Yes" : "No";
+}
+
+OptionSubmenuType AutoReloadOption::submenu_type() const
+{
+        return OptionSubmenuType::input;
 }
 
 void AutoReloadOption::change(OptionChangeCommand command) const
@@ -1229,14 +1566,26 @@ void AutoReloadOption::change(OptionChangeCommand command) const
         s_is_ranged_wpn_auto_reload = !s_is_ranged_wpn_auto_reload;
 }
 
-std::string AutoReloadOption::name() const
+std::string ProjectileDelayOption::name() const
 {
-        return "Ranged weapon auto reload";
+        return "Projectile delay (ms)";
 }
 
-std::string AutoReloadOption::value_str() const
+std::string ProjectileDelayOption::descr() const
 {
-        return s_is_ranged_wpn_auto_reload ? "Yes" : "No";
+        return (
+                "Number of milliseconds per step when running "
+                "projectile animations.");
+}
+
+std::string ProjectileDelayOption::value_str() const
+{
+        return std::to_string(s_delay_projectile_draw);
+}
+
+OptionSubmenuType ProjectileDelayOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
 }
 
 void ProjectileDelayOption::change(OptionChangeCommand command) const
@@ -1276,61 +1625,25 @@ void ProjectileDelayOption::change(OptionChangeCommand command) const
                         allowed_range.max);
 }
 
-std::string ProjectileDelayOption::name() const
+std::string ExplosionDelayOption::name() const
 {
-        return "Projectile delay (ms)";
+        return "Explosion delay (ms)";
 }
 
-std::string ProjectileDelayOption::value_str() const
+std::string ExplosionDelayOption::descr() const
 {
-        return std::to_string(s_delay_projectile_draw);
+        return (
+                "Duration of explosion animations (milliseconds).");
 }
 
-void ShotgunDelayOption::change(OptionChangeCommand command) const
+std::string ExplosionDelayOption::value_str() const
 {
-        const Range allowed_range(0, 900);
-
-        if (command == OptionChangeCommand::enter) {
-                // Enter
-                query::QueryNumberConfig query_config;
-
-                query_config.allowed_range = allowed_range;
-                query_config.default_value = s_delay_shotgun;
-                query_config.cancel_returns_default = true;
-
-                const int nr =
-                        query::number(
-                                query_config,
-                                "Shotgun delay");
-
-                if (nr != -1) {
-                        s_delay_shotgun = nr;
-                }
-        }
-        else if (command == OptionChangeCommand::left) {
-                // Left
-                s_delay_shotgun -= 10;
-        }
-        else {
-                // Right
-                s_delay_shotgun += 10;
-        }
-
-        s_delay_shotgun =
-                std::clamp(
-                        s_delay_shotgun,
-                        allowed_range.min,
-                        allowed_range.max);
+        return std::to_string(s_delay_explosion);
 }
 
-std::string ShotgunDelayOption::name() const
+OptionSubmenuType ExplosionDelayOption::submenu_type() const
 {
-        return "Shotgun delay (ms)";
-}
-
-std::string ShotgunDelayOption::value_str() const
-{
-        return std::to_string(s_delay_shotgun);
+        return OptionSubmenuType::gameplay;
 }
 
 void ExplosionDelayOption::change(OptionChangeCommand command) const
@@ -1370,83 +1683,171 @@ void ExplosionDelayOption::change(OptionChangeCommand command) const
                         allowed_range.max);
 }
 
-std::string ExplosionDelayOption::name() const
-{
-        return "Explosion delay (ms)";
-}
+// std::string ResetDefaultsOption::name() const
+// {
+//         return "Reset to defaults";
+// }
 
-std::string ExplosionDelayOption::value_str() const
-{
-        return std::to_string(s_delay_explosion);
-}
+// std::string ResetDefaultsOption::descr() const
+// {
+//         return (
+//                 "");
+// }
 
-void ResetDefaultsOption::change(OptionChangeCommand command) const
-{
-        if (command == OptionChangeCommand::enter) {
-                set_default_variables();
-                update_render_dims();
-                io::init_other();
-                audio::init();
-                states::draw();
-                io::update_screen();
-        }
-}
+// std::string ResetDefaultsOption::value_str() const
+// {
+//         return "";
+// }
 
-std::string ResetDefaultsOption::name() const
-{
-        return "Reset to defaults";
-}
+// OptionSubmenuType ResetDefaultsOption::submenu_type() const
+// {
+//         return OptionSubmenuType::gameplay;
+// }
 
-std::string ResetDefaultsOption::value_str() const
-{
-        return "";
-}
+// void ResetDefaultsOption::change(OptionChangeCommand command) const
+// {
+//         if (command == OptionChangeCommand::enter) {
+//                 set_default_variables();
+//                 update_render_dims();
+//                 io::init_other();
+//                 audio::init();
+//                 states::draw();
+//                 io::update_screen();
+//         }
+// }
 
 }  // namespace config
 
 // -----------------------------------------------------------------------------
-// Config state
+// Options state
 // -----------------------------------------------------------------------------
-ConfigState::ConfigState() :
-        m_browser((int)s_options.size())
+OptionsState::OptionsState() :
+        m_browser((int)config::OptionSubmenuType::END)
+{
+        m_browser.set_custom_menu_keys({'v', 'a', 'i', 'g'});
+}
+
+StateId OptionsState::id() const
+{
+        return StateId::options;
+}
+
+void OptionsState::update()
+{
+        const io::InputData input = io::read_input();
+
+        const MenuAction action =
+                m_browser.read(input, MenuInputMode::scrolling_and_letters);
+
+        switch (action) {
+        case MenuAction::esc:
+        case MenuAction::space: {
+                states::pop();
+                return;
+        } break;
+
+        case MenuAction::selected: {
+                const auto submenu = (config::OptionSubmenuType)m_browser.y();
+
+                filter_current_options(submenu);
+
+                s_current_submenu = submenu;
+
+                states::push(std::make_unique<OptionsSubmenuState>());
+        } break;
+
+        default: {
+        } break;
+        }
+}
+
+void OptionsState::draw()
+{
+        draw_box(panels::area(Panel::screen));
+
+        io::draw_text_center(
+                " Options ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), 0},
+                colors::title(),
+                io::DrawBg::yes,
+                colors::black(),
+                true);  // Allow pixel-level adjustment
+
+        // io::draw_text_center(
+        //         std::string(
+        //                 " " +
+        //                 common_text::g_set_option_hint +
+        //                 " " +
+        //                 common_text::g_screen_exit_hint +
+        //                 " "),
+        //         Panel::screen,
+        //         {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
+        //         colors::title(),
+        //         io::DrawBg::yes,
+        //         colors::black(),
+        //         true);  // Allow pixel-level adjustment
+
+        const auto nr_submenus = (int)config::OptionSubmenuType::END;
+
+        const int x = panels::center_x(Panel::screen) - 4;
+
+        int y = panels::center_y(Panel::screen) - (nr_submenus / 2) - 1;
+
+        for (int i = 0; i < (int)config::OptionSubmenuType::END; ++i) {
+                auto submenu_type = config::OptionSubmenuType(i);
+
+                const std::string name =
+                        submenu_name_with_key_shortcut(submenu_type);
+
+                const Color& color =
+                        (m_browser.is_at_idx((int)i))
+                        ? colors::menu_highlight()
+                        : colors::menu_dark();
+
+                io::draw_text(name, Panel::screen, {x, y}, color);
+
+                ++y;
+        }
+}
+
+// -----------------------------------------------------------------------------
+// Options submenu state
+// -----------------------------------------------------------------------------
+OptionsSubmenuState::OptionsSubmenuState() :
+        m_browser((int)s_current_options.size())
 {
         m_browser.enable_left_right_keys();
 }
 
-StateId ConfigState::id() const
+StateId OptionsSubmenuState::id() const
 {
-        return StateId::config;
+        return StateId::options_submenu;
 }
 
-void ConfigState::update()
+void OptionsSubmenuState::update()
 {
         // Some options play a custom selection audio, so they must disable the
         // one played by the menu browser.
         const bool enable_selection_audio =
-                s_options.at(m_browser.y())->allow_browser_selection_audio();
+                s_current_options[m_browser.y()]
+                        ->allow_browser_selection_audio();
 
         m_browser.set_selection_audio_enabled(enable_selection_audio);
 
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         const MenuAction action =
-                m_browser.read(
-                        input,
-                        MenuInputMode::scrolling);
+                m_browser.read(input, MenuInputMode::scrolling);
 
-        const auto& option = s_options.at(m_browser.y());
+        const config::Option* const option = s_current_options[m_browser.y()];
 
         bool did_set_option = false;
 
         switch (action) {
         case MenuAction::esc:
         case MenuAction::space: {
-                // Since text mode wall symbol may have changed, we need to
-                // redefine the terrain data list.
-                terrain::init();
-
                 states::pop();
-
                 return;
         } break;
 
@@ -1465,8 +1866,8 @@ void ConfigState::update()
                 did_set_option = true;
         } break;
 
-        default:
-                break;
+        default: {
+        } break;
         }
 
         if (did_set_option) {
@@ -1478,12 +1879,12 @@ void ConfigState::update()
         }
 }
 
-void ConfigState::draw()
+void OptionsSubmenuState::draw()
 {
         draw_box(panels::area(Panel::screen));
 
         io::draw_text_center(
-                " Options ",
+                " " + submenu_name(s_current_submenu) + " ",
                 Panel::screen,
                 {panels::center_x(Panel::screen), 0},
                 colors::title(),
@@ -1505,47 +1906,59 @@ void ConfigState::draw()
                 colors::black(),
                 true);  // Allow pixel-level adjustment
 
-        auto y = 0;
+        int y = 0;
 
         const int nr_shown = m_browser.nr_items_shown();
 
-        for (auto i = 0; i < nr_shown; ++i) {
-                const auto& option = s_options[i];
+        for (int i = 0; i < nr_shown; ++i) {
+                const config::Option* const option = s_current_options[i];
 
                 const std::string name = option->name();
 
-                // Create some distance to "reset to defaults"
-                if (i == (nr_shown - 1)) {
-                        ++y;
-                }
-
-                const auto& color =
+                const Color& color =
                         (m_browser.is_at_idx((int)i))
                         ? colors::menu_highlight()
                         : colors::menu_dark();
 
                 io::draw_text(
                         name,
-                        Panel::info_screen_content,
+                        Panel::options,
                         {0, y},
                         color);
 
                 const std::string value_str = option->value_str();
 
                 if (!value_str.empty()) {
-                        io::draw_text(
-                                ":",
-                                Panel::info_screen_content,
-                                {s_opt_values_x_pos - 2, y},
-                                color);
+                        // io::draw_text(
+                        //         ":",
+                        //         Panel::options_values,
+                        //         {s_opt_values_x_pos - 2, y},
+                        //         color);
 
                         io::draw_text(
                                 value_str,
-                                Panel::info_screen_content,
-                                {s_opt_values_x_pos, y},
+                                Panel::options_values,
+                                {0, y},
                                 color);
                 }
 
                 ++y;
+        }
+
+        const config::Option* const selected_option =
+                s_current_options[m_browser.y()];
+
+        const std::string descr_str = selected_option->descr();
+
+        if (!descr_str.empty()) {
+                Text text(descr_str);
+
+                text.set_w(panels::w(Panel::options_descr));
+
+                io::draw_text(
+                        text,
+                        Panel::options_descr,
+                        {0, 0},
+                        colors::text());
         }
 }

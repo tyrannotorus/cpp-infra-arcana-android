@@ -18,7 +18,8 @@ enum class StateId
 {
         browse_highscore_entry,
         browse_spells,
-        config,
+        options,
+        options_submenu,
         game,
         highscore,
         inventory,

@@ -328,9 +328,10 @@ std::vector<std::string> Potion::descr_hook() const
 
 std::string Potion::alignment_str() const
 {
-        return (alignment() == PotionAlignment::good)
-                ? "Benign"
-                : "Malign";
+        return (
+                (alignment() == PotionAlignment::good)
+                        ? "Benign"
+                        : "Malign");
 }
 
 void Potion::on_player_reached_new_dlvl_hook()

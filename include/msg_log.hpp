@@ -110,6 +110,8 @@ namespace msg_log
 {
 inline constexpr size_t g_nr_log_lines = 3;
 
+const std::string g_more_str = "[space]";
+
 void init();
 
 void draw();

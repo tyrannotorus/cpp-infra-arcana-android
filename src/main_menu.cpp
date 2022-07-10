@@ -290,9 +290,7 @@ void MainMenuState::update()
 
                         init::init_session();
 
-                        auto new_game_state = std::make_unique<NewGameState>();
-
-                        states::push(std::move(new_game_state));
+                        states::push(std::make_unique<NewGameState>());
                 } break;
 
                 case 1: {
@@ -319,25 +317,17 @@ void MainMenuState::update()
 
                 case 2: {
                         // Manual
-                        std::unique_ptr<State> browse_manual_state(
-                                new BrowseManual);
-
-                        states::push(std::move(browse_manual_state));
+                        states::push(std::make_unique<BrowseManual>());
                 } break;
 
                 case 3: {
                         // Options
-                        std::unique_ptr<State> config_state(new ConfigState);
-
-                        states::push(std::move(config_state));
+                        states::push(std::make_unique<OptionsState>());
                 } break;
 
                 case 4: {
                         // Highscores
-                        std::unique_ptr<State> browse_highscore_state(
-                                new BrowseHighscore);
-
-                        states::push(std::move(browse_highscore_state));
+                        states::push(std::make_unique<BrowseHighscore>());
                 } break;
 
                 case 5: {

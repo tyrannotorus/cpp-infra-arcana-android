@@ -28,19 +28,19 @@ Other info:          Terminus TTF is a TrueType version of Terminus Font
 Changes made:        Sharpened the generated image, and made some minor
                      adjustments
 
-File(s):             12x22_monospace_medium.png
+File(s):             12x22_monospace.png
 Source:              https://www.1001fonts.com/monospace-font.html
 Original name:       Monospace Medium
 License:             SIL Open Font License, Version 1.1 (OFL-1.1)
 
-File(s):             10x24_dejavu_sans_mono_book.png
-                     12x24_dejavu_sans_mono_book.png
-                     13x24_dejavu_sans_mono_book.png
+File(s):             10x24_dejavu.png
+                     12x24_dejavu.png
+                     13x24_dejavu.png
 Source:              https://www.1001fonts.com/dejavu-sans-font.html
 Original name:       DejaVu Sans Font Family
 License:             See LICENSE-FONT-DEJAVU.txt
 
-File(s):             13x24_special_elite.png
+File(s):             13x24_typewriter.png
 Source:              https://www.1001fonts.com/special-elite-font.html
 Original name:       Special Elite Font
 License:             See LICENSE-FONT-SPECIAL-ELITE.txt

@@ -87,17 +87,31 @@ bool has_seen_hint_global(hints::Id id);
 void set_hint_seen_global(hints::Id id);
 bool always_warn_new_mon();
 int delay_projectile_draw();
-int delay_shotgun();
 int delay_explosion();
 void set_default_player_name(const std::string& name);
 std::string default_player_name();
 
 }  // namespace config
 
-class ConfigState : public State
+class OptionsState : public State
 {
 public:
-        ConfigState();
+        OptionsState();
+
+        void update() override;
+
+        void draw() override;
+
+        StateId id() const override;
+
+private:
+        MenuBrowser m_browser;
+};
+
+class OptionsSubmenuState : public State
+{
+public:
+        OptionsSubmenuState();
 
         void update() override;
 

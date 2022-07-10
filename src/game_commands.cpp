@@ -221,7 +221,7 @@ static void handle_game_menu_command()
         }
         else if (choice == 1) {
                 // Options
-                states::push(std::make_unique<ConfigState>());
+                states::push(std::make_unique<OptionsState>());
         }
         else if (choice == 2) {
                 // Quit
@@ -767,7 +767,7 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::options: {
-                states::push(std::make_unique<ConfigState>());
+                states::push(std::make_unique<OptionsState>());
         } break;
 
         case GameCmd::reload: {

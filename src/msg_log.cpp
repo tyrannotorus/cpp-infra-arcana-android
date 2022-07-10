@@ -40,8 +40,6 @@ static size_t s_history_count = 0;
 
 static Msg s_history[s_history_cap];
 
-static const std::string s_more_str = "[space]";
-
 // We only allow grouping up to 9 identical messages into a repeated message
 // (e.g. "Bla. (x3)"), so that the repeat number is always a single digit (this
 // simplifies calculation of required space for messages).
@@ -50,7 +48,8 @@ static const int s_max_nr_repeats = 9;
 // "(xN)" where N is guaranteed to be a single digit, see above.
 static const int s_repeat_str_len = 4;
 
-static const int s_space_reserved_for_more_prompt = (int)s_more_str.size() + 1;
+static const int s_space_reserved_for_more_prompt =
+        (int)msg_log::g_more_str.size() + 1;
 
 static bool s_is_waiting_more_pompt = false;
 
@@ -213,7 +212,7 @@ static void draw_more_prompt()
                 // MUST fit on the line (handled when adding messages).
                 if (line_nr != (msg_log::g_nr_log_lines - 1)) {
                         const int more_x1 =
-                                more_x0 + (int)s_more_str.size() - 1;
+                                more_x0 + (int)msg_log::g_more_str.size() - 1;
 
                         if (more_x1 >= panels::w(Panel::log)) {
                                 more_x0 = 0;
@@ -223,11 +222,11 @@ static void draw_more_prompt()
         }
 
         ASSERT(
-                (more_x0 + (int)s_more_str.size()) <=
+                (more_x0 + (int)msg_log::g_more_str.size()) <=
                 (panels::w(Panel::log)));
 
         io::draw_text(
-                s_more_str,
+                msg_log::g_more_str,
                 Panel::log,
                 {more_x0, (int)line_nr},
                 colors::msg_more(),

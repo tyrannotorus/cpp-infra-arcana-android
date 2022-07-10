@@ -11,6 +11,15 @@
 
 namespace config
 {
+enum class OptionSubmenuType
+{
+        video,
+        audio,
+        input,
+        gameplay,
+        END
+};
+
 // Values for user changing option left/right or pressing enter.
 enum class OptionChangeCommand
 {
@@ -22,11 +31,15 @@ enum class OptionChangeCommand
 class Option
 {
 public:
-        virtual void change(OptionChangeCommand command) const = 0;
-
         virtual std::string name() const = 0;
 
+        virtual std::string descr() const = 0;
+
         virtual std::string value_str() const = 0;
+
+        virtual OptionSubmenuType submenu_type() const = 0;
+
+        virtual void change(OptionChangeCommand command) const = 0;
 
         // Some options play a custom selection audio, so they must disable the
         // one played by the menu browser.
@@ -39,11 +52,15 @@ public:
 class MasterVolumeOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 
         bool allow_browser_selection_audio() const override
         {
@@ -54,11 +71,15 @@ public:
 class AmbientAudioEnabledOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 
         bool allow_browser_selection_audio() const override
         {
@@ -69,222 +90,296 @@ public:
 class PreloadAmbientAudioOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class InputModeOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class AlwaysCenterViewOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class TilesModeOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class FontOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class FullscreenOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class VideoScalingOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class TextModeFilledWallsOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class SkipIntroLevelOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class SkipIntroPopupOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class AnyKeyConfirmMoreOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class DisplayHintsOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class AlwaysWarnMonsterOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class WarnThrowValuableOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class WarnLightExplosivesOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class WanDrinkMalignPotionOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class WarnRangedWeaponMeleeOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class AutoReloadOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
+        std::string descr() const override;
+
         std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
+        void change(OptionChangeCommand command) const override;
 };
 
 class ProjectileDelayOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
-        std::string value_str() const override;
-};
+        std::string descr() const override;
 
-class ShotgunDelayOption : public Option
-{
-public:
+        std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
         void change(OptionChangeCommand command) const override;
-
-        std::string name() const override;
-
-        std::string value_str() const override;
 };
 
 class ExplosionDelayOption : public Option
 {
 public:
-        void change(OptionChangeCommand command) const override;
-
         std::string name() const override;
 
-        std::string value_str() const override;
-};
+        std::string descr() const override;
 
-class ResetDefaultsOption : public Option
-{
-public:
+        std::string value_str() const override;
+
+        OptionSubmenuType submenu_type() const override;
+
         void change(OptionChangeCommand command) const override;
-
-        std::string name() const override;
-
-        std::string value_str() const override;
 };
+
+// class ResetDefaultsOption : public Option
+// {
+// public:
+//         std::string name() const override;
+
+//         std::string descr() const override;
+
+//         std::string value_str() const override;
+
+//         OptionSubmenuType submenu_type() const override;
+
+//         void change(OptionChangeCommand command) const override;
+// };
 
 }  // namespace config
 
