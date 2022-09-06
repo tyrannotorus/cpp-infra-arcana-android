@@ -26,6 +26,8 @@
 - Made some changes to reduce the risk of registering key presses when the game window regains focus (e.g. accidentally doing a melee attack due to the game registering a tab press when alt-tabbing back to the game)
 - Changed color of grates to gray, to clarify that they are made of metal (and not wood)
 - Turn number is now displayed
+- Improved the stairs down tile (thanks to Andy Walker)
+- Added more sound effects (thanks Andy Walker for various gate sounds, item container opening sounds, and a horn sound).
 
 ##############################
 # Fixes
