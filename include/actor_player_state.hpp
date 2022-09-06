@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#ifndef ACTOR_PLAYER_STATE
-#define ACTOR_PLAYER_STATE
+#ifndef ACTOR_PLAYER_STATE_HPP
+#define ACTOR_PLAYER_STATE_HPP
 
 #include <memory>
 
@@ -70,4 +70,4 @@ void init();
 
 }  // namespace actor
 
-#endif  // ACTOR_PLAYER_STATE
+#endif  // ACTOR_PLAYER_STATE_HPP

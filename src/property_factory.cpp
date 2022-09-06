@@ -22,6 +22,9 @@ Prop* make(const PropId id)
         case PropId::wound:
                 return new PropWound();
 
+        case PropId::moribund:
+                return new PropMoribund();
+
         case PropId::blind:
                 return new PropBlind();
 
@@ -329,10 +332,16 @@ Prop* make(const PropId id)
                 return new Prop(id);
 
         case PropId::sanctuary:
-                return new Prop(id);
+                return new PropSanctuary();
 
         case PropId::meditative_focused:
                 return new Prop(id);
+
+        case PropId::accrue_pain:
+                return new PropAccruePain();
+
+        case PropId::crimson_passage:
+                return new PropCrimsonPassage();
 
         case PropId::END:
                 break;

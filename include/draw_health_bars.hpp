@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#ifndef DRAW_HEALTH_BARS
-#define DRAW_HEALTH_BARS
+#ifndef DRAW_HEALTH_BARS_HPP
+#define DRAW_HEALTH_BARS_HPP
 
 void draw_health_bars();
 

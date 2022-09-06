@@ -83,7 +83,10 @@ enum class Id
         player_ghoul_claw,
 
         // Intrinsic attacks for monsters
-        // NOTE: There is a string -> id map for these entries
+        //
+        // NOTE: There is a string -> id map for these entries, see
+        // item_data.cpp.
+        //
         intr_kick,
         intr_bite,
         intr_claw,
@@ -117,10 +120,12 @@ enum class Id
         armor_asb_suit,
         armor_mi_go,
 
+        // Head items
         gas_mask,
+        torture_collar,
 
         // Scrolls
-        // NOTE: There is no scroll for the identify spell - this is on purpose
+        // NOTE: There is NO scroll for the identify spell, this is intentional.
         scroll_aura_of_decay,
         scroll_aza_gaze,
         scroll_bless,
@@ -130,10 +135,10 @@ enum class Id
         scroll_light,
         scroll_cataclysm,
         scroll_control_object,
-        scroll_pest,
+        scroll_pestilence,
         scroll_premonition,
         scroll_erudition,
-        scroll_res,
+        scroll_resistance,
         scroll_see_invis,
         scroll_slow,
         scroll_haste,
@@ -142,6 +147,10 @@ enum class Id
         scroll_telep,
         scroll_terrify,
         scroll_transmut,
+        scroll_accrue_pain,
+        scroll_blood_temper,
+        scroll_sacrifice_life,
+        scroll_crimson_passage,
 
         // Potions
         potion_blindness,
@@ -203,6 +212,8 @@ enum class Id
         END
 };
 
+// NOTE: There is a string -> item set id map for these entries, see
+// item_data.cpp.
 enum class ItemSetId
 {
         minor_treasure,

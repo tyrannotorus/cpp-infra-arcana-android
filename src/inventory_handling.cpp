@@ -58,7 +58,7 @@ static bool run_drop_query(
 {
         TRACE_FUNC_BEGIN;
 
-        const auto& data = item.data();
+        const item::ItemData& data = item.data();
 
         msg_log::clear();
 
@@ -125,84 +125,23 @@ static void cap_str_to_menu_x1(
 
 static void activate(const size_t backpack_idx)
 {
-        auto* item = map::g_player->m_inv.m_backpack[backpack_idx];
+        item::Item* item = map::g_player->m_inv.m_backpack[backpack_idx];
 
-        auto result = item->activate(map::g_player);
+        ConsumeItem result = item->activate(map::g_player);
 
         if (result == ConsumeItem::yes) {
                 map::g_player->m_inv.decr_item_in_backpack(backpack_idx);
         }
 }
 
-static void on_body_slot_item_selected()
+static void print_cannot_remove_torture_collar_msg(const item::Item& item)
 {
-        if (map::g_player->m_properties.has(PropId::burning)) {
-                msg_log::add("Not while burning.");
+        const std::string name =
+                item.name(
+                        ItemNameType::plain,
+                        ItemNameInfo::none);
 
-                return;
-        }
-
-        actor::player_state::g_remove_armor_countdown =
-                s_nr_turns_to_handle_armor;
-
-        game_time::tick();
-}
-
-static void on_equipable_backpack_item_selected(const size_t backpack_idx)
-{
-        auto& inv = map::g_player->m_inv;
-        auto* const item_to_equip = inv.m_backpack[backpack_idx];
-        const auto item_type = item_to_equip->data().type;
-
-        switch (item_type) {
-        case ItemType::melee_wpn:
-        case ItemType::ranged_wpn: {
-                if (inv.has_item_in_slot(SlotId::wpn)) {
-                        inv.unequip_slot(SlotId::wpn);
-
-                        actor::player_state::g_item_equipping = item_to_equip;
-                }
-                else {
-                        inv.equip_backpack_item(backpack_idx, SlotId::wpn);
-                }
-        } break;
-
-        case ItemType::head_wear: {
-                if (inv.has_item_in_slot(SlotId::head)) {
-                        inv.unequip_slot(SlotId::head);
-
-                        actor::player_state::g_item_equipping = item_to_equip;
-                }
-                else {
-                        inv.equip_backpack_item(backpack_idx, SlotId::head);
-                }
-        } break;
-
-        case ItemType::armor: {
-                if (map::g_player->m_properties.has(PropId::burning)) {
-                        msg_log::add("Not while burning.");
-
-                        return;
-                }
-
-                if (inv.has_item_in_slot(SlotId::body)) {
-                        actor::player_state::g_remove_armor_countdown =
-                                s_nr_turns_to_handle_armor;
-                }
-
-                actor::player_state::g_item_equipping = item_to_equip;
-
-                actor::player_state::g_equip_armor_countdown =
-                        s_nr_turns_to_handle_armor;
-        } break;
-
-        default:
-        {
-                ASSERT(false);
-        } break;
-        }
-
-        game_time::tick();
+        msg_log::add("The " + name + " cannot be removed!");
 }
 
 // -----------------------------------------------------------------------------
@@ -268,7 +207,7 @@ void InvState::draw_slot(
         const ItemNameAttackInfo attack_info)
 {
         // Draw key
-        auto color =
+        Color color =
                 is_marked
                 ? colors::menu_key_highlight()
                 : colors::menu_key_dark();
@@ -288,9 +227,9 @@ void InvState::draw_slot(
         p.x += (int)key_str.length() + 1;
 
         // Draw slot label
-        const auto& slot = map::g_player->m_inv.m_slots[(size_t)id];
+        const InvSlot& slot = map::g_player->m_inv.m_slots[(size_t)id];
 
-        const auto slot_name = slot.name;
+        const std::string slot_name = slot.name;
 
         color =
                 is_marked
@@ -306,7 +245,7 @@ void InvState::draw_slot(
         p.x += 7;  // Offset to leave room for slot label
 
         // Draw item
-        const auto* const item = slot.item;
+        const item::Item* const item = slot.item;
 
         if (item) {
                 // An item is equipped here
@@ -324,7 +263,7 @@ void InvState::draw_slot(
 
                 item_name = text_format::first_to_upper(item_name);
 
-                const auto color_item =
+                const Color color_item =
                         is_marked
                         ? colors::light_white()
                         : item->interface_color();
@@ -369,7 +308,7 @@ void InvState::draw_backpack_item(
         const ItemNameAttackInfo attack_info)
 {
         // Draw key
-        const auto color =
+        const Color color =
                 is_marked
                 ? colors::menu_key_highlight()
                 : colors::menu_key_dark();
@@ -389,7 +328,8 @@ void InvState::draw_backpack_item(
         p.x += (int)key_str.length() + 1;
 
         // Draw item
-        const auto* const item = map::g_player->m_inv.m_backpack[backpack_idx];
+        const item::Item* const item =
+                map::g_player->m_inv.m_backpack[backpack_idx];
 
         // draw_item_symbol(*item, p);
 
@@ -405,7 +345,7 @@ void InvState::draw_backpack_item(
 
         cap_str_to_menu_x1(item_name, p.x);
 
-        const auto color_item =
+        const Color color_item =
                 is_marked
                 ? colors::light_white()
                 : item->interface_color();
@@ -458,7 +398,7 @@ void InvState::draw_weight_pct_and_dots(
 
                 const P weight_pos(weight_x, item_pos.y);
 
-                const auto weight_color =
+                const Color weight_color =
                         is_marked
                         ? colors::light_white()
                         : colors::menu_dark();
@@ -520,7 +460,7 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
         // -------------------------------------------------------------
         // Base description
         // -------------------------------------------------------------
-        const auto base_descr = m_viewed_item->descr();
+        const std::vector<std::string> base_descr = m_viewed_item->descr();
 
         if (!base_descr.empty()) {
                 for (const std::string& paragraph : base_descr) {
@@ -537,7 +477,7 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
                 ? "They are "
                 : "It is ";
 
-        const auto& d = m_viewed_item->data();
+        const item::ItemData& d = m_viewed_item->data();
 
         // -------------------------------------------------------------
         // Damage and hit chance
@@ -664,10 +604,11 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
 
         std::vector<std::string> formatted_lines;
 
-        const auto w = panels::w(Panel::inventory_descr);
+        const int w = panels::w(Panel::inventory_descr);
 
-        for (const auto& line : lines) {
-                const auto new_formatted_lines = text_format::split(line, w);
+        for (const std::string& line : lines) {
+                const std::vector<std::string> new_formatted_lines =
+                        text_format::split(line, w);
 
                 if (!formatted_lines.empty()) {
                         formatted_lines.emplace_back("");
@@ -692,7 +633,7 @@ void InvState::draw_item_descr() const
                 return;
         }
 
-        const auto lines = make_detailed_descr_lines();
+        const std::vector<std::string> lines = make_detailed_descr_lines();
 
         if (m_descr_idx >= (int)lines.size()) {
                 ASSERT(false);
@@ -713,9 +654,9 @@ void InvState::draw_item_descr() const
         const bool should_fade = last_idx_can_show < (nr_lines - 1);
 
         for (int i = descr_idx; i <= last_idx; ++i) {
-                const auto& line = lines[i];
+                const std::string& line = lines[i];
 
-                auto color = colors::text();
+                Color color = colors::text();
 
                 if (should_fade && (pos.y >= y_to_fade_from)) {
                         const int y_rel = pos.y - y_to_fade_from;
@@ -832,7 +773,7 @@ void BrowseInv::draw()
 
 void BrowseInv::update()
 {
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         if (input.key == 'i') {
                 // Exit screen
@@ -841,81 +782,176 @@ void BrowseInv::update()
                 return;
         }
 
-        auto& inv = map::g_player->m_inv;
-
         const MenuAction action =
                 m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
         switch (action) {
         case MenuAction::selected: {
-                const auto inv_type_marked =
-                        (m_browser.y() < (int)SlotId::END)
-                        ? InvType::slots
-                        : InvType::backpack;
-
-                if (inv_type_marked == InvType::slots) {
-                        InvSlot& slot = inv.m_slots[m_browser.y()];
-
-                        if (!slot.item) {
-                                states::push(std::make_unique<Equip>(slot));
-
-                                return;
-                        }
-
-                        // Has item in selected slot
-                        states::pop();
-
-                        msg_log::clear();
-
-                        if (slot.id == SlotId::body) {
-                                on_body_slot_item_selected();
-                        }
-                        else {
-                                inv.unequip_slot(slot.id);
-
-                                game_time::tick();
-                        }
-
-                        return;
-                }
-                else {
-                        // In backpack inventory
-                        const size_t backpack_idx =
-                                m_browser.y() - (int)SlotId::END;
-
-                        // Exit screen
-                        states::pop();
-
-                        auto* item = inv.m_backpack[backpack_idx];
-
-                        const auto& data = item->data();
-
-                        if ((data.type == ItemType::melee_wpn) ||
-                            (data.type == ItemType::ranged_wpn) ||
-                            (data.type == ItemType::armor) ||
-                            (data.type == ItemType::head_wear)) {
-                                on_equipable_backpack_item_selected(
-                                        backpack_idx);
-                        }
-                        else {
-                                activate(backpack_idx);
-                        }
-
-                        return;
-                }
+                on_selected();
         } break;
 
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
                 states::pop();
-
-                return;
         } break;
 
         default:
                 break;
         }
+}
+
+void BrowseInv::on_selected() const
+{
+        const InvType inv_type_marked =
+                (m_browser.y() < (int)SlotId::END)
+                ? InvType::slots
+                : InvType::backpack;
+
+        if (inv_type_marked == InvType::slots) {
+                InvSlot& slot = map::g_player->m_inv.m_slots[m_browser.y()];
+
+                on_inventory_slot_selected(slot);
+        }
+        else {
+                const size_t backpack_idx = m_browser.y() - (int)SlotId::END;
+
+                on_backpack_item_selected(backpack_idx);
+        }
+}
+
+void BrowseInv::on_inventory_slot_selected(InvSlot& slot) const
+{
+        if (!slot.item) {
+                // No item in slot, let player select something
+                // to equip.
+                states::push(std::make_unique<Equip>(slot));
+        }
+        else {
+                // Has item in selected slot
+                on_inventory_slot_with_item_selected(slot);
+        }
+}
+
+void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot) const
+{
+        states::pop();
+
+        msg_log::clear();
+
+        // NOTE: This object is now deleted!
+
+        // HACK: The Flagellant Torture Collar is not allowed to be removed.
+        if (slot.item->id() == item::Id::torture_collar) {
+                print_cannot_remove_torture_collar_msg(*slot.item);
+        }
+        else if (slot.id == SlotId::body) {
+                if (map::g_player->m_properties.has(PropId::burning)) {
+                        msg_log::add("Not while burning.");
+
+                        return;
+                }
+
+                actor::player_state::g_remove_armor_countdown =
+                        s_nr_turns_to_handle_armor;
+
+                game_time::tick();
+        }
+        else {
+                map::g_player->m_inv.unequip_slot(slot.id);
+
+                game_time::tick();
+        }
+}
+
+void BrowseInv::on_backpack_item_selected(const size_t backpack_idx) const
+{
+        item::Item* item = map::g_player->m_inv.m_backpack[backpack_idx];
+
+        const item::ItemData& data = item->data();
+
+        if ((data.type == ItemType::melee_wpn) ||
+            (data.type == ItemType::ranged_wpn) ||
+            (data.type == ItemType::armor) ||
+            (data.type == ItemType::head_wear)) {
+                on_equipable_backpack_item_selected(backpack_idx);
+        }
+        else {
+                activate(backpack_idx);
+        }
+}
+
+void BrowseInv::on_equipable_backpack_item_selected(
+        const size_t backpack_idx) const
+{
+        // Exit screen
+        states::pop();
+
+        // NOTE: This object is now deleted!
+
+        Inventory& inv = map::g_player->m_inv;
+        item::Item* const item_to_equip = inv.m_backpack[backpack_idx];
+        const ItemType item_type = item_to_equip->data().type;
+
+        switch (item_type) {
+        case ItemType::melee_wpn:
+        case ItemType::ranged_wpn: {
+                if (inv.has_item_in_slot(SlotId::wpn)) {
+                        inv.unequip_slot(SlotId::wpn);
+
+                        actor::player_state::g_item_equipping = item_to_equip;
+                }
+                else {
+                        inv.equip_backpack_item(backpack_idx, SlotId::wpn);
+                }
+        } break;
+
+        case ItemType::head_wear: {
+                const item::Item* const item = inv.item_in_slot(SlotId::head);
+
+                if (item) {
+                        // HACK: The Flagellant Torture Collar is not allowed to
+                        // be removed.
+                        if (item->id() == item::Id::torture_collar) {
+                                print_cannot_remove_torture_collar_msg(*item);
+
+                                return;
+                        }
+
+                        inv.unequip_slot(SlotId::head);
+
+                        actor::player_state::g_item_equipping = item_to_equip;
+                }
+                else {
+                        inv.equip_backpack_item(backpack_idx, SlotId::head);
+                }
+        } break;
+
+        case ItemType::armor: {
+                if (map::g_player->m_properties.has(PropId::burning)) {
+                        msg_log::add("Not while burning.");
+
+                        return;
+                }
+
+                if (inv.has_item_in_slot(SlotId::body)) {
+                        actor::player_state::g_remove_armor_countdown =
+                                s_nr_turns_to_handle_armor;
+                }
+
+                actor::player_state::g_item_equipping = item_to_equip;
+
+                actor::player_state::g_equip_armor_countdown =
+                        s_nr_turns_to_handle_armor;
+        } break;
+
+        default:
+        {
+                ASSERT(false);
+        } break;
+        }
+
+        game_time::tick();
 }
 
 // -----------------------------------------------------------------------------
@@ -925,16 +961,16 @@ void Apply::on_start()
 {
         map::g_player->m_inv.sort_backpack();
 
-        auto& backpack = map::g_player->m_inv.m_backpack;
+        std::vector<item::Item*>& backpack = map::g_player->m_inv.m_backpack;
 
         m_filtered_backpack_indexes.clear();
 
         m_filtered_backpack_indexes.reserve(backpack.size());
 
         for (size_t i = 0; i < backpack.size(); ++i) {
-                const auto* const item = backpack[i];
+                const item::Item* const item = backpack[i];
 
-                const auto& d = item->data();
+                const item::ItemData& d = item->data();
 
                 if (d.has_std_activate) {
                         m_filtered_backpack_indexes.push_back(i);
@@ -1020,7 +1056,7 @@ void Apply::draw()
 
 void Apply::update()
 {
-        auto input = io::read_input();
+        io::InputData input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(input, MenuInputMode::scrolling_and_letters);
@@ -1090,7 +1126,7 @@ void Drop::draw()
 
         const int browser_y = m_browser.y();
 
-        const auto idx_range_shown = m_browser.range_shown();
+        const Range idx_range_shown = m_browser.range_shown();
 
         int y = 0;
 
@@ -1145,88 +1181,100 @@ void Drop::draw()
 
 void Drop::update()
 {
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
         switch (action) {
         case MenuAction::selected: {
-                const int browser_y = m_browser.y();
-
-                const auto inv_type_marked =
-                        (m_browser.y() < (int)SlotId::END)
-                        ? InvType::slots
-                        : InvType::backpack;
-
-                auto idx = (size_t)browser_y;
-
-                item::Item* item = nullptr;
-
-                if (inv_type_marked == InvType::slots) {
-                        if (!map::g_player->m_inv.has_item_in_slot((SlotId)idx)) {
-                                return;
-                        }
-
-                        item = map::g_player->m_inv.m_slots[idx].item;
-                }
-                else {
-                        // Backpack item marked
-                        idx -= (size_t)SlotId::END;
-
-                        item = map::g_player->m_inv.m_backpack[idx];
-                }
-
-                ASSERT(item);
-
-                // Exit screen
-                states::pop();
-
-                if (item->current_curse().is_active()) {
-                        const auto name =
-                                item->name(
-                                        ItemNameType::plain,
-                                        ItemNameInfo::none,
-                                        ItemNameAttackInfo::none);
-
-                        msg_log::add("I refuse to drop the " + name + "!");
-
-                        return;
-                }
-
-                if ((inv_type_marked == InvType::slots) &&
-                    (idx == (size_t)SlotId::body)) {
-                        // Body slot marked, start dropping the armor
-                        actor::player_state::g_remove_armor_countdown =
-                                s_nr_turns_to_handle_armor;
-
-                        actor::player_state::g_is_dropping_armor_from_body = true;
-
-                        game_time::tick();
-                }
-                else {
-                        // Not dropping from body slot, drop immediately
-                        const bool did_drop =
-                                run_drop_query(*item, inv_type_marked, idx);
-
-                        if (did_drop) {
-                                game_time::tick();
-                        }
-                }
-
-                return;
+                on_selected();
         } break;
 
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
                 states::pop();
-
-                return;
         } break;
 
         default:
                 break;
+        }
+}
+
+void Drop::on_selected() const
+{
+        const int browser_y = m_browser.y();
+
+        const InvType inv_type_marked =
+                (m_browser.y() < (int)SlotId::END)
+                ? InvType::slots
+                : InvType::backpack;
+
+        auto idx = (size_t)browser_y;
+
+        item::Item* item = nullptr;
+
+        Inventory& inv = map::g_player->m_inv;
+
+        if (inv_type_marked == InvType::slots) {
+                if (!inv.has_item_in_slot((SlotId)idx)) {
+                        // No item in this slot, just do nothing (keep browsing
+                        // for item to drop).
+                        return;
+                }
+
+                item = inv.m_slots[idx].item;
+        }
+        else {
+                // Backpack item marked.
+                idx -= (size_t)SlotId::END;
+
+                item = inv.m_backpack[idx];
+        }
+
+        ASSERT(item);
+
+        // Exit screen
+        states::pop();
+
+        // HACK: The Flagellant Torture Collar is not allowed to be removed.
+        if (item->id() == item::Id::torture_collar) {
+                print_cannot_remove_torture_collar_msg(*item);
+
+                return;
+        }
+
+        if (item->current_curse().is_active()) {
+                const std::string name =
+                        item->name(
+                                ItemNameType::plain,
+                                ItemNameInfo::none,
+                                ItemNameAttackInfo::none);
+
+                msg_log::add("I refuse to drop the " + name + "!");
+
+                return;
+        }
+
+        if ((inv_type_marked == InvType::slots) &&
+            (idx == (size_t)SlotId::body)) {
+                // Body slot marked, start dropping the armor
+                actor::player_state::g_remove_armor_countdown =
+                        s_nr_turns_to_handle_armor;
+
+                actor::player_state::g_is_dropping_armor_from_body = true;
+
+                game_time::tick();
+        }
+        else {
+                // Not dropping from body slot, drop immediately
+                const bool did_drop =
+                        run_drop_query(*item, inv_type_marked, idx);
+
+                if (did_drop) {
+                        game_time::tick();
+                }
         }
 }
 
@@ -1238,13 +1286,14 @@ void Equip::on_start()
         map::g_player->m_inv.sort_backpack();
 
         // Filter backpack
-        const auto& backpack = map::g_player->m_inv.m_backpack;
+        const std::vector<item::Item*>& backpack =
+                map::g_player->m_inv.m_backpack;
 
         m_filtered_backpack_indexes.clear();
 
         for (size_t i = 0; i < backpack.size(); ++i) {
-                const auto* const item = backpack[i];
-                const auto& data = item->data();
+                const item::Item* const item = backpack[i];
+                const item::ItemData& data = item->data();
 
                 switch (m_slot_to_equip.id) {
                 case SlotId::wpn:
@@ -1360,12 +1409,12 @@ void Equip::draw()
                 const size_t backpack_idx =
                         m_filtered_backpack_indexes[i];
 
-                auto* const item =
+                item::Item* const item =
                         map::g_player->m_inv.m_backpack[backpack_idx];
 
-                const auto& d = item->data();
+                const item::ItemData& d = item->data();
 
-                auto att_inf = ItemNameAttackInfo::none;
+                ItemNameAttackInfo att_inf = ItemNameAttackInfo::none;
 
                 if ((m_slot_to_equip.id == SlotId::wpn) ||
                     (m_slot_to_equip.id == SlotId::wpn_alt)) {
@@ -1406,7 +1455,7 @@ void Equip::draw()
 
 void Equip::update()
 {
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         if (m_filtered_backpack_indexes.empty() ||
             (input.key == SDLK_SPACE) ||
@@ -1424,7 +1473,7 @@ void Equip::update()
         case MenuAction::selected: {
                 const size_t idx = m_filtered_backpack_indexes[m_browser.y()];
 
-                const auto slot_id = m_slot_to_equip.id;
+                const SlotId slot_id = m_slot_to_equip.id;
 
                 states::pop_until(StateId::game);
 
@@ -1466,10 +1515,10 @@ void SelectThrow::on_start()
 
         // Filter slots
         for (InvSlot& slot : map::g_player->m_inv.m_slots) {
-                const auto* const item = slot.item;
+                const item::Item* const item = slot.item;
 
                 if (item) {
-                        const auto& d = item->data();
+                        const item::ItemData& d = item->data();
 
                         if (d.ranged.is_throwable_wpn) {
                                 FilteredInvEntry entry;
@@ -1482,12 +1531,13 @@ void SelectThrow::on_start()
         }
 
         // Filter backpack
-        const auto& backpack = map::g_player->m_inv.m_backpack;
+        const std::vector<item::Item*>& backpack =
+                map::g_player->m_inv.m_backpack;
 
         for (size_t i = 0; i < backpack.size(); ++i) {
-                const auto* const item = backpack[i];
+                const item::Item* const item = backpack[i];
 
-                const auto& d = item->data();
+                const item::ItemData& d = item->data();
 
                 if (d.ranged.is_throwable_wpn) {
                         FilteredInvEntry entry;
@@ -1507,7 +1557,7 @@ void SelectThrow::on_start()
                 }
         }
 
-        const auto list_size = m_filtered_inv.size();
+        const size_t list_size = m_filtered_inv.size();
 
         if (list_size == 0) {
                 // Nothing to throw, exit screen
@@ -1533,7 +1583,7 @@ void SelectThrow::on_start()
         if (actor::player_state::g_last_thrown_item) {
                 // A "last thrown item" exists, re-insert the throw key at the
                 // beginning of the key list (so that it's currently selected)
-                auto custom_keys = m_browser.menu_keys();
+                std::vector<char> custom_keys = m_browser.menu_keys();
 
                 custom_keys.insert(std::begin(custom_keys), throw_key);
 
@@ -1567,7 +1617,7 @@ void SelectThrow::draw()
 
                 const bool is_marked = browser_y == i;
 
-                const auto& inv_entry = m_filtered_inv[i];
+                const FilteredInvEntry& inv_entry = m_filtered_inv[i];
 
                 if (inv_entry.is_slot) {
                         const auto slot_id = (SlotId)inv_entry.relative_idx;
@@ -1614,14 +1664,15 @@ void SelectThrow::draw()
 
 void SelectThrow::update()
 {
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
-        const auto& inv_entry_marked = m_filtered_inv[m_browser.y()];
+        const FilteredInvEntry& inv_entry_marked =
+                m_filtered_inv[m_browser.y()];
 
-        const auto& inv = map::g_player->m_inv;
+        const Inventory& inv = map::g_player->m_inv;
 
         item::Item* item = nullptr;
 
@@ -1639,7 +1690,7 @@ void SelectThrow::update()
         case MenuAction::selected: {
                 states::pop();
 
-                const auto name =
+                const std::string name =
                         item->name(
                                 ItemNameType::plain,
                                 ItemNameInfo::none,
@@ -1672,7 +1723,7 @@ void SelectThrow::update()
                                 MorePromptOnMsg::no,
                                 CopyToMsgHistory::no);
 
-                        const auto answer = query::yes_or_no();
+                        const BinaryAnswer answer = query::yes_or_no();
 
                         msg_log::clear();
 
@@ -1716,10 +1767,11 @@ void SelectIdentify::on_start()
                                 return true;
                         }
                         else {
-                                const auto result = std::find(
-                                        begin(allowed_item_types),
-                                        end(allowed_item_types),
-                                        item_type);
+                                const auto result =
+                                        std::find(
+                                                std::begin(allowed_item_types),
+                                                std::end(allowed_item_types),
+                                                item_type);
 
                                 return result != end(allowed_item_types);
                         }
@@ -1727,13 +1779,13 @@ void SelectIdentify::on_start()
 
         // Filter slots
         for (InvSlot& slot : map::g_player->m_inv.m_slots) {
-                const auto* const item = slot.item;
+                const item::Item* const item = slot.item;
 
                 if (!item) {
                         continue;
                 }
 
-                const auto& d = item->data();
+                const item::ItemData& d = item->data();
 
                 if (!d.is_identified &&
                     is_allowed_item_type(d.type, m_item_types_allowed)) {
@@ -1747,9 +1799,10 @@ void SelectIdentify::on_start()
 
         // Filter backpack
         for (size_t i = 0; i < map::g_player->m_inv.m_backpack.size(); ++i) {
-                const auto* const item = map::g_player->m_inv.m_backpack[i];
+                const item::Item* const item =
+                        map::g_player->m_inv.m_backpack[i];
 
-                const auto& d = item->data();
+                const item::ItemData& d = item->data();
 
                 if (!d.is_identified &&
                     is_allowed_item_type(d.type, m_item_types_allowed)) {
@@ -1761,7 +1814,7 @@ void SelectIdentify::on_start()
                 }
         }
 
-        const auto list_size = m_filtered_inv.size();
+        const size_t list_size = m_filtered_inv.size();
 
         if (list_size == 0) {
                 // Nothing to identify, exit screen
@@ -1804,7 +1857,7 @@ void SelectIdentify::draw()
 
                 const bool is_marked = browser_y == i;
 
-                const auto& inv_entry = m_filtered_inv[i];
+                const FilteredInvEntry& inv_entry = m_filtered_inv[i];
 
                 if (inv_entry.is_slot) {
                         const auto slot_id = (SlotId)inv_entry.relative_idx;
@@ -1851,18 +1904,19 @@ void SelectIdentify::draw()
 
 void SelectIdentify::update()
 {
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         const MenuAction action =
                 m_browser.read(
                         input,
                         MenuInputMode::scrolling_and_letters);
 
-        const auto& inv = map::g_player->m_inv;
+        const Inventory& inv = map::g_player->m_inv;
 
         switch (action) {
         case MenuAction::selected: {
-                const auto& inv_entry_marked = m_filtered_inv[m_browser.y()];
+                const FilteredInvEntry& inv_entry_marked =
+                        m_filtered_inv[m_browser.y()];
 
                 item::Item* item_to_identify = nullptr;
 

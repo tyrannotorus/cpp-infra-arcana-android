@@ -185,6 +185,7 @@ enum class TileId
         tomb_open,
         tome,
         tommy_gun,
+        torture_collar,
         trap_general,
         trapez,
         tree,

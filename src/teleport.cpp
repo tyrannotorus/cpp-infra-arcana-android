@@ -241,7 +241,7 @@ void teleport(
         // * Has another living actor, or
         // * Blocks walking (otherwise for example ethereal creatures could
         //   teleport far into the walls)
-        const auto blocked_for_actor =
+        const auto& blocked_for_actor =
                 map::get_blocked_map_info_for_actor(actor);
 
         for (size_t i = 0; i < nr_positions; ++i) {

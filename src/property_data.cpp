@@ -140,11 +140,11 @@ static void init_data_list()
         d.std_rnd_turns = Range(50, 100);
         d.name = "Physical Resistance";
         d.name_short = "Phys Res";
-        d.descr = "Cannot be harmed by plain physical force.";
-        d.msg_start_player = "I feel resistant to physical harm.";
-        d.msg_start_mon = "is resistant to physical harm.";
-        d.msg_end_player = "I feel vulnerable to physical harm.";
-        d.msg_end_mon = "is vulnerable to physical harm.";
+        d.descr = "Cannot be harmed by physical attacks.";
+        d.msg_start_player = "I feel impervious to physical attacks.";
+        d.msg_start_mon = "looks tough as steel.";
+        d.msg_end_player = "I feel vulnerable to physical attacks.";
+        d.msg_end_mon = "looks less tough.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::good;
@@ -535,6 +535,37 @@ static void init_data_list()
                 "and the cost is reduced by 1 spirit point.";
         d.msg_start_player = "I feel very focused.";
         d.msg_end_player = "I feel less focused.";
+        d.allow_test_on_bot = false;
+        d.alignment = PropAlignment::good;
+        add(d);
+
+        d.id = PropId::accrue_pain;
+        d.name = "Accrue Pain";
+        d.name_short = "Accrue Pain";
+        d.descr =
+                "If the total damage received in the duration of this spell "
+                "exceeds a certain threshold, "
+                "all adjacent seen enemies takes damage "
+                "(the damage received is counted after damage reduction from "
+                "armor, and includes any type of damage except spirit).";
+        d.msg_start_player = "My blood must be spilt!";
+        d.msg_end_player = "The bloodletting was insufficient.";
+        d.allow_test_on_bot = false;
+        d.alignment = PropAlignment::good;
+        add(d);
+
+        d.id = PropId::crimson_passage;
+        d.name = "Crimson Passage";
+        d.name_short = "Crims Psg";
+        d.descr =
+                "Walking does not spend any time, "
+                "but every step taken drains 2 hit points "
+                "(waiting in place can still be done as normal). "
+                "The effect ends after a certain number of steps have "
+                "been taken, "
+                "or if there is not enough hit points to drain.";
+        d.msg_start_player = "A gruesome path lies ahead.";
+        d.msg_end_player = "My movement is normal again.";
         d.allow_test_on_bot = false;
         d.alignment = PropAlignment::good;
         add(d);
@@ -1030,9 +1061,7 @@ static void init_data_list()
         d.std_rnd_turns = Range(50, 100);
         d.name = "Regenerating";
         d.name_short = "Regenerating";
-        d.descr =
-                "+1 extra hit point regenerated per turn, and "
-                "10% chance per turn to heal one wound.";
+        d.descr = "+1 extra hit point regenerated per turn.";
         d.msg_start_player = "My body starts healing itself much faster.";
         d.msg_start_mon = "starts regenerating damage very quickly.";
         d.msg_end_player = "My body heals itself slower now.";
@@ -1226,6 +1255,18 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.update_vision_on_toggled = false;
         d.allow_test_on_bot = true;
+        d.alignment = PropAlignment::good;
+        add(d);
+
+        d.id = PropId::moribund;
+        d.descr =
+                "Gains bonuses due to low health. Bonus level "
+                "1, 2, and 3 are acheived when health is reduced to "
+                "10, 6, and 3 hit points, respectively. "
+                "For each bonus level, the following is received: "
+                "+1 melee damage, +10% melee hit chance, +1 armor point.";
+        d.allow_display_turns = false;
+        d.allow_test_on_bot = false;
         d.alignment = PropAlignment::good;
         add(d);
 }

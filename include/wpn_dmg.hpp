@@ -35,7 +35,7 @@ public:
 
         Range total_range() const
         {
-                return Range(m_min + m_plus, m_max + m_plus);
+                return {m_min + m_plus, m_max + m_plus};
         }
 
         int base_min() const

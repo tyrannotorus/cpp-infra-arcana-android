@@ -1482,7 +1482,7 @@ void Liquid::on_hit(
 
 void Liquid::bump(actor::Actor& actor_bumping)
 {
-        const auto& props = actor_bumping.m_properties;
+        const PropHandler& props = actor_bumping.m_properties;
 
         if (props.has(PropId::ethereal) ||
             props.has(PropId::flying) ||
@@ -1491,30 +1491,38 @@ void Liquid::bump(actor::Actor& actor_bumping)
                 return;
         }
 
-        actor_bumping.m_properties.apply(
-                property_factory::make(PropId::delayed_by_liquid));
+        if (!props.has(PropId::crimson_passage)) {
+                actor_bumping.m_properties.apply(
+                        property_factory::make(PropId::delayed_by_liquid));
 
-        if (actor::is_player(&actor_bumping)) {
-                std::string type_str;
+                // Print message if player, unless player is wearing torture
+                // collar (in that case the message is redundant since the
+                // player is delayed on every move they make anyway).
+                if (actor::is_player(&actor_bumping) &&
+                    !map::g_player->m_inv.has_item_in_slot(
+                            SlotId::head,
+                            item::Id::torture_collar)) {
+                        std::string type_str;
 
-                switch (m_type) {
-                case LiquidType::water:
-                case LiquidType::magic_water:
-                        type_str = "water";
-                        break;
+                        switch (m_type) {
+                        case LiquidType::water:
+                        case LiquidType::magic_water:
+                                type_str = "water";
+                                break;
 
-                case LiquidType::mud:
-                        type_str = "mud";
-                        break;
+                        case LiquidType::mud:
+                                type_str = "mud";
+                                break;
+                        }
+
+                        msg_log::add(
+                                "I wade slowly through the knee high " +
+                                type_str +
+                                ".");
                 }
-
-                msg_log::add(
-                        "I wade slowly through the knee high " +
-                        type_str +
-                        ".");
         }
 
-        // Make a sound, unless player with Silent trait
+        // Make a sound, unless player with Silent trait.
         if (!player_bon::has_trait(Trait::silent) ||
             !actor::is_player(&actor_bumping)) {
                 const std::string msg =
@@ -1539,6 +1547,7 @@ void Liquid::bump(actor::Actor& actor_bumping)
                 snd_emit::run(snd);
         }
 
+        // "Magic pool" effects.
         if (actor::is_player(&actor_bumping) &&
             (m_type == LiquidType::magic_water)) {
                 run_magic_pool_effects_on_player();

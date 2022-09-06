@@ -142,7 +142,7 @@ static DidAction try_cast_spell(
 
         // Only cast the spell if monster has enough spirit - or sometimes try
         // anyway if the monster has low HP and is hostile to the player.
-        const auto cost = spell.spell->spi_cost_range(spell.skill, &mon);
+        const Range cost = spell.spell->cost_range(spell.skill, &mon);
         const bool has_spi = cost.max < mon.m_sp;
 
         if (!has_spi) {

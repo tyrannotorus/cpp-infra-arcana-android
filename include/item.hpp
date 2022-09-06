@@ -247,6 +247,18 @@ public:
                 m_curse = item_curse::Curse();
         }
 
+        int armor_points() const;
+
+        int durability() const
+        {
+                return m_durability;
+        }
+
+        void set_max_durability()
+        {
+                m_durability = 100;
+        }
+
         int m_nr_items {1};
 
 protected:
@@ -298,9 +310,11 @@ protected:
         WpnDmg m_base_melee_dmg;
         WpnDmg m_base_ranged_dmg;
 
+        int m_durability;
+
 private:
         // Properties to apply on owning actor (when e.g. wearing the item, or
-        // just keeping it in the inventory)
+        // just keeping it in the inventory).
         std::vector<Prop*> m_carrier_props {};
 
         item_curse::Curse m_curse {};
@@ -321,9 +335,6 @@ public:
 
         ~Armor() = default;
 
-        void save_hook() const override;
-        void load_hook() override;
-
         Color interface_color() const override
         {
                 return colors::gray();
@@ -331,27 +342,7 @@ public:
 
         std::string name_info_str() const override;
 
-        int armor_points() const;
-
-        int durability() const
-        {
-                return m_dur;
-        }
-
-        void set_max_durability()
-        {
-                m_dur = 100;
-        }
-
-        bool is_destroyed() const
-        {
-                return armor_points() <= 0;
-        }
-
         void hit(int dmg);
-
-protected:
-        int m_dur;
 };
 
 class ArmorAsbSuit : public Armor
@@ -612,14 +603,17 @@ public:
 
         std::string name_info_str() const override;
 
-        void on_equip_hook(Verbose verbose) override;
-
-        void on_unequip_hook() override;
-
         void decr_turns_left(Inventory& carrier_inv);
 
 protected:
         int m_nr_turns_left;
+};
+
+class TortureCollar : public Headwear
+{
+public:
+        TortureCollar(ItemData* item_data) :
+                Headwear(item_data) {}
 };
 
 class Explosive : public Item

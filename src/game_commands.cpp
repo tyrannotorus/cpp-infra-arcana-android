@@ -87,9 +87,7 @@ static void query_quit()
                 // Choosing to quit the game deletes the save
                 saving::erase_save();
 
-                states::pop();
-
-                init::cleanup_session();
+                states::pop_until(StateId::main_menu);
         }
 }
 
@@ -984,10 +982,9 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f8: {
-                map::update_terrain(
-                        terrain::make(
-                                terrain::Id::chest,
-                                map::g_player->m_pos.with_x_offset(1)));
+                map::g_player->m_properties.apply(
+                        property_factory::make(
+                                PropId::diseased));
         } break;
 
         case GameCmd::debug_f9: {

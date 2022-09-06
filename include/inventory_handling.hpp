@@ -103,6 +103,17 @@ public:
         void draw() override;
 
         void update() override;
+
+private:
+        void on_selected() const;
+
+        void on_inventory_slot_selected(InvSlot& slot) const;
+
+        void on_inventory_slot_with_item_selected(InvSlot& slot) const;
+
+        void on_backpack_item_selected(size_t backpack_idx) const;
+
+        void on_equipable_backpack_item_selected(size_t backpack_idx) const;
 };
 
 class Apply : public InvState
@@ -130,6 +141,9 @@ public:
         void draw() override;
 
         void update() override;
+
+private:
+        void on_selected() const;
 };
 
 class Equip : public InvState

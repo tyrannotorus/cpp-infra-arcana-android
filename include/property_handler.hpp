@@ -143,10 +143,14 @@ public:
 
         bool allow_move_dir(Dir dir) const;
 
+        void on_moved_non_center_dir() const;
+
         int affect_max_hp(int hp_max) const;
         int affect_max_spi(int spi_max) const;
 
         int player_extra_min_shock() const;
+
+        int armor_points() const;
 
         bool allow_attack(Verbose verbose) const;
         bool allow_attack_melee(Verbose verbose) const;
@@ -170,7 +174,7 @@ public:
         bool allow_cast_intr_spell_absolute(Verbose verbose) const;
         bool allow_cast_intr_spell_chance(Verbose verbose) const;
 
-        void on_hit();
+        void on_hit(int dmg, DmgType dmg_type);
         void on_death();
         void on_destroyed_alive();
         void on_destroyed_corpse();

@@ -22,6 +22,7 @@
 #include "draw_box.hpp"
 #include "game.hpp"
 #include "global.hpp"
+#include "init.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "panel.hpp"
@@ -30,6 +31,10 @@
 #include "rect.hpp"
 #include "text.hpp"
 #include "text_format.hpp"
+
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 // New game state
@@ -60,11 +65,11 @@ void PickBgState::on_start()
         m_bgs = player_bon::pickable_bgs();
 
         m_browser.reset(
-                m_bgs.size(),
+                (int)m_bgs.size(),
                 panels::h(Panel::create_char_menu));
 
         // Set the marker on war veteran, to recommend it as a default choice
-        // for new players
+        // for new players.
         const auto war_vet_pos =
                 std::find(std::begin(m_bgs), std::end(m_bgs), Bg::war_vet);
 
@@ -87,7 +92,7 @@ void PickBgState::update()
         else
 #endif  // NDEBUG
         {
-                const auto input = io::read_input();
+                const io::InputData input = io::read_input();
 
                 action =
                         m_browser.read(
@@ -97,7 +102,7 @@ void PickBgState::update()
 
         switch (action) {
         case MenuAction::selected: {
-                const auto bg = m_bgs[m_browser.y()];
+                const Bg bg = m_bgs[m_browser.y()];
 
                 player_bon::pick_bg(bg);
 
@@ -113,6 +118,7 @@ void PickBgState::update()
         } break;
 
         case MenuAction::esc: {
+                init::cleanup_session();
                 states::pop_until(StateId::main_menu);
         } break;
 
@@ -215,7 +221,7 @@ void PickOccultistState::on_start()
 
 void PickOccultistState::update()
 {
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         const auto action =
                 m_browser.read(
@@ -224,7 +230,7 @@ void PickOccultistState::update()
 
         switch (action) {
         case MenuAction::selected: {
-                const auto domain = m_domains[m_browser.y()];
+                const OccultistDomain domain = m_domains[m_browser.y()];
 
                 player_bon::pick_occultist_domain(domain);
 
@@ -232,6 +238,7 @@ void PickOccultistState::update()
         } break;
 
         case MenuAction::esc: {
+                init::cleanup_session();
                 states::pop_until(StateId::main_menu);
         } break;
 
@@ -257,10 +264,10 @@ void PickOccultistState::draw()
 
         int y = 0;
 
-        const auto domain_marked = m_domains[m_browser.y()];
+        const OccultistDomain domain_marked = m_domains[m_browser.y()];
 
         // Domains
-        for (const auto domain : m_domains) {
+        for (OccultistDomain domain : m_domains) {
                 auto str =
                         std::string("(") +
                         m_browser.menu_keys()[y] +
@@ -268,7 +275,7 @@ void PickOccultistState::draw()
 
                 const bool is_marked = (domain == domain_marked);
 
-                auto color =
+                Color color =
                         is_marked
                         ? colors::menu_key_highlight()
                         : colors::menu_key_dark();
@@ -279,7 +286,10 @@ void PickOccultistState::draw()
                         {0, y},
                         color);
 
-                str = player_bon::spell_domain_title(domain);
+                const SpellDomain spell_domain =
+                        player_bon::occultist_to_spell_domain(domain);
+
+                str = spells::spell_domain_title(spell_domain);
 
                 color =
                         is_marked
@@ -298,7 +308,8 @@ void PickOccultistState::draw()
         // Description
         y = 0;
 
-        const auto descr = player_bon::occultist_domain_descr(domain_marked);
+        const std::string descr =
+                player_bon::occultist_domain_descr(domain_marked);
 
         ASSERT(!descr.empty());
 
@@ -306,7 +317,7 @@ void PickOccultistState::draw()
                 return;
         }
 
-        const auto formatted_lines = text_format::split(
+        const std::vector<std::string> formatted_lines = text_format::split(
                 descr,
                 panels::w(Panel::create_char_descr));
 
@@ -366,7 +377,7 @@ void PickTraitState::update()
                 return;
         }
 
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         // Switch trait screen mode?
         if (input.key == SDLK_TAB) {
@@ -437,6 +448,7 @@ void PickTraitState::update()
 
         case MenuAction::esc: {
                 if (states::contains_state(StateId::pick_name)) {
+                        init::cleanup_session();
                         states::pop_until(StateId::main_menu);
                 }
         }
@@ -723,7 +735,7 @@ void RemoveTraitState::update()
                 return;
         }
 
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         const auto action =
                 m_browser.read(
@@ -903,7 +915,7 @@ void EnterNameState::update()
                 return;
         }
 
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         if (input.key == SDLK_ESCAPE) {
                 states::pop_until(StateId::main_menu);

@@ -102,14 +102,14 @@ enum class PropId
         small_crawling,
         burrowing,
 
-        // Properties mostly used for AI control
+        // Properties mostly used for AI control.
         waiting,  // Prevent acting - also used for player
         disabled_attack,
         disabled_melee,
         disabled_ranged,
 
-        // Properties for supporting specific game mechanics (not intended to be
-        // used in a general way)
+        // Properties for supporting specific game mechanics (NOT intended to be
+        // used in a general way).
         descend,
         zuul_possess_priest,
         possessed_by_zuul,
@@ -133,6 +133,9 @@ enum class PropId
         sanctuary,
         astral_opium_addiction,
         meditative_focused,  // From Meditative trait
+        moribund,  // Flagellant low health bonuses
+        accrue_pain,  // From the Accrue Pain spell
+        crimson_passage,  // From the Crimson Passage spell
 
         END
 };

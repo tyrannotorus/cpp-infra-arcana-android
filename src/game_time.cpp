@@ -97,7 +97,7 @@ static actor::Speed decr_speed_category(actor::Speed speed)
 static actor::Speed current_actor_speed(const actor::Actor& actor)
 {
         // Paralyzed actors always act at normal speed (otherwise paralysis will
-        // barely affect super fast monsters at all)
+        // barely affect super fast monsters at all).
         if (actor.m_properties.has(PropId::paralyzed)) {
                 return actor::Speed::normal;
         }
@@ -106,7 +106,7 @@ static actor::Speed current_actor_speed(const actor::Actor& actor)
                 return actor::Speed::very_fast;
         }
 
-        auto speed = actor.m_data->speed;
+        actor::Speed speed = actor.m_data->speed;
 
         if (actor.m_properties.has(PropId::slowed)) {
                 speed = decr_speed_category(speed);

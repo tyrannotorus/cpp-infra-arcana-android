@@ -191,8 +191,11 @@ public:
                 return true;
         }
 
-        virtual PropEnded on_hit()
+        virtual PropEnded on_hit(const int dmg, const DmgType dmg_type)
         {
+                (void)dmg;
+                (void)dmg_type;
+
                 return PropEnded::no;
         }
 
@@ -239,7 +242,17 @@ public:
                 return spi_max;
         }
 
+        virtual int player_temporary_shock_change() const
+        {
+                return 0;
+        }
+
         virtual int player_extra_min_shock() const
+        {
+                return 0;
+        }
+
+        virtual int armor_points() const
         {
                 return 0;
         }
@@ -348,6 +361,11 @@ public:
                 (void)dir;
 
                 return true;
+        }
+
+        virtual PropEnded on_moved_non_center_dir()
+        {
+                return PropEnded::no;
         }
 
         virtual bool is_resisting_other_prop(const PropId prop_id) const
@@ -536,7 +554,7 @@ public:
                 }
         }
 
-        PropEnded on_hit() override;
+        PropEnded on_hit(int dmg, DmgType dmg_type) override;
 };
 
 class PropBlind : public Prop
@@ -853,16 +871,11 @@ public:
 
         std::string msg_end_player() const override;
 
-        std::string name_short() const override
-        {
-                return "Wounded(" + std::to_string(m_nr_wounds) + ")";
-        }
+        std::string name_short() const override;
 
         int ability_mod(AbilityId ability) const override;
 
         void on_more(const Prop& new_prop) override;
-
-        PropEnded on_actor_turn() override;
 
         bool is_finished() const override
         {
@@ -885,6 +898,26 @@ private:
         std::string get_all_wounds_heal_str() const;
 
         int m_nr_wounds {1};
+};
+
+class PropMoribund : public Prop
+{
+public:
+        PropMoribund() :
+                Prop(PropId::moribund) {}
+
+        std::string name() const override;
+
+        std::string name_short() const override;
+
+        int ability_mod(AbilityId ability) const override;
+
+        int armor_points() const override;
+
+        int calc_bonus_lvl() const;
+
+private:
+        bool has_bonus() const;
 };
 
 class PropHpSap : public Prop
@@ -1132,7 +1165,7 @@ public:
                 return false;
         }
 
-        PropEnded on_hit() override;
+        PropEnded on_hit(int dmg, DmgType dmg_type) override;
 };
 
 class PropSlowed : public Prop
@@ -1698,6 +1731,65 @@ private:
         std::unique_ptr<item::Item> m_discarded_item {};
 
         std::string get_weapon_name() const;
+};
+
+class PropAccruePain : public Prop
+{
+public:
+        PropAccruePain() :
+                Prop(PropId::accrue_pain) {}
+
+        void save() const override;
+        void load() override;
+
+        PropEnded on_hit(int dmg, DmgType dmg_type) override;
+
+        void set_attack_dmg(const int dmg)
+        {
+                m_attack_dmg = dmg;
+        }
+
+        void set_dmg_threshold(const int dmg)
+        {
+                m_dmg_threshold = dmg;
+        }
+
+private:
+        void apply_dmg();
+
+        int m_attack_dmg {1};
+        int m_dmg_received {0};
+        int m_dmg_threshold {1};
+};
+
+class PropSanctuary : public Prop
+{
+public:
+        PropSanctuary() :
+                Prop(PropId::sanctuary) {}
+
+        PropEnded on_moved_non_center_dir() override;
+};
+
+class PropCrimsonPassage : public Prop
+{
+public:
+        PropCrimsonPassage() :
+                Prop(PropId::crimson_passage) {}
+
+        void save() const override;
+        void load() override;
+
+        PropEnded on_moved_non_center_dir() override;
+
+        void set_nr_steps_allowed(const int nr_steps)
+        {
+                m_nr_steps_allowed = nr_steps;
+        }
+
+private:
+        int m_nr_steps_allowed {1};
+        int m_nr_steps_taken {0};
 };
 
 #endif  // PROPERTY_HPP

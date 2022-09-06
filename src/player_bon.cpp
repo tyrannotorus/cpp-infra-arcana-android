@@ -64,8 +64,8 @@ static const int s_exorcist_bon_trait_lvl_1 = 2;
 static const int s_exorcist_bon_trait_lvl_2 = 4;
 static const int s_exorcist_bon_trait_lvl_3 = 6;
 
-static const int s_occultist_upgrade_lvl_1 = 4;
-static const int s_occultist_upgrade_lvl_2 = 8;
+static const int s_spell_upgrade_lvl_1 = 4;
+static const int s_spell_upgrade_lvl_2 = 8;
 
 static std::string trait_descr_for_spell(
         const SpellId spell_id,
@@ -93,7 +93,7 @@ static std::string trait_descr_for_spell(
                 str += " " + line;
         }
 
-        const auto cost_str = spell->spi_cost_range(skill).str();
+        const auto cost_str = spell->cost_range(skill).str();
         const auto sp_str = std::to_string(map::g_player->m_sp);
         const auto max_sp_str = std::to_string(actor::max_sp(*map::g_player));
 
@@ -175,7 +175,11 @@ static void update_trait_data()
         d.id = Trait::master_marksman;
         d.title = "Master Marksman";
         d.trait_prereqs = {Trait::expert_marksman};
-        d.blocked_for_bgs = {Bg::ghoul, Bg::exorcist, Bg::occultist};
+        d.blocked_for_bgs = {
+                Bg::ghoul,
+                Bg::exorcist,
+                Bg::occultist,
+                Bg::flagellant};
         set_trait_data(d);
 
         // --- Cool-headed ---
@@ -270,7 +274,11 @@ static void update_trait_data()
         d.id = Trait::treasure_hunter;
         d.title = "Treasure Hunter";
         d.descr = "You tend to find more items";
-        d.blocked_for_bgs = {Bg::exorcist, Bg::ghoul, Bg::war_vet};
+        d.blocked_for_bgs = {
+                Bg::exorcist,
+                Bg::ghoul,
+                Bg::war_vet,
+                Bg::flagellant};
         d.blocked_for_occultist_domains = {
                 OccultistDomain::enchanter,
                 OccultistDomain::invoker,
@@ -339,7 +347,7 @@ static void update_trait_data()
                 map::g_player->m_properties.end_prop(PropId::r_disease);
         };
         d.trait_prereqs = {Trait::healer};
-        d.blocked_for_bgs = {Bg::ghoul};
+        d.blocked_for_bgs = {Bg::ghoul, Bg::flagellant};
         set_trait_data(d);
 
         // --- Stout Spirit ---
@@ -461,6 +469,14 @@ static void update_trait_data()
         d.trait_prereqs = {Trait::tough};
         set_trait_data(d);
 
+        // --- Unbreakable ---
+        d = trait_data(Trait::rugged);
+        d.id = Trait::unbreakable;
+        d.title = "Unbreakable";
+        d.bg_prereq = Bg::flagellant;
+        d.trait_prereqs = {Trait::rugged};
+        set_trait_data(d);
+
         // --- Thick Skinned ---
         d.id = Trait::thick_skinned;
         d.title = "Thick Skinned";
@@ -468,12 +484,20 @@ static void update_trait_data()
         d.trait_prereqs = {Trait::tough};
         set_trait_data(d);
 
+        // --- Callous ---
+        d = trait_data(Trait::thick_skinned);
+        d.id = Trait::callous;
+        d.title = "Callous";
+        d.bg_prereq = Bg::flagellant;
+        d.trait_prereqs = {Trait::thick_skinned};
+        set_trait_data(d);
+
         // --- Resistant ---
         d.id = Trait::resistant;
         d.title = "Resistant";
         d.descr =
-                "+25% chance to resist paralysis, burning, and poison - and "
-                "the duration of those effects is halved";
+                "+25% chance to resist paralysis, burning, and poison - "
+                "and the duration of those effects is halved";
         d.trait_prereqs = {Trait::tough};
         set_trait_data(d);
 
@@ -837,6 +861,24 @@ static void update_trait_data()
                 "hit chance on the following turn, unless damage is taken";
         d.bg_prereq = Bg::war_vet;
         set_trait_data(d);
+
+        // --- Galvanization ---
+        d.id = Trait::galvanization;
+        d.title = "Galvanization";
+        d.descr =
+                "Casting any spell from the Blood domain grants "
+                "Regeneration for 4-8 turns "
+                "(+1 extra hit point regenerated per turn)";
+        d.bg_prereq = Bg::flagellant;
+        set_trait_data(d);
+
+        // --- Death Sense ---
+        d.id = Trait::death_sense;
+        d.title = "Death Sense";
+        d.descr =
+                "Doubles all Flagellant bonuses gained when health is low";
+        d.bg_prereq = Bg::flagellant;
+        set_trait_data(d);
 }
 
 static bool is_trait_blocked_for_bg(
@@ -862,24 +904,25 @@ static bool is_trait_blocked_for_bg(
         return is_blocked_for_bg || is_blocked_for_domain;
 }
 
-static void incr_occultist_spells()
+static void incr_spell_skills(const SpellDomain spell_domain)
 {
-        for (int id = 0; id < (int)SpellId::END; ++id) {
-                const std::unique_ptr<Spell>
-                        spell(spells::make((SpellId)id));
+        for (int i = 0; i < (int)SpellId::END; ++i) {
+                const auto id = (SpellId)i;
 
-                const bool is_learnable =
-                        spell->player_can_learn();
+                const std::unique_ptr<Spell> spell(spells::make(id));
 
-                const bool is_matching_domain =
-                        (spell->domain() == s_player_occultist_domain);
-
-                if (is_learnable && is_matching_domain) {
-                        player_spells::incr_spell_skill(
-                                (SpellId)id,
-                                Verbose::yes);
+                if (spell->player_can_learn() &&
+                    (spell->domain() == spell_domain)) {
+                        player_spells::incr_spell_skill(id, Verbose::yes);
                 }
         }
+}
+
+static bool is_spell_upgrade_clvl(const int clvl)
+{
+        return (
+                (clvl == s_spell_upgrade_lvl_1) ||
+                (clvl == s_spell_upgrade_lvl_2));
 }
 
 // -----------------------------------------------------------------------------
@@ -952,6 +995,9 @@ std::string bg_title(const Bg id)
         case Bg::exorcist:
                 return "Exorcist";
 
+        case Bg::flagellant:
+                return "Flagellant";
+
         case Bg::ghoul:
                 return "Ghoul";
 
@@ -965,30 +1011,6 @@ std::string bg_title(const Bg id)
                 return "War Veteran";
 
         case Bg::END:
-                break;
-        }
-
-        ASSERT(false);
-
-        return "";
-}
-
-std::string spell_domain_title(const OccultistDomain domain)
-{
-        switch (domain) {
-        case OccultistDomain::clairvoyant:
-                return "Clairvoyance";
-
-        case OccultistDomain::enchanter:
-                return "Enchantment";
-
-        case OccultistDomain::invoker:
-                return "Invocation";
-
-        case OccultistDomain::transmuter:
-                return "Transmutation";
-
-        case OccultistDomain::END:
                 break;
         }
 
@@ -1019,6 +1041,33 @@ std::string occultist_profession_title(const OccultistDomain domain)
         ASSERT(false);
 
         return "";
+}
+
+SpellDomain occultist_to_spell_domain(
+        const OccultistDomain occultist_domain)
+{
+        switch (occultist_domain) {
+        case OccultistDomain::clairvoyant:
+                return SpellDomain::clairvoyance;
+                break;
+
+        case OccultistDomain::enchanter:
+                return SpellDomain::enchantment;
+                break;
+
+        case OccultistDomain::invoker:
+                return SpellDomain::invocation;
+                break;
+
+        case OccultistDomain::transmuter:
+                return SpellDomain::transmutation;
+                break;
+
+        case OccultistDomain::END:
+                break;
+        }
+
+        return SpellDomain::END;
 }
 
 std::string trait_title(const Trait id)
@@ -1068,6 +1117,34 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 put_trait(Trait::undead_bane);
                 break;
 
+        case Bg::flagellant:
+                put("No shock received for taking damage.");
+                put("");
+                put("Gains bonuses while health is low. Bonus level "
+                    "1, 2, and 3 are acheived when health is reduced to "
+                    "10, 6, and 3 hit points, respectively. "
+                    "For each bonus level, the following is received: "
+                    "+1 melee damage, +10% melee hit chance, +1 armor point.");
+                put("");
+                put("Wears a torture collar which cannot be taken off; "
+                    "walking requires extra turns, and stealth and evasion "
+                    "are reduced by 20%. However, wearing the collar hardens "
+                    "the Flagellant against physical suffering, armor is "
+                    "increased by 3 points.");
+                put("");
+                put("Specializes in spells belonging to the Blood domain. "
+                    "At character levels " +
+                    std::to_string(s_spell_upgrade_lvl_1) +
+                    " and " +
+                    std::to_string(s_spell_upgrade_lvl_2) +
+                    ", all spells belonging to this domain are cast at "
+                    "a higher skill level.");
+                put("");
+                put_trait(Trait::self_aware);
+                put("");
+                put_trait(Trait::thick_skinned);
+                break;
+
         case Bg::ghoul:
                 put("Does not regenerate hit points and cannot use medical "
                     "equipment - heals by feeding on corpses (feeding is done "
@@ -1096,9 +1173,9 @@ std::vector<ColoredString> bg_descr(const Bg id)
         case Bg::occultist:
                 put("Specializes in a spell domain (selected at character "
                     "creation). At character levels " +
-                    std::to_string(s_occultist_upgrade_lvl_1) +
+                    std::to_string(s_spell_upgrade_lvl_1) +
                     " and " +
-                    std::to_string(s_occultist_upgrade_lvl_2) +
+                    std::to_string(s_spell_upgrade_lvl_2) +
                     ", all spells belonging to the chosen domain are cast at "
                     "a higher skill level. This choice also determines "
                     "starting spells");
@@ -1203,7 +1280,7 @@ TraitPrereqData trait_prereqs(
         result.bg = d.bg_prereq;
 
         // Remove traits which are blocked for this background (prerequisites
-        // are considered fulfilled)
+        // are considered fulfilled).
         for (auto it = std::begin(result.traits);
              it != std::end(result.traits);) {
                 if (is_trait_blocked_for_bg(*it, bg, occultist_domain)) {
@@ -1215,7 +1292,7 @@ TraitPrereqData trait_prereqs(
                 }
         }
 
-        // Sort lexicographically
+        // Sort lexicographically.
         std::sort(
                 std::begin(result.traits),
                 std::end(result.traits),
@@ -1260,7 +1337,7 @@ std::vector<Bg> pickable_bgs()
                 result.push_back((Bg)i);
         }
 
-        // Sort lexicographically
+        // Sort lexicographically.
         std::sort(
                 std::begin(result),
                 std::end(result),
@@ -1283,15 +1360,25 @@ std::vector<OccultistDomain> pickable_occultist_domains()
                 result.push_back((OccultistDomain)i);
         }
 
-        // Sort lexicographically
+        // Sort lexicographically.
         std::sort(
                 std::begin(result),
                 std::end(result),
                 [](
                         const OccultistDomain domain_1,
                         const OccultistDomain domain_2) {
-                        const std::string str1 = spell_domain_title(domain_1);
-                        const std::string str2 = spell_domain_title(domain_2);
+                        const SpellDomain spell_domain_1 =
+                                occultist_to_spell_domain(domain_1);
+
+                        const SpellDomain spell_domain_2 =
+                                occultist_to_spell_domain(domain_2);
+
+                        const std::string str1 =
+                                spells::spell_domain_title(spell_domain_1);
+
+                        const std::string str2 =
+                                spells::spell_domain_title(spell_domain_2);
+
                         return str1 < str2;
                 });
 
@@ -1311,7 +1398,7 @@ UnpickedTraitsData unpicked_traits(
                         continue;
                 }
 
-                // Check if trait is explicitly blocked for this background
+                // Check if trait is explicitly blocked for this background.
                 const bool is_blocked_for_bg =
                         is_trait_blocked_for_bg(
                                 d.id,
@@ -1322,10 +1409,10 @@ UnpickedTraitsData unpicked_traits(
                         continue;
                 }
 
-                // Check trait prerequisites (traits and background)
+                // Check trait prerequisites (traits and background).
 
                 // NOTE: Traits blocked for the current background are not
-                // considered prerequisites
+                // considered prerequisites.
                 const auto prereq_data =
                         trait_prereqs(
                                 d.id,
@@ -1391,7 +1478,7 @@ std::vector<Trait> traits_can_be_removed()
                         continue;
                 }
 
-                bool is_blocking_other_trait = false;
+                bool is_prereq_for_other_trait = false;
 
                 for (const auto& d_other : s_trait_data) {
                         if (!s_traits_picked[(size_t)d_other.id]) {
@@ -1405,12 +1492,12 @@ std::vector<Trait> traits_can_be_removed()
                                         d.id);
 
                         if (match != std::end(d_other.trait_prereqs)) {
-                                is_blocking_other_trait = true;
+                                is_prereq_for_other_trait = true;
                                 break;
                         }
                 }
 
-                if (is_blocking_other_trait) {
+                if (is_prereq_for_other_trait) {
                         continue;
                 }
 
@@ -1422,6 +1509,8 @@ std::vector<Trait> traits_can_be_removed()
 
 void pick_bg(const Bg bg)
 {
+        TRACE_FUNC_BEGIN;
+
         ASSERT(bg != Bg::END);
 
         s_player_bg = bg;
@@ -1431,7 +1520,7 @@ void pick_bg(const Bg bg)
                 pick_trait(Trait::stout_spirit);
                 pick_trait(Trait::undead_bane);
 
-                // Mark all scrolls as found, so they do not yield XP
+                // Mark all scrolls as found, so that they do not yield XP.
                 for (auto& d : item::g_data) {
                         if (d.type == ItemType::scroll) {
                                 d.is_found = true;
@@ -1439,25 +1528,38 @@ void pick_bg(const Bg bg)
                 }
         } break;
 
-        case Bg::ghoul: {
-                auto* prop_r_disease =
-                        property_factory::make(PropId::r_disease);
+        case Bg::flagellant: {
+                pick_trait(Trait::self_aware);
+                pick_trait(Trait::thick_skinned);
 
-                prop_r_disease->set_indefinite();
+                Prop* moribund = property_factory::make(PropId::moribund);
+
+                moribund->set_indefinite();
 
                 map::g_player->m_properties.apply(
-                        prop_r_disease,
+                        moribund,
+                        PropSrc::intr,
+                        true,
+                        Verbose::no);
+        } break;
+
+        case Bg::ghoul: {
+                Prop* r_disease = property_factory::make(PropId::r_disease);
+
+                r_disease->set_indefinite();
+
+                map::g_player->m_properties.apply(
+                        r_disease,
                         PropSrc::intr,
                         true,
                         Verbose::no);
 
-                auto* prop_darkvis =
-                        property_factory::make(PropId::darkvision);
+                Prop* darkvis = property_factory::make(PropId::darkvision);
 
-                prop_darkvis->set_indefinite();
+                darkvis->set_indefinite();
 
                 map::g_player->m_properties.apply(
-                        prop_darkvis,
+                        darkvis,
                         PropSrc::intr,
                         true,
                         Verbose::no);
@@ -1487,6 +1589,8 @@ void pick_bg(const Bg bg)
         case Bg::END:
                 break;
         }
+
+        TRACE_FUNC_END;
 }
 
 void pick_occultist_domain(const OccultistDomain domain)
@@ -1530,6 +1634,8 @@ void pick_occultist_domain(const OccultistDomain domain)
 
 void on_player_gained_lvl(const int new_lvl)
 {
+        TRACE_FUNC_BEGIN;
+
         switch (s_player_bg) {
         case Bg::exorcist: {
                 const bool is_exorcist_extra_trait =
@@ -1544,21 +1650,23 @@ void on_player_gained_lvl(const int new_lvl)
                 }
         } break;
 
+        case Bg::flagellant: {
+                if (is_spell_upgrade_clvl(new_lvl)) {
+                        incr_spell_skills(SpellDomain::blood);
+                }
+        } break;
+
         case Bg::ghoul: {
         } break;
 
         case Bg::occultist: {
-                const bool is_occultist_spell_incr_lvl =
-                        (new_lvl == s_occultist_upgrade_lvl_1) ||
-                        (new_lvl == s_occultist_upgrade_lvl_2);
-
-                if (is_occultist_spell_incr_lvl) {
-                        incr_occultist_spells();
-                }
-
                 switch (s_player_occultist_domain) {
                 case OccultistDomain::clairvoyant: {
-                        auto* const prop =
+                        if (is_spell_upgrade_clvl(new_lvl)) {
+                                incr_spell_skills(SpellDomain::clairvoyance);
+                        }
+
+                        Prop* const prop =
                                 map::g_player->m_properties.prop(
                                         PropId::magic_searching);
 
@@ -1567,21 +1675,30 @@ void on_player_gained_lvl(const int new_lvl)
                         auto* const searching =
                                 static_cast<PropMagicSearching*>(prop);
 
-                        if (new_lvl == s_occultist_upgrade_lvl_1) {
+                        if (new_lvl == s_spell_upgrade_lvl_1) {
                                 searching->set_allow_reveal_items();
                         }
-                        else if (new_lvl == s_occultist_upgrade_lvl_2) {
+                        else if (new_lvl == s_spell_upgrade_lvl_2) {
                                 searching->set_allow_reveal_creatures();
                         }
                 } break;
 
                 case OccultistDomain::enchanter: {
+                        if (is_spell_upgrade_clvl(new_lvl)) {
+                                incr_spell_skills(SpellDomain::enchantment);
+                        }
                 } break;
 
                 case OccultistDomain::invoker: {
+                        if (is_spell_upgrade_clvl(new_lvl)) {
+                                incr_spell_skills(SpellDomain::invocation);
+                        }
                 } break;
 
                 case OccultistDomain::transmuter: {
+                        if (is_spell_upgrade_clvl(new_lvl)) {
+                                incr_spell_skills(SpellDomain::transmutation);
+                        }
                 } break;
 
                 case OccultistDomain::END: {
@@ -1600,6 +1717,8 @@ void on_player_gained_lvl(const int new_lvl)
                 ASSERT(false);
         } break;
         }
+
+        TRACE_FUNC_END;
 }
 
 void set_all_traits_to_picked()
@@ -1611,6 +1730,8 @@ void set_all_traits_to_picked()
 
 void pick_trait(const Trait id)
 {
+        TRACE_FUNC_BEGIN;
+
         ASSERT(id != Trait::END);
 
         s_traits_picked[(size_t)id] = true;
@@ -1623,16 +1744,20 @@ void pick_trait(const Trait id)
 
         s_trait_log.push_back(trait_log_entry);
 
-        const auto& d = trait_data(id);
+        const TraitData& d = trait_data(id);
 
         if (d.on_picked) {
                 // Has trait pick function
                 trait_data(id).on_picked();
         }
+
+        TRACE_FUNC_END;
 }
 
 void remove_trait(const Trait id)
 {
+        TRACE_FUNC_BEGIN;
+
         ASSERT(id != Trait::END);
 
         s_traits_picked[(size_t)id] = false;
@@ -1645,7 +1770,7 @@ void remove_trait(const Trait id)
 
         s_trait_log.push_back(trait_log_entry);
 
-        const auto& d = trait_data(id);
+        const TraitData& d = trait_data(id);
 
         // If the trait applies effects when picked, it must also revert those
         ASSERT(!(d.on_picked && !d.on_removed));
@@ -1654,6 +1779,8 @@ void remove_trait(const Trait id)
                 // Has trait removal function
                 trait_data(id).on_removed();
         }
+
+        TRACE_FUNC_END;
 }
 
 std::vector<TraitLogEntry> trait_log()

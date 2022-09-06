@@ -292,15 +292,15 @@ void on_game_over(const IsWin is_win)
                 make_game_summary_lines(
                         highscore_entry);
 
-        // Dump the lines to a memorial file
+        // Dump the lines to a memorial file.
         make_memorial_file(
                 game_summary_lines,
                 game_summary_file_path);
 
-        // From now on the session data is not needed anymore
+        // From now on the session data is not needed anymore.
         init::cleanup_session();
 
-        // Show game summary first, then highscores
+        // Show game summary first, then highscores.
         states::push(
                 std::make_unique<BrowseHighscore>());
 

@@ -299,6 +299,7 @@ enum class ShockSrc
         use_strange_item,
         cast_intr_spell,
         time,
+        take_damage,
         misc,
         END
 };

@@ -1452,6 +1452,31 @@ void init()
         d.land_on_hard_snd_msg = "";
         g_data[(size_t)d.id] = d;
 
+        reset_data(d, ItemType::head_wear);
+        d.id = Id::torture_collar;
+        d.base_name = {"Torture Collar", "", "a Torture Collar"};
+        d.base_descr = {
+                "A gruesome torture device with spikes driven into the neck "
+                "of the wearer. It is impossible to take off.",
+
+                "Walking with the collar requires extra turns, and stealth "
+                "and evasion are reduced by 20%. However, wearing the "
+                "collar hardens the Flagellant against physical suffering, "
+                "armor is increased by 3 points."};
+        d.is_stackable = false;
+        d.color = colors::red();
+        d.tile = gfx::TileId::torture_collar;
+        d.character = '[';
+        d.weight = Weight::light;
+        d.is_unique = true;
+        d.value = Value::supreme_treasure;
+        d.chance_to_incl_in_spawn_list = 0;
+        d.allow_spawn = false;
+        d.ability_mods_while_equipped[(size_t)AbilityId::stealth] = -20;
+        d.ability_mods_while_equipped[(size_t)AbilityId::dodging] = -20;
+        d.armor.armor_points = 3;
+        g_data[(size_t)d.id] = d;
+
         reset_data(d, ItemType::scroll);
         d.id = Id::scroll_aura_of_decay;
         d.spell_cast_from_scroll = SpellId::aura_of_decay;
@@ -1468,7 +1493,7 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
-        d.id = Id::scroll_pest;
+        d.id = Id::scroll_pestilence;
         d.spell_cast_from_scroll = SpellId::pestilence;
         g_data[(size_t)d.id] = d;
 
@@ -1508,7 +1533,7 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
-        d.id = Id::scroll_res;
+        d.id = Id::scroll_resistance;
         d.spell_cast_from_scroll = SpellId::resistance;
         g_data[(size_t)d.id] = d;
 
@@ -1525,6 +1550,26 @@ void init()
         reset_data(d, ItemType::scroll);
         d.id = Id::scroll_transmut;
         d.spell_cast_from_scroll = SpellId::transmut;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::scroll);
+        d.id = Id::scroll_accrue_pain;
+        d.spell_cast_from_scroll = SpellId::accrue_pain;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::scroll);
+        d.id = Id::scroll_blood_temper;
+        d.spell_cast_from_scroll = SpellId::blood_tempering;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::scroll);
+        d.id = Id::scroll_sacrifice_life;
+        d.spell_cast_from_scroll = SpellId::sacrifice_life;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::scroll);
+        d.id = Id::scroll_crimson_passage;
+        d.spell_cast_from_scroll = SpellId::crimson_passage;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
@@ -2337,10 +2382,7 @@ ItemData::ItemData() :
         spell_cast_from_scroll(SpellId::END),
         land_on_hard_snd_msg("I hear a thudding sound."),
         land_on_hard_sfx(audio::SfxId::END),
-        allow_display_dmg(true),
-        melee(MeleeData()),
-        ranged(RangedData()),
-        armor(ArmorData())
+        allow_display_dmg(true)
 {
         for (size_t i = 0; i < (size_t)AbilityId::END; ++i) {
                 ability_mods_while_equipped[i] = 0;

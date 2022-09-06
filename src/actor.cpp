@@ -702,27 +702,38 @@ void Actor::change_max_sp(const int change, const Verbose verbose)
 
 int Actor::armor_points() const
 {
-        int ap = 0;
+        int armor_points = 0;
 
-        // Worn armor
         if (m_data->is_humanoid) {
-                auto* armor =
-                        static_cast<item::Armor*>(
-                                m_inv.item_in_slot(SlotId::body));
+                // Add armor from items.
+                const std::vector<SlotId> slot_ids {
+                        SlotId::body,
+                        SlotId::head};
 
-                if (armor) {
-                        ap += armor->armor_points();
+                for (SlotId slot_id : slot_ids) {
+                        item::Item* item = m_inv.item_in_slot(slot_id);
+
+                        if (item) {
+                                armor_points += item->armor_points();
+                        }
                 }
         }
 
-        // "Natural armor"
+        // Add armor from properties.
+        armor_points += m_properties.armor_points();
+
         if (is_player(this)) {
+                // Add armor from player traits.
                 if (player_bon::has_trait(Trait::thick_skinned)) {
-                        ++ap;
+                        ++armor_points;
+                }
+
+                if (player_bon::has_trait(Trait::callous)) {
+                        ++armor_points;
                 }
         }
 
-        return ap;
+        return armor_points;
 }
 
 std::string Actor::death_msg() const

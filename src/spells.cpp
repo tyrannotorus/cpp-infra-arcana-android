@@ -915,6 +915,18 @@ Spell* make(const SpellId spell_id)
         case SpellId::identify:
                 return new SpellIdentify();
 
+        case SpellId::blood_tempering:
+                return new SpellBloodTempering();
+
+        case SpellId::sacrifice_life:
+                return new SpellSacrificeLife();
+
+        case SpellId::accrue_pain:
+                return new SpellAccruePain();
+
+        case SpellId::crimson_passage:
+                return new SpellCrimsonPassage();
+
         case SpellId::END:
                 break;
         }
@@ -932,6 +944,33 @@ SpellId str_to_spell_id(const std::string& str)
 SpellSkill str_to_spell_skill_id(const std::string& str)
 {
         return s_str_to_spell_skill_map.at(str);
+}
+
+std::string spell_domain_title(const SpellDomain domain)
+{
+        switch (domain) {
+        case SpellDomain::clairvoyance:
+                return "Clairvoyance";
+
+        case SpellDomain::enchantment:
+                return "Enchantment";
+
+        case SpellDomain::invocation:
+                return "Invocation";
+
+        case SpellDomain::transmutation:
+                return "Transmutation";
+
+        case SpellDomain::blood:
+                return "Blood";
+
+        case SpellDomain::END:
+                break;
+        }
+
+        ASSERT(false);
+
+        return "";
 }
 
 std::string skill_to_str(const SpellSkill skill)
@@ -1032,11 +1071,11 @@ terrain::DidClose run_close_spell_effect_at(
 // -----------------------------------------------------------------------------
 // Spell
 // -----------------------------------------------------------------------------
-Range Spell::spi_cost_range(
+Range Spell::cost_range(
         const SpellSkill skill,
         const actor::Actor* const caster) const
 {
-        const int cost_max = base_max_spi_cost(skill);
+        const int cost_max = base_max_cost(skill);
         const int cost_min = (cost_max + 1) / 2;
 
         Range range(cost_min, cost_max);
@@ -1063,7 +1102,7 @@ void Spell::cast(
 
         ASSERT(caster);
 
-        auto& properties = caster->m_properties;
+        PropHandler& properties = caster->m_properties;
 
         // If this is an intrinsic cast, check properties which NEVER allows
         // casting or speaking.
@@ -1086,14 +1125,16 @@ void Spell::cast(
                         ? ShockSrc::cast_intr_spell
                         : ShockSrc::use_strange_item;
 
-                int value = shock_value();
+                int shock = shock_value();
 
                 if (map::g_player->m_inv.has_item_in_backpack(
                             item::Id::necronomicon)) {
-                        value *= 2;
+                        shock *= 2;
                 }
 
-                map::g_player->incr_shock((double)value, shock_src);
+                if (shock > 0) {
+                        map::g_player->incr_shock((double)shock, shock_src);
+                }
 
                 // Make sound if noisy - casting from scrolls is always noisy.
                 if (is_noisy(skill) || (spell_src == SpellSrc::manuscript)) {
@@ -1156,10 +1197,24 @@ void Spell::cast(
         bool allow_cast = true;
 
         if (spell_src == SpellSrc::learned) {
-                const auto cost_range = spi_cost_range(skill, caster);
+                const Range cost = cost_range(skill, caster);
 
-                if (cost_range.min > 0) {
-                        actor::hit_sp(*caster, cost_range.roll(), Verbose::no);
+                if (cost.min > 0) {
+                        if (cost_type() == SpellCostType::spirit) {
+                                // Spell costs spirit to cast.
+                                actor::hit_sp(
+                                        *caster,
+                                        cost.roll(),
+                                        Verbose::no);
+                        }
+                        else {
+                                // Spell costs hit points to cast.
+                                actor::hit(
+                                        *caster,
+                                        cost.roll(),
+                                        DmgType::pure,
+                                        AllowWound::no);
+                        }
                 }
 
                 // Check properties which MAY allow casting.
@@ -1178,15 +1233,28 @@ void Spell::cast(
                         << "'" << name() << "'"
                         << std::endl;
 
+                // Here we run the actual casting of the spell itself:
                 run_effect(caster, skill, seen_targets);
 
                 end_properties_for_casting_spell(*caster, id());
+
+                // Grant regeneration from Flagellant galvanization trait?
+                if (actor::is_player(caster) &&
+                    player_bon::has_trait(Trait::galvanization) &&
+                    (domain() == SpellDomain::blood)) {
+                        Prop* const regen =
+                                property_factory::make(PropId::regenerating);
+
+                        regen->set_duration(rnd::range(4, 8));
+
+                        properties.apply(regen);
+                }
         }
 
         if (actor::is_player(caster) &&
             caster->is_alive() &&
             allow_cast &&
-            (base_max_spi_cost(skill) > 0) &&
+            (base_max_cost(skill) > 0) &&
             rnd::one_in(7)) {
                 // Run a random side effect.
                 const int d = 3;
@@ -1197,7 +1265,7 @@ void Spell::cast(
                         {std::min(map::w() - 1, caster->m_pos.x + d),
                          std::min(map::h() - 1, caster->m_pos.y + d)});
 
-                auto nearby_positions = rect.positions();
+                std::vector<P> nearby_positions = rect.positions();
 
                 rnd::shuffle(nearby_positions);
 
@@ -1277,15 +1345,15 @@ std::vector<std::string> Spell::descr(
 
 std::string Spell::domain_descr() const
 {
-        const auto my_domain = domain();
+        const SpellDomain my_domain = domain();
 
-        if (my_domain == OccultistDomain::END) {
+        if (my_domain == SpellDomain::END) {
                 return "";
         }
 
         const std::string domain_title =
                 text_format::first_to_upper(
-                        player_bon::spell_domain_title(domain()));
+                        spells::spell_domain_title(domain()));
 
         return "It belongs to the \"" + domain_title + "\" domain.";
 }
@@ -1297,6 +1365,10 @@ int Spell::shock_value() const
         int value = 0;
 
         switch (type) {
+        case SpellShock::none:
+                value = 0;
+                break;
+
         case SpellShock::mild:
                 value = 4;
                 break;
@@ -1334,7 +1406,7 @@ Range SpellAuraOfDecay::duration_range(const SpellSkill skill) const
         return duration_range;
 }
 
-int SpellAuraOfDecay::base_max_spi_cost(const SpellSkill skill) const
+int SpellAuraOfDecay::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
@@ -1398,7 +1470,7 @@ int SpellAuraOfDecay::mon_cooldown() const
 }
 
 bool SpellAuraOfDecay::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         return (
@@ -1699,7 +1771,7 @@ void SpellBolt::draw_projectile_travel(
 }
 
 bool SpellBolt::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -1917,7 +1989,7 @@ std::vector<std::string> SpellAzaGaze::descr_specific(
 }
 
 bool SpellAzaGaze::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -1971,7 +2043,7 @@ int SpellCataclysm::nr_explosions(const SpellSkill skill) const
         return 1;
 }
 
-int SpellCataclysm::base_max_spi_cost(const SpellSkill skill) const
+int SpellCataclysm::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
@@ -2155,7 +2227,7 @@ std::vector<std::string> SpellCataclysm::descr_specific(
 }
 
 bool SpellCataclysm::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         // Always allow casting with a visible target.
@@ -2307,7 +2379,7 @@ std::vector<std::string> SpellPestilence::descr_specific(
 }
 
 bool SpellPestilence::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         // Always allow casting with a visible target.
@@ -2527,7 +2599,7 @@ std::vector<std::string> SpellSpectralWeapons::descr_specific(
 // -----------------------------------------------------------------------------
 // Control Object
 // -----------------------------------------------------------------------------
-int SpellControlObject::base_max_spi_cost(const SpellSkill skill) const
+int SpellControlObject::base_max_cost(const SpellSkill skill) const
 {
         if (skill == SpellSkill::transcendent) {
                 return 1;
@@ -3136,7 +3208,7 @@ std::vector<std::string> SpellSeeInvis::descr_specific(
 }
 
 bool SpellSeeInvis::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)seen_targets;
@@ -3150,7 +3222,7 @@ bool SpellSeeInvis::allow_mon_cast_now(
 // -----------------------------------------------------------------------------
 // Spell Shield
 // -----------------------------------------------------------------------------
-int SpellSpellShield::base_max_spi_cost(const SpellSkill skill) const
+int SpellSpellShield::base_max_cost(const SpellSkill skill) const
 {
         return 5 - (int)skill;
 }
@@ -3185,7 +3257,7 @@ std::vector<std::string> SpellSpellShield::descr_specific(
 }
 
 bool SpellSpellShield::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)seen_targets;
@@ -3217,7 +3289,7 @@ Range SpellHaste::duration_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellHaste::base_max_spi_cost(const SpellSkill skill) const
+int SpellHaste::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
@@ -3260,7 +3332,7 @@ int SpellHaste::mon_cooldown() const
 }
 
 bool SpellHaste::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         return (
@@ -3292,7 +3364,7 @@ Range SpellPremonition::duration_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellPremonition::base_max_spi_cost(const SpellSkill skill) const
+int SpellPremonition::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
@@ -3334,7 +3406,7 @@ std::vector<std::string> SpellPremonition::descr_specific(
 // -----------------------------------------------------------------------------
 // Erudition
 // -----------------------------------------------------------------------------
-int SpellErudition::base_max_spi_cost(const SpellSkill skill) const
+int SpellErudition::base_max_cost(const SpellSkill skill) const
 {
         return 7 - (int)skill;
 }
@@ -3423,7 +3495,7 @@ std::vector<std::string> SpellErudition::descr_specific(
 // -----------------------------------------------------------------------------
 // Identify
 // -----------------------------------------------------------------------------
-int SpellIdentify::base_max_spi_cost(const SpellSkill skill) const
+int SpellIdentify::base_max_cost(const SpellSkill skill) const
 {
         return ((skill == SpellSkill::transcendent) ? 4 : 8);
 }
@@ -3548,7 +3620,7 @@ void SpellTeleport::run_effect(
 }
 
 bool SpellTeleport::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         const bool is_low_hp = (mon.m_hp <= (actor::max_hp(mon) / 2));
@@ -3642,7 +3714,7 @@ std::vector<std::string> SpellResistance::descr_specific(
 }
 
 bool SpellResistance::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)seen_targets;
@@ -3722,7 +3794,7 @@ void SpellKnockBack::run_effect(
 }
 
 bool SpellKnockBack::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -3733,7 +3805,7 @@ bool SpellKnockBack::allow_mon_cast_now(
 // -----------------------------------------------------------------------------
 // Curse
 // -----------------------------------------------------------------------------
-int SpellCurse::base_max_spi_cost(const SpellSkill skill) const
+int SpellCurse::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
@@ -3816,7 +3888,7 @@ void SpellCurse::run_effect(
 }
 
 bool SpellCurse::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -3848,7 +3920,7 @@ Range SpellEnfeeble::duration_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellEnfeeble::base_max_spi_cost(const SpellSkill skill) const
+int SpellEnfeeble::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
@@ -3952,7 +4024,7 @@ std::vector<std::string> SpellEnfeeble::descr_specific(
 }
 
 bool SpellEnfeeble::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -3984,7 +4056,7 @@ Range SpellSlow::duration_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellSlow::base_max_spi_cost(const SpellSkill skill) const
+int SpellSlow::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
@@ -4087,7 +4159,7 @@ int SpellSlow::mon_cooldown() const
 }
 
 bool SpellSlow::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4119,7 +4191,7 @@ Range SpellTerrify::duration_range(SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellTerrify::base_max_spi_cost(const SpellSkill skill) const
+int SpellTerrify::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
@@ -4220,7 +4292,7 @@ std::vector<std::string> SpellTerrify::descr_specific(
 }
 
 bool SpellTerrify::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4286,7 +4358,7 @@ void SpellDisease::run_effect(
 }
 
 bool SpellDisease::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4443,7 +4515,7 @@ void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
 }
 
 bool SpellSummonMon::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         // Always allow casting with a visible target.
@@ -4522,7 +4594,7 @@ void SpellSummonTentacles::run_effect(
 }
 
 bool SpellSummonTentacles::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         // Always allow casting with a visible target.
@@ -4597,7 +4669,7 @@ void SpellHeal::run_effect(
 }
 
 bool SpellHeal::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)seen_targets;
@@ -4696,7 +4768,7 @@ void SpellMiGoHypno::run_effect(
 }
 
 bool SpellMiGoHypno::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4759,7 +4831,7 @@ void SpellBurn::run_effect(
 }
 
 bool SpellBurn::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -4813,7 +4885,7 @@ void SpellDeafen::run_effect(
 }
 
 bool SpellDeafen::allow_mon_cast_now(
-        actor::Actor& mon,
+        const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {
         (void)mon;
@@ -5056,6 +5128,295 @@ std::vector<std::string> SpellTransmut::descr_specific(
                 "% chance for a +2 weapon, " +
                 std::to_string(chance_weapon(skill, 3)) +
                 "% chance for a +3 weapon, etc.");
+
+        return descr;
+}
+
+// -----------------------------------------------------------------------------
+// Blood Tempering
+// -----------------------------------------------------------------------------
+Range SpellBloodTempering::duration_range(SpellSkill skill) const
+{
+        Range duration_range;
+
+        duration_range.min = 4 + ((int)skill * 2);
+        duration_range.max = duration_range.min + 4;
+
+        return duration_range;
+}
+
+int SpellBloodTempering::base_max_cost(const SpellSkill skill) const
+{
+        (void)skill;
+
+        return 8;
+}
+
+void SpellBloodTempering::run_effect(
+        actor::Actor* caster,
+        SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)seen_targets;
+
+        int nr_turns = duration_range(skill).roll();
+
+        Prop* r_phys = property_factory::make(PropId::r_phys);
+
+        r_phys->set_duration(nr_turns);
+
+        caster->m_properties.apply(r_phys);
+}
+
+std::vector<std::string> SpellBloodTempering::descr_specific(
+        SpellSkill skill) const
+{
+        std::vector<std::string> descr;
+
+        descr.emplace_back(
+                "Through ardous suffering, the caster tempers their body to "
+                "resist physical force (cannot be harmed by normal attacks, "
+                "however other forms of damage such as fire is still "
+                "harmful).");
+
+        descr.emplace_back(
+                "The spell lasts for " +
+                duration_range(skill).str() +
+                " turns.");
+
+        return descr;
+}
+
+// -----------------------------------------------------------------------------
+// Accrue Pain
+// -----------------------------------------------------------------------------
+Range SpellAccruePain::duration_range(const SpellSkill skill) const
+{
+        Range duration_range;
+
+        duration_range.min = ((int)skill + 1) * 15;
+        duration_range.max = duration_range.min * 2;
+
+        return duration_range;
+}
+
+Range SpellAccruePain::dmg_range(const SpellSkill skill) const
+{
+        switch (skill) {
+        case SpellSkill::basic:
+                return {12, 20};  // Avg 16.0
+
+        case SpellSkill::expert:
+                return {16, 28};  // Avg 22.0
+
+        case SpellSkill::master:
+                return {20, 36};  // Avg 28.0
+
+        case SpellSkill::transcendent:
+                return {24, 44};  // Avg 34.0
+        }
+
+        ASSERT(false);
+
+        return {1, 1};
+}
+
+Range SpellAccruePain::dmg_threshold_range() const
+{
+        return {8, 12};
+}
+
+void SpellAccruePain::run_effect(
+        actor::Actor* caster,
+        SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)seen_targets;
+
+        auto* const prop =
+                static_cast<PropAccruePain*>(
+                        property_factory::make(PropId::accrue_pain));
+
+        prop->set_duration(duration_range(skill).roll());
+
+        prop->set_attack_dmg(dmg_range(skill).roll());
+
+        prop->set_dmg_threshold(dmg_threshold_range().roll());
+
+        caster->m_properties.apply(prop);
+}
+
+std::vector<std::string> SpellAccruePain::descr_specific(
+        SpellSkill skill) const
+{
+        std::vector<std::string> descr;
+
+        // Re-use the property description as spell description.
+        descr.push_back(
+                property_data::g_data[(size_t)PropId::accrue_pain].descr);
+
+        descr.push_back(
+                "The damage threshold to trigger the attack is " +
+                dmg_threshold_range().str() +
+                " hit points.");
+
+        descr.push_back(
+                "The spell does " +
+                dmg_range(skill).str() +
+                " damage if the threshold is exceeded.");
+
+        descr.emplace_back(
+                "The spell lasts for " +
+                duration_range(skill).str() +
+                " turns before it is wasted.");
+
+        return descr;
+}
+
+// -----------------------------------------------------------------------------
+// Crimson Passage
+// -----------------------------------------------------------------------------
+bool SpellCrimsonPassage::is_noisy(SpellSkill skill) const
+{
+        return (skill == SpellSkill::basic) ? true : false;
+}
+
+SpellShock SpellCrimsonPassage::shock_type() const
+{
+        // If the effect is already active, the spell does not cause shock.
+        //
+        // HACK: Assuming only the player can cast this spell.
+        return (
+                map::g_player->m_properties.has(PropId::crimson_passage)
+                        ? SpellShock::none
+                        : SpellShock::disturbing);
+}
+
+int SpellCrimsonPassage::base_max_cost(const SpellSkill skill) const
+{
+        (void)skill;
+
+        // If the effect is already active, the spell is free to cast.
+        //
+        // HACK: Assuming only the player can cast this spell.
+        return (
+                map::g_player->m_properties.has(PropId::crimson_passage)
+                        ? 0
+                        : 3);
+}
+
+int SpellCrimsonPassage::nr_steps_allowed(const SpellSkill skill) const
+{
+        if (skill == SpellSkill::transcendent) {
+                return -1;
+        }
+        else {
+                return ((int)skill + 1) * 4;
+        }
+}
+
+void SpellCrimsonPassage::run_effect(
+        actor::Actor* caster,
+        SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)seen_targets;
+
+        if (caster->m_properties.has(PropId::crimson_passage)) {
+                // Effect already active, cancel it instead.
+                caster->m_properties.end_prop(PropId::crimson_passage);
+
+                return;
+        }
+
+        auto* const prop =
+                static_cast<PropCrimsonPassage*>(
+                        property_factory::make(PropId::crimson_passage));
+
+        prop->set_indefinite();
+
+        prop->set_nr_steps_allowed(nr_steps_allowed(skill));
+
+        caster->m_properties.apply(prop);
+}
+
+std::vector<std::string> SpellCrimsonPassage::descr_specific(
+        SpellSkill skill) const
+{
+        std::vector<std::string> descr;
+
+        // Re-use the property description as spell description.
+        descr.push_back(
+                property_data::g_data[(size_t)PropId::crimson_passage].descr);
+
+        const int nr_steps = nr_steps_allowed(skill);
+
+        if (nr_steps == -1) {
+                descr.emplace_back(
+                        "An infinite number of steps may be taken, the spell "
+                        "is only limited by the number of hit points.");
+        }
+        else {
+                descr.emplace_back(
+                        std::to_string(nr_steps_allowed(skill)) +
+                        " steps may be taken before the effect ends.");
+        }
+
+        descr.emplace_back(
+                "Casting the spell again while it is already active cancels "
+                "the effect (this does not drain hit points or cause shock).");
+
+        return descr;
+}
+
+// -----------------------------------------------------------------------------
+// Sacrifice Life
+// -----------------------------------------------------------------------------
+int SpellSacrificeLife::pct_sp_per_hp(const SpellSkill skill) const
+{
+        return ((int)skill + 1) * 50;
+}
+
+void SpellSacrificeLife::run_effect(
+        actor::Actor* caster,
+        SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)skill;
+        (void)seen_targets;
+
+        const int hp = caster->m_hp;
+
+        if (hp <= 2) {
+                // Not enough HP.
+                msg_log::add("I feel like I have very little to offer.");
+
+                return;
+        }
+
+        const int hp_drained = ((hp - 1) / 2) * 2;
+
+        actor::hit(*caster, hp_drained, DmgType::pure, AllowWound::no);
+
+        const int sp_gained = (hp_drained * pct_sp_per_hp(skill)) / 100;
+
+        caster->restore_sp(sp_gained, true);
+}
+
+std::vector<std::string> SpellSacrificeLife::descr_specific(
+        SpellSkill skill) const
+{
+        std::vector<std::string> descr;
+
+        descr.emplace_back(
+                "Brings the caster to the brink of death in order to restore "
+                "the spirit. The amount restored is proportional to the life "
+                "sacrificed.");
+
+        descr.emplace_back(
+                "Spirit points gained is " +
+                std::to_string(pct_sp_per_hp(skill)) +
+                "% of hit points sacrificed.");
 
         return descr;
 }

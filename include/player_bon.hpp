@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+enum class SpellDomain;
+
 namespace actor
 {
 struct ActorData;
@@ -82,12 +84,19 @@ enum class Trait
         // Unique for War veteran
         steady_aimer,
 
+        // Unique for Flagellant
+        unbreakable,
+        callous,
+        galvanization,
+        death_sense,
+
         END
 };
 
 enum class Bg
 {
         exorcist,
+        flagellant,
         ghoul,
         occultist,
         rogue,
@@ -101,7 +110,6 @@ enum class OccultistDomain
         clairvoyant,
         enchanter,
         invoker,
-        // summoner,
         transmuter,
 
         END
@@ -163,9 +171,9 @@ std::string trait_descr(Trait id);
 
 std::string bg_title(Bg id);
 
-std::string spell_domain_title(OccultistDomain domain);
-
 std::string occultist_profession_title(OccultistDomain domain);
+
+SpellDomain occultist_to_spell_domain(OccultistDomain occultist_domain);
 
 // NOTE: The string vector returned is not formatted. Each line still needs to
 // be formatted by the caller. The reason for using a vector instead of a string

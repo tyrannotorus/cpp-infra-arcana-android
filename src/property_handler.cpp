@@ -648,7 +648,7 @@ void PropHandler::on_turn_begin()
                                 --prop->m_nr_turns_left;
                         }
 
-                        const auto prop_ended = prop->on_actor_turn();
+                        const PropEnded prop_ended = prop->on_actor_turn();
 
                         (void)prop_ended;
                 }
@@ -953,12 +953,23 @@ int PropHandler::player_extra_min_shock() const
         return shock;
 }
 
+int PropHandler::armor_points() const
+{
+        int armor = 0;
+
+        for (const auto& prop : m_props) {
+                armor += prop->armor_points();
+        }
+
+        return armor;
+}
+
 void PropHandler::affect_move_dir(Dir& dir) const
 {
         for (size_t i = 0; i < m_props.size();) {
                 const auto& prop = m_props[i];
 
-                const auto prop_ended = prop->affect_move_dir(dir);
+                const PropEnded prop_ended = prop->affect_move_dir(dir);
 
                 if (prop_ended == PropEnded::no) {
                         ++i;
@@ -975,6 +986,19 @@ bool PropHandler::allow_move_dir(const Dir dir) const
         }
 
         return true;
+}
+
+void PropHandler::on_moved_non_center_dir() const
+{
+        for (size_t i = 0; i < m_props.size();) {
+                const auto& prop = m_props[i];
+
+                const PropEnded prop_ended = prop->on_moved_non_center_dir();
+
+                if (prop_ended == PropEnded::no) {
+                        ++i;
+                }
+        }
 }
 
 bool PropHandler::allow_attack(const Verbose verbose) const
@@ -1112,12 +1136,12 @@ bool PropHandler::allow_pray(const Verbose verbose) const
         return true;
 }
 
-void PropHandler::on_hit()
+void PropHandler::on_hit(const int dmg, const DmgType dmg_type)
 {
         for (size_t i = 0; i < m_props.size();) {
                 const auto& prop = m_props[i];
 
-                const auto prop_ended = prop->on_hit();
+                const PropEnded prop_ended = prop->on_hit(dmg, dmg_type);
 
                 if (prop_ended == PropEnded::no) {
                         ++i;

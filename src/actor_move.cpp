@@ -327,30 +327,61 @@ static bool should_player_be_immobile()
         return map::g_player->enc_percent() >= g_enc_immobile_lvl;
 }
 
-static bool should_player_stagger(const P& target)
+static bool is_player_stagger()
 {
         const int enc = map::g_player->enc_percent();
 
-        const auto terrain_id = map::g_terrain.at(target)->id();
+        return enc >= 100 || is_player_staggering_from_wounds();
+}
+
+static bool is_player_torture_collared()
+{
+        return (
+                map::g_player->m_inv.has_item_in_slot(
+                        SlotId::head,
+                        item::Id::torture_collar));
+}
+
+static void handle_player_slowed_movement(const P& target)
+{
+        if (map::g_player->m_properties.has(PropId::crimson_passage)) {
+                return;
+        }
+
+        const terrain::Id terrain_id = map::g_terrain.at(target)->id();
 
         if (terrain_id == terrain::Id::liquid) {
-                return false;
+                return;
         }
-        else {
-                return enc >= 100 || is_player_staggering_from_wounds();
+
+        bool should_wait = false;
+
+        if (is_player_torture_collared()) {
+                should_wait = true;
+        }
+        else if (is_player_stagger()) {
+                msg_log::add("I stagger.", colors::msg_note());
+
+                should_wait = true;
+        }
+
+        if (should_wait) {
+                map::g_player->m_properties.apply(
+                        property_factory::make(
+                                PropId::waiting));
         }
 }
 
 static void move_player_non_center_direction(const P& target)
 {
-        auto& player = *map::g_player;
+        actor::Actor& player = *map::g_player;
 
         const bool is_terrain_blocking_move =
                 !map::can_actor_move_into_terrain_at(player, target);
 
         actor::Actor* const mon = map::living_actor_at(target);
 
-        const auto is_aware_of_mon = (mon && mon->is_player_aware_of_me());
+        const bool is_aware_of_mon = (mon && mon->is_player_aware_of_me());
 
         if (mon && !player.is_leader_of(mon) && is_aware_of_mon) {
                 player_bump_known_hostile_mon(*mon);
@@ -358,7 +389,7 @@ static void move_player_non_center_direction(const P& target)
                 return;
         }
 
-        const auto pre_move_result = pre_bump_terrains(player, target);
+        const AllowAction pre_move_result = pre_bump_terrains(player, target);
 
         if (pre_move_result == AllowAction::no) {
                 return;
@@ -382,13 +413,8 @@ static void move_player_non_center_direction(const P& target)
 
                         return;
                 }
-                else if (should_player_stagger(target)) {
-                        msg_log::add("I stagger.", colors::msg_note());
 
-                        player.m_properties.apply(
-                                property_factory::make(
-                                        PropId::waiting));
-                }
+                handle_player_slowed_movement(target);
 
                 if (mon && player.is_leader_of(mon)) {
                         player_displace_allied_mon(*mon, map::g_player->m_pos);
@@ -402,8 +428,7 @@ static void move_player_non_center_direction(const P& target)
 
                 print_corpses_at_player_msgs();
 
-                // Moving ends sanctuary
-                player.m_properties.end_prop(PropId::sanctuary);
+                player.m_properties.on_moved_non_center_dir();
         }
 
         bump_terrains(player, target);
@@ -451,7 +476,14 @@ static void do_move_action_player(Dir dir)
                 // * the player waited in the current position on purpose, or
                 // * the player was stuck (e.g. in a spider web)
 
-                game_time::tick();
+                const bool is_free_move =
+                        (player.m_properties.has(PropId::crimson_passage) &&
+                         (dir != Dir::center) &&
+                         (dir != Dir::END));
+
+                if (!is_free_move) {
+                        game_time::tick();
+                }
         }
 }
 
@@ -576,6 +608,8 @@ static void do_move_action_mon(actor::Actor& mon, Dir dir)
                 actor::set_position(mon, target_p);
 
                 bump_terrains(mon, mon.m_pos);
+
+                mon.m_properties.on_moved_non_center_dir();
 
                 if (actor::can_player_see_actor(mon)) {
                         actor::make_player_aware_mon(mon);

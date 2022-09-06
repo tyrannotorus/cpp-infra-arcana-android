@@ -89,7 +89,8 @@ namespace item
 Item::Item(ItemData* item_data) :
         m_data(item_data),
         m_base_melee_dmg(item_data->melee.dmg),
-        m_base_ranged_dmg(item_data->ranged.dmg)
+        m_base_ranged_dmg(item_data->ranged.dmg),
+        m_durability(rnd::range(80, 100))
 {
 }
 
@@ -123,6 +124,16 @@ Id Item::id() const
 
 void Item::save()
 {
+        saving::put_int(m_base_melee_dmg.base_min());
+        saving::put_int(m_base_melee_dmg.base_max());
+        saving::put_int(m_base_melee_dmg.plus());
+
+        saving::put_int(m_base_ranged_dmg.base_min());
+        saving::put_int(m_base_ranged_dmg.base_max());
+        saving::put_int(m_base_ranged_dmg.plus());
+
+        saving::put_int(m_durability);
+
         m_curse.save();
 
         save_hook();
@@ -130,6 +141,16 @@ void Item::save()
 
 void Item::load()
 {
+        m_base_melee_dmg.set_base_min(saving::get_int());
+        m_base_melee_dmg.set_base_max(saving::get_int());
+        m_base_melee_dmg.set_plus(saving::get_int());
+
+        m_base_ranged_dmg.set_base_min(saving::get_int());
+        m_base_ranged_dmg.set_base_max(saving::get_int());
+        m_base_ranged_dmg.set_plus(saving::get_int());
+
+        m_durability = saving::get_int();
+
         m_curse.load();
 
         load_hook();
@@ -180,6 +201,7 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
         }
 
         if (actor::is_player(attacker)) {
+                // Bonus damage from melee traits.
                 if (player_bon::has_trait(Trait::adept_melee)) {
                         range.set_plus(range.plus() + 1);
                 }
@@ -201,6 +223,22 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
                         if (player_bon::has_trait(Trait::toxic)) {
                                 range.set_plus(range.plus() + 1);
                         }
+                }
+
+                // Bonus damage from Flagellant Moribund?
+                if (attacker && attacker->m_properties.has(PropId::moribund)) {
+                        auto* const moribund =
+                                static_cast<PropMoribund*>(
+                                        attacker->m_properties.prop(
+                                                PropId::moribund));
+
+                        int moribund_bon = moribund->calc_bonus_lvl();
+
+                        if (player_bon::has_trait(Trait::death_sense)) {
+                                moribund_bon *= 2;
+                        }
+
+                        range.set_plus(range.plus() + moribund_bon);
                 }
         }
 
@@ -687,6 +725,29 @@ void Item::clear_carrier_props()
         m_actor_carrying->m_properties.remove_props_for_item(this);
 }
 
+int Item::armor_points() const
+{
+        // NOTE: AP must be able to reach zero, otherwise the armor will never
+        // count as destroyed.
+
+        const int ap_max = m_data->armor.armor_points;
+
+        if (m_durability > 60) {
+                return ap_max;
+        }
+        else if (m_durability > 40) {
+                return std::max(0, ap_max - 1);
+        }
+        else if (m_durability > 25) {
+                return std::max(0, ap_max - 2);
+        }
+        else if (m_durability > 15) {
+                return std::max(0, ap_max - 3);
+        }
+
+        return 0;
+}
+
 // -----------------------------------------------------------------------------
 // Trapezohedron
 // -----------------------------------------------------------------------------
@@ -714,44 +775,7 @@ ItemPrePickResult Trapez::pre_pickup_hook()
 // Armor
 // -----------------------------------------------------------------------------
 Armor::Armor(ItemData* const item_data) :
-        Item(item_data),
-        m_dur(rnd::range(80, 100)) {}
-
-void Armor::save_hook() const
-{
-        saving::put_int(m_dur);
-}
-
-void Armor::load_hook()
-{
-        m_dur = saving::get_int();
-}
-
-int Armor::armor_points() const
-{
-        // NOTE: AP must be able to reach zero, otherwise the armor will never
-        // count as destroyed.
-
-        const int ap_max = m_data->armor.armor_points;
-
-        if (m_dur > 60) {
-                return ap_max;
-        }
-
-        if (m_dur > 40) {
-                return std::max(0, ap_max - 1);
-        }
-
-        if (m_dur > 25) {
-                return std::max(0, ap_max - 2);
-        }
-
-        if (m_dur > 15) {
-                return std::max(0, ap_max - 3);
-        }
-
-        return 0;
-}
+        Item(item_data) {}
 
 void Armor::hit(const int dmg)
 {
@@ -776,9 +800,9 @@ void Armor::hit(const int dmg)
                 war_vet_k = 0.5;
         }
 
-        m_dur -= (int)(dmg_db * df * k * war_vet_k);
+        m_durability -= (int)(dmg_db * df * k * war_vet_k);
 
-        m_dur = std::max(0, m_dur);
+        m_durability = std::max(0, m_durability);
 
         const int ap_after = armor_points();
 
@@ -805,9 +829,9 @@ void ArmorAsbSuit::on_equip_hook(const Verbose verbose)
 {
         (void)verbose;
 
-        auto* prop_r_fire = property_factory::make(PropId::r_fire);
-        auto* prop_r_acid = property_factory::make(PropId::r_acid);
-        auto* prop_r_elec = property_factory::make(PropId::r_elec);
+        Prop* prop_r_fire = property_factory::make(PropId::r_fire);
+        Prop* prop_r_acid = property_factory::make(PropId::r_acid);
+        Prop* prop_r_elec = property_factory::make(PropId::r_elec);
 
         prop_r_fire->set_indefinite();
         prop_r_acid->set_indefinite();
@@ -854,27 +878,11 @@ Wpn::Wpn(ItemData* const item_data) :
 
 void Wpn::save_hook() const
 {
-        saving::put_int(m_base_melee_dmg.base_min());
-        saving::put_int(m_base_melee_dmg.base_max());
-        saving::put_int(m_base_melee_dmg.plus());
-
-        saving::put_int(m_base_ranged_dmg.base_min());
-        saving::put_int(m_base_ranged_dmg.base_max());
-        saving::put_int(m_base_ranged_dmg.plus());
-
         saving::put_int(m_ammo_loaded);
 }
 
 void Wpn::load_hook()
 {
-        m_base_melee_dmg.set_base_min(saving::get_int());
-        m_base_melee_dmg.set_base_max(saving::get_int());
-        m_base_melee_dmg.set_plus(saving::get_int());
-
-        m_base_ranged_dmg.set_base_min(saving::get_int());
-        m_base_ranged_dmg.set_base_max(saving::get_int());
-        m_base_ranged_dmg.set_plus(saving::get_int());
-
         m_ammo_loaded = saving::get_int();
 }
 
@@ -1084,7 +1092,7 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
-        // Gas mask and Asbestos suit protects against blindness
+        // Gas mask and Asbestos suit protects against blindness.
         Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
@@ -1094,7 +1102,7 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         }
 
         if (rnd::coin_toss()) {
-                auto* const prop = property_factory::make(PropId::blind);
+                Prop* const prop = property_factory::make(PropId::blind);
 
                 prop->set_duration(2);
 
@@ -1179,7 +1187,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
-        // Gas mask and Asbestos suit protects against blindness
+        // Gas mask and Asbestos suit protects against blindness.
         Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
@@ -1188,7 +1196,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
-        auto* const prop = property_factory::make(PropId::blind);
+        Prop* const prop = property_factory::make(PropId::blind);
 
         actor_hit.m_properties.apply(prop);
 }
@@ -1202,7 +1210,7 @@ void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
                 return;
         }
 
-        // Gas mask and Asbestos suit protects against blindness
+        // Gas mask and Asbestos suit protects against blindness.
         Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
@@ -1211,7 +1219,7 @@ void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
                 return;
         }
 
-        auto* const prop = property_factory::make(PropId::blind);
+        Prop* const prop = property_factory::make(PropId::blind);
 
         prop->set_duration(7);
 
@@ -1565,16 +1573,6 @@ void MedicalBag::stop_action()
 // -----------------------------------------------------------------------------
 // Gas mask
 // -----------------------------------------------------------------------------
-void GasMask::on_equip_hook(const Verbose verbose)
-{
-        (void)verbose;
-}
-
-void GasMask::on_unequip_hook()
-{
-        clear_carrier_props();
-}
-
 void GasMask::decr_turns_left(Inventory& carrier_inv)
 {
         --m_nr_turns_left;

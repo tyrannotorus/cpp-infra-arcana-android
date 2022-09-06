@@ -36,7 +36,7 @@ static void learn_spell_player(const SpellId spell)
         player_spells::learn_spell(spell, Verbose::no);
 
         // Also identify and "find" the corresponding scroll (if one exists)
-        for (auto& d : item::g_data) {
+        for (item::ItemData& d : item::g_data) {
                 if (d.spell_cast_from_scroll != spell) {
                         continue;
                 }
@@ -57,21 +57,18 @@ static void learn_spell_player(const SpellId spell)
 
 static void make_for_player_exorcist()
 {
-        auto& inv = map::g_player->m_inv;
+        Inventory& inv = map::g_player->m_inv;
 
-        auto* const hatchet = item::make(item::Id::hatchet);
+        item::Item* const hatchet = item::make(item::Id::hatchet);
 
-        inv.put_in_slot(
-                SlotId::wpn,
-                hatchet,
-                Verbose::no);
+        inv.put_in_slot(SlotId::wpn, hatchet, Verbose::no);
 
         inv.put_in_slot(
                 SlotId::wpn_alt,
                 item::make(item::Id::revolver),
                 Verbose::no);
 
-        auto* revolver_bullets = item::make(item::Id::revolver_bullet);
+        item::Item* revolver_bullets = item::make(item::Id::revolver_bullet);
 
         revolver_bullets->m_nr_items = 8;
 
@@ -92,9 +89,37 @@ static void make_for_player_exorcist()
         learn_spell_player(SpellId::purge);
 }
 
+static void make_for_player_flagellant()
+{
+        Inventory& inv = map::g_player->m_inv;
+
+        inv.put_in_slot(
+                SlotId::head,
+                item::make(item::Id::torture_collar),
+                Verbose::no);
+
+        item::Item* const dagger = item::make(item::Id::dagger);
+
+        inv.put_in_slot(SlotId::wpn, dagger, Verbose::no);
+
+        inv.put_in_backpack(item::make(item::Id::iron_spike, 6));
+
+        map::g_player->set_unarmed_wpn(
+                static_cast<item::Wpn*>(
+                        item::make(item::Id::player_punch)));
+
+        inv.put_in_backpack(item::make(item::Id::dynamite, 1));
+        inv.put_in_backpack(item::make(item::Id::molotov, 1));
+        inv.put_in_backpack(item::make(item::Id::medical_bag));
+        inv.put_in_backpack(item::make(item::Id::lantern));
+
+        learn_spell_player(SpellId::accrue_pain);
+        learn_spell_player(SpellId::crimson_passage);
+}
+
 static void make_for_player_occultist_common()
 {
-        auto& inv = map::g_player->m_inv;
+        Inventory& inv = map::g_player->m_inv;
 
         inv.put_in_slot(
                 SlotId::wpn,
@@ -106,7 +131,7 @@ static void make_for_player_occultist_common()
                 item::make(item::Id::revolver),
                 Verbose::no);
 
-        auto* revolver_bullets = item::make(item::Id::revolver_bullet);
+        item::Item* revolver_bullets = item::make(item::Id::revolver_bullet);
 
         revolver_bullets->m_nr_items = 8;
 
@@ -117,7 +142,7 @@ static void make_for_player_occultist_common()
                 item::make(item::Id::armor_leather_jacket),
                 Verbose::no);
 
-        auto* spirit_pot = item::make(item::Id::potion_spirit);
+        item::Item* spirit_pot = item::make(item::Id::potion_spirit);
 
         spirit_pot->identify(Verbose::no);
 
@@ -170,21 +195,18 @@ static void make_for_player_occultist_invoc()
 
 static void make_for_player_rogue()
 {
-        auto& inv = map::g_player->m_inv;
+        Inventory& inv = map::g_player->m_inv;
 
-        auto* const dagger = item::make(item::Id::dagger);
+        item::Item* const dagger = item::make(item::Id::dagger);
 
-        inv.put_in_slot(
-                SlotId::wpn,
-                dagger,
-                Verbose::no);
+        inv.put_in_slot(SlotId::wpn, dagger, Verbose::no);
 
         inv.put_in_slot(
                 SlotId::wpn_alt,
                 item::make(item::Id::revolver),
                 Verbose::no);
 
-        auto* revolver_bullets = item::make(item::Id::revolver_bullet);
+        item::Item* revolver_bullets = item::make(item::Id::revolver_bullet);
 
         revolver_bullets->m_nr_items = 8;
 
@@ -197,7 +219,7 @@ static void make_for_player_rogue()
 
         inv.put_in_backpack(item::make(item::Id::iron_spike, 12));
 
-        auto* rod_cloud_minds = item::make(item::Id::rod_cloud_minds);
+        item::Item* rod_cloud_minds = item::make(item::Id::rod_cloud_minds);
 
         rod_cloud_minds->identify(Verbose::no);
 
@@ -218,7 +240,8 @@ static void make_for_player_rogue()
         inv.put_in_backpack(item::make(item::Id::medical_bag));
         inv.put_in_backpack(item::make(item::Id::lantern));
 
-        auto* const throwing_knives = item::make(item::Id::thr_knife, 12);
+        item::Item* const throwing_knives =
+                item::make(item::Id::thr_knife, 12);
 
         inv.put_in_backpack(throwing_knives);
 
@@ -227,7 +250,7 @@ static void make_for_player_rogue()
 
 static void make_for_player_war_vet()
 {
-        auto& inv = map::g_player->m_inv;
+        Inventory& inv = map::g_player->m_inv;
 
         inv.put_in_slot(
                 SlotId::wpn,
@@ -260,7 +283,7 @@ static void make_for_player_war_vet()
         inv.put_in_backpack(item::make(item::Id::lantern));
         inv.put_in_backpack(item::make(item::Id::gas_mask));
 
-        auto* const throwing_knives = item::make(item::Id::thr_knife, 6);
+        item::Item* const throwing_knives = item::make(item::Id::thr_knife, 6);
 
         inv.put_in_backpack(throwing_knives);
 
@@ -281,6 +304,10 @@ static void make_for_player()
                 make_for_player_exorcist();
         } break;
 
+        case Bg::flagellant: {
+                make_for_player_flagellant();
+        } break;
+
         case Bg::occultist:
                 make_for_player_occultist_common();
 
@@ -296,10 +323,6 @@ static void make_for_player()
                 case OccultistDomain::invoker:
                         make_for_player_occultist_invoc();
                         break;
-
-                        // case OccultistDomain::summoner:
-                        //         make_for_player_occultist_summoner();
-                        //         break;
 
                 case OccultistDomain::transmuter:
                         make_for_player_occultist_transmut();
@@ -340,7 +363,7 @@ static void make_random_item_to_backpack(
         std::vector<int> weights;
         weights.reserve(item_id_bucket.size());
 
-        for (const auto id : item_id_bucket) {
+        for (const item::Id id : item_id_bucket) {
                 // NOTE: Reusing the "chance to include in spawn list" data for
                 // the weight when doing a weighted random choice here.
 
@@ -360,7 +383,7 @@ static void make_random_item_to_backpack(
 
         const item::Id item_id = item_id_bucket[idx];
 
-        auto* item = item::make(item_id);
+        item::Item* item = item::make(item_id);
 
         actor.m_inv.put_in_backpack(item);
 }
@@ -372,7 +395,7 @@ static void make_item_set_treasure(
         std::vector<item::Id> item_bucket;
 
         for (int i = 0; i < (int)item::Id::END; ++i) {
-                const auto& d = item::g_data[i];
+                const item::ItemData& d = item::g_data[i];
 
                 if ((d.chance_to_incl_in_spawn_list > 0) &&
                     (d.value == value)) {
@@ -435,7 +458,7 @@ static void make_item_set_firearm(actor::Actor& actor)
         switch (choice) {
         case 0: {
                 // Revolver
-                auto* item = item::make(item::Id::revolver);
+                item::Item* item = item::make(item::Id::revolver);
                 auto* wpn = static_cast<item::Wpn*>(item);
 
                 const int ammo_cap = wpn->data().ranged.max_ammo;
@@ -451,7 +474,7 @@ static void make_item_set_firearm(actor::Actor& actor)
 
         case 1: {
                 // Pistol
-                auto* item = item::make(item::Id::pistol);
+                item::Item* item = item::make(item::Id::pistol);
                 auto* wpn = static_cast<item::Wpn*>(item);
 
                 const int ammo_cap = wpn->data().ranged.max_ammo;
@@ -466,7 +489,7 @@ static void make_item_set_firearm(actor::Actor& actor)
 
         case 2: {
                 // Pump shotgun
-                auto* item = item::make(item::Id::pump_shotgun);
+                item::Item* item = item::make(item::Id::pump_shotgun);
                 auto* wpn = static_cast<item::Wpn*>(item);
 
                 const int ammo_cap = wpn->data().ranged.max_ammo;
@@ -487,7 +510,7 @@ static void make_item_set_firearm(actor::Actor& actor)
                         item::make(item::Id::sawed_off),
                         Verbose::no);
 
-                auto* item = item::make(item::Id::shotgun_shell);
+                item::Item* item = item::make(item::Id::shotgun_shell);
                 item->m_nr_items = rnd::range(1, 6);
 
                 inv.put_in_backpack(item);
@@ -495,7 +518,7 @@ static void make_item_set_firearm(actor::Actor& actor)
 
         case 4: {
                 // Rifle
-                auto* item = item::make(item::Id::rifle);
+                item::Item* item = item::make(item::Id::rifle);
                 auto* wpn = static_cast<item::Wpn*>(item);
 
                 const int ammo_cap = wpn->data().ranged.max_ammo;
@@ -514,10 +537,10 @@ static void make_item_set_firearm(actor::Actor& actor)
 
                 // Number of bullets loaded needs to be a multiple of the number
                 // of projectiles fired in each burst
-                auto* item = item::make(item::Id::machine_gun);
+                item::Item* item = item::make(item::Id::machine_gun);
                 auto* const wpn = static_cast<item::Wpn*>(item);
 
-                const auto cap_scaled =
+                const int cap_scaled =
                         wpn->data().ranged.max_ammo /
                         g_nr_mg_projectiles;
 
@@ -542,7 +565,7 @@ static void make_item_set_spike_gun(actor::Actor& actor)
         Inventory& inv = actor.m_inv;
 
         {
-                auto* item = item::make(item::Id::spike_gun);
+                item::Item* item = item::make(item::Id::spike_gun);
 
                 auto* wpn = static_cast<item::Wpn*>(item);
 
@@ -554,7 +577,7 @@ static void make_item_set_spike_gun(actor::Actor& actor)
         }
 
         {
-                auto* item = item::make(item::Id::iron_spike);
+                item::Item* item = item::make(item::Id::iron_spike);
 
                 item->m_nr_items = rnd::range(1, 6);
 
@@ -564,7 +587,7 @@ static void make_item_set_spike_gun(actor::Actor& actor)
 
 static void make_item_set_zealot_spiked_mace(actor::Actor& actor)
 {
-        auto* item = item::make(item::Id::spiked_mace);
+        item::Item* item = item::make(item::Id::spiked_mace);
 
         item->set_melee_plus(0);
 
@@ -581,21 +604,21 @@ static void make_item_set_witches_eye(actor::Actor& actor)
                 return;
         }
 
-        auto* item = item::make(item::Id::witch_eye);
+        item::Item* item = item::make(item::Id::witch_eye);
 
         actor.m_inv.put_in_backpack(item);
 }
 
 static void make_item_set_fluctuating_material(actor::Actor& actor)
 {
-        auto* item = item::make(item::Id::fluctuating_material);
+        item::Item* item = item::make(item::Id::fluctuating_material);
 
         actor.m_inv.put_in_backpack(item);
 }
 
 static void make_item_set_priest_dagger(actor::Actor& actor)
 {
-        auto* item = item::make(item::Id::dagger);
+        item::Item* item = item::make(item::Id::dagger);
 
         const std::vector<int> weights = {6, 3, 1};
 
@@ -630,19 +653,17 @@ static void make_item_set_high_priest_guard_war_vet(actor::Actor& actor)
 
 static void make_item_set_high_priest_guard_rogue(actor::Actor& actor)
 {
-        auto* const item = item::make(item::Id::machete);
+        item::Item* const item = item::make(item::Id::machete);
 
         item->set_melee_plus(1);
 
-        actor.m_inv.put_in_slot(
-                SlotId::wpn,
-                item,
-                Verbose::no);
+        actor.m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 }
 
 static void make_monster_item_sets(actor::Actor& actor)
 {
-        for (const auto& item_set : actor.m_data->item_sets) {
+        for (const actor::ActorItemSetData& item_set :
+             actor.m_data->item_sets) {
                 if (!rnd::percent(item_set.pct_chance_to_spawn)) {
                         continue;
                 }
@@ -710,12 +731,12 @@ static void make_monster_item_sets(actor::Actor& actor)
 static void make_monster_intr_attacks(actor::Actor& actor)
 {
         for (auto& intr_attack : actor.m_data->intr_attacks) {
-                auto* item = item::make(intr_attack->item_id);
+                item::Item* item = item::make(intr_attack->item_id);
 
                 // Override damage with the damage in the intrinsic attack data
                 // (we always override both melee and ranged damage - this
                 // doesn't matter, since only one damage type will be used and
-                // the other will have no effect)
+                // the other will have no effect).
                 const WpnDmg range(1, intr_attack->dmg);
 
                 item->set_base_melee_dmg(range);
@@ -733,7 +754,7 @@ static void make_monster_spells(actor::Actor& actor)
                 return;
         }
 
-        for (auto& spell_data : actor.m_data->spells) {
+        for (actor::ActorSpellData& spell_data : actor.m_data->spells) {
                 if (!rnd::percent(spell_data.pct_chance_to_know)) {
                         continue;
                 }

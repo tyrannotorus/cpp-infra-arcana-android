@@ -31,6 +31,8 @@ enum class OptionChangeCommand
 class Option
 {
 public:
+        virtual ~Option() = default;
+
         virtual std::string name() const = 0;
 
         virtual std::string descr() const = 0;
@@ -383,4 +385,4 @@ public:
 
 }  // namespace config
 
-#endif  // CONFIG_HPP
+#endif  // CONFIG_OPTIONS_HPP

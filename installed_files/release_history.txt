@@ -5,30 +5,36 @@
 ##############################
 # Gameplay
 ##############################
-* Status effects that will end immediately after the next action are shown as e.g. "Premonition (ending)" in the gui, so that it is possible to know whether it will last until the next player turn or not (previously seeing an active status effect listed could be misleading since it could end before any monster acts).
+- Added a new background (class) "Flagellant"
+- Added a new spell domain "Blood" (with some new spells), where all spells costs hit points to cast.
+- The "Regenerating" status effect no longer heals wounds (it caused bad gameplay design combined with certain Flagellant mechanics)
+- Status effects that will end immediately after the next action are shown as e.g. "Premonition (ending)" in the gui, so that it is possible to know whether it will last until the next player turn or not (previously seeing an active status effect listed could be misleading since it could end before any monster acts).
 
 ##############################
 # User interface
 ##############################
-* 2x scaled graphics is now also possible in windowed mode.
-* Changed the tile set size to 20x0 (from 24x24), most of the tiles are simply cropped since they had a lot of redundant black space around them, and a few tiles have been slightly reworked.
-* Added a tiny 7x13 font, intended for use with 2x scaled graphics.
-* Added a red flashing animation when a creature is hit by a melee attack.
-* Split the options menu into several sub-menus (Video, Audio, Input, Gameplay).
-* When the game asks for a number (e.g. number of items to drop) this is now done in a popup screen instead.
-* When entering text or numbers, the underscore cursor is blinking
-* The explosion area hint when aiming explosives is drawn as a blended overlay instead.
-* Made some changes to reduce the risk of registering key presses when the game window regains focus (e.g. accidentally doing a melee attack due to the game registering a tab press when alt-tabbing back to the game)
-* Changed color of grates to gray, to clarify that they are made of metal (and not wood)
+- 2x scaled graphics is now also possible in windowed mode.
+- The game no longer tries to determine if the window is large enough, any size is allowed even if all text will not fit.
+- Changed the tile set size to 20x0 (from 24x24), most of the tiles are simply cropped since they had a lot of redundant black space around them, and a few tiles have been slightly reworked.
+- Added a tiny 7x13 font, intended for use with 2x scaled graphics.
+- By default, the game runs in fullscreen, using the 7x13 font, and 2x scaled graphics.
+- Added a red flashing animation when a creature is hit by a melee attack.
+- Split the options menu into several sub-menus (Video, Audio, Input, Gameplay).
+- When the game asks for a number (e.g. number of items to drop) this is now done in a popup screen instead.
+- When entering text or numbers, the underscore cursor is blinking
+- The explosion area hint when aiming explosives is drawn as a blended overlay instead.
+- Made some changes to reduce the risk of registering key presses when the game window regains focus (e.g. accidentally doing a melee attack due to the game registering a tab press when alt-tabbing back to the game)
+- Changed color of grates to gray, to clarify that they are made of metal (and not wood)
+- Turn number is now displayed
 
 ##############################
 # Fixes
 ##############################
-* Fixed a problem with the game time system, that caused slow creatures to act slightly more often and fast/very fast creatures to act slightly less often than they were supposed to (especially noticeable when kiting a slow monster, since it would occasionally get unexpected extra moves).
-* Attacking a monster that is delayed by moving into liquid no longer allows them to act immediately.
-* The names of some ambient sound clip files were calculated incorrectly, resulting in a few ambient sounds not being loaded/used.
-* Kicking locked wooden chests would print the message "I kick the locked wooden chest! I kick the lid. The lock resists." - removed the redundant part "I kick the lid".
-* Kicking chests caused extra rolls for sprains in some cases (so the risk of a sprain was doubled, and player could get double sprains).
+- Fixed a problem with the game time system, that caused slow creatures to act slightly more often and fast/very fast creatures to act slightly less often than they were supposed to (especially noticeable when kiting a slow monster, since it would occasionally get unexpected extra moves).
+- Attacking a monster that is delayed by moving into liquid no longer allows them to act immediately.
+- The names of some ambient sound clip files were calculated incorrectly, resulting in a few ambient sounds not being loaded/used.
+- Kicking locked wooden chests would print the message "I kick the locked wooden chest! I kick the lid. The lock resists." - removed the redundant part "I kick the lid".
+- Kicking chests caused extra rolls for sprains in some cases (so the risk of a sprain was doubled, and player could get double sprains).
 
 
 ============================================================

@@ -259,7 +259,7 @@ public:
 
         size_t length() const
         {
-                return (size_t)(m_dims.x * m_dims.y);
+                return (size_t)m_dims.x * (size_t)m_dims.y;
         }
 
         const P& dims() const

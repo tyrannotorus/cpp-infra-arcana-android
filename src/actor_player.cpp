@@ -376,6 +376,12 @@ int Actor::shock_resistance(const ShockSrc shock_src) const
                 }
                 break;
 
+        case ShockSrc::take_damage:
+                if (player_bon::is_bg(Bg::flagellant)) {
+                        res = 100;
+                }
+                break;
+
         case ShockSrc::time:
         case ShockSrc::misc:
         case ShockSrc::END:
@@ -397,7 +403,7 @@ double Actor::shock_taken_after_mods(
 void Actor::incr_shock(double shock, ShockSrc shock_src)
 {
         if (m_properties.has(PropId::r_shock)) {
-                // Player is shock resistant
+                // Player is shock resistant.
                 return;
         }
 
@@ -727,6 +733,8 @@ void Actor::update_tmp_shock()
                 increased_tmp_shock += increased_tmp_chock_on_blind();
         }
         else if (m_properties.allow_see()) {
+                // Visual things that might affect shock.
+
                 increased_tmp_shock += increased_tmp_shock_from_dark();
                 reduced_tmp_shock += reduced_tmp_shock_from_light();
 

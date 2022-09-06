@@ -74,16 +74,12 @@ static void draw_descr_box(const std::vector<ColoredString>& lines)
 
 static void try_cast(Spell* const spell)
 {
-        const auto& props = map::g_player->m_properties;
+        const PropHandler& props = map::g_player->m_properties;
 
-        bool allow_cast =
-                props.allow_cast_intr_spell_absolute(
-                        Verbose::yes);
+        bool allow_cast = props.allow_cast_intr_spell_absolute(Verbose::yes);
 
         if (allow_cast) {
-                allow_cast =
-                        allow_cast &&
-                        props.allow_speak(Verbose::yes);
+                allow_cast = allow_cast && props.allow_speak(Verbose::yes);
         }
 
         if (!allow_cast) {
@@ -92,16 +88,26 @@ static void try_cast(Spell* const spell)
 
         msg_log::clear();
 
-        const auto skill = actor::spell_skill(*map::g_player, spell->id());
+        const SpellSkill skill =
+                actor::spell_skill(*map::g_player, spell->id());
 
-        const auto spi_cost_range =
-                spell->spi_cost_range(
-                        skill,
-                        map::g_player);
+        const Range cost_range = spell->cost_range(skill, map::g_player);
 
-        if (spi_cost_range.max >= map::g_player->m_sp) {
+        const int resource_avail =
+                (spell->cost_type() == SpellCostType::spirit)
+                ? map::g_player->m_sp
+                : map::g_player->m_hp;
+
+        if (cost_range.max >= resource_avail) {
+                const std::string resource_name =
+                        (spell->cost_type() == SpellCostType::spirit)
+                        ? "spirit"
+                        : "health";
+
                 const std::string msg =
-                        "Low spirit, try casting spell anyway? " +
+                        "Low " +
+                        resource_name +
+                        ", try casting spell anyway? " +
                         common_text::g_yes_or_no_hint;
 
                 msg_log::add(
@@ -123,13 +129,158 @@ static void try_cast(Spell* const spell)
         msg_log::add("I cast " + spell->name() + "!");
 
         if (map::g_player->is_alive()) {
-                const auto seen_foes = actor::seen_foes(*map::g_player);
+                const std::vector<actor::Actor*> seen_foes =
+                        actor::seen_foes(*map::g_player);
 
                 spell->cast(
                         map::g_player,
                         skill,
                         SpellSrc::learned,
                         seen_foes);
+        }
+}
+
+static void draw_spell_menu_line(
+        const Spell* const spell,
+        const int y,
+        const char menu_key,
+        const bool is_marked)
+{
+        std::string key_str = "(?)";
+
+        key_str[1] = menu_key;
+
+        const std::string name = spell->name();
+
+        constexpr int cost_label_x = 23;
+        constexpr int skill_label_x = cost_label_x + 10;
+
+        int x = 0;
+
+        auto color =
+                is_marked
+                ? colors::menu_key_highlight()
+                : colors::menu_key_dark();
+
+        io::draw_text(key_str, Panel::inventory_menu, {x, y}, color);
+
+        x = (int)key_str.size() + 1;
+
+        color =
+                is_marked
+                ? colors::menu_highlight()
+                : colors::menu_dark();
+
+        io::draw_text(
+                name,
+                Panel::inventory_menu,
+                {x, y},
+                color);
+
+        std::string fill_str;
+
+        const size_t fill_size = cost_label_x - x - name.size();
+
+        for (size_t ii = 0; ii < fill_size; ++ii) {
+                fill_str.push_back('.');
+        }
+
+        const SpellSkill skill = player_spells::spell_skill(spell->id());
+
+        const Range cost = spell->cost_range(skill, map::g_player);
+
+        if (cost.min > 0) {
+                const Color fill_color = colors::gray().shaded(70);
+
+                io::draw_text(
+                        fill_str,
+                        Panel::inventory_menu,
+                        {x + (int)name.size(), y},
+                        fill_color);
+
+                x = cost_label_x;
+
+                const std::string cost_label =
+                        (spell->cost_type() == SpellCostType::spirit)
+                        ? "SP: "
+                        : "HP: ";
+
+                io::draw_text(
+                        cost_label,
+                        Panel::inventory_menu,
+                        {x, y},
+                        colors::dark_gray());
+
+                x += (int)cost_label.size();
+
+                const Color cost_color =
+                        (spell->cost_type() == SpellCostType::spirit)
+                        ? colors::light_blue()
+                        : colors::light_red();
+
+                io::draw_text(
+                        cost.str(),
+                        Panel::inventory_menu,
+                        {x, y},
+                        cost_color);
+        }
+
+        if (spell->can_be_improved_with_skill()) {
+                x = skill_label_x;
+
+                std::string str = "Skill: ";
+
+                io::draw_text(
+                        str,
+                        Panel::inventory_menu,
+                        {x, y},
+                        colors::dark_gray());
+
+                x += (int)str.size();
+
+                switch (skill) {
+                case SpellSkill::basic:
+                        str = "I";
+                        break;
+
+                case SpellSkill::expert:
+                        str = "II";
+                        break;
+
+                case SpellSkill::master:
+                        str = "III";
+                        break;
+
+                case SpellSkill::transcendent:
+                        str = "IV";
+                        break;
+                }
+
+                io::draw_text(
+                        str,
+                        Panel::inventory_menu,
+                        {x, y},
+                        colors::white());
+        }
+}
+
+static void draw_spell_descr(const Spell* const spell)
+{
+        const SpellSkill skill = player_spells::spell_skill(spell->id());
+
+        const std::vector<std::string> descr =
+                spell->descr(skill, SpellSrc::learned);
+
+        std::vector<ColoredString> lines;
+
+        lines.reserve(descr.size());
+
+        for (const auto& line : descr) {
+                lines.emplace_back(line, colors::light_white());
+        }
+
+        if (!lines.empty()) {
+                draw_descr_box(lines);
         }
 }
 
@@ -395,149 +546,22 @@ void BrowseSpell::draw()
                 P(panels::center_x(Panel::screen), 0),
                 colors::title());
 
-        P p(0, 0);
+        int y = 0;
 
         for (int i = 0; i < nr_spells; ++i) {
-                std::string key_str = "(?)";
+                Spell* const spell = s_learned_spells[i];
 
-                key_str[1] = m_browser.menu_keys()[i];
+                const char menu_key = m_browser.menu_keys()[i];
 
                 const bool is_marked = m_browser.is_at_idx(i);
 
-                auto* const spell = s_learned_spells[i];
-                const auto name = spell->name();
-
-                constexpr int spi_label_x = 23;
-                constexpr int skill_label_x = spi_label_x + 10;
-
-                p.x = 0;
-
-                auto color =
-                        is_marked
-                        ? colors::menu_key_highlight()
-                        : colors::menu_key_dark();
-
-                io::draw_text(
-                        key_str,
-                        Panel::inventory_menu,
-                        p,
-                        color);
-
-                p.x = (int)key_str.size() + 1;
-
-                color =
-                        is_marked
-                        ? colors::menu_highlight()
-                        : colors::menu_dark();
-
-                io::draw_text(
-                        name,
-                        Panel::inventory_menu,
-                        p,
-                        color);
-
-                std::string fill_str;
-
-                const size_t fill_size = spi_label_x - p.x - name.size();
-
-                for (size_t ii = 0; ii < fill_size; ++ii) {
-                        fill_str.push_back('.');
-                }
-
-                const auto id = spell->id();
-
-                const auto skill = player_spells::spell_skill(id);
-
-                const auto spi_cost =
-                        spell->spi_cost_range(
-                                skill,
-                                map::g_player);
-
-                if (spi_cost.min > 0) {
-                        const Color fill_color = colors::gray().shaded(70);
-
-                        io::draw_text(
-                                fill_str,
-                                Panel::inventory_menu,
-                                P(p.x + (int)name.size(), p.y),
-                                fill_color);
-
-                        p.x = spi_label_x;
-
-                        std::string str = "SP: ";
-
-                        io::draw_text(
-                                str,
-                                Panel::inventory_menu,
-                                p,
-                                colors::dark_gray());
-
-                        p.x += (int)str.size();
-
-                        io::draw_text(
-                                spi_cost.str(),
-                                Panel::inventory_menu,
-                                p,
-                                colors::white());
-                }
-
-                if (spell->can_be_improved_with_skill()) {
-                        p.x = skill_label_x;
-
-                        std::string str = "Skill: ";
-
-                        io::draw_text(
-                                str,
-                                Panel::inventory_menu,
-                                p,
-                                colors::dark_gray());
-
-                        p.x += (int)str.size();
-
-                        switch (skill) {
-                        case SpellSkill::basic:
-                                str = "I";
-                                break;
-
-                        case SpellSkill::expert:
-                                str = "II";
-                                break;
-
-                        case SpellSkill::master:
-                                str = "III";
-                                break;
-
-                        case SpellSkill::transcendent:
-                                str = "IV";
-                                break;
-                        }
-
-                        io::draw_text(
-                                str,
-                                Panel::inventory_menu,
-                                p,
-                                colors::white());
-                }
+                draw_spell_menu_line(spell, y, menu_key, is_marked);
 
                 if (is_marked) {
-                        const auto descr =
-                                spell->descr(skill, SpellSrc::learned);
-
-                        std::vector<ColoredString> lines;
-
-                        lines.reserve(descr.size());
-                        for (const auto& line : descr) {
-                                lines.emplace_back(
-                                        line,
-                                        colors::light_white());
-                        }
-
-                        if (!lines.empty()) {
-                                draw_descr_box(lines);
-                        }
+                        draw_spell_descr(spell);
                 }
 
-                ++p.y;
+                ++y;
         }
 }
 

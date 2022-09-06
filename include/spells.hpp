@@ -61,6 +61,10 @@ enum class SpellId
         resistance,
         see_invis,
         transmut,
+        accrue_pain,
+        sacrifice_life,
+        blood_tempering,
+        crimson_passage,
 
         // Exorcist background
         cleansing_fire,
@@ -84,6 +88,17 @@ enum class SpellId
         END
 };
 
+enum class SpellDomain
+{
+        clairvoyance,
+        enchantment,
+        invocation,
+        transmutation,
+        blood,
+
+        END
+};
+
 enum class SpellSkill
 {
         basic,
@@ -101,9 +116,17 @@ enum class SpellSrc
 
 enum class SpellShock
 {
+        none,
         mild,
         disturbing,
         severe
+};
+
+// Does the spell cost spirit or hit points to cast?
+enum class SpellCostType
+{
+        spirit,
+        hit_points
 };
 
 namespace spells
@@ -111,6 +134,8 @@ namespace spells
 Spell* make(SpellId spell_id);
 
 SpellId str_to_spell_id(const std::string& str);
+
+std::string spell_domain_title(SpellDomain domain);
 
 SpellSkill str_to_spell_skill_id(const std::string& str);
 
@@ -140,7 +165,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const;
 
         virtual bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const
         {
                 (void)mon;
@@ -160,7 +185,7 @@ public:
 
         virtual SpellId id() const = 0;
 
-        virtual OccultistDomain domain() const = 0;
+        virtual SpellDomain domain() const = 0;
 
         virtual bool can_be_improved_with_skill() const
         {
@@ -176,9 +201,14 @@ public:
         virtual std::vector<std::string> descr_specific(
                 SpellSkill skill) const = 0;
 
-        Range spi_cost_range(
+        Range cost_range(
                 SpellSkill skill,
                 const actor::Actor* caster = nullptr) const;
+
+        virtual SpellCostType cost_type() const
+        {
+                return SpellCostType::spirit;
+        }
 
         int shock_value() const;
 
@@ -190,7 +220,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const = 0;
 
 protected:
-        virtual int base_max_spi_cost(SpellSkill skill) const = 0;
+        virtual int base_max_cost(SpellSkill skill) const = 0;
 
         virtual bool is_noisy(SpellSkill skill) const = 0;
 
@@ -203,7 +233,7 @@ public:
         SpellCurse() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -218,9 +248,9 @@ public:
                 return SpellId::curse;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::enchanter;
+                return SpellDomain::enchantment;
         }
 
         SpellShock shock_type() const override
@@ -246,7 +276,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 protected:
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -262,7 +292,7 @@ public:
         SpellEnfeeble() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -277,9 +307,9 @@ public:
                 return SpellId::enfeeble;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::enchanter;
+                return SpellDomain::enchantment;
         }
 
         SpellShock shock_type() const override
@@ -303,7 +333,7 @@ public:
 protected:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -319,7 +349,7 @@ public:
         SpellSlow() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -334,9 +364,9 @@ public:
                 return SpellId::slow;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::enchanter;
+                return SpellDomain::enchantment;
         }
 
         SpellShock shock_type() const override
@@ -360,7 +390,7 @@ public:
 protected:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -376,7 +406,7 @@ public:
         SpellTerrify() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -391,9 +421,9 @@ public:
                 return SpellId::terrify;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::enchanter;
+                return SpellDomain::enchantment;
         }
 
         SpellShock shock_type() const override
@@ -415,7 +445,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 protected:
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -433,7 +463,7 @@ public:
         SpellAuraOfDecay() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -453,9 +483,9 @@ public:
                 return SpellId::aura_of_decay;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::invoker;
+                return SpellDomain::invocation;
         }
 
         SpellShock shock_type() const override
@@ -472,7 +502,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -513,7 +543,7 @@ public:
         virtual std::vector<std::string> descr_specific(
                 SpellSkill skill) const = 0;
 
-        virtual int base_max_spi_cost(SpellSkill skill) const = 0;
+        virtual int base_max_cost(SpellSkill skill) const = 0;
 };
 
 class ForceBolt : public BoltImpl
@@ -563,7 +593,7 @@ public:
         std::vector<std::string> descr_specific(
                 SpellSkill skill) const override;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -613,7 +643,7 @@ public:
         std::vector<std::string> descr_specific(
                 SpellSkill skill) const override;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -630,7 +660,7 @@ public:
         {}
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -653,9 +683,9 @@ public:
                 return m_impl->id();
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::invoker;
+                return SpellDomain::invocation;
         }
 
         SpellShock shock_type() const override
@@ -675,9 +705,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
-                return m_impl->base_max_spi_cost(skill);
+                return m_impl->base_max_cost(skill);
         }
 
         bool is_noisy(const SpellSkill skill) const override
@@ -700,7 +730,7 @@ public:
         SpellAzaGaze() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -723,9 +753,9 @@ public:
                 return SpellId::aza_gaze;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::invoker;
+                return SpellDomain::invocation;
         }
 
         SpellShock shock_type() const override
@@ -742,7 +772,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -782,7 +812,7 @@ public:
         SpellCataclysm() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         bool player_can_learn() const override
@@ -800,9 +830,9 @@ public:
                 return SpellId::cataclysm;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::invoker;
+                return SpellDomain::invocation;
         }
 
         SpellShock shock_type() const override
@@ -825,7 +855,7 @@ private:
 
         int nr_destruction_sweeps(SpellSkill skill) const;
 
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -841,7 +871,7 @@ public:
         SpellPestilence() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -864,9 +894,9 @@ public:
                 return SpellId::pestilence;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::transmuter;
+                return SpellDomain::transmutation;
         }
 
         SpellShock shock_type() const override
@@ -885,7 +915,7 @@ public:
 private:
         int nr_rats_summoned(SpellSkill skill) const;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -922,9 +952,9 @@ public:
                 return SpellId::spectral_weapons;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::transmuter;
+                return SpellDomain::transmutation;
         }
 
         SpellShock shock_type() const override
@@ -941,7 +971,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -985,9 +1015,9 @@ public:
                 return SpellId::control_object;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::transmuter;
+                return SpellDomain::transmutation;
         }
 
         SpellShock shock_type() const override
@@ -1004,7 +1034,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         int max_dist(SpellSkill skill) const;
 
@@ -1031,9 +1061,9 @@ public:
                 return SpellId::cleansing_fire;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         bool can_be_improved_with_skill() const override
@@ -1055,7 +1085,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1092,9 +1122,9 @@ public:
                 return SpellId::sanctuary;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         bool can_be_improved_with_skill() const override
@@ -1116,7 +1146,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1153,9 +1183,9 @@ public:
                 return SpellId::purge;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         bool can_be_improved_with_skill() const override
@@ -1177,7 +1207,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1216,9 +1246,9 @@ public:
                 return SpellId::frenzy;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         bool can_be_improved_with_skill() const override
@@ -1240,7 +1270,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1275,12 +1305,12 @@ public:
                 return SpellId::bless;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
                 // NOTE: This could perhaps be considered an enchantment spell,
                 // but the way the spell description is phrased, it sounds a lot
                 // more like alteration
-                return OccultistDomain::transmuter;
+                return SpellDomain::transmutation;
         }
 
         SpellShock shock_type() const override
@@ -1299,7 +1329,7 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1334,9 +1364,9 @@ public:
                 return SpellId::transmut;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::transmuter;
+                return SpellDomain::transmutation;
         }
 
         SpellShock shock_type() const override
@@ -1361,7 +1391,7 @@ private:
 
         int chance_weapon(SpellSkill skill, int plus) const;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1395,9 +1425,9 @@ public:
                 return SpellId::light;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::transmuter;
+                return SpellDomain::transmutation;
         }
 
         SpellShock shock_type() const override
@@ -1420,7 +1450,7 @@ private:
 
         Range burning_duration_range() const;
 
-        int base_max_spi_cost(SpellSkill skill) const override
+        int base_max_cost(SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1441,7 +1471,7 @@ public:
         SpellKnockBack() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1464,9 +1494,9 @@ public:
                 return SpellId::knockback;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         SpellShock shock_type() const override
@@ -1488,7 +1518,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1509,7 +1539,7 @@ public:
         SpellTeleport() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1532,9 +1562,9 @@ public:
                 return SpellId::teleport;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::transmuter;
+                return SpellDomain::transmutation;
         }
 
         SpellShock shock_type() const override
@@ -1553,7 +1583,7 @@ public:
 private:
         int invis_duration(SpellSkill skill) const;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1576,7 +1606,7 @@ public:
         SpellSeeInvis() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1599,9 +1629,9 @@ public:
                 return SpellId::see_invis;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::clairvoyant;
+                return SpellDomain::clairvoyance;
         }
 
         SpellShock shock_type() const override
@@ -1620,7 +1650,7 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1641,7 +1671,7 @@ public:
         SpellSpellShield() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1664,9 +1694,9 @@ public:
                 return SpellId::spell_shield;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::enchanter;
+                return SpellDomain::enchantment;
         }
 
         SpellShock shock_type() const override
@@ -1683,7 +1713,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1699,7 +1729,7 @@ public:
         SpellHaste() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override;
@@ -1719,9 +1749,9 @@ public:
                 return SpellId::haste;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::transmuter;
+                return SpellDomain::transmutation;
         }
 
         SpellShock shock_type() const override
@@ -1740,7 +1770,7 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1770,9 +1800,9 @@ public:
                 return SpellId::premonition;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::clairvoyant;
+                return SpellDomain::clairvoyance;
         }
 
         SpellShock shock_type() const override
@@ -1791,7 +1821,7 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1821,9 +1851,9 @@ public:
                 return SpellId::erudition;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::clairvoyant;
+                return SpellDomain::clairvoyance;
         }
 
         SpellShock shock_type() const override
@@ -1840,7 +1870,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1872,9 +1902,9 @@ public:
                 return SpellId::identify;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::clairvoyant;
+                return SpellDomain::clairvoyance;
         }
 
         SpellShock shock_type() const override
@@ -1891,7 +1921,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(SpellSkill skill) const override;
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1907,7 +1937,7 @@ public:
         SpellResistance() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1930,9 +1960,9 @@ public:
                 return SpellId::resistance;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::enchanter;
+                return SpellDomain::enchantment;
         }
 
         SpellShock shock_type() const override
@@ -1951,11 +1981,234 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
                 return 7;
+        }
+
+        bool is_noisy(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return true;
+        }
+};
+
+class SpellBloodTempering : public Spell
+{
+public:
+        SpellBloodTempering() = default;
+
+        bool player_can_learn() const override
+        {
+                return true;
+        }
+
+        std::string name() const override
+        {
+                return "Blood Tempering";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::blood_tempering;
+        }
+
+        SpellDomain domain() const override
+        {
+                return SpellDomain::blood;
+        }
+
+        SpellCostType cost_type() const override
+        {
+                return SpellCostType::hit_points;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::disturbing;
+        }
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override;
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+private:
+        Range duration_range(SpellSkill skill) const;
+
+        int base_max_cost(SpellSkill skill) const override;
+
+        bool is_noisy(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return true;
+        }
+};
+
+class SpellAccruePain : public Spell
+{
+public:
+        SpellAccruePain() = default;
+
+        bool player_can_learn() const override
+        {
+                return true;
+        }
+
+        std::string name() const override
+        {
+                return "Accrue Pain";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::accrue_pain;
+        }
+
+        SpellDomain domain() const override
+        {
+                return SpellDomain::blood;
+        }
+
+        SpellCostType cost_type() const override
+        {
+                return SpellCostType::hit_points;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::disturbing;
+        }
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override;
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+private:
+        Range duration_range(SpellSkill skill) const;
+        Range dmg_range(SpellSkill skill) const;
+        Range dmg_threshold_range() const;
+
+        int base_max_cost(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return 4;
+        }
+
+        bool is_noisy(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return true;
+        }
+};
+
+class SpellCrimsonPassage : public Spell
+{
+public:
+        SpellCrimsonPassage() = default;
+
+        bool player_can_learn() const override
+        {
+                return true;
+        }
+
+        std::string name() const override
+        {
+                return "Crimson Passage";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::crimson_passage;
+        }
+
+        SpellDomain domain() const override
+        {
+                return SpellDomain::blood;
+        }
+
+        SpellCostType cost_type() const override
+        {
+                return SpellCostType::hit_points;
+        }
+
+        SpellShock shock_type() const override;
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override;
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+private:
+        int nr_steps_allowed(SpellSkill skill) const;
+
+        int base_max_cost(SpellSkill skill) const override;
+
+        bool is_noisy(SpellSkill skill) const override;
+};
+
+class SpellSacrificeLife : public Spell
+{
+public:
+        SpellSacrificeLife() = default;
+
+        bool player_can_learn() const override
+        {
+                return true;
+        }
+
+        std::string name() const override
+        {
+                return "Sacrifice Life";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::sacrifice_life;
+        }
+
+        SpellDomain domain() const override
+        {
+                return SpellDomain::blood;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::severe;
+        }
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override;
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+private:
+        int pct_sp_per_hp(SpellSkill skill) const;
+
+        int base_max_cost(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return 0;
         }
 
         bool is_noisy(const SpellSkill skill) const override
@@ -1972,7 +2225,7 @@ public:
         SpellDisease() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -1995,9 +2248,9 @@ public:
                 return SpellId::disease;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         SpellShock shock_type() const override
@@ -2019,7 +2272,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2040,7 +2293,7 @@ public:
         SpellSummonMon() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2063,9 +2316,9 @@ public:
                 return SpellId::summon;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         SpellShock shock_type() const override
@@ -2087,7 +2340,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2115,7 +2368,7 @@ public:
         SpellSummonTentacles() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2138,9 +2391,9 @@ public:
                 return SpellId::summon_tentacles;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         SpellShock shock_type() const override
@@ -2162,7 +2415,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2183,7 +2436,7 @@ public:
         SpellHeal() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2206,9 +2459,9 @@ public:
                 return SpellId::heal;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::enchanter;
+                return SpellDomain::enchantment;
         }
 
         SpellShock shock_type() const override
@@ -2227,7 +2480,7 @@ public:
 private:
         int nr_hp_restored(SpellSkill skill) const;
 
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2250,7 +2503,7 @@ public:
         SpellMiGoHypno() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2273,9 +2526,9 @@ public:
                 return SpellId::mi_go_hypno;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         SpellShock shock_type() const override
@@ -2297,7 +2550,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2318,7 +2571,7 @@ public:
         SpellBurn() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2341,9 +2594,9 @@ public:
                 return SpellId::burn;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         SpellShock shock_type() const override
@@ -2365,7 +2618,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2386,7 +2639,7 @@ public:
         SpellDeafen() = default;
 
         bool allow_mon_cast_now(
-                actor::Actor& mon,
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
         int mon_cooldown() const override
@@ -2409,9 +2662,9 @@ public:
                 return SpellId::deafen;
         }
 
-        OccultistDomain domain() const override
+        SpellDomain domain() const override
         {
-                return OccultistDomain::END;
+                return SpellDomain::END;
         }
 
         SpellShock shock_type() const override
@@ -2433,7 +2686,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_spi_cost(const SpellSkill skill) const override
+        int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
 

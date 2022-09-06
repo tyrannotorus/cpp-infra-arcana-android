@@ -329,10 +329,10 @@ void Scroll::on_actor_turn_in_inv_hook(const InvType inv_type)
 
                 const auto domain = spell->domain();
 
-                if (domain != OccultistDomain::END) {
+                if (domain != SpellDomain::END) {
                         const std::string domain_str =
                                 text_format::first_to_lower(
-                                        player_bon::spell_domain_title(
+                                        spells::spell_domain_title(
                                                 spell->domain()));
 
                         if (!domain_str.empty()) {
@@ -483,12 +483,11 @@ std::string Scroll::name_info_str() const
         if (m_data->is_spell_domain_known && !m_data->is_identified) {
                 const std::unique_ptr<const Spell> spell(make_spell());
 
-                const auto domain = spell->domain();
+                const SpellDomain domain = spell->domain();
 
-                if (domain != OccultistDomain::END) {
+                if (domain != SpellDomain::END) {
                         const auto domain_title =
-                                player_bon::spell_domain_title(
-                                        spell->domain());
+                                spells::spell_domain_title(domain);
 
                         return "(" + domain_title + ")";
                 }

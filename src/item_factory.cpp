@@ -281,10 +281,14 @@ Item* make(const Id item_id, const int nr_items)
                 r = new GasMask(d);
                 break;
 
+        case Id::torture_collar:
+                r = new TortureCollar(d);
+                break;
+
         case Id::scroll_aura_of_decay:
         case Id::scroll_cataclysm:
         case Id::scroll_telep:
-        case Id::scroll_pest:
+        case Id::scroll_pestilence:
         case Id::scroll_enfeeble:
         case Id::scroll_slow:
         case Id::scroll_terrify:
@@ -292,7 +296,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::scroll_darkbolt:
         case Id::scroll_aza_gaze:
         case Id::scroll_control_object:
-        case Id::scroll_res:
+        case Id::scroll_resistance:
         case Id::scroll_light:
         case Id::scroll_spectral_wpns:
         case Id::scroll_transmut:
@@ -302,6 +306,10 @@ Item* make(const Id item_id, const int nr_items)
         case Id::scroll_erudition:
         case Id::scroll_haste:
         case Id::scroll_spell_shield:
+        case Id::scroll_accrue_pain:
+        case Id::scroll_blood_temper:
+        case Id::scroll_sacrifice_life:
+        case Id::scroll_crimson_passage:
                 r = new scroll::Scroll(d);
                 break;
 

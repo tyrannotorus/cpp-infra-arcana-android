@@ -864,8 +864,11 @@ PropEnded PropPoisoned::on_actor_turn()
         return PropEnded::no;
 }
 
-PropEnded PropAiming::on_hit()
+PropEnded PropAiming::on_hit(const int dmg, const DmgType dmg_type)
 {
+        (void)dmg;
+        (void)dmg_type;
+
         m_owner->m_properties.end_prop(id());
 
         return PropEnded::yes;
@@ -983,6 +986,11 @@ void PropWound::load()
         m_nr_wounds = saving::get_int();
 }
 
+std::string PropWound::name_short() const
+{
+        return "Wounded(" + std::to_string(m_nr_wounds) + ")";
+}
+
 int PropWound::ability_mod(const AbilityId ability) const
 {
         // A player with Survivalist receives no ability penalties
@@ -1076,27 +1084,74 @@ void PropWound::on_more(const Prop& new_prop)
         }
 }
 
-PropEnded PropWound::on_actor_turn()
+std::string PropMoribund::name() const
 {
-        if (actor::is_player(m_owner) &&
-            m_owner->m_properties.has(PropId::regenerating) &&
-            rnd::percent(10)) {
-                --m_nr_wounds;
-
-                if (m_nr_wounds > 0) {
-                        print_one_wound_healed_msg();
-
-                        return PropEnded::no;
-                }
-                else {
-                        // This was the last wound, end self
-                        m_owner->m_properties.end_prop(id());
-
-                        return PropEnded::yes;
-                }
+        if (!has_bonus()) {
+                return "";
         }
 
-        return PropEnded::no;
+        return "Moribund";
+}
+
+std::string PropMoribund::name_short() const
+{
+        if (!has_bonus()) {
+                return "";
+        }
+
+        const int bonus_lvl = calc_bonus_lvl();
+
+        return "Moribund(" + std::to_string(bonus_lvl) + ")";
+}
+
+int PropMoribund::ability_mod(AbilityId ability) const
+{
+        int k = calc_bonus_lvl();
+
+        if (player_bon::has_trait(Trait::death_sense)) {
+                k *= 2;
+        }
+
+        switch (ability) {
+        case AbilityId::melee:
+                return 10 * k;
+                break;
+
+        default:
+                return 0;
+        }
+}
+
+int PropMoribund::armor_points() const
+{
+        int armor_bon = calc_bonus_lvl();
+
+        if (player_bon::has_trait(Trait::death_sense)) {
+                armor_bon *= 2;
+        }
+
+        return armor_bon;
+}
+
+int PropMoribund::calc_bonus_lvl() const
+{
+        if (m_owner->m_hp <= 3) {
+                return 3;
+        }
+        else if (m_owner->m_hp <= 6) {
+                return 2;
+        }
+        else if (m_owner->m_hp <= 10) {
+                return 1;
+        }
+        else {
+                return 0;
+        }
+}
+
+bool PropMoribund::has_bonus() const
+{
+        return calc_bonus_lvl() > 0;
 }
 
 PropHpSap::PropHpSap() :
@@ -1786,8 +1841,11 @@ void PropParalyzed::on_applied()
         }
 }
 
-PropEnded PropFainted::on_hit()
+PropEnded PropFainted::on_hit(const int dmg, const DmgType dmg_type)
 {
+        (void)dmg;
+        (void)dmg_type;
+
         m_owner->m_properties.end_prop(id());
 
         return PropEnded::yes;
@@ -3003,7 +3061,7 @@ PropActResult PropMajorClaphamSummon::on_act()
 
         map::update_vision();
 
-        map::g_player->incr_shock(12.0, ShockSrc::misc);
+        map::g_player->incr_shock(12.0, ShockSrc::see_mon);
 
         m_owner->m_properties.end_prop(id());
 
@@ -3361,4 +3419,125 @@ std::optional<std::string> PropSpectralWpn::override_actor_descr() const
         str += ", floating through the air as if wielded by an invisible hand.";
 
         return str;
+}
+
+void PropAccruePain::save() const
+{
+        saving::put_int(m_attack_dmg);
+        saving::put_int(m_dmg_received);
+        saving::put_int(m_dmg_threshold);
+}
+
+void PropAccruePain::load()
+{
+        m_attack_dmg = saving::get_int();
+        m_dmg_received = saving::get_int();
+        m_dmg_threshold = saving::get_int();
+}
+
+PropEnded PropAccruePain::on_hit(const int dmg, const DmgType dmg_type)
+{
+        if (!m_owner->is_alive()) {
+                return PropEnded::no;
+        }
+
+        if (dmg_type == DmgType::spirit) {
+                return PropEnded::no;
+        }
+
+        m_dmg_received += dmg;
+
+        if (m_dmg_received <= m_dmg_threshold) {
+                return PropEnded::no;
+        }
+
+        // Damage threshold exceeded.
+
+        msg_log::add("The vessel of pain shatters, a deluge rushes forth!");
+
+        apply_dmg();
+
+        // End self, with no message (custom message printed here instead).
+        m_owner->m_properties.end_prop(
+                id(),
+                PropEndConfig(
+                        PropEndAllowCallEndHook::no,
+                        PropEndAllowMsg::no,
+                        PropEndAllowHistoricMsg::yes));
+
+        return PropEnded::yes;
+}
+
+void PropAccruePain::apply_dmg()
+{
+        std::vector<actor::Actor*> targets;
+
+        const std::vector<actor::Actor*> seen_foes =
+                actor::seen_foes(*m_owner);
+
+        for (actor::Actor* const actor : seen_foes) {
+                if (m_owner->m_pos.is_adjacent(actor->m_pos)) {
+                        targets.push_back(actor);
+                }
+        }
+
+        if (targets.empty()) {
+                msg_log::add("No one is there to receive it.");
+
+                return;
+        }
+
+        draw_blast_at_seen_actors(targets, colors::light_red());
+
+        for (actor::Actor* const actor : targets) {
+                const std::string name =
+                        text_format::first_to_upper(
+                                actor->name_the());
+
+                msg_log::add(name + " is hit!");
+
+                actor::hit(*actor, m_attack_dmg, DmgType::pure);
+        }
+}
+
+PropEnded PropSanctuary::on_moved_non_center_dir()
+{
+        m_owner->m_properties.end_prop(id());
+
+        return PropEnded::yes;
+}
+
+void PropCrimsonPassage::save() const
+{
+        saving::put_int(m_nr_steps_allowed);
+        saving::put_int(m_nr_steps_taken);
+}
+
+void PropCrimsonPassage::load()
+{
+        m_nr_steps_allowed = saving::get_int();
+        m_nr_steps_taken = saving::get_int();
+}
+
+PropEnded PropCrimsonPassage::on_moved_non_center_dir()
+{
+        const int dmg = 2;
+
+        if (m_owner->m_hp <= dmg) {
+                m_owner->m_properties.end_prop(id());
+
+                return PropEnded::yes;
+        }
+
+        actor::hit(*m_owner, dmg, DmgType::pure, AllowWound::no);
+
+        ++m_nr_steps_taken;
+
+        if (m_nr_steps_taken >= m_nr_steps_allowed) {
+                m_owner->m_properties.end_prop(id());
+
+                return PropEnded::yes;
+        }
+
+        return PropEnded::no;
 }

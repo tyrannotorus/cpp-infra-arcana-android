@@ -38,49 +38,56 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static int hit_armor(actor::Actor& actor, int dmg)
+static void destroy_armor(actor::Actor& actor, const item::Armor* const armor)
 {
-        // NOTE: We retrieve armor points BEFORE damaging the armor, since it
-        // should reduce damage taken even if it gets damaged or destroyed.
-        const int ap = actor.armor_points();
+        TRACE << "Armor was destroyed" << std::endl;
 
-        // Danage worn armor
-        if (actor.m_data->is_humanoid) {
-                auto* const item = actor.m_inv.item_in_slot(SlotId::body);
+        if (actor::is_player(&actor)) {
+                const std::string armor_name =
+                        armor->name(
+                                ItemNameType::plain,
+                                ItemNameInfo::none);
 
-                if (item) {
-                        TRACE_VERBOSE << "Has armor, running hit on armor"
-                                      << std::endl;
+                const std::string msg = "My " + armor_name + " is torn apart!";
 
-                        auto* const armor = static_cast<item::Armor*>(item);
-
-                        armor->hit(dmg);
-
-                        if (armor->is_destroyed()) {
-                                TRACE << "Armor was destroyed" << std::endl;
-
-                                if (actor::is_player(&actor)) {
-                                        const std::string armor_name =
-                                                armor->name(
-                                                        ItemNameType::plain,
-                                                        ItemNameInfo::none);
-
-                                        msg_log::add(
-                                                ("My " +
-                                                 armor_name +
-                                                 " is torn apart!"),
-                                                colors::msg_note());
-                                }
-
-                                actor.m_inv.remove_item_in_slot(
-                                        SlotId::body, true);
-                        }
-                }
+                msg_log::add(msg, colors::msg_note());
         }
 
-        // Reduce damage by the total ap value - the new damage value may be
-        // negative, this is the callers resonsibility to handle
-        dmg -= ap;
+        actor.m_inv.remove_item_in_slot(SlotId::body, true);
+}
+
+static void damage_armor(actor::Actor& actor, int dmg)
+{
+        item::Item* const item = actor.m_inv.item_in_slot(SlotId::body);
+
+        if (!item) {
+                return;
+        }
+
+        TRACE_VERBOSE << "Has armor, damaging armor" << std::endl;
+
+        auto* const armor = static_cast<item::Armor*>(item);
+
+        armor->hit(dmg);
+
+        if (armor->armor_points() <= 0) {
+                destroy_armor(actor, armor);
+        }
+}
+
+static int hit_armor_and_calc_new_damage(actor::Actor& actor, int dmg)
+{
+        // NOTE: We retrieve armor points BEFORE damaging the armor, since the
+        // armor should reduce damage taken by the current (pre-hit) armor value
+        // even if it gets damaged or destroyed.
+        const int armor_points = actor.armor_points();
+
+        // Danage worn armor.
+        if (actor.m_data->is_humanoid) {
+                damage_armor(actor, dmg);
+        }
+
+        dmg -= armor_points;
 
         dmg = std::max(1, dmg);
 
@@ -321,8 +328,8 @@ static void on_player_hit(
         const DmgType dmg_type,
         const AllowWound allow_wound)
 {
-        // NOTE: Interrupt player multi-turn actions, unless the damage is a
-        // small number of "pure" damage (i.e. not physical, electrical,
+        // NOTE: Here we interrupt player multi-turn actions, UNLESS the damage
+        // is a small number of "pure" damage (i.e. not physical, electrical,
         // etc). The idea is that something like taking a pistol shot should
         // realistically stop you from treating wounds or handling equipment
         // etc, while taking a minor hit by something like poison ticking would
@@ -334,7 +341,7 @@ static void on_player_hit(
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
         }
 
-        map::g_player->incr_shock(1.0, ShockSrc::misc);
+        map::g_player->incr_shock(1.0, ShockSrc::take_damage);
 
         const bool is_enough_dmg_for_wound = (dmg >= g_min_dmg_to_wound);
         const bool is_physical = is_physical_dmg_type(dmg_type);
@@ -427,7 +434,7 @@ void hit(
         if ((dmg > 0)) {
                 if (is_physical_dmg_type(dmg_type)) {
                         // NOTE: Armor never reduces damage to zero.
-                        dmg = hit_armor(actor, dmg);
+                        dmg = hit_armor_and_calc_new_damage(actor, dmg);
                 }
 
                 // Soaking up damage with SP instead due to Prolonged Life?
@@ -448,7 +455,7 @@ void hit(
                 on_player_hit(dmg, dmg_type, allow_wound);
         }
 
-        actor.m_properties.on_hit();
+        actor.m_properties.on_hit(dmg, dmg_type);
 
         if ((dmg > 0) &&
             !(actor::is_player(&actor) && config::is_bot_playing())) {
@@ -480,7 +487,7 @@ void hit_sp(
                 }
         }
 
-        actor.m_properties.on_hit();
+        actor.m_properties.on_hit(dmg, DmgType::spirit);
 
         if (!actor::is_player(&actor) || !config::is_bot_playing()) {
                 actor.m_sp = std::max(0, actor.m_sp - dmg);
