@@ -33,6 +33,7 @@
 #include "messages.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
+#include "paths.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
 #include "pos.hpp"
@@ -43,6 +44,20 @@
 #include "terrain_data.hpp"
 #include "terrain_pylon.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static void log_user_data_dir()
+{
+        TRACE
+                << "User data directory: "
+                << "'" << paths::user_dir() << "'"
+                << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+// init
+// -----------------------------------------------------------------------------
 namespace init
 {
 bool g_is_cheat_vision_enabled = false;
@@ -54,6 +69,9 @@ void init_io()
         TRACE_FUNC_BEGIN;
 
         io::init_sdl();
+
+        log_user_data_dir();
+
         config::init();
         colors::init();
         io::init_other();

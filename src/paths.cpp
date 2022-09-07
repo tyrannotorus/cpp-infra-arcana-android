@@ -8,7 +8,6 @@
 
 #include <ostream>
 
-#include "debug.hpp"
 #include "io.hpp"
 
 namespace paths
@@ -61,8 +60,6 @@ std::string messages_dir()
 std::string user_dir()
 {
         auto path_str = io::sdl_pref_dir();
-
-        TRACE << "User data directory: " << path_str << std::endl;
 
         return path_str;
 }

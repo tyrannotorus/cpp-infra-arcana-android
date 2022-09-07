@@ -493,6 +493,30 @@ static std::vector<std::string> lines_from_variables()
         return lines;
 }
 
+static std::vector<std::string> make_user_data_info_lines()
+{
+        std::string str =
+                "User data location: " +
+                paths::user_dir();
+
+        return text_format::split(str, panels::w(Panel::screen) - 1);
+}
+
+static void draw_user_data_info()
+{
+        std::vector<std::string> lines = make_user_data_info_lines();
+
+        int y = panels::y1(Panel::screen) - (int)lines.size();
+
+        for (size_t i = 0; i < lines.size(); ++i) {
+                const std::string& line = lines[i];
+
+                io::draw_text(line, Panel::screen, {1, y}, colors::text());
+
+                ++y;
+        }
+}
+
 // -----------------------------------------------------------------------------
 // Config
 // -----------------------------------------------------------------------------
@@ -1887,6 +1911,8 @@ void OptionsState::draw()
 
                 ++y;
         }
+
+        draw_user_data_info();
 }
 
 // -----------------------------------------------------------------------------

@@ -844,7 +844,7 @@ std::string sdl_pref_dir()
                 subdir_str += "_" + sha1_result.value();
         }
 
-        auto* const path_ptr =
+        char* const path_ptr =
                 // NOTE: This is somewhat of a hack, see the function arguments
                 SDL_GetPrefPath(
                         "infra_arcana",  // "Organization"
@@ -853,8 +853,6 @@ std::string sdl_pref_dir()
         std::string path_str = path_ptr;
 
         SDL_free(path_ptr);
-
-        TRACE << "User data directory: " << path_str << std::endl;
 
         return path_str;
 }
