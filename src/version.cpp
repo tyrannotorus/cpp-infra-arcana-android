@@ -13,7 +13,7 @@
 
 namespace version_info
 {
-const std::string g_version_str = "v21.0.1";
+const std::string g_version_str = "v22.0.0-beta1";
 
 const std::string g_copyright_str =
         "(c) 2011-2022 Martin Tornqvist";
