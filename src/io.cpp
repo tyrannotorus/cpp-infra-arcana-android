@@ -32,6 +32,7 @@
 #include "io_internal.hpp"
 #include "paths.hpp"
 #include "state.hpp"
+#include "text_format.hpp"
 #include "version.hpp"
 
 // -----------------------------------------------------------------------------
@@ -248,21 +249,71 @@ static SDL_Renderer* create_renderer()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const renderer =
-                SDL_CreateRenderer(
-                        io::g_sdl_window,
-                        -1,
-                        SDL_RENDERER_SOFTWARE);
+        uint32_t flags = 0U;
+
+        switch (config::renderer_type()) {
+        case RendererType::auto_select:
+                break;
+
+        case RendererType::sw:
+                flags = SDL_RENDERER_SOFTWARE;
+                break;
+
+        case RendererType::END:
+                ASSERT(false);
+                break;
+        }
+
+        SDL_Renderer* const renderer =
+                SDL_CreateRenderer(io::g_sdl_window, -1, flags);
 
         if (!renderer) {
                 TRACE_ERROR_RELEASE
-                        << "Failed to create SDL renderer"
-                        << std::endl
+                        << "Failed to create SDL renderer: "
                         << SDL_GetError()
                         << std::endl;
 
                 PANIC;
         }
+
+        SDL_RendererInfo info;
+
+        if (SDL_GetRendererInfo(renderer, &info) != 0) {
+                TRACE_ERROR_RELEASE
+                        << "Could not get RendererInfo: "
+                        << SDL_GetError()
+                        << std::endl;
+
+                PANIC;
+        }
+
+        TRACE
+                << "Created SDL Renderer with name: '" << info.name << "'"
+                << std::endl;
+
+        std::string flags_str;
+
+        if (info.flags & SDL_RENDERER_SOFTWARE) {
+                text_format::append_as_comma_list(
+                        flags_str, "SDL_RENDERER_SOFTWARE");
+        }
+
+        if (info.flags & SDL_RENDERER_ACCELERATED) {
+                text_format::append_as_comma_list(
+                        flags_str, "SDL_RENDERER_ACCELERATED");
+        }
+
+        if (info.flags & SDL_RENDERER_PRESENTVSYNC) {
+                text_format::append_as_comma_list(
+                        flags_str, "SDL_RENDERER_PRESENTVSYNC");
+        }
+
+        if (info.flags & SDL_RENDERER_TARGETTEXTURE) {
+                text_format::append_as_comma_list(
+                        flags_str, "SDL_RENDERER_TARGETTEXTURE");
+        }
+
+        TRACE << "Flags: [" + flags_str + "]" << std::endl;
 
         TRACE_FUNC_END;
 

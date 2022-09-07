@@ -64,6 +64,7 @@ static InputMode s_input_mode = InputMode::standard;
 static std::string s_font_name;
 static bool s_always_center_view_on_player = false;
 static bool s_is_tiles_mode = false;
+static RendererType s_renderer_type = RendererType::auto_select;
 static bool s_is_fullscreen = false;
 static bool s_is_2x_scale_requested = false;
 static bool s_is_2x_scale_enabled = false;
@@ -271,6 +272,7 @@ static void set_default_variables()
 
         s_is_ambient_audio_enabled = true;
         s_is_ambient_audio_preloaded = false;
+        s_renderer_type = RendererType::auto_select;
         s_is_fullscreen = true;
         s_is_2x_scale_requested = true;
         s_is_2x_scale_enabled = true;
@@ -347,6 +349,9 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         lines.erase(std::begin(lines));
 
         update_render_dims();
+
+        s_renderer_type = (RendererType)to_int(lines.front());
+        lines.erase(std::begin(lines));
 
         s_is_fullscreen = lines.front() == "1";
         lines.erase(std::begin(lines));
@@ -451,6 +456,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(s_always_center_view_on_player ? "1" : "0");
         lines.emplace_back(s_is_tiles_mode ? "1" : "0");
         lines.push_back(s_font_name);
+        lines.push_back(std::to_string((int)s_renderer_type));
         lines.emplace_back(s_is_fullscreen ? "1" : "0");
         lines.emplace_back(s_is_2x_scale_requested ? "1" : "0");
         lines.emplace_back(s_is_2x_scale_enabled ? "1" : "0");
@@ -503,6 +509,7 @@ void init()
         // Video
         s_options.emplace_back(std::make_unique<TilesModeOption>());
         s_options.emplace_back(std::make_unique<FontOption>());
+        s_options.emplace_back(std::make_unique<RendererTypeOption>());
         s_options.emplace_back(std::make_unique<FullscreenOption>());
         s_options.emplace_back(std::make_unique<VideoScalingOption>());
         s_options.emplace_back(std::make_unique<TextModeFilledWallsOption>());
@@ -580,6 +587,11 @@ bool is_tiles_mode()
 std::string font_name()
 {
         return s_font_name;
+}
+
+RendererType renderer_type()
+{
+        return s_renderer_type;
 }
 
 bool is_fullscreen()
@@ -1176,6 +1188,72 @@ void FullscreenOption::change(OptionChangeCommand command) const
         s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
         io::on_user_toggle_fullscreen();
+}
+
+std::string RendererTypeOption::name() const
+{
+        return "Use hardware acceleration";
+}
+
+std::string RendererTypeOption::descr() const
+{
+        return (
+                "Use automatic selection (attempt to use hardware "
+                "acceleration first, or use software fallback), or "
+                "force using software renderer.");
+}
+
+std::string RendererTypeOption::value_str() const
+{
+        switch (s_renderer_type) {
+        case RendererType::auto_select:
+                return "Auto select";
+
+        case RendererType::sw:
+                return "Software";
+
+        case RendererType::END:
+                break;
+        }
+
+        ASSERT(false);
+
+        return "";
+}
+
+OptionSubmenuType RendererTypeOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
+}
+
+void RendererTypeOption::change(OptionChangeCommand command) const
+{
+        auto renderer_type_nr = (int)s_renderer_type;
+        const auto nr_renderer_types = (int)RendererType::END;
+
+        if ((command == OptionChangeCommand::enter) ||
+            (command == OptionChangeCommand::right)) {
+                // Enter or right
+                if (renderer_type_nr < (nr_renderer_types - 1)) {
+                        ++renderer_type_nr;
+                }
+                else {
+                        renderer_type_nr = 0;
+                }
+        }
+        else {
+                // Left
+                if (renderer_type_nr > 0) {
+                        --renderer_type_nr;
+                }
+                else {
+                        renderer_type_nr = nr_renderer_types - 1;
+                }
+        }
+
+        s_renderer_type = (RendererType)(renderer_type_nr);
+
+        io::init_other();
 }
 
 std::string VideoScalingOption::name() const

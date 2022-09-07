@@ -13,6 +13,7 @@
 ##############################
 # User interface
 ##############################
+- Hardware acceleration is now used for rendering (if possible), also added an option to force software rendering.
 - 2x scaled graphics is now also possible in windowed mode.
 - The game no longer tries to determine if the window is large enough, any size is allowed even if all text will not fit.
 - Changed the tile set size to 20x0 (from 24x24), most of the tiles are simply cropped since they had a lot of redundant black space around them, and a few tiles have been slightly reworked.

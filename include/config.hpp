@@ -25,6 +25,14 @@ enum class InputMode
         END
 };
 
+enum class RendererType
+{
+        auto_select,
+        sw,
+
+        END
+};
+
 enum class HintsMode
 {
         once_per_game,
@@ -41,6 +49,7 @@ void init();
 InputMode input_mode();
 std::string font_name();
 bool always_center_view_on_player();
+RendererType renderer_type();
 bool is_tiles_mode();
 void set_fullscreen(bool value);
 bool is_fullscreen();
