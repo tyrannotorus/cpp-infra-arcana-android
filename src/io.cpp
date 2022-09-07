@@ -838,6 +838,12 @@ std::string sdl_pref_dir()
                 '.',
                 '_');
 
+        std::replace(
+                std::begin(subdir_str),
+                std::end(subdir_str),
+                '-',
+                '_');
+
         const auto sha1_result = version_info::read_git_sha1_str_from_file();
 
         if (sha1_result) {
