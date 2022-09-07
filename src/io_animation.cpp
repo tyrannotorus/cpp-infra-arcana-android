@@ -247,29 +247,7 @@ void draw_flash_animations()
         for (const FlashData& flash : s_flashes) {
                 const auto a = (uint8_t)((255 * flash.alpha_pct) / 100);
 
-                // Use color modulation if living actor (do not change color of
-                // the actor's black background, only the tile itself),
-                // otherwise just draw a blended rectangle.
-                if (flash.actor_flashed_at &&
-                    does_actor_exist(flash.actor_flashed_at) &&
-                    flash.actor_flashed_at->is_alive()) {
-                        // NOTE: The alpha value doesn't seem to affect anything
-                        // when using color modulation (i.e. SDL_BLENDMODE_MOD),
-                        // so the color is shaded here instead (achieves a
-                        // somewhat different effect, but it looks good).
-                        const int shade_pct = std::min(50, flash.alpha_pct);
-
-                        draw_rectangle_filled_mod_blending(
-                                flash.px_rect,
-                                flash.color.shaded(shade_pct),
-                                a);
-                }
-                else {
-                        draw_rectangle_filled(
-                                flash.px_rect,
-                                flash.color,
-                                a);
-                }
+                draw_rectangle_filled(flash.px_rect, flash.color, a);
         }
 
         disable_clip_rect();
