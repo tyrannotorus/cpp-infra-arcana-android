@@ -385,11 +385,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX
                 # -Og is also recommended by the gcc manual for debug builds.
                 -Og
                 -g
-                -fsanitize=address
-                -fsanitize=undefined
-                -fno-sanitize-recover
+                # -fsanitize=address
+                # -fsanitize=undefined
+                # -fno-sanitize-recover
                 # Needed for full stack trace when running gcc sanitizers
-                -fno-omit-frame-pointer
+                # -fno-omit-frame-pointer
                 #
                 # Uncomment to generate gmon.out for gprof (must also be done for linker
                 # flags, see below)
@@ -417,8 +417,8 @@ set(RELEASE_COMPILE_FLAGS
 
 set(TEST_COMPILE_FLAGS
         ${DEBUG_COMPILE_FLAGS}
-        -fno-sanitize=all
-        -fsanitize=undefined
+        # -fno-sanitize=all
+        # -fsanitize=undefined
         -DTRACE_LVL=0
         )
  
@@ -633,8 +633,8 @@ else()
                 ${SDL2_MIXER_LIBRARIES}
                 )
 
-        target_link_libraries(ia-debug PUBLIC   -lasan -lubsan)
-        target_link_libraries(ia-test PUBLIC    -lubsan)
+        # target_link_libraries(ia-debug PUBLIC   -lasan -lubsan)
+        # target_link_libraries(ia-test PUBLIC    -lubsan)
 
         target_link_libraries(ia PUBLIC         ${SDL_LIBS})
         target_link_libraries(ia-debug PUBLIC   ${SDL_LIBS})
