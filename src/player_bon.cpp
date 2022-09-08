@@ -1140,7 +1140,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 put("");
                 put_trait(Trait::self_aware);
                 put("");
-                put_trait(Trait::thick_skinned);
+                put_trait(Trait::tough);
                 break;
 
         case Bg::ghoul:
@@ -1528,7 +1528,7 @@ void pick_bg(const Bg bg)
 
         case Bg::flagellant: {
                 pick_trait(Trait::self_aware);
-                pick_trait(Trait::thick_skinned);
+                pick_trait(Trait::tough);
 
                 Prop* moribund = property_factory::make(PropId::moribund);
 
