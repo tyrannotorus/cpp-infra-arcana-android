@@ -777,7 +777,7 @@ void BrowseInv::update()
 
         if (input.key == 'i') {
                 // Exit screen
-                states::pop();
+                states::pop_until(StateId::game);
 
                 return;
         }
@@ -793,7 +793,7 @@ void BrowseInv::update()
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
-                states::pop();
+                states::pop_until(StateId::game);
         } break;
 
         default:
@@ -835,7 +835,7 @@ void BrowseInv::on_inventory_slot_selected(InvSlot& slot) const
 
 void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot) const
 {
-        states::pop();
+        states::pop_until(StateId::game);
 
         msg_log::clear();
 
@@ -867,7 +867,7 @@ void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot) const
 void BrowseInv::on_backpack_item_selected(const size_t backpack_idx) const
 {
         // Exit screen
-        states::pop();
+        states::pop_until(StateId::game);
 
         item::Item* item = map::g_player->m_inv.m_backpack[backpack_idx];
 
@@ -887,11 +887,6 @@ void BrowseInv::on_backpack_item_selected(const size_t backpack_idx) const
 void BrowseInv::on_equipable_backpack_item_selected(
         const size_t backpack_idx) const
 {
-        // Exit screen
-        states::pop();
-
-        // NOTE: This object is now deleted!
-
         Inventory& inv = map::g_player->m_inv;
         item::Item* const item_to_equip = inv.m_backpack[backpack_idx];
         const ItemType item_type = item_to_equip->data().type;
@@ -982,7 +977,7 @@ void Apply::on_start()
 
         if (m_filtered_backpack_indexes.empty()) {
                 // Exit screen
-                states::pop();
+                states::pop_until(StateId::game);
 
                 msg_log::add("I carry nothing to apply.");
 
@@ -1071,7 +1066,7 @@ void Apply::update()
                                 m_filtered_backpack_indexes[m_browser.y()];
 
                         // Exit screen
-                        states::pop();
+                        states::pop_until(StateId::game);
 
                         activate(backpack_idx);
 
@@ -1082,7 +1077,7 @@ void Apply::update()
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
-                states::pop();
+                states::pop_until(StateId::game);
                 return;
         } break;
 
@@ -1197,7 +1192,7 @@ void Drop::update()
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
-                states::pop();
+                states::pop_until(StateId::game);
         } break;
 
         default:
@@ -1239,7 +1234,7 @@ void Drop::on_selected() const
         ASSERT(item);
 
         // Exit screen
-        states::pop();
+        states::pop_until(StateId::game);
 
         // HACK: The Flagellant Torture Collar is not allowed to be removed.
         if (item->id() == item::Id::torture_collar) {
@@ -1463,7 +1458,7 @@ void Equip::update()
         if (m_filtered_backpack_indexes.empty() ||
             (input.key == SDLK_SPACE) ||
             (input.key == SDLK_ESCAPE)) {
-                // Leave screen, and go back to inventory
+                // Leave screen, and go back to inventory.
                 states::pop();
 
                 return;
@@ -1563,8 +1558,8 @@ void SelectThrow::on_start()
         const size_t list_size = m_filtered_inv.size();
 
         if (list_size == 0) {
-                // Nothing to throw, exit screen
-                states::pop();
+                // Nothing to throw, exit screen.
+                states::pop_until(StateId::game);
 
                 msg_log::add("I carry no throwing weapons.");
 
@@ -1691,7 +1686,7 @@ void SelectThrow::update()
 
         switch (action) {
         case MenuAction::selected: {
-                states::pop();
+                states::pop_until(StateId::game);
 
                 const std::string name =
                         item->name(
@@ -1746,7 +1741,7 @@ void SelectThrow::update()
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
-                states::pop();
+                states::pop_until(StateId::game);
 
                 return;
         } break;
@@ -1821,7 +1816,7 @@ void SelectIdentify::on_start()
 
         if (list_size == 0) {
                 // Nothing to identify, exit screen
-                states::pop();
+                states::pop_until(StateId::game);
 
                 msg_log::add("There is nothing to identify.");
 
@@ -1934,7 +1929,7 @@ void SelectIdentify::update()
                 }
 
                 // Exit screen
-                states::pop();
+                states::pop_until(StateId::game);
 
                 io::clear_screen();
 
