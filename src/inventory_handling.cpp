@@ -866,6 +866,9 @@ void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot) const
 
 void BrowseInv::on_backpack_item_selected(const size_t backpack_idx) const
 {
+        // Exit screen
+        states::pop();
+
         item::Item* item = map::g_player->m_inv.m_backpack[backpack_idx];
 
         const item::ItemData& data = item->data();
