@@ -232,13 +232,17 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
                                         attacker->m_properties.prop(
                                                 PropId::moribund));
 
-                        int moribund_bon = moribund->calc_bonus_lvl();
+                        const bool has_moribund_bon = moribund->has_bonus();
 
-                        if (player_bon::has_trait(Trait::death_sense)) {
-                                moribund_bon *= 2;
+                        if (has_moribund_bon) {
+                                int moribund_bon = 3;
+
+                                if (player_bon::has_trait(Trait::death_sense)) {
+                                        moribund_bon *= 2;
+                                }
+
+                                range.set_plus(range.plus() + moribund_bon);
                         }
-
-                        range.set_plus(range.plus() + moribund_bon);
                 }
         }
 

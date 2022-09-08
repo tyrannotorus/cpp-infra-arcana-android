@@ -1095,63 +1095,46 @@ std::string PropMoribund::name() const
 
 std::string PropMoribund::name_short() const
 {
-        if (!has_bonus()) {
-                return "";
-        }
-
-        const int bonus_lvl = calc_bonus_lvl();
-
-        return "Moribund(" + std::to_string(bonus_lvl) + ")";
+        return has_bonus() ? "Moribund" : "";
 }
 
 int PropMoribund::ability_mod(AbilityId ability) const
 {
-        int k = calc_bonus_lvl();
-
-        if (player_bon::has_trait(Trait::death_sense)) {
-                k *= 2;
-        }
-
-        switch (ability) {
-        case AbilityId::melee:
-                return 10 * k;
-                break;
-
-        default:
+        if (!has_bonus()) {
                 return 0;
         }
+
+        if (ability != AbilityId::melee) {
+                return 0;
+        }
+
+        int melee_bonus = 30;
+
+        if (player_bon::has_trait(Trait::death_sense)) {
+                melee_bonus *= 2;
+        }
+
+        return melee_bonus;
 }
 
 int PropMoribund::armor_points() const
 {
-        int armor_bon = calc_bonus_lvl();
-
-        if (player_bon::has_trait(Trait::death_sense)) {
-                armor_bon *= 2;
-        }
-
-        return armor_bon;
-}
-
-int PropMoribund::calc_bonus_lvl() const
-{
-        if (m_owner->m_hp <= 3) {
-                return 3;
-        }
-        else if (m_owner->m_hp <= 6) {
-                return 2;
-        }
-        else if (m_owner->m_hp <= 10) {
-                return 1;
-        }
-        else {
+        if (!has_bonus()) {
                 return 0;
         }
+
+        int armor_bonus = 3;
+
+        if (player_bon::has_trait(Trait::death_sense)) {
+                armor_bonus *= 2;
+        }
+
+        return armor_bonus;
 }
 
 bool PropMoribund::has_bonus() const
 {
-        return calc_bonus_lvl() > 0;
+        return m_owner->m_hp <= 6;
 }
 
 PropHpSap::PropHpSap() :

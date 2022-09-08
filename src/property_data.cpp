@@ -1260,11 +1260,9 @@ static void init_data_list()
 
         d.id = PropId::moribund;
         d.descr =
-                "Gains bonuses due to low health. Bonus level "
-                "1, 2, and 3 are acheived when health is reduced to "
-                "10, 6, and 3 hit points, respectively. "
-                "For each bonus level, the following is received: "
-                "+1 melee damage, +10% melee hit chance, +1 armor point.";
+                "While health is reduced to 6 hit points or below, "
+                "the following bonuses are received: "
+                "+3 melee damage, +30% melee hit chance, +3 armor points.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
         d.alignment = PropAlignment::good;

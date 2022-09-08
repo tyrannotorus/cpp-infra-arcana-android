@@ -1120,11 +1120,9 @@ std::vector<ColoredString> bg_descr(const Bg id)
         case Bg::flagellant:
                 put("No shock received for taking damage.");
                 put("");
-                put("Gains bonuses while health is low. Bonus level "
-                    "1, 2, and 3 are acheived when health is reduced to "
-                    "10, 6, and 3 hit points, respectively. "
-                    "For each bonus level, the following is received: "
-                    "+1 melee damage, +10% melee hit chance, +1 armor point.");
+                put("While health is reduced to 6 hit points or below, "
+                    "the following bonuses are received: "
+                    "+3 melee damage, +30% melee hit chance, +3 armor points.");
                 put("");
                 put("Wears a torture collar which cannot be taken off; "
                     "walking requires extra turns, and stealth and evasion "

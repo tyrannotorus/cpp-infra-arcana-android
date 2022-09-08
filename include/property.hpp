@@ -914,9 +914,6 @@ public:
 
         int armor_points() const override;
 
-        int calc_bonus_lvl() const;
-
-private:
         bool has_bonus() const;
 };
 
