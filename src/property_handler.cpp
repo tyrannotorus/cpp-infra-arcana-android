@@ -1136,12 +1136,16 @@ bool PropHandler::allow_pray(const Verbose verbose) const
         return true;
 }
 
-void PropHandler::on_hit(const int dmg, const DmgType dmg_type)
+void PropHandler::on_hit(
+        const int dmg,
+        const DmgType dmg_type,
+        actor::Actor* const attacker)
 {
         for (size_t i = 0; i < m_props.size();) {
                 const auto& prop = m_props[i];
 
-                const PropEnded prop_ended = prop->on_hit(dmg, dmg_type);
+                const PropEnded prop_ended =
+                        prop->on_hit(dmg, dmg_type, attacker);
 
                 if (prop_ended == PropEnded::no) {
                         ++i;

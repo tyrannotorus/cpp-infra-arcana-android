@@ -61,7 +61,7 @@ enum class SpellId
         resistance,
         see_invis,
         transmut,
-        accrue_pain,
+        thorns,
         sacrifice_life,
         blood_tempering,
         crimson_passage,
@@ -799,7 +799,8 @@ private:
 
         void do_damage_on_target(
                 actor::Actor& target,
-                SpellSkill skill) const;
+                SpellSkill skill,
+                actor::Actor* caster) const;
 
         void apply_properties_on_target(
                 actor::Actor& target,
@@ -2052,10 +2053,10 @@ private:
         }
 };
 
-class SpellAccruePain : public Spell
+class SpellThorns : public Spell
 {
 public:
-        SpellAccruePain() = default;
+        SpellThorns() = default;
 
         bool player_can_learn() const override
         {
@@ -2064,12 +2065,12 @@ public:
 
         std::string name() const override
         {
-                return "Accrue Pain";
+                return "Thorns";
         }
 
         SpellId id() const override
         {
-                return SpellId::accrue_pain;
+                return SpellId::thorns;
         }
 
         SpellDomain domain() const override
@@ -2098,7 +2099,6 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
         Range dmg_range(SpellSkill skill) const;
-        Range dmg_threshold_range() const;
 
         int base_max_cost(const SpellSkill skill) const override
         {

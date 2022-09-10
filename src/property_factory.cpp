@@ -337,8 +337,8 @@ Prop* make(const PropId id)
         case PropId::meditative_focused:
                 return new Prop(id);
 
-        case PropId::accrue_pain:
-                return new PropAccruePain();
+        case PropId::thorns:
+                return new PropThorns();
 
         case PropId::crimson_passage:
                 return new PropCrimsonPassage();

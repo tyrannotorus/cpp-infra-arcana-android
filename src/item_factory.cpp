@@ -306,7 +306,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::scroll_erudition:
         case Id::scroll_haste:
         case Id::scroll_spell_shield:
-        case Id::scroll_accrue_pain:
+        case Id::scroll_thorns:
         case Id::scroll_blood_temper:
         case Id::scroll_sacrifice_life:
         case Id::scroll_crimson_passage:

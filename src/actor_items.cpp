@@ -113,7 +113,7 @@ static void make_for_player_flagellant()
         inv.put_in_backpack(item::make(item::Id::medical_bag));
         inv.put_in_backpack(item::make(item::Id::lantern));
 
-        learn_spell_player(SpellId::accrue_pain);
+        learn_spell_player(SpellId::thorns);
         learn_spell_player(SpellId::crimson_passage);
 }
 

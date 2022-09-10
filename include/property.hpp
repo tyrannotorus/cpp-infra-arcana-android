@@ -191,10 +191,14 @@ public:
                 return true;
         }
 
-        virtual PropEnded on_hit(const int dmg, const DmgType dmg_type)
+        virtual PropEnded on_hit(
+                const int dmg,
+                const DmgType dmg_type,
+                actor::Actor* const attacker)
         {
                 (void)dmg;
                 (void)dmg_type;
+                (void)attacker;
 
                 return PropEnded::no;
         }
@@ -554,7 +558,10 @@ public:
                 }
         }
 
-        PropEnded on_hit(int dmg, DmgType dmg_type) override;
+        PropEnded on_hit(
+                int dmg,
+                DmgType dmg_type,
+                actor::Actor* attacker) override;
 };
 
 class PropBlind : public Prop
@@ -1162,7 +1169,10 @@ public:
                 return false;
         }
 
-        PropEnded on_hit(int dmg, DmgType dmg_type) override;
+        PropEnded on_hit(
+                int dmg,
+                DmgType dmg_type,
+                actor::Actor* attacker) override;
 };
 
 class PropSlowed : public Prop
@@ -1730,33 +1740,33 @@ private:
         std::string get_weapon_name() const;
 };
 
-class PropAccruePain : public Prop
+class PropThorns : public Prop
 {
 public:
-        PropAccruePain() :
-                Prop(PropId::accrue_pain) {}
+        PropThorns() :
+                Prop(PropId::thorns) {}
 
         void save() const override;
         void load() override;
 
-        PropEnded on_hit(int dmg, DmgType dmg_type) override;
+        PropEnded on_hit(
+                int dmg,
+                DmgType dmg_type,
+                actor::Actor* attacker) override;
 
-        void set_attack_dmg(const int dmg)
+        void set_dmg(const int dmg)
         {
-                m_attack_dmg = dmg;
-        }
-
-        void set_dmg_threshold(const int dmg)
-        {
-                m_dmg_threshold = dmg;
+                m_dmg = dmg;
         }
 
 private:
-        void apply_dmg();
+        void hit_actor(actor::Actor& target);
 
-        int m_attack_dmg {1};
-        int m_dmg_received {0};
-        int m_dmg_threshold {1};
+        void print_msg_player_retaliate_mon(const actor::Actor& target) const;
+        void print_msg_mon_retaliate_player() const;
+        void print_msg_mon_retaliate_mon(const actor::Actor& target) const;
+
+        int m_dmg {1};
 };
 
 class PropSanctuary : public Prop

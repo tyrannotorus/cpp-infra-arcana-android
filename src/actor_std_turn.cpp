@@ -293,7 +293,7 @@ static void std_turn_common(actor::Actor& actor)
 {
         // Do light damage if in lit cell
         if (map::g_light.at(actor.m_pos)) {
-                actor::hit(actor, 1, DmgType::light);
+                actor::hit(actor, 1, DmgType::light, nullptr);
         }
 
         if (!actor.is_alive()) {

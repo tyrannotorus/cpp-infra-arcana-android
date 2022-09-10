@@ -134,7 +134,7 @@ enum class PropId
         astral_opium_addiction,
         meditative_focused,  // From Meditative trait
         moribund,  // Flagellant low health bonuses
-        accrue_pain,  // From the Accrue Pain spell
+        thorns,  // From the Thorns spell
         crimson_passage,  // From the Crimson Passage spell
 
         END

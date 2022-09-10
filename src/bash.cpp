@@ -172,7 +172,11 @@ static void bash_corpse_with_wpn(
 
         const int dmg = dmg_range.total_range().roll();
 
-        actor::hit(mon, dmg, wpn_used_att_corpse.data().melee.dmg_type);
+        actor::hit(
+                mon,
+                dmg,
+                wpn_used_att_corpse.data().melee.dmg_type,
+                map::g_player);
 
         if (&wpn_used_att_corpse == &kick_wpn) {
                 bash::try_sprain_player();
@@ -368,7 +372,7 @@ void try_sprain_player()
 
                 const int dmg = rnd::range(1, 2);
 
-                actor::hit(*map::g_player, dmg, DmgType::pure);
+                actor::hit(*map::g_player, dmg, DmgType::pure, nullptr);
         }
 }
 

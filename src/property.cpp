@@ -859,15 +859,19 @@ PropEnded PropPoisoned::on_actor_turn()
                         " suffers from poisoning!");
         }
 
-        actor::hit(*m_owner, dmg, DmgType::pure);
+        actor::hit(*m_owner, dmg, DmgType::pure, nullptr);
 
         return PropEnded::no;
 }
 
-PropEnded PropAiming::on_hit(const int dmg, const DmgType dmg_type)
+PropEnded PropAiming::on_hit(
+        const int dmg,
+        const DmgType dmg_type,
+        actor::Actor* const attacker)
 {
         (void)dmg;
         (void)dmg_type;
+        (void)attacker;
 
         m_owner->m_properties.end_prop(id());
 
@@ -938,7 +942,7 @@ PropEnded PropNailed::affect_move_dir(Dir& dir)
                 }
         }
 
-        actor::hit(*m_owner, rnd::range(1, 3), DmgType::pure);
+        actor::hit(*m_owner, rnd::range(1, 3), DmgType::pure, nullptr);
 
         if (!m_owner->is_alive() || !rnd::one_in(4)) {
                 return PropEnded::no;
@@ -1694,7 +1698,7 @@ PropEnded PropBurning::on_actor_turn()
                 msg_log::add("AAAARGH IT BURNS!!!", colors::light_red());
         }
 
-        actor::hit(*m_owner, rnd::range(1, 3), DmgType::fire);
+        actor::hit(*m_owner, rnd::range(1, 3), DmgType::fire, nullptr);
 
         return PropEnded::no;
 }
@@ -1824,10 +1828,14 @@ void PropParalyzed::on_applied()
         }
 }
 
-PropEnded PropFainted::on_hit(const int dmg, const DmgType dmg_type)
+PropEnded PropFainted::on_hit(
+        const int dmg,
+        const DmgType dmg_type,
+        actor::Actor* const attacker)
 {
         (void)dmg;
         (void)dmg_type;
+        (void)attacker;
 
         m_owner->m_properties.end_prop(id());
 
@@ -2904,7 +2912,7 @@ void PropAuraOfDecay::run_effect_on_actors() const
 
                 const int dmg = m_dmg_range.roll();
 
-                actor::hit(*actor, dmg, DmgType::pure);
+                actor::hit(*actor, dmg, DmgType::pure, m_owner);
 
                 if (!actor::is_player(actor)) {
                         actor->become_aware_player(
@@ -3404,83 +3412,160 @@ std::optional<std::string> PropSpectralWpn::override_actor_descr() const
         return str;
 }
 
-void PropAccruePain::save() const
+void PropThorns::save() const
 {
-        saving::put_int(m_attack_dmg);
-        saving::put_int(m_dmg_received);
-        saving::put_int(m_dmg_threshold);
+        saving::put_int(m_dmg);
 }
 
-void PropAccruePain::load()
+void PropThorns::load()
 {
-        m_attack_dmg = saving::get_int();
-        m_dmg_received = saving::get_int();
-        m_dmg_threshold = saving::get_int();
+        m_dmg = saving::get_int();
 }
 
-PropEnded PropAccruePain::on_hit(const int dmg, const DmgType dmg_type)
+PropEnded PropThorns::on_hit(
+        const int dmg,
+        const DmgType dmg_type,
+        actor::Actor* const attacker)
 {
+        (void)dmg;
+        (void)dmg_type;
+
+        if (!attacker) {
+                return PropEnded::no;
+        }
+
         if (!m_owner->is_alive()) {
                 return PropEnded::no;
         }
 
-        if (dmg_type == DmgType::spirit) {
-                return PropEnded::no;
-        }
+        hit_actor(*attacker);
 
-        m_dmg_received += dmg;
-
-        if (m_dmg_received <= m_dmg_threshold) {
-                return PropEnded::no;
-        }
-
-        // Damage threshold exceeded.
-
-        msg_log::add("The vessel of pain shatters, a deluge rushes forth!");
-
-        apply_dmg();
-
-        // End self, with no message (custom message printed here instead).
-        m_owner->m_properties.end_prop(
-                id(),
-                PropEndConfig(
-                        PropEndAllowCallEndHook::no,
-                        PropEndAllowMsg::no,
-                        PropEndAllowHistoricMsg::yes));
-
-        return PropEnded::yes;
+        return PropEnded::no;
 }
 
-void PropAccruePain::apply_dmg()
+void PropThorns::hit_actor(actor::Actor& target)
 {
-        std::vector<actor::Actor*> targets;
+        const bool player_see_retaliator =
+                actor::can_player_see_actor(*m_owner);
 
-        const std::vector<actor::Actor*> seen_foes =
-                actor::seen_foes(*m_owner);
+        const bool player_see_target =
+                actor::can_player_see_actor(target);
 
-        for (actor::Actor* const actor : seen_foes) {
-                if (m_owner->m_pos.is_adjacent(actor->m_pos)) {
-                        targets.push_back(actor);
+        const bool player_see_target_pos =
+                map::g_seen.at(target.m_pos);
+
+        const bool player_see_retaliator_pos =
+                map::g_seen.at(m_owner->m_pos);
+
+        const bool should_print_msg =
+                player_see_retaliator ||
+                player_see_target ||
+                player_see_retaliator_pos ||
+                player_see_target_pos;
+
+        if (should_print_msg) {
+                draw_blast_at_cells({target.m_pos}, colors::red());
+
+                if (actor::is_player(&target)) {
+                        // Target is player.
+                        print_msg_mon_retaliate_player();
+                }
+                else {
+                        // Target is monster.
+                        if (actor::is_player(m_owner)) {
+                                // Player retaliating on monster.
+                                print_msg_player_retaliate_mon(target);
+                        }
+                        else {
+                                // Monster retaliating on monster.
+                                print_msg_mon_retaliate_mon(target);
+                        }
                 }
         }
 
-        if (targets.empty()) {
-                msg_log::add("No one is there to receive it.");
+        // NOTE: Setting attacker to nullptr here to avoid an "infinite" loop
+        // (or until one of them are dead), in case both creatures have the
+        // thorns effect.
+        actor::hit(target, m_dmg, DmgType::pure, nullptr);
+}
 
-                return;
+void PropThorns::print_msg_player_retaliate_mon(
+        const actor::Actor& target) const
+{
+        const bool player_see_target =
+                actor::can_player_see_actor(target);
+
+        std::string target_name;
+
+        if (player_see_target) {
+                target_name = target.name_the();
+        }
+        else {
+                target_name = "it";
         }
 
-        draw_blast_at_seen_actors(targets, colors::light_red());
+        const std::string msg = "I retaliate upon " + target_name + "!";
 
-        for (actor::Actor* const actor : targets) {
-                const std::string name =
+        msg_log::add(msg, colors::msg_good());
+}
+
+void PropThorns::print_msg_mon_retaliate_player() const
+{
+        const bool player_see_retaliator =
+                actor::can_player_see_actor(*m_owner);
+
+        std::string retaliator_name;
+
+        if (player_see_retaliator) {
+                retaliator_name = m_owner->name_the();
+        }
+        else {
+                retaliator_name = "it";
+        }
+
+        const std::string msg =
+                "My attack upon " +
+                retaliator_name +
+                " is retaliated by a magic aura!";
+
+        msg_log::add(msg, colors::msg_bad());
+}
+
+void PropThorns::print_msg_mon_retaliate_mon(
+        const actor::Actor& target) const
+{
+        const bool player_see_retaliator =
+                actor::can_player_see_actor(*m_owner);
+
+        const bool player_see_target =
+                actor::can_player_see_actor(target);
+
+        std::string retaliator_name;
+        std::string target_name;
+
+        if (player_see_retaliator) {
+                retaliator_name =
                         text_format::first_to_upper(
-                                actor->name_the());
-
-                msg_log::add(name + " is hit!");
-
-                actor::hit(*actor, m_attack_dmg, DmgType::pure);
+                                m_owner->name_the());
         }
+        else {
+                retaliator_name = "It";
+        }
+
+        if (player_see_target) {
+                target_name = target.name_the();
+        }
+        else {
+                target_name = "it";
+        }
+
+        const std::string msg =
+                retaliator_name +
+                "retaliates upon " +
+                target_name +
+                " by a magic aura!";
+
+        msg_log::add(msg);
 }
 
 PropEnded PropSanctuary::on_moved_non_center_dir()
@@ -3512,7 +3597,7 @@ PropEnded PropCrimsonPassage::on_moved_non_center_dir()
                 return PropEnded::yes;
         }
 
-        actor::hit(*m_owner, dmg, DmgType::pure, AllowWound::no);
+        actor::hit(*m_owner, dmg, DmgType::pure, nullptr, AllowWound::no);
 
         ++m_nr_steps_taken;
 

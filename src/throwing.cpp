@@ -343,6 +343,7 @@ void throw_item(
                                                 *actor_here,
                                                 dmg,
                                                 item_thrown_data.ranged.dmg_type,
+                                                &actor_throwing,
                                                 AllowWound::yes);
 
                                         actor_here

@@ -539,17 +539,15 @@ static void init_data_list()
         d.alignment = PropAlignment::good;
         add(d);
 
-        d.id = PropId::accrue_pain;
-        d.name = "Accrue Pain";
-        d.name_short = "Accrue Pain";
+        d.id = PropId::thorns;
+        d.name = "Thorns";
+        d.name_short = "Thorns";
         d.descr =
-                "If the total damage received in the duration of this spell "
-                "exceeds a certain threshold, "
-                "all adjacent seen enemies takes damage "
-                "(the damage received is counted after damage reduction from "
-                "armor, and includes any type of damage except spirit).";
-        d.msg_start_player = "My blood must be spilt!";
-        d.msg_end_player = "The bloodletting was insufficient.";
+                "Any time the caster is harmed by a melee attack, "
+                "ranged attack or damaging spell, the attacker is "
+                "struck by an irresistible force.";
+        d.msg_start_player = "Reprisal is sealed!";
+        d.msg_end_player = "I cease to return harm.";
         d.allow_test_on_bot = false;
         d.alignment = PropAlignment::good;
         add(d);

@@ -222,7 +222,11 @@ ConsumeItem StrangeDevice::activate(actor::Actor* const actor)
                         "It hits me with a jolt of electricity!",
                         colors::msg_bad());
 
-                actor::hit(*actor, rnd::range(1, 3), DmgType::electric);
+                actor::hit(
+                        *actor,
+                        rnd::range(1, 3),
+                        DmgType::electric,
+                        nullptr);
         }
 
         if (should_fail) {

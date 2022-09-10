@@ -1061,6 +1061,7 @@ void MiGoGun::pre_ranged_attack()
                 *m_actor_carrying,
                 g_mi_go_gun_hp_drained,
                 DmgType::pure,
+                nullptr,
                 AllowWound::no);
 
         auto* disabled_regen =
@@ -1155,7 +1156,11 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                         msg_log::add(mon_name_the + " looks shocked!");
                 }
 
-                actor::hit(*mon, rnd::range(3, 15), DmgType::pure);
+                actor::hit(
+                        *mon,
+                        rnd::range(3, 15),
+                        DmgType::pure,
+                        &actor_hit);
 
                 if (mon->is_alive()) {
                         mon->m_properties.apply(new PropConfused());

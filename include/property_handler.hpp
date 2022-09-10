@@ -174,7 +174,7 @@ public:
         bool allow_cast_intr_spell_absolute(Verbose verbose) const;
         bool allow_cast_intr_spell_chance(Verbose verbose) const;
 
-        void on_hit(int dmg, DmgType dmg_type);
+        void on_hit(int dmg, DmgType dmg_type, actor::Actor* attacker);
         void on_death();
         void on_destroyed_alive();
         void on_destroyed_corpse();

@@ -218,7 +218,11 @@ static void apply_explosion_on_pos(
                                 colors::msg_bad());
                 }
 
-                actor::hit(*living_actor, dmg, DmgType::explosion);
+                actor::hit(
+                        *living_actor,
+                        dmg,
+                        DmgType::explosion,
+                        nullptr);
 
                 if (living_actor->is_alive() &&
                     actor::is_player(living_actor)) {
@@ -230,7 +234,11 @@ static void apply_explosion_on_pos(
 
         // Damage dead actors
         for (auto* corpse : corpses_here) {
-                actor::hit(*corpse, dmg, DmgType::explosion);
+                actor::hit(
+                        *corpse,
+                        dmg,
+                        DmgType::explosion,
+                        nullptr);
         }
 
         // Add smoke

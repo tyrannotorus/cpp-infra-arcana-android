@@ -387,6 +387,7 @@ void hit(
         Actor& actor,
         int dmg,
         const DmgType dmg_type,
+        actor::Actor* const attacker,
         const AllowWound allow_wound)
 {
         if (actor.m_state == ActorState::destroyed) {
@@ -414,7 +415,7 @@ void hit(
         }
 
         if (dmg_type == DmgType::spirit) {
-                hit_sp(actor, dmg);
+                hit_sp(actor, dmg, attacker);
 
                 return;
         }
@@ -455,7 +456,7 @@ void hit(
                 on_player_hit(dmg, dmg_type, allow_wound);
         }
 
-        actor.m_properties.on_hit(dmg, dmg_type);
+        actor.m_properties.on_hit(dmg, dmg_type, attacker);
 
         if ((dmg > 0) &&
             !(actor::is_player(&actor) && config::is_bot_playing())) {
@@ -477,6 +478,7 @@ void hit(
 void hit_sp(
         Actor& actor,
         const int dmg,
+        actor::Actor* const attacker,
         const Verbose verbose)
 {
         if (verbose == Verbose::yes) {
@@ -487,7 +489,7 @@ void hit_sp(
                 }
         }
 
-        actor.m_properties.on_hit(dmg, DmgType::spirit);
+        actor.m_properties.on_hit(dmg, DmgType::spirit, attacker);
 
         if (!actor::is_player(&actor) || !config::is_bot_playing()) {
                 actor.m_sp = std::max(0, actor.m_sp - dmg);

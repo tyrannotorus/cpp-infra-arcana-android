@@ -921,8 +921,8 @@ Spell* make(const SpellId spell_id)
         case SpellId::sacrifice_life:
                 return new SpellSacrificeLife();
 
-        case SpellId::accrue_pain:
-                return new SpellAccruePain();
+        case SpellId::thorns:
+                return new SpellThorns();
 
         case SpellId::crimson_passage:
                 return new SpellCrimsonPassage();
@@ -1205,6 +1205,7 @@ void Spell::cast(
                                 actor::hit_sp(
                                         *caster,
                                         cost.roll(),
+                                        nullptr,
                                         Verbose::no);
                         }
                         else {
@@ -1213,6 +1214,7 @@ void Spell::cast(
                                         *caster,
                                         cost.roll(),
                                         DmgType::pure,
+                                        nullptr,
                                         AllowWound::no);
                         }
                 }
@@ -1390,9 +1392,21 @@ int Spell::shock_value() const
 // -----------------------------------------------------------------------------
 Range SpellAuraOfDecay::dmg_range(const SpellSkill skill) const
 {
-        const int max_dmg = std::min(1 + (int)skill, 3);
+        switch (skill) {
+        case SpellSkill::basic:
+                return {1, 1};  // Avg 1.0
 
-        return {1, max_dmg};
+        case SpellSkill::expert:
+                return {1, 2};  // Avg 1.5
+
+        case SpellSkill::master:
+        case SpellSkill::transcendent:
+                return {1, 3};  // Avg 2.0
+        }
+
+        ASSERT(false);
+
+        return {1, 1};
 }
 
 Range SpellAuraOfDecay::duration_range(const SpellSkill skill) const
@@ -1673,10 +1687,10 @@ void SpellBolt::run_effect(
         }
 
         const auto& target_p = target->m_pos;
-        const bool player_see_cell = map::g_seen.at(target_p);
+        const bool player_see_pos = map::g_seen.at(target_p);
         const bool player_see_tgt = actor::can_player_see_actor(*target);
 
-        if (player_see_tgt || player_see_cell) {
+        if (player_see_tgt || player_see_pos) {
                 draw_blast_at_cells({target->m_pos}, colors::magenta());
 
                 Color msg_clr = colors::msg_good();
@@ -1715,6 +1729,7 @@ void SpellBolt::run_effect(
                 *target,
                 dmg_range.roll(),
                 DmgType::blunt,
+                caster,
                 AllowWound::no);
 
         m_impl->on_hit(*target, *caster, skill);
@@ -1829,11 +1844,17 @@ Range SpellAzaGaze::conflict_duration_range(SpellSkill skill) const
 
 void SpellAzaGaze::do_damage_on_target(
         actor::Actor& target,
-        SpellSkill const skill) const
+        SpellSkill const skill,
+        actor::Actor* const caster) const
 {
         const int dmg = dmg_range(skill).roll();
 
-        actor::hit(target, dmg, DmgType::explosion, AllowWound::no);
+        actor::hit(
+                target,
+                dmg,
+                DmgType::explosion,
+                caster,
+                AllowWound::no);
 }
 
 void SpellAzaGaze::apply_properties_on_target(
@@ -1905,7 +1926,7 @@ void SpellAzaGaze::run_effect_on_target(
                 snd.run();
         }
 
-        do_damage_on_target(target, skill);
+        do_damage_on_target(target, skill, caster);
 
         if (!actor::is_player(&target)) {
                 target.become_aware_player(actor::AwareSource::spell_victim);
@@ -2901,7 +2922,11 @@ void SpellPurge::run_effect(
                                 colors::light_white());
                 }
 
-                actor::hit(*actor, dmg_range().roll(), DmgType::pure);
+                actor::hit(
+                        *actor,
+                        dmg_range().roll(),
+                        DmgType::pure,
+                        caster);
 
                 if (actor->is_alive()) {
                         auto* const fear =
@@ -5188,32 +5213,32 @@ std::vector<std::string> SpellBloodTempering::descr_specific(
 }
 
 // -----------------------------------------------------------------------------
-// Accrue Pain
+// Thorns
 // -----------------------------------------------------------------------------
-Range SpellAccruePain::duration_range(const SpellSkill skill) const
+Range SpellThorns::duration_range(const SpellSkill skill) const
 {
         Range duration_range;
 
-        duration_range.min = ((int)skill + 1) * 15;
+        duration_range.min = ((int)skill + 1) * 5;
         duration_range.max = duration_range.min * 2;
 
         return duration_range;
 }
 
-Range SpellAccruePain::dmg_range(const SpellSkill skill) const
+Range SpellThorns::dmg_range(const SpellSkill skill) const
 {
         switch (skill) {
         case SpellSkill::basic:
-                return {12, 20};  // Avg 16.0
+                return {2, 4};  // Avg 3.0
 
         case SpellSkill::expert:
-                return {16, 28};  // Avg 22.0
+                return {3, 6};  // Avg 4.5
 
         case SpellSkill::master:
-                return {20, 36};  // Avg 28.0
+                return {4, 8};  // Avg 6.0
 
         case SpellSkill::transcendent:
-                return {24, 44};  // Avg 34.0
+                return {5, 10};  // Avg 7.5
         }
 
         ASSERT(false);
@@ -5221,12 +5246,7 @@ Range SpellAccruePain::dmg_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-Range SpellAccruePain::dmg_threshold_range() const
-{
-        return {8, 12};
-}
-
-void SpellAccruePain::run_effect(
+void SpellThorns::run_effect(
         actor::Actor* caster,
         SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
@@ -5234,36 +5254,29 @@ void SpellAccruePain::run_effect(
         (void)seen_targets;
 
         auto* const prop =
-                static_cast<PropAccruePain*>(
-                        property_factory::make(PropId::accrue_pain));
+                static_cast<PropThorns*>(
+                        property_factory::make(PropId::thorns));
 
         prop->set_duration(duration_range(skill).roll());
 
-        prop->set_attack_dmg(dmg_range(skill).roll());
-
-        prop->set_dmg_threshold(dmg_threshold_range().roll());
+        prop->set_dmg(dmg_range(skill).roll());
 
         caster->m_properties.apply(prop);
 }
 
-std::vector<std::string> SpellAccruePain::descr_specific(
+std::vector<std::string> SpellThorns::descr_specific(
         SpellSkill skill) const
 {
         std::vector<std::string> descr;
 
-        // Re-use the property description as spell description.
+        // Re-using the property description as spell description.
         descr.push_back(
-                property_data::g_data[(size_t)PropId::accrue_pain].descr);
+                property_data::g_data[(size_t)PropId::thorns].descr);
 
         descr.push_back(
-                "The damage threshold to trigger the attack is " +
-                dmg_threshold_range().str() +
-                " hit points.");
-
-        descr.push_back(
-                "The spell does " +
+                "The spell returns " +
                 dmg_range(skill).str() +
-                " damage if the threshold is exceeded.");
+                " damage to the attacker.");
 
         descr.emplace_back(
                 "The spell lasts for " +
@@ -5345,7 +5358,7 @@ std::vector<std::string> SpellCrimsonPassage::descr_specific(
 {
         std::vector<std::string> descr;
 
-        // Re-use the property description as spell description.
+        // Re-using the property description as spell description.
         descr.push_back(
                 property_data::g_data[(size_t)PropId::crimson_passage].descr);
 
@@ -5396,7 +5409,12 @@ void SpellSacrificeLife::run_effect(
 
         const int hp_drained = ((hp - 1) / 2) * 2;
 
-        actor::hit(*caster, hp_drained, DmgType::pure, AllowWound::no);
+        actor::hit(
+                *caster,
+                hp_drained,
+                DmgType::pure,
+                nullptr,
+                AllowWound::no);
 
         const int sp_gained = (hp_drained * pct_sp_per_hp(skill)) / 100;
 

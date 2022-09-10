@@ -129,7 +129,7 @@ static void scorch_actor(actor::Actor& actor)
                         colors::msg_good());
         }
 
-        actor::hit(actor, 1, DmgType::fire);
+        actor::hit(actor, 1, DmgType::fire, nullptr);
 }
 
 static void spread_burning(const terrain::Terrain& terrain)
@@ -1124,7 +1124,8 @@ void Statue::topple(
                 actor::hit(
                         *actor_behind,
                         rnd::range(3, 6),
-                        DmgType::blunt);
+                        DmgType::blunt,
+                        actor_toppling);
 
                 if (actor_behind->is_alive()) {
                         auto* const paralyzed =

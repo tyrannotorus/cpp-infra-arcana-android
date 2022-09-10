@@ -1553,8 +1553,8 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
-        d.id = Id::scroll_accrue_pain;
-        d.spell_cast_from_scroll = SpellId::accrue_pain;
+        d.id = Id::scroll_thorns;
+        d.spell_cast_from_scroll = SpellId::thorns;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);

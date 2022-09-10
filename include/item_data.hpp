@@ -147,7 +147,7 @@ enum class Id
         scroll_telep,
         scroll_terrify,
         scroll_transmut,
-        scroll_accrue_pain,
+        scroll_thorns,
         scroll_blood_temper,
         scroll_sacrifice_life,
         scroll_crimson_passage,

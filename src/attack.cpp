@@ -1069,6 +1069,7 @@ static void hit_actor_with_projectile(
                         *projectile.actor_hit,
                         projectile.dmg,
                         wpn.data().ranged.dmg_type,
+                        projectile.att_data->attacker,
                         AllowWound::yes);
         }
 
@@ -1628,7 +1629,7 @@ static ProjectileFireData fire_projectiles(
 static void melee_hit_actor(
         const int dmg,
         actor::Actor& defender,
-        const actor::Actor* const attacker,
+        actor::Actor* const attacker,
         const P& attacker_origin,
         item::Wpn& wpn)
 {
@@ -1642,7 +1643,12 @@ static void melee_hit_actor(
         const auto dmg_type = wpn.data().melee.dmg_type;
 
         if (dmg > 0) {
-                actor::hit(defender, dmg, dmg_type, allow_wound);
+                actor::hit(
+                        defender,
+                        dmg,
+                        dmg_type,
+                        attacker,
+                        allow_wound);
 
                 if (defender.m_data->can_bleed &&
                     (is_physical_dmg_type(dmg_type) ||

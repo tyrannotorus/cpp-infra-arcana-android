@@ -628,19 +628,23 @@ void ShadowDagger::hit_radiant_creature(actor::Actor& actor) const
                 return;
         }
 
-        if (actor::can_player_see_actor(actor)) {
-                const auto actor_name =
-                        text_format::first_to_upper(
-                                actor.name_the());
+        const bool player_see_target = actor::can_player_see_actor(actor);
+        const bool player_see_pos = map::g_seen.at(actor.m_pos);
 
-                msg_log::add(actor_name + " is assailed by dark energy.");
+        if (player_see_target || player_see_pos) {
+                const std::string target_name =
+                        player_see_target
+                        ? text_format::first_to_upper(actor.name_the())
+                        : "It";
+
+                msg_log::add(target_name + " is assailed by dark energy.");
 
                 draw_blast_at_seen_actors({&actor}, colors::gray());
         }
 
         const int dmg = rnd::range(1, 4);
 
-        actor::hit(actor, dmg, DmgType::pure);
+        actor::hit(actor, dmg, DmgType::pure, m_actor_carrying);
 }
 
 // -----------------------------------------------------------------------------
