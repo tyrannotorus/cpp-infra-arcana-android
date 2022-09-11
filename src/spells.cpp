@@ -5416,7 +5416,9 @@ void SpellSacrificeLife::run_effect(
                 return;
         }
 
-        const int hp_drained = ((hp - 1) / 2) * 2;
+        int hp_drained = ((hp - 1) / 2) * 2;
+
+        hp_drained = std::min(8, hp_drained);
 
         actor::hit(
                 *caster,
