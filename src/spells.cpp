@@ -118,6 +118,15 @@ static const StrToSpellSkillMap s_str_to_spell_skill_map = {
         {"master", SpellSkill::master},
         {"transcendent", SpellSkill::transcendent}};
 
+using SpellDomainToShockTypeMap = std::unordered_map<SpellDomain, ShockSrc>;
+
+static const SpellDomainToShockTypeMap s_spell_domain_to_shock_type_map = {
+        {SpellDomain::blood, ShockSrc::cast_intr_spell_blood},
+        {SpellDomain::clairvoyance, ShockSrc::cast_intr_spell_clairvoyance},
+        {SpellDomain::enchantment, ShockSrc::cast_intr_spell_enchantment},
+        {SpellDomain::invocation, ShockSrc::cast_intr_spell_invocation},
+        {SpellDomain::transmutation, ShockSrc::cast_intr_spell_transmutation}};
+
 static const std::string s_spell_resist_msg = "The spell is resisted!";
 
 static const std::string s_spell_reflect_msg = "The spell is reflected!";
@@ -1122,7 +1131,7 @@ void Spell::cast(
 
                 const ShockSrc shock_src =
                         (spell_src == SpellSrc::learned)
-                        ? ShockSrc::cast_intr_spell
+                        ? s_spell_domain_to_shock_type_map.at(domain())
                         : ShockSrc::use_strange_item;
 
                 int shock = shock_value();

@@ -364,9 +364,21 @@ int Actor::shock_resistance(const ShockSrc shock_src) const
 
         switch (shock_src) {
         case ShockSrc::use_strange_item:
-        case ShockSrc::cast_intr_spell:
-                if (player_bon::bg() == Bg::occultist) {
+        case ShockSrc::cast_intr_spell_clairvoyance:
+        case ShockSrc::cast_intr_spell_enchantment:
+        case ShockSrc::cast_intr_spell_invocation:
+        case ShockSrc::cast_intr_spell_transmutation:
+                if (player_bon::is_bg(Bg::occultist)) {
                         res += 50;
+                }
+                break;
+
+        case ShockSrc::cast_intr_spell_blood:
+                if (player_bon::is_bg(Bg::occultist)) {
+                        res += 50;
+                }
+                else if (player_bon::is_bg(Bg::flagellant)) {
+                        res += 25;
                 }
                 break;
 

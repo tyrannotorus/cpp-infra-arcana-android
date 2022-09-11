@@ -1138,6 +1138,9 @@ std::vector<ColoredString> bg_descr(const Bg id)
                     ", all spells belonging to this domain are cast at "
                     "a higher skill level.");
                 put("");
+                put("-25% shock taken from casting memorized spells "
+                    "from the Blood domain.");
+                put("");
                 put_trait(Trait::self_aware);
                 put("");
                 put_trait(Trait::tough);
@@ -1176,13 +1179,12 @@ std::vector<ColoredString> bg_descr(const Bg id)
                     std::to_string(s_spell_upgrade_lvl_2) +
                     ", all spells belonging to the chosen domain are cast at "
                     "a higher skill level. This choice also determines "
-                    "starting spells");
+                    "starting spells.");
                 put("");
-                put("-50% shock taken from casting spells (when casting "
-                    "memorized spells or casting from Manuscripts), and "
-                    "from carrying, using or identifying strange items "
-                    "(e.g. drinking a potion or carrying a disturbing "
-                    "artifact)");
+                put("-50% shock taken from casting memorized spells, "
+                    "and from using or identifying strange items "
+                    "(e.g. drinking a potion, or casting a spell from "
+                    "a manuscript)");
                 put("");
                 put("Can dispel magic traps, doing so grants spirit points");
                 put("");

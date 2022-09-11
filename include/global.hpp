@@ -296,11 +296,21 @@ enum class MonShockLvl
 enum class ShockSrc
 {
         see_mon,
+
         use_strange_item,
-        cast_intr_spell,
+
+        cast_intr_spell_clairvoyance,
+        cast_intr_spell_enchantment,
+        cast_intr_spell_invocation,
+        cast_intr_spell_transmutation,
+        cast_intr_spell_blood,
+
         time,
+
         take_damage,
+
         misc,
+
         END
 };
 
