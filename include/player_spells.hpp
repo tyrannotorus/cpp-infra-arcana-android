@@ -20,19 +20,20 @@ void cleanup();
 void save();
 void load();
 
+bool is_spell_learned(SpellId id);
 void learn_spell(SpellId id, Verbose verbose);
 
-void unlearn_spell(SpellId id, Verbose verbose);
+// Silently removes a learned spell (no messages).
+void remove_learned_spell(SpellId id);
+
+bool is_spell_forgotten(SpellId id);
+void forget_spell(SpellId id);
+void recall_spell(SpellId id);
+void recall_all_spells();
 
 void incr_spell_skill(SpellId id, Verbose verbose);
-
-void reduce_spell_skill(SpellId id, Verbose verbose);
-
 SpellSkill spell_skill(SpellId id);
-
 void set_spell_skill(SpellId id, SpellSkill val);
-
-bool is_spell_learned(SpellId id);
 
 bool is_getting_altar_bonus();
 

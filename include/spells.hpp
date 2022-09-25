@@ -187,6 +187,13 @@ public:
 
         virtual SpellDomain domain() const = 0;
 
+        // Casting a memorized tenebrous spell disables it (i.e. single use,
+        // until it it re-enabled).
+        virtual bool is_tenebrous() const
+        {
+                return false;
+        }
+
         virtual bool can_be_improved_with_skill() const
         {
                 return true;
@@ -225,6 +232,8 @@ protected:
         virtual bool is_noisy(SpellSkill skill) const = 0;
 
         void on_resist(actor::Actor& target) const;
+
+        bool m_is_disabled {false};
 };
 
 class SpellCurse : public Spell
@@ -2022,6 +2031,11 @@ public:
                 return SpellDomain::blood;
         }
 
+        bool is_tenebrous() const override
+        {
+                return true;
+        }
+
         SpellCostType cost_type() const override
         {
                 return SpellCostType::hit_points;
@@ -2186,6 +2200,11 @@ public:
         SpellDomain domain() const override
         {
                 return SpellDomain::blood;
+        }
+
+        bool is_tenebrous() const override
+        {
+                return true;
         }
 
         SpellShock shock_type() const override

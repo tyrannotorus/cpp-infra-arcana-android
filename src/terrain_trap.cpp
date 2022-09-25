@@ -1438,14 +1438,14 @@ void TrapUnlearnSpell::trigger()
 
         std::vector<SpellId> id_bucket;
 
-        // Do not unlearn spells for the Exorcist
+        // Do not unlearn spells for the Exorcist.
         if (!player_bon::is_bg(Bg::exorcist)) {
                 id_bucket.reserve((size_t)SpellId::END);
 
                 for (int i = 0; i < (int)SpellId::END; ++i) {
                         const auto id = (SpellId)i;
 
-                        // Only allow unlearning spells with scrolls
+                        // Only allow unlearning spells with scrolls.
                         bool has_scroll = false;
 
                         for (const auto& d : item::g_data) {
@@ -1467,9 +1467,9 @@ void TrapUnlearnSpell::trigger()
                 return;
         }
 
-        const auto id = rnd::element(id_bucket);
+        const SpellId id = rnd::element(id_bucket);
 
-        player_spells::unlearn_spell(id, Verbose::yes);
+        player_spells::forget_spell(id);
 
         TRACE_FUNC_END_VERBOSE;
 }

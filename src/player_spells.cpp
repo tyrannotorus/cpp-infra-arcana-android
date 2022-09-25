@@ -46,19 +46,21 @@ static std::vector<Spell*> s_learned_spells;
 
 static SpellSkill s_spell_skills[(size_t)SpellId::END];
 
+static bool s_is_forgotten[(size_t)SpellId::END];
+
 static void draw_descr_box(const std::vector<ColoredString>& lines)
 {
         io::cover_panel(Panel::inventory_descr);
 
         P pos(0, 0);
 
-        for (const auto& line : lines) {
-                const auto formatted =
+        for (const ColoredString& line : lines) {
+                const std::vector<std::string> formatted =
                         text_format::split(
                                 line.str,
                                 panels::w(Panel::inventory_descr));
 
-                for (const auto& formatted_line : formatted) {
+                for (const std::string& formatted_line : formatted) {
                         io::draw_text(
                                 formatted_line,
                                 Panel::inventory_descr,
@@ -76,13 +78,25 @@ static void try_cast(Spell* const spell)
 {
         const PropHandler& props = map::g_player->m_properties;
 
-        bool allow_cast = props.allow_cast_intr_spell_absolute(Verbose::yes);
-
-        if (allow_cast) {
-                allow_cast = allow_cast && props.allow_speak(Verbose::yes);
+        if (!props.allow_cast_intr_spell_absolute(Verbose::yes)) {
+                return;
         }
 
-        if (!allow_cast) {
+        // TODO: Not all spells "require making noise", it seems insconsistent
+        // to outright prevent casting here.
+        if (!props.allow_speak(Verbose::yes)) {
+                return;
+        }
+
+        if (player_spells::is_spell_forgotten(spell->id())) {
+                const std::string name =
+                        text_format::first_to_upper(spell->name());
+
+                msg_log::add(
+                        name +
+                        " has faded from my memory, I can no longer "
+                        "cast it.");
+
                 return;
         }
 
@@ -157,7 +171,7 @@ static void draw_spell_menu_line(
 
         int x = 0;
 
-        auto color =
+        Color color =
                 is_marked
                 ? colors::menu_key_highlight()
                 : colors::menu_key_dark();
@@ -166,10 +180,18 @@ static void draw_spell_menu_line(
 
         x = (int)key_str.size() + 1;
 
-        color =
-                is_marked
-                ? colors::menu_highlight()
-                : colors::menu_dark();
+        if (s_is_forgotten[(size_t)spell->id()]) {
+                color =
+                        is_marked
+                        ? colors::light_magenta()
+                        : colors::magenta().shaded(20);
+        }
+        else {
+                color =
+                        is_marked
+                        ? colors::menu_highlight()
+                        : colors::menu_dark();
+        }
 
         io::draw_text(
                 name,
@@ -275,7 +297,7 @@ static void draw_spell_descr(const Spell* const spell)
 
         lines.reserve(descr.size());
 
-        for (const auto& line : descr) {
+        for (const std::string& line : descr) {
                 lines.emplace_back(line, colors::light_white());
         }
 
@@ -304,6 +326,8 @@ void cleanup()
 
         for (size_t i = 0; i < (size_t)SpellId::END; ++i) {
                 s_spell_skills[i] = (SpellSkill)0;
+
+                s_is_forgotten[i] = false;
         }
 }
 
@@ -317,6 +341,8 @@ void save()
 
         for (size_t i = 0; i < (size_t)SpellId::END; ++i) {
                 saving::put_int((int)s_spell_skills[i]);
+
+                saving::put_bool(s_is_forgotten[i]);
         }
 }
 
@@ -332,6 +358,8 @@ void load()
 
         for (size_t i = 0; i < (size_t)SpellId::END; ++i) {
                 s_spell_skills[i] = (SpellSkill)saving::get_int();
+
+                s_is_forgotten[i] = saving::get_bool();
         }
 }
 
@@ -355,7 +383,7 @@ void learn_spell(const SpellId id, const Verbose verbose)
                 return;
         }
 
-        auto* const spell = spells::make(id);
+        Spell* const spell = spells::make(id);
 
         const bool player_can_learn = spell->player_can_learn();
 
@@ -376,12 +404,11 @@ void learn_spell(const SpellId id, const Verbose verbose)
         s_learned_spells.push_back(spell);
 }
 
-void unlearn_spell(const SpellId id, const Verbose verbose)
+void remove_learned_spell(const SpellId id)
 {
         ASSERT(id != SpellId::END);
 
         if (!is_spell_learned(id)) {
-                // Spell was already unknown
                 return;
         }
 
@@ -398,22 +425,57 @@ void unlearn_spell(const SpellId id, const Verbose verbose)
                 return;
         }
 
-        const auto* const spell = *spell_iterator;
+        const Spell* const spell = *spell_iterator;
 
         ASSERT(spell->player_can_learn());
-
-        if (verbose == Verbose::yes) {
-                const auto name = spell->name();
-
-                msg_log::add(
-                        "I no longer recall how to cast " +
-                        name +
-                        "!");
-        }
 
         delete spell;
 
         s_learned_spells.erase(spell_iterator);
+}
+
+bool is_spell_forgotten(SpellId id)
+{
+        ASSERT(id != SpellId::END);
+
+        return s_is_forgotten[(size_t)id];
+}
+
+void forget_spell(const SpellId id)
+{
+        if (is_spell_forgotten(id)) {
+                return;
+        }
+
+        std::unique_ptr<const Spell> spell(spells::make(id));
+
+        const std::string name = spell->name();
+
+        msg_log::add("I no longer recall how to cast " + name + "!");
+
+        s_is_forgotten[(size_t)id] = true;
+}
+
+void recall_spell(const SpellId id)
+{
+        if (!is_spell_forgotten(id)) {
+                return;
+        }
+
+        std::unique_ptr<const Spell> spell(spells::make(id));
+
+        const std::string name = spell->name();
+
+        msg_log::add("I remember how to cast " + name + " again!");
+
+        s_is_forgotten[(size_t)id] = false;
+}
+
+void recall_all_spells()
+{
+        for (size_t i = 0; i < (size_t)SpellId::END; ++i) {
+                recall_spell((SpellId)i);
+        }
 }
 
 void incr_spell_skill(const SpellId id, const Verbose verbose)
@@ -425,7 +487,7 @@ void incr_spell_skill(const SpellId id, const Verbose verbose)
                 << (int)id
                 << std::endl;
 
-        auto& skill = s_spell_skills[(size_t)id];
+        SpellSkill& skill = s_spell_skills[(size_t)id];
 
         TRACE << "skill before: " << (int)skill << std::endl;
 
@@ -455,7 +517,7 @@ SpellSkill spell_skill(const SpellId id)
                 return SpellSkill::basic;
         }
 
-        auto skill = s_spell_skills[(size_t)id];
+        SpellSkill skill = s_spell_skills[(size_t)id];
 
         // Altar skill bonus - max level is master.
         if ((skill < SpellSkill::master) &&
@@ -498,8 +560,8 @@ bool is_getting_altar_bonus()
                 return false;
         }
 
-        for (const auto& d : dir_utils::g_dir_list) {
-                const auto p = map::g_player->m_pos + d;
+        for (const P& d : dir_utils::g_dir_list) {
+                const P p = map::g_player->m_pos + d;
 
                 if (map::g_terrain.at(p)->id() == terrain::Id::altar) {
                         return true;
@@ -576,7 +638,7 @@ void BrowseSpell::update()
 
         switch (action) {
         case MenuAction::selected: {
-                auto* const spell = s_learned_spells[m_browser.y()];
+                Spell* const spell = s_learned_spells[m_browser.y()];
 
                 // Exit screen
                 states::pop();

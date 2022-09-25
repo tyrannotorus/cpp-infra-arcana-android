@@ -29,14 +29,7 @@ namespace mapgen
 {
 void make_monoliths()
 {
-        // Determine number of Monoliths to place, by a weighted choice
-        std::vector<int> nr_weights = {
-                50,  // 0 monolith(s)
-                50,  // 1 -
-                1,  // 2 -
-        };
-
-        const int nr_monoliths = rnd::weighted_choice(nr_weights);
+        const int nr_monoliths = rnd::one_in(20) ? 2 : 1;
 
         Array2<bool> blocked(map::dims());
 

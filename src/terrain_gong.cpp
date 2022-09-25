@@ -106,8 +106,8 @@ static std::unique_ptr<terrain::gong::Toll> make_toll(terrain::gong::TollId id)
         case terrain::gong::TollId::cursed:
                 return std::make_unique<terrain::gong::Cursed>();
 
-        case terrain::gong::TollId::unlearn_spell:
-                return std::make_unique<terrain::gong::UnlearnSpell>();
+        case terrain::gong::TollId::forget_spell:
+                return std::make_unique<terrain::gong::ForgetSpell>();
 
         case terrain::gong::TollId::spawn_monsters:
                 return std::make_unique<terrain::gong::SpawnMonsters>();
@@ -706,66 +706,60 @@ void SpawnMonsters::run_effect()
 }
 
 // -----------------------------------------------------------------------------
-// Unlearn spell
+// Forget spell
 // -----------------------------------------------------------------------------
-UnlearnSpell::UnlearnSpell()
+ForgetSpell::ForgetSpell()
 {
-        const auto spell_bucket = make_spell_bucket();
+        const std::vector<SpellId> spell_bucket = make_spell_bucket();
 
         if (!spell_bucket.empty()) {
-                m_spell_to_unlearn = rnd::element(spell_bucket);
+                m_spell_to_forget = rnd::element(spell_bucket);
         }
 }
 
-std::vector<BonusId> UnlearnSpell::bonuses_not_allowed_with() const
+std::vector<BonusId> ForgetSpell::bonuses_not_allowed_with() const
 {
         return {BonusId::upgrade_spell};
 }
 
-bool UnlearnSpell::is_allowed() const
+bool ForgetSpell::is_allowed() const
 {
-        return m_spell_to_unlearn != SpellId::END;
+        return m_spell_to_forget != SpellId::END;
 }
 
-void UnlearnSpell::run_effect()
+void ForgetSpell::run_effect()
 {
-        player_spells::unlearn_spell(m_spell_to_unlearn, Verbose::yes);
+        player_spells::forget_spell(m_spell_to_forget);
 }
 
-std::vector<SpellId> UnlearnSpell::make_spell_bucket() const
+std::vector<SpellId> ForgetSpell::make_spell_bucket() const
 {
         std::vector<SpellId> result;
 
-        // Find all spells which have scrolls with low spawn chances
-        std::vector<SpellId> low_spawn_spells;
-
         for (size_t i = 0; i < (size_t)item::Id::END; ++i) {
-                const auto& d = item::g_data[i];
+                const item::ItemData& d = item::g_data[i];
 
-                const bool is_scroll = d.type == ItemType::scroll;
-
-                const bool is_low_chance =
-                        d.chance_to_incl_in_spawn_list ==
-                        scroll::g_low_spawn_chance;
-
-                if (is_scroll && is_low_chance) {
-                        if (d.spell_cast_from_scroll == SpellId::END) {
-                                ASSERT(false);
-
-                                continue;
-                        }
-
-                        low_spawn_spells.push_back(d.spell_cast_from_scroll);
+                if (d.type != ItemType::scroll) {
+                        continue;
                 }
-        }
 
-        ASSERT(!low_spawn_spells.empty());
+                const SpellId spell_id = d.spell_cast_from_scroll;
 
-        // Get all learned spells from the low spawn chance spells
-        for (const auto id : low_spawn_spells) {
-                if (player_spells::is_spell_learned(id)) {
-                        result.push_back(id);
+                if (spell_id == SpellId::END) {
+                        ASSERT(false);
+
+                        continue;
                 }
+
+                if (!player_spells::is_spell_learned(spell_id)) {
+                        continue;
+                }
+
+                if (player_spells::is_spell_forgotten(spell_id)) {
+                        continue;
+                }
+
+                result.push_back(spell_id);
         }
 
         return result;

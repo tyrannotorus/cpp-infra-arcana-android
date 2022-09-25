@@ -62,7 +62,7 @@ enum class TollId
         xp_reduced,
         deaf,
         cursed,
-        unlearn_spell,
+        forget_spell,
         spawn_monsters,
 
         // TODO: Consider these:
@@ -318,16 +318,16 @@ private:
         actor::Id m_id_to_spawn {actor::Id::END};
 };
 
-class UnlearnSpell : public Toll
+class ForgetSpell : public Toll
 {
 public:
-        UnlearnSpell();
+        ForgetSpell();
 
         bool is_allowed() const override;
 
         TollId id() const override
         {
-                return TollId::unlearn_spell;
+                return TollId::forget_spell;
         }
 
         std::vector<BonusId> bonuses_not_allowed_with() const override;
@@ -337,7 +337,7 @@ public:
 private:
         std::vector<SpellId> make_spell_bucket() const;
 
-        SpellId m_spell_to_unlearn {SpellId::END};
+        SpellId m_spell_to_forget {SpellId::END};
 };
 
 }  // namespace gong

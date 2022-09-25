@@ -541,9 +541,7 @@ static void update_trait_data()
                         Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::unlearn_spell(
-                        SpellId::bless,
-                        Verbose::no);
+                player_spells::remove_learned_spell(SpellId::bless);
         };
         d.bg_prereq = Bg::exorcist;
         set_trait_data(d);
@@ -582,9 +580,7 @@ static void update_trait_data()
                         Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::unlearn_spell(
-                        SpellId::cleansing_fire,
-                        Verbose::no);
+                player_spells::remove_learned_spell(SpellId::cleansing_fire);
         };
         d.bg_prereq = Bg::exorcist;
         set_trait_data(d);
@@ -623,9 +619,7 @@ static void update_trait_data()
                         Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::unlearn_spell(
-                        SpellId::heal,
-                        Verbose::no);
+                player_spells::remove_learned_spell(SpellId::heal);
         };
         d.bg_prereq = Bg::exorcist;
         set_trait_data(d);
@@ -664,9 +658,7 @@ static void update_trait_data()
                         Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::unlearn_spell(
-                        SpellId::light,
-                        Verbose::no);
+                player_spells::remove_learned_spell(SpellId::light);
         };
         d.bg_prereq = Bg::exorcist;
         set_trait_data(d);
@@ -705,9 +697,7 @@ static void update_trait_data()
                         Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::unlearn_spell(
-                        SpellId::sanctuary,
-                        Verbose::no);
+                player_spells::remove_learned_spell(SpellId::sanctuary);
         };
         d.bg_prereq = Bg::exorcist;
         set_trait_data(d);
@@ -746,9 +736,7 @@ static void update_trait_data()
                         Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::unlearn_spell(
-                        SpellId::see_invis,
-                        Verbose::no);
+                player_spells::remove_learned_spell(SpellId::see_invis);
         };
         d.bg_prereq = Bg::exorcist;
         set_trait_data(d);

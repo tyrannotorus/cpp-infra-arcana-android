@@ -16,6 +16,7 @@
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
+#include "player_spells.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "terrain_factory.hpp"
@@ -55,7 +56,7 @@ void Monolith::on_hit(
 
                         msg_log::add(msg);
 
-                        game::incr_player_xp(15);
+                        game::incr_player_xp(8);
 
                         map::g_player->restore_sp(999, false, Verbose::no);
                         map::g_player->restore_sp(10, true);
@@ -128,7 +129,9 @@ void Monolith::activate()
 
         audio::play(audio::SfxId::monolith);
 
-        game::incr_player_xp(20);
+        game::incr_player_xp(10);
+
+        player_spells::recall_all_spells();
 
         m_is_activated = true;
 

@@ -1115,13 +1115,21 @@ void Spell::cast(
 
         // If this is an intrinsic cast, check properties which NEVER allows
         // casting or speaking.
-
+        //
         // NOTE: If this is a non-intrinsic cast (e.g. from a scroll), then we
         // assume that the caller has made all checks themselves.
-        if ((spell_src == SpellSrc::learned) &&
-            (!properties.allow_cast_intr_spell_absolute(Verbose::yes) ||
-             !properties.allow_speak(Verbose::yes))) {
-                return;
+        //
+        if (spell_src == SpellSrc::learned) {
+                if (!properties.allow_cast_intr_spell_absolute(Verbose::yes)) {
+                        return;
+                }
+
+                if (!properties.allow_speak(Verbose::yes)) {
+                        // TODO: Not all spells "require making noise", it seems
+                        // insconsistent to outright prevent casting when the
+                        // caster cannot speak.
+                        return;
+                }
         }
 
         // OK, we can try to cast
@@ -1260,6 +1268,13 @@ void Spell::cast(
 
                         properties.apply(regen);
                 }
+
+                // Disable tenebrous spell for the player?
+                if (actor::is_player(caster) &&
+                    is_tenebrous() &&
+                    (spell_src == SpellSrc::learned)) {
+                        player_spells::forget_spell(id());
+                }
         }
 
         if (actor::is_player(caster) &&
@@ -1331,10 +1346,30 @@ std::vector<std::string> Spell::descr(
         const SpellSkill skill,
         const SpellSrc spell_src) const
 {
-        auto lines = descr_specific(skill);
+        std::vector<std::string> lines = descr_specific(skill);
 
         if (spell_src != SpellSrc::manuscript) {
                 lines.push_back(get_noise_descr(is_noisy(skill)));
+        }
+
+        if (spell_src == SpellSrc::learned) {
+                const std::string forgotten_hint_str =
+                        "A forgotten spell is recalled again if "
+                        "a monolith is activated, "
+                        "or if the spell is cast from a manuscript.";
+
+                if (player_spells::is_spell_forgotten(id())) {
+                        lines.emplace_back(
+                                "Forgotten - this spell can no longer be "
+                                "cast from memory. " +
+                                forgotten_hint_str);
+                }
+                else if (is_tenebrous()) {
+                        lines.emplace_back(
+                                "Tenebrous - this spell will be instantly "
+                                "forgotten if cast from memory. " +
+                                forgotten_hint_str);
+                }
         }
 
         std::string str;
