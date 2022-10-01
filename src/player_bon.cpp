@@ -411,8 +411,8 @@ static void update_trait_data()
         d.title = "Meditative";
         d.descr =
                 "Applies a focused state which allows the next spell to be "
-                "cast without spending a turn, and with the cost reduced by "
-                "1 spirit point - it takes 125-150 turns to regain this "
+                "cast without spending a turn, and with the casting cost "
+                "reduced by 1 point - it takes 125-150 turns to regain this "
                 "state after a spell is cast";
         d.on_picked = []() {
                 auto* prop = property_factory::make(PropId::meditative_focused);
