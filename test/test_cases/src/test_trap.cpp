@@ -104,9 +104,9 @@ TEST_CASE("Spider web")
         REQUIRE(tested_unstuck);
 }
 
-TEST_CASE("Unlearn spells")
+TEST_CASE("Forget spells")
 {
-        // Test that the unlearn spell trap can unlearn spells
+        // Test that the "forget spell" makes you forget spells.
 
         const P pos_l(5, 7);
         const P pos_r(6, 7);
@@ -116,20 +116,20 @@ TEST_CASE("Unlearn spells")
         map::update_terrain(terrain::make(terrain::Id::floor, pos_l));
 
         {
-                auto* const unlearn_trap =
+                auto* const trap =
                         static_cast<terrain::Trap*>(
                                 terrain::make(
                                         terrain::Id::trap,
                                         pos_r));
 
-                unlearn_trap->try_init_type(terrain::TrapId::unlearn_spell);
+                trap->try_init_type(terrain::TrapId::unlearn_spell);
 
-                unlearn_trap->set_mimic_terrain(
+                trap->set_mimic_terrain(
                         terrain::make(terrain::Id::floor, pos_r));
 
-                map::update_terrain(unlearn_trap);
+                map::update_terrain(trap);
 
-                unlearn_trap->reveal(terrain::PrintRevealMsg::no);
+                trap->reveal(terrain::PrintRevealMsg::no);
         }
 
         player_spells::learn_spell(SpellId::darkbolt, Verbose::no);
@@ -138,6 +138,9 @@ TEST_CASE("Unlearn spells")
         REQUIRE(player_spells::is_spell_learned(SpellId::darkbolt));
         REQUIRE(player_spells::is_spell_learned(SpellId::heal));
 
+        REQUIRE(!player_spells::is_spell_forgotten(SpellId::darkbolt));
+        REQUIRE(!player_spells::is_spell_forgotten(SpellId::heal));
+
         // Step into the trap
         map::g_player->m_pos = pos_l;
         game_time::g_allow_tick = true;
@@ -145,12 +148,16 @@ TEST_CASE("Unlearn spells")
 
         REQUIRE(map::g_player->m_pos == pos_r);
 
-        // Now only one spell should be learned
-        const int nr_learned_after_first_trigger =
-                (int)player_spells::is_spell_learned(SpellId::darkbolt) +
-                (int)player_spells::is_spell_learned(SpellId::heal);
+        // Both spells should still be learned.
+        REQUIRE(player_spells::is_spell_learned(SpellId::darkbolt));
+        REQUIRE(player_spells::is_spell_learned(SpellId::heal));
 
-        REQUIRE(nr_learned_after_first_trigger == 1);
+        // One spell should be forgotten.
+        const int nr_forgotten_after_first_trigger =
+                (int)player_spells::is_spell_forgotten(SpellId::darkbolt) +
+                (int)player_spells::is_spell_forgotten(SpellId::heal);
+
+        REQUIRE(nr_forgotten_after_first_trigger == 1);
 
         // Step into the trap again
         map::g_player->m_pos = pos_l;
@@ -159,16 +166,21 @@ TEST_CASE("Unlearn spells")
 
         REQUIRE(map::g_player->m_pos == pos_r);
 
-        // Now both spells should be unlearned
-        REQUIRE(!player_spells::is_spell_learned(SpellId::darkbolt));
-        REQUIRE(!player_spells::is_spell_learned(SpellId::heal));
+        // Both spells should still be learned.
+        REQUIRE(player_spells::is_spell_learned(SpellId::darkbolt));
+        REQUIRE(player_spells::is_spell_learned(SpellId::heal));
+
+        // Now both spells should be forgotten.
+        REQUIRE(player_spells::is_spell_forgotten(SpellId::darkbolt));
+        REQUIRE(player_spells::is_spell_forgotten(SpellId::heal));
 
         test_utils::cleanup_all();
 }
 
-TEST_CASE("Do not unlearn frenzy")
+TEST_CASE("Do not forget frenzy")
 {
-        // Test that the unlearn spell trap will not unlearn Ghoul Frenzy
+        // Test that the "forget spell" trap will not make you forget Ghoul
+        // Frenzy.
 
         const P pos_l(5, 7);
         const P pos_r(6, 7);
@@ -178,20 +190,20 @@ TEST_CASE("Do not unlearn frenzy")
         map::update_terrain(terrain::make(terrain::Id::floor, pos_l));
 
         {
-                auto* const unlearn_trap =
+                auto* const trap =
                         static_cast<terrain::Trap*>(
                                 terrain::make(
                                         terrain::Id::trap,
                                         pos_r));
 
-                unlearn_trap->try_init_type(terrain::TrapId::unlearn_spell);
+                trap->try_init_type(terrain::TrapId::unlearn_spell);
 
-                unlearn_trap->set_mimic_terrain(
+                trap->set_mimic_terrain(
                         terrain::make(terrain::Id::floor, pos_r));
 
-                map::update_terrain(unlearn_trap);
+                map::update_terrain(trap);
 
-                unlearn_trap->reveal(terrain::PrintRevealMsg::no);
+                trap->reveal(terrain::PrintRevealMsg::no);
         }
 
         player_bon::pick_bg(Bg::ghoul);
@@ -201,6 +213,9 @@ TEST_CASE("Do not unlearn frenzy")
         REQUIRE(player_spells::is_spell_learned(SpellId::darkbolt));
         REQUIRE(player_spells::is_spell_learned(SpellId::frenzy));
 
+        REQUIRE(!player_spells::is_spell_forgotten(SpellId::darkbolt));
+        REQUIRE(!player_spells::is_spell_forgotten(SpellId::frenzy));
+
         // Step into the trap
         map::g_player->m_pos = pos_l;
         game_time::g_allow_tick = true;
@@ -208,9 +223,13 @@ TEST_CASE("Do not unlearn frenzy")
 
         REQUIRE(map::g_player->m_pos == pos_r);
 
-        // Only frenzy should be learned now
-        REQUIRE(!player_spells::is_spell_learned(SpellId::darkbolt));
+        // Both spells should still be learned.
+        REQUIRE(player_spells::is_spell_learned(SpellId::darkbolt));
         REQUIRE(player_spells::is_spell_learned(SpellId::frenzy));
+
+        // Frenzy should not be forgotten now.
+        REQUIRE(player_spells::is_spell_forgotten(SpellId::darkbolt));
+        REQUIRE(!player_spells::is_spell_forgotten(SpellId::frenzy));
 
         // Step into the trap again
         map::g_player->m_pos = pos_l;
@@ -219,9 +238,13 @@ TEST_CASE("Do not unlearn frenzy")
 
         REQUIRE(map::g_player->m_pos == pos_r);
 
-        // Still only frenzy should be learned
-        REQUIRE(!player_spells::is_spell_learned(SpellId::darkbolt));
+        // Both spells should still be learned.
+        REQUIRE(player_spells::is_spell_learned(SpellId::darkbolt));
         REQUIRE(player_spells::is_spell_learned(SpellId::frenzy));
+
+        // Frenzy should STILL not be forgotten now.
+        REQUIRE(player_spells::is_spell_forgotten(SpellId::darkbolt));
+        REQUIRE(!player_spells::is_spell_forgotten(SpellId::frenzy));
 
         test_utils::cleanup_all();
 }

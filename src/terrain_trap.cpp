@@ -1445,19 +1445,28 @@ void TrapUnlearnSpell::trigger()
                 for (int i = 0; i < (int)SpellId::END; ++i) {
                         const auto id = (SpellId)i;
 
-                        // Only allow unlearning spells with scrolls.
                         bool has_scroll = false;
 
-                        for (const auto& d : item::g_data) {
+                        for (const item::ItemData& d : item::g_data) {
                                 if (d.spell_cast_from_scroll == id) {
                                         has_scroll = true;
                                         break;
                                 }
                         }
 
-                        if (player_spells::is_spell_learned(id) && has_scroll) {
-                                id_bucket.push_back(id);
+                        if (!has_scroll) {
+                                continue;
                         }
+
+                        if (!player_spells::is_spell_learned(id)) {
+                                continue;
+                        }
+
+                        if (player_spells::is_spell_forgotten(id)) {
+                                continue;
+                        }
+
+                        id_bucket.push_back(id);
                 }
         }
 
