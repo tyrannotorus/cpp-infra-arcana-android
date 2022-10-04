@@ -1578,6 +1578,11 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
+        d.id = Id::scroll_invis;
+        d.spell_cast_from_scroll = SpellId::invis;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::scroll);
         d.id = Id::scroll_see_invis;
         d.spell_cast_from_scroll = SpellId::see_invis;
         g_data[(size_t)d.id] = d;
@@ -1653,10 +1658,6 @@ void init()
         d.id = Id::potion_descent;
         mod_spawn_chance(d, 0.15);
         d.spawn_std_range.max = g_dlvl_last_mid_game;
-        g_data[(size_t)d.id] = d;
-
-        reset_data(d, ItemType::potion);
-        d.id = Id::potion_invis;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::device);

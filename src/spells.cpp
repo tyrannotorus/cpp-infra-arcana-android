@@ -789,8 +789,18 @@ static void end_properties_for_casting_spell(
         actor::Actor& caster,
         const SpellId spell_id)
 {
-        // End cloaking
-        caster.m_properties.end_prop(PropId::cloaked);
+        // End cloaking (unless invisibility was cast now).
+        //
+        // NOTE: This could be slightly weird, as the player could for example
+        // have cloaking with a very long duration applied, and then cast
+        // invisibility, applying actual invisibility instead of cloaking - then
+        // the long cloaking effect will still be kept. But this seems like a
+        // very minor issue or perhaps not an issue at all. It just means that
+        // the invisibility spell is an exception from spells breaking cloaking.
+        //
+        if (spell_id != SpellId::invis) {
+                caster.m_properties.end_prop(PropId::cloaked);
+        }
 
         // End focused
         caster.m_properties.end_prop(PropId::meditative_focused);
@@ -905,6 +915,9 @@ Spell* make(const SpellId spell_id)
 
         case SpellId::transmut:
                 return new SpellTransmut();
+
+        case SpellId::invis:
+                return new SpellInvis();
 
         case SpellId::see_invis:
                 return new SpellSeeInvis();
@@ -3223,8 +3236,100 @@ std::vector<std::string> SpellLight::descr_specific(
 }
 
 // -----------------------------------------------------------------------------
+// Invisibility
+// -----------------------------------------------------------------------------
+int SpellInvis::base_max_cost(const SpellSkill skill) const
+{
+        (void)skill;
+
+        return 8;
+}
+
+Range SpellInvis::duration_range(SpellSkill skill) const
+{
+        switch (skill) {
+        case SpellSkill::basic:
+                return {4, 6};
+
+        case SpellSkill::expert:
+                return {5, 7};
+
+        case SpellSkill::master:
+                return {6, 8};
+
+        case SpellSkill::transcendent:
+                return {8, 10};
+        }
+
+        ASSERT(false);
+
+        return {1, 1};
+}
+
+bool SpellInvis::is_noisy(const SpellSkill skill) const
+{
+        (void)skill;
+
+        return false;
+}
+
+void SpellInvis::run_effect(
+        actor::Actor* const caster,
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)seen_targets;
+
+        const PropId prop_id =
+                (skill == SpellSkill::basic)
+                ? PropId::cloaked
+                : PropId::invis;
+
+        Prop* const prop = property_factory::make(prop_id);
+
+        prop->set_duration(duration_range(skill).roll());
+
+        caster->m_properties.apply(prop);
+}
+
+std::vector<std::string> SpellInvis::descr_specific(
+        const SpellSkill skill) const
+{
+        std::vector<std::string> descr;
+
+        descr.emplace_back(
+                "Makes the caster invisible to normal vision for a "
+                "brief time.");
+
+        if (skill == SpellSkill::basic) {
+                descr.emplace_back(
+                        "Attacking or casting spells reveals the caster.");
+        }
+        else {
+                descr.emplace_back(
+                        "The caster is truly invisible for the duration of "
+                        "the the spell, and can freely attack or cast "
+                        "spells without breaking the invisibility.");
+        }
+
+        descr.push_back(
+                "The spell lasts " +
+                duration_range(skill).str() +
+                " turns.");
+
+        return descr;
+}
+
+// -----------------------------------------------------------------------------
 // See Invisible
 // -----------------------------------------------------------------------------
+int SpellSeeInvis::base_max_cost(const SpellSkill skill) const
+{
+        (void)skill;
+
+        return 8;
+}
+
 Range SpellSeeInvis::duration_range(SpellSkill skill) const
 {
         switch (skill) {
@@ -3253,7 +3358,7 @@ void SpellSeeInvis::run_effect(
 {
         (void)seen_targets;
 
-        auto* prop = property_factory::make(PropId::see_invis);
+        Prop* prop = property_factory::make(PropId::see_invis);
 
         prop->set_duration(duration_range(skill).roll());
 

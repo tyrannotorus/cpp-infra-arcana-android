@@ -752,22 +752,4 @@ void Descent::quaff_impl(actor::Actor& actor)
         identify(Verbose::yes);
 }
 
-void Invis::quaff_impl(actor::Actor& actor)
-{
-        actor.m_properties.apply(property_factory::make(PropId::cloaked));
-
-        if (actor::can_player_see_actor(actor)) {
-                identify(Verbose::yes);
-        }
-}
-
-void Invis::collide_hook(const P& pos, actor::Actor* const actor)
-{
-        (void)pos;
-
-        if (actor) {
-                quaff_impl(*actor);
-        }
-}
-
 }  // namespace potion

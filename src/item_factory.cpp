@@ -301,6 +301,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::scroll_spectral_wpns:
         case Id::scroll_transmut:
         case Id::scroll_heal:
+        case Id::scroll_invis:
         case Id::scroll_see_invis:
         case Id::scroll_premonition:
         case Id::scroll_erudition:
@@ -359,10 +360,6 @@ Item* make(const Id item_id, const int nr_items)
 
         case Id::potion_descent:
                 r = new potion::Descent(d);
-                break;
-
-        case Id::potion_invis:
-                r = new potion::Invis(d);
                 break;
 
         case Id::device_blaster:

@@ -139,6 +139,7 @@ enum class Id
         scroll_premonition,
         scroll_erudition,
         scroll_resistance,
+        scroll_invis,
         scroll_see_invis,
         scroll_slow,
         scroll_haste,
@@ -159,7 +160,6 @@ enum class Id
         potion_descent,
         potion_fortitude,
         potion_insight,
-        potion_invis,  // TODO: Should be called "Potion of Cloaking"
         potion_paralyze,
         potion_poison,
         potion_r_elec,

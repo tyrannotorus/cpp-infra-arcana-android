@@ -59,6 +59,7 @@ enum class SpellId
         cataclysm,
         control_object,
         resistance,
+        invis,
         see_invis,
         transmut,
         thorns,
@@ -1319,7 +1320,7 @@ public:
         {
                 // NOTE: This could perhaps be considered an enchantment spell,
                 // but the way the spell description is phrased, it sounds a lot
-                // more like alteration
+                // more like transmutation.
                 return SpellDomain::transmutation;
         }
 
@@ -1610,6 +1611,57 @@ private:
         int max_dist(SpellSkill skill) const;
 };
 
+class SpellInvis : public Spell
+{
+public:
+        SpellInvis() = default;
+
+        bool player_can_learn() const override
+        {
+                return true;
+        }
+
+        std::string name() const override
+        {
+                return "Invisibility";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::invis;
+        }
+
+        SpellDomain domain() const override
+        {
+                return SpellDomain::enchantment;
+        }
+
+        bool is_tenebrous() const override
+        {
+                return true;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::mild;
+        }
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override;
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+private:
+        Range duration_range(SpellSkill skill) const;
+
+        int base_max_cost(SpellSkill skill) const override;
+
+        bool is_noisy(SpellSkill skill) const override;
+};
+
 class SpellSeeInvis : public Spell
 {
 public:
@@ -1660,12 +1712,7 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(const SpellSkill skill) const override
-        {
-                (void)skill;
-
-                return 8;
-        }
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {

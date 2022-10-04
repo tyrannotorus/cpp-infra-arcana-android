@@ -477,38 +477,6 @@ private:
         }
 };
 
-// TODO: Should be called "Potion of Cloaking"
-class Invis : public Potion
-{
-public:
-        Invis(item::ItemData* const item_data) :
-                Potion(item_data) {}
-        ~Invis() = default;
-
-        void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Invisibility";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "Makes the consumer invisible to normal vision for a "
-                        "brief time. Attacking or casting spells immediately "
-                        "reveals the consumer.");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
-        void collide_hook(const P& pos, actor::Actor* actor) override;
-};
-
 }  // namespace potion
 
 #endif  // ITEM_POTION_HPP
