@@ -903,7 +903,7 @@ void Actor::update_fov()
         for (size_t i = 0; i < nr_map_positions; ++i) {
                 map::g_seen.at(i) = false;
 
-                auto& los = map::g_los.at(i);
+                LosResult& los = map::g_los.at(i);
                 los.is_blocked_hard = true;
                 los.is_blocked_by_dark = false;
         }
@@ -913,7 +913,7 @@ void Actor::update_fov()
         Array2<bool> blocked_los(map::dims());
 
         if (m_properties.allow_see()) {
-                const auto fov_lmt = fov::fov_rect(m_pos, map::dims());
+                const R fov_lmt = fov::fov_rect(m_pos, map::dims());
 
                 map_parsers::BlocksLos()
                         .run(blocked_los, fov_lmt, MapParseMode::overwrite);
@@ -923,13 +923,14 @@ void Actor::update_fov()
                 fov_map.light = &map::g_light;
                 fov_map.dark = &map::g_dark;
 
-                const auto fov_result = fov::run(m_pos, fov_map);
+                const Array2<LosResult> fov_result = fov::run(m_pos, fov_map);
 
                 for (int x = fov_lmt.p0.x; x <= fov_lmt.p1.x; ++x) {
                         for (int y = fov_lmt.p0.y; y <= fov_lmt.p1.y; ++y) {
-                                const auto& los_result = fov_result.at(x, y);
+                                const LosResult& los_result =
+                                        fov_result.at(x, y);
 
-                                auto& los_to_update = map::g_los.at(x, y);
+                                LosResult& los_to_update = map::g_los.at(x, y);
 
                                 map::g_seen.at(x, y) =
                                         !los_result.is_blocked_hard &&

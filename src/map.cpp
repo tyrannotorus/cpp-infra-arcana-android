@@ -172,11 +172,11 @@ static void set_map_blocking_info_for_terrain(const terrain::Terrain& terrain)
                 !terrain.is_los_passable();
 }
 
-// This function can only set blocking status from false to true.
+// NOTE: This function can only set blocking status from false to true.
 static void append_map_blocking_info_for_terrain(
         const terrain::Terrain& terrain)
 {
-        const auto& p = terrain.pos();
+        const P& p = terrain.pos();
 
         const bool blocks_walking = !terrain.is_walkable();
 

@@ -1960,7 +1960,7 @@ void SmokeGrenade::on_player_paralyzed()
 
         const P& p = map::g_player->m_pos;
 
-        const auto t_id = map::g_terrain.at(p)->id();
+        const terrain::Id t_id = map::g_terrain.at(p)->id();
 
         if (t_id != terrain::Id::chasm) {
                 explosion::run_smoke_explosion_at(map::g_player->m_pos);

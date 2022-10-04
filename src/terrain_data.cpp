@@ -224,7 +224,8 @@ static void init_data_list()
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.can_have_corpse = false;
-        d.msg_on_player_blocked = "A chasm lies in my way.";
+        d.msg_on_player_blocked =
+                "A chasm lies in my way.";
         d.msg_on_player_blocked_blind =
                 "I realize I am standing on the edge of a chasm.";
         d.matl_type = Matl::empty;

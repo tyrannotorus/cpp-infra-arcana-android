@@ -404,11 +404,12 @@ void run_smoke_explosion_at(const P& origin, const int radi_change)
         map_parsers::BlocksProjectiles()
                 .run(blocked, area);
 
-        auto pos_lists = cells_reached(
-                area,
-                origin,
-                ExplExclCenter::no,
-                blocked);
+        std::vector<std::vector<P>> pos_lists =
+                cells_reached(
+                        area,
+                        origin,
+                        ExplExclCenter::no,
+                        blocked);
 
         // TODO: Sound message?
         Snd snd("",
@@ -422,7 +423,7 @@ void run_smoke_explosion_at(const P& origin, const int radi_change)
         snd_emit::run(snd);
 
         for (const std::vector<P>& inner : pos_lists) {
-                for (const auto& pos : inner) {
+                for (const P& pos : inner) {
                         if (blocked.at(pos)) {
                                 continue;
                         }

@@ -355,15 +355,17 @@ int turn_nr()
 
 std::vector<terrain::Terrain*> mobs_at(const P& p)
 {
-        std::vector<terrain::Terrain*> mobs;
+        std::vector<terrain::Terrain*> mobs_at_pos;
 
-        for (auto* m : mobs) {
-                if (m->pos() == p) {
-                        mobs.push_back(m);
-                }
-        }
+        std::copy_if(
+                std::begin(g_mobs),
+                std::end(g_mobs),
+                std::back_inserter(mobs_at_pos),
+                [p](const terrain::Terrain* const t) {
+                        return t->pos() == p;
+                });
 
-        return mobs;
+        return mobs_at_pos;
 }
 
 void add_mob(terrain::Terrain* const terrain)
