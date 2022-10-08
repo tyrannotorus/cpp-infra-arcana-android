@@ -144,8 +144,6 @@ void MapBuilder::build()
 
         gods::set_random_god();
 
-        map::update_map_info();
-
         spawn_starting_allies();
 
         map_control::g_controller = map_controller();

@@ -36,8 +36,6 @@ static void put_floor_and_walls_on_map()
                         map::set_terrain(t);
                 }
         }
-
-        map::update_map_info();
 }
 
 namespace test_utils
@@ -57,7 +55,7 @@ void init_all()
 
         put_floor_and_walls_on_map();
 
-        actor::set_position(*map::g_player, map::rect().center());
+        map::g_player->m_pos = map::rect().center();
 }
 
 void cleanup_all()

@@ -910,16 +910,18 @@ void Actor::update_fov()
 
         const bool has_darkvision = m_properties.has(PropId::darkvision);
 
-        Array2<bool> blocked_los(map::dims());
-
         if (m_properties.allow_see()) {
-                const R fov_lmt = fov::fov_rect(m_pos, map::dims());
+                Array2<bool> hard_blocked(map::dims());
+
+                const auto fov_lmt = fov::fov_rect(m_pos, map::dims());
 
                 map_parsers::BlocksLos()
-                        .run(blocked_los, fov_lmt, MapParseMode::overwrite);
+                        .run(hard_blocked,
+                             fov_lmt,
+                             MapParseMode::overwrite);
 
                 FovMap fov_map;
-                fov_map.hard_blocked = &blocked_los;
+                fov_map.hard_blocked = &hard_blocked;
                 fov_map.light = &map::g_light;
                 fov_map.dark = &map::g_dark;
 
@@ -993,18 +995,21 @@ void Actor::update_fov()
 
 void Actor::fov_hack() const
 {
-        Array2<bool> blocked =
-                map::get_blocked_map_info_for_actor(
-                        *map::g_player);
+        Array2<bool> blocked_los(map::dims());
+
+        map_parsers::BlocksLos()
+                .run(blocked_los, blocked_los.rect());
+
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksWalking(ParseActors::no)
+                .run(blocked, blocked.rect());
 
         const std::vector<terrain::Id> free_terrains = {
                 terrain::Id::chasm};
 
-        const int w = blocked.w();
-        const int h = blocked.h();
-
-        for (int x = 0; x < w; ++x) {
-                for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < blocked.w(); ++x) {
+                for (int y = 0; y < blocked.h(); ++y) {
                         const P p(x, y);
 
                         if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
@@ -1015,10 +1020,9 @@ void Actor::fov_hack() const
 
         const bool has_darkvision = m_properties.has(PropId::darkvision);
 
-        for (int x = 0; x < w; ++x) {
-                for (int y = 0; y < h; ++y) {
-                        if (!map::g_terrain_blocks_los.at(x, y) ||
-                            !blocked.at(x, y)) {
+        for (int x = 0; x < map::w(); ++x) {
+                for (int y = 0; y < map::h(); ++y) {
+                        if (!blocked_los.at(x, y) || !blocked.at(x, y)) {
                                 continue;
                         }
 

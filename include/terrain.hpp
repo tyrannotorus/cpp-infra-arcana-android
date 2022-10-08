@@ -183,6 +183,11 @@ public:
                 return m_data->move_rules.is_walkable;
         }
 
+        virtual bool can_move(const actor::Actor& actor) const
+        {
+                return m_data->move_rules.can_move(actor);
+        }
+
         // Is this given property allowing movement into this terrain, when it
         // normally wouldn't be?
         virtual bool is_property_allowing_move(PropId id) const

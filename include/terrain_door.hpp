@@ -77,6 +77,8 @@ public:
 
         bool is_walkable() const override;
 
+        bool can_move(const actor::Actor& actor) const override;
+
         bool is_property_allowing_move(PropId id) const override;
 
         bool is_los_passable() const override;

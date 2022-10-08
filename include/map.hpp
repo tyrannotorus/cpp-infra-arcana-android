@@ -7,7 +7,6 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
-#include <bitset>
 #include <cstddef>
 #include <vector>
 
@@ -101,19 +100,6 @@ extern Array2<PlayerMemoryItem> g_item_memory;
 extern Array2<terrain::Terrain*> g_terrain;
 extern Array2<PlayerMemoryTerrain> g_terrain_memory;
 
-// Cached map information.
-//
-// NOTE: Blocking terrain info also inclues "mobile terrain" such as smoke.
-//
-extern Array2<bool> g_terrain_blocks_walking;
-extern Array2<bool> g_terrain_blocks_flying;
-extern Array2<bool> g_terrain_blocks_tiny_flying;
-extern Array2<bool> g_terrain_blocks_ethereal;
-extern Array2<bool> g_terrain_blocks_ooze;
-extern Array2<bool> g_terrain_blocks_small_crawling;
-extern Array2<bool> g_terrain_blocks_burrowing;
-extern Array2<bool> g_terrain_blocks_los;
-
 extern actor::Actor* g_player;
 
 extern int g_dlvl;
@@ -142,16 +128,6 @@ const P& dims();
 R rect();
 size_t nr_positions();
 
-// Updates all cached map information (e.g. which positions blocks walking or
-// blocks LOS).  This call is somewhat expensive, it should not be called
-// frequently. It is assumed that all arrays already have the correct size
-// (e.g. via a "reset" call).
-void update_map_info();
-
-// Updates cached map info for the terrain and "mobile" terrain (e.g. smoke) at
-// the given position.
-void update_map_info_for_terrain_at(const P& pos);
-
 // Updates light map, player fov (etc).
 void update_vision();
 
@@ -174,31 +150,6 @@ void clear_player_memory_at(const P& p);
 void update_light_map();
 
 void delete_and_remove_room_from_list(Room* room);
-
-// Returns the appropriate array with cached terrain blocking information for
-// the given actor's properties (e.g. the array for terrain blocking walking for
-// a regular creature without any movement properties).
-//
-// NOTE: This makes assumptions on what exists in the game. For example there is
-// no creature that is both "burrowing" and "flying". In general there is poor
-// support for combinations of movement properties, since a specific array will
-// be chosen for one or the other of the properties (some combinations do work
-// however - if combining movement properties, consider this function, what the
-// properties do, and which terrain is moving/blocking for those properties).
-//
-// One possible solution for unsupported combinations (that have contradicting
-// movement rules) is to add new properties instead, like "flying_burrowing".
-//
-const Array2<bool>& get_blocked_map_info_for_actor(const actor::Actor& actor);
-
-// Checks if the actor can move into the terrain at the given position, taking
-// into consideration the actor's properties (such as flying, ethereal, ...).
-// This function should be pretty cheap to call due to caching.
-//
-// NOTE: Only terrain is considered, not if the position is blocked by another
-// creature for example!
-//
-bool can_actor_move_into_terrain_at(const actor::Actor& actor, const P& pos);
 
 actor::Actor* living_actor_at(const P& pos);
 actor::Actor* first_corpse_at(const P& pos);

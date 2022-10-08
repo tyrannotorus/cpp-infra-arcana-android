@@ -233,7 +233,7 @@ static void player_act()
                         const auto* const target_terrain =
                                 map::g_terrain.at(target);
 
-                        if (!map::can_actor_move_into_terrain_at(player, target)) {
+                        if (!target_terrain->can_move(player)) {
                                 should_abort = true;
                         }
                         else {

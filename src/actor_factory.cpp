@@ -33,37 +33,22 @@
 static std::vector<P> free_spawn_positions(const R& area)
 {
         // NOTE: Here we only allow spawning on positions that do not block
-        // walking. This is a simple rule but somewhat strict rule; all
-        // creatures may exist on such positions, but some creatures could
-        // potentially be spawned elsewhere (such as a flying creature over a
-        // chasm). The current method should be good enough however.
+        // walking. This is a simple, but somewhat strict rule; all creatures
+        // may exist on such positions, but some creatures could potentially be
+        // spawned elsewhere (such as a flying creature over a chasm). The
+        // current method should be good enough however.
 
-        Array2<bool> blocked = map::g_terrain_blocks_walking;
+        Array2<bool> blocked(map::dims());
 
-        for (const actor::Actor* const actor : game_time::g_actors) {
-                if (actor->is_alive()) {
-                        blocked.at(actor->m_pos) = true;
-                }
-        }
+        map_parsers::BlocksWalking(ParseActors::yes)
+                .run(blocked, area, MapParseMode::overwrite);
 
         return to_vec(blocked, false, area);
 }
 
 static actor::Actor* spawn_at(const P& pos, const actor::Id id)
 {
-        if (!map::is_pos_inside_outer_walls(pos)) {
-                TRACE
-                        << ("Attempted to spawn monster at position not "
-                            "completely inside the outer walls: ")
-                        << pos.x << "," << pos.y
-                        << " - position blocks walking in map info cache?: "
-                        << map::g_terrain_blocks_walking.at(pos)
-                        << std::endl;
-
-                ASSERT(false);
-
-                return nullptr;
-        }
+        ASSERT(map::is_pos_inside_outer_walls(pos));
 
         return actor::make(id, pos);
 }

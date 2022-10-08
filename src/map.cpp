@@ -65,14 +65,6 @@ static void init_arrays_data()
                 map::g_item_memory.at(i) = {};
                 map::g_terrain.at(i) = nullptr;
                 map::g_terrain_memory.at(i) = {};
-                map::g_terrain_blocks_walking.at(i) = {};
-                map::g_terrain_blocks_flying.at(i) = {};
-                map::g_terrain_blocks_tiny_flying.at(i) = {};
-                map::g_terrain_blocks_ethereal.at(i) = {};
-                map::g_terrain_blocks_ooze.at(i) = {};
-                map::g_terrain_blocks_small_crawling.at(i) = {};
-                map::g_terrain_blocks_burrowing.at(i) = {};
-                map::g_terrain_blocks_los.at(i) = {};
         }
 }
 
@@ -88,14 +80,6 @@ static void resize_arrays()
         map::g_item_memory.resize_no_init(s_dims);
         map::g_terrain.resize_no_init(s_dims);
         map::g_terrain_memory.resize_no_init(s_dims);
-        map::g_terrain_blocks_walking.resize_no_init(s_dims);
-        map::g_terrain_blocks_flying.resize_no_init(s_dims);
-        map::g_terrain_blocks_tiny_flying.resize_no_init(s_dims);
-        map::g_terrain_blocks_ethereal.resize_no_init(s_dims);
-        map::g_terrain_blocks_ooze.resize_no_init(s_dims);
-        map::g_terrain_blocks_small_crawling.resize_no_init(s_dims);
-        map::g_terrain_blocks_burrowing.resize_no_init(s_dims);
-        map::g_terrain_blocks_los.resize_no_init(s_dims);
 }
 
 static void free_layers_owned_memory()
@@ -111,125 +95,6 @@ static void free_layers_owned_memory()
                 auto* const item_pp = &map::g_items.at(i);
                 delete *item_pp;
                 *item_pp = nullptr;
-        }
-}
-
-static void set_map_blocking_info_true_for_all_at(const P& pos)
-{
-        map::g_terrain_blocks_walking.at(pos) = true;
-        map::g_terrain_blocks_flying.at(pos) = true;
-        map::g_terrain_blocks_tiny_flying.at(pos) = true;
-        map::g_terrain_blocks_ethereal.at(pos) = true;
-        map::g_terrain_blocks_ooze.at(pos) = true;
-        map::g_terrain_blocks_small_crawling.at(pos) = true;
-        map::g_terrain_blocks_burrowing.at(pos) = true;
-        map::g_terrain_blocks_los.at(pos) = true;
-}
-
-static void set_map_blocking_info_for_terrain(const terrain::Terrain& terrain)
-{
-        // NOTE: If the position can be walked through, every creature can move
-        // through it.
-        //
-        // TODO: Consider explicitly setting for all terrain whether the terrain
-        // blocks walking, flying, small crawling etc (in the terrain data or in
-        // overridden functions). Then this function could perhaps just do
-        // straightforward assignments instead.
-        //
-
-        const auto& p = terrain.pos();
-
-        const bool blocks_walking = !terrain.is_walkable();
-
-        map::g_terrain_blocks_walking.at(p) =
-                blocks_walking;
-
-        map::g_terrain_blocks_flying.at(p) =
-                blocks_walking &&
-                !terrain.is_property_allowing_move(PropId::flying);
-
-        map::g_terrain_blocks_tiny_flying.at(p) =
-                blocks_walking &&
-                !terrain.is_property_allowing_move(PropId::tiny_flying);
-
-        map::g_terrain_blocks_ethereal.at(p) =
-                blocks_walking &&
-                !terrain.is_property_allowing_move(PropId::ethereal);
-
-        map::g_terrain_blocks_ooze.at(p) =
-                blocks_walking &&
-                !terrain.is_property_allowing_move(PropId::ooze);
-
-        map::g_terrain_blocks_small_crawling.at(p) =
-                blocks_walking &&
-                !terrain.is_property_allowing_move(PropId::small_crawling);
-
-        map::g_terrain_blocks_burrowing.at(p) =
-                blocks_walking &&
-                !terrain.is_property_allowing_move(PropId::burrowing);
-
-        map::g_terrain_blocks_los.at(p) =
-                !terrain.is_los_passable();
-}
-
-// NOTE: This function can only set blocking status from false to true.
-static void append_map_blocking_info_for_terrain(
-        const terrain::Terrain& terrain)
-{
-        const P& p = terrain.pos();
-
-        const bool blocks_walking = !terrain.is_walkable();
-
-        if (!map::g_terrain_blocks_walking.at(p)) {
-                map::g_terrain_blocks_walking.at(p) =
-                        blocks_walking;
-        }
-
-        if (!map::g_terrain_blocks_flying.at(p)) {
-                map::g_terrain_blocks_flying.at(p) =
-                        blocks_walking &&
-                        !terrain.is_property_allowing_move(
-                                PropId::flying);
-        }
-
-        if (!map::g_terrain_blocks_tiny_flying.at(p)) {
-                map::g_terrain_blocks_tiny_flying.at(p) =
-                        blocks_walking &&
-                        !terrain.is_property_allowing_move(
-                                PropId::tiny_flying);
-        }
-
-        if (!map::g_terrain_blocks_ethereal.at(p)) {
-                map::g_terrain_blocks_ethereal.at(p) =
-                        blocks_walking &&
-                        !terrain.is_property_allowing_move(
-                                PropId::ethereal);
-        }
-
-        if (!map::g_terrain_blocks_ooze.at(p)) {
-                map::g_terrain_blocks_ooze.at(p) =
-                        blocks_walking &&
-                        !terrain.is_property_allowing_move(
-                                PropId::ooze);
-        }
-
-        if (!map::g_terrain_blocks_small_crawling.at(p)) {
-                map::g_terrain_blocks_small_crawling.at(p) =
-                        blocks_walking &&
-                        !terrain.is_property_allowing_move(
-                                PropId::small_crawling);
-        }
-
-        if (!map::g_terrain_blocks_burrowing.at(p)) {
-                map::g_terrain_blocks_burrowing.at(p) =
-                        blocks_walking &&
-                        !terrain.is_property_allowing_move(
-                                PropId::burrowing);
-        }
-
-        if (!map::g_terrain_blocks_los.at(p)) {
-                map::g_terrain_blocks_los.at(p) =
-                        !terrain.is_los_passable();
         }
 }
 
@@ -398,48 +263,6 @@ size_t nr_positions()
         return (size_t)s_dims.x * (size_t)s_dims.y;
 }
 
-void update_map_info()
-{
-        for (int x = 0; x < s_dims.x; ++x) {
-                for (int y = 0; y < s_dims.y; ++y) {
-                        const P pos(x, y);
-
-                        if (map::is_pos_inside_outer_walls(pos)) {
-                                const terrain::Terrain& terrain =
-                                        *g_terrain.at(pos);
-
-                                set_map_blocking_info_for_terrain(terrain);
-                        }
-                        else {
-                                set_map_blocking_info_true_for_all_at(pos);
-                        }
-                }
-        }
-
-        for (const terrain::Terrain* const mob : game_time::g_mobs) {
-                append_map_blocking_info_for_terrain(*mob);
-        }
-}
-
-void update_map_info_for_terrain_at(const P& pos)
-{
-        if (!map::is_pos_inside_outer_walls(pos)) {
-                set_map_blocking_info_true_for_all_at(pos);
-
-                return;
-        }
-
-        const terrain::Terrain& terrain = *g_terrain.at(pos);
-
-        set_map_blocking_info_for_terrain(terrain);
-
-        const std::vector<terrain::Terrain*> mobs = game_time::mobs_at(pos);
-
-        for (const terrain::Terrain* const mob : mobs) {
-                append_map_blocking_info_for_terrain(*mob);
-        }
-}
-
 void update_vision()
 {
         update_light_map();
@@ -483,11 +306,6 @@ void update_terrain(terrain::Terrain* terrain)
 
         terrain->on_placed();
 
-        update_map_info_for_terrain_at(terrain->pos());
-
-        // TODO: This is a very paranoid approach. Updating could be done more
-        // selectively (for example check if the updated terrain could possibly
-        // change light levels), which might help improve performance.
         update_light_map();
 }
 
@@ -495,7 +313,7 @@ void set_terrain(terrain::Terrain* terrain)
 {
         ASSERT(terrain);
 
-        const auto p = terrain->pos();
+        const P p = terrain->pos();
 
         terrain::Terrain* const prev_terrain = g_terrain.at(p);
 
@@ -657,35 +475,6 @@ void delete_and_remove_room_from_list(Room* const room)
         }
 
         ASSERT(false && "Tried to remove non-existing room");
-}
-
-const Array2<bool>& get_blocked_map_info_for_actor(const actor::Actor& actor)
-{
-        const auto& props = actor.m_properties;
-
-        if (props.has(PropId::ethereal)) {
-                return g_terrain_blocks_ethereal;
-        }
-        else if (props.has(PropId::tiny_flying)) {
-                return g_terrain_blocks_tiny_flying;
-        }
-        else if (props.has(PropId::flying)) {
-                return g_terrain_blocks_flying;
-        }
-        else if (props.has(PropId::ooze)) {
-                return g_terrain_blocks_ooze;
-        }
-        else if (props.has(PropId::small_crawling)) {
-                return g_terrain_blocks_small_crawling;
-        }
-        else {
-                return g_terrain_blocks_walking;
-        }
-}
-
-bool can_actor_move_into_terrain_at(const actor::Actor& actor, const P& pos)
-{
-        return !get_blocked_map_info_for_actor(actor).at(pos);
 }
 
 actor::Actor* living_actor_at(const P& pos)

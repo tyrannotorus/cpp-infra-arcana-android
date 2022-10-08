@@ -246,7 +246,7 @@ void make_gore(const P& origin)
 
 void Terrain::bump(actor::Actor& actor_bumping)
 {
-        if (!map::can_actor_move_into_terrain_at(actor_bumping, m_pos) &&
+        if (!can_move(actor_bumping) &&
             actor::is_player(&actor_bumping)) {
                 if (map::g_seen.at(m_pos)) {
                         msg_log::add(m_data->msg_on_player_blocked);
@@ -264,13 +264,13 @@ AllowAction Terrain::pre_bump(actor::Actor& actor_bumping)
                 return AllowAction::yes;
         }
 
-        const auto& props = actor_bumping.m_properties;
+        const PropHandler& props = actor_bumping.m_properties;
 
         if ((m_burn_state == BurnState::burning) &&
             !props.has(PropId::r_fire) &&
             !props.has(PropId::flying) &&
             !props.has(PropId::tiny_flying) &&
-            map::can_actor_move_into_terrain_at(actor_bumping, m_pos) &&
+            can_move(actor_bumping) &&
             map::g_seen.at(m_pos)) {
                 const std::string msg =
                         "Step into the flames? " +
@@ -1337,7 +1337,7 @@ void Stairs::bump(actor::Actor& actor_bumping)
 
         switch (choice) {
         case 0:
-                actor::set_position(*map::g_player, m_pos);
+                map::g_player->m_pos = m_pos;
 
                 if (is_fake()) {
                         // NOTE: This destroys this object
@@ -1360,7 +1360,7 @@ void Stairs::bump(actor::Actor& actor_bumping)
                 break;
 
         case 1:
-                actor::set_position(*map::g_player, m_pos);
+                map::g_player->m_pos = m_pos;
 
                 if (is_fake()) {
                         // NOTE: This destroys this object

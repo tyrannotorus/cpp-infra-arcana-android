@@ -27,6 +27,7 @@
 #include "game.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
 #include "marker.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
@@ -83,7 +84,13 @@ static std::vector<P> get_free_positions_around_pos(
 
 static void make_all_mon_not_seeing_player_unaware()
 {
-        for (auto* const mon : game_time::g_actors) {
+        Array2<bool> blocks_los(map::dims());
+
+        const auto r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
+
+        map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
+
+        for (actor::Actor* const mon : game_time::g_actors) {
                 if (actor::is_player(mon)) {
                         continue;
                 }
@@ -92,7 +99,7 @@ static void make_all_mon_not_seeing_player_unaware()
                         can_mon_see_actor(
                                 *mon,
                                 *map::g_player,
-                                map::g_terrain_blocks_los);
+                                blocks_los);
 
                 if (!can_mon_see_player) {
                         mon->m_mon_aware_state.aware_counter = 0;
@@ -184,7 +191,10 @@ void teleport(
         // First run a floodfill with some terrain unblocked - some terrain
         // shall block teleporting past them, and some shall be allowed to
         // teleport past even though they are normally blocking.
-        Array2<bool> blocked = map::get_blocked_map_info_for_actor(actor);
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksActor(actor, ParseActors::no)
+                .run(blocked, blocked.rect());
 
         const size_t nr_positions = map::nr_positions();
 
@@ -236,26 +246,14 @@ void teleport(
                 }
         }
 
-        // Do not allow teleporting into any position that:
-        // * Has terrain blocking this actor, or
-        // * Has another living actor, or
-        // * Blocks walking (otherwise for example ethereal creatures could
-        //   teleport far into the walls)
-        const auto& blocked_for_actor =
-                map::get_blocked_map_info_for_actor(actor);
+        // Do not allow teleporting into any cell that blocks this actor
+        map_parsers::BlocksActor(actor, ParseActors::yes)
+                .run(blocked, blocked.rect(), MapParseMode::append);
 
-        for (size_t i = 0; i < nr_positions; ++i) {
-                if (blocked_for_actor.at(i) ||
-                    map::g_terrain_blocks_walking.at(i)) {
-                        blocked.at(i) = true;
-                }
-        }
-
-        for (const auto* const actor_found : game_time::g_actors) {
-                if (actor_found->is_alive()) {
-                        blocked.at(actor_found->m_pos) = true;
-                }
-        }
+        // Do not allow teleporting into any cell that blocks walking (otherwise
+        // for example ethereal monsters could teleport far into the walls).
+        map_parsers::BlocksWalking(ParseActors::no)
+                .run(blocked, blocked.rect(), MapParseMode::append);
 
         blocked.at(actor.m_pos) = false;
 
@@ -273,7 +271,7 @@ void teleport(
         }
 
         // No teleport control - teleport randomly.
-        auto pos_bucket =
+        std::vector<P> pos_bucket =
                 to_vec(
                         blocked,
                         false,  // Store false values
@@ -357,7 +355,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
         // Update actor position to new position
-        actor::set_position(actor, p);
+        actor.m_pos = p;
 
         if (actor::is_player(&actor)) {
                 viewport::show(

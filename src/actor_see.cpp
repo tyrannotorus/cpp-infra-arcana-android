@@ -15,6 +15,7 @@
 #include "global.hpp"
 #include "init.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
@@ -124,11 +125,18 @@ static std::vector<actor::Actor*> seen_actors_mon(const actor::Actor& mon)
 {
         std::vector<actor::Actor*> result;
 
+        Array2<bool> blocked_los(map::dims());
+
         R los_rect(
                 std::max(0, mon.m_pos.x - g_fov_radi_int),
                 std::max(0, mon.m_pos.y - g_fov_radi_int),
                 std::min(map::w() - 1, mon.m_pos.x + g_fov_radi_int),
                 std::min(map::h() - 1, mon.m_pos.y + g_fov_radi_int));
+
+        map_parsers::BlocksLos()
+                .run(blocked_los,
+                     los_rect,
+                     MapParseMode::overwrite);
 
         for (auto* const other_actor : game_time::g_actors) {
                 if (other_actor == &mon) {
@@ -143,7 +151,7 @@ static std::vector<actor::Actor*> seen_actors_mon(const actor::Actor& mon)
                         actor::can_mon_see_actor(
                                 mon,
                                 *other_actor,
-                                map::g_terrain_blocks_los);
+                                blocked_los);
 
                 if (!can_see_actor) {
                         continue;
@@ -300,7 +308,16 @@ std::vector<Actor*> seeable_foes_for_mon(const Actor& mon)
 {
         std::vector<Actor*> result;
 
-        for (auto* other_actor : game_time::g_actors) {
+        Array2<bool> blocked_los(map::dims());
+
+        const R fov_rect = fov::fov_rect(mon.m_pos, blocked_los.dims());
+
+        map_parsers::BlocksLos()
+                .run(blocked_los,
+                     fov_rect,
+                     MapParseMode::overwrite);
+
+        for (Actor* other_actor : game_time::g_actors) {
                 if (other_actor == &mon) {
                         continue;
                 }
@@ -325,10 +342,7 @@ std::vector<Actor*> seeable_foes_for_mon(const Actor& mon)
                         continue;
                 }
 
-                if (!is_seeable_for_mon(
-                            mon,
-                            *other_actor,
-                            map::g_terrain_blocks_los)) {
+                if (!is_seeable_for_mon(mon, *other_actor, blocked_los)) {
                         continue;
                 }
 
@@ -340,9 +354,9 @@ std::vector<Actor*> seeable_foes_for_mon(const Actor& mon)
 
 bool is_player_seeing_burning_terrain()
 {
-        const auto& player = *map::g_player;
+        const Actor& player = *map::g_player;
 
-        const auto fov_r = fov::fov_rect(player.m_pos, map::dims());
+        const R fov_r = fov::fov_rect(player.m_pos, map::dims());
 
         for (const auto& pos : fov_r.positions()) {
                 const bool is_seen = map::g_seen.at(pos);

@@ -90,6 +90,8 @@ struct MoveRules
                 props_allow_move.clear();
         }
 
+        bool can_move(const actor::Actor& actor) const;
+
         // Is this given property allowing movement into this terrain, when it
         // normally wouldn't be?
         bool is_property_allowing_move(PropId id) const;

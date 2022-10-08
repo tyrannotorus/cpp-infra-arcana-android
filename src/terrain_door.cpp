@@ -157,8 +157,6 @@ void Door::init_type_and_state(const DoorType type, DoorSpawnState spawn_state)
                 m_is_hidden = false;
                 break;
         }
-
-        map::update_map_info_for_terrain_at(m_pos);
 }
 
 void Door::on_hit(
@@ -463,6 +461,31 @@ WasDestroyed Door::on_finished_burning()
 bool Door::is_walkable() const
 {
         return m_is_open;
+}
+
+bool Door::can_move(const actor::Actor& actor) const
+{
+        if (m_is_open) {
+                return true;
+        }
+
+        // The door is closed
+
+        const auto& properties = actor.m_properties;
+
+        // Can move through all door types
+        if (properties.has(PropId::ethereal) ||
+            properties.has(PropId::ooze)) {
+                return true;
+        }
+
+        // Small crawling creatures can pass through gates
+        if ((m_type == DoorType::gate) &&
+            properties.has(PropId::small_crawling)) {
+                return true;
+        }
+
+        return false;
 }
 
 bool Door::is_property_allowing_move(PropId id) const
@@ -981,7 +1004,6 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 if (rnd::coin_toss()) {
                         m_is_open = false;
 
-                        map::update_map_info_for_terrain_at(m_pos);
                         map::update_vision();
 
                         if (is_player) {
@@ -1062,7 +1084,6 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
         m_is_open = false;
 
-        map::update_map_info_for_terrain_at(m_pos);
         map::update_vision();
 
         if (is_player) {
@@ -1342,7 +1363,6 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                 game_time::tick();
 
-                map::update_map_info_for_terrain_at(m_pos);
                 map::update_vision();
         }
 
@@ -1366,10 +1386,6 @@ DidOpen Door::open(actor::Actor* const actor_opening)
         m_is_hidden = false;
         m_is_stuck = false;
         m_is_known_stuck = false;
-
-        map::update_map_info_for_terrain_at(m_pos);
-
-        ASSERT(!map::g_terrain_blocks_walking.at(m_pos));
 
         if (map::g_seen.at(m_pos)) {
                 const std::string name = base_name();
@@ -1403,8 +1419,6 @@ DidClose Door::close(actor::Actor* const actor_closing)
         (void)actor_closing;
 
         m_is_open = false;
-
-        map::update_map_info_for_terrain_at(m_pos);
 
         if (map::g_seen.at(m_pos)) {
                 const std::string name = base_name();

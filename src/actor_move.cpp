@@ -27,6 +27,7 @@
 #include "item.hpp"
 #include "item_data.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
@@ -136,7 +137,7 @@ static void player_displace_allied_mon(actor::Actor& mon, const P& new_mon_pos)
                 msg_log::add("I displace " + mon_name + ".");
         }
 
-        actor::set_position(mon, new_mon_pos);
+        mon.m_pos = new_mon_pos;
 }
 
 static void player_walk_on_item(item::Item* const item)
@@ -202,17 +203,17 @@ static AllowAction pre_bump_terrains(
         actor::Actor& actor,
         const P& target)
 {
-        const auto mobs = game_time::mobs_at(target);
+        const std::vector<terrain::Terrain*> mobs = game_time::mobs_at(target);
 
-        for (auto* mob : mobs) {
-                const auto result = mob->pre_bump(actor);
+        for (terrain::Terrain* mob : mobs) {
+                const AllowAction result = mob->pre_bump(actor);
 
                 if (result == AllowAction::no) {
                         return result;
                 }
         }
 
-        const auto result = map::g_terrain.at(target)->pre_bump(actor);
+        const AllowAction result = map::g_terrain.at(target)->pre_bump(actor);
 
         return result;
 }
@@ -282,13 +283,13 @@ static void print_mon_enter_non_walkable_terrain_msg(
 
 static void bump_terrains(actor::Actor& actor, const P& target)
 {
-        const auto mobs = game_time::mobs_at(target);
+        const std::vector<terrain::Terrain*> mobs = game_time::mobs_at(target);
 
-        for (auto* mob : mobs) {
+        for (terrain::Terrain* mob : mobs) {
                 mob->bump(actor);
         }
 
-        auto* const terrain = map::g_terrain.at(target);
+        terrain::Terrain* const terrain = map::g_terrain.at(target);
 
         if (!actor::is_player(&actor) &&
             !terrain->is_walkable() &&
@@ -377,7 +378,8 @@ static void move_player_non_center_direction(const P& target)
         actor::Actor& player = *map::g_player;
 
         const bool is_terrain_blocking_move =
-                !map::can_actor_move_into_terrain_at(player, target);
+                map_parsers::BlocksActor(player, ParseActors::no)
+                        .run(target);
 
         actor::Actor* const mon = map::living_actor_at(target);
 
@@ -422,7 +424,7 @@ static void move_player_non_center_direction(const P& target)
 
                 map::g_terrain.at(player.m_pos)->on_leave(player);
 
-                actor::set_position(player, target);
+                player.m_pos = target;
 
                 player_walk_on_item(map::g_items.at(player.m_pos));
 
@@ -524,7 +526,11 @@ static void sanity_check_mon_can_move_into_terrain(
         const actor::Actor& mon,
         const P& target_pos)
 {
-        if (map::can_actor_move_into_terrain_at(mon, target_pos)) {
+        const bool is_blocked =
+                map_parsers::BlocksActor(mon, ParseActors::yes)
+                        .run(target_pos);
+
+        if (!is_blocked) {
                 return;
         }
 
@@ -605,7 +611,7 @@ static void do_move_action_mon(actor::Actor& mon, Dir dir)
                 // Leave current cell
                 map::g_terrain.at(mon.m_pos)->on_leave(mon);
 
-                actor::set_position(mon, target_p);
+                mon.m_pos = target_p;
 
                 bump_terrains(mon, mon.m_pos);
 
@@ -631,26 +637,6 @@ void do_move_action(Actor& actor, const Dir dir)
         }
         else {
                 do_move_action_mon(actor, dir);
-        }
-}
-
-void set_position(Actor& actor, const P& pos)
-{
-        actor.m_pos = pos;
-
-        // Update light map if necessary.
-
-        // NOTE: For the player, we take the lazy approach and always update the
-        // light map (in case the lantern is active for example). It couuld
-        // possibly be done more selectively, but it would probably not be worth
-        // the trouble.
-        const auto& props = actor.m_properties;
-
-        if (is_player(&actor) ||
-            props.has(PropId::radiant_self) ||
-            props.has(PropId::radiant_adjacent) ||
-            props.has(PropId::radiant_fov)) {
-                map::update_light_map();
         }
 }
 

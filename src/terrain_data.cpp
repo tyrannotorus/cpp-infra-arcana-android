@@ -520,6 +520,26 @@ static void init_data_list()
 // -----------------------------------------------------------------------------
 namespace terrain
 {
+bool MoveRules::can_move(const actor::Actor& actor) const
+{
+        if (is_walkable) {
+                return true;
+        }
+
+        // This terrain blocks walking, check if any property overrides this
+        // (e.g. flying)
+
+        const auto match =
+                std::find_if(
+                        std::begin(props_allow_move),
+                        std::end(props_allow_move),
+                        [&actor](const PropId id) {
+                                return actor.m_properties.has(id);
+                        });
+
+        return match != std::end(props_allow_move);
+}
+
 bool MoveRules::is_property_allowing_move(const PropId id) const
 {
         return (

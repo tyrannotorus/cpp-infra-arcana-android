@@ -21,7 +21,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-#ifndef NDEBUG
 static void handle_args(int argc, char** argv)
 {
         for (int arg_nr = 0; arg_nr < argc; ++arg_nr) {
@@ -47,7 +46,6 @@ static void handle_args(int argc, char** argv)
                 }
         }
 }
-#endif  // NDEBUG
 
 // -----------------------------------------------------------------------------
 // main
@@ -60,12 +58,9 @@ int main(int argc, char** argv)
 
         init::init_io();
 
-#ifdef NDEBUG
         (void)argc;
         (void)argv;
-#else
         handle_args(argc, argv);
-#endif  // NDEBUG
 
         init::init_game();
 

@@ -83,15 +83,12 @@ void PickBgState::update()
 {
         auto action = MenuAction::selected;
 
-#ifndef NDEBUG
         if (config::is_stress_test()) {
                 // Stress-test mode, we just want to run everything
                 // automatically without requiring manual input.
                 action = MenuAction::selected;
         }
-        else
-#endif  // NDEBUG
-        {
+        else {
                 const io::InputData input = io::read_input();
 
                 action =

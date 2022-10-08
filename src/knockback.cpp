@@ -85,8 +85,8 @@ void run(
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
         }
 
-        const auto d = (actor.m_pos - attacked_from_pos).signs();
-        const auto new_pos = actor.m_pos + d;
+        const P d = (actor.m_pos - attacked_from_pos).signs();
+        const P new_pos = actor.m_pos + d;
 
         if (map::living_actor_at(new_pos)) {
                 // Target position is occupied by another actor
@@ -94,7 +94,8 @@ void run(
         }
 
         const bool actor_can_move_into_tgt_pos =
-                map::can_actor_move_into_terrain_at(actor, new_pos);
+                !map_parsers::BlocksActor(actor, ParseActors::no)
+                         .run(new_pos);
 
         const std::vector<terrain::Id> deep_terrains = {
                 terrain::Id::chasm};
@@ -103,7 +104,7 @@ void run(
                 map_parsers::IsAnyOfTerrains(deep_terrains)
                         .run(new_pos);
 
-        auto& tgt_terrain = map::g_terrain.at(new_pos);
+        const terrain::Terrain* const tgt_terrain = map::g_terrain.at(new_pos);
 
         if (!actor_can_move_into_tgt_pos &&
             !is_tgt_pos_deep &&
@@ -154,7 +155,7 @@ void run(
         // Leave current cell
         map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
-        actor::set_position(actor, new_pos);
+        actor.m_pos = new_pos;
 
         if (!is_player && player_can_see_actor) {
                 actor::make_player_aware_mon(actor);

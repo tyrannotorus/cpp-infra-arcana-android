@@ -251,15 +251,12 @@ void MainMenuState::update()
 {
         auto action = MenuAction::selected;
 
-#ifndef NDEBUG
         if (config::is_stress_test()) {
                 // Stress-test mode, we just want to run everything
                 // automatically without requiring manual input.
                 action = MenuAction::selected;
         }
-        else
-#endif  // NDEBUG
-        {
+        else {
                 const auto input = io::read_input();
 
                 action =
@@ -272,10 +269,7 @@ void MainMenuState::update()
         case MenuAction::selected:
                 switch (m_browser.y()) {
                 case 0: {
-#ifndef NDEBUG
-                        if (!config::is_bot_playing())
-#endif  // NDEBUG
-                        {
+                        if (!config::is_bot_playing()) {
                                 if (saving::is_save_available()) {
                                         const bool should_proceed =
                                                 query_overwrite_savefile();

@@ -1279,22 +1279,29 @@ PropEnded PropConfused::affect_move_dir(Dir& dir)
                 return PropEnded::no;
         }
 
-        const auto& blocked = map::get_blocked_map_info_for_actor(*m_owner);
+        Array2<bool> blocked(map::dims());
+
+        const R area_check_blocked(
+                m_owner->m_pos - P(1, 1),
+                m_owner->m_pos + P(1, 1));
+
+        map_parsers::BlocksActor(*m_owner, ParseActors::yes)
+                .run(blocked,
+                     area_check_blocked,
+                     MapParseMode::overwrite);
 
         std::vector<P> d_bucket;
 
-        for (const auto& d : dir_utils::g_dir_list) {
-                const auto tgt_p = m_owner->m_pos + d;
+        for (const P& d : dir_utils::g_dir_list) {
+                const P tgt_p = m_owner->m_pos + d;
 
-                if (blocked.at(tgt_p) || map::living_actor_at(tgt_p)) {
-                        continue;
+                if (!blocked.at(tgt_p)) {
+                        d_bucket.push_back(d);
                 }
-
-                d_bucket.push_back(d);
         }
 
         if (!d_bucket.empty()) {
-                const auto& d = rnd::element(d_bucket);
+                const P& d = rnd::element(d_bucket);
 
                 dir = dir_utils::dir(d);
         }
@@ -1544,7 +1551,7 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
                 return true;
         }
 
-        const auto new_pos = m_owner->m_pos + dir_utils::offset(dir);
+        const P new_pos = m_owner->m_pos + dir_utils::offset(dir);
 
         const actor::Actor* actor_at_tgt = map::living_actor_at(new_pos);
 
@@ -1556,13 +1563,17 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
                 return true;
         }
 
-        const auto seen_foes = actor::seen_foes(*m_owner);
+        const std::vector<actor::Actor*> seen_foes =
+                actor::seen_foes(*m_owner);
 
         if (seen_foes.empty()) {
                 return true;
         }
 
-        Array2<bool> blocked = map::get_blocked_map_info_for_actor(*m_owner);
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksActor(*m_owner, ParseActors::no)
+                .run(blocked, blocked.rect());
 
         // Mark the positions of all seen actors as free (the monsters may be
         // inside wall cells, e.g. worms crawling through rubble).

@@ -32,6 +32,7 @@
 #include "item_device.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
 #include "map_travel.hpp"
 #include "misc.hpp"
 #include "panel.hpp"
@@ -89,8 +90,10 @@ static void show_map_and_freeze(const std::string& msg)
 
 static void find_stair_path()
 {
-        Array2<bool> blocked =
-                map::get_blocked_map_info_for_actor(*map::g_player);
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksActor(*map::g_player, ParseActors::no)
+                .run(blocked, blocked.rect());
 
         const int w = map::w();
         const int h = map::h();
@@ -122,7 +125,7 @@ static void find_stair_path()
                 show_map_and_freeze("Could not find stairs");
         }
 
-        const auto& player_p = map::g_player->m_pos;
+        const P& player_p = map::g_player->m_pos;
 
         if (blocked.at(player_p)) {
                 show_map_and_freeze("Player on blocked position");
@@ -455,22 +458,40 @@ static void stress_test_act()
 {
         static int stress_test_step = 1;
         static bool move_right = true;
-        static bool is_rats_hostile = true;
+        static bool is_hostile = true;
 
         map::g_player->m_properties.end_prop(PropId::terrified);
         map::g_player->m_properties.end_prop(PropId::frenzied);
         map::g_player->m_properties.end_prop(PropId::confused);
 
         if ((stress_test_step % 150) == 0) {
-                auto* const leader = is_rats_hostile ? nullptr : map::g_player;
+                actor::Actor* const leader =
+                        is_hostile
+                        ? nullptr
+                        : map::g_player;
 
                 actor::spawn(
                         map::g_player->m_pos,
-                        {400, actor::Id::rat},
+                        {100, actor::Id::rat},
                         map::rect())
                         .set_leader(leader);
+        }
 
-                is_rats_hostile = !is_rats_hostile;
+        if ((stress_test_step % 500) == 0) {
+                actor::Actor* const leader =
+                        is_hostile
+                        ? nullptr
+                        : map::g_player;
+
+                actor::spawn(
+                        map::g_player->m_pos,
+                        {10, actor::Id::zombie},
+                        map::rect())
+                        .set_leader(leader);
+        }
+
+        if ((stress_test_step % 150) == 0) {
+                is_hostile = !is_hostile;
         }
 
         const auto p_adj =
@@ -493,7 +514,7 @@ static void stress_test_act()
                 game_commands::handle(GameCmd::left);
         }
 
-        if (stress_test_step == 1000) {
+        if (stress_test_step == 2000) {
                 states::pop_all();
         }
         else {

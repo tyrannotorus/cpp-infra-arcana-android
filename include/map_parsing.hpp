@@ -135,6 +135,25 @@ private:
         bool parse_actor(const actor::Actor& a) const override;
 };
 
+class BlocksActor : public MapParser
+{
+public:
+        BlocksActor(const actor::Actor& actor, ParseActors parse_actors) :
+                MapParser(ParseTerrain::yes, ParseMobs::yes, parse_actors),
+                m_actor(actor) {}
+
+private:
+        bool parse_terrain(
+                const terrain::Terrain& t,
+                const P& pos) const override;
+
+        bool parse_mob(const terrain::Terrain& f) const override;
+
+        bool parse_actor(const actor::Actor& a) const override;
+
+        const actor::Actor& m_actor;
+};
+
 class BlocksProjectiles : public MapParser
 {
 public:

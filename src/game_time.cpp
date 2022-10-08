@@ -373,8 +373,6 @@ void add_mob(terrain::Terrain* const terrain)
         g_mobs.push_back(terrain);
 
         terrain->on_placed();
-
-        map::update_map_info_for_terrain_at(terrain->pos());
 }
 
 void erase_mob(
@@ -383,15 +381,11 @@ void erase_mob(
 {
         for (auto it = std::begin(g_mobs); it != std::end(g_mobs); ++it) {
                 if (*it == terrain) {
-                        const P pos = terrain->pos();
-
                         if (destroy_object) {
                                 delete terrain;
                         }
 
                         g_mobs.erase(it);
-
-                        map::update_map_info_for_terrain_at(pos);
 
                         return;
                 }
