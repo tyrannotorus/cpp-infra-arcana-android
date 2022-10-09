@@ -333,12 +333,19 @@ static void bash_pos(const P& pos)
                 return;
         }
 
-        // --- Nothing to kick here, attack the air. ---
-        msg_log::add("*Whoosh!*");
+        // Nothing to kick here.
 
-        audio::play(audio::SfxId::miss_medium);
+        if (pos == map::g_player->m_pos) {
+                msg_log::add("There is nothing there to bash.");
+        }
+        else {
+                // Kick "the air".
+                msg_log::add("*Whoosh!*");
 
-        game_time::tick();
+                audio::play(audio::SfxId::miss_medium);
+
+                game_time::tick();
+        }
 }
 
 // -----------------------------------------------------------------------------
