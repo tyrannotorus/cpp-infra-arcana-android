@@ -104,9 +104,12 @@ ConsumeItem FluctuatingMaterial::activate(actor::Actor* actor)
         const auto item_name = name(ItemNameType::plain);
 
         msg_log::add(
-                "I stare into the " +
-                item_name +
-                ", and feel myself changing...");
+                ("I stare into the " +
+                 item_name +
+                 ", and feel myself changing..."),
+                colors::text(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::yes);
 
         // First lose one trait, then gain one trait
 
