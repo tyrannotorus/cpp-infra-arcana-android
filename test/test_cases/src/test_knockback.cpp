@@ -18,7 +18,7 @@
 #include "terrain_factory.hpp"
 #include "test_utils.hpp"
 
-TEST_CASE("Creatures are not nailed to occupied feature blocking los")
+TEST_CASE("Creatures are not nailed to occupied terrain blocking los")
 {
         const P pos_l(5, 7);
         const P pos_r(6, 7);
@@ -34,7 +34,7 @@ TEST_CASE("Creatures are not nailed to occupied feature blocking los")
         map::update_terrain(
                 terrain::make(terrain::Id::wall, pos_r.with_x_offset(1)));
 
-        auto* other_actor = actor::make(actor::Id::zombie, pos_r);
+        actor::Actor* other_actor = actor::make(actor::Id::zombie, pos_r);
 
         map::g_player->m_pos = pos_l;
 

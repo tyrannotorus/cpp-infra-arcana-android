@@ -1648,7 +1648,7 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
                         MorePromptOnMsg::no,
                         CopyToMsgHistory::no);
 
-                auto result = query::yes_or_no();
+                BinaryAnswer result = query::yes_or_no();
 
                 msg_log::clear();
 
@@ -1736,9 +1736,9 @@ void Dynamite::on_player_paralyzed()
 
         // NOTE: This object is now deleted.
 
-        const auto& p = map::g_player->m_pos;
+        const P& p = map::g_player->m_pos;
 
-        const auto t_id = map::g_terrain.at(p)->id();
+        const terrain::Id t_id = map::g_terrain.at(p)->id();
 
         if (t_id != terrain::Id::chasm) {
                 auto* const t =
@@ -1899,15 +1899,15 @@ void Flare::on_player_paralyzed()
 {
         msg_log::add("The lit Flare falls from my hand!");
 
-        actor::player_state::g_active_explosive.reset();
-
         const int fuse_turns = m_fuse_turns;
+
+        actor::player_state::g_active_explosive.reset();
 
         // NOTE: This object is now deleted.
 
-        const auto& p = map::g_player->m_pos;
+        const P& p = map::g_player->m_pos;
 
-        const auto t_id = map::g_terrain.at(p)->id();
+        const terrain::Id t_id = map::g_terrain.at(p)->id();
 
         if (t_id != terrain::Id::chasm) {
                 auto* const t =
@@ -1943,7 +1943,7 @@ void SmokeGrenade::on_std_turn_player_hold_ignited()
 
                 actor::player_state::g_active_explosive.reset();
 
-                delete this;
+                // NOTE: This object is now deleted.
         }
 }
 
@@ -1958,6 +1958,8 @@ void SmokeGrenade::on_player_paralyzed()
 
         actor::player_state::g_active_explosive.reset();
 
+        // NOTE: This object is now deleted.
+
         const P& p = map::g_player->m_pos;
 
         const terrain::Id t_id = map::g_terrain.at(p)->id();
@@ -1965,8 +1967,6 @@ void SmokeGrenade::on_player_paralyzed()
         if (t_id != terrain::Id::chasm) {
                 explosion::run_smoke_explosion_at(map::g_player->m_pos);
         }
-
-        delete this;
 }
 
 Color SmokeGrenade::ignited_projectile_color() const
