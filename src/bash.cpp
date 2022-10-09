@@ -279,9 +279,9 @@ static void bash_pos(const P& pos)
         // position according to priority.
 
         const auto kick_wpn = make_tmp_kick_wpn();
-        const auto* wpn = get_wielded_wpn_or_unarmed();
+        const item::Item* wpn = get_wielded_wpn_or_unarmed();
 
-        auto* living_actor = map::living_actor_at(pos);
+        actor::Actor* living_actor = map::living_actor_at(pos);
 
         // --- Kick living actor that the player is aware of? ---
         if ((pos != map::g_player->m_pos) &&
@@ -293,7 +293,7 @@ static void bash_pos(const P& pos)
         }
 
         // --- Bash terrain? ---
-        auto* const terrain = map::g_terrain.at(pos);
+        terrain::Terrain* const terrain = map::g_terrain.at(pos);
 
         if ((pos != map::g_player->m_pos) &&
             allow_bash_terrain(terrain)) {
@@ -316,7 +316,7 @@ static void bash_pos(const P& pos)
 
         // Check all corpses here, stop at any corpse which is prioritized for
         // bashing (Zombies)
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if ((actor->m_pos == pos) &&
                     (actor->m_state == ActorState::corpse)) {
                         corpse = actor;
@@ -337,6 +337,8 @@ static void bash_pos(const P& pos)
         msg_log::add("*Whoosh!*");
 
         audio::play(audio::SfxId::miss_medium);
+
+        game_time::tick();
 }
 
 // -----------------------------------------------------------------------------
