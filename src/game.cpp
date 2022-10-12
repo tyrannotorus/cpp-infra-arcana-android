@@ -426,8 +426,6 @@ void GameState::on_start()
 
                 map_builder->build();
 
-                draw_map::clear();
-
                 minimap::clear();
 
                 viewport::show(

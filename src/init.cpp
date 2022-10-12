@@ -143,7 +143,6 @@ void init_session()
         player_bon::init();
         insanity::init();
         msg_log::init();
-        draw_map::clear();
         game::init();
         bot::init();
         player_spells::init();

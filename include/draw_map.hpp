@@ -9,8 +9,6 @@
 
 namespace draw_map
 {
-void clear();
-
 void run();
 
 }  // namespace draw_map

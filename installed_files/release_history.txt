@@ -24,6 +24,7 @@
 - Added a tiny 7x13 font, intended for use with 2x scaled graphics.
 - By default, the game runs in fullscreen, using the 7x13 font, and 2x scaled graphics.
 - Added a red flashing animation when a creature is hit by a melee attack.
+- Items tiles on the map are now "blinking" (cycling between shown and not shown with a certain time interval), this allows showing that for example a trap is beneath an item (previously this was shown, less intuitively, by coloring the background of the item), and also it makes it clearer which tiles are items that you can pick up.
 - Split the options menu into several sub-menus (Video, Audio, Input, Gameplay).
 - The user data location is now printed in the main options menu.
 - When the game asks for a number (e.g. number of items to drop) this is now done in a popup screen instead.
