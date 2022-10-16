@@ -16,6 +16,6 @@ valgrind \
         --leak-check=full \
         --show-possibly-lost=no \
         --show-reachable=no \
-        $generate_suppressions \
+        ${generate_suppressions} \
         --suppressions=./../tools/valgrind.supp \
         ./ia-debug

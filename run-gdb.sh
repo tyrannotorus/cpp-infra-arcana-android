@@ -8,6 +8,6 @@ root_dir=${PWD}
 
 cd build
 
-./ia-debug --stress-test
+gdb --args ./ia-debug $*
 
 cd ${root_dir}

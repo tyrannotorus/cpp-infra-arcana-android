@@ -2,7 +2,7 @@
 
 set -xue
 
-root_dir=$PWD
+root_dir=${PWD}
 
 ./build-debug.sh
 
@@ -10,4 +10,4 @@ cd build
 
 ./ia-debug $*
 
-cd $root_dir
+cd ${root_dir}

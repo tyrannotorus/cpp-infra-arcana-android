@@ -2,7 +2,7 @@
 
 set -xue
 
-root_dir=$PWD
+root_dir=${PWD}
 
 ./build-test.sh
 
@@ -10,4 +10,4 @@ cd build
 
 ctest --verbose
 
-cd $root_dir
+cd ${root_dir}
