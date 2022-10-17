@@ -75,8 +75,6 @@ static bool run_drop_query(
 
         TRACE << "Item is stackable and more than one" << std::endl;
 
-        io::clear_screen();
-
         states::draw();
 
         const std::string title =
@@ -705,8 +703,6 @@ void BrowseInv::on_start()
 
 void BrowseInv::draw()
 {
-        io::clear_screen();
-
         draw_box(panels::area(Panel::screen));
 
         const int browser_y = m_browser.y();
@@ -1001,8 +997,6 @@ void Apply::draw()
                 return;
         }
 
-        io::clear_screen();
-
         draw_box(panels::area(Panel::screen));
 
         const int browser_y = m_browser.y();
@@ -1112,8 +1106,6 @@ void Drop::on_start()
 
 void Drop::draw()
 {
-        io::clear_screen();
-
         draw_box(panels::area(Panel::screen));
 
         io::draw_text_center(
@@ -1834,8 +1826,6 @@ void SelectIdentify::on_start()
 
 void SelectIdentify::draw()
 {
-        io::clear_screen();
-
         draw_box(panels::area(Panel::screen));
 
         const int browser_y = m_browser.y();

@@ -1017,7 +1017,6 @@ void handle(const GameCmd cmd)
                         return;
                 }
 
-                io::clear_screen();
                 states::draw();
                 io::update_screen();
 

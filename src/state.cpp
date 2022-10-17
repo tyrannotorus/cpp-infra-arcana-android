@@ -27,7 +27,6 @@ static void run_state_iteration()
                 return;
         }
 
-        io::clear_screen();
         states::draw();
         io::update_screen();
 
@@ -140,6 +139,8 @@ void draw()
         if (is_empty()) {
                 return;
         }
+
+        io::clear_screen();
 
         // Find the first state from the end which is NOT drawn overlayed.
         auto draw_from = std::end(s_current_states);

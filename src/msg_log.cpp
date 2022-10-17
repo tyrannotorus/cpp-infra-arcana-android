@@ -537,8 +537,6 @@ void add(
                                 copy_to_history);
         }
 
-        io::clear_screen();
-
         states::draw();
 
         if (add_more_prompt_on_msg == MorePromptOnMsg::yes) {

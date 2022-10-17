@@ -151,7 +151,6 @@ void display(const Id id)
 
         msg_log::more_prompt();
 
-        io::clear_screen();
         states::draw();
         io::update_screen();
 

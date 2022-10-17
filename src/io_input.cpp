@@ -415,7 +415,6 @@ InputData read_input()
                 bool should_redraw_flash = step_flash_animations();
 
                 if (should_redraw_cycling || should_redraw_flash) {
-                        clear_screen();
                         states::draw();
                         update_screen();
                 }

@@ -75,8 +75,6 @@ StateId MainMenuState::id() const
 
 void MainMenuState::draw()
 {
-        io::clear_screen();
-
         if (config::is_tiles_mode()) {
                 draw_box(panels::area(Panel::screen));
         }
