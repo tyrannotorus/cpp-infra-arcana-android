@@ -8,6 +8,6 @@ root_dir=${PWD}
 
 cd build
 
-gdb --args ./ia-debug $*
+gdb -q --args ./ia-debug $*
 
 cd ${root_dir}
