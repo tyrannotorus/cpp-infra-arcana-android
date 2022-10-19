@@ -71,11 +71,11 @@ void run_until_state_done(std::unique_ptr<State> state)
 {
         TRACE_FUNC_BEGIN;
 
-        auto* state_addr = state.get();
+        State* state_ptr = state.get();
 
         push(std::move(state));
 
-        while (contains_state(state_addr)) {
+        while (contains_state(state_ptr)) {
                 run_state_iteration();
         }
 

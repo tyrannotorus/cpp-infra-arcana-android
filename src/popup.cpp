@@ -536,8 +536,6 @@ void MenuPopupState::draw()
         }
 
         draw_horizontal_line(horizontal_line_w, y);
-
-        io::update_screen();
 }
 
 void MenuPopupState::update()
