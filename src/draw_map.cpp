@@ -439,7 +439,7 @@ void run()
         draw_mobiles();
         draw_living_monsters();
 
-        if ((io::graphics_cycle_nr(io::GraphicsCycle::slow) % 2) == 0) {
+        if ((io::graphics_cycle_nr(io::GraphicsCycle::slow) % 3) != 0) {
                 draw_items();
         }
 
