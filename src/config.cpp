@@ -1224,7 +1224,9 @@ std::string RendererTypeOption::descr() const
         return (
                 "Use automatic selection (attempt to use hardware "
                 "acceleration first, or use software fallback), or "
-                "force using software renderer.");
+                "force using software renderer. "
+                "If you experience any graphical issues, setting this option "
+                "to \"Software\" may fix the problem.");
 }
 
 std::string RendererTypeOption::value_str() const
