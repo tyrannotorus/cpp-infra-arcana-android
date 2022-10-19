@@ -4876,8 +4876,7 @@ std::vector<std::string> SpellHeal::descr_specific(
 
         if (skill == SpellSkill::transcendent) {
                 descr.emplace_back(
-                        "+1 hit point regenerated per turn, and 10% chance "
-                        "per turn to heal one wound, for " +
+                        "+1 hit point regenerated per turn, for " +
                         regen_duration().str() +
                         " turns.");
         }
