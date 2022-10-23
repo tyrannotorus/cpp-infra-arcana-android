@@ -34,6 +34,47 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+// Background color to draw in cases where one "object" is obscuring another,
+// such as when an item is on top of a trap.
+static Array2<std::optional<Color>> s_bg_color_obscured(0, 0);
+
+static void set_bg_color_obscured_terrain(
+        const terrain::Terrain* const terrain,
+        const size_t pos_idx)
+{
+        std::optional<Color>& value = s_bg_color_obscured.at(pos_idx);
+
+        switch (terrain->id()) {
+        case terrain::Id::liquid: {
+                value = terrain->color();
+        } break;
+
+        case terrain::Id::chains: {
+                value = terrain->color_default();
+        } break;
+
+        case terrain::Id::trap: {
+                if (!terrain->is_hidden()) {
+                        value = colors::yellow();
+                }
+        } break;
+
+        default:
+        {
+        } break;
+        }
+}
+
+static void set_bg_color_when_obscured_dead_actor(const actor::Actor& actor)
+{
+        s_bg_color_obscured.at(actor.m_pos) = colors::gray_brown();
+}
+
+static void use_bg_color_obscuring(Color& color, const P& p)
+{
+        color = s_bg_color_obscured.at(p).value_or(color);
+}
+
 static void adapt_color_for_lit_pos(Color& color)
 {
         color.set_rgb(
@@ -52,7 +93,7 @@ static void adapt_color_for_dark_pos(Color& color)
                 std::min(255, color.b() + 20));
 }
 
-static void adapt_color_for_light_level(const size_t pos_idx, Color& color)
+static void adapt_color_for_light_level(Color& color, const size_t pos_idx)
 {
         const terrain::Terrain* const t = map::g_terrain.at(pos_idx);
 
@@ -70,12 +111,12 @@ static void adapt_color_for_light_level(const size_t pos_idx, Color& color)
         }
 }
 
-static void adapt_color_for_light_level(const P& pos, Color& color)
+static void adapt_color_for_light_level(Color& color, const P& pos)
 {
-        adapt_color_for_light_level(map::g_terrain.pos_to_idx(pos), color);
+        adapt_color_for_light_level(color, map::g_terrain.pos_to_idx(pos));
 }
 
-static void adapt_color_for_distance_to_player(const P& pos, Color& color)
+static void adapt_color_for_distance_to_player(Color& color, const P& pos)
 {
         if (map::g_light.at(pos)) {
                 return;
@@ -126,8 +167,15 @@ static void draw_terrains()
 
                 const Color terrain_color_bg = t->color_bg();
 
-                if (terrain_color_bg != colors::black()) {
+                if (terrain_color_bg == colors::black()) {
+                        // Set background color to use if this terrain is
+                        // obscured by another object (e.g. an item on a trap).
+                        set_bg_color_obscured_terrain(t, i);
+                }
+                else {
                         draw_obj.color_bg = terrain_color_bg;
+
+                        s_bg_color_obscured.at(i) = terrain_color_bg;
                 }
 
                 if (config::text_mode_filled_walls()) {
@@ -150,9 +198,9 @@ static void draw_terrains()
                         }
                 }
 
-                adapt_color_for_light_level(i, draw_obj.color);
+                adapt_color_for_light_level(draw_obj.color, i);
 
-                adapt_color_for_distance_to_player(t->pos(), draw_obj.color);
+                adapt_color_for_distance_to_player(draw_obj.color, t->pos());
 
                 draw_obj.draw();
         }
@@ -174,7 +222,11 @@ static void draw_dead_actors()
                 draw_obj.tile = actor->tile();
                 draw_obj.character = actor->character();
 
-                adapt_color_for_light_level(p, draw_obj.color);
+                adapt_color_for_light_level(draw_obj.color, p);
+
+                use_bg_color_obscuring(draw_obj.color_bg, p);
+
+                set_bg_color_when_obscured_dead_actor(*actor);
 
                 draw_obj.draw();
         }
@@ -205,7 +257,9 @@ static void draw_items()
                         draw_obj.tile = item->tile();
                         draw_obj.character = item->character();
 
-                        adapt_color_for_light_level(p, draw_obj.color);
+                        adapt_color_for_light_level(draw_obj.color, p);
+
+                        use_bg_color_obscuring(draw_obj.color_bg, p);
 
                         draw_obj.draw();
                 }
@@ -233,7 +287,7 @@ static void draw_mobiles()
                 draw_obj.tile = mob_tile;
                 draw_obj.character = mob_character;
 
-                adapt_color_for_light_level(p, draw_obj.color);
+                adapt_color_for_light_level(draw_obj.color, p);
 
                 draw_obj.draw();
         }
@@ -280,7 +334,7 @@ static void draw_living_seen_monster(const actor::Actor& mon)
                 }
         }
 
-        adapt_color_for_light_level(mon.m_pos, draw_obj.color);
+        adapt_color_for_light_level(draw_obj.color, mon.m_pos);
 
         draw_obj.draw();
 }
@@ -304,7 +358,7 @@ static void draw_living_hidden_monster(const actor::Actor& mon)
         draw_obj.color = colors::white();
         draw_obj.color_bg = color_bg;
 
-        adapt_color_for_light_level(mon.m_pos, draw_obj.color);
+        adapt_color_for_light_level(draw_obj.color, mon.m_pos);
 
         draw_obj.draw();
 }
@@ -433,15 +487,15 @@ namespace draw_map
 {
 void run()
 {
+        // NOTE: This will also setup the whole array with default values.
+        s_bg_color_obscured.resize(map::dims());
+
         draw_unseen_cells_from_player_memory();
         draw_terrains();
         draw_dead_actors();
+        draw_items();
         draw_mobiles();
         draw_living_monsters();
-
-        if ((io::graphics_cycle_nr(io::GraphicsCycle::slow) % 3) != 0) {
-                draw_items();
-        }
 
         draw_player_character();
 }

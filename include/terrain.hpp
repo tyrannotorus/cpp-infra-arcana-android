@@ -176,7 +176,12 @@ public:
 
         virtual Color color() const;
 
-        virtual Color color_bg() const;
+        virtual Color color_default() const
+        {
+                return colors::white();
+        }
+
+        Color color_bg() const;
 
         virtual bool is_walkable() const
         {
@@ -333,13 +338,6 @@ protected:
                 (void)dmg;
         }
 
-        virtual Color color_default() const
-        {
-                return colors::white();
-        }
-
-        virtual Color color_bg_default() const;
-
         void try_start_burning(Verbose verbose);
 
         virtual DidTriggerTrap trigger_trap(actor::Actor* const actor)
@@ -387,13 +385,13 @@ public:
 
         gfx::TileId tile() const override;
 
+        Color color_default() const override;
+
         std::string name(Article article) const override;
 
         FloorType m_type;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -410,11 +408,11 @@ public:
 
         std::string name(Article article) const override;
 
+        Color color_default() const override;
+
         WasDestroyed on_finished_burning() override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -438,11 +436,11 @@ public:
         gfx::TileId tile() const override;
         std::string name(Article article) const override;
 
+        Color color_default() const override;
+
         GrassType m_type;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -458,13 +456,14 @@ public:
         Bush() = delete;
 
         std::string name(Article article) const override;
+
+        Color color_default() const override;
+
         WasDestroyed on_finished_burning() override;
 
         GrassType m_type;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -480,11 +479,12 @@ public:
         Vines() = delete;
 
         std::string name(Article article) const override;
+
+        Color color_default() const override;
+
         WasDestroyed on_finished_burning() override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -501,13 +501,11 @@ public:
 
         std::string name(Article article) const override;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
 private:
-        Color color_default() const override;
-
-        Color color_bg_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -524,9 +522,9 @@ public:
 
         std::string name(Article article) const override;
 
-private:
         Color color_default() const override;
 
+private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -544,9 +542,9 @@ public:
 
         std::string name(Article article) const override;
 
-private:
         Color color_default() const override;
 
+private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -581,6 +579,8 @@ public:
         gfx::TileId front_wall_tile() const;
         gfx::TileId top_wall_tile() const;
 
+        Color color_default() const override;
+
         void set_rnd_common_wall();
         void set_moss_grown();
 
@@ -588,8 +588,6 @@ public:
         bool m_is_mossy;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -606,9 +604,9 @@ public:
 
         std::string name(Article article) const override;
 
-private:
         Color color_default() const override;
 
+private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -625,9 +623,9 @@ public:
 
         std::string name(Article article) const override;
 
-private:
         Color color_default() const override;
 
+private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -644,9 +642,9 @@ public:
 
         std::string name(Article article) const override;
 
-private:
         Color color_default() const override;
 
+private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -663,6 +661,8 @@ public:
 
         std::string name(Article article) const override;
 
+        Color color_default() const override;
+
         void set_inscription(const std::string& str)
         {
                 m_inscr = str;
@@ -671,8 +671,6 @@ public:
         void bump(actor::Actor& actor_bumping) override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -691,9 +689,9 @@ public:
 
         std::string name(Article article) const override;
 
-private:
         Color color_default() const override;
 
+private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -715,6 +713,10 @@ public:
 
         std::string name(Article article) const override;
 
+        gfx::TileId tile() const override;
+
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         void set_type(const StatueType type)
@@ -729,13 +731,9 @@ public:
 
         void set_player_bg(Bg bg);
 
-        gfx::TileId tile() const override;
-
         void topple(Dir direction, actor::Actor* actor_toppling = nullptr);
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -757,9 +755,9 @@ public:
 
         std::string name(Article article) const override;
 
-private:
         Color color_default() const override;
 
+private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -774,6 +772,8 @@ public:
         Stairs() = delete;
 
         std::string name(Article article) const override;
+
+        Color color_default() const override;
 
         void bump(actor::Actor& actor_bumping) override;
 
@@ -792,8 +792,6 @@ public:
         }
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -818,14 +816,14 @@ public:
         gfx::TileId tile() const override;
         char character() const override;
 
+        Color color_default() const override;
+
         void set_axis(const Axis axis)
         {
                 m_axis = axis;
         }
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -843,15 +841,13 @@ public:
 
         std::string name(Article article) const override;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         LiquidType m_type;
 
 private:
-        Color color_default() const override;
-
-        Color color_bg_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -869,9 +865,9 @@ public:
 
         std::string name(Article article) const override;
 
-private:
         Color color_default() const override;
 
+private:
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -889,6 +885,8 @@ public:
         std::string name(Article article) const override;
 
         gfx::TileId tile() const override;
+
+        Color color_default() const override;
 
         void toggle();
 
@@ -921,8 +919,6 @@ public:
         }
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -943,6 +939,8 @@ public:
 
         Altar() = delete;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         void on_new_turn() override;
@@ -950,8 +948,6 @@ public:
         std::string name(Article article) const override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -969,11 +965,11 @@ public:
 
         std::string name(Article article) const override;
 
+        Color color_default() const override;
+
         WasDestroyed on_finished_burning() override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -1019,6 +1015,8 @@ public:
 
         gfx::TileId tile() const override;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         bool is_open() const
@@ -1029,8 +1027,6 @@ public:
         DidOpen open(actor::Actor* actor_opening) override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -1066,6 +1062,8 @@ public:
 
         gfx::TileId tile() const override;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         bool is_open() const
@@ -1082,8 +1080,6 @@ public:
                 std::optional<int> dmg = std::nullopt) override;
 
 private:
-        Color color_default() const override;
-
         void on_player_kick();
 
         void player_loot();
@@ -1104,6 +1100,8 @@ public:
 
         gfx::TileId tile() const override;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         bool is_open() const
@@ -1116,8 +1114,6 @@ public:
         WasDestroyed on_finished_burning() override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -1139,13 +1135,13 @@ public:
 
         gfx::TileId tile() const override;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         WasDestroyed on_finished_burning() override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -1167,13 +1163,13 @@ public:
 
         gfx::TileId tile() const override;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         WasDestroyed on_finished_burning() override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
@@ -1210,6 +1206,8 @@ public:
 
         std::string name(Article article) const override;
 
+        Color color_default() const override;
+
         void on_new_turn() override;
 
         void bump(actor::Actor& actor_bumping) override;
@@ -1234,8 +1232,6 @@ public:
         void curse();
 
 private:
-        Color color_default() const override;
-
         std::string type_name() const;
 
         std::string type_indefinite_article() const;
@@ -1262,6 +1258,8 @@ public:
 
         gfx::TileId tile() const override;
 
+        Color color_default() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         DidOpen open(actor::Actor* actor_opening) override;
@@ -1269,8 +1267,6 @@ public:
         WasDestroyed on_finished_burning() override;
 
 private:
-        Color color_default() const override;
-
         void on_hit(
                 DmgType dmg_type,
                 actor::Actor* actor,

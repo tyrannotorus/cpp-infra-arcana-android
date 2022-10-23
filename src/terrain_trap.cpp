@@ -521,30 +521,18 @@ void Trap::on_revealed_from_searching()
 
 std::string Trap::name(const Article article) const
 {
-        return m_is_hidden
-                ? m_mimic_terrain->name(article)
-                : m_trap_impl->name(article);
+        return (
+                m_is_hidden
+                        ? m_mimic_terrain->name(article)
+                        : m_trap_impl->name(article));
 }
 
 Color Trap::color_default() const
 {
-        return m_is_hidden
-                ? m_mimic_terrain->color()
-                : m_trap_impl->color();
-}
-
-Color Trap::color_bg_default() const
-{
-        const auto* const item = map::g_items.at(m_pos);
-        const auto* const corpse = map::first_corpse_at(m_pos);
-
-        if (!m_is_hidden && (item || corpse)) {
-                return m_trap_impl->color();
-        }
-        else {
-                // Is hidden, or nothing is over the trap
-                return colors::black();
-        }
+        return (
+                m_is_hidden
+                        ? m_mimic_terrain->color()
+                        : m_trap_impl->color());
 }
 
 char Trap::character() const

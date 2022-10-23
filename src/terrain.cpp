@@ -517,7 +517,7 @@ Color Terrain::color_bg() const
         switch (m_burn_state) {
         case BurnState::not_burned:
         case BurnState::has_burned:
-                return color_bg_default();
+                return colors::black();
 
         case BurnState::burning:
                 return m_burn_color_bg;
@@ -548,11 +548,6 @@ void Terrain::add_light(Array2<bool>& light) const
         }
 
         add_light_hook(light);
-}
-
-Color Terrain::color_bg_default() const
-{
-        return colors::black();
 }
 
 // -----------------------------------------------------------------------------
@@ -1635,20 +1630,6 @@ Color Liquid::color_default() const
         return colors::yellow();
 }
 
-Color Liquid::color_bg_default() const
-{
-        const auto* const item = map::g_items.at(m_pos);
-        const auto* const corpse = map::first_corpse_at(m_pos);
-
-        if (item || corpse) {
-                return color();
-        }
-        else {
-                // Nothing is "over" the liquid
-                return colors::black();
-        }
-}
-
 // -----------------------------------------------------------------------------
 // Chasm
 // -----------------------------------------------------------------------------
@@ -2209,20 +2190,6 @@ std::string Chains::name(const Article article) const
 Color Chains::color_default() const
 {
         return colors::gray();
-}
-
-Color Chains::color_bg_default() const
-{
-        const auto* const item = map::g_items.at(m_pos);
-        const auto* const corpse = map::first_corpse_at(m_pos);
-
-        if (item || corpse) {
-                return color();
-        }
-        else {
-                // Nothing is "over" the chains
-                return colors::black();
-        }
 }
 
 void Chains::bump(actor::Actor& actor_bumping)

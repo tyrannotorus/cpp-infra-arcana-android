@@ -166,8 +166,8 @@ void populate_std_lvl()
 
         blocked.at(player_p) = true;
 
-        for (auto* const room : map::g_room_list) {
-                const auto chance_trapped =
+        for (Room* const room : map::g_room_list) {
+                const Fraction chance_trapped =
                         chance_for_trapped_room(room->m_type);
 
                 if ((chance_trapped.num == -1) || !chance_trapped.roll()) {

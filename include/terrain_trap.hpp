@@ -127,7 +127,6 @@ private:
         TrapImpl* make_trap_impl_from_id(TrapId trap_id);
 
         Color color_default() const override;
-        Color color_bg_default() const override;
 
         void on_hit(
                 DmgType dmg_type,

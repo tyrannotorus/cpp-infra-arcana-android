@@ -76,6 +76,8 @@ struct Fraction
 {
         Fraction() = default;
 
+        Fraction(const Fraction&) = default;
+
         Fraction(const int numerator, const int denominator) :
                 num(numerator),
                 den(denominator) {}
