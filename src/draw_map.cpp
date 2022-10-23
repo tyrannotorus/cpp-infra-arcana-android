@@ -46,7 +46,7 @@ static void set_bg_color_obscured_terrain(
 
         switch (terrain->id()) {
         case terrain::Id::liquid: {
-                value = terrain->color();
+                value = terrain->color_default();
         } break;
 
         case terrain::Id::chains: {
@@ -55,7 +55,12 @@ static void set_bg_color_obscured_terrain(
 
         case terrain::Id::trap: {
                 if (!terrain->is_hidden()) {
-                        value = colors::yellow();
+                        if (config::use_trap_color_when_obscured()) {
+                                value = terrain->color_default();
+                        }
+                        else {
+                                value = colors::yellow();
+                        }
                 }
         } break;
 

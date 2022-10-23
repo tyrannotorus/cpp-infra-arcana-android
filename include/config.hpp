@@ -73,6 +73,7 @@ int map_cell_px_w();
 int map_cell_px_h();
 
 bool text_mode_filled_walls();
+bool use_trap_color_when_obscured();
 int master_volume_pct();
 bool is_ambient_audio_enabled();
 bool is_ambient_audio_preloaded();

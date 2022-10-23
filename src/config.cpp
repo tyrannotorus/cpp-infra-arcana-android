@@ -69,6 +69,7 @@ static bool s_is_fullscreen = false;
 static bool s_is_2x_scale_requested = false;
 static bool s_is_2x_scale_enabled = false;
 static bool s_text_mode_filled_walls = true;
+static bool s_use_trap_color_when_obscured = true;
 static bool s_warn_on_throw_valuable = false;
 static bool s_warn_on_light_explosive = false;
 static bool s_warn_on_drink_malign_potion = false;
@@ -277,6 +278,7 @@ static void set_default_variables()
         s_is_2x_scale_requested = true;
         s_is_2x_scale_enabled = true;
         s_text_mode_filled_walls = true;
+        s_use_trap_color_when_obscured = false;
         s_is_intro_lvl_skipped = false;
         s_is_intro_popup_skipped = false;
         s_is_any_key_confirm_more = false;
@@ -363,6 +365,9 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         lines.erase(std::begin(lines));
 
         s_text_mode_filled_walls = lines.front() == "1";
+        lines.erase(std::begin(lines));
+
+        s_use_trap_color_when_obscured = lines.front() == "1";
         lines.erase(std::begin(lines));
 
         s_is_intro_lvl_skipped = lines.front() == "1";
@@ -461,6 +466,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(s_is_2x_scale_requested ? "1" : "0");
         lines.emplace_back(s_is_2x_scale_enabled ? "1" : "0");
         lines.emplace_back(s_text_mode_filled_walls ? "1" : "0");
+        lines.emplace_back(s_use_trap_color_when_obscured ? "1" : "0");
         lines.emplace_back(s_is_intro_lvl_skipped ? "1" : "0");
         lines.emplace_back(s_is_intro_popup_skipped ? "1" : "0");
         lines.emplace_back(s_is_any_key_confirm_more ? "1" : "0");
@@ -537,6 +543,8 @@ void init()
         s_options.emplace_back(std::make_unique<FullscreenOption>());
         s_options.emplace_back(std::make_unique<VideoScalingOption>());
         s_options.emplace_back(std::make_unique<TextModeFilledWallsOption>());
+        s_options.emplace_back(
+                std::make_unique<UseTrapColorWhenObscuredOption>());
 
         // Audio
         s_options.emplace_back(std::make_unique<MasterVolumeOption>());
@@ -684,6 +692,11 @@ int map_cell_px_h()
 bool text_mode_filled_walls()
 {
         return s_text_mode_filled_walls;
+}
+
+bool use_trap_color_when_obscured()
+{
+        return s_use_trap_color_when_obscured;
 }
 
 int master_volume_pct()
@@ -1347,6 +1360,39 @@ void TextModeFilledWallsOption::change(OptionChangeCommand command) const
 
         // Redefine the terrain data list.
         terrain::init();
+}
+
+std::string UseTrapColorWhenObscuredOption::name() const
+{
+        return "Use trap color when obscured";
+}
+
+std::string UseTrapColorWhenObscuredOption::descr() const
+{
+        return (
+                "If a trap is obscured by another object (e.g. an item), use "
+                "the color of the specific trap type as background color to "
+                "signify that there is a trap underneath the objct, "
+                "otherwise use the same background color regardless of "
+                "trap type.");
+}
+
+std::string UseTrapColorWhenObscuredOption::value_str() const
+{
+        return s_use_trap_color_when_obscured ? "Yes" : "No";
+}
+
+OptionSubmenuType UseTrapColorWhenObscuredOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
+}
+
+void UseTrapColorWhenObscuredOption::change(
+        OptionChangeCommand command) const
+{
+        (void)command;
+
+        s_use_trap_color_when_obscured = !s_use_trap_color_when_obscured;
 }
 
 std::string SkipIntroLevelOption::name() const
