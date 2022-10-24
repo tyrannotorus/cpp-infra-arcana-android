@@ -543,8 +543,6 @@ void init()
         s_options.emplace_back(std::make_unique<FullscreenOption>());
         s_options.emplace_back(std::make_unique<VideoScalingOption>());
         s_options.emplace_back(std::make_unique<TextModeFilledWallsOption>());
-        s_options.emplace_back(
-                std::make_unique<UseTrapColorWhenObscuredOption>());
 
         // Audio
         s_options.emplace_back(std::make_unique<MasterVolumeOption>());
@@ -561,6 +559,8 @@ void init()
         s_options.emplace_back(std::make_unique<SkipIntroLevelOption>());
         s_options.emplace_back(std::make_unique<SkipIntroPopupOption>());
         s_options.emplace_back(std::make_unique<DisplayHintsOption>());
+        s_options.emplace_back(
+                std::make_unique<UseTrapColorWhenObscuredOption>());
         s_options.emplace_back(std::make_unique<AlwaysWarnMonsterOption>());
         s_options.emplace_back(std::make_unique<WarnThrowValuableOption>());
         s_options.emplace_back(std::make_unique<WarnLightExplosivesOption>());
@@ -1384,7 +1384,7 @@ std::string UseTrapColorWhenObscuredOption::value_str() const
 
 OptionSubmenuType UseTrapColorWhenObscuredOption::submenu_type() const
 {
-        return OptionSubmenuType::video;
+        return OptionSubmenuType::gameplay;
 }
 
 void UseTrapColorWhenObscuredOption::change(
