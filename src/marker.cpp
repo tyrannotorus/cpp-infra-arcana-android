@@ -495,8 +495,7 @@ void Aiming::on_moved()
 
         const int dist = king_dist(m_origin, m_pos);
 
-        const bool is_in_max_range =
-                (dist <= max_king_dist());
+        const bool is_in_max_range = (dist <= max_king_dist());
 
         if (is_in_max_range) {
                 auto* const actor = map::living_actor_at(m_pos);
@@ -518,6 +517,21 @@ void Aiming::on_moved()
                         msg_log::add(
                                 std::to_string(hit_chance) + "% hit chance.",
                                 colors::light_white(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::no,
+                                CopyToMsgHistory::no);
+                }
+
+                const bool is_in_effective_range =
+                        effective_king_dist_range()
+                                .is_in_range(dist);
+
+                if (!is_in_effective_range &&
+                    (m_wpn.data().ranged.effective_range.max > 0)) {
+                        msg_log::add(
+                                ("Aiming outside effective weapon range "
+                                 "(50% damage)."),
+                                colors::msg_note(),
                                 MsgInterruptPlayer::no,
                                 MorePromptOnMsg::no,
                                 CopyToMsgHistory::no);
@@ -578,34 +592,6 @@ void Aiming::handle_input(const io::InputData& input)
 
                 msg_log::clear();
 
-                const int dist = king_dist(m_origin, m_pos);
-
-                const bool is_in_effective_range =
-                        effective_king_dist_range()
-                                .is_in_range(dist);
-
-                const bool is_in_max_range =
-                        (dist <= max_king_dist());
-
-                if (!is_in_effective_range &&
-                    is_in_max_range &&
-                    (m_wpn.data().ranged.effective_range.max > 0)) {
-                        const std::string msg =
-                                "Aiming outside effective weapon range "
-                                "(50% damage) fire anyway? " +
-                                common_text::g_yes_or_no_hint;
-
-                        msg_log::add(msg);
-
-                        const auto answer = query::yes_or_no();
-
-                        msg_log::clear();
-
-                        if (answer == BinaryAnswer::no) {
-                                return;
-                        }
-                }
-
                 auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor && actor::can_player_see_actor(*actor)) {
@@ -648,11 +634,11 @@ void Throwing::on_moved()
 {
         view::print_living_actor_info_msg(m_pos);
 
-        const bool is_in_range =
-                king_dist(m_origin, m_pos) <=
-                max_king_dist();
+        const int dist = king_dist(m_origin, m_pos);
 
-        if (is_in_range) {
+        const bool is_in_max_range = (dist <= max_king_dist());
+
+        if (is_in_max_range) {
                 auto* const actor = map::living_actor_at(m_pos);
 
                 if (actor &&
@@ -672,6 +658,21 @@ void Throwing::on_moved()
                         msg_log::add(
                                 std::to_string(hit_chance) + "% hit chance.",
                                 colors::light_white(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::no,
+                                CopyToMsgHistory::no);
+                }
+
+                const bool is_in_effective_range =
+                        effective_king_dist_range()
+                                .is_in_range(dist);
+
+                if (!is_in_effective_range &&
+                    (m_inv_item->data().ranged.effective_range.max > 0)) {
+                        msg_log::add(
+                                ("Aiming outside effective weapon range "
+                                 "(50% damage)."),
+                                colors::msg_note(),
                                 MsgInterruptPlayer::no,
                                 MorePromptOnMsg::no,
                                 CopyToMsgHistory::no);
@@ -719,34 +720,6 @@ void Throwing::handle_input(const io::InputData& input)
                 }
 
                 msg_log::clear();
-
-                const int dist = king_dist(m_origin, m_pos);
-
-                const bool is_in_effective_range =
-                        effective_king_dist_range()
-                                .is_in_range(dist);
-
-                const bool is_in_max_range =
-                        (dist <= max_king_dist());
-
-                if (!is_in_effective_range &&
-                    is_in_max_range &&
-                    (m_inv_item->data().ranged.effective_range.max > 0)) {
-                        const std::string msg =
-                                "Aiming outside effective weapon range "
-                                "(50% damage) throw anyway? " +
-                                common_text::g_yes_or_no_hint;
-
-                        msg_log::add(msg);
-
-                        const auto answer = query::yes_or_no();
-
-                        msg_log::clear();
-
-                        if (answer == BinaryAnswer::no) {
-                                return;
-                        }
-                }
 
                 auto* const actor = map::living_actor_at(m_pos);
 
