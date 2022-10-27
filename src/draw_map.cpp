@@ -399,7 +399,14 @@ static io::MapDrawObj player_memory_to_draw_obj(
 
 static void draw_unseen_cells_from_player_memory()
 {
-        const R view = viewport::get_map_view_area();
+        R view = viewport::get_map_view_area();
+
+        // Also draw a little bit outside the viewport - we allow showing a
+        // fraction of tiles if the map panel size is not aligned with a whole
+        // number of map tiles (for example 15.6 map tiles can be shown on the Y
+        // axis). The drawing is clipped to the map panel, so pixels outside the
+        // map panel will not be drawn.
+        view.p1 = view.p1.with_offsets(2, 2);
 
         for (int x = view.p0.x; x < view.p1.x; ++x) {
                 for (int y = view.p0.y; y < view.p1.y; ++y) {

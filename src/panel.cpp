@@ -59,31 +59,29 @@ static void set_game_state_panels(const P& max_gui_dims)
 
         const auto nr_log_lines = (int)msg_log::g_nr_log_lines;
 
-        const int log_border_x0 = 0;
-        const int log_border_y0 = max_gui_dims.y - nr_log_lines - 2;
-        const int log_border_x1 = map_gui_border_x0 - 1;
-        const int log_border_y1 = max_gui_dims.y - 1;
+        const int log_x0 = 1;
+        const int log_y0 = max_gui_dims.y - nr_log_lines - 1;
+        const int log_x1 = map_gui_border_x0 - 1;
+        const int log_y1 = max_gui_dims.y - 2;
+
+        const int map_x0 = 0;
+        const int map_y0 = 0;
+        const int map_x1 = max_gui_dims.x - map_gui_stats_border_w - 1;
+        const int map_y1 = log_y0 - 1;
 
         set_panel_area(
                 Panel::map,
-                0,
-                0,
-                max_gui_dims.x - map_gui_stats_border_w - 1,
-                log_border_y0 - 1);
-
-        set_panel_area(
-                Panel::log_border,
-                log_border_x0,
-                log_border_y0,
-                log_border_x1,
-                log_border_y1);
+                map_x0,
+                map_y0,
+                map_x1,
+                map_y1);
 
         set_panel_area(
                 Panel::log,
-                log_border_x0 + 1,
-                log_border_y0 + 1,
-                log_border_x1 - 1,
-                log_border_y1 - 1);
+                log_x0,
+                log_y0,
+                log_x1,
+                log_y1);
 
         set_panel_area(
                 Panel::map_gui_stats_border,

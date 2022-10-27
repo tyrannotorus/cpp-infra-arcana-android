@@ -17,7 +17,6 @@ enum class Panel
         map_gui_stats,
         map_gui_stats_border,
         log,
-        log_border,
         create_char_menu,
         create_char_descr,
         options,
