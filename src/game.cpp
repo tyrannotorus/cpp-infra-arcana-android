@@ -69,7 +69,7 @@ static const std::string s_intro_msg_default =
         "I am determined to enter these sprawling catacombs and rob them of "
         "treasures and knowledge. At the depths of the abyss lies my true "
         "destiny, an artifact of non-human origin referred to as "
-        "{light_white}\"The shining Trapezohedron\"{reset_color} "
+        "{yellow}\"The shining Trapezohedron\"{reset_color} "
         "- a window to all the secrets of the universe!";
 
 static const std::string s_intro_msg_exorcist =
@@ -79,7 +79,7 @@ static const std::string s_intro_msg_exorcist =
         "I am determined to enter these sprawling catacombs and purge them of "
         "the corruption that dwells within. At the depths of the abyss lies "
         "an artifact of non-human origin referred to as "
-        "{light_white}\"The shining Trapezohedron\"{reset_color} "
+        "{yellow}\"The shining Trapezohedron\"{reset_color} "
         "- rumored to be a window to all the secrets of the universe. "
         "This must be destroyed, so that none more may be tempted by "
         "its deceitful promises!";
@@ -502,7 +502,7 @@ void GameState::update()
         // Then another state cycle will be executed, and rendering performed.
         while (true) {
                 // Let the current actor act
-                auto* const actor = game_time::current_actor();
+                actor::Actor* const actor = game_time::current_actor();
 
                 const bool allow_act = actor->m_properties.allow_act();
 
@@ -542,7 +542,7 @@ void GameState::update()
                 }
 
                 // Stop if the next actor is the player (to trigger rendering).
-                const auto* next_actor = game_time::current_actor();
+                const actor::Actor* next_actor = game_time::current_actor();
 
                 if (actor::is_player(next_actor)) {
                         break;
@@ -591,7 +591,7 @@ void WinGameState::draw()
         }
 
         for (const std::string& section_msg : win_msg) {
-                const auto section_lines =
+                const std::vector<std::string> section_lines =
                         text_format::split(section_msg, max_w);
 
                 for (const std::string& line : section_lines) {
@@ -625,7 +625,7 @@ void WinGameState::draw()
 
 void WinGameState::update()
 {
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         switch (input.key) {
         case SDLK_SPACE:
