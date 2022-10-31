@@ -316,112 +316,133 @@ static void read_file(std::vector<std::string>& lines)
         }
 }
 
+static void remove_line(std::vector<std::string>& lines)
+{
+        if ((int)lines.size() == 0) {
+                TRACE_ERROR_RELEASE
+                        << "Invalid config file at "
+                        << "'" << paths::config_file_path() << "'"
+                        << " (end of file reached unexpectedly)!"
+                        << std::endl;
+
+                PANIC;
+        }
+
+        TRACE
+                << "Read config file line "
+                << "'" << lines[0] << "', "
+                << (int)(lines.size()) - 1 << " lines remaining"
+                << std::endl;
+
+        lines.erase(std::begin(lines));
+}
+
 static void set_variables_from_lines(std::vector<std::string>& lines)
 {
         TRACE_FUNC_BEGIN;
 
         s_master_volume_pct_option = to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_master_volume_pct_adjusted = to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_ambient_audio_enabled = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_ambient_audio_preloaded = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_input_mode = (InputMode)to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_window_px_w = to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_window_px_h = to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_always_center_view_on_player = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_tiles_mode = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_font_name = lines.front();
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         update_render_dims();
 
         s_renderer_type = (RendererType)to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_fullscreen = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_2x_scale_requested = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_2x_scale_enabled = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_text_mode_filled_walls = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_use_trap_color_when_obscured = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_intro_lvl_skipped = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_intro_popup_skipped = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_any_key_confirm_more = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_hints_mode = (HintsMode)to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_always_warn_new_mon = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_warn_on_throw_valuable = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_warn_on_light_explosive = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_warn_on_drink_malign_potion = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_warn_on_ranged_wpn_melee = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_is_ranged_wpn_auto_reload = lines.front() == "1";
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_delay_projectile_draw = to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_delay_explosion = to_int(lines.front());
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         s_default_player_name = "";
 
         const bool has_default_name = lines.front() == "1";
 
-        lines.erase(std::begin(lines));
+        remove_line(lines);
 
         if (has_default_name) {
                 s_default_player_name = lines.front();
 
-                lines.erase(std::begin(lines));
+                remove_line(lines);
         }
 
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
                 s_has_seen_hint_global[i] = lines.front() == "1";
 
-                lines.erase(std::begin(lines));
+                remove_line(lines);
         }
 
         ASSERT(lines.empty());
