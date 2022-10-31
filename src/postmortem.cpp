@@ -67,17 +67,15 @@ void PostmortemInfo::draw()
 
                 ++y;
         }
-
-        io::update_screen();
 }
 
 void PostmortemInfo::update()
 {
         const int line_jump = 3;
 
-        const int nr_lines = m_lines.size();
+        const int nr_lines = (int)m_lines.size();
 
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         switch (input.key) {
         case SDLK_DOWN:

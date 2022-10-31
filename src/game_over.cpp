@@ -268,43 +268,37 @@ static std::vector<ColoredString> make_game_summary_lines(
 // -----------------------------------------------------------------------------
 void on_game_over(const IsWin is_win)
 {
-        const auto game_summary_time_stamp =
+        const std::string game_summary_time_stamp =
                 game::start_time().time_str(TimeType::second, false);
 
-        const auto game_summary_filename =
+        const std::string game_summary_filename =
                 map::g_player->name_a() +
                 "_" +
                 game_summary_time_stamp +
                 ".txt";
 
-        const auto game_summary_file_path =
+        const std::string game_summary_file_path =
                 paths::user_dir() +
                 game_summary_filename;
 
-        auto highscore_entry =
+        HighscoreEntry highscore_entry =
                 highscore::make_entry_from_current_game_data(
                         game_summary_file_path,
                         is_win);
 
         highscore::append_entry_to_highscores_file(highscore_entry);
 
-        const auto game_summary_lines =
-                make_game_summary_lines(
-                        highscore_entry);
+        const std::vector<ColoredString> game_summary_lines =
+                make_game_summary_lines(highscore_entry);
 
         // Dump the lines to a memorial file.
-        make_memorial_file(
-                game_summary_lines,
-                game_summary_file_path);
+        make_memorial_file(game_summary_lines, game_summary_file_path);
 
         // From now on the session data is not needed anymore.
         init::cleanup_session();
 
         // Show game summary first, then highscores.
-        states::push(
-                std::make_unique<BrowseHighscore>());
+        states::push(std::make_unique<BrowseHighscore>());
 
-        states::push(
-                std::make_unique<PostmortemInfo>(
-                        game_summary_lines));
+        states::push(std::make_unique<PostmortemInfo>(game_summary_lines));
 }

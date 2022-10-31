@@ -116,9 +116,6 @@ void go_to_nxt()
 
         TRACE << "Leaving dungeon level '" << map::g_dlvl << "'" << std::endl;
 
-        io::clear_screen();
-        io::update_screen();
-
         minimap::clear();
 
         s_map_list.erase(std::begin(s_map_list));
