@@ -10,7 +10,7 @@ build-linux:
         stage: build
         script:
                 - ./build-release.sh
-                - ./run-test.sh
+                - ./run-tests.sh
                 - mv build/target/ia ia-linux-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)
         artifacts:
                 paths:
