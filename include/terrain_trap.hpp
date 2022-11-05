@@ -32,9 +32,6 @@ enum class TrapId
         blinding,
         deafening,
         dart,
-        gas_confusion,
-        gas_fear,
-        gas_paralyze,
         smoke,
         fire,
         alarm,
@@ -301,68 +298,6 @@ private:
         P m_spear_origin;
 
         bool m_is_spear_origin_destroyed;
-};
-
-class GasTrapImpl : public MechTrapImpl
-{
-protected:
-        friend class Trap;
-
-        GasTrapImpl(P pos, TrapId type, Trap* const base_trap) :
-                MechTrapImpl(pos, type, base_trap) {}
-
-        std::string name(const Article article) const override
-        {
-                std::string name =
-                        (article == Article::a) ? "a" : "the";
-
-                name += " gas trap";
-
-                return name;
-        }
-
-        Color color() const override
-        {
-                return colors::magenta();
-        }
-
-        Range nr_turns_range_to_trigger() const override
-        {
-                return {0, 4};
-        }
-};
-
-class TrapGasConfusion : public GasTrapImpl
-{
-private:
-        friend class Trap;
-
-        TrapGasConfusion(P pos, Trap* const base_trap) :
-                GasTrapImpl(pos, TrapId::gas_confusion, base_trap) {}
-
-        void trigger() override;
-};
-
-class TrapGasParalyzation : public GasTrapImpl
-{
-private:
-        friend class Trap;
-
-        TrapGasParalyzation(P pos, Trap* const base_trap) :
-                GasTrapImpl(pos, TrapId::gas_paralyze, base_trap) {}
-
-        void trigger() override;
-};
-
-class TrapGasFear : public GasTrapImpl
-{
-private:
-        friend class Trap;
-
-        TrapGasFear(P pos, Trap* const base_trap) :
-                GasTrapImpl(pos, TrapId::gas_fear, base_trap) {}
-
-        void trigger() override;
 };
 
 class TrapBlindingFlash : public MechTrapImpl

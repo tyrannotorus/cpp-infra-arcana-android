@@ -132,18 +132,6 @@ TrapImpl* Trap::make_trap_impl_from_id(const TrapId trap_id)
                 return new TrapSpear(m_pos, this);
                 break;
 
-        case TrapId::gas_confusion:
-                return new TrapGasConfusion(m_pos, this);
-                break;
-
-        case TrapId::gas_paralyze:
-                return new TrapGasParalyzation(m_pos, this);
-                break;
-
-        case TrapId::gas_fear:
-                return new TrapGasFear(m_pos, this);
-                break;
-
         case TrapId::blinding:
                 return new TrapBlindingFlash(m_pos, this);
                 break;
@@ -793,105 +781,6 @@ void TrapSpear::trigger()
         }
 
         TRACE_FUNC_BEGIN_VERBOSE;
-}
-
-void TrapGasConfusion::trigger()
-{
-        TRACE_FUNC_BEGIN_VERBOSE;
-
-        if (map::g_seen.at(m_pos)) {
-                msg_log::add(
-                        "A burst of gas is released from a vent in the floor!");
-        }
-
-        Snd snd(
-                "I hear a burst of gas.",
-                audio::SfxId::gas,
-                IgnoreMsgIfOriginSeen::yes,
-                m_pos,
-                nullptr,
-                SndVol::low,
-                AlertsMon::yes);
-
-        snd.run();
-
-        explosion::run(
-                m_pos,
-                ExplType::apply_prop,
-                EmitExplSnd::no,
-                -1,
-                ExplExclCenter::no,
-                {property_factory::make(PropId::confused)},
-                colors::magenta(),
-                ExplIsGas::yes);
-
-        TRACE_FUNC_END_VERBOSE;
-}
-
-void TrapGasParalyzation::trigger()
-{
-        TRACE_FUNC_BEGIN_VERBOSE;
-
-        if (map::g_seen.at(m_pos)) {
-                msg_log::add(
-                        "A burst of gas is released from a vent in the floor!");
-        }
-
-        Snd snd(
-                "I hear a burst of gas.",
-                audio::SfxId::gas,
-                IgnoreMsgIfOriginSeen::yes,
-                m_pos,
-                nullptr,
-                SndVol::low,
-                AlertsMon::yes);
-
-        snd.run();
-
-        explosion::run(
-                m_pos,
-                ExplType::apply_prop,
-                EmitExplSnd::no,
-                -1,
-                ExplExclCenter::no,
-                {property_factory::make(PropId::paralyzed)},
-                colors::magenta(),
-                ExplIsGas::yes);
-
-        TRACE_FUNC_END_VERBOSE;
-}
-
-void TrapGasFear::trigger()
-{
-        TRACE_FUNC_BEGIN_VERBOSE;
-
-        if (map::g_seen.at(m_pos)) {
-                msg_log::add(
-                        "A burst of gas is released from a vent in the floor!");
-        }
-
-        Snd snd(
-                "I hear a burst of gas.",
-                audio::SfxId::gas,
-                IgnoreMsgIfOriginSeen::yes,
-                m_pos,
-                nullptr,
-                SndVol::low,
-                AlertsMon::yes);
-
-        snd.run();
-
-        explosion::run(
-                m_pos,
-                ExplType::apply_prop,
-                EmitExplSnd::no,
-                -1,
-                ExplExclCenter::no,
-                {property_factory::make(PropId::terrified)},
-                colors::magenta(),
-                ExplIsGas::yes);
-
-        TRACE_FUNC_END_VERBOSE;
 }
 
 void TrapBlindingFlash::trigger()

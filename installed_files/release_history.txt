@@ -14,6 +14,7 @@
 - Monoliths are roughly twice as common (typically ~1 per floor instead of ~0.5 per floor), but only yield half as much XP.
 - The "Regenerating" status effect no longer heals wounds (it caused bad gameplay design combined with certain Flagellant mechanics)
 - Status effects that will end immediately after the next action are shown as e.g. "Premonition (ending)" in the gui, so that it is possible to know whether it will last until the next player turn or not (previously seeing an active status effect listed could be misleading since it could end before any monster acts).
+- Removed all gas trap types (confusion gas etc)
 
 ##############################
 # User interface
