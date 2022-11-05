@@ -125,7 +125,9 @@ static const SpellDomainToShockTypeMap s_spell_domain_to_shock_type_map = {
         {SpellDomain::clairvoyance, ShockSrc::cast_intr_spell_clairvoyance},
         {SpellDomain::enchantment, ShockSrc::cast_intr_spell_enchantment},
         {SpellDomain::invocation, ShockSrc::cast_intr_spell_invocation},
-        {SpellDomain::transmutation, ShockSrc::cast_intr_spell_transmutation}};
+        {SpellDomain::transmutation, ShockSrc::cast_intr_spell_transmutation},
+        // NOTE: Not all spells belong to a domain:
+        {SpellDomain::END, ShockSrc::cast_intr_spell_general}};
 
 static const std::string s_spell_resist_msg = "The spell is resisted!";
 

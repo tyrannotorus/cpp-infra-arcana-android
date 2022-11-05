@@ -304,6 +304,8 @@ enum class ShockSrc
         cast_intr_spell_invocation,
         cast_intr_spell_transmutation,
         cast_intr_spell_blood,
+        // For misc spells that do not belong to a domain:
+        cast_intr_spell_general,
 
         time,
 

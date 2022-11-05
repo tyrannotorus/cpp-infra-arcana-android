@@ -368,6 +368,7 @@ int Actor::shock_resistance(const ShockSrc shock_src) const
         case ShockSrc::cast_intr_spell_enchantment:
         case ShockSrc::cast_intr_spell_invocation:
         case ShockSrc::cast_intr_spell_transmutation:
+        case ShockSrc::cast_intr_spell_general:
                 if (player_bon::is_bg(Bg::occultist)) {
                         res += 50;
                 }
