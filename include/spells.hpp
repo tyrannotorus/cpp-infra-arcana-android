@@ -2268,7 +2268,7 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int pct_sp_per_hp(SpellSkill skill) const;
+        int nr_sp_per_hp(SpellSkill skill) const;
 
         int base_max_cost(const SpellSkill skill) const override
         {

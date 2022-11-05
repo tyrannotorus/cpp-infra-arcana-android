@@ -5535,9 +5535,9 @@ std::vector<std::string> SpellCrimsonPassage::descr_specific(
 // -----------------------------------------------------------------------------
 // Sacrifice Life
 // -----------------------------------------------------------------------------
-int SpellSacrificeLife::pct_sp_per_hp(const SpellSkill skill) const
+int SpellSacrificeLife::nr_sp_per_hp(const SpellSkill skill) const
 {
-        return ((int)skill + 1) * 50;
+        return 1 + (int)skill;
 }
 
 void SpellSacrificeLife::run_effect(
@@ -5568,7 +5568,7 @@ void SpellSacrificeLife::run_effect(
                 nullptr,
                 AllowWound::no);
 
-        const int sp_gained = (hp_drained * pct_sp_per_hp(skill)) / 100;
+        const int sp_gained = hp_drained * nr_sp_per_hp(skill);
 
         caster->restore_sp(sp_gained, true);
 }
@@ -5579,14 +5579,24 @@ std::vector<std::string> SpellSacrificeLife::descr_specific(
         std::vector<std::string> descr;
 
         descr.emplace_back(
-                "Brings the caster to the brink of death in order to restore "
+                "Sacrifices the life force of the caster in order to restore "
                 "the spirit. The amount restored is proportional to the life "
-                "sacrificed.");
+                "lost. A maximum of 8 hit points may be sacrificed.");
 
-        descr.emplace_back(
-                "Spirit points gained is " +
-                std::to_string(pct_sp_per_hp(skill)) +
-                "% of hit points sacrificed.");
+        const int k = nr_sp_per_hp(skill);
+
+        if (k == 1) {
+                descr.emplace_back(
+                        "For each hit point sacrificed, " +
+                        std::to_string(k) +
+                        " spirit point is gained.");
+        }
+        else {
+                descr.emplace_back(
+                        "For each hit point sacrificed, " +
+                        std::to_string(k) +
+                        " spirit points are gained.");
+        }
 
         return descr;
 }
