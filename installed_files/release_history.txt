@@ -9,6 +9,7 @@
 - Added a new spell domain "Blood" (with some new spells), where all spells costs hit points to cast.
 - Spells are no longer removed from the spell list when forgotten due to triggering magic traps or using gongs, instead they are marked as "forgotten". Activating a monolith recalls all forgotten spells, and casting from a manuscript recalls that particular spell.
 - A few particularly powerful spells are "tenebrous", such spells are immediately "forgotten" when they are cast from memory, and cannot be cast until recalled again (by activating a monolith, or casting the spell from a manuscript).
+- The Cursed status effect no longer causes a chance to fail spell casting (but "Doomed" still causes a chance to fail).
 - Changed Potion of Invisibility into a "tenebrous" spell instead.
 - Monoliths are roughly twice as common (typically ~1 per floor instead of ~0.5 per floor), but only yield half as much XP.
 - The "Regenerating" status effect no longer heals wounds (it caused bad gameplay design combined with certain Flagellant mechanics)

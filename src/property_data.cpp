@@ -800,9 +800,7 @@ static void init_data_list()
         d.std_rnd_turns = Range(30, 60);
         d.name = "Cursed";
         d.name_short = "Cursed";
-        d.descr =
-                "-10% to hit chance, evasion, stealth, and searching, "
-                "5% chance to fail when attempting to read or cast spells.";
+        d.descr = "-10% to hit chance, evasion, stealth, and searching.";
         d.msg_start_player = "I feel misfortunate.";
         d.msg_start_mon = "is cursed.";
         d.msg_end_player = "I feel more fortunate.";

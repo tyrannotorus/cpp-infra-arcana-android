@@ -639,12 +639,6 @@ public:
         PropCursed() :
                 Prop(PropId::cursed) {}
 
-        bool allow_read_chance(
-                Verbose verbose) const override;
-
-        bool allow_cast_intr_spell_chance(
-                Verbose verbose) const override;
-
         int ability_mod(AbilityId ability) const override;
 
         void on_applied() override;

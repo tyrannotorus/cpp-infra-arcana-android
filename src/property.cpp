@@ -184,58 +184,6 @@ void PropCursed::on_more(const Prop& new_prop)
         curse_adjacent(m_owner->m_pos);
 }
 
-bool PropCursed::allow_read_chance(const Verbose verbose) const
-{
-        if (rnd::percent(5)) {
-                if (verbose == Verbose::yes) {
-                        if (actor::is_player(m_owner)) {
-                                msg_log::add(common_text::g_miscast_player);
-                        }
-                        else if (actor::can_player_see_actor(*m_owner)) {
-                                const std::string name =
-                                        text_format::first_to_upper(
-                                                m_owner->name_the());
-
-                                msg_log::add(
-                                        name +
-                                        " " +
-                                        common_text::g_miscast_mon);
-                        }
-                }
-
-                return false;
-        }
-        else {
-                return true;
-        }
-}
-
-bool PropCursed::allow_cast_intr_spell_chance(const Verbose verbose) const
-{
-        if (rnd::percent(5)) {
-                if (verbose == Verbose::yes) {
-                        if (actor::is_player(m_owner)) {
-                                msg_log::add(common_text::g_miscast_player);
-                        }
-                        else if (actor::can_player_see_actor(*m_owner)) {
-                                const std::string name =
-                                        text_format::first_to_upper(
-                                                m_owner->name_the());
-
-                                msg_log::add(
-                                        name +
-                                        " " +
-                                        common_text::g_miscast_mon);
-                        }
-                }
-
-                return false;
-        }
-        else {
-                return true;
-        }
-}
-
 int PropCursed::ability_mod(const AbilityId ability) const
 {
         switch (ability) {
