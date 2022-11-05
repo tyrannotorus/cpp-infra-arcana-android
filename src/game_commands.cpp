@@ -66,6 +66,7 @@
 #include "state.hpp"
 #include "teleport.hpp"
 #include "terrain_factory.hpp"
+#include "terrain_trap.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -982,9 +983,28 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f8: {
-                map::g_player->m_properties.apply(
-                        property_factory::make(
-                                PropId::cursed));
+                auto* const trap =
+                        static_cast<terrain::Trap*>(
+                                terrain::make(
+                                        terrain::Id::trap,
+                                        map::g_player->m_pos.with_x_offset(2)));
+
+                terrain::Terrain* const mimic =
+                        terrain::make(
+                                terrain::Id::floor,
+                                map::g_player->m_pos.with_x_offset(2));
+
+                trap->set_mimic_terrain(mimic);
+
+                const bool is_trap_ok =
+                        trap->try_init_type(terrain::TrapId::any);
+
+                if (is_trap_ok) {
+                        map::update_terrain(trap);
+                }
+                else {
+                        delete trap;
+                }
         } break;
 
         case GameCmd::debug_f9: {

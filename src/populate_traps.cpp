@@ -129,7 +129,7 @@ static terrain::Trap* try_make_trap(const terrain::TrapId id, const P& pos)
                 return nullptr;
         }
 
-        auto* const mimic = terrain::make(t->id(), pos);
+        terrain::Terrain* const mimic = terrain::make(t->id(), pos);
 
         auto* const trap =
                 static_cast<terrain::Trap*>(
