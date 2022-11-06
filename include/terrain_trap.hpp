@@ -518,8 +518,6 @@ protected:
 
         virtual ~MagicTrapImpl() = default;
 
-        TrapPlacementValid on_place() override;
-
         std::string name(const Article article) const override
         {
                 std::string name =

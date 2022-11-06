@@ -554,23 +554,6 @@ Matl Trap::matl() const
 // -----------------------------------------------------------------------------
 // Trap implementations
 // -----------------------------------------------------------------------------
-TrapPlacementValid MagicTrapImpl::on_place()
-{
-        // Do not allow placing magic traps next to blocking terrains
-        // (non-Occultist characters cannot disarm them)
-        for (const P& d : dir_utils::g_dir_list) {
-                const P p(m_pos + d);
-
-                const auto* const t = map::g_terrain.at(p);
-
-                if (!t->is_walkable()) {
-                        return TrapPlacementValid::no;
-                }
-        }
-
-        return TrapPlacementValid::yes;
-}
-
 TrapDart::TrapDart(P pos, Trap* const base_trap) :
         MechTrapImpl(pos, TrapId::dart, base_trap),
         m_is_poisoned((map::g_dlvl >= g_dlvl_harder_traps) && rnd::one_in(3)),
