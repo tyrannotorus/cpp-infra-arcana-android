@@ -411,14 +411,18 @@ void Trap::disarm()
                 return;
         }
 
+        if (m_nr_turns_until_trigger != -1) {
+                msg_log::add("It cannot be disarmed now!");
+
+                return;
+        }
+
         msg_log::add(m_trap_impl->disarm_msg());
 
         destroy();
 
         if (is_magic_trap) {
-                map::g_player->restore_sp(
-                        rnd::range(1, 6),
-                        true);  // Can go above max
+                map::g_player->restore_sp(rnd::range(1, 6), true);
         }
 
         game_time::tick();
