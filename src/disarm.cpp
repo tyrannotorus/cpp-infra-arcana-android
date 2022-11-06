@@ -108,8 +108,6 @@ void player_disarm()
 
         trap->disarm();
 
-        game_time::tick();
-
 }  // player_disarm
 
 }  // namespace disarm

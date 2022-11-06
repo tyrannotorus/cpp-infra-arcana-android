@@ -420,6 +420,8 @@ void Trap::disarm()
                         rnd::range(1, 6),
                         true);  // Can go above max
         }
+
+        game_time::tick();
 }
 
 void Trap::destroy()
