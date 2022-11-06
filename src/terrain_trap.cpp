@@ -456,19 +456,24 @@ DidTriggerTrap Trap::trigger_trap(actor::Actor* const actor)
 
         (void)actor;
 
-        TRACE_VERBOSE << "Name of trap triggering: "
-                      << m_trap_impl->name(Article::a)
-                      << std::endl;
+        TRACE_VERBOSE
+                << "Name of trap triggering: "
+                << m_trap_impl->name(Article::a)
+                << std::endl;
 
         m_nr_turns_until_trigger = -1;
 
-        TRACE_VERBOSE << "Calling trigger in trap implementation" << std::endl;
+        TRACE_VERBOSE << "Calling trap implementation trigger" << std::endl;
 
         m_trap_impl->trigger();
 
-        // NOTE: This object may now be deleted (e.g. a web was torn down)!
+        // Traps are always destroyed after being triggered.
+
+        // NOTE: This deletes this terrain object!
+        destroy();
 
         TRACE_FUNC_END_VERBOSE;
+
         return DidTriggerTrap::yes;
 }
 
@@ -1238,8 +1243,6 @@ void TrapWeb::trigger()
                         actor->become_aware_player(actor::AwareSource::other);
                 }
         }
-
-        m_base_trap->destroy();
 
         TRACE_FUNC_END_VERBOSE;
 }
