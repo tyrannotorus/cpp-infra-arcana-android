@@ -48,6 +48,43 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static void print_magic_trap_trigger_messages(
+        const actor::Actor& actor,
+        const bool is_hidden)
+{
+        const bool is_player = actor::is_player(&actor);
+        const bool can_see = actor.m_properties.allow_see();
+        const bool player_sees_actor = actor::can_player_see_actor(actor);
+        const std::string actor_name = actor.name_the();
+
+        if (is_player) {
+                if (can_see) {
+                        std::string msg = "A beam of light shoots out from";
+
+                        if (!is_hidden) {
+                                msg += " a curious shape on";
+                        }
+
+                        msg += " the floor!";
+
+                        msg_log::add(msg);
+                }
+                else {
+                        msg_log::add("I feel a peculiar energy around me!");
+                }
+
+                msg_log::more_prompt();
+        }
+        else {
+                // Is a monster
+                if (player_sees_actor) {
+                        msg_log::add(
+                                "A beam of light shoots out under " +
+                                actor_name +
+                                ".");
+                }
+        }
+}
 
 // -----------------------------------------------------------------------------
 // terrain
@@ -223,8 +260,9 @@ void Trap::on_new_turn_hook()
         if (m_nr_turns_until_trigger > 0) {
                 --m_nr_turns_until_trigger;
 
-                TRACE_VERBOSE << "Number of turns until trigger: "
-                              << m_nr_turns_until_trigger << std::endl;
+                TRACE
+                        << "Number of turns until trigger: "
+                        << m_nr_turns_until_trigger << std::endl;
 
                 if (m_nr_turns_until_trigger == 0) {
                         // NOTE: This will reset number of turns until triggered
@@ -235,9 +273,15 @@ void Trap::on_new_turn_hook()
 
 void Trap::trigger_start(const actor::Actor* actor)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         ASSERT(m_trap_impl);
+
+        TRACE
+                << "Start trigger for trap of type '"
+                << m_trap_impl->name(Article::a)
+                << "'"
+                << std::endl;
 
         if (actor::is_player(actor)) {
                 // Reveal trap if triggered by player stepping on it
@@ -312,7 +356,7 @@ void Trap::trigger_start(const actor::Actor* actor)
                 trigger_trap(nullptr);
         }
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
@@ -452,7 +496,7 @@ void Trap::destroy()
 
 DidTriggerTrap Trap::trigger_trap(actor::Actor* const actor)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         (void)actor;
 
@@ -472,14 +516,14 @@ DidTriggerTrap Trap::trigger_trap(actor::Actor* const actor)
         // NOTE: This deletes this terrain object!
         destroy();
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 
         return DidTriggerTrap::yes;
 }
 
 void Trap::reveal(const PrintRevealMsg print_reveal_msg)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         const bool is_hidden_before = m_is_hidden;
 
@@ -510,7 +554,7 @@ void Trap::reveal(const PrintRevealMsg print_reveal_msg)
                 msg_log::add(msg);
         }
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void Trap::on_revealed_from_searching()
@@ -536,9 +580,10 @@ Color Trap::color_default() const
 
 char Trap::character() const
 {
-        return m_is_hidden
-                ? m_mimic_terrain->character()
-                : m_trap_impl->character();
+        return (
+                m_is_hidden
+                        ? m_mimic_terrain->character()
+                        : m_trap_impl->character());
 }
 
 gfx::TileId Trap::tile() const
@@ -618,7 +663,7 @@ TrapPlacementValid TrapDart::on_place()
 
 void TrapDart::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         ASSERT((m_dart_origin.x == m_pos.x) || (m_dart_origin.y == m_pos.y));
         ASSERT(m_dart_origin != m_pos);
@@ -679,7 +724,7 @@ void TrapDart::trigger()
 
         delete wpn;
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 TrapSpear::TrapSpear(P pos, Trap* const base_trap) :
@@ -725,7 +770,7 @@ TrapPlacementValid TrapSpear::on_place()
 
 void TrapSpear::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         ASSERT(m_spear_origin.x == m_pos.x || m_spear_origin.y == m_pos.y);
         ASSERT(m_spear_origin != m_pos);
@@ -760,8 +805,9 @@ void TrapSpear::trigger()
                 }
                 else {
                         // Not poisoned
-                        wpn = static_cast<item::Wpn*>(
-                                item::make(item::Id::trap_spear));
+                        wpn =
+                                static_cast<item::Wpn*>(
+                                        item::make(item::Id::trap_spear));
                 }
 
                 // Attack!
@@ -774,12 +820,12 @@ void TrapSpear::trigger()
                 delete wpn;
         }
 
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 }
 
 void TrapBlindingFlash::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         if (map::g_seen.at(m_pos)) {
                 msg_log::add("There is an intense flash of light!");
@@ -794,12 +840,12 @@ void TrapBlindingFlash::trigger()
                 {property_factory::make(PropId::blind)},
                 colors::yellow());
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapDeafening::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         if (map::g_seen.at(m_pos)) {
                 msg_log::add(
@@ -815,12 +861,12 @@ void TrapDeafening::trigger()
                 {property_factory::make(PropId::deaf)},
                 colors::light_white());
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapTeleport::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         auto* const actor_here = map::living_actor_at(m_pos);
 
@@ -831,42 +877,15 @@ void TrapTeleport::trigger()
                 return;
         }
 
-        const auto is_player = actor::is_player(actor_here);
-        const auto can_see = actor_here->m_properties.allow_see();
-        const auto player_sees_actor = actor::can_player_see_actor(*actor_here);
-        const auto actor_name = actor_here->name_the();
-        const auto is_hidden = m_base_trap->is_hidden();
+        map::update_vision();
 
-        if (is_player) {
-                map::update_vision();
-
-                if (can_see) {
-                        std::string msg = "A beam of light shoots out from";
-
-                        if (!is_hidden) {
-                                msg += " a curious shape on";
-                        }
-
-                        msg += " the floor!";
-
-                        msg_log::add(msg);
-                }
-                else {
-                        // Cannot see
-                        msg_log::add("I feel a peculiar energy around me!");
-                }
-        }
-        else {
-                // Is a monster
-                if (player_sees_actor) {
-                        msg_log::add(
-                                "A beam shoots out under " + actor_name + ".");
-                }
-        }
+        print_magic_trap_trigger_messages(
+                *actor_here,
+                m_base_trap->is_hidden());
 
         teleport(*actor_here);
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapSummonMon::trigger()
@@ -882,40 +901,17 @@ void TrapSummonMon::trigger()
                 return;
         }
 
-        const bool is_player = actor::is_player(actor_here);
-        const bool is_hidden = m_base_trap->is_hidden();
-
-        TRACE_VERBOSE << "Is player: " << is_player << std::endl;
-
-        if (!is_player) {
-                TRACE_VERBOSE << "Not triggered by player" << std::endl;
-                TRACE_FUNC_END_VERBOSE;
+        if (!actor::is_player(actor_here)) {
+                TRACE << "Not triggered by player" << std::endl;
+                TRACE_FUNC_END;
                 return;
         }
 
-        const bool can_see = actor_here->m_properties.allow_see();
-        TRACE_VERBOSE << "Actor can see: " << can_see << std::endl;
+        map::update_vision();
 
-        const std::string actor_name = actor_here->name_the();
-        TRACE_VERBOSE << "Actor name: " << actor_name << std::endl;
-
-        map::g_player->update_fov();
-
-        if (can_see) {
-                std::string msg = "A beam of light shoots out from";
-
-                if (!is_hidden) {
-                        msg += " a curious shape on";
-                }
-
-                msg += " the floor!";
-
-                msg_log::add(msg);
-        }
-        else {
-                // Cannot see
-                msg_log::add("I feel a peculiar energy around me!");
-        }
+        print_magic_trap_trigger_messages(
+                *actor_here,
+                m_base_trap->is_hidden());
 
         TRACE << "Finding summon candidates" << std::endl;
         std::vector<actor::Id> summon_bucket;
@@ -930,13 +926,13 @@ void TrapSummonMon::trigger()
         }
 
         if (summon_bucket.empty()) {
-                TRACE_VERBOSE << "No eligible candidates found" << std::endl;
+                TRACE << "No eligible candidates found" << std::endl;
         }
         else {
                 // Eligible monsters found
                 const auto id_to_summon = rnd::element(summon_bucket);
 
-                TRACE_VERBOSE << "Actor id: " << int(id_to_summon) << std::endl;
+                TRACE << "Actor id: " << int(id_to_summon) << std::endl;
 
                 const auto summoned =
                         actor::spawn(m_pos, {id_to_summon}, map::rect())
@@ -979,7 +975,7 @@ void TrapSummonMon::trigger()
 
 void TrapHpSap::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         auto* const actor_here = map::living_actor_at(m_pos);
 
@@ -990,42 +986,17 @@ void TrapHpSap::trigger()
                 return;
         }
 
-        const bool is_player = actor::is_player(actor_here);
-        const bool is_hidden = m_base_trap->is_hidden();
-
-        TRACE_VERBOSE << "Is player: " << is_player << std::endl;
-
-        if (!is_player) {
-                TRACE_VERBOSE << "Not triggered by player" << std::endl;
-
-                TRACE_FUNC_END_VERBOSE;
-
+        if (!actor::is_player(actor_here)) {
+                TRACE << "Not triggered by player" << std::endl;
+                TRACE_FUNC_END;
                 return;
         }
 
-        const bool can_see = actor_here->m_properties.allow_see();
+        map::update_vision();
 
-        TRACE_VERBOSE << "Actor can see: " << can_see << std::endl;
-
-        const std::string actor_name = actor_here->name_the();
-
-        TRACE_VERBOSE << "Actor name: " << actor_name << std::endl;
-
-        if (can_see) {
-                std::string msg = "A beam of light shoots out from";
-
-                if (!is_hidden) {
-                        msg += " a curious shape on";
-                }
-
-                msg += " the floor!";
-
-                msg_log::add(msg);
-        }
-        else {
-                // Cannot see
-                msg_log::add("I feel a peculiar energy around me!");
-        }
+        print_magic_trap_trigger_messages(
+                *actor_here,
+                m_base_trap->is_hidden());
 
         auto* const hp_sap = property_factory::make(PropId::hp_sap);
 
@@ -1033,12 +1004,12 @@ void TrapHpSap::trigger()
 
         actor_here->m_properties.apply(hp_sap);
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapSpiSap::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         auto* const actor_here = map::living_actor_at(m_pos);
 
@@ -1049,42 +1020,17 @@ void TrapSpiSap::trigger()
                 return;
         }
 
-        const bool is_player = actor::is_player(actor_here);
-        const bool is_hidden = m_base_trap->is_hidden();
-
-        TRACE_VERBOSE << "Is player: " << is_player << std::endl;
-
-        if (!is_player) {
-                TRACE_VERBOSE << "Not triggered by player" << std::endl;
-
-                TRACE_FUNC_END_VERBOSE;
-
+        if (!actor::is_player(actor_here)) {
+                TRACE << "Not triggered by player" << std::endl;
+                TRACE_FUNC_END;
                 return;
         }
 
-        const bool can_see = actor_here->m_properties.allow_see();
+        map::update_vision();
 
-        TRACE_VERBOSE << "Actor can see: " << can_see << std::endl;
-
-        const std::string actor_name = actor_here->name_the();
-
-        TRACE_VERBOSE << "Actor name: " << actor_name << std::endl;
-
-        if (can_see) {
-                std::string msg = "A beam of light shoots out from";
-
-                if (!is_hidden) {
-                        msg += " a curious shape on";
-                }
-
-                msg += " the floor!";
-
-                msg_log::add(msg);
-        }
-        else {
-                // Cannot see
-                msg_log::add("I feel a peculiar energy around me!");
-        }
+        print_magic_trap_trigger_messages(
+                *actor_here,
+                m_base_trap->is_hidden());
 
         auto* const sp_sap = property_factory::make(PropId::spi_sap);
 
@@ -1092,12 +1038,12 @@ void TrapSpiSap::trigger()
 
         actor_here->m_properties.apply(sp_sap);
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapSmoke::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         if (map::g_seen.at(m_pos)) {
                 msg_log::add(
@@ -1118,12 +1064,12 @@ void TrapSmoke::trigger()
 
         explosion::run_smoke_explosion_at(m_pos);
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapFire::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         if (map::g_seen.at(m_pos)) {
                 msg_log::add("Flames burst out from a vent in the floor!");
@@ -1148,12 +1094,12 @@ void TrapFire::trigger()
                 ExplExclCenter::no,
                 {property_factory::make(PropId::burning)});
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapAlarm::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         Snd snd(
                 "An alarm sounds!",
@@ -1166,12 +1112,12 @@ void TrapAlarm::trigger()
 
         snd.run();
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapWeb::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         auto* const actor_here = map::living_actor_at(m_pos);
 
@@ -1227,12 +1173,12 @@ void TrapWeb::trigger()
                 }
         }
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapSlow::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         auto* const actor_here = map::living_actor_at(m_pos);
 
@@ -1246,12 +1192,12 @@ void TrapSlow::trigger()
         actor_here->m_properties.apply(
                 property_factory::make(PropId::slowed));
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapCurse::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         auto* const actor_here = map::living_actor_at(m_pos);
 
@@ -1262,15 +1208,21 @@ void TrapCurse::trigger()
                 return;
         }
 
+        map::update_vision();
+
+        print_magic_trap_trigger_messages(
+                *actor_here,
+                m_base_trap->is_hidden());
+
         actor_here->m_properties.apply(
                 property_factory::make(PropId::cursed));
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 void TrapUnlearnSpell::trigger()
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
+        TRACE_FUNC_BEGIN;
 
         auto* const actor_here = map::living_actor_at(m_pos);
 
@@ -1281,29 +1233,18 @@ void TrapUnlearnSpell::trigger()
                 return;
         }
 
-        // TODO: Monsters could unlearn spells too
+        // TODO: Monsters could unlearn spells too.
         if (!actor::is_player(actor_here)) {
+                TRACE << "Not triggered by player" << std::endl;
+                TRACE_FUNC_END;
                 return;
         }
 
-        const bool can_see = actor_here->m_properties.allow_see();
-        const bool is_hidden = m_base_trap->is_hidden();
+        map::update_vision();
 
-        if (can_see) {
-                std::string msg = "A beam of light shoots out from";
-
-                if (!is_hidden) {
-                        msg += " a curious shape on";
-                }
-
-                msg += " the floor!";
-
-                msg_log::add(msg);
-        }
-        else {
-                // Cannot see
-                msg_log::add("I feel a peculiar energy around me!");
-        }
+        print_magic_trap_trigger_messages(
+                *actor_here,
+                m_base_trap->is_hidden());
 
         std::vector<SpellId> id_bucket;
 
@@ -1349,7 +1290,7 @@ void TrapUnlearnSpell::trigger()
 
         player_spells::forget_spell(id);
 
-        TRACE_FUNC_END_VERBOSE;
+        TRACE_FUNC_END;
 }
 
 }  // namespace terrain

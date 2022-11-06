@@ -14,12 +14,12 @@
 - Monoliths are roughly twice as common (typically ~1 per floor instead of ~0.5 per floor), but only yield half as much XP.
 - The "Regenerating" status effect no longer heals wounds (it caused bad gameplay design combined with certain Flagellant mechanics)
 - Status effects that will end immediately after the next action are shown as e.g. "Premonition (ending)" in the gui, so that it is possible to know whether it will last until the next player turn or not (previously seeing an active status effect listed could be misleading since it could end before any monster acts).
-- Removed all gas trap types (confusion gas etc)
 - Traps are always destroyed after they are triggered (i.e. they can only ever be triggered once).
-- Magic traps may now spawn anywhere (previously they were not allowed to spawn next to blocking terrain, which made these trap types a bit rare).
 - It is no longer possible to disarm a trap that has started triggering ("I hear a click...").
+- Magic traps may now spawn anywhere (previously they were not allowed to spawn next to blocking terrain, which made these trap types a bit rare).
 - Dart traps, spear traps, and alarm traps now always trigger instantly when a creature steps on them.
-- Alarm traps now emit a sound with "global" range, instead of just a "loud" sound (although creatures with short hearing range such as Worm Masses still needs to be very near to hear the sound).
+- Alarm traps now emit a sound with "global" range, instead of just a "loud" sound (although creatures with short hearing range such as Worm Masses still need to be very near to hear the sound).
+- Removed all gas trap types (confusion gas etc)
 
 ##############################
 # User interface
