@@ -21,7 +21,8 @@ class Actor;
 enum class SndVol
 {
         low,
-        high
+        high,
+        global
 };
 
 enum class AlertsMon
@@ -116,9 +117,9 @@ public:
                 return m_actor_who_made_sound;
         }
 
-        int is_loud() const
+        SndVol volume() const
         {
-                return m_vol == SndVol::high;
+                return m_vol;
         }
 
         void add_string(const std::string& str)

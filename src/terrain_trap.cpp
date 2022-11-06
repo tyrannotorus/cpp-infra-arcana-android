@@ -1161,7 +1161,7 @@ void TrapAlarm::trigger()
                 IgnoreMsgIfOriginSeen::no,
                 m_pos,
                 nullptr,
-                SndVol::high,
+                SndVol::global,
                 AlertsMon::yes);
 
         snd.run();

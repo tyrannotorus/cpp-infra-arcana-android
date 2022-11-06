@@ -27,15 +27,23 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static const int s_snd_dist_normal = g_fov_radi_int;
-
-static const int s_snd_dist_loud = s_snd_dist_normal * 2;
-
 static int s_nr_snd_msg_printed_current_turn;
 
 static int get_max_dist(const Snd& snd)
 {
-        return snd.is_loud() ? s_snd_dist_loud : s_snd_dist_normal;
+        switch (snd.volume()) {
+        case SndVol::low:
+                return g_fov_radi_int;
+
+        case SndVol::high:
+                return g_fov_radi_int * 2;
+
+        case SndVol::global:
+                return 999;
+        }
+
+        ASSERT(false);
+        return g_fov_radi_int;
 }
 
 static bool is_snd_heard_at_range(const int range, const Snd& snd)
