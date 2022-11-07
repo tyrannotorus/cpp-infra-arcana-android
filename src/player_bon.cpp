@@ -855,7 +855,7 @@ static void update_trait_data()
         d.title = "Galvanization";
         d.descr =
                 "Casting any spell from the Blood domain grants "
-                "Regeneration for 4-8 turns "
+                "Regeneration for 4-6 turns "
                 "(+1 extra hit point regenerated per turn)";
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);

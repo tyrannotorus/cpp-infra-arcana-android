@@ -1279,7 +1279,7 @@ void Spell::cast(
                         Prop* const regen =
                                 property_factory::make(PropId::regenerating);
 
-                        regen->set_duration(rnd::range(4, 8));
+                        regen->set_duration(rnd::range(4, 6));
 
                         properties.apply(regen);
                 }
