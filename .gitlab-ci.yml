@@ -9,6 +9,8 @@ before_script:
 build-linux:
         stage: build
         script:
+                - echo ${CI_COMMIT_TAG}
+                - echo ${CI_COMMIT_SHA}
                 - ./build-release.sh
                 - ./run-tests.sh
                 - mv build/target/ia ia-linux-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)
@@ -22,6 +24,8 @@ build-linux:
 build-windows:
         stage: build
         script:
+                - echo ${CI_COMMIT_TAG}
+                - echo ${CI_COMMIT_SHA}
                 - apt-get update && apt-get install -y mingw-w64
                 - ./build-release-windows-cross-compile.sh
                 - mv build/target/ia "ia-windows-x64-${CI_COMMIT_TAG}-${CI_COMMIT_SHA:0:8}-$(date +%Y-%m-%d)"
