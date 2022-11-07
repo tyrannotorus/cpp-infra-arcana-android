@@ -72,7 +72,26 @@ static void set_bg_color_obscured_terrain(
 
 static void set_bg_color_when_obscured_dead_actor(const actor::Actor& actor)
 {
-        s_bg_color_obscured.at(actor.m_pos) = colors::gray_brown();
+        const Color& color_default = colors::gray_brown();
+        const Color& color_corpse_rises = colors::dark_teal();
+
+        std::optional<Color>& color_here = s_bg_color_obscured.at(actor.m_pos);
+
+        if (color_here && (color_here.value() == color_corpse_rises)) {
+                // This position is colored as containing a corpse that will
+                // rise again, do not change the color.
+                return;
+        }
+
+        const bool is_corpse_rises =
+                actor.m_properties.has(PropId::corpse_rises);
+
+        const Color& new_color =
+                is_corpse_rises
+                ? color_corpse_rises
+                : color_default;
+
+        s_bg_color_obscured.at(actor.m_pos) = new_color;
 }
 
 static void use_bg_color_obscuring(Color& color, const P& p)
