@@ -24,6 +24,31 @@
 #include "terrain_trap.hpp"
 #include "test_utils.hpp"
 
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static void put_unlearn_spell_trap(const P& pos)
+{
+        map::update_terrain(terrain::make(terrain::Id::floor, pos));
+
+        auto* const trap =
+                static_cast<terrain::Trap*>(
+                        terrain::make(
+                                terrain::Id::trap,
+                                pos));
+
+        trap->try_init_type(terrain::TrapId::unlearn_spell);
+
+        trap->set_mimic_terrain(terrain::make(terrain::Id::floor, pos));
+
+        map::update_terrain(trap);
+
+        trap->reveal(terrain::PrintRevealMsg::no);
+}
+
+// -----------------------------------------------------------------------------
+// Test cases
+// -----------------------------------------------------------------------------
 TEST_CASE("Spider web")
 {
         // Test that a monster can get stuck in a spider web, and that they can
@@ -115,22 +140,7 @@ TEST_CASE("Forget spells")
 
         map::update_terrain(terrain::make(terrain::Id::floor, pos_l));
 
-        {
-                auto* const trap =
-                        static_cast<terrain::Trap*>(
-                                terrain::make(
-                                        terrain::Id::trap,
-                                        pos_r));
-
-                trap->try_init_type(terrain::TrapId::unlearn_spell);
-
-                trap->set_mimic_terrain(
-                        terrain::make(terrain::Id::floor, pos_r));
-
-                map::update_terrain(trap);
-
-                trap->reveal(terrain::PrintRevealMsg::no);
-        }
+        put_unlearn_spell_trap(pos_r);
 
         player_spells::learn_spell(SpellId::darkbolt, Verbose::no);
         player_spells::learn_spell(SpellId::heal, Verbose::no);
@@ -160,6 +170,8 @@ TEST_CASE("Forget spells")
         REQUIRE(nr_forgotten_after_first_trigger == 1);
 
         // Step into the trap again
+        put_unlearn_spell_trap(pos_r);
+
         map::g_player->m_pos = pos_l;
         game_time::g_allow_tick = true;
         actor::do_move_action(*map::g_player, Dir::right);
@@ -189,22 +201,7 @@ TEST_CASE("Do not forget frenzy")
 
         map::update_terrain(terrain::make(terrain::Id::floor, pos_l));
 
-        {
-                auto* const trap =
-                        static_cast<terrain::Trap*>(
-                                terrain::make(
-                                        terrain::Id::trap,
-                                        pos_r));
-
-                trap->try_init_type(terrain::TrapId::unlearn_spell);
-
-                trap->set_mimic_terrain(
-                        terrain::make(terrain::Id::floor, pos_r));
-
-                map::update_terrain(trap);
-
-                trap->reveal(terrain::PrintRevealMsg::no);
-        }
+        put_unlearn_spell_trap(pos_r);
 
         player_bon::pick_bg(Bg::ghoul);
 
@@ -232,6 +229,8 @@ TEST_CASE("Do not forget frenzy")
         REQUIRE(!player_spells::is_spell_forgotten(SpellId::frenzy));
 
         // Step into the trap again
+        put_unlearn_spell_trap(pos_r);
+
         map::g_player->m_pos = pos_l;
         game_time::g_allow_tick = true;
         actor::do_move_action(*map::g_player, Dir::right);
