@@ -45,7 +45,6 @@
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
-#include "terrain_pylon.hpp"
 #include "text_format.hpp"
 #include "throwing.hpp"
 #include "view.hpp"
@@ -1209,47 +1208,6 @@ char CtrlObjToggleLever::menu_key() const
         return 't';
 }
 
-bool CtrlObjActivatePylon::can_control(
-        const terrain::Terrain& terrain,
-        const SpellSkill skill) const
-{
-        (void)skill;
-
-        if (terrain.id() != terrain::Id::pylon) {
-                return false;
-        }
-
-        const auto& pylon = static_cast<const terrain::Pylon&>(terrain);
-
-        return !pylon.is_activated();
-}
-
-DidAction CtrlObjActivatePylon::run(
-        terrain::Terrain& terrain,
-        const SpellSkill skill) const
-{
-        (void)skill;
-
-        auto& pylon = static_cast<terrain::Pylon&>(terrain);
-
-        pylon.activate();
-
-        return DidAction::yes;
-}
-
-std::string CtrlObjActivatePylon::menu_label(
-        const terrain::Terrain& terrain) const
-{
-        (void)terrain;
-
-        return "(p) Activate pylon";
-}
-
-char CtrlObjActivatePylon::menu_key() const
-{
-        return 'p';
-}
-
 bool CtrlObjStrike::can_control(
         const terrain::Terrain& terrain,
         const SpellSkill skill) const
@@ -1594,9 +1552,6 @@ void CtrlObj::set_possible_actions()
 
         all_actions.emplace_back(
                 std::make_shared<CtrlObjToggleLever>());
-
-        all_actions.emplace_back(
-                std::make_shared<CtrlObjActivatePylon>());
 
         all_actions.emplace_back(
                 std::make_shared<CtrlObjStrike>());

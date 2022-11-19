@@ -349,22 +349,6 @@ public:
         char menu_key() const override;
 };
 
-class CtrlObjActivatePylon : public CtrlObjAction
-{
-public:
-        bool can_control(
-                const terrain::Terrain& terrain,
-                SpellSkill skill) const override;
-
-        DidAction run(
-                terrain::Terrain& terrain,
-                SpellSkill skill) const override;
-
-        std::string menu_label(const terrain::Terrain& terrain) const override;
-
-        char menu_key() const override;
-};
-
 class CtrlObjStrike : public CtrlObjAction
 {
 public:

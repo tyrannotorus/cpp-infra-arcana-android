@@ -93,7 +93,7 @@ static std::string get_fake_name(
         const terrain::pylon::PylonId id,
         const Article article)
 {
-        const auto& appearance = get_appearance_for_id(id);
+        const PylonAppearance& appearance = get_appearance_for_id(id);
 
         if (article == Article::a) {
                 return appearance.name_a;
@@ -181,13 +181,13 @@ std::vector<actor::Actor*> PylonImpl::living_actors_reached() const
 {
         std::vector<actor::Actor*> actors;
 
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 // Actor is dead?
                 if (actor->m_state != ActorState::alive) {
                         continue;
                 }
 
-                const auto& p = actor->m_pos;
+                const P& p = actor->m_pos;
 
                 const int d = 1;
 
@@ -204,13 +204,13 @@ std::vector<actor::Actor*> PylonImpl::living_actors_reached() const
 
 actor::Actor* PylonImpl::rnd_reached_living_actor() const
 {
-        const auto actors = living_actors_reached();
+        const std::vector<actor::Actor*> actors = living_actors_reached();
 
         if (actors.empty()) {
                 return nullptr;
         }
 
-        auto* actor = rnd::element(living_actors_reached());
+        actor::Actor* actor = rnd::element(living_actors_reached());
 
         return actor;
 }
@@ -254,11 +254,11 @@ std::string PylonInvis::effect_descr() const
         return "turns creatures invisible";
 }
 
-void PylonInvis::on_new_turn_activated()
+void PylonInvis::on_new_turn()
 {
-        const auto actors = living_actors_reached();
+        const std::vector<actor::Actor*> actors = living_actors_reached();
 
-        for (auto* actor : actors) {
+        for (actor::Actor* actor : actors) {
                 if (actor->m_properties.has(PropId::cloaked)) {
                         continue;
                 }
@@ -297,11 +297,11 @@ std::string PylonSlow::effect_descr() const
         return "slows creatures";
 }
 
-void PylonSlow::on_new_turn_activated()
+void PylonSlow::on_new_turn()
 {
-        const auto actors = living_actors_reached();
+        const std::vector<actor::Actor*> actors = living_actors_reached();
 
-        for (auto* actor : actors) {
+        for (actor::Actor* actor : actors) {
                 if (actor->m_properties.has(PropId::slowed)) {
                         continue;
                 }
@@ -337,11 +337,11 @@ std::string PylonHaste::effect_descr() const
         return "accelerates creatures";
 }
 
-void PylonHaste::on_new_turn_activated()
+void PylonHaste::on_new_turn()
 {
-        const auto actors = living_actors_reached();
+        const std::vector<actor::Actor*> actors = living_actors_reached();
 
-        for (auto* actor : actors) {
+        for (actor::Actor* actor : actors) {
                 if (actor->m_properties.has(PropId::hasted)) {
                         continue;
                 }
@@ -377,16 +377,16 @@ std::string PylonKnockback::effect_descr() const
         return "repels creatures";
 }
 
-void PylonKnockback::on_new_turn_activated()
+void PylonKnockback::on_new_turn()
 {
         // Occasionally do not run the effect
         if (rnd::one_in(4)) {
                 return;
         }
 
-        const auto actors = living_actors_reached();
+        const std::vector<actor::Actor*> actors = living_actors_reached();
 
-        for (auto* actor : actors) {
+        for (actor::Actor* actor : actors) {
                 const bool can_player_see_actor_before =
                         actor::can_player_see_actor(*actor);
 
@@ -425,18 +425,18 @@ std::string PylonTeleport::effect_descr() const
         return "teleports creatures";
 }
 
-void PylonTeleport::on_new_turn_activated()
+void PylonTeleport::on_new_turn()
 {
         // Occasionally do not run the effect
         if (rnd::coin_toss()) {
                 return;
         }
 
-        const auto actors = living_actors_reached();
+        const std::vector<actor::Actor*> actors = living_actors_reached();
 
         const int max_dist = 15;
 
-        for (auto* const actor : actors) {
+        for (actor::Actor* const actor : actors) {
                 const bool can_player_see_actor_before =
                         actor::can_player_see_actor(*actor);
 
@@ -470,11 +470,11 @@ std::string PylonTerrify::effect_descr() const
         return "causes fear";
 }
 
-void PylonTerrify::on_new_turn_activated()
+void PylonTerrify::on_new_turn()
 {
-        auto actors = living_actors_reached();
+        const std::vector<actor::Actor*> actors = living_actors_reached();
 
-        for (auto* actor : actors) {
+        for (actor::Actor* actor : actors) {
                 if (actor->m_properties.has(PropId::terrified)) {
                         continue;
                 }
@@ -543,7 +543,8 @@ gfx::TileId Pylon::tile() const
                 return (gfx::TileId)0;
         }
 
-        const auto& appearance = get_appearance_for_id(m_pylon_impl->id());
+        const PylonAppearance& appearance =
+                get_appearance_for_id(m_pylon_impl->id());
 
         return appearance.tile;
 }
@@ -556,14 +557,10 @@ Color Pylon::color_default() const
                 return {};
         }
 
-        const auto& appearance = get_appearance_for_id(m_pylon_impl->id());
+        const PylonAppearance& appearance =
+                get_appearance_for_id(m_pylon_impl->id());
 
-        if (m_is_activated) {
-                return appearance.color;
-        }
-        else {
-                return appearance.color.shaded(50);
-        }
+        return appearance.color;
 }
 
 std::string Pylon::name(const Article article) const
@@ -583,81 +580,7 @@ std::string Pylon::name(const Article article) const
                 str = get_fake_name(m_pylon_impl->id(), article);
         }
 
-        if (m_is_activated) {
-                str += " (activated)";
-        }
-        else {
-                str += " (deactivated)";
-        }
-
         return str;
-}
-
-void Pylon::bump(actor::Actor& actor_bumping)
-{
-        (void)actor_bumping;
-
-        TRACE_FUNC_BEGIN;
-
-        map::memorize_terrain_at(m_pos);
-        map::update_vision();
-
-        // If player is blind, ask it they really want to activate the Pylon.
-        if (!map::g_seen.at(m_pos)) {
-                msg_log::clear();
-
-                const std::string msg =
-                        "There is a Pylon here. Touch it? " +
-                        common_text::g_yes_or_no_hint;
-
-                msg_log::add(
-                        msg,
-                        colors::light_white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
-
-                const auto answer = query::yes_or_no();
-
-                if (answer == BinaryAnswer::no) {
-                        msg_log::clear();
-
-                        TRACE_FUNC_END;
-
-                        return;
-                }
-        }
-
-        msg_log::add("I touch the Pylon.");
-
-        if (m_is_activated) {
-                msg_log::add("Nothing happens.");
-
-                return;
-        }
-
-        activate();
-
-        map::memorize_terrain_at(m_pos);
-        map::update_vision();
-
-        game_time::tick();
-
-        TRACE_FUNC_END;
-}
-
-void Pylon::activate()
-{
-        m_is_activated = true;
-        m_startup_countdown = 3;
-
-        // TODO: Add sound effect
-
-        if (map::g_seen.at(m_pos)) {
-                msg_log::add(
-                        "The Pylon starts to light up and emit a humming "
-                        "noise.");
-        }
 }
 
 void Pylon::on_hit(
@@ -698,26 +621,15 @@ void Pylon::on_new_turn_hook()
                 return;
         }
 
-        if (m_is_activated) {
-                if (m_startup_countdown > 0) {
-                        --m_startup_countdown;
-                }
-                else {
-                        ASSERT(m_startup_countdown == 0);
-
-                        m_pylon_impl->on_new_turn_activated();
-                }
-        }
+        m_pylon_impl->on_new_turn();
 }
 
 void Pylon::add_light_hook(Array2<bool>& light) const
 {
-        if (m_is_activated) {
-                for (const auto& d : dir_utils::g_dir_list_w_center) {
-                        const auto p = m_pos + d;
+        for (const P& d : dir_utils::g_dir_list_w_center) {
+                const P p = m_pos + d;
 
-                        light.at(p) = true;
-                }
+                light.at(p) = true;
         }
 }
 

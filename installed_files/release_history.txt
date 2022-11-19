@@ -20,6 +20,7 @@
 - Dart traps, spear traps, and alarm traps now always trigger instantly when a creature steps on them.
 - Alarm traps now emit a sound with "global" range, instead of just a "loud" sound (although creatures with short hearing range such as Worm Masses still need to be very near to hear the sound).
 - Removed all gas trap types (confusion gas etc)
+- Reverted Pylons to make them always active again (they start permanently activated, instead of being activated by bumping them)
 
 ##############################
 # User interface

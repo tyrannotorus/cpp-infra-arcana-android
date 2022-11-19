@@ -65,7 +65,7 @@ public:
 
         virtual std::string name(Article article) const = 0;
 
-        virtual void on_new_turn_activated() = 0;
+        virtual void on_new_turn() = 0;
 
 protected:
         virtual std::string effect_descr() const = 0;
@@ -86,7 +86,7 @@ public:
         PylonTerrify(const PylonId id, const P& p) :
                 PylonImpl(id, p) {}
 
-        void on_new_turn_activated() override;
+        void on_new_turn() override;
 
         std::string name(Article article) const override;
 
@@ -100,7 +100,7 @@ public:
         PylonInvis(const PylonId id, const P& p) :
                 PylonImpl(id, p) {}
 
-        void on_new_turn_activated() override;
+        void on_new_turn() override;
 
         std::string name(Article article) const override;
 
@@ -114,7 +114,7 @@ public:
         PylonSlow(const PylonId id, const P& p) :
                 PylonImpl(id, p) {}
 
-        void on_new_turn_activated() override;
+        void on_new_turn() override;
 
         std::string name(Article article) const override;
 
@@ -128,7 +128,7 @@ public:
         PylonHaste(const PylonId id, const P& p) :
                 PylonImpl(id, p) {}
 
-        void on_new_turn_activated() override;
+        void on_new_turn() override;
 
         std::string name(Article article) const override;
 
@@ -142,7 +142,7 @@ public:
         PylonKnockback(const PylonId id, const P& p) :
                 PylonImpl(id, p) {}
 
-        void on_new_turn_activated() override;
+        void on_new_turn() override;
 
         std::string name(Article article) const override;
 
@@ -156,7 +156,7 @@ public:
         PylonTeleport(const PylonId id, const P& p) :
                 PylonImpl(id, p) {}
 
-        void on_new_turn_activated() override;
+        void on_new_turn() override;
 
         std::string name(Article article) const override;
 
@@ -182,13 +182,6 @@ public:
 
         void activate();
 
-        bool is_activated() const
-        {
-                return m_is_activated;
-        }
-
-        void bump(actor::Actor& actor_bumping) override;
-
         gfx::TileId tile() const override;
 
         Color color_default() const override;
@@ -207,9 +200,6 @@ private:
         pylon::PylonImpl* make_pylon_impl_from_id(pylon::PylonId id);
 
         std::unique_ptr<pylon::PylonImpl> m_pylon_impl;
-
-        bool m_is_activated {false};
-        int m_startup_countdown {-1};
 };
 
 }  // namespace terrain
