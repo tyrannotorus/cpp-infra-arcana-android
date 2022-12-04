@@ -86,6 +86,8 @@ static const std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
         {"deep_one", actor::Id::deep_one},
         {"niduza", actor::Id::niduza},
         {"ape", actor::Id::ape},
+        {"troglodyte", actor::Id::troglodyte},
+        {"abyssal_troglodyte", actor::Id::abyssal_troglodyte},
         {"keziah_mason", actor::Id::keziah_mason},
         {"brown_jenkin", actor::Id::brown_jenkin},
         {"major_clapham_lee", actor::Id::major_clapham_lee},

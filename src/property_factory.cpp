@@ -274,6 +274,9 @@ Prop* make(const PropId id)
         case PropId::summons_locusts:
                 return new PropSummonsLocusts();
 
+        case PropId::others_terrified_on_death:
+                return new PropOthersTerrifiedOnDeath();
+
         case PropId::vomits_ooze:
                 return new PropVomitsOoze();
 

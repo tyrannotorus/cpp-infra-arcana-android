@@ -5685,7 +5685,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>19</hit_points>
             <spirit>6</spirit>
             <speed>fast</speed>
             <shock_level>unsettling</shock_level>
@@ -5742,6 +5742,192 @@
             <native_room>forest</native_room>
             <native_room>cave</native_room>
             <native_room>monster</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- troglodyte -->
+    <!--************************************************************-->
+    <monster id="troglodyte">
+        <text>
+            <name_a>a Troglodyte</name_a>
+            <name_the>the Troglodyte</name_the>
+            <corpse_name_a>a Troglodyte corpse</corpse_name_a>
+            <corpse_name_the>the Troglodyte corpse</corpse_name_the>
+            <description>A small cave-dwelling humanoid. Their mouths are set with rows of serrated teeth, well-adapted for cutting through flesh. However, they are cowardly opportunistic creatures, prefering to stalk lonely prey that they perceive as an easy target - when met with violence, they will usually retreat, at least for a moment.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>looks wary.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen>shrieks.</aware_message_seen>
+            <aware_message_hidden>I hear shrieking.</aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>troglodyte</tile>
+            <character>M</character>
+            <color>sepia</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>16</hit_points>
+            <spirit>6</spirit>
+            <speed>normal</speed>
+            <shock_level>unsettling</shock_level>
+            <melee>70</melee>
+            <ranged>0</ranged>
+            <dodging>25</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>true</can_open_doors>
+            <can_bash_doors>false</can_bash_doors>
+            <size>humanoid</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <humanoid/>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="bite">
+                <damage>7</damage>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>darkvision</property>
+            <property>corpse_eater</property>
+            <property>others_terrified_on_death</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>5</erratic_move_percent>
+            <turns_aware>16</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>true</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>13</min_dungeon_level>
+            <max_dungeon_level>18</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size>swarm</group_size>
+            <native_room>forest</native_room>
+            <native_room>cave</native_room>
+            <native_room>damp</native_room>
+            <native_room>pool</native_room>
+            <native_room>chasm</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- abyssal_troglodyte -->
+    <!--************************************************************-->
+    <monster id="abyssal_troglodyte">
+        <text>
+            <name_a>an Abyssal Troglodyte</name_a>
+            <name_the>the Abyssal Troglodyte</name_the>
+            <corpse_name_a>an Abyssal Troglodyte corpse</corpse_name_a>
+            <corpse_name_the>the Abyssal Troglodyte corpse</corpse_name_the>
+            <description>This sub-species has adapted to thriving in particularly deep environments where very little light reaches. They are even more fierce than their counterparts who dwell closer to the surface. Their mouths are set with rows of serrated teeth, well-adapted for cutting through flesh. However, they are cowardly opportunistic creatures, prefering to stalk lonely prey that they perceive as an easy target - when met with violence, they will usually retreat, at least for a moment.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>looks wary.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen>shrieks.</aware_message_seen>
+            <aware_message_hidden>I hear shrieking.</aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>troglodyte</tile>
+            <character>M</character>
+            <color>gray</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>19</hit_points>
+            <spirit>6</spirit>
+            <speed>normal</speed>
+            <shock_level>unsettling</shock_level>
+            <melee>75</melee>
+            <ranged>0</ranged>
+            <dodging>25</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>true</can_open_doors>
+            <can_bash_doors>false</can_bash_doors>
+            <size>humanoid</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <humanoid/>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="bite">
+                <damage>8</damage>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>darkvision</property>
+            <property>corpse_eater</property>
+            <property>others_terrified_on_death</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>5</erratic_move_percent>
+            <turns_aware>16</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>true</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>19</min_dungeon_level>
+            <max_dungeon_level>-1</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size>swarm</group_size>
+            <native_room>forest</native_room>
+            <native_room>cave</native_room>
+            <native_room>damp</native_room>
+            <native_room>pool</native_room>
+            <native_room>chasm</native_room>
         </spawning>
     </monster>
 

@@ -1428,6 +1428,15 @@ private:
         bool m_prevent_std_death_msg {true};
 };
 
+class PropOthersTerrifiedOnDeath : public Prop
+{
+public:
+        PropOthersTerrifiedOnDeath() :
+                Prop(PropId::others_terrified_on_death) {}
+
+        void on_death() override;
+};
+
 class PropCorpseEater : public Prop
 {
 public:

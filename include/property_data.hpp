@@ -91,6 +91,9 @@ enum class PropId
         short_hearing_range,
         frenzies_self,  // E.g. Apes
         summons_locusts,  // Khephren ability
+        // Monster with this property terrifies other monsters with this
+        // property on death ("cowardly monsters", e.g. Troglodytes).
+        others_terrified_on_death,
 
         // Properties describing the actors body or method of moving around.
         // These affect which terrain types the actor can move through, but

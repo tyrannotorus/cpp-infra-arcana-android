@@ -190,6 +190,7 @@ enum class TileId
         trapez,
         tree,
         tree_fungi,
+        troglodyte,
         vines,
         void_traveler,
         vortex,

@@ -2245,6 +2245,39 @@ void PropSplitsOnDeath::on_death()
         map::update_vision();
 }
 
+void PropOthersTerrifiedOnDeath::on_death()
+{
+        const int max_dist = g_fov_radi_int * 2;
+
+        const int duration = rnd::range(6, 8);
+
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if (actor == m_owner) {
+                        continue;
+                }
+
+                if (!actor->is_alive()) {
+                        continue;
+                }
+
+                if (!actor->m_properties.has(id())) {
+                        continue;
+                }
+
+                const int dist = king_dist(m_owner->m_pos, actor->m_pos);
+
+                if (dist > max_dist) {
+                        continue;
+                }
+
+                Prop* const prop = property_factory::make(PropId::terrified);
+
+                prop->set_duration(duration);
+
+                actor->m_properties.apply(prop);
+        }
+}
+
 PropActResult PropCorpseEater::on_act()
 {
         auto did_action = DidAction::no;

@@ -167,7 +167,9 @@ static void make_aware_of_unseeable_mon_by_vigilant(actor::Actor& mon)
         if (!mon.is_player_aware_of_me()) {
                 if (is_cell_seen) {
                         // The cell is seen - the monster must be invisible
-                        ASSERT(mon.m_properties.has(PropId::invis));
+                        ASSERT(
+                                mon.m_properties.has(PropId::invis) ||
+                                mon.m_properties.has(PropId::cloaked));
 
                         print_aware_invis_mon_msg(mon);
                 }

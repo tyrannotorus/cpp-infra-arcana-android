@@ -88,6 +88,8 @@ enum class Id
         deep_one,
         niduza,
         ape,
+        troglodyte,
+        abyssal_troglodyte,
         worm_mass,
         mind_worm,
         primordial_worm,

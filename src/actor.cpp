@@ -516,16 +516,22 @@ int Actor::ability(const AbilityId id, const bool is_affected_by_props) const
 
 bool Actor::is_leader_of(const Actor* const actor) const
 {
-        if (!actor) {
+        if (actor) {
+                return actor->m_leader == this;
+        }
+        else {
                 return false;
         }
-
-        return actor->m_leader == this;
 }
 
 bool Actor::is_actor_my_leader(const Actor* const actor) const
 {
-        return m_leader == actor;
+        if (m_leader) {
+                return m_leader == actor;
+        }
+        else {
+                return false;
+        }
 }
 
 bool Actor::is_in_same_group_as(const Actor* actor) const
