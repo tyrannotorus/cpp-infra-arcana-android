@@ -5776,7 +5776,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>13</hit_points>
             <spirit>6</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
@@ -5809,7 +5809,7 @@
 
         <ai>
             <erratic_move_percent>5</erratic_move_percent>
-            <turns_aware>16</turns_aware>
+            <turns_aware>12</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>true</looks>
             <avoids_blocking_friend>true</avoids_blocking_friend>
@@ -5869,7 +5869,7 @@
         </audio>
 
         <attributes>
-            <hit_points>19</hit_points>
+            <hit_points>17</hit_points>
             <spirit>6</spirit>
             <speed>normal</speed>
             <shock_level>unsettling</shock_level>
