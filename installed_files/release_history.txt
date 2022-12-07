@@ -16,7 +16,8 @@
 - Status effects that will end immediately after the next action are shown as e.g. "Premonition (ending)" in the gui, so that it is possible to know whether it will last until the next player turn or not (previously seeing an active status effect listed could be misleading since it could end before any monster acts).
 - Traps are always destroyed after they are triggered (i.e. they can only ever be triggered once).
 - It is no longer possible to disarm a trap that has started triggering ("I hear a click...").
-- Magic traps may now spawn anywhere (previously they were not allowed to spawn next to blocking terrain, which made these trap types a bit rare).
+- Magic traps (strange shape on the ground) may now spawn anywhere, previously they were not allowed to spawn next to blocking terrain, which made these trap types rare to encounted.
+- Magic traps are always revealed, i.e. there is no need to detect them.
 - Dart traps, spear traps, and alarm traps now always trigger instantly when a creature steps on them.
 - Alarm traps now emit a sound with "global" range, instead of just a "loud" sound (although creatures with short hearing range such as Worm Masses still need to be very near to hear the sound).
 - Removed all gas trap types (confusion gas etc)
@@ -43,7 +44,7 @@
 - Made some changes to reduce the risk of registering key presses when the game window regains focus (e.g. accidentally doing a melee attack due to the game registering a tab press when alt-tabbing back to the game)
 - Changed color of grates to gray, to clarify that they are made of metal (and not wood)
 - Turn number is now displayed
-- Improved the stairs down tile (thanks to Andy Walker)
+- Improved the tiles for stairs down (thanks to Andy Walker) and magic traps.
 - Added more sound effects (thanks Andy Walker for various gate sounds, item container opening sounds, and a horn sound).
 
 ##############################

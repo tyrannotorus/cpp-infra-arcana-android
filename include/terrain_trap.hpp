@@ -79,9 +79,9 @@ public:
 
         void bump(actor::Actor& actor_bumping) override;
 
-        char character() const override;
-
         gfx::TileId tile() const override;
+
+        char character() const override;
 
         std::string name(Article article) const override;
 
@@ -121,8 +121,6 @@ public:
         void player_try_spot_hidden();
 
 private:
-        TrapImpl* make_trap_impl_from_id(TrapId trap_id);
-
         Color color_default() const override;
 
         void on_hit(
@@ -144,14 +142,18 @@ private:
 
 class TrapImpl
 {
-protected:
-        friend class Trap;
+public:
         TrapImpl(P p, TrapId type, Trap* const base_trap) :
                 m_pos(p),
                 m_type(type),
                 m_base_trap(base_trap) {}
 
         virtual ~TrapImpl() = default;
+
+        TrapId type() const
+        {
+                return m_type;
+        }
 
         // Called by the trap terrain after picking a random trap
         // implementation. This allows the specific implementation initialize
@@ -189,20 +191,16 @@ protected:
 
         virtual std::string disarm_msg() const = 0;
 
+protected:
         P m_pos;
-
         TrapId m_type;
-
-        P m_dart_origin_pos;
-
+        P m_dart_origin_pos {-1, -1};
         Trap* const m_base_trap;
 };
 
 class MechTrapImpl : public TrapImpl
 {
-protected:
-        friend class Trap;
-
+public:
         MechTrapImpl(P pos, TrapId type, Trap* const base_trap) :
                 TrapImpl(pos, type, base_trap) {}
 
@@ -226,9 +224,7 @@ protected:
 
 class TrapDart : public MechTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapDart(P pos, Trap* base_trap);
 
         std::string name(const Article article) const override
@@ -255,6 +251,7 @@ private:
                 return {0, 0};
         }
 
+private:
         bool m_is_poisoned;
 
         P m_dart_origin;
@@ -264,9 +261,7 @@ private:
 
 class TrapSpear : public MechTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapSpear(P pos, Trap* base_trap);
 
         std::string name(const Article article) const override
@@ -293,6 +288,7 @@ private:
                 return {0, 0};
         }
 
+private:
         bool m_is_poisoned;
 
         P m_spear_origin;
@@ -302,9 +298,7 @@ private:
 
 class TrapBlindingFlash : public MechTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapBlindingFlash(P pos, Trap* const base_trap) :
                 MechTrapImpl(pos, TrapId::blinding, base_trap) {}
 
@@ -333,9 +327,7 @@ private:
 
 class TrapDeafening : public MechTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapDeafening(P pos, Trap* const base_trap) :
                 MechTrapImpl(pos, TrapId::deafening, base_trap) {}
 
@@ -364,9 +356,7 @@ private:
 
 class TrapSmoke : public MechTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapSmoke(P pos, Trap* const base_trap) :
                 MechTrapImpl(pos, TrapId::smoke, base_trap) {}
 
@@ -395,9 +385,7 @@ private:
 
 class TrapFire : public MechTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapFire(P pos, Trap* const base_trap) :
                 MechTrapImpl(pos, TrapId::fire, base_trap) {}
 
@@ -426,9 +414,7 @@ private:
 
 class TrapAlarm : public MechTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapAlarm(P pos, Trap* const base_trap) :
                 MechTrapImpl(pos, TrapId::alarm, base_trap) {}
 
@@ -457,9 +443,7 @@ private:
 
 class TrapWeb : public MechTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapWeb(P pos, Trap* const base_trap) :
                 MechTrapImpl(pos, TrapId::web, base_trap) {}
 
@@ -482,6 +466,11 @@ private:
                 return name;
         }
 
+        gfx::TileId tile() const override
+        {
+                return gfx::TileId::web;
+        }
+
         char character() const override
         {
                 return '*';
@@ -497,11 +486,6 @@ private:
                 return false;
         }
 
-        gfx::TileId tile() const override
-        {
-                return gfx::TileId::web;
-        }
-
         std::string disarm_msg() const override
         {
                 return "I tear down a spider web.";
@@ -510,9 +494,7 @@ private:
 
 class MagicTrapImpl : public TrapImpl
 {
-protected:
-        friend class Trap;
-
+public:
         MagicTrapImpl(P pos, TrapId type, Trap* const base_trap) :
                 TrapImpl(pos, type, base_trap) {}
 
@@ -525,19 +507,24 @@ protected:
                         ? "a"
                         : "the";
 
-                name += " strange shape";
+                name += " strange shape on the floor";
 
                 return name;
-        }
-
-        Color color() const override
-        {
-                return colors::light_red();
         }
 
         gfx::TileId tile() const override
         {
                 return gfx::TileId::elder_sign;
+        }
+
+        char character() const override
+        {
+                return '*';
+        }
+
+        Color color() const override
+        {
+                return colors::light_red();
         }
 
         bool is_magical() const override
@@ -558,9 +545,7 @@ protected:
 
 class TrapTeleport : public MagicTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapTeleport(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::teleport, base_trap) {}
 
@@ -569,9 +554,7 @@ private:
 
 class TrapSummonMon : public MagicTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapSummonMon(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::summon, base_trap) {}
 
@@ -580,9 +563,7 @@ private:
 
 class TrapHpSap : public MagicTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapHpSap(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::hp_sap, base_trap) {}
 
@@ -591,9 +572,7 @@ private:
 
 class TrapSpiSap : public MagicTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapSpiSap(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::spi_sap, base_trap) {}
 
@@ -602,9 +581,7 @@ private:
 
 class TrapSlow : public MagicTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapSlow(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::slow, base_trap) {}
 
@@ -613,9 +590,7 @@ private:
 
 class TrapCurse : public MagicTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapCurse(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::curse, base_trap) {}
 
@@ -624,9 +599,7 @@ private:
 
 class TrapUnlearnSpell : public MagicTrapImpl
 {
-private:
-        friend class Trap;
-
+public:
         TrapUnlearnSpell(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::unlearn_spell, base_trap) {}
 

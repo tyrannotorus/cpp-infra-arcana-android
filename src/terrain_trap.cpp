@@ -86,6 +86,101 @@ static void print_magic_trap_trigger_messages(
         }
 }
 
+static terrain::TrapImpl* make_trap_impl_from_id(
+        const terrain::TrapId trap_id,
+        const P& pos,
+        terrain::Trap* parent_trap)
+{
+        switch (trap_id) {
+        case terrain::TrapId::dart:
+                return new terrain::TrapDart(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::spear:
+                return new terrain::TrapSpear(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::blinding:
+                return new terrain::TrapBlindingFlash(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::deafening:
+                return new terrain::TrapDeafening(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::teleport:
+                return new terrain::TrapTeleport(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::summon:
+                return new terrain::TrapSummonMon(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::hp_sap:
+                return new terrain::TrapHpSap(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::spi_sap:
+                return new terrain::TrapSpiSap(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::smoke:
+                return new terrain::TrapSmoke(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::fire:
+                return new terrain::TrapFire(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::alarm:
+                return new terrain::TrapAlarm(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::web:
+                return new terrain::TrapWeb(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::slow:
+                return new terrain::TrapSlow(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::curse:
+                return new terrain::TrapCurse(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::unlearn_spell:
+                return new terrain::TrapUnlearnSpell(pos, parent_trap);
+                break;
+
+        case terrain::TrapId::END:
+        case terrain::TrapId::any:
+                break;
+        }
+
+        return nullptr;
+}
+
+static terrain::TrapImpl* try_make_impl(
+        const terrain::TrapId trap_id,
+        const P& pos,
+        terrain::Trap* parent_trap)
+{
+        terrain::TrapImpl* impl =
+                make_trap_impl_from_id(trap_id, pos, parent_trap);
+
+        terrain::TrapPlacementValid valid = impl->on_place();
+
+        if (valid == terrain::TrapPlacementValid::yes) {
+                return impl;
+        }
+        else {
+                // Placement not valid.
+                delete impl;
+
+                return nullptr;
+        }
+}
+
 // -----------------------------------------------------------------------------
 // terrain
 // -----------------------------------------------------------------------------
@@ -101,132 +196,57 @@ bool Trap::try_init_type(const TrapId id)
 {
         ASSERT(id != TrapId::END);
 
-        m_is_hidden = true;
-
-        auto* const terrain_here = map::g_terrain.at(m_pos);
+        Terrain* const terrain_here = map::g_terrain.at(m_pos);
 
         if (!terrain_here->can_have_trap()) {
-                TRACE << "Cannot place trap on terrain id: "
-                      << (int)terrain_here->id()
-                      << std::endl
-                      << "Trap id: " << (int)id
-                      << std::endl;
+                TRACE
+                        << "Cannot place trap on terrain id: "
+                        << (int)terrain_here->id()
+                        << std::endl
+                        << "Trap id: " << (int)id
+                        << std::endl;
 
                 ASSERT(false);
 
                 return false;
         }
 
-        auto try_make_impl = [&](const TrapId trap_id) {
-                auto* impl = make_trap_impl_from_id(trap_id);
-
-                auto valid = impl->on_place();
-
-                if (valid == TrapPlacementValid::yes) {
-                        m_trap_impl = impl;
-                }
-                else {
-                        // Placement not valid
-                        delete impl;
-                }
-        };
-
         if (id == TrapId::any) {
-                // Attempt to set a trap implementation until succeeding
+                // Attempt to set a trap implementation until succeeding.
                 while (true) {
-                        const int last = (int)TrapId::END - 1;
-
+                        const auto last = (int)TrapId::END - 1;
                         const auto random_id = (TrapId)rnd::range(0, last);
 
-                        try_make_impl(random_id);
+                        TrapImpl* const impl =
+                                try_make_impl(random_id, m_pos, this);
 
-                        if (m_trap_impl) {
+                        if (impl) {
                                 // Trap placement is good!
+                                m_trap_impl = impl;
+
                                 break;
                         }
                 }
         }
         else {
-                // Make a specific trap type
+                // Make a specific trap type.
 
                 // NOTE: This may fail, in which case we have no trap
                 // implementation. The trap creator is responsible for handling
                 // this situation.
-                try_make_impl(id);
+                m_trap_impl = try_make_impl(id, m_pos, this);
         }
 
-        return m_trap_impl != nullptr;
-}
+        if (m_trap_impl) {
+                // "Mechanical" traps are always created as hidden, magical
+                // traps always created as visible.
+                m_is_hidden = !is_magical();
 
-TrapImpl* Trap::make_trap_impl_from_id(const TrapId trap_id)
-{
-        switch (trap_id) {
-        case TrapId::dart:
-                return new TrapDart(m_pos, this);
-                break;
-
-        case TrapId::spear:
-                return new TrapSpear(m_pos, this);
-                break;
-
-        case TrapId::blinding:
-                return new TrapBlindingFlash(m_pos, this);
-                break;
-
-        case TrapId::deafening:
-                return new TrapDeafening(m_pos, this);
-                break;
-
-        case TrapId::teleport:
-                return new TrapTeleport(m_pos, this);
-                break;
-
-        case TrapId::summon:
-                return new TrapSummonMon(m_pos, this);
-                break;
-
-        case TrapId::hp_sap:
-                return new TrapHpSap(m_pos, this);
-                break;
-
-        case TrapId::spi_sap:
-                return new TrapSpiSap(m_pos, this);
-                break;
-
-        case TrapId::smoke:
-                return new TrapSmoke(m_pos, this);
-                break;
-
-        case TrapId::fire:
-                return new TrapFire(m_pos, this);
-                break;
-
-        case TrapId::alarm:
-                return new TrapAlarm(m_pos, this);
-                break;
-
-        case TrapId::web:
-                return new TrapWeb(m_pos, this);
-                break;
-
-        case TrapId::slow:
-                return new TrapSlow(m_pos, this);
-                break;
-
-        case TrapId::curse:
-                return new TrapCurse(m_pos, this);
-                break;
-
-        case TrapId::unlearn_spell:
-                return new TrapUnlearnSpell(m_pos, this);
-                break;
-
-        case TrapId::END:
-        case TrapId::any:
-                break;
+                return true;
         }
-
-        return nullptr;
+        else {
+                return false;
+        }
 }
 
 void Trap::on_hit(
@@ -245,7 +265,7 @@ TrapId Trap::type() const
 {
         ASSERT(m_trap_impl);
 
-        return m_trap_impl->m_type;
+        return m_trap_impl->type();
 }
 
 bool Trap::is_magical() const
@@ -366,7 +386,7 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
                 return AllowAction::yes;
         }
 
-        const auto& props = actor_bumping.m_properties;
+        const PropHandler& props = actor_bumping.m_properties;
 
         if (map::g_seen.at(m_pos) &&
             !m_is_hidden &&
@@ -390,7 +410,7 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
                         MorePromptOnMsg::no,
                         CopyToMsgHistory::no);
 
-                const auto query_result = query::yes_or_no();
+                const BinaryAnswer query_result = query::yes_or_no();
 
                 msg_log::clear();
 
@@ -403,7 +423,8 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
                 // The trap is unknown, or will not be triggered by the player -
                 // delegate the question to the mimicked terrain
 
-                const auto result = m_mimic_terrain->pre_bump(actor_bumping);
+                const AllowAction result =
+                        m_mimic_terrain->pre_bump(actor_bumping);
 
                 return result;
         }
@@ -413,9 +434,9 @@ void Trap::bump(actor::Actor& actor_bumping)
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
-        const auto& d = *actor_bumping.m_data;
+        const actor::ActorData& d = *actor_bumping.m_data;
 
-        const auto& props = actor_bumping.m_properties;
+        const PropHandler& props = actor_bumping.m_properties;
 
         if (props.has(PropId::ethereal) ||
             props.has(PropId::flying) ||
@@ -480,7 +501,7 @@ void Trap::destroy()
         // terrain), and mechanical traps puts rubble.
 
         if (is_magical() || type() == TrapId::web) {
-                auto* const f_tmp = m_mimic_terrain;
+                Terrain* const f_tmp = m_mimic_terrain;
 
                 m_mimic_terrain = nullptr;
 
@@ -564,36 +585,52 @@ void Trap::on_revealed_from_searching()
 
 std::string Trap::name(const Article article) const
 {
-        return (
-                m_is_hidden
-                        ? m_mimic_terrain->name(article)
-                        : m_trap_impl->name(article));
+        if (m_is_hidden) {
+                return m_mimic_terrain->name(article);
+        }
+        else {
+                return m_trap_impl->name(article);
+        }
 }
 
 Color Trap::color_default() const
 {
-        return (
-                m_is_hidden
-                        ? m_mimic_terrain->color()
-                        : m_trap_impl->color());
+        if (m_is_hidden) {
+                return m_mimic_terrain->color();
+        }
+        else {
+                return m_trap_impl->color();
+        }
 }
 
 char Trap::character() const
 {
-        return (
-                m_is_hidden
-                        ? m_mimic_terrain->character()
-                        : m_trap_impl->character());
+        if (m_is_hidden) {
+                return m_mimic_terrain->character();
+        }
+        else {
+                return m_trap_impl->character();
+        }
 }
 
 gfx::TileId Trap::tile() const
 {
-        return m_is_hidden ? m_mimic_terrain->tile() : m_trap_impl->tile();
+        if (m_is_hidden) {
+                return m_mimic_terrain->tile();
+        }
+        else {
+                return m_trap_impl->tile();
+        }
 }
 
 Matl Trap::matl() const
 {
-        return m_is_hidden ? m_mimic_terrain->matl() : m_data->matl_type;
+        if (m_is_hidden) {
+                return m_mimic_terrain->matl();
+        }
+        else {
+                return m_data->matl_type;
+        }
 }
 
 // -----------------------------------------------------------------------------
@@ -608,14 +645,14 @@ TrapDart::TrapDart(P pos, Trap* const base_trap) :
 
 TrapPlacementValid TrapDart::on_place()
 {
-        auto offsets = dir_utils::g_cardinal_list;
+        std::vector<P> offsets = dir_utils::g_cardinal_list;
 
         rnd::shuffle(offsets);
 
         const int nr_steps_min = 2;
         const int nr_steps_max = g_fov_radi_int;
 
-        auto trap_plament_valid = TrapPlacementValid::no;
+        TrapPlacementValid trap_plament_valid = TrapPlacementValid::no;
 
         for (const P& d : offsets) {
                 P p = m_pos;
@@ -623,7 +660,7 @@ TrapPlacementValid TrapDart::on_place()
                 for (int i = 0; i <= nr_steps_max; ++i) {
                         p += d;
 
-                        const auto* const terrain = map::g_terrain.at(p);
+                        const Terrain* const terrain = map::g_terrain.at(p);
 
                         const bool is_wall = terrain->id() == terrain::Id::wall;
 
@@ -736,16 +773,16 @@ TrapSpear::TrapSpear(P pos, Trap* const base_trap) :
 
 TrapPlacementValid TrapSpear::on_place()
 {
-        auto offsets = dir_utils::g_cardinal_list;
+        std::vector<P> offsets = dir_utils::g_cardinal_list;
 
         rnd::shuffle(offsets);
 
-        auto trap_plament_valid = TrapPlacementValid::no;
+        TrapPlacementValid trap_plament_valid = TrapPlacementValid::no;
 
         for (const P& d : offsets) {
                 const P p = m_pos + d;
 
-                const auto* const terrain = map::g_terrain.at(p);
+                const Terrain* const terrain = map::g_terrain.at(p);
 
                 const bool is_wall = terrain->id() == terrain::Id::wall;
 
@@ -793,7 +830,7 @@ void TrapSpear::trigger()
         }
 
         // Is anyone standing on the trap now?
-        auto* const actor_on_trap = map::living_actor_at(m_pos);
+        actor::Actor* const actor_on_trap = map::living_actor_at(m_pos);
 
         if (actor_on_trap) {
                 // Make a temporary spear weapon
@@ -868,7 +905,7 @@ void TrapTeleport::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::living_actor_at(m_pos);
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -892,7 +929,7 @@ void TrapSummonMon::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::living_actor_at(m_pos);
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -917,7 +954,7 @@ void TrapSummonMon::trigger()
         std::vector<actor::Id> summon_bucket;
 
         for (size_t i = 0; i < (size_t)actor::Id::END; ++i) {
-                const auto& data = actor::g_data[i];
+                const actor::ActorData& data = actor::g_data[i];
 
                 if (data.can_be_summoned_by_mon &&
                     data.spawn_min_dlvl <= (map::g_dlvl + 2)) {
@@ -930,19 +967,19 @@ void TrapSummonMon::trigger()
         }
         else {
                 // Eligible monsters found
-                const auto id_to_summon = rnd::element(summon_bucket);
+                const actor::Id id_to_summon = rnd::element(summon_bucket);
 
                 TRACE << "Actor id: " << int(id_to_summon) << std::endl;
 
-                const auto summoned =
+                const actor::MonSpawnResult summoned =
                         actor::spawn(m_pos, {id_to_summon}, map::rect())
                                 .make_aware_of_player();
 
                 std::for_each(
                         std::begin(summoned.monsters),
                         std::end(summoned.monsters),
-                        [](auto* const mon) {
-                                auto* prop_summoned =
+                        [](actor::Actor* const mon) {
+                                Prop* prop_summoned =
                                         property_factory::make(
                                                 PropId::summoned);
 
@@ -950,7 +987,7 @@ void TrapSummonMon::trigger()
 
                                 mon->m_properties.apply(prop_summoned);
 
-                                auto* prop_waiting =
+                                Prop* prop_waiting =
                                         property_factory::make(
                                                 PropId::waiting);
 
@@ -977,7 +1014,7 @@ void TrapHpSap::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::living_actor_at(m_pos);
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -998,7 +1035,7 @@ void TrapHpSap::trigger()
                 *actor_here,
                 m_base_trap->is_hidden());
 
-        auto* const hp_sap = property_factory::make(PropId::hp_sap);
+        Prop* const hp_sap = property_factory::make(PropId::hp_sap);
 
         hp_sap->set_indefinite();
 
@@ -1011,7 +1048,7 @@ void TrapSpiSap::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::living_actor_at(m_pos);
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1032,7 +1069,7 @@ void TrapSpiSap::trigger()
                 *actor_here,
                 m_base_trap->is_hidden());
 
-        auto* const sp_sap = property_factory::make(PropId::spi_sap);
+        Prop* const sp_sap = property_factory::make(PropId::spi_sap);
 
         sp_sap->set_indefinite();
 
@@ -1119,7 +1156,7 @@ void TrapWeb::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::living_actor_at(m_pos);
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1151,7 +1188,7 @@ void TrapWeb::trigger()
                 }
         }
 
-        auto* const entangled = property_factory::make(PropId::entangled);
+        Prop* const entangled = property_factory::make(PropId::entangled);
 
         entangled->set_indefinite();
 
@@ -1163,7 +1200,7 @@ void TrapWeb::trigger()
 
         // Players getting stuck in spider webs alerts all spiders
         if (actor::is_player(actor_here)) {
-                for (auto* const actor : game_time::g_actors) {
+                for (actor::Actor* const actor : game_time::g_actors) {
                         if (actor::is_player(actor) ||
                             !actor->m_data->is_spider) {
                                 continue;
@@ -1180,7 +1217,7 @@ void TrapSlow::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::living_actor_at(m_pos);
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1199,7 +1236,7 @@ void TrapCurse::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::living_actor_at(m_pos);
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         ASSERT(actor_here);
 
@@ -1224,7 +1261,7 @@ void TrapUnlearnSpell::trigger()
 {
         TRACE_FUNC_BEGIN;
 
-        auto* const actor_here = map::living_actor_at(m_pos);
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         if (!actor_here) {
                 // Should never happen
