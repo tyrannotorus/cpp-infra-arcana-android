@@ -38,6 +38,7 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
+#include "random.hpp"
 #include "sound.hpp"
 #include "spells.hpp"
 #include "teleport.hpp"
@@ -318,9 +319,10 @@ void Trap::trigger_start(const actor::Actor* actor)
         ASSERT(m_trap_impl);
 
         TRACE
-                << "Start trigger for trap of type '"
-                << m_trap_impl->name(Article::a)
-                << "'"
+                << "Start trigger for trap of type "
+                << "'" << m_trap_impl->name(Article::a) << "', "
+                << "with trap implementation id "
+                << "'" << (int)m_trap_impl->type() << "'"
                 << std::endl;
 
         if (actor::is_player(actor)) {
@@ -335,7 +337,7 @@ void Trap::trigger_start(const actor::Actor* actor)
         }
 
         if (is_magical()) {
-                // TODO: Play sfx for magic traps (if player)
+                // TODO: Play sfx for magic traps.
         }
         else if (type() != TrapId::web) {
                 // Not magical, not spider web
@@ -413,7 +415,7 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
             !props.has(PropId::ethereal) &&
             !props.has(PropId::flying) &&
             !props.has(PropId::tiny_flying)) {
-                // The trap is known, and will be triggered by the player
+                // The trap is known, and would be triggered by the player.
 
                 const std::string name_the = name(Article::the);
 
@@ -440,8 +442,8 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
                                 : AllowAction::yes);
         }
         else {
-                // The trap is unknown, or will not be triggered by the player -
-                // delegate the question to the mimicked terrain
+                // The trap is hidden, or would not be triggered by the player -
+                // delegate the question to the mimicked terrain.
 
                 const AllowAction result =
                         m_mimic_terrain->pre_bump(actor_bumping);
@@ -525,12 +527,13 @@ void Trap::destroy()
         // terrain), and mechanical traps puts rubble.
 
         if (is_magical() || type() == TrapId::web) {
-                Terrain* const f_tmp = m_mimic_terrain;
+                // Magical trap or wbb.
+                Terrain* const mimic_terrain = m_mimic_terrain;
 
                 m_mimic_terrain = nullptr;
 
-                // NOTE: This call destroys the object!
-                map::update_terrain(f_tmp);
+                // NOTE: This call destroys this object!
+                map::update_terrain(mimic_terrain);
         }
         else {
                 // "Mechanical" trap
@@ -934,7 +937,8 @@ void TrapTeleport::trigger()
         ASSERT(actor_here);
 
         if (!actor_here) {
-                // Should never happen
+                // Should never happen.
+                ASSERT(false);
                 return;
         }
 
@@ -958,15 +962,8 @@ void TrapSummonMon::trigger()
         ASSERT(actor_here);
 
         if (!actor_here) {
-                // Should never happen
-                return;
-        }
-
-        // TODO: Do not return here! The trigger message should be printed, and
-        // the trigger effect should happen!
-        if (!actor::is_player(actor_here)) {
-                TRACE << "Not triggered by player" << std::endl;
-                TRACE_FUNC_END;
+                // Should never happen.
+                ASSERT(false);
                 return;
         }
 
@@ -1045,15 +1042,8 @@ void TrapHpSap::trigger()
         ASSERT(actor_here);
 
         if (!actor_here) {
-                // Should never happen
-                return;
-        }
-
-        // TODO: Do not return here! The trigger message should be printed, and
-        // the trigger effect should happen!
-        if (!actor::is_player(actor_here)) {
-                TRACE << "Not triggered by player" << std::endl;
-                TRACE_FUNC_END;
+                // Should never happen.
+                ASSERT(false);
                 return;
         }
 
@@ -1063,7 +1053,18 @@ void TrapHpSap::trigger()
                 *actor_here,
                 m_base_trap->is_hidden());
 
-        Prop* const hp_sap = property_factory::make(PropId::hp_sap);
+        auto* const hp_sap =
+                static_cast<PropHpSap*>(
+                        property_factory::make(PropId::hp_sap));
+
+        if (!actor::is_player(actor_here)) {
+                // This is a monster triggering the trap - drain half of the
+                // monsters hit points instead, so that this trap will actually
+                // have a tangible effect.
+                const int max_hp = actor::max_hp(*actor_here);
+
+                hp_sap->set_nr_drained(max_hp / 2);
+        }
 
         hp_sap->set_indefinite();
 
@@ -1081,15 +1082,8 @@ void TrapSpiSap::trigger()
         ASSERT(actor_here);
 
         if (!actor_here) {
-                // Should never happen
-                return;
-        }
-
-        // TODO: Do not return here! The trigger message should be printed, and
-        // the trigger effect should happen!
-        if (!actor::is_player(actor_here)) {
-                TRACE << "Not triggered by player" << std::endl;
-                TRACE_FUNC_END;
+                // Should never happen.
+                ASSERT(false);
                 return;
         }
 
@@ -1252,7 +1246,8 @@ void TrapSlow::trigger()
         ASSERT(actor_here);
 
         if (!actor_here) {
-                // Should never happen
+                // Should never happen.
+                ASSERT(false);
                 return;
         }
 
@@ -1271,7 +1266,8 @@ void TrapCurse::trigger()
         ASSERT(actor_here);
 
         if (!actor_here) {
-                // Should never happen
+                // Should never happen.
+                ASSERT(false);
                 return;
         }
 
@@ -1294,17 +1290,8 @@ void TrapUnlearnSpell::trigger()
         actor::Actor* const actor_here = map::living_actor_at(m_pos);
 
         if (!actor_here) {
-                // Should never happen
+                // Should never happen.
                 ASSERT(false);
-
-                return;
-        }
-
-        // TODO: Do not return here! The trigger message should be printed, and
-        // the trigger effect should happen! Monsters could unlearn spells too.
-        if (!actor::is_player(actor_here)) {
-                TRACE << "Not triggered by player" << std::endl;
-                TRACE_FUNC_END;
                 return;
         }
 
@@ -1314,6 +1301,18 @@ void TrapUnlearnSpell::trigger()
                 *actor_here,
                 m_base_trap->is_hidden());
 
+        if (actor::is_player(actor_here)) {
+                try_unlearn_for_player();
+        }
+        else {
+                try_unlearn_for_monster(*actor_here);
+        }
+
+        TRACE_FUNC_END;
+}
+
+void TrapUnlearnSpell::try_unlearn_for_player() const
+{
         std::vector<SpellId> id_bucket;
 
         // Do not unlearn spells for the Exorcist.
@@ -1354,11 +1353,40 @@ void TrapUnlearnSpell::trigger()
                 return;
         }
 
+        msg_log::add("I am surrounded by a misty haze.");
+
         const SpellId id = rnd::element(id_bucket);
 
         player_spells::forget_spell(id);
+}
 
-        TRACE_FUNC_END;
+void TrapUnlearnSpell::try_unlearn_for_monster(actor::Actor& actor) const
+{
+        std::vector<actor::MonSpell>& spells = actor.m_mon_spells;
+
+        const bool player_sees_actor = actor::can_player_see_actor(actor);
+
+        if (spells.empty()) {
+                if (player_sees_actor) {
+                        msg_log::add("There is no apparent effect.");
+                }
+
+                return;
+        }
+
+        if (player_sees_actor) {
+                const std::string actor_name =
+                        text_format::first_to_upper(
+                                actor.name_the());
+
+                msg_log::add("A misty haze surrounds " + actor_name + ".");
+        }
+
+        const int idx = rnd::idx(spells);
+
+        delete spells[idx].spell;
+
+        spells.erase(std::begin(spells) + idx);
 }
 
 }  // namespace terrain

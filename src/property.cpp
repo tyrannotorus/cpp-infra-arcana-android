@@ -1115,6 +1115,11 @@ void PropHpSap::on_more(const Prop& new_prop)
                         ->m_nr_drained;
 }
 
+void PropHpSap::set_nr_drained(const int value)
+{
+        m_nr_drained = value;
+}
+
 PropSpiSap::PropSpiSap() :
         Prop(PropId::spi_sap),
         m_nr_drained(1) {}

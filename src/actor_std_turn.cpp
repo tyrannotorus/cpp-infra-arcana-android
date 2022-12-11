@@ -303,12 +303,22 @@ static void std_turn_common(actor::Actor& actor)
         // Slowly decrease current HP/spirit if above max
         const int decr_above_max_n_turns = 7;
 
-        const bool decr_this_turn =
-                ((game_time::turn_nr() % decr_above_max_n_turns) == 0);
+        // Monsters decrement their HP every standard turn when above max (so
+        // that things draining max HP will have an affect faster), while the
+        // player can have HP above max longer.
+        bool decr_this_turn = true;
+
+        if (actor::is_player(&actor)) {
+                decr_this_turn =
+                        ((game_time::turn_nr() %
+                          decr_above_max_n_turns) == 0);
+        }
 
         const bool is_hp_above_max = (actor.m_hp > actor::max_hp(actor));
 
         if (is_hp_above_max && decr_this_turn) {
+                TRACE << actor.m_hp << std::endl;
+
                 --actor.m_hp;
         }
 

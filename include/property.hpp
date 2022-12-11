@@ -936,6 +936,8 @@ public:
 
         int affect_max_hp(int hp_max) const override;
 
+        void set_nr_drained(int value);
+
 private:
         int m_nr_drained;
 };

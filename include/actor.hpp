@@ -251,7 +251,7 @@ public:
 
         // Monster specific state
         //
-        // NOTE: PLAYER specific state is in "actor_player_state.hpp".
+        // NOTE: Player specific state is in "actor_player_state.hpp".
         //
         AiState m_ai_state {};
         AwareState m_mon_aware_state {};

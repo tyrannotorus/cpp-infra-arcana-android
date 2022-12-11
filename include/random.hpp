@@ -145,7 +145,7 @@ T element(const std::vector<T>& v)
 }
 
 template <typename T>
-size_t idx(const std::vector<T>& v)
+int idx(const std::vector<T>& v)
 {
         return range(0, v.size() - 1);
 }

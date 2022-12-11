@@ -983,9 +983,23 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f8: {
-                map::g_player->m_properties.apply(
-                        property_factory::make(
-                                PropId::deaf));
+                const P p = map::g_player->m_pos.with_x_offset(1);
+
+                if (map::g_terrain.at(p)->can_have_trap()) {
+                        auto* const trap =
+                                static_cast<terrain::Trap*>(
+                                        terrain::make(terrain::Id::trap, p));
+
+                        trap->set_mimic_terrain(
+                                terrain::make(terrain::Id::floor, p));
+
+                        if (trap->try_init_type(terrain::TrapId::unlearn_spell)) {
+                                map::update_terrain(trap);
+                        }
+                        else {
+                                delete trap;
+                        }
+                }
         } break;
 
         case GameCmd::debug_f9: {

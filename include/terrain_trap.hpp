@@ -606,6 +606,11 @@ public:
                 MagicTrapImpl(pos, TrapId::unlearn_spell, base_trap) {}
 
         void trigger() override;
+
+private:
+        void try_unlearn_for_player() const;
+
+        void try_unlearn_for_monster(actor::Actor& actor) const;
 };
 
 }  // namespace terrain
