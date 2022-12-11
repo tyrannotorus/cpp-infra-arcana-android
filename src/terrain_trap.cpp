@@ -152,6 +152,7 @@ static terrain::TrapImpl* make_trap_impl_from_id(
                 return new terrain::TrapUnlearnSpell(pos, parent_trap);
                 break;
 
+        case terrain::TrapId::END_MECHANICAL:
         case terrain::TrapId::END:
         case terrain::TrapId::any:
                 break;
@@ -181,6 +182,25 @@ static terrain::TrapImpl* try_make_impl(
         }
 }
 
+static terrain::TrapId get_random_id_to_spawn()
+{
+        Range id_range;
+
+        // Spawn magic traps most of the time.
+        if (rnd::one_in(3)) {
+                // "Mechanical" trap.
+                id_range.min = 0;
+                id_range.max = (int)terrain::TrapId::END_MECHANICAL - 1;
+        }
+        else {
+                // Magic trap.
+                id_range.min = (int)terrain::TrapId::END_MECHANICAL + 1;
+                id_range.max = (int)terrain::TrapId::END - 1;
+        }
+
+        return (terrain::TrapId)id_range.roll();
+}
+
 // -----------------------------------------------------------------------------
 // terrain
 // -----------------------------------------------------------------------------
@@ -194,6 +214,7 @@ Trap::~Trap()
 
 bool Trap::try_init_type(const TrapId id)
 {
+        ASSERT(id != TrapId::END_MECHANICAL);
         ASSERT(id != TrapId::END);
 
         Terrain* const terrain_here = map::g_terrain.at(m_pos);
@@ -214,8 +235,7 @@ bool Trap::try_init_type(const TrapId id)
         if (id == TrapId::any) {
                 // Attempt to set a trap implementation until succeeding.
                 while (true) {
-                        const auto last = (int)TrapId::END - 1;
-                        const auto random_id = (TrapId)rnd::range(0, last);
+                        const TrapId random_id = get_random_id_to_spawn();
 
                         TrapImpl* const impl =
                                 try_make_impl(random_id, m_pos, this);
@@ -449,9 +469,13 @@ void Trap::bump(actor::Actor& actor_bumping)
         }
 
         if (!actor::is_player(&actor_bumping)) {
+                // TODO: This seems to prevent the trap from triggering when the
+                // player kicks a monster into the trap in some cases? Perhaps
+                // when the monster has just stepped into sight of the player?
+                // The problem can happen both when the monster is aware or
+                // unaware?
+
                 // Put some extra restrictions on monsters triggering traps.
-                // This helps prevent stupid situations like a group of monsters
-                // in a small room repeatedly triggering a trap.
                 if (!actor_bumping.m_ai_state.is_target_seen ||
                     !actor_bumping.is_aware_of_player() ||
                     is_hidden()) {
@@ -938,6 +962,8 @@ void TrapSummonMon::trigger()
                 return;
         }
 
+        // TODO: Do not return here! The trigger message should be printed, and
+        // the trigger effect should happen!
         if (!actor::is_player(actor_here)) {
                 TRACE << "Not triggered by player" << std::endl;
                 TRACE_FUNC_END;
@@ -1023,6 +1049,8 @@ void TrapHpSap::trigger()
                 return;
         }
 
+        // TODO: Do not return here! The trigger message should be printed, and
+        // the trigger effect should happen!
         if (!actor::is_player(actor_here)) {
                 TRACE << "Not triggered by player" << std::endl;
                 TRACE_FUNC_END;
@@ -1057,6 +1085,8 @@ void TrapSpiSap::trigger()
                 return;
         }
 
+        // TODO: Do not return here! The trigger message should be printed, and
+        // the trigger effect should happen!
         if (!actor::is_player(actor_here)) {
                 TRACE << "Not triggered by player" << std::endl;
                 TRACE_FUNC_END;
@@ -1270,7 +1300,8 @@ void TrapUnlearnSpell::trigger()
                 return;
         }
 
-        // TODO: Monsters could unlearn spells too.
+        // TODO: Do not return here! The trigger message should be printed, and
+        // the trigger effect should happen! Monsters could unlearn spells too.
         if (!actor::is_player(actor_here)) {
                 TRACE << "Not triggered by player" << std::endl;
                 TRACE_FUNC_END;

@@ -38,6 +38,8 @@ enum class TrapId
         spear,
         web,
 
+        END_MECHANICAL,
+
         // Magical traps
         teleport,
         summon,
