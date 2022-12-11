@@ -72,17 +72,21 @@ set(COMMON_SRC
         include/inventory_handling.hpp
         include/io.hpp
         include/item.hpp
-        include/item_artifact.hpp
+        include/item_ammo.hpp
+        include/item_armor.hpp
         include/item_att_property.hpp
-        include/item_curio.hpp
         include/item_curse.hpp
         include/item_curse_ids.hpp
         include/item_data.hpp
         include/item_device.hpp
+        include/item_explosive.hpp
         include/item_factory.hpp
+        include/item_head.hpp
+        include/item_misc.hpp
         include/item_potion.hpp
         include/item_rod.hpp
         include/item_scroll.hpp
+        include/item_weapon.hpp
         include/knockback.hpp
         include/line_calc.hpp
         include/main_menu.hpp
@@ -207,15 +211,19 @@ set(COMMON_SRC
         src/inventory.cpp
         src/inventory_handling.cpp
         src/item.cpp
-        src/item_artifact.cpp
-        src/item_curio.cpp
+        src/item_ammo.cpp
+        src/item_armor.cpp
         src/item_curse.cpp
         src/item_data.cpp
         src/item_device.cpp
+        src/item_explosive.cpp
         src/item_factory.cpp
+        src/item_head.cpp
+        src/item_misc.cpp
         src/item_potion.cpp
         src/item_rod.cpp
         src/item_scroll.cpp
+        src/item_weapon.cpp
         src/knockback.cpp
         src/line_calc.cpp
         src/main_menu.cpp

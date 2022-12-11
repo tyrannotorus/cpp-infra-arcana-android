@@ -22,6 +22,7 @@
 #include "game.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "item_armor.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"

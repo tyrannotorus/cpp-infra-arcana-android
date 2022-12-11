@@ -5,10 +5,9 @@
 // =============================================================================
 
 #include "terrain_factory.hpp"
-#include "pos.hpp"
+#include "debug.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
-#include "terrain_dmg.hpp"
 #include "terrain_door.hpp"
 #include "terrain_event.hpp"
 #include "terrain_gong.hpp"

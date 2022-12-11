@@ -37,6 +37,7 @@
 #include "saving.hpp"
 #include "spells.hpp"
 #include "teleport.hpp"
+#include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_factory.hpp"
 #include "terrain_mob.hpp"

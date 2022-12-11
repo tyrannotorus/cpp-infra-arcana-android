@@ -21,6 +21,7 @@
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"

@@ -15,7 +15,11 @@
 #include "pos.hpp"
 #include "random.hpp"
 #include "terrain.hpp"
-#include "terrain_data.hpp"
+
+namespace terrain
+{
+struct TerrainData;
+}  // namespace terrain
 
 namespace actor
 {

@@ -38,6 +38,7 @@
 #include "inventory.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_explosive.hpp"
 #include "item_factory.hpp"
 #include "knockback.hpp"
 #include "line_calc.hpp"

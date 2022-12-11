@@ -10,20 +10,25 @@
 #include <ostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "debug.hpp"
 #include "drop.hpp"
 #include "global.hpp"
 #include "item.hpp"
-#include "item_artifact.hpp"
-#include "item_curio.hpp"
+#include "item_ammo.hpp"
+#include "item_armor.hpp"
 #include "item_curse.hpp"
 #include "item_curse_ids.hpp"
 #include "item_data.hpp"
 #include "item_device.hpp"
+#include "item_explosive.hpp"
+#include "item_head.hpp"
+#include "item_misc.hpp"
 #include "item_potion.hpp"
 #include "item_rod.hpp"
 #include "item_scroll.hpp"
+#include "item_weapon.hpp"
 #include "random.hpp"
 #include "wpn_dmg.hpp"
 

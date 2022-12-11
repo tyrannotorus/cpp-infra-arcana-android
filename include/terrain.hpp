@@ -7,6 +7,7 @@
 #ifndef TERRAIN_HPP
 #define TERRAIN_HPP
 
+#include <algorithm>
 #include <optional>
 #include <string>
 #include <vector>
@@ -16,6 +17,7 @@
 #include "gfx.hpp"
 #include "global.hpp"
 #include "pos.hpp"
+#include "property_data.hpp"
 #include "terrain_data.hpp"
 
 namespace io

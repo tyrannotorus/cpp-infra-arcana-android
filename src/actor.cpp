@@ -24,6 +24,7 @@
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_device.hpp"
+#include "item_explosive.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"

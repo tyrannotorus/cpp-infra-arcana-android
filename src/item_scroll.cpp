@@ -18,6 +18,7 @@
 #include "debug.hpp"
 #include "game.hpp"
 #include "global.hpp"
+#include "inventory.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
@@ -30,8 +31,6 @@
 #include "saving.hpp"
 #include "spells.hpp"
 #include "text_format.hpp"
-
-struct P;
 
 // -----------------------------------------------------------------------------
 // Private

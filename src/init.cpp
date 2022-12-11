@@ -6,7 +6,8 @@
 
 #include "init.hpp"
 
-#include <memory>
+#include <ostream>
+#include <string>
 
 #include "actor_data.hpp"
 #include "audio.hpp"
@@ -14,7 +15,6 @@
 #include "colors.hpp"
 #include "config.hpp"
 #include "debug.hpp"
-#include "draw_map.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "highscore.hpp"

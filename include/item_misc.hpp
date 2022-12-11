@@ -4,18 +4,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#ifndef ITEM_ARTIFACT_HPP
-#define ITEM_ARTIFACT_HPP
+#ifndef ITEM_MISC_HPP
+#define ITEM_MISC_HPP
 
 #include <string>
 
+#include "colors.hpp"
 #include "global.hpp"
 #include "item.hpp"
 #include "item_curse_ids.hpp"
 #include "random.hpp"
 #include "sound.hpp"
-
-class WpnDmg;
 
 namespace actor
 {
@@ -26,25 +25,72 @@ namespace item
 {
 struct ItemData;
 
-// -----------------------------------------------------------------------------
-// Staff of the Pharaohs
-// -----------------------------------------------------------------------------
-class PharaohStaff : public Wpn
+enum class MedBagAction
 {
-public:
-        PharaohStaff(ItemData* item_data);
-
-        void on_std_turn_in_inv_hook(InvType inv_type) override;
-
-private:
-        void on_mon_see_player_carrying(actor::Actor& mon) const;
-
-        void on_melee_hit(actor::Actor& actor_hit, int dmg) override;
+        treat_wound,
+        sanitize_infection,
+        END
 };
 
-// -----------------------------------------------------------------------------
-// Talisman of Reflection
-// -----------------------------------------------------------------------------
+class Trapez : public Item
+{
+public:
+        Trapez(ItemData* item_data);
+
+        ItemPrePickResult pre_pickup_hook() override;
+};
+
+class MedicalBag : public Item
+{
+public:
+        MedicalBag(ItemData* item_data);
+
+        ~MedicalBag() = default;
+
+        void save_hook() const override;
+
+        void load_hook() override;
+
+        Color interface_color() const override
+        {
+                return colors::green();
+        }
+
+        std::string name_info_str() const override;
+
+        void on_pickup_hook() override;
+
+        ConsumeItem activate(actor::Actor* actor) override;
+
+        void continue_action();
+
+        void interrupted(ForceInterruptActions is_forced);
+
+        void finish_current_action();
+
+        void randomize_nr_supplies();
+
+        int nr_supplies() const
+        {
+                return m_nr_supplies;
+        }
+
+protected:
+        MedBagAction choose_action() const;
+
+        int tot_suppl_for_action(MedBagAction action) const;
+
+        int tot_turns_for_action() const;
+
+        void stop_action();
+
+        static const int m_max_starting_supplies {24};
+
+        int m_nr_supplies {m_max_starting_supplies};
+        int m_nr_turns_left_action {-1};
+        MedBagAction m_current_action {MedBagAction::END};
+};
+
 class ReflTalisman : public Item
 {
 public:
@@ -55,9 +101,6 @@ public:
         void on_removed_from_inv_hook() override;
 };
 
-// -----------------------------------------------------------------------------
-// Talisman of Resurrection
-// -----------------------------------------------------------------------------
 class ResurrectTalisman : public Item
 {
 public:
@@ -73,9 +116,6 @@ public:
         }
 };
 
-// -----------------------------------------------------------------------------
-// Talisman of Teleportation Control
-// -----------------------------------------------------------------------------
 class TeleCtrlTalisman : public Item
 {
 public:
@@ -91,9 +131,6 @@ public:
         void on_removed_from_inv_hook() override;
 };
 
-// -----------------------------------------------------------------------------
-// Horn of Malice
-// -----------------------------------------------------------------------------
 class HornOfMaliceHeard : public SndHeardEffect
 {
 public:
@@ -121,9 +158,6 @@ private:
         int m_charges;
 };
 
-// -----------------------------------------------------------------------------
-// Horn of Banishment
-// -----------------------------------------------------------------------------
 class HornOfBanishmentHeard : public SndHeardEffect
 {
 public:
@@ -151,9 +185,6 @@ private:
         int m_charges;
 };
 
-// -----------------------------------------------------------------------------
-// Holy Symbol
-// -----------------------------------------------------------------------------
 class HolySymbol : public Item
 {
 public:
@@ -178,9 +209,6 @@ private:
         bool m_has_failed_attempt {false};
 };
 
-// -----------------------------------------------------------------------------
-// Arcane Clockwork
-// -----------------------------------------------------------------------------
 class Clockwork : public Item
 {
 public:
@@ -198,29 +226,6 @@ private:
         int m_charges;
 };
 
-// -----------------------------------------------------------------------------
-// Shadow Dagger
-// -----------------------------------------------------------------------------
-class ShadowDagger : public Wpn
-{
-public:
-        ShadowDagger(ItemData* item_data);
-
-        void on_melee_hit(actor::Actor& actor_hit, int dmg) override;
-
-        void on_ranged_hit(actor::Actor& actor_hit) override;
-
-private:
-        bool is_radiant_creature(const actor::Actor& actor) const;
-
-        void hit_normal_creature(actor::Actor& actor) const;
-
-        void hit_radiant_creature(actor::Actor& actor) const;
-};
-
-// -----------------------------------------------------------------------------
-// Orb of Life
-// -----------------------------------------------------------------------------
 class OrbOfLife : public Item
 {
 public:
@@ -231,9 +236,6 @@ public:
         void on_removed_from_inv_hook() override;
 };
 
-// -----------------------------------------------------------------------------
-// Necronomicon
-// -----------------------------------------------------------------------------
 class Necronomicon : public Item
 {
 public:
@@ -246,6 +248,67 @@ public:
         void on_pickup_hook() override;
 };
 
+class WitchEye : public Item
+{
+public:
+        WitchEye(ItemData* const item_data) :
+                Item(item_data) {}
+
+        ConsumeItem activate(actor::Actor* actor) override;
+
+        // TODO: Consider interface color for "Other Curiosities". Should they
+        // all share the same color?
+        // Color interface_color() const final
+        // {
+        //         return colors::light_red();
+        // }
+};
+
+// class FlaskOfDamning : public Item
+// {
+// public:
+//         FlaskOfDamning(ItemData* const item_data) :
+//                 Item(item_data) {}
+
+//         ConsumeItem activate(actor::Actor* actor);
+// };
+
+// class ObsidianCharm : public Item
+// {
+// public:
+//         ObsidianCharm(ItemData* const item_data) :
+//                 Item(item_data) {}
+
+//         ConsumeItem activate(actor::Actor* actor);
+// };
+
+class FluctuatingMaterial : public Item
+{
+public:
+        FluctuatingMaterial(ItemData* const item_data) :
+                Item(item_data) {}
+
+        ConsumeItem activate(actor::Actor* actor) override;
+};
+
+// class BatWingSalve : public Item
+// {
+// public:
+//         BatWingSalve(ItemData* const item_data) :
+//                 Item(item_data) {}
+
+//         ConsumeItem activate(actor::Actor* actor);
+// };
+
+class AstralOpium : public Item
+{
+public:
+        AstralOpium(ItemData* const item_data) :
+                Item(item_data) {}
+
+        ConsumeItem activate(actor::Actor* actor) override;
+};
+
 }  // namespace item
 
-#endif  // ITEM_ARTIFACT_HPP
+#endif  // ITEM_MISC_HPP

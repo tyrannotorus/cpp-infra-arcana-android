@@ -11,6 +11,7 @@
 
 #include "actor_data.hpp"
 #include "item.hpp"
+#include "item_weapon.hpp"
 #include "pos.hpp"
 #include "wpn_dmg.hpp"
 

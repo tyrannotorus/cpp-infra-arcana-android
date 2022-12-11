@@ -23,6 +23,8 @@
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_device.hpp"
+#include "item_misc.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "panel.hpp"
 #include "player_bon.hpp"

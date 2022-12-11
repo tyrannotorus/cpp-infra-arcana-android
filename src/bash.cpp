@@ -28,6 +28,7 @@
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"

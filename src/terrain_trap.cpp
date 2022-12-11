@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <memory>
 #include <ostream>
 #include <vector>
 
@@ -25,10 +26,9 @@
 #include "explosion.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
-#include "io.hpp"
-#include "item.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
@@ -41,6 +41,7 @@
 #include "random.hpp"
 #include "sound.hpp"
 #include "spells.hpp"
+#include "state.hpp"
 #include "teleport.hpp"
 #include "terrain_data.hpp"
 #include "terrain_factory.hpp"
@@ -770,13 +771,15 @@ void TrapDart::trigger()
         item::Wpn* wpn = nullptr;
 
         if (m_is_poisoned) {
-                wpn = static_cast<item::Wpn*>(
-                        item::make(item::Id::trap_dart_poison));
+                wpn =
+                        static_cast<item::Wpn*>(
+                                item::make(item::Id::trap_dart_poison));
         }
         else {
                 // Not poisoned
-                wpn = static_cast<item::Wpn*>(
-                        item::make(item::Id::trap_dart));
+                wpn =
+                        static_cast<item::Wpn*>(
+                                item::make(item::Id::trap_dart));
         }
 
         // Fire!

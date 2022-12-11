@@ -31,6 +31,7 @@
 #include "item_data.hpp"
 #include "item_device.hpp"
 #include "item_factory.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "map_travel.hpp"

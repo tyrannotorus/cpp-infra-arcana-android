@@ -22,6 +22,7 @@
 #include "init.hpp"
 #include "io.hpp"
 #include "item.hpp"
+#include "item_weapon.hpp"
 #include "map_parsing.hpp"
 #include "minimap.hpp"
 #include "misc.hpp"

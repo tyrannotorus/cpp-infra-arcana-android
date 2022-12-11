@@ -30,6 +30,7 @@
 #include "inventory.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "misc.hpp"

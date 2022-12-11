@@ -8,6 +8,8 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <memory>
+#include <ostream>
 #include <vector>
 
 #include "actor.hpp"
@@ -22,6 +24,7 @@
 #include "inventory.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_explosive.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"

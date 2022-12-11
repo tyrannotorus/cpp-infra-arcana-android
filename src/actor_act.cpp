@@ -32,6 +32,7 @@
 #include "io.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_misc.hpp"
 #include "map.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
