@@ -1084,21 +1084,22 @@ std::vector<ColoredString> bg_descr(const Bg id)
         case Bg::exorcist:
                 put("Starts with a Holy Symbol, which can restore "
                     "spirit points and grant resistance against "
-                    "shock and fear");
+                    "shock and fear.");
                 put("");
                 put("Cannot use manuscripts, altars, monoliths, or gongs, "
                     "but gains experience and spirit points for destroying "
-                    "these (manuscripts are destroyed when picking them up)");
+                    "these (manuscripts are destroyed when picking them up).");
                 put("");
                 put("Spirit points gained above the maximum level can be kept "
-                    "indefinitely until they are spent");
+                    "indefinitely until they are spent.");
                 put("");
                 put("Gains a bonus trait at character levels " +
                     std::to_string(s_exorcist_bon_trait_lvl_1) +
                     ", " +
                     std::to_string(s_exorcist_bon_trait_lvl_2) +
                     ", and " +
-                    std::to_string(s_exorcist_bon_trait_lvl_3));
+                    std::to_string(s_exorcist_bon_trait_lvl_3) +
+                    ".");
                 put("");
                 put_trait(Trait::stout_spirit);
                 put("");
@@ -1137,26 +1138,26 @@ std::vector<ColoredString> bg_descr(const Bg id)
         case Bg::ghoul:
                 put("Does not regenerate hit points and cannot use medical "
                     "equipment - heals by feeding on corpses (feeding is done "
-                    "while waiting on a corpse)");
+                    "while waiting on a corpse).");
                 put("");
                 put("Can incite frenzy at will, and does not become weakened "
-                    "when frenzy ends");
+                    "when frenzy ends.");
                 put("");
-                put("+8 hit points");
+                put("+8 hit points.");
                 put("");
-                put("Is immune to disease and infections");
+                put("Is immune to disease and infections.");
                 put("");
-                put("Does not get sprains");
+                put("Does not get sprains.");
                 put("");
-                put("Can see in darkness");
+                put("Can see in darkness.");
                 put("");
                 put("-50% shock taken from seeing monsters and standing "
                     "in darkness, but also -50% shock reduction bonus "
-                    "from light");
+                    "from light.");
                 put("");
-                put("-15% hit chance with firearms and thrown weapons");
+                put("-15% hit chance with firearms and thrown weapons.");
                 put("");
-                put("All ghouls are allied");
+                put("All ghouls are allied.");
                 break;
 
         case Bg::occultist:
@@ -1172,37 +1173,39 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 put("-50% shock taken from casting memorized spells, "
                     "and from using or identifying strange items "
                     "(e.g. drinking a potion, or casting a spell from "
-                    "a manuscript)");
+                    "a manuscript).");
                 put("");
-                put("Can dispel magic traps, doing so grants spirit points");
+                put("Starts with several Bone Charms, that can be used for "
+                    "gaining spell resistance or dispelling magic traps.");
                 put("");
-                put("+3 spirit points (in addition to \"Stout Spirit\")");
+                put("+3 spirit points (in addition to \"Stout Spirit\").");
                 put("");
                 put_trait(Trait::stout_spirit);
                 break;
 
         case Bg::rogue:
-                put("Shock received passively over time is reduced by 25%");
+                put("Shock received passively over time is reduced by 25%.");
                 put("");
-                put("+10% chance to spot hidden monsters, doors, and traps");
+                put("+10% chance to spot hidden monsters, doors, and traps.");
                 put("");
-                put("Remains aware of the presence of other creatures longer");
+                put("Remains aware of the presence of other creatures longer.");
                 put("");
                 put("Can sense the presence of unique monsters or powerful "
-                    "artifacts");
+                    "artifacts.");
                 put("");
                 put("Has acquired an artifact which can cloud the minds of all "
-                    "enemies, causing them to forget the presence of the user");
+                    "enemies, causing them to forget the presence of the "
+                    "user.");
                 put("");
                 put_trait(Trait::stealthy);
                 break;
 
         case Bg::war_vet:
-                put("Switches to prepared weapon instantly");
+                put("Switches to prepared weapon instantly.");
                 put("");
-                put("Starts with a Flak Jacket");
+                put("Starts with a Flak Jacket.");
                 put("");
-                put("Maintains armor twice as long before it breaks");
+                put("Maintains armor twice as long before it breaks.");
                 put("");
                 put_trait(Trait::adept_marksman);
                 put("");

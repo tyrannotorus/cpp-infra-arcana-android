@@ -91,7 +91,13 @@ void player_disarm()
                 return;
         }
 
-        // There is a known and seen trap here
+        // There is a known and seen trap here.
+
+        if (trap->is_magical()) {
+                msg_log::add("It cannot be removed through normal means.");
+
+                return;
+        }
 
         const auto* const actor_on_trap = map::living_actor_at(pos);
 
@@ -107,6 +113,8 @@ void player_disarm()
         }
 
         trap->disarm();
+
+        game_time::tick();
 
 }  // player_disarm
 

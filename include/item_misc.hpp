@@ -264,6 +264,15 @@ public:
         // }
 };
 
+class BoneCharm : public Item
+{
+public:
+        BoneCharm(ItemData* const item_data) :
+                Item(item_data) {}
+
+        ConsumeItem activate(actor::Actor* actor) override;
+};
+
 // class FlaskOfDamning : public Item
 // {
 // public:

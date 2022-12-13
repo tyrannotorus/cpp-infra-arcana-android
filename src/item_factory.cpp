@@ -208,6 +208,10 @@ Item* make(const Id item_id, const int nr_items)
                 r = new WitchEye(d);
                 break;
 
+        case Id::bone_charm:
+                r = new BoneCharm(d);
+                break;
+
                 // case Id::flask_of_damning:
                 //         r = new FlaskOfDamning(d);
                 //         break;

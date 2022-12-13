@@ -33,6 +33,8 @@
 #include "random.hpp"
 #include "saving.hpp"
 #include "state.hpp"
+#include "terrain.hpp"
+#include "terrain_trap.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -815,20 +817,20 @@ void Necronomicon::on_std_turn_in_inv_hook(const InvType inv_type)
 
 ItemPrePickResult Necronomicon::pre_pickup_hook()
 {
-        if (!player_bon::is_bg(Bg::exorcist)) {
+        if (player_bon::is_bg(Bg::exorcist)) {
+                msg_log::add("I destroy the profane text!");
+
+                game::incr_player_xp(10);
+
+                map::g_player->restore_sp(999, false, Verbose::no);
+                map::g_player->restore_sp(11, true);
+
+                return ItemPrePickResult::destroy_item;
+        }
+        else {
+                // Not Exorcist.
                 return ItemPrePickResult::do_pickup;
         }
-
-        // Is exorcist
-
-        msg_log::add("I destroy the profane text!");
-
-        game::incr_player_xp(10);
-
-        map::g_player->restore_sp(999, false, Verbose::no);
-        map::g_player->restore_sp(11, true);
-
-        return ItemPrePickResult::destroy_item;
 }
 
 void Necronomicon::on_pickup_hook()
@@ -866,6 +868,43 @@ ConsumeItem WitchEye::activate(actor::Actor* actor)
         else {
                 return ConsumeItem::no;
         }
+}
+
+ConsumeItem BoneCharm::activate(actor::Actor* actor)
+{
+        (void)actor;
+
+        Prop* const r_spell = property_factory::make(PropId::r_spell);
+
+        r_spell->set_duration(rnd::range(6, 12));
+
+        map::g_player->m_properties.apply(r_spell);
+
+        for (terrain::Terrain* const terrain : map::g_terrain) {
+                const P p = terrain->pos();
+
+                if (!map::g_seen.at(p)) {
+                        continue;
+                }
+
+                if (terrain->id() != terrain::Id::trap) {
+                        continue;
+                }
+
+                auto* const trap = static_cast<terrain::Trap*>(terrain);
+
+                if (!trap->is_magical()) {
+                        continue;
+                }
+
+                msg_log::more_prompt();
+
+                trap->disarm();
+
+                map::g_player->restore_sp(rnd::range(1, 6), true);
+        }
+
+        return ConsumeItem::yes;
 }
 
 // ConsumeItem FlaskOfDamning::activate(actor::Actor* actor)

@@ -2109,7 +2109,7 @@ void init()
                 "surrounding area, and the presence of all items and creatures "
                 "is revealed."};
         d.type = ItemType::general;
-        d.value = item::Value::minor_treasure;
+        d.value = item::Value::rare_treasure;
         d.weight = Weight::extra_light;
         d.has_std_activate = true;
         d.color = colors::light_green();
@@ -2121,6 +2121,37 @@ void init()
         d.allow_spawn = false;
         d.is_stackable = false;
         d.land_on_hard_snd_msg = "";
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::general);
+        d.id = Id::bone_charm;
+        d.base_name = {"Bone Charm", "Bone Charms", "a Bone Charm"};
+        d.base_descr = {
+                "An old finger bone, carved with tiny symbols.",
+
+                "Snapping it in two "
+                "grants protection against harmful spells "
+                "for 6-12 turns, or until a spell is blocked.",
+
+                "It also dispels all seen magic traps "
+                "(\"strange shape\" on the floor). "
+                "For each trap dispelled, 1-6 spirit points are gained, "
+                "which may raise spirit above maximum level."};
+        d.type = ItemType::general;
+        d.value = item::Value::minor_treasure;
+        d.weight = Weight::extra_light;
+        d.has_std_activate = true;
+        d.color = colors::gray_brown();
+        d.tile = gfx::TileId::bone_charm;
+        d.character = '%';
+        d.max_stack_at_spawn = 3;
+        d.chance_to_incl_in_spawn_list = 60;
+        d.is_stackable = true;
+        d.land_on_hard_snd_msg = "";
+        d.native_containers.push_back(terrain::Id::chest);
+        d.native_containers.push_back(terrain::Id::cabinet);
+        d.native_containers.push_back(terrain::Id::cocoon);
+        d.native_containers.push_back(terrain::Id::tomb);
         g_data[(size_t)d.id] = d;
 
         // reset_data(d, ItemType::general);

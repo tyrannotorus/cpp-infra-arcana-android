@@ -33,6 +33,7 @@ enum class TileId
         blast1,
         blast2,
         bog_tcher,
+        bone_charm,
         bookshelf_empty,
         bookshelf_full,
         brazier,

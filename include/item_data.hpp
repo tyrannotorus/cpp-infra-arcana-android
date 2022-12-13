@@ -184,10 +184,16 @@ enum class Id
         rod_cloud_minds,
         rod_shockwave,
 
-        // Medical bag
+        // Misc
         medical_bag,
-
-        // Artifacts
+        zombie_dust,
+        witch_eye,
+        bone_charm,
+        // flask_of_damning,
+        // obsidian_charm,
+        fluctuating_material,
+        // bat_wing_salve,
+        astral_opium,
         holy_symbol,
         clockwork,
         horn_of_banishment,
@@ -199,15 +205,6 @@ enum class Id
         shadow_dagger,
         tele_ctrl_talisman,
         necronomicon,
-
-        // Other Curiosities
-        zombie_dust,
-        witch_eye,
-        // flask_of_damning,
-        // obsidian_charm,
-        fluctuating_material,
-        // bat_wing_salve,
-        astral_opium,
 
         END
 };

@@ -159,6 +159,7 @@ static void make_for_player_occultist_common()
                 static_cast<item::Wpn*>(
                         item::make(item::Id::player_punch)));
 
+        inv.put_in_backpack(item::make(item::Id::bone_charm, 3));
         inv.put_in_backpack(item::make(item::Id::dynamite, 1));
         inv.put_in_backpack(item::make(item::Id::molotov, 1));
         inv.put_in_backpack(item::make(item::Id::medical_bag));
