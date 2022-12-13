@@ -12,6 +12,7 @@
 #include "catch.hpp"
 #include "game_time.hpp"
 #include "item_factory.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "property_factory.hpp"
