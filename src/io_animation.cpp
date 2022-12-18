@@ -34,7 +34,7 @@ static int s_graphics_cycle_nr[nr_graphics_cycle_types];
 
 static std::vector<io::FlashData> s_flashes;
 
-static const uint32_t s_flash_animation_delay_ms = 50U;
+static const uint32_t s_flash_animation_delay_ms = 40U;
 static const int s_flash_alpha_start_value = 80;
 static const int s_flash_alpha_decr = 12;
 static uint32_t s_last_flash_animation_step_ms = 0U;
