@@ -26,6 +26,7 @@
 - Removed all gas trap types (confusion gas etc)
 - Reverted Pylons to make them always active again (they start permanently activated, instead of being activated by bumping them)
 - Added more monsters
+- Fixed a bug where the player killing themselves with an Incinerator would freeze the game.
 
 ##############################
 # User interface

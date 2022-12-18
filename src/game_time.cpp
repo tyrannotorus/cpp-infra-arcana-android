@@ -207,6 +207,11 @@ static void run_std_turn_events()
 
                         ++i;
                 }
+
+                if (!map::g_player || !map::g_player->is_alive()) {
+                        return;
+                }
+
         }  // Actor loop
 
         // Allow already burning terrains to damage stuff, spread fire, etc.
@@ -443,6 +448,10 @@ void reset_current_actor_idx()
 
 void tick()
 {
+        if (!map::g_player || !map::g_player->is_alive()) {
+                return;
+        }
+
 #ifndef NDEBUG
         ASSERT(g_allow_tick);
 
@@ -497,6 +506,10 @@ void tick()
                 if (actor->m_delay <= 0) {
                         // This actor is ready to go.
                         break;
+                }
+
+                if (!map::g_player || !map::g_player->is_alive()) {
+                        return;
                 }
         }
 
