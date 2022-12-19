@@ -340,9 +340,9 @@ static void load_logo()
         // Use a smaller image if graphics are scaled, otherwise the logo looks
         // gigantic.
         const std::string img_path =
-                config::is_2x_scale_enabled()
-                ? paths::logo_small_img_path()
-                : paths::logo_img_path();
+                (config::video_scale_factor() == 1)
+                ? paths::logo_img_path()
+                : paths::logo_small_img_path();
 
         io::g_logo_texture = load_texture(img_path);
 
@@ -582,9 +582,7 @@ void set_clip_rect_to_panel(const Panel panel)
 {
         auto px_area = gui_to_px_rect(panels::area(panel));
 
-        if (config::is_2x_scale_enabled()) {
-                px_area = px_area.scaled_up(2);
-        }
+        px_area = px_area.scaled_up(config::video_scale_factor());
 
         const SDL_Rect clip_rect {
                 px_area.p0.x,
@@ -637,13 +635,13 @@ void draw_character_at_px(
         clip_rect.w = gui_cell_px_dims.x;
         clip_rect.h = gui_cell_px_dims.y;
 
-        // * Now apply offset and scaling, if needed *
+        // * Now apply offset and scaling *
 
         // Scaling
-        if (config::is_2x_scale_enabled()) {
-                px_pos = px_pos.scaled_up(2);
-                gui_cell_px_dims = gui_cell_px_dims.scaled_up(2);
-        }
+        const int scale_factor = config::video_scale_factor();
+
+        px_pos = px_pos.scaled_up(scale_factor);
+        gui_cell_px_dims = gui_cell_px_dims.scaled_up(scale_factor);
 
         // Apply rendering offsets (to center the graphics in the window)
         px_pos = px_pos.with_offsets(g_rendering_px_offset);
@@ -701,15 +699,13 @@ void draw_tile(const TileDrawObj& obj)
                         obj.bg_color);
         }
 
-        // * Now apply offset and scaling, if needed *
+        // * Now apply offset and scaling *
 
         // Scaling
-        if (config::is_2x_scale_enabled()) {
-                // We are running fullscreen 2x scale - scale up the position
-                // and rendering size
-                px_pos = px_pos.scaled_up(2);
-                map_cell_px_dims = map_cell_px_dims.scaled_up(2);
-        }
+        const int scale_factor = config::video_scale_factor();
+
+        px_pos = px_pos.scaled_up(scale_factor);
+        map_cell_px_dims = map_cell_px_dims.scaled_up(scale_factor);
 
         // Apply rendering offsets (to center the graphics in the window)
         px_pos = px_pos.with_offsets(g_rendering_px_offset);
@@ -801,15 +797,13 @@ void draw_logo()
 
         P px_pos((screen_px_w - img_px_dims.x) / 2, 0);
 
-        // * Now apply offset and scaling, if needed *
+        // * Now apply offset and scaling *
 
         // Scaling
-        if (config::is_2x_scale_enabled()) {
-                // We are running fullscreen 2x scale - scale up the position
-                // and rendering size
-                px_pos = px_pos.scaled_up(2);
-                img_px_dims = img_px_dims.scaled_up(2);
-        }
+        const int scale_factor = config::video_scale_factor();
+
+        px_pos = px_pos.scaled_up(scale_factor);
+        img_px_dims = img_px_dims.scaled_up(scale_factor);
 
         // Apply rendering offsets (to center the graphics in the window)
         px_pos = px_pos.with_offsets(g_rendering_px_offset);

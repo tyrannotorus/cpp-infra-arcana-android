@@ -114,19 +114,16 @@ static P calc_rendering_offsets(
 
 static void update_rendering_offsets()
 {
-        // NOTE: The window may be scaled up to 2x, but the screen panel is
-        // never scaled up. Therefore we may have to scale down the window size
-        // to compare it with the screen panel, and then scale up the offsets
-        // again afterwards.
-
-        const bool is_2x_scale = config::is_2x_scale_enabled();
+        // NOTE: The window may be scaled up, but the screen panel is never
+        // scaled up. Therefore we scale down the window size to compare it with
+        // the screen panel, and then scale up the offsets again afterwards.
 
         const auto window_px_dims = get_sdl_window_px_dims();
 
+        const int scale_factor = config::video_scale_factor();
+
         const auto window_logical_px_dims =
-                is_2x_scale
-                ? window_px_dims.scaled_down(2)
-                : window_px_dims;
+                window_px_dims.scaled_down(scale_factor);
 
         const auto screen_panel_logical_px_dims =
                 io::panel_px_dims(Panel::screen);
@@ -137,9 +134,7 @@ static void update_rendering_offsets()
                         screen_panel_logical_px_dims);
 
         io::g_rendering_px_offset =
-                is_2x_scale
-                ? rendering_px_offset.scaled_up(2)
-                : rendering_px_offset;
+                rendering_px_offset.scaled_up(scale_factor);
 }
 
 static SDL_Window* init_window_fullscreen()
@@ -150,14 +145,15 @@ static SDL_Window* init_window_fullscreen()
 
         auto window_size = native_resolution;
 
-        if (config::is_2x_scale_enabled()) {
-                window_size = window_size.scaled_down(2);
-        }
+        window_size =
+                window_size.scaled_down(
+                        config::video_scale_factor());
 
-        TRACE << "Fullscreen window size: "
-              << window_size.x << "x"
-              << window_size.y
-              << std::endl;
+        TRACE
+                << "Fullscreen window size: "
+                << window_size.x << "x"
+                << window_size.y
+                << std::endl;
 
         panels::init(io::px_to_gui_coords(window_size));
 
@@ -173,14 +169,14 @@ static SDL_Window* init_window_windowed()
                   config::window_px_h());
 
         const auto window_logical_size =
-                config::is_2x_scale_enabled()
-                ? window_size.scaled_down(2)
-                : window_size;
+                window_size.scaled_down(
+                        config::video_scale_factor());
 
-        TRACE << "Window size: "
-              << window_size.x << "x"
-              << window_size.y
-              << std::endl;
+        TRACE
+                << "Window size: "
+                << window_size.x << "x"
+                << window_size.y
+                << std::endl;
 
         TRACE << "Window logical size: "
               << window_logical_size.x << "x"
@@ -251,9 +247,8 @@ void try_set_window_gui_cells(P new_gui_dims)
         const auto new_logical_px_size = io::gui_to_px_coords(new_gui_dims);
 
         const auto new_px_size =
-                config::is_2x_scale_enabled()
-                ? new_logical_px_size.scaled_up(2)
-                : new_logical_px_size;
+                new_logical_px_size.scaled_up(
+                        config::video_scale_factor());
 
         SDL_SetWindowSize(g_sdl_window, new_px_size.x, new_px_size.y);
 }
@@ -263,9 +258,8 @@ void on_window_resized()
         const auto new_px_dims = get_sdl_window_px_dims();
 
         const auto new_logical_px_dims =
-                config::is_2x_scale_enabled()
-                ? new_px_dims.scaled_down(2)
-                : new_px_dims;
+                new_px_dims.scaled_down(
+                        config::video_scale_factor());
 
         TRACE << "New window size: "
               << new_px_dims.x << "x"
@@ -306,9 +300,8 @@ P sdl_window_gui_dims()
         const auto px_dims = get_sdl_window_px_dims();
 
         const auto logical_px_dims =
-                config::is_2x_scale_enabled()
-                ? px_dims.scaled_down(2)
-                : px_dims;
+                px_dims.scaled_down(
+                        config::video_scale_factor());
 
         return io::px_to_gui_coords(logical_px_dims);
 }

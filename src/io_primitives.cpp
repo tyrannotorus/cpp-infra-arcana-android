@@ -28,15 +28,14 @@ namespace io
 {
 void draw_rectangle(R px_rect, const Color& color)
 {
-        // NOTE: To handle graphics scaling, we draw an extra inner rectangle -
+        // NOTE: To handle graphics scaling, we draw extra inner rectangles -
         // this is somewhat hacky, but it fulfills the purpose...
         int nr_rects = 1;
 
-        if (config::is_2x_scale_enabled()) {
-                px_rect = px_rect.scaled_up(2);
+        const int scale_factor = config::video_scale_factor();
 
-                nr_rects = 2;
-        }
+        px_rect = px_rect.scaled_up(scale_factor);
+        nr_rects = scale_factor;
 
         px_rect = px_rect.with_offset(g_rendering_px_offset);
 
@@ -67,9 +66,7 @@ void draw_rectangle_filled(
         const Color& color,
         const uint8_t alpha)
 {
-        if (config::is_2x_scale_enabled()) {
-                px_rect = px_rect.scaled_up(2);
-        }
+        px_rect = px_rect.scaled_up(config::video_scale_factor());
 
         px_rect = px_rect.with_offset(g_rendering_px_offset);
 

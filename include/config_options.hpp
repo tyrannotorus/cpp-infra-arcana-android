@@ -187,7 +187,7 @@ public:
         void change(OptionChangeCommand command) const override;
 };
 
-class VideoScalingOption : public Option
+class VideoScaleOption : public Option
 {
 public:
         std::string name() const override;

@@ -53,7 +53,7 @@ RendererType renderer_type();
 bool is_tiles_mode();
 void set_fullscreen(bool value);
 bool is_fullscreen();
-bool is_2x_scale_enabled();
+int video_scale_factor();
 
 // Actual window size (i.e. not logical size)
 void set_window_px_w(int w);

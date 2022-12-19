@@ -49,15 +49,17 @@ by bumping them).
 ##############################
 # Graphics
 - Hardware acceleration is now used for rendering (if possible), also added an option to force software rendering.
+- It is now possible to set video scaling higher than 2x (3x and 4x are possible as well).
+- On first startup, the game tries to set an appropriate video scale factor based on the user resolution.
 
 # Window handling
-- 2x scaled graphics is now also possible in windowed mode.
+- Video scaling is now also possible in windowed mode.
 - The game no longer tries to determine if the window is large enough, any size is allowed even if all text will not fit.
 
 # Design
 - Changed the tile set size to 20x0 (from 24x24), most of the tiles are simply cropped since they had a lot of redundant black space around them, and a few tiles have been slightly reworked.
-- Added a tiny 7x13 font, intended for use with 2x scaled graphics.
-- By default, the game runs in fullscreen, using the 7x13 font, and 2x scaled graphics.
+- Added a tiny 7x13 font, intended for use with scaled up graphics.
+- By default, the game runs in fullscreen, using the 7x13 font, and tries to set an appropriate video scale factor (e.g. 2x for 1920x1080).
 - Added a flashing animation when a creature is hit by a melee attack.
 - When the game asks for a number (e.g. number of items to drop) this is now done in a popup screen instead.
 - When entering text or numbers, the underscore cursor is blinking
