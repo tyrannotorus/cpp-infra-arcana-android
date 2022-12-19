@@ -66,7 +66,6 @@ static bool s_always_center_view_on_player = false;
 static bool s_is_tiles_mode = false;
 static RendererType s_renderer_type = RendererType::auto_select;
 static bool s_is_fullscreen = false;
-static bool s_is_2x_scale_requested = false;
 static bool s_is_2x_scale_enabled = false;
 static bool s_text_mode_filled_walls = true;
 static bool s_use_trap_color_when_obscured = true;
@@ -275,7 +274,6 @@ static void set_default_variables()
         s_is_ambient_audio_preloaded = false;
         s_renderer_type = RendererType::auto_select;
         s_is_fullscreen = true;
-        s_is_2x_scale_requested = true;
         s_is_2x_scale_enabled = true;
         s_text_mode_filled_walls = true;
         s_use_trap_color_when_obscured = false;
@@ -377,9 +375,6 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         remove_line(lines);
 
         s_is_fullscreen = lines.front() == "1";
-        remove_line(lines);
-
-        s_is_2x_scale_requested = lines.front() == "1";
         remove_line(lines);
 
         s_is_2x_scale_enabled = lines.front() == "1";
@@ -484,7 +479,6 @@ static std::vector<std::string> lines_from_variables()
         lines.push_back(s_font_name);
         lines.push_back(std::to_string((int)s_renderer_type));
         lines.emplace_back(s_is_fullscreen ? "1" : "0");
-        lines.emplace_back(s_is_2x_scale_requested ? "1" : "0");
         lines.emplace_back(s_is_2x_scale_enabled ? "1" : "0");
         lines.emplace_back(s_text_mode_filled_walls ? "1" : "0");
         lines.emplace_back(s_use_trap_color_when_obscured ? "1" : "0");
@@ -650,11 +644,6 @@ RendererType renderer_type()
 bool is_fullscreen()
 {
         return s_is_fullscreen;
-}
-
-bool is_2x_scale_requested()
-{
-        return s_is_2x_scale_requested;
 }
 
 bool is_2x_scale_enabled()
@@ -870,15 +859,6 @@ std::string default_player_name()
 void set_fullscreen(const bool value)
 {
         s_is_fullscreen = value;
-
-        const auto lines = lines_from_variables();
-
-        write_lines_to_file(lines);
-}
-
-void set_2x_scale_enabled(const bool value)
-{
-        s_is_2x_scale_enabled = value;
 
         const auto lines = lines_from_variables();
 
@@ -1143,9 +1123,6 @@ void TilesModeOption::change(OptionChangeCommand command) const
 
         s_is_tiles_mode = !s_is_tiles_mode;
 
-        // Attempt to use 2x scaling if requested
-        s_is_2x_scale_enabled = s_is_2x_scale_requested;
-
         update_render_dims();
         io::init_other();
 }
@@ -1206,9 +1183,6 @@ void FontOption::change(OptionChangeCommand command) const
 
         s_font_name = s_font_image_names[font_idx];
 
-        // Attempt to use 2x scaling if requested
-        s_is_2x_scale_enabled = s_is_2x_scale_requested;
-
         update_render_dims();
         io::init_other();
 }
@@ -1241,9 +1215,6 @@ void FullscreenOption::change(OptionChangeCommand command) const
         (void)command;
 
         config::set_fullscreen(!s_is_fullscreen);
-
-        // Attempt to use 2x scaling if requested
-        s_is_2x_scale_enabled = s_is_2x_scale_requested;
 
         io::on_user_toggle_fullscreen();
 }
@@ -1331,7 +1302,7 @@ std::string VideoScalingOption::descr() const
 
 std::string VideoScalingOption::value_str() const
 {
-        return s_is_2x_scale_requested ? "Yes" : "No";
+        return s_is_2x_scale_enabled ? "Yes" : "No";
 }
 
 OptionSubmenuType VideoScalingOption::submenu_type() const
@@ -1343,10 +1314,7 @@ void VideoScalingOption::change(OptionChangeCommand command) const
 {
         (void)command;
 
-        s_is_2x_scale_requested = !s_is_2x_scale_requested;
-
-        // Attempt to use 2x scaling if requested
-        s_is_2x_scale_enabled = s_is_2x_scale_requested;
+        s_is_2x_scale_enabled = !s_is_2x_scale_enabled;
 
         io::on_user_toggle_scaling();
 }
