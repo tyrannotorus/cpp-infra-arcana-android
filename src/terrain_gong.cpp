@@ -656,16 +656,16 @@ void Cursed::run_effect()
 // -----------------------------------------------------------------------------
 SpawnMonsters::SpawnMonsters()
 {
-        std::vector<actor::Id> summon_bucket;
+        std::vector<std::string> summon_bucket;
 
-        summon_bucket.reserve((size_t)actor::Id::END);
+        summon_bucket.reserve(actor::g_data.size());
 
-        for (int i = 0; i < (int)actor::Id::END; ++i) {
-                const actor::ActorData& data = actor::g_data[i];
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& data = it.second;
 
                 if (data.can_be_summoned_by_mon) {
                         if (data.spawn_min_dlvl <= (map::g_dlvl + 3)) {
-                                summon_bucket.push_back(actor::Id(i));
+                                summon_bucket.push_back(data.id);
                         }
                 }
         }
@@ -677,12 +677,12 @@ SpawnMonsters::SpawnMonsters()
 
 bool SpawnMonsters::is_allowed() const
 {
-        return m_id_to_spawn != actor::Id::END;
+        return !m_id_to_spawn.empty();
 }
 
 void SpawnMonsters::run_effect()
 {
-        if (m_id_to_spawn == actor::Id::END) {
+        if (m_id_to_spawn.empty()) {
                 ASSERT(false);
 
                 return;

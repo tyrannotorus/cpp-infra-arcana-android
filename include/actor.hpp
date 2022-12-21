@@ -111,7 +111,7 @@ class Actor
 public:
         virtual ~Actor();
 
-        Id id() const
+        std::string id() const
         {
                 return m_data->id;
         }

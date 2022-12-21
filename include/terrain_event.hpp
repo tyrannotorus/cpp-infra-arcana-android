@@ -21,11 +21,6 @@
 
 // TODO: Events should probably not be terrain
 
-namespace actor
-{
-enum class Id;
-}  // namespace actor
-
 namespace terrain
 {
 class Event : public Terrain
@@ -113,7 +108,7 @@ public:
 
         ~EventSpawnMonstersDelayed() = default;
 
-        void set_mon_id(const actor::Id id)
+        void set_mon_id(const std::string& id)
         {
                 m_id = id;
         }
@@ -126,7 +121,7 @@ public:
         void on_new_turn() override;
 
 private:
-        actor::Id m_id {(actor::Id)0};
+        std::string m_id {};
         size_t m_nr_mon {1};
 
         int m_countdown {3};

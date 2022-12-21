@@ -185,7 +185,7 @@ TEST_CASE("Saving and loading the game")
                 map::g_dlvl = 7;
 
                 // Actor data
-                actor::g_data[(size_t)actor::Id::END - 1].nr_kills = 123;
+                actor::g_data["MON_ZOMBIE"].nr_kills = 123;
 
                 // Learned spells
                 player_spells::learn_spell(
@@ -411,8 +411,7 @@ TEST_CASE("Saving and loading the game")
                 REQUIRE(map::g_dlvl == 7);
 
                 // Actor data
-                REQUIRE(actor::g_data[(int)actor::Id::END - 1]
-                                .nr_kills == 123);
+                REQUIRE(actor::g_data["MON_ZOMBIE"].nr_kills == 123);
 
                 // Learned spells
                 REQUIRE(player_spells::is_spell_learned(SpellId::bless));

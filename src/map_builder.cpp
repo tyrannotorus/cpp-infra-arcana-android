@@ -30,7 +30,7 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<actor::Id> actor_ids_for_starting_allies(
+static std::vector<std::string> actor_ids_for_starting_allies(
         const actor::StartingAllyEntry& allies_entry)
 {
         return {(size_t)allies_entry.nr.roll(), allies_entry.id};

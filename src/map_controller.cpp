@@ -77,7 +77,7 @@ void MapControllerBoss::on_std_turn()
         }
 
         for (const auto* const actor : game_time::g_actors) {
-                if ((actor->id() == actor::Id::the_high_priest) &&
+                if ((actor->id() == "MON_THE_HIGH_PRIEST") &&
                     actor->is_alive()) {
                         // The boss is still alive
                         return;
@@ -108,7 +108,7 @@ void MapControllerBoss::on_std_turn()
 
         // actor_factory::spawn(
         //         pos,
-        //         {nr_snakes, actor::Id::pit_viper});
+        //         {nr_snakes, "MON_PIT_VIPER"});
 }
 
 // -----------------------------------------------------------------------------

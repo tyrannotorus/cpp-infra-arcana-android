@@ -315,7 +315,7 @@ public:
         void run_effect() override;
 
 private:
-        actor::Id m_id_to_spawn {actor::Id::END};
+        std::string m_id_to_spawn {};
 };
 
 class ForgetSpell : public Toll

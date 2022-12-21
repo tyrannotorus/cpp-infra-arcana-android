@@ -76,8 +76,8 @@ TEST_CASE("Seen hostile monster attacking seen friendly monster")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make(actor::Id::ghoul, {7, 6});
-        auto* mon_hostile = actor::make(actor::Id::zombie, {7, 7});
+        auto* mon_allied = actor::make("MON_GHOUL", {7, 6});
+        auto* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
 
         // Make the hostile monster aware so it doesn't become aware by
         // attacking (attacking bumps awareness) and runs its "aware phrase".
@@ -122,8 +122,8 @@ TEST_CASE("Hostile monster outside FOV attacking friendly monster outside FOV")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make(actor::Id::ghoul, {9, 6});
-        auto* mon_hostile = actor::make(actor::Id::zombie, {9, 7});
+        auto* mon_allied = actor::make("MON_GHOUL", {9, 6});
+        auto* mon_hostile = actor::make("MON_ZOMBIE", {9, 7});
 
         // Make the hostile monster aware so it doesn't become aware by
         // attacking (attacking bumps awareness) and runs its "aware phrase".
@@ -177,8 +177,8 @@ TEST_CASE("Invisible hostile monster attacking seen friendly monster")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make(actor::Id::ghoul, {7, 6});
-        auto* mon_hostile = actor::make(actor::Id::zombie, {7, 7});
+        auto* mon_allied = actor::make("MON_GHOUL", {7, 6});
+        auto* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
 
         const auto& mon_allied_player_aware_counter =
                 mon_allied->m_mon_aware_state.player_aware_of_me_counter;
@@ -243,8 +243,8 @@ TEST_CASE("Invisible hostile monster attacking invisible friendly monster")
 
         // First place the monsters outside FOV to not trigger player awareness
         // when vision is updated when invisibility is applied.
-        auto* mon_allied = actor::make(actor::Id::ghoul, {27, 6});
-        auto* mon_hostile = actor::make(actor::Id::zombie, {27, 7});
+        auto* mon_allied = actor::make("MON_GHOUL", {27, 6});
+        auto* mon_hostile = actor::make("MON_ZOMBIE", {27, 7});
 
         auto& mon_allied_player_aware_counter =
                 mon_allied->m_mon_aware_state.player_aware_of_me_counter;
@@ -312,8 +312,8 @@ TEST_CASE("Visible friendly monster attacking invisible hostile monster")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make(actor::Id::ghoul, {7, 6});
-        auto* mon_hostile = actor::make(actor::Id::zombie, {7, 7});
+        auto* mon_allied = actor::make("MON_GHOUL", {7, 6});
+        auto* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
 
         auto& mon_allied_player_aware_counter =
                 mon_allied->m_mon_aware_state.player_aware_of_me_counter;
@@ -375,7 +375,7 @@ TEST_CASE("Player kicking invisible monster")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon = actor::make(actor::Id::zombie, {8, 5});
+        auto* mon = actor::make("MON_ZOMBIE", {8, 5});
 
         mon->m_properties.apply(property_factory::make(PropId::invis));
 
@@ -433,7 +433,7 @@ TEST_CASE("Test player killing invisible monster")
 
         map::g_player->m_inv.put_in_slot(SlotId::wpn, wpn, Verbose::no);
 
-        auto* mon = actor::make(actor::Id::zombie, {8, 5});
+        auto* mon = actor::make("MON_ZOMBIE", {8, 5});
 
         mon->m_properties.apply(property_factory::make(PropId::invis));
 

@@ -86,7 +86,7 @@ TEST_CASE("Spider web")
                 }
 
                 actor::Actor* const actor =
-                        actor::make(actor::Id::zombie, pos_l);
+                        actor::make("MON_ZOMBIE", pos_l);
 
                 // Requirement for triggering traps
                 actor->m_ai_state.is_target_seen = true;

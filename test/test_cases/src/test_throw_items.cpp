@@ -65,7 +65,7 @@ TEST_CASE("Throw potion at monster")
 
         map::g_player->m_pos = {5, 7};
 
-        auto* const mon = actor::make(actor::Id::zombie, {6, 7});
+        auto* const mon = actor::make("MON_ZOMBIE", {6, 7});
 
         REQUIRE(!mon->m_properties.has(PropId::r_fire));
 

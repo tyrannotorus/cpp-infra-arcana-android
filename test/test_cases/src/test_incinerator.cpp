@@ -36,8 +36,8 @@ TEST_CASE("Incinerator projectile explodes on hitting creature")
 
         map::g_player->m_pos = p0;
 
-        const auto* const rat_1 = actor::make(actor::Id::rat, p1);
-        const auto* const rat_2 = actor::make(actor::Id::rat, p2);
+        const auto* const rat_1 = actor::make("MON_RAT", p1);
+        const auto* const rat_2 = actor::make("MON_RAT", p2);
 
         auto* const wpn =
                 static_cast<item::Wpn*>(
@@ -82,8 +82,8 @@ TEST_CASE("Incinerator projectile explodes on hitting floor")
 
         map::g_player->m_pos = p0;
 
-        const auto* const rat_1 = actor::make(actor::Id::rat, p1);
-        const auto* const rat_2 = actor::make(actor::Id::rat, p3);
+        const auto* const rat_1 = actor::make("MON_RAT", p1);
+        const auto* const rat_2 = actor::make("MON_RAT", p3);
 
         auto* const wpn =
                 static_cast<item::Wpn*>(

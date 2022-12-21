@@ -7,6 +7,7 @@
 #ifndef ACTOR_FACTORY_HPP
 #define ACTOR_FACTORY_HPP
 
+#include <string>
 #include <vector>
 
 struct P;
@@ -15,8 +16,6 @@ struct R;
 namespace actor
 {
 class Actor;
-
-enum class Id;
 
 enum class MakeMonAware
 {
@@ -38,15 +37,15 @@ public:
 
 void delete_all_mon();
 
-Actor* make(Id id, const P& pos);
+Actor* make(const std::string& id, const P& pos);
 
 MonSpawnResult spawn(
         const P& origin,
-        const std::vector<Id>& monster_ids,
+        const std::vector<std::string>& monster_ids,
         const R& area_allowed);
 
 MonSpawnResult spawn_random_position(
-        const std::vector<Id>& monster_ids,
+        const std::vector<std::string>& monster_ids,
         const R& area_allowed);
 
 }  // namespace actor

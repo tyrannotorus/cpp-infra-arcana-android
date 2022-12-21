@@ -46,7 +46,7 @@ static std::vector<P> free_spawn_positions(const R& area)
         return to_vec(blocked, false, area);
 }
 
-static actor::Actor* spawn_at(const P& pos, const actor::Id id)
+static actor::Actor* spawn_at(const P& pos, const std::string& id)
 {
         ASSERT(map::is_pos_inside_outer_walls(pos));
 
@@ -55,7 +55,7 @@ static actor::Actor* spawn_at(const P& pos, const actor::Id id)
 
 static actor::MonSpawnResult spawn_at_positions(
         const std::vector<P>& positions,
-        const std::vector<actor::Id>& ids)
+        const std::vector<std::string>& ids)
 {
         actor::MonSpawnResult result;
 
@@ -105,11 +105,21 @@ MonSpawnResult& MonSpawnResult::make_aware_of_player()
         return *this;
 }
 
-Actor* make(const Id id, const P& pos)
+Actor* make(const std::string& id, const P& pos)
 {
         auto* actor = new Actor();
 
-        init_actor(*actor, pos, g_data[(size_t)id]);
+        const auto data_result = g_data.find(id);
+
+        if (data_result == std::end(g_data)) {
+                TRACE_ERROR_RELEASE
+                        << "Undefined monster ID: "
+                        << "'" << id << "'" << std::endl;
+
+                PANIC;
+        }
+
+        init_actor(*actor, pos, data_result->second);
 
         if (actor->m_data->nr_left_allowed_to_spawn > 0) {
                 --actor->m_data->nr_left_allowed_to_spawn;
@@ -159,7 +169,7 @@ void delete_all_mon()
 
 MonSpawnResult spawn(
         const P& origin,
-        const std::vector<Id>& monster_ids,
+        const std::vector<std::string>& monster_ids,
         const R& area_allowed)
 {
         auto free_positions = free_spawn_positions(area_allowed);
@@ -177,7 +187,7 @@ MonSpawnResult spawn(
 }
 
 MonSpawnResult spawn_random_position(
-        const std::vector<Id>& monster_ids,
+        const std::vector<std::string>& monster_ids,
         const R& area_allowed)
 {
         auto free_positions = free_spawn_positions(area_allowed);

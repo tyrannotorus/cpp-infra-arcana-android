@@ -62,8 +62,10 @@ static std::vector<ColoredString> make_game_summary_lines(
 
         int nr_kills_tot_all_mon = 0;
 
-        for (const auto& d : actor::g_data) {
-                if ((d.id != actor::Id::player) && (d.nr_kills > 0)) {
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& d = it.second;
+
+                if ((d.id != "MON_PLAYER") && (d.nr_kills > 0)) {
                         nr_kills_tot_all_mon += d.nr_kills;
 
                         if (d.is_unique) {

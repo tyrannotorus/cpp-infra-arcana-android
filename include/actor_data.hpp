@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "ability_values.hpp"
@@ -26,103 +27,6 @@
 
 namespace actor
 {
-enum class Id
-{
-        player,
-        zombie,
-        bloated_zombie,
-        major_clapham_lee,
-        dean_halsey,
-        crawling_intestines,
-        crawling_hand,
-        thing,
-        floating_skull,
-        cultist,
-        zealot,
-        bog_tcher,
-        keziah_mason,
-        brown_jenkin,
-        cultist_priest,
-        cultist_wizard,
-        cultist_arch_wizard,
-        green_spider,
-        white_spider,
-        red_spider,
-        shadow_spider,
-        leng_spider,
-        leng_doomweaver,
-        leng_matriarch,
-        rat,
-        transcendent_rat,
-        rat_thing,
-        pit_viper,
-        spitting_cobra,
-        black_mamba,
-        fire_hound,
-        energy_hound,
-        zuul,
-        ghost,
-        wraith,
-        mi_go,
-        mi_go_commander,
-        flying_polyp,
-        greater_polyp,
-        mind_leech,
-        ghoul,
-        shadow,
-        invis_stalker,
-        wolf,
-        void_traveler,
-        elder_void_traveler,
-        raven,
-        giant_bat,
-        vampire_bat,
-        abaxu,  // Unique bat
-        byakhee,
-        giant_mantis,
-        locust,
-        mummy,
-        croc_head_mummy,
-        khephren,
-        nitokris,
-        deep_one,
-        niduza,
-        ape,
-        troglodyte,
-        abyssal_troglodyte,
-        worm_mass,
-        mind_worm,
-        primordial_worm,
-        dust_vortex,
-        fire_vortex,
-        energy_vortex,
-        ooze_putrid,
-        ooze_lurking,
-        ooze_poison,
-        glasuu,
-        strange_color,
-        ghastly_light,
-        chthonian,
-        hunting_horror,
-        sentry_drone,
-        spectral_wpn,
-        mold,
-        mold_halluc,
-        gas_spore,
-        tentacle_cluster,
-        warping_aberrance,
-        death_fiend,
-        khaga_offspring,
-        khaga,
-        shapeshifter,
-        the_high_priest,
-        high_priest_guard_war_vet,
-        high_priest_guard_rogue,
-        high_priest_guard_ghoul,
-
-        END
-};
-
 enum class MonGroupSize
 {
         alone,
@@ -169,7 +73,7 @@ struct ActorSpellData
 
 struct StartingAllyEntry
 {
-        Id id {(Id)0};
+        std::string id {};
         Range nr {1, 1};
 };
 
@@ -210,7 +114,7 @@ struct ActorData
 
         void reset();
 
-        Id id;
+        std::string id;
         std::string name_a;
         std::string name_the;
         std::string corpse_name_a;
@@ -277,7 +181,7 @@ struct ActorData
         std::vector<StartingAllyEntry> starting_allies;
 };
 
-extern ActorData g_data[(size_t)Id::END];
+extern std::unordered_map<std::string, ActorData> g_data;
 
 void init();
 

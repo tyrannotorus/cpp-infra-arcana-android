@@ -43,12 +43,12 @@ static const std::string s_cannot_be_harmed_by_start =
         "They cannot be harmed by";
 
 static const std::pair<PropId, std::string> s_cannot_be_harmed_by_props[] = {
-        {PropId::r_phys, "{gray}physical damage{reset_color}"},
-        {PropId::r_fire, "{light_red}fire{reset_color}"},
-        {PropId::r_elec, "{yellow}electricity{reset_color}"},
-        {PropId::r_poison, "{light_green}poison{reset_color}"},
-        {PropId::r_disease, "{green}disease{reset_color}"},
-        {PropId::r_spell, "{magenta}magic{reset_color}"},
+        {PropId::r_phys, "{COLOR_GRAY}physical damage{reset_color}"},
+        {PropId::r_fire, "{COLOR_LIGHT_RED}fire{reset_color}"},
+        {PropId::r_elec, "{COLOR_YELLOW}electricity{reset_color}"},
+        {PropId::r_poison, "{COLOR_LIGHT_GREEN}poison{reset_color}"},
+        {PropId::r_disease, "{COLOR_GREEN}disease{reset_color}"},
+        {PropId::r_spell, "{COLOR_MAGENTA}magic{reset_color}"},
 };
 
 static const std::string s_unaffected_by_start =
@@ -118,7 +118,7 @@ static std::string get_mon_memory_turns_descr(
 
                 return name_a +
                         " will remember hostile creatures for at least "
-                        "{dark_yellow}" +
+                        "{COLOR_DARK_YELLOW}" +
                         nr_turns_aware_str +
                         "{_}turns{reset_color}.";
         }
@@ -127,7 +127,7 @@ static std::string get_mon_memory_turns_descr(
                 return (
                         name_a +
                         " remembers hostile creatures for a "
-                        "{dark_yellow}very long time{reset_color}.");
+                        "{COLOR_DARK_YELLOW}very long time{reset_color}.");
         }
 }
 
@@ -185,25 +185,25 @@ static MonShockStrings mon_shock_lvl_to_strings(const MonShockLvl shock_lvl)
 
         switch (shock_lvl) {
         case MonShockLvl::unsettling:
-                result.color_fmt_str = "{dark_brown}";
+                result.color_fmt_str = "{COLOR_DARK_BROWN}";
                 result.shock_str = "unsettling";
                 result.punct_str = ".";
                 break;
 
         case MonShockLvl::frightening:
-                result.color_fmt_str = "{gray}";
+                result.color_fmt_str = "{COLOR_GRAY}";
                 result.shock_str = "frightening";
                 result.punct_str = ".";
                 break;
 
         case MonShockLvl::terrifying:
-                result.color_fmt_str = "{red}";
+                result.color_fmt_str = "{COLOR_RED}";
                 result.shock_str = "terrifying";
                 result.punct_str = "!";
                 break;
 
         case MonShockLvl::mind_shattering:
-                result.color_fmt_str = "{light_red}";
+                result.color_fmt_str = "{COLOR_LIGHT_RED}";
                 result.shock_str = "mind shattering";
                 result.punct_str = "!";
                 break;
@@ -291,7 +291,7 @@ static std::string get_melee_hit_chance_descr(actor::Actor& actor)
         std::string descr =
                 "The chance to hit " +
                 actor.name_the() +
-                " in melee combat is currently{_}{light_green}" +
+                " in melee combat is currently{_}{COLOR_LIGHT_GREEN}" +
                 std::to_string(hit_chance) +
                 "%{reset_color}";
 
@@ -317,7 +317,7 @@ static std::string get_sneak_chance_descr(actor::Actor& actor)
         std::string descr =
                 "The chance to remain undetected by " +
                 actor.name_the() +
-                " is currently{_}{light_green}" +
+                " is currently{_}{COLOR_LIGHT_GREEN}" +
                 std::to_string(tot_value) +
                 "%{reset_color}.";
 
@@ -514,7 +514,7 @@ static std::string auto_description_str(actor::Actor& actor)
         if (actor_data.is_undead) {
                 text_format::append_with_space(
                         str,
-                        "{magenta}This creature is undead.{reset_color}");
+                        "{COLOR_MAGENTA}This creature is undead.{reset_color}");
         }
 
         if (!actor.is_actor_my_leader(map::g_player)) {
@@ -557,13 +557,13 @@ static std::string temporary_negative_properties_str(actor::Actor& actor)
 
                 // TODO: This is VERY hacky (maybe Text should support RGB?):
                 if (entry.title.color == colors::msg_good()) {
-                        str += "{light_green}";
+                        str += "{COLOR_LIGHT_GREEN}";
                 }
                 else if (entry.title.color == colors::msg_bad()) {
-                        str += "{light_red}";
+                        str += "{COLOR_LIGHT_RED}";
                 }
                 else {
-                        str += "{white}";
+                        str += "{COLOR_WHITE}";
                 }
 
                 str += entry.title.str;

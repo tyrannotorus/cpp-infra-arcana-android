@@ -41,11 +41,6 @@ class Room;
 template <typename T>
 class Array2;
 
-namespace actor
-{
-enum class Id;
-}  // namespace actor
-
 enum class RoomType
 {
         // Standard rooms (standardized terrain spawning and reshaping)
@@ -275,7 +270,7 @@ protected:
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
 
-        actor::Id get_random_monster_type() const;
+        std::string get_random_monster_type() const;
 };
 
 class CryptRoom : public StdRoom

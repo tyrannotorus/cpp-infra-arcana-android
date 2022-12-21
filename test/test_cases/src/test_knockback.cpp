@@ -34,7 +34,7 @@ TEST_CASE("Creatures are not nailed to occupied terrain blocking los")
         map::update_terrain(
                 terrain::make(terrain::Id::wall, pos_r.with_x_offset(1)));
 
-        actor::Actor* other_actor = actor::make(actor::Id::zombie, pos_r);
+        actor::Actor* other_actor = actor::make("MON_ZOMBIE", pos_r);
 
         map::g_player->m_pos = pos_l;
 

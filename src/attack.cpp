@@ -455,7 +455,7 @@ static void print_mon_melee_hit_msg(const int dmg, const MeleeAttData& att_data)
 
         if (!att_data.att_item->data().is_intr &&
             // TODO: This is hacky
-            (att_data.attacker->id() != actor::Id::spectral_wpn)) {
+            (att_data.attacker->id() != "MON_SPECTRAL_WPN")) {
                 const std::string wpn_name_a =
                         att_data.att_item->name(
                                 ItemNameType::a,

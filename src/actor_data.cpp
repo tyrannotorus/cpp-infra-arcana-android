@@ -11,7 +11,6 @@
 #include <optional>
 #include <ostream>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -29,166 +28,58 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static const std::unordered_map<std::string, actor::Id> str_to_actor_id_map = {
-        {"player", actor::Id::player},
-        {"zombie", actor::Id::zombie},
-        {"bloated_zombie", actor::Id::bloated_zombie},
-        {"crawling_intestines", actor::Id::crawling_intestines},
-        {"crawling_hand", actor::Id::crawling_hand},
-        {"thing", actor::Id::thing},
-        {"floating_skull", actor::Id::floating_skull},
-        {"cultist", actor::Id::cultist},
-        {"zealot", actor::Id::zealot},
-        {"cultist_priest", actor::Id::cultist_priest},
-        {"cultist_wizard", actor::Id::cultist_wizard},
-        {"cultist_arch_wizard", actor::Id::cultist_arch_wizard},
-        {"bog_tcher", actor::Id::bog_tcher},
-        {"rat", actor::Id::rat},
-        {"transcendent_rat", actor::Id::transcendent_rat},
-        {"rat_thing", actor::Id::rat_thing},
-        {"green_spider", actor::Id::green_spider},
-        {"white_spider", actor::Id::white_spider},
-        {"red_spider", actor::Id::red_spider},
-        {"shadow_spider", actor::Id::shadow_spider},
-        {"leng_spider", actor::Id::leng_spider},
-        {"leng_doomweaver", actor::Id::leng_doomweaver},
-        {"leng_matriarch", actor::Id::leng_matriarch},
-        {"pit_viper", actor::Id::pit_viper},
-        {"spitting_cobra", actor::Id::spitting_cobra},
-        {"black_mamba", actor::Id::black_mamba},
-        {"mi_go", actor::Id::mi_go},
-        {"mi_go_commander", actor::Id::mi_go_commander},
-        {"flying_polyp", actor::Id::flying_polyp},
-        {"greater_polyp", actor::Id::greater_polyp},
-        {"mind_leech", actor::Id::mind_leech},
-        {"ghoul", actor::Id::ghoul},
-        {"shadow", actor::Id::shadow},
-        {"invis_stalker", actor::Id::invis_stalker},
-        {"wolf", actor::Id::wolf},
-        {"fire_hound", actor::Id::fire_hound},
-        {"energy_hound", actor::Id::energy_hound},
-        {"zuul", actor::Id::zuul},
-        {"ghost", actor::Id::ghost},
-        {"wraith", actor::Id::wraith},
-        {"void_traveler", actor::Id::void_traveler},
-        {"elder_void_traveler", actor::Id::elder_void_traveler},
-        {"raven", actor::Id::raven},
-        {"giant_bat", actor::Id::giant_bat},
-        {"vampire_bat", actor::Id::vampire_bat},
-        {"abaxu", actor::Id::abaxu},
-        {"byakhee", actor::Id::byakhee},
-        {"giant_mantis", actor::Id::giant_mantis},
-        {"locust", actor::Id::locust},
-        {"mummy", actor::Id::mummy},
-        {"croc_head_mummy", actor::Id::croc_head_mummy},
-        {"khephren", actor::Id::khephren},
-        {"nitokris", actor::Id::nitokris},
-        {"deep_one", actor::Id::deep_one},
-        {"niduza", actor::Id::niduza},
-        {"ape", actor::Id::ape},
-        {"troglodyte", actor::Id::troglodyte},
-        {"abyssal_troglodyte", actor::Id::abyssal_troglodyte},
-        {"keziah_mason", actor::Id::keziah_mason},
-        {"brown_jenkin", actor::Id::brown_jenkin},
-        {"major_clapham_lee", actor::Id::major_clapham_lee},
-        {"dean_halsey", actor::Id::dean_halsey},
-        {"worm_mass", actor::Id::worm_mass},
-        {"primordial_worm", actor::Id::primordial_worm},
-        {"mind_worm", actor::Id::mind_worm},
-        {"dust_vortex", actor::Id::dust_vortex},
-        {"fire_vortex", actor::Id::fire_vortex},
-        {"energy_vortex", actor::Id::energy_vortex},
-        {"ooze_putrid", actor::Id::ooze_putrid},
-        {"ooze_lurking", actor::Id::ooze_lurking},
-        {"ooze_poison", actor::Id::ooze_poison},
-        {"glasuu", actor::Id::glasuu},
-        {"strange_color", actor::Id::strange_color},
-        {"ghastly_light", actor::Id::ghastly_light},
-        {"chthonian", actor::Id::chthonian},
-        {"hunting_horror", actor::Id::hunting_horror},
-        {"sentry_drone", actor::Id::sentry_drone},
-        {"spectral_wpn", actor::Id::spectral_wpn},
-        {"mold", actor::Id::mold},
-        {"mold_halluc", actor::Id::mold_halluc},
-        {"gas_spore", actor::Id::gas_spore},
-        {"tentacle_cluster", actor::Id::tentacle_cluster},
-        {"warping_aberrance", actor::Id::warping_aberrance},
-        {"death_fiend", actor::Id::death_fiend},
-        {"khaga_offspring", actor::Id::khaga_offspring},
-        {"khaga", actor::Id::khaga},
-        {"shapeshifter", actor::Id::shapeshifter},
-        {"the_high_priest", actor::Id::the_high_priest},
-        {"high_priest_guard_war_vet", actor::Id::high_priest_guard_war_vet},
-        {"high_priest_guard_rogue", actor::Id::high_priest_guard_rogue},
-        {"high_priest_guard_ghoul", actor::Id::high_priest_guard_ghoul}};
+template <typename K, typename V>
+static std::vector<std::string> get_keys_sorted(
+        const std::unordered_map<K, V>& m)
+{
+        std::vector<std::string> keys;
+        keys.reserve(m.size());
+
+        for (const auto& it : m) {
+                keys.push_back(it.first);
+        }
+
+        std::sort(std::begin(keys), std::end(keys));
+
+        return keys;
+}
 
 using StrToMonShockLvlMap = std::unordered_map<std::string, MonShockLvl>;
 
 static const StrToMonShockLvlMap str_to_shock_lvl_map = {
-        {"none", MonShockLvl::none},
-        {"unsettling", MonShockLvl::unsettling},
-        {"frightening", MonShockLvl::frightening},
-        {"terrifying", MonShockLvl::terrifying},
-        {"mind_shattering", MonShockLvl::mind_shattering}};
+        {"MONSHOCK_NONE", MonShockLvl::none},
+        {"MONSHOCK_UNSETTLING", MonShockLvl::unsettling},
+        {"MONSHOCK_FRIGHTENING", MonShockLvl::frightening},
+        {"MONSHOCK_TERRIFYING", MonShockLvl::terrifying},
+        {"MONSHOCK_MIND_SHATTERING", MonShockLvl::mind_shattering}};
 
 static const std::unordered_map<std::string, actor::Speed> str_to_speed_map = {
-        {"slow", actor::Speed::slow},
-        {"normal", actor::Speed::normal},
-        {"fast", actor::Speed::fast},
-        {"very_fast", actor::Speed::very_fast}};
+        {"MONSPEED_SLOW", actor::Speed::slow},
+        {"MONSPEED_NORMAL", actor::Speed::normal},
+        {"MONSPEED_FAST", actor::Speed::fast},
+        {"MONSPEED_VERY_FAST", actor::Speed::very_fast}};
 
 using StrToMonGroupSizeMap =
         std::unordered_map<std::string, actor::MonGroupSize>;
 
 static const StrToMonGroupSizeMap s_str_to_group_size_map = {
-        {"alone", actor::MonGroupSize::alone},
-        {"few", actor::MonGroupSize::few},
-        {"pack", actor::MonGroupSize::pack},
-        {"swarm", actor::MonGroupSize::swarm}};
-
-using MonGroupSizeToStrMap =
-        std::unordered_map<actor::MonGroupSize, std::string>;
-
-static const MonGroupSizeToStrMap s_group_size_to_str_map = {
-        {actor::MonGroupSize::alone, "alone"},
-        {actor::MonGroupSize::few, "few"},
-        {actor::MonGroupSize::pack, "pack"},
-        {actor::MonGroupSize::swarm, "swarm"}};
+        {"MONGROUPSIZE_ALONE", actor::MonGroupSize::alone},
+        {"MONGROUPSIZE_FEW", actor::MonGroupSize::few},
+        {"MONGROUPSIZE_PACK", actor::MonGroupSize::pack},
+        {"MONGROUPSIZE_SWARM", actor::MonGroupSize::swarm}};
 
 using StrToSizeMap =
         std::unordered_map<std::string, actor::Size>;
 
 static const StrToSizeMap s_str_to_actor_size_map = {
-        {"floor", actor::Size::floor},
-        {"humanoid", actor::Size::humanoid},
-        {"giant", actor::Size::giant}};
+        {"MONSIZE_FLOOR", actor::Size::floor},
+        {"MONSIZE_HUMANOID", actor::Size::humanoid},
+        {"MONSIZE_GIANT", actor::Size::giant}};
 
-using SizeToStrMap =
-        std::unordered_map<actor::Size, std::string>;
-
-static const SizeToStrMap s_actor_size_to_str_map = {
-        {actor::Size::floor, "floor"},
-        {actor::Size::humanoid, "humanoid"},
-        {actor::Size::giant, "giant"}};
-
-using StrToAiIdMap =
-        std::unordered_map<std::string, actor::AiId>;
-
-static const StrToAiIdMap s_str_to_ai_id_map = {
-        {"looks", actor::AiId::looks},
-        {"avoids_blocking_friend", actor::AiId::avoids_blocking_friend},
-        {"attacks", actor::AiId::attacks},
-        {"paths_to_target_when_aware", actor::AiId::paths_to_target_when_aware},
-        {"moves_to_target_when_los", actor::AiId::moves_to_target_when_los},
-        {"moves_to_lair", actor::AiId::moves_to_lair},
-        {"moves_to_leader", actor::AiId::moves_to_leader},
-        {"moves_randomly_when_unaware",
-         actor::AiId::moves_randomly_when_unaware}};
-
-using AiIdToStrMap =
+using AiIdToTagNameMap =
         std::unordered_map<actor::AiId, std::string>;
 
-static const AiIdToStrMap s_ai_id_to_str_map = {
+static const AiIdToTagNameMap s_ai_id_to_tag_name_map = {
         {actor::AiId::looks, "looks"},
         {actor::AiId::avoids_blocking_friend, "avoids_blocking_friend"},
         {actor::AiId::attacks, "attacks"},
@@ -196,18 +87,7 @@ static const AiIdToStrMap s_ai_id_to_str_map = {
         {actor::AiId::moves_to_target_when_los, "moves_to_target_when_los"},
         {actor::AiId::moves_to_lair, "moves_to_lair"},
         {actor::AiId::moves_to_leader, "moves_to_leader"},
-        {actor::AiId::moves_randomly_when_unaware,
-         "moves_randomly_when_unaware"}};
-
-static actor::Id get_id(xml::Element* mon_e)
-{
-        const auto id_search = str_to_actor_id_map.find(
-                xml::get_attribute_str(mon_e, "id"));
-
-        ASSERT(id_search != std::end(str_to_actor_id_map));
-
-        return id_search->second;
-}
+        {actor::AiId::moves_randomly_when_unaware, "moves_randomly_when_unaware"}};
 
 static void dump_text(xml::Element* text_e, actor::ActorData& data)
 {
@@ -612,7 +492,7 @@ static void dump_ai(xml::Element* ai_e, actor::ActorData& data)
 
         for (size_t i = 0; i < (size_t)actor::AiId::END; ++i) {
                 const std::string ai_id_str =
-                        s_ai_id_to_str_map.at((actor::AiId)i);
+                        s_ai_id_to_tag_name_map.at((actor::AiId)i);
 
                 data.ai[i] =
                         xml::get_text_bool(
@@ -714,11 +594,11 @@ static void dump_starting_allies(xml::Element* allies_e, actor::ActorData& data)
         for (auto* e = xml::first_child(allies_e);
              e;
              e = xml::next_sibling(e)) {
-                const std::string id_str = xml::get_attribute_str(e, "id");
+                const std::string id = xml::get_attribute_str(e, "id");
 
                 actor::StartingAllyEntry starting_ally;
 
-                starting_ally.id = str_to_actor_id_map.at(id_str);
+                starting_ally.id = id;
 
                 xml::try_get_attribute_int(e, "min", starting_ally.nr.min);
                 xml::try_get_attribute_int(e, "max", starting_ally.nr.max);
@@ -743,14 +623,14 @@ static void read_actor_definitions_xml()
 
         auto* mon_e = xml::first_child(top_e);
 
+        TRACE << "Reading monster data" << std::endl;
+
         for (; mon_e; mon_e = xml::next_sibling(mon_e, "monster")) {
-                TRACE << "Reading monster data" << std::endl;
+                const std::string id = xml::get_attribute_str(mon_e, "id");
 
-                const actor::Id id = get_id(mon_e);
+                TRACE << "Reading monster data for ID: " << id << std::endl;
 
-                TRACE << "Monster ID = " << (int)id << std::endl;
-
-                auto& data = actor::g_data[(size_t)id];
+                actor::ActorData& data = actor::g_data[id];
 
                 data.reset();
 
@@ -814,7 +694,7 @@ namespace actor
 // -----------------------------------------------------------------------------
 void ActorData::reset()
 {
-        id = Id::END;
+        id = "";
         name_a = "";
         name_the = "";
         corpse_name_a = "";
@@ -888,7 +768,7 @@ void ActorData::reset()
         descr = "";
 }
 
-ActorData g_data[(size_t)Id::END];
+std::unordered_map<std::string, ActorData> g_data;
 
 void init()
 {
@@ -901,8 +781,10 @@ void init()
 
 void save()
 {
-        for (int i = 0; i < (int)Id::END; ++i) {
-                const auto& d = g_data[i];
+        const std::vector<std::string> keys = get_keys_sorted(g_data);
+
+        for (const std::string& key : keys) {
+                ActorData& d = g_data[key];
 
                 saving::put_int(d.nr_left_allowed_to_spawn);
                 saving::put_int(d.nr_kills);
@@ -912,8 +794,10 @@ void save()
 
 void load()
 {
-        for (int i = 0; i < (int)Id::END; ++i) {
-                auto& d = g_data[i];
+        const std::vector<std::string> keys = get_keys_sorted(g_data);
+
+        for (const std::string& key : keys) {
+                ActorData& d = g_data[key];
 
                 d.nr_left_allowed_to_spawn = saving::get_int();
                 d.nr_kills = saving::get_int();

@@ -399,7 +399,7 @@ ConsumeItem SentryDrone::run_effect()
 
         actor::spawn(
                 map::g_player->m_pos,
-                {actor::Id::sentry_drone},
+                {"MON_SENTRY_DRONE"},
                 map::rect())
                 .make_aware_of_player()
                 .set_leader(map::g_player);

@@ -44,10 +44,10 @@ TEST_CASE("Melee attack data")
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 = *actor::make(actor::Id::zombie, p2);
+        auto& mon_1 = *actor::make("MON_ZOMBIE", p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 = *actor::make(actor::Id::zombie, p3);
+        auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
         mon_2.m_properties.apply(property_factory::make(PropId::invis));
 
@@ -66,11 +66,8 @@ TEST_CASE("Melee attack data")
         int expected_hit_chance_vs_mon_2 = 0;
 
         {
-                const auto& player_data =
-                        actor::g_data[(size_t)actor::Id::player];
-
-                const auto& mon_data =
-                        actor::g_data[(size_t)actor::Id::zombie];
+                const auto& player_data = actor::g_data["MON_PLAYER"];
+                const auto& mon_data = actor::g_data["MON_ZOMBIE"];
 
                 const int player_skill_mod =
                         player_data.ability_values.val(
@@ -131,7 +128,7 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
                 property_factory::make(PropId::weakened));
 
         // Zombie
-        auto& mon = *actor::make(actor::Id::zombie, p2);
+        auto& mon = *actor::make("MON_ZOMBIE", p2);
 
         map::g_player->update_fov();
 
@@ -169,7 +166,7 @@ TEST_CASE("Melee attack data has reduced damage against pierce resistance")
         map::g_player->m_pos = p1;
 
         // Worm Mass
-        auto& mon = *actor::make(actor::Id::worm_mass, p2);
+        auto& mon = *actor::make("MON_WORM_MASS", p2);
 
         map::g_player->update_fov();
 
@@ -213,10 +210,10 @@ TEST_CASE("Ranged attack data")
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 = *actor::make(actor::Id::zombie, p2);
+        auto& mon_1 = *actor::make("MON_ZOMBIE", p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 = *actor::make(actor::Id::zombie, p3);
+        auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
         mon_2.m_properties.apply(property_factory::make(PropId::invis));
 
@@ -233,11 +230,8 @@ TEST_CASE("Ranged attack data")
         int expected_hit_chance_vs_mon_2 = 0;
 
         {
-                const auto& player_data =
-                        actor::g_data[(size_t)actor::Id::player];
-
-                const auto& mon_data =
-                        actor::g_data[(size_t)actor::Id::zombie];
+                const auto& player_data = actor::g_data["MON_PLAYER"];
+                const auto& mon_data = actor::g_data["MON_ZOMBIE"];
 
                 const int player_skill_mod =
                         player_data.ability_values.val(
@@ -317,10 +311,10 @@ TEST_CASE("Throwing attack data")
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 = *actor::make(actor::Id::zombie, p2);
+        auto& mon_1 = *actor::make("MON_ZOMBIE", p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 = *actor::make(actor::Id::zombie, p3);
+        auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
         mon_2.m_properties.apply(property_factory::make(PropId::invis));
 
@@ -337,11 +331,9 @@ TEST_CASE("Throwing attack data")
         int expected_hit_chance_vs_mon_2 = 0;
 
         {
-                const auto& player_data =
-                        actor::g_data[(size_t)actor::Id::player];
+                const auto& player_data = actor::g_data["MON_PLAYER"];
 
-                const auto& mon_data =
-                        actor::g_data[(size_t)actor::Id::zombie];
+                const auto& mon_data = actor::g_data["MON_ZOMBIE"];
 
                 const int player_skill_mod =
                         player_data.ability_values.val(

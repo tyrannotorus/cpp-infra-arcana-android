@@ -1076,7 +1076,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 const auto d = trait_descr(trait_id);
 
                 descr.emplace_back(
-                        "{white}" + t + "{color_reset}: " + d,
+                        "{COLOR_WHITE}" + t + "{color_reset}: " + d,
                         colors::gray());
         };
 

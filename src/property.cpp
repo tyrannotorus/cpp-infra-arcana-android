@@ -518,7 +518,7 @@ void PropZuulPossessPriest::on_placed()
 
                 auto* actor =
                         actor::make(
-                                actor::Id::cultist_priest,
+                                "MON_CULTIST_PRIEST",
                                 m_owner->m_pos);
 
                 auto* prop = new PropPossessedByZuul();
@@ -544,8 +544,7 @@ void PropPossessedByZuul::on_death()
                         text_format::first_to_upper(
                                 m_owner->name_the());
 
-                const std::string& name2 =
-                        actor::g_data[(size_t)actor::Id::zuul].name_the;
+                const std::string& name2 = actor::g_data["MON_ZUUL"].name_the;
 
                 msg_log::add(name1 + " was possessed by " + name2 + "!");
         }
@@ -559,11 +558,11 @@ void PropPossessedByZuul::on_death()
         terrain::make_blood(pos);
 
         // Zuul is now free, allow it to spawn infinitely
-        actor::g_data[(size_t)actor::Id::zuul].nr_left_allowed_to_spawn = -1;
+        actor::g_data["MON_ZUUL"].nr_left_allowed_to_spawn = -1;
 
         actor::spawn(
                 pos,
-                {actor::Id::zuul},
+                {"MON_ZUUL"},
                 map::rect())
                 .make_aware_of_player();
 
@@ -605,7 +604,7 @@ void PropShapeshifts::on_death()
         const auto spawned =
                 actor::spawn(
                         m_owner->m_pos,
-                        {actor::Id::shapeshifter},
+                        {"MON_SHAPESHIFTER"},
                         map::rect());
 
         map::update_vision();
@@ -640,9 +639,11 @@ void PropShapeshifts::on_death()
 
 void PropShapeshifts::shapeshift(const Verbose verbose) const
 {
-        std::vector<actor::Id> mon_id_bucket;
+        std::vector<std::string> mon_id_bucket;
 
-        for (const auto& d : actor::g_data) {
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& d = it.second;
+
                 Range allowed_mon_depth_range(
                         d.spawn_min_dlvl - 2,
                         d.spawn_max_dlvl);
@@ -653,7 +654,7 @@ void PropShapeshifts::shapeshift(const Verbose verbose) const
 
                 if (!d.can_be_shapeshifted_into ||
                     (d.id == m_owner->id()) ||
-                    (d.id == actor::Id::shapeshifter) ||
+                    (d.id == "MON_SHAPESHIFTER") ||
                     !d.is_auto_spawn_allowed ||
                     d.is_unique ||
                     !allowed_mon_depth_range.is_in_range(map::g_dlvl)) {
@@ -1331,13 +1332,15 @@ PropHallucinating::get_allowed_fake_mon_data() const
 {
         std::vector<const actor::ActorData*> result;
 
-        result.reserve((size_t)actor::Id::END);
+        result.reserve(actor::g_data.size());
 
-        for (const auto& d : actor::g_data) {
-                if ((d.id == actor::Id::player) ||
-                    (d.id == actor::Id::spectral_wpn) ||
-                    (d.id == actor::Id::strange_color) ||
-                    (d.id == actor::Id::cultist)) {
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& d = it.second;
+
+                if ((d.id == "MON_PLAYER") ||
+                    (d.id == "MON_SPECTRAL_WPN") ||
+                    (d.id == "MON_STRANGE_COLOR") ||
+                    (d.id == "MON_CULTIST")) {
                         continue;
                 }
 
@@ -2573,7 +2576,7 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
                 return;
         }
 
-        auto id_to_spawn = actor::Id::END;
+        std::string id_to_spawn;
 
         const std::vector<int> weights = {
                 25,  // Hand
@@ -2589,7 +2592,7 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
 
         switch (mon_choice) {
         case 0:
-                id_to_spawn = actor::Id::crawling_hand;
+                id_to_spawn = "MON_CRAWLING_HAND";
 
                 spawn_msg =
                         "The hand of " +
@@ -2598,7 +2601,7 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
                 break;
 
         case 1:
-                id_to_spawn = actor::Id::crawling_intestines;
+                id_to_spawn = "MON_CRAWLING_INTESTINES";
 
                 spawn_msg =
                         "The intestines of " +
@@ -2607,7 +2610,7 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
                 break;
 
         case 2:
-                id_to_spawn = actor::Id::floating_skull;
+                id_to_spawn = "MON_FLOATING_SKULL";
 
                 spawn_msg =
                         "The head of " +
@@ -2628,7 +2631,7 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
                 map::g_player->incr_shock(4.0, ShockSrc::see_mon);
         }
 
-        ASSERT(id_to_spawn != actor::Id::END);
+        ASSERT(!id_to_spawn.empty());
 
         const auto spawned =
                 actor::spawn(
@@ -2743,15 +2746,15 @@ void PropVomitsOoze::on_std_turn()
 
         const auto area_allowed = R(m_owner->m_pos - 1, m_owner->m_pos + 1);
 
-        actor::Id ooze_ids[] = {
-                actor::Id::ooze_putrid,
-                actor::Id::ooze_lurking,
-                actor::Id::ooze_poison};
+        std::string ooze_ids[] = {
+                "MON_OOZE_PUTRID",
+                "MON_OOZE_LURKING",
+                "MON_OOZE_POISON"};
 
-        std::vector<actor::Id> id_bucket;
+        std::vector<std::string> id_bucket;
 
-        for (const auto id : ooze_ids) {
-                const auto& d = actor::g_data[(size_t)id];
+        for (const std::string& id : ooze_ids) {
+                const actor::ActorData& d = actor::g_data[id];
 
                 if (map::g_dlvl >= d.spawn_min_dlvl) {
                         id_bucket.push_back(id);
@@ -2760,7 +2763,7 @@ void PropVomitsOoze::on_std_turn()
 
         // Robustness - always allow at least Putrid Ooze
         if (id_bucket.empty()) {
-                id_bucket.push_back(actor::Id::ooze_putrid);
+                id_bucket.emplace_back("MON_OOZE_PUTRID");
         }
 
         if (actor::can_player_see_actor(*m_owner)) {
@@ -2771,7 +2774,7 @@ void PropVomitsOoze::on_std_turn()
                 msg_log::add(parent_name + " spews ooze.");
         }
 
-        actor::Id id_to_spawn = rnd::element(id_bucket);
+        std::string id_to_spawn = rnd::element(id_bucket);
 
         auto* const leader =
                 m_owner->m_leader
@@ -3009,13 +3012,13 @@ PropActResult PropMajorClaphamSummon::on_act()
                 msg_log::add("Major Clapham Lee calls forth his Tomb-Legions!");
         }
 
-        std::vector<actor::Id> ids_to_summon = {actor::Id::dean_halsey};
+        std::vector<std::string> ids_to_summon = {"MON_DEAN_HALSEY"};
 
         const int nr_of_extra_spawns = 4;
 
-        const std::vector<actor::Id> possible_random_id_choices = {
-                actor::Id::zombie,
-                actor::Id::bloated_zombie};
+        const std::vector<std::string> possible_random_id_choices = {
+                "MON_ZOMBIE",
+                "MON_BLOATED_ZOMBIE"};
 
         const std::vector<int> weights = {
                 4,
@@ -3292,7 +3295,7 @@ PropActResult PropSummonsLocusts::on_act()
         auto summoned =
                 actor::spawn(
                         m_owner->m_pos,
-                        {nr_of_spawns, actor::Id::locust},
+                        {nr_of_spawns, "MON_LOCUST"},
                         map::rect());
 
         summoned.set_leader(leader_of_spawned_mon);

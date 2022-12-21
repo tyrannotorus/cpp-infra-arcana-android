@@ -1532,13 +1532,13 @@ std::string DisplayHintsOption::descr() const
 {
         return (
                 "Controls when in-game hints should be displayed. "
-                "\n\n{light_white}Once per game:{color_reset} Show all hints "
-                "once in each game session (and repeat them again in "
-                "other sessions). "
-                "\n\n{light_white}Once:{color_reset} Only show each hint once "
-                "across all game sessions. "
-                "\n\n{light_white}Never:{color_reset} Completely "
-                "disable hints.");
+                "\n\n{COLOR_LIGHT_WHITE}Once per game:{color_reset} "
+                "Show all hints once in each game session "
+                "(and repeat them again in other sessions). "
+                "\n\n{COLOR_LIGHT_WHITE}Once:{color_reset} "
+                "Only show each hint once across all game sessions. "
+                "\n\n{COLOR_LIGHT_WHITE}Never:{color_reset} "
+                "Completely disable hints.");
 }
 
 std::string DisplayHintsOption::value_str() const

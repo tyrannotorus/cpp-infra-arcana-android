@@ -46,19 +46,19 @@ static std::vector<RoomType> s_room_bucket;
 using StrToRoomTypeMap = std::unordered_map<std::string, RoomType>;
 
 static const StrToRoomTypeMap s_str_to_room_type_map = {
-        {"plain", RoomType::plain},
-        {"human", RoomType::human},
-        {"ritual", RoomType::ritual},
-        {"jail", RoomType::jail},
-        {"spider", RoomType::spider},
-        {"crawling_pit", RoomType::crawling_pit},
-        {"crypt", RoomType::crypt},
-        {"monster", RoomType::monster},
-        {"damp", RoomType::damp},
-        {"pool", RoomType::pool},
-        {"cave", RoomType::cave},
-        {"chasm", RoomType::chasm},
-        {"forest", RoomType::forest}};
+        {"ROOM_PLAIN", RoomType::plain},
+        {"ROOM_HUMAN", RoomType::human},
+        {"ROOM_RITUAL", RoomType::ritual},
+        {"ROOM_JAIL", RoomType::jail},
+        {"ROOM_SPIDER", RoomType::spider},
+        {"ROOM_CRAWLING_PIT", RoomType::crawling_pit},
+        {"ROOM_CRYPT", RoomType::crypt},
+        {"ROOM_MONSTER", RoomType::monster},
+        {"ROOM_DAMP", RoomType::damp},
+        {"ROOM_POOL", RoomType::pool},
+        {"ROOM_CAVE", RoomType::cave},
+        {"ROOM_CHASM", RoomType::chasm},
+        {"ROOM_FOREST", RoomType::forest}};
 
 static void add_to_room_bucket(const RoomType type, const size_t nr)
 {
@@ -606,7 +606,7 @@ P StdRoom::find_auto_terrain_placement(
 
 void StdRoom::place_auto_terrains()
 {
-        TRACE_FUNC_BEGIN;
+        TRACE_FUNC_BEGIN_VERBOSE;
 
         // Make a terrain bucket
         std::vector<terrain::Id> terrain_bucket;
@@ -675,6 +675,8 @@ void StdRoom::place_auto_terrains()
                                 std::end(away_from_walls_bucket));
                 }
         }
+
+        TRACE_FUNC_END_VERBOSE;
 }
 
 // -----------------------------------------------------------------------------
@@ -994,19 +996,19 @@ void CrawlingPitRoom::on_post_connect_hook(Array2<bool>& door_proposals)
         }
 }
 
-actor::Id CrawlingPitRoom::get_random_monster_type() const
+std::string CrawlingPitRoom::get_random_monster_type() const
 {
-        std::vector<actor::Id> actor_id_bucket;
+        std::vector<std::string> actor_id_bucket;
 
         // Snakes
         if (map::g_dlvl <= g_dlvl_last_mid_game) {
-                for (size_t i = 0; i < (size_t)actor::Id::END; ++i) {
-                        const auto& d = actor::g_data[i];
+                for (const auto& it : actor::g_data) {
+                        const actor::ActorData& d = it.second;
 
                         // NOTE: We do not allow Spitting Cobras, because it's
                         // VERY tedious to fight swarms of them (attack, get
                         // blinded, back away, repeat...).
-                        if (d.is_snake && (d.id != actor::Id::spitting_cobra)) {
+                        if (d.is_snake && (d.id != "MON_SPITTING_COBRA")) {
                                 actor_id_bucket.push_back(d.id);
                         }
                 }
@@ -1014,17 +1016,17 @@ actor::Id CrawlingPitRoom::get_random_monster_type() const
 
         // Worm Masses
         if (map::g_dlvl <= g_dlvl_last_mid_game) {
-                actor_id_bucket.push_back(actor::Id::worm_mass);
+                actor_id_bucket.emplace_back("MON_WORM_MASS");
         }
 
         // Mind Worms
         if ((map::g_dlvl >= 3) && (map::g_dlvl <= g_dlvl_last_mid_game)) {
-                actor_id_bucket.push_back(actor::Id::mind_worm);
+                actor_id_bucket.emplace_back("MON_MIND_WORM");
         }
 
         // Primordial Worms
         if (map::g_dlvl >= g_dlvl_first_late_game) {
-                actor_id_bucket.push_back(actor::Id::primordial_worm);
+                actor_id_bucket.emplace_back("MON_PRIMORDIAL_WORM");
         }
 
         return rnd::element(actor_id_bucket);

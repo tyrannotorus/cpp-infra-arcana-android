@@ -171,7 +171,7 @@ void init()
 
         g_room_list.clear();
 
-        g_player = actor::make(actor::Id::player, {0, 0});
+        g_player = actor::make("MON_PLAYER", {0, 0});
 }
 
 void cleanup()

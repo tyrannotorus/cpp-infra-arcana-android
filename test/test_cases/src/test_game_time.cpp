@@ -16,7 +16,7 @@ TEST_CASE("Test player acts twice compared to slow monster")
 {
         test_utils::init_all();
 
-        auto* mon = actor::make(actor::Id::bloated_zombie, {7, 7});
+        auto* mon = actor::make("MON_BLOATED_ZOMBIE", {7, 7});
 
         mon->m_mon_aware_state.aware_counter = 100;
 
@@ -99,7 +99,7 @@ TEST_CASE("Test standard turn incrementation with player and monster")
 {
         test_utils::init_all();
 
-        auto* mon = actor::make(actor::Id::zombie, {7, 7});
+        auto* mon = actor::make("MON_ZOMBIE", {7, 7});
 
         mon->m_mon_aware_state.aware_counter = 100;
 

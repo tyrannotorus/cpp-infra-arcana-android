@@ -256,7 +256,7 @@ TEST_CASE("Test spell shield")
 
         SECTION("Temporary spell shield")
         {
-                auto* const mon = actor::make(actor::Id::zombie, {11, 10});
+                auto* const mon = actor::make("MON_ZOMBIE", {11, 10});
 
                 map::update_vision();
 
@@ -281,7 +281,7 @@ TEST_CASE("Test spell shield")
 
         SECTION("Natural spell shield")
         {
-                auto* const mon = actor::make(actor::Id::khaga, {11, 10});
+                auto* const mon = actor::make("MON_KHAGA", {11, 10});
 
                 map::update_vision();
 
@@ -314,8 +314,8 @@ TEST_CASE("Test spell reflection hits correct creature")
 
         map::g_player->m_pos.set(10, 10);
 
-        auto* const mon_1 = actor::make(actor::Id::zombie, {11, 10});
-        auto* const mon_2 = actor::make(actor::Id::zombie, {12, 10});
+        auto* const mon_1 = actor::make("MON_ZOMBIE", {11, 10});
+        auto* const mon_2 = actor::make("MON_ZOMBIE", {12, 10});
 
         map::update_vision();
 
@@ -361,7 +361,7 @@ TEST_CASE("Test reflected knockback spell blocked by caster spell shield")
 
         map::g_player->m_pos.set(10, 10);
 
-        auto* const mon = actor::make(actor::Id::zombie, {11, 10});
+        auto* const mon = actor::make("MON_ZOMBIE", {11, 10});
 
         map::update_vision();
 

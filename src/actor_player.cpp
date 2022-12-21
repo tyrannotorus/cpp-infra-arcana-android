@@ -860,11 +860,11 @@ void Actor::kick_mon(Actor& defender)
             (d.is_spider ||
              d.is_rat ||
              d.is_snake ||
-             (d.id == Id::worm_mass) ||
-             (d.id == Id::mind_worm) ||
-             (d.id == Id::crawling_intestines) ||
-             (d.id == Id::crawling_hand) ||
-             (d.id == Id::thing))) {
+             (d.id == "MON_WORM_MASS") ||
+             (d.id == "MON_MIND_WORM") ||
+             (d.id == "MON_CRAWLING_INTESTINES") ||
+             (d.id == "MON_CRAWLING_HAND") ||
+             (d.id == "MON_THING"))) {
                 kick_wpn =
                         static_cast<item::Wpn*>(
                                 item::make(item::Id::player_stomp));

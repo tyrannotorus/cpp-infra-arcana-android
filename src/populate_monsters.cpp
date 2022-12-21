@@ -11,6 +11,7 @@
 #include <iterator>
 #include <memory>
 #include <ostream>
+#include <set>
 #include <string>
 
 #include "actor.hpp"
@@ -49,11 +50,11 @@ static int random_out_of_depth()
         return nr_levels;
 }
 
-static WeightedItems<actor::Id> valid_auto_spawn_monsters(
+static WeightedItems<std::string> valid_auto_spawn_monsters(
         const int nr_lvls_out_of_depth,
         const AllowSpawnUniqueMon allow_spawn_unique)
 {
-        WeightedItems<actor::Id> weighted_ids;
+        WeightedItems<std::string> weighted_ids;
 
         int dlvl =
                 std::clamp(
@@ -66,15 +67,17 @@ static WeightedItems<actor::Id> valid_auto_spawn_monsters(
         }
 
         // Get list of actors currently on the level to help avoid spawning
-        // multiple unique monsters of the same id
-        bool spawned_ids[(size_t)actor::Id::END] = {};
+        // multiple unique monsters of the same id.
+        std::set<std::string> spawned_ids;
 
-        for (const auto* const actor : game_time::g_actors) {
-                spawned_ids[(size_t)actor->id()] = true;
+        for (const actor::Actor* const actor : game_time::g_actors) {
+                spawned_ids.insert(actor->id());
         }
 
-        for (const auto& d : actor::g_data) {
-                if (d.id == actor::Id::player) {
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& d = it.second;
+
+                if (d.id == "MON_PLAYER") {
                         continue;
                 }
 
@@ -95,7 +98,8 @@ static WeightedItems<actor::Id> valid_auto_spawn_monsters(
                         continue;
                 }
 
-                if (d.is_unique && spawned_ids[(size_t)d.id]) {
+                if (d.is_unique &&
+                    (spawned_ids.find(d.id) != std::end(spawned_ids))) {
                         continue;
                 }
 
@@ -121,7 +125,7 @@ static bool make_random_group_for_room(
 
         const int nr_lvls_out_of_depth_allowed = random_out_of_depth();
 
-        auto id_bucket =
+        WeightedItems<std::string> id_bucket =
                 valid_auto_spawn_monsters(
                         nr_lvls_out_of_depth_allowed,
                         AllowSpawnUniqueMon::yes);
@@ -136,22 +140,23 @@ static bool make_random_group_for_room(
                         continue;
                 }
 
-                const auto id = id_bucket.items[i];
+                const std::string id = id_bucket.items[i];
 
-                const auto& d = actor::g_data[(size_t)id];
+                const actor::ActorData& d = actor::g_data[id];
 
-                if (std::find(
-                            std::begin(d.native_rooms),
-                            std::end(d.native_rooms),
-                            room_type) != std::end(d.native_rooms)) {
+                if (
+                        std::find(
+                                std::begin(d.native_rooms),
+                                std::end(d.native_rooms),
+                                room_type) != std::end(d.native_rooms)) {
                         // Monster is native to room - keep the monster
                         continue;
                 }
 
                 // Monster not allowed - erase it
-                id_bucket.items.erase(id_bucket.items.begin() + i);
+                id_bucket.items.erase(std::begin(id_bucket.items) + (int)i);
 
-                id_bucket.weights.erase(id_bucket.weights.begin() + i);
+                id_bucket.weights.erase(std::begin(id_bucket.weights) + (int)i);
 
                 --i;
         }
@@ -213,12 +218,12 @@ static void make_random_group_at(
 namespace populate_mon
 {
 void make_group_at(
-        const actor::Id id,
+        const std::string& id,
         const std::vector<P>& sorted_free_cells,
         Array2<bool>* const blocked_out,
         const MonRoamingAllowed is_roaming_allowed)
 {
-        const auto& d = actor::g_data[(size_t)id];
+        const actor::ActorData& d = actor::g_data[id];
 
         int max_nr_in_group = 1;
 

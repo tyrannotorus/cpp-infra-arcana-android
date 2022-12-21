@@ -963,14 +963,14 @@ void TrapSummonMon::trigger()
                 m_base_trap->is_hidden());
 
         TRACE << "Finding summon candidates" << std::endl;
-        std::vector<actor::Id> summon_bucket;
+        std::vector<std::string> summon_bucket;
 
-        for (size_t i = 0; i < (size_t)actor::Id::END; ++i) {
-                const actor::ActorData& data = actor::g_data[i];
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& data = it.second;
 
                 if (data.can_be_summoned_by_mon &&
                     data.spawn_min_dlvl <= (map::g_dlvl + 2)) {
-                        summon_bucket.push_back((actor::Id)i);
+                        summon_bucket.push_back(data.id);
                 }
         }
 
@@ -979,9 +979,9 @@ void TrapSummonMon::trigger()
         }
         else {
                 // Eligible monsters found
-                const actor::Id id_to_summon = rnd::element(summon_bucket);
+                const std::string id_to_summon = rnd::element(summon_bucket);
 
-                TRACE << "Actor id: " << int(id_to_summon) << std::endl;
+                TRACE << "Actor id: " << id_to_summon << std::endl;
 
                 const actor::MonSpawnResult summoned =
                         actor::spawn(m_pos, {id_to_summon}, map::rect())

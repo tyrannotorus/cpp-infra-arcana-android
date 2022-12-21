@@ -12,7 +12,7 @@
 
 TEST_CASE("Text with color codes, no split")
 {
-        std::string str = "aaa {light_magenta}bbbbb{color_reset} cc";
+        std::string str = "aaa {COLOR_LIGHT_MAGENTA}bbbbb{color_reset} cc";
 
         Text text(str);
 
@@ -53,7 +53,7 @@ TEST_CASE("Text with color codes, no split")
 TEST_CASE("Text with color codes, split")
 {
         std::string str =
-                "aaa {light_magenta}b {light_cyan}cc "
+                "aaa {COLOR_LIGHT_MAGENTA}b {COLOR_LIGHT_CYAN}cc "
                 "ddd eee f";
 
         Text text(str);
@@ -118,7 +118,7 @@ TEST_CASE("Text with color codes, split")
 
 TEST_CASE("Split before space")
 {
-        std::string str = "aaa {light_magenta}bbbbb{color_reset} cc";
+        std::string str = "aaa {COLOR_LIGHT_MAGENTA}bbbbb{color_reset} cc";
 
         Text text(str);
 
@@ -158,7 +158,7 @@ TEST_CASE("Split before space")
 
 TEST_CASE("Split after space")
 {
-        std::string str = "aaa {light_magenta}bbbbb{color_reset} cc";
+        std::string str = "aaa {COLOR_LIGHT_MAGENTA}bbbbb{color_reset} cc";
 
         Text text(str);
 
@@ -198,7 +198,7 @@ TEST_CASE("Split after space")
 
 TEST_CASE("Split before non-breaking space")
 {
-        std::string str = "aaa {light_magenta}bbbbb{color_reset}{_}cc";
+        std::string str = "aaa {COLOR_LIGHT_MAGENTA}bbbbb{color_reset}{_}cc";
 
         Text text(str);
 
@@ -242,7 +242,7 @@ TEST_CASE("Split before non-breaking space")
 
 TEST_CASE("Split after non-breaking space")
 {
-        std::string str = "aaa {light_magenta}bbbbb{color_reset}{_}cc";
+        std::string str = "aaa {COLOR_LIGHT_MAGENTA}bbbbb{color_reset}{_}cc";
 
         Text text(str);
 
@@ -286,7 +286,7 @@ TEST_CASE("Split after non-breaking space")
 
 TEST_CASE("Text with color codes, split before dot")
 {
-        std::string str = "aaa {light_magenta}bbbbb{color_reset}. cc";
+        std::string str = "aaa {COLOR_LIGHT_MAGENTA}bbbbb{color_reset}. cc";
 
         Text text(str);
 

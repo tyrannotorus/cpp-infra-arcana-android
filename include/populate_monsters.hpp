@@ -12,11 +12,6 @@
 #include "global.hpp"
 #include "room.hpp"
 
-namespace actor
-{
-enum class Id;
-}  // namespace actor
-
 struct P;
 
 template <typename T>
@@ -25,7 +20,7 @@ class Array2;
 namespace populate_mon
 {
 void make_group_at(
-        actor::Id id,
+        const std::string& id,
         const std::vector<P>& sorted_free_cells,
         Array2<bool>* blocked_out,
         MonRoamingAllowed roaming_allowed);

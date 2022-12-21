@@ -49,7 +49,7 @@ TEST_CASE("Sound alerts monster")
         // Put a wall in the middle (the sound will travel around this wall)
         map::update_terrain(terrain::make(terrain::Id::wall, wall_pos));
 
-        auto* const zombie = actor::make(actor::Id::zombie, mon_pos);
+        auto* const zombie = actor::make("MON_ZOMBIE", mon_pos);
 
         REQUIRE(!zombie->is_aware_of_player());
 
@@ -88,7 +88,7 @@ TEST_CASE("Player wading alerts monsters")
 
         map::g_player->m_pos = {4, 5};
 
-        auto* const zombie = actor::make(actor::Id::zombie, {7, 5});
+        auto* const zombie = actor::make("MON_ZOMBIE", {7, 5});
 
         REQUIRE(!zombie->is_aware_of_player());
 
@@ -115,8 +115,8 @@ TEST_CASE("Monster wading does not alert monsters")
         map::update_terrain(terrain::make(terrain::Id::liquid, {6, 5}));
         map::update_terrain(terrain::make(terrain::Id::floor, {7, 5}));
 
-        auto* const zombie_1 = actor::make(actor::Id::zombie, {5, 5});
-        auto* const zombie_2 = actor::make(actor::Id::zombie, {7, 5});
+        auto* const zombie_1 = actor::make("MON_ZOMBIE", {5, 5});
+        auto* const zombie_2 = actor::make("MON_ZOMBIE", {7, 5});
 
         REQUIRE(!zombie_1->is_aware_of_player());
         REQUIRE(!zombie_2->is_aware_of_player());

@@ -54,8 +54,8 @@ static bool is_void_traveler_affecting_player_teleport(
         const auto actor_id = actor.id();
 
         const bool is_void_traveler =
-                (actor_id == actor::Id::void_traveler) ||
-                (actor_id == actor::Id::elder_void_traveler);
+                (actor_id == "MON_VOID_TRAVELER") ||
+                (actor_id == "MON_ELDER_VOID_TRAVELER");
 
         return (
                 is_void_traveler &&

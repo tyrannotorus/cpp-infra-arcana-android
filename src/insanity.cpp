@@ -464,7 +464,7 @@ void InsShadows::on_start_hook()
         auto summoned =
                 actor::spawn(
                         map::g_player->m_pos,
-                        {nr, actor::Id::shadow},
+                        {nr, "MON_SHADOW"},
                         map::rect())
                         .make_aware_of_player();
 
@@ -495,14 +495,14 @@ void InsParanoia::on_start_hook()
                 return;
         }
 
-        std::vector<actor::Id> stalker_id(1, actor::Id::invis_stalker);
+        std::vector<std::string> stalker_id(1, "MON_INVIS_STALKER");
 
         const P& pos = map::g_player->m_pos;
 
         auto summoned =
                 actor::spawn(
                         pos,
-                        {actor::Id::invis_stalker},
+                        {"MON_INVIS_STALKER"},
                         map::rect())
                         .make_aware_of_player();
 

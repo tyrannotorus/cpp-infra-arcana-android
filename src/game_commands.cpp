@@ -1006,14 +1006,31 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f9: {
-                std::string msg = "Listing all monsters (ID#  Name):";
+                std::string msg =
+                        "Listing all monsters (IDX    ID):";
 
-                for (const auto& d : actor::g_data) {
+                std::vector<std::string> mon_ids;
+                mon_ids.reserve(actor::g_data.size());
+
+                for (const auto& it : actor::g_data) {
+                        mon_ids.push_back(it.first);
+                }
+
+                std::sort(std::begin(mon_ids), std::end(mon_ids));
+
+                int default_idx = 0;
+
+                for (size_t i = 0; i < mon_ids.size(); ++i) {
                         msg +=
                                 "\n" +
-                                std::to_string((size_t)d.id) +
-                                "  " +
-                                d.name_a;
+                                std::to_string(i) +
+                                "    " +
+                                mon_ids[i];
+
+                        if (mon_ids[i] == "MON_ZOMBIE") {
+                                // Use this as default value for the query.
+                                default_idx = (int)i;
+                        }
                 }
 
                 TRACE << msg << std::endl;
@@ -1022,16 +1039,20 @@ void handle(const GameCmd cmd)
 
                 query::QueryNumberConfig query_config;
 
-                query_config.allowed_range = {1, (int)actor::Id::END - 1};
-                query_config.default_value = (int)actor::Id::zombie;
+                query_config.allowed_range = {1, (int)actor::g_data.size() - 1};
+                query_config.default_value = default_idx;
                 query_config.cancel_returns_default = false;
 
-                const int idx =
+                // TODO: It would be more convenient to query for a string
+                // instead, so that the monster ID string could be entered
+                // directly, instead of an index number (perhaps with partial
+                // matches allowed).
+                const int idx_to_spawn =
                         query::number(
                                 query_config,
                                 query_str);
 
-                if (idx == -1) {
+                if (idx_to_spawn == -1) {
                         return;
                 }
 
@@ -1053,7 +1074,7 @@ void handle(const GameCmd cmd)
                         return;
                 }
 
-                const auto mon_id = (actor::Id)idx;
+                const std::string mon_id = mon_ids[idx_to_spawn];
 
                 actor::spawn(
                         map::g_player->m_pos.with_x_offset(2),

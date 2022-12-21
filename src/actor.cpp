@@ -102,7 +102,7 @@ static Color color_monster(const actor::Actor& actor)
         }
 
         // TODO: Make this a property:
-        if ((actor.id() == actor::Id::ooze_lurking) && !actor.m_mimic_data) {
+        if ((actor.id() == "MON_OOZE_LURKING") && !actor.m_mimic_data) {
                 return map::g_wall_color;
         }
 
@@ -292,7 +292,7 @@ int max_sp(const Actor& actor)
 
 bool is_player(const Actor* const actor)
 {
-        return actor && (actor->m_data->id == Id::player);
+        return actor && (actor->m_data->id == "MON_PLAYER");
 }
 
 void print_aware_invis_mon_msg(const Actor& mon)
@@ -411,7 +411,7 @@ gfx::TileId Actor::tile() const
         }
 
         // HACK: Overriding tile for (firearm) Cultists
-        if (id() == Id::cultist) {
+        if (id() == "MON_CULTIST") {
                 const auto* const wpn = m_inv.item_in_slot(SlotId::wpn);
 
                 ASSERT(wpn);

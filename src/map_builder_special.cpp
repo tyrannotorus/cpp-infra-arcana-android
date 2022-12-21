@@ -155,10 +155,10 @@ void MapBuilderDeepOneLair::handle_template_pos(const P& p, const char c)
                         map::g_player->m_pos = p;
                 }
                 else if (c == 'd') {
-                        actor::make(actor::Id::deep_one, p);
+                        actor::make("MON_DEEP_ONE", p);
                 }
                 else if (c == 'B') {
-                        actor::make(actor::Id::niduza, p);
+                        actor::make("MON_NIDUZA", p);
                 }
                 else if (c == '%') {
                         terrain::make_blood(p);
@@ -550,26 +550,26 @@ void MapBuilderEgypt::handle_template_pos(const P& p, const char c)
                         map::set_terrain(terrain::make(terrain::Id::floor, p));
                 }
 
-                auto actor_id = actor::Id::END;
+                std::string actor_id;
 
                 switch (c) {
                 case 'P':
-                        actor_id = actor::Id::khephren;
+                        actor_id = "MON_KHEPHREN";
                         break;
 
                 case 'M':
-                        actor_id = actor::Id::mummy;
+                        actor_id = "MON_MUMMY";
                         break;
 
                 case 'C':
-                        actor_id = actor::Id::croc_head_mummy;
+                        actor_id = "MON_CROC_HEAD_MUMMY";
                         break;
 
                 default:
                         break;
                 }
 
-                if (actor_id != actor::Id::END) {
+                if (!actor_id.empty()) {
                         auto* const actor = actor::make(actor_id, p);
 
                         actor->m_ai_state.is_roaming_allowed =
@@ -665,10 +665,10 @@ void MapBuilderRatCave::handle_template_pos(const P& p, const char c)
                         actor::Actor* actor = nullptr;
 
                         if (rnd::one_in(6)) {
-                                actor = actor::make(actor::Id::rat_thing, p);
+                                actor = actor::make("MON_RAT_THING", p);
                         }
                         else {
-                                actor = actor::make(actor::Id::rat, p);
+                                actor = actor::make("MON_RAT", p);
                         }
 
                         auto* prop = new PropFrenzied();
@@ -764,16 +764,16 @@ void MapBuilderBoss::handle_template_pos(const P& p, const char c)
                         map::g_player->m_pos = p;
                 }
                 else if (c == 'P') {
-                        actor::make(actor::Id::the_high_priest, p);
+                        actor::make("MON_THE_HIGH_PRIEST", p);
                 }
                 else if (c == 'W') {
-                        actor::make(actor::Id::high_priest_guard_war_vet, p);
+                        actor::make("MON_HIGH_PRIEST_GUARD_WAR_VET", p);
                 }
                 else if (c == 'R') {
-                        actor::make(actor::Id::high_priest_guard_rogue, p);
+                        actor::make("MON_HIGH_PRIEST_GUARD_ROGUE", p);
                 }
                 else if (c == 'G') {
-                        actor::make(actor::Id::high_priest_guard_ghoul, p);
+                        actor::make("MON_HIGH_PRIEST_GUARD_GHOUL", p);
                 }
         } break;
 
@@ -808,7 +808,7 @@ void MapBuilderBoss::on_template_built()
         actor::Actor* high_priest = nullptr;
 
         for (auto* const actor : game_time::g_actors) {
-                if (actor->id() == actor::Id::the_high_priest) {
+                if (actor->id() == "MON_THE_HIGH_PRIEST") {
                         high_priest = actor;
 
                         break;

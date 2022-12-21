@@ -3073,13 +3073,13 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
 
         DidTriggerTrap did_trigger_trap = DidTriggerTrap::no;
 
-        auto id_to_spawn = actor::Id::END;
+        std::string id_to_spawn;
 
         const bool is_seen = map::g_seen.at(m_pos);
 
         switch (m_trait) {
         case TombTrait::ghost: {
-                id_to_spawn = actor::Id::ghost;
+                id_to_spawn = "MON_GHOST";
 
                 const std::string msg = "The air suddenly feels colder.";
 
@@ -3093,11 +3093,11 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
         } break;
 
         case TombTrait::other_undead: {
-                std::vector<actor::Id> mon_bucket = {
-                        actor::Id::mummy,
-                        actor::Id::croc_head_mummy,
-                        actor::Id::zombie,
-                        actor::Id::floating_skull};
+                std::vector<std::string> mon_bucket = {
+                        "MON_MUMMY",
+                        "MON_CROC_HEAD_MUMMY",
+                        "MON_ZOMBIE",
+                        "MON_FLOATING_SKULL"};
 
                 id_to_spawn = rnd::element(mon_bucket);
 
@@ -3167,15 +3167,15 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
                 }
                 else {
                         // Not fumes
-                        std::vector<actor::Id> mon_bucket;
+                        std::vector<std::string> mon_bucket;
 
-                        for (size_t i = 0; i < size_t(actor::Id::END); ++i) {
-                                const auto& d = actor::g_data[i];
+                        for (const auto& it : actor::g_data) {
+                                const actor::ActorData& d = it.second;
 
                                 if (d.natural_props[(size_t)PropId::ooze] &&
                                     d.is_auto_spawn_allowed &&
                                     !d.is_unique) {
-                                        mon_bucket.push_back((actor::Id)i);
+                                        mon_bucket.push_back(d.id);
                                 }
                         }
 
@@ -3203,8 +3203,8 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
                 break;
         }
 
-        if (id_to_spawn != actor::Id::END) {
-                const auto summoned =
+        if (!id_to_spawn.empty()) {
+                const actor::MonSpawnResult summoned =
                         actor::spawn(m_pos, {id_to_spawn}, map::rect())
                                 .make_aware_of_player();
 
@@ -4635,10 +4635,10 @@ DidTriggerTrap Cocoon::trigger_trap(actor::Actor* const actor)
         else if (rnd < 50) {
                 // Spiders
                 TRACE << "Attempting to spawn spiders" << std::endl;
-                std::vector<actor::Id> spawn_bucket;
+                std::vector<std::string> spawn_bucket;
 
-                for (int i = 0; i < (int)actor::Id::END; ++i) {
-                        const auto& d = actor::g_data[i];
+                for (const auto& it : actor::g_data) {
+                        const actor::ActorData& d = it.second;
 
                         if (d.is_spider &&
                             (d.actor_size == actor::Size::floor) &&

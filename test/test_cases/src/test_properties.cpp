@@ -89,7 +89,7 @@ TEST_CASE("Frenzy allows moving away from monster if LOS blocked")
 
         map::g_player->m_pos.set(10, 10);
 
-        auto* const mon = actor::make(actor::Id::zombie, {14, 10});
+        auto* const mon = actor::make("MON_ZOMBIE", {14, 10});
 
         map::update_vision();
 
@@ -123,7 +123,7 @@ TEST_CASE("Frenzy allows moving away from unseen known monster")
 
         map::g_player->m_pos.set(10, 10);
 
-        auto* const mon = actor::make(actor::Id::zombie, {14, 10});
+        auto* const mon = actor::make("MON_ZOMBIE", {14, 10});
 
         map::update_vision();
 
@@ -163,7 +163,7 @@ TEST_CASE("Frenzy allows attacking adjacent unseen known monster")
 
         map::g_player->m_pos.set(10, 10);
 
-        actor::make(actor::Id::zombie, {14, 10});
+        actor::make("MON_ZOMBIE", {14, 10});
 
         map::update_vision();
 
@@ -172,7 +172,7 @@ TEST_CASE("Frenzy allows attacking adjacent unseen known monster")
 
         REQUIRE(map::g_player->m_pos == P(10, 10));
 
-        auto* const mon_2 = actor::make(actor::Id::zombie, {10, 11});
+        auto* const mon_2 = actor::make("MON_ZOMBIE", {10, 11});
 
         mon_2->m_properties.apply(property_factory::make(PropId::invis));
 

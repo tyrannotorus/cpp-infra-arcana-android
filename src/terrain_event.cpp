@@ -171,15 +171,15 @@ void EventWallCrumble::on_new_turn()
         // Spawn monsters
 
         // Actor id, and corresponding maximum number of monsters allowed
-        std::vector<std::pair<actor::Id, size_t>> spawn_bucket;
+        std::vector<std::pair<std::string, size_t>> spawn_bucket;
 
         if (map::g_dlvl <= g_dlvl_last_early_game) {
-                spawn_bucket.emplace_back(actor::Id::rat, 24);
-                spawn_bucket.emplace_back(actor::Id::rat_thing, 16);
+                spawn_bucket.emplace_back("MON_RAT", 24);
+                spawn_bucket.emplace_back("MON_RAT_THING", 16);
         }
 
-        spawn_bucket.emplace_back(actor::Id::zombie, 4);
-        spawn_bucket.emplace_back(actor::Id::bloated_zombie, 1);
+        spawn_bucket.emplace_back("MON_ZOMBIE", 4);
+        spawn_bucket.emplace_back("MON_BLOATED_ZOMBIE", 1);
 
         const auto spawn_data = rnd::element(spawn_bucket);
 
@@ -352,9 +352,11 @@ void EventSnakeEmerge::on_new_turn()
 
         rnd::shuffle(tgt_bucket);
 
-        std::vector<actor::Id> id_bucket;
+        std::vector<std::string> id_bucket;
 
-        for (const auto& d : actor::g_data) {
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& d = it.second;
+
                 if (d.is_snake) {
                         id_bucket.push_back(d.id);
                 }

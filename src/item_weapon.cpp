@@ -195,7 +195,7 @@ void PlayerGhoulClaw::on_melee_kill(actor::Actor& actor_killed)
             rnd::one_in(3)) {
                 actor::spawn(
                         actor_killed.m_pos,
-                        {1, actor::Id::worm_mass},
+                        {1, "MON_WORM_MASS"},
                         map::rect())
                         .make_aware_of_player()
                         .set_leader(map::g_player);
@@ -436,8 +436,8 @@ void PharaohStaff::on_std_turn_in_inv_hook(const InvType inv_type)
 void PharaohStaff::on_mon_see_player_carrying(actor::Actor& mon) const
 {
         // TODO: Consider an "is_mummy" actor data field
-        if ((mon.id() != actor::Id::mummy) &&
-            (mon.id() != actor::Id::croc_head_mummy)) {
+        if ((mon.id() != "MON_MUMMY") &&
+            (mon.id() != "MON_CROC_HEAD_MUMMY")) {
                 return;
         }
 

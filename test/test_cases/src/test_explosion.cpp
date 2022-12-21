@@ -151,7 +151,7 @@ TEST_CASE("Explosions damage actors")
 
         const P origin(5, 7);
 
-        auto* a1 = actor::make(actor::Id::rat, origin.with_x_offset(1));
+        auto* a1 = actor::make("MON_RAT", origin.with_x_offset(1));
 
         REQUIRE(a1->m_state == ActorState::alive);
 
@@ -179,7 +179,7 @@ TEST_CASE("Explosions damage corpses")
         for (int i = 0; i < nr_corpses; ++i) {
                 corpses[i] =
                         actor::make(
-                                actor::Id::rat,
+                                "MON_RAT",
                                 origin.with_x_offset(1));
 
                 actor::kill(
@@ -190,7 +190,7 @@ TEST_CASE("Explosions damage corpses")
         }
 
         // Check that living and dead actors on the same cell can be destroyed
-        auto* a1 = actor::make(actor::Id::rat, origin.with_x_offset(1));
+        auto* a1 = actor::make("MON_RAT", origin.with_x_offset(1));
 
         for (int i = 0; i < nr_corpses; ++i) {
                 REQUIRE(corpses[i]->m_state == ActorState::corpse);
@@ -220,7 +220,7 @@ TEST_CASE("Fire explosion applies burning to actors")
         for (int i = 0; i < nr_corpses; ++i) {
                 corpses[i] =
                         actor::make(
-                                actor::Id::rat,
+                                "MON_RAT",
                                 origin.with_x_offset(1));
 
                 actor::kill(
@@ -232,12 +232,12 @@ TEST_CASE("Fire explosion applies burning to actors")
 
         auto* const a1 =
                 actor::make(
-                        actor::Id::rat,
+                        "MON_RAT",
                         origin.with_x_offset(-1));
 
         auto* const a2 =
                 actor::make(
-                        actor::Id::rat,
+                        "MON_RAT",
                         origin.with_x_offset(1));
 
         explosion::run(
@@ -280,7 +280,7 @@ TEST_CASE("Gas explosions not affecting gas immune creatures")
 
         map::update_terrain(terrain::make(terrain::Id::floor, origin));
 
-        auto* const actor = actor::make(actor::Id::zombie, origin);
+        auto* const actor = actor::make("MON_ZOMBIE", origin);
 
         REQUIRE(!actor->m_properties.has(PropId::confused));
 

@@ -74,49 +74,49 @@
 using StrToSpellIdMap = std::unordered_map<std::string, SpellId>;
 
 static const StrToSpellIdMap s_str_to_spell_id_map = {
-        {"aura_of_decay", SpellId::aura_of_decay},
-        {"spectral_weapons", SpellId::spectral_weapons},
-        {"aza_gaze", SpellId::aza_gaze},
-        {"bless", SpellId::bless},
-        {"burn", SpellId::burn},
-        {"force_bolt", SpellId::force_bolt},
-        {"darkbolt", SpellId::darkbolt},
-        {"deafen", SpellId::deafen},
-        {"disease", SpellId::disease},
-        {"premonition", SpellId::premonition},
-        {"erudition", SpellId::erudition},
-        {"enfeeble", SpellId::enfeeble},
-        {"curse", SpellId::curse},
-        {"cleansing_fire", SpellId::cleansing_fire},
-        {"sanctuary", SpellId::sanctuary},
-        {"purge", SpellId::purge},
-        {"frenzy", SpellId::frenzy},
-        {"heal", SpellId::heal},
-        {"identify", SpellId::identify},
-        {"knockback", SpellId::knockback},
-        {"light", SpellId::light},
-        {"cataclysm", SpellId::cataclysm},
-        {"mi_go_hypno", SpellId::mi_go_hypno},
-        {"control_object", SpellId::control_object},
-        {"pestilence", SpellId::pestilence},
-        {"res", SpellId::resistance},
-        {"see_invis", SpellId::see_invis},
-        {"slow", SpellId::slow},
-        {"haste", SpellId::haste},
-        {"spell_shield", SpellId::spell_shield},
-        {"summon", SpellId::summon},
-        {"summon_tentacles", SpellId::summon_tentacles},
-        {"teleport", SpellId::teleport},
-        {"terrify", SpellId::terrify},
-        {"transmut", SpellId::transmut}};
+        {"SPELL_AURA_OF_DECAY", SpellId::aura_of_decay},
+        {"SPELL_SPECTRAL_WEAPONS", SpellId::spectral_weapons},
+        {"SPELL_AZA_GAZE", SpellId::aza_gaze},
+        {"SPELL_BLESS", SpellId::bless},
+        {"SPELL_BURN", SpellId::burn},
+        {"SPELL_FORCE_BOLT", SpellId::force_bolt},
+        {"SPELL_DARKBOLT", SpellId::darkbolt},
+        {"SPELL_DEAFEN", SpellId::deafen},
+        {"SPELL_DISEASE", SpellId::disease},
+        {"SPELL_PREMONITION", SpellId::premonition},
+        {"SPELL_ERUDITION", SpellId::erudition},
+        {"SPELL_ENFEEBLE", SpellId::enfeeble},
+        {"SPELL_CURSE", SpellId::curse},
+        {"SPELL_CLEANSING_FIRE", SpellId::cleansing_fire},
+        {"SPELL_SANCTUARY", SpellId::sanctuary},
+        {"SPELL_PURGE", SpellId::purge},
+        {"SPELL_FRENZY", SpellId::frenzy},
+        {"SPELL_HEAL", SpellId::heal},
+        {"SPELL_IDENTIFY", SpellId::identify},
+        {"SPELL_KNOCKBACK", SpellId::knockback},
+        {"SPELL_LIGHT", SpellId::light},
+        {"SPELL_CATACLYSM", SpellId::cataclysm},
+        {"SPELL_MI_GO_HYPNO", SpellId::mi_go_hypno},
+        {"SPELL_CONTROL_OBJECT", SpellId::control_object},
+        {"SPELL_PESTILENCE", SpellId::pestilence},
+        {"SPELL_RES", SpellId::resistance},
+        {"SPELL_SEE_INVIS", SpellId::see_invis},
+        {"SPELL_SLOW", SpellId::slow},
+        {"SPELL_HASTE", SpellId::haste},
+        {"SPELL_SPELL_SHIELD", SpellId::spell_shield},
+        {"SPELL_SUMMON", SpellId::summon},
+        {"SPELL_SUMMON_TENTACLES", SpellId::summon_tentacles},
+        {"SPELL_TELEPORT", SpellId::teleport},
+        {"SPELL_TERRIFY", SpellId::terrify},
+        {"SPELL_TRANSMUT", SpellId::transmut}};
 
 using StrToSpellSkillMap = std::unordered_map<std::string, SpellSkill>;
 
 static const StrToSpellSkillMap s_str_to_spell_skill_map = {
-        {"basic", SpellSkill::basic},
-        {"expert", SpellSkill::expert},
-        {"master", SpellSkill::master},
-        {"transcendent", SpellSkill::transcendent}};
+        {"SPELLSKILL_BASIC", SpellSkill::basic},
+        {"SPELLSKILL_EXPERT", SpellSkill::expert},
+        {"SPELLSKILL_MASTER", SpellSkill::master},
+        {"SPELLSKILL_TRANSCENDENT", SpellSkill::transcendent}};
 
 using SpellDomainToShockTypeMap = std::unordered_map<SpellDomain, ShockSrc>;
 
@@ -157,7 +157,7 @@ static void spawn_monsters(const Context& context)
 
         const auto p = rnd::element(context.nearby_positions);
 
-        const auto id = actor::Id::tentacle_cluster;
+        const std::string id = "MON_TENTACLE_CLUSTER";
 
         auto spawned = actor::spawn(p, {id}, map::rect());
 
@@ -412,7 +412,7 @@ static void flay_human(const Context& context)
 
         actor::spawn(
                 target_actor->m_pos,
-                {actor::Id::crawling_intestines},
+                {"MON_CRAWLING_INTESTINES"},
                 map::rect());
 
         TRACE_FUNC_END;
@@ -2387,10 +2387,10 @@ void SpellPestilence::run_effect(
                         : caster;
         }
 
-        const auto id =
+        const std::string id =
                 (skill == SpellSkill::transcendent)
-                ? actor::Id::transcendent_rat
-                : actor::Id::rat;
+                ? "MON_TRANSCENDENT_RAT"
+                : "MON_RAT";
 
         const auto mon_summoned =
                 actor::spawn(
@@ -2613,7 +2613,7 @@ void SpellSpectralWeapons::run_effect(
                 const auto summoned =
                         actor::spawn(
                                 caster->m_pos,
-                                {actor::Id::spectral_wpn},
+                                {"MON_SPECTRAL_WPN"},
                                 map::rect())
                                 .set_leader(caster);
 
@@ -4552,9 +4552,10 @@ void SpellSummonMon::run_effect(
 {
         (void)seen_targets;
 
-        auto mon_dlvl_range = get_allowed_mon_dlvl_range(skill);
+        Range mon_dlvl_range = get_allowed_mon_dlvl_range(skill);
 
-        auto summon_bucket = make_summon_bucket(mon_dlvl_range);
+        std::vector<std::string> summon_bucket =
+                make_summon_bucket(mon_dlvl_range);
 
         if (summon_bucket.empty()) {
                 // No eligible monsters found, try again but allow monsters from
@@ -4576,8 +4577,8 @@ void SpellSummonMon::run_effect(
         }
 
 #ifndef NDEBUG
-        for (const auto id : summon_bucket) {
-                ASSERT(actor::g_data[(size_t)id].can_be_summoned_by_mon);
+        for (const std::string id : summon_bucket) {
+                ASSERT(actor::g_data[id].can_be_summoned_by_mon);
         }
 #endif  // NDEBUG
 
@@ -4616,13 +4617,13 @@ Range SpellSummonMon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
         return dlvl_range;
 }
 
-std::vector<actor::Id> SpellSummonMon::make_summon_bucket(
+std::vector<std::string> SpellSummonMon::make_summon_bucket(
         const Range& dlvl_range) const
 {
-        std::vector<actor::Id> summon_bucket;
+        std::vector<std::string> summon_bucket;
 
-        for (size_t i = 0; i < (size_t)actor::Id::END; ++i) {
-                const auto& data = actor::g_data[i];
+        for (auto& it : actor::g_data) {
+                const actor::ActorData& data = it.second;
 
                 if (!data.can_be_summoned_by_mon) {
                         continue;
@@ -4637,13 +4638,13 @@ std::vector<actor::Id> SpellSummonMon::make_summon_bucket(
                         continue;
                 }
 
-                summon_bucket.push_back(actor::Id(i));
+                summon_bucket.push_back(data.id);
         }
 
         return summon_bucket;
 }
 
-void SpellSummonMon::summon(const actor::Id id, actor::Actor* caster) const
+void SpellSummonMon::summon(const std::string& id, actor::Actor* caster) const
 {
         auto* const caster_leader = caster->m_leader;
 
@@ -4736,7 +4737,7 @@ void SpellSummonTentacles::run_effect(
         const auto summoned =
                 actor::spawn(
                         caster->m_pos,
-                        {actor::Id::tentacle_cluster},
+                        {"MON_TENTACLE_CLUSTER"},
                         map::rect())
                         .make_aware_of_player()
                         .set_leader(leader);

@@ -231,39 +231,39 @@ static void load_colors()
 
         auto* colors_e = xml::first_child(doc);
 
-        load_color(colors_e, "black", s_sdl_black);
-        load_color(colors_e, "extra_dark_gray", s_sdl_extra_dark_gray);
-        load_color(colors_e, "dark_gray", s_sdl_dark_gray);
-        load_color(colors_e, "gray", s_sdl_gray);
-        load_color(colors_e, "white", s_sdl_white);
-        load_color(colors_e, "light_white", s_sdl_light_white);
-        load_color(colors_e, "red", s_sdl_red);
-        load_color(colors_e, "light_red", s_sdl_light_red);
-        load_color(colors_e, "dark_green", s_sdl_dark_green);
-        load_color(colors_e, "green", s_sdl_green);
-        load_color(colors_e, "light_green", s_sdl_light_green);
-        load_color(colors_e, "dark_yellow", s_sdl_dark_yellow);
-        load_color(colors_e, "yellow", s_sdl_yellow);
-        load_color(colors_e, "blue", s_sdl_blue);
-        load_color(colors_e, "light_blue", s_sdl_light_blue);
-        load_color(colors_e, "magenta", s_sdl_magenta);
-        load_color(colors_e, "light_magenta", s_sdl_light_magenta);
-        load_color(colors_e, "cyan", s_sdl_cyan);
-        load_color(colors_e, "light_cyan", s_sdl_light_cyan);
-        load_color(colors_e, "brown", s_sdl_brown);
-        load_color(colors_e, "dark_brown", s_sdl_dark_brown);
-        load_color(colors_e, "gray_brown", s_sdl_gray_brown);
-        load_color(colors_e, "dark_gray_brown", s_sdl_dark_gray_brown);
-        load_color(colors_e, "violet", s_sdl_violet);
-        load_color(colors_e, "dark_violet", s_sdl_dark_violet);
-        load_color(colors_e, "orange", s_sdl_orange);
-        load_color(colors_e, "gold", s_sdl_gold);
-        load_color(colors_e, "sepia", s_sdl_sepia);
-        load_color(colors_e, "light_sepia", s_sdl_light_sepia);
-        load_color(colors_e, "dark_sepia", s_sdl_dark_sepia);
-        load_color(colors_e, "teal", s_sdl_teal);
-        load_color(colors_e, "light_teal", s_sdl_light_teal);
-        load_color(colors_e, "dark_teal", s_sdl_dark_teal);
+        load_color(colors_e, "COLOR_BLACK", s_sdl_black);
+        load_color(colors_e, "COLOR_EXTRA_DARK_GRAY", s_sdl_extra_dark_gray);
+        load_color(colors_e, "COLOR_DARK_GRAY", s_sdl_dark_gray);
+        load_color(colors_e, "COLOR_GRAY", s_sdl_gray);
+        load_color(colors_e, "COLOR_WHITE", s_sdl_white);
+        load_color(colors_e, "COLOR_LIGHT_WHITE", s_sdl_light_white);
+        load_color(colors_e, "COLOR_RED", s_sdl_red);
+        load_color(colors_e, "COLOR_LIGHT_RED", s_sdl_light_red);
+        load_color(colors_e, "COLOR_DARK_GREEN", s_sdl_dark_green);
+        load_color(colors_e, "COLOR_GREEN", s_sdl_green);
+        load_color(colors_e, "COLOR_LIGHT_GREEN", s_sdl_light_green);
+        load_color(colors_e, "COLOR_DARK_YELLOW", s_sdl_dark_yellow);
+        load_color(colors_e, "COLOR_YELLOW", s_sdl_yellow);
+        load_color(colors_e, "COLOR_BLUE", s_sdl_blue);
+        load_color(colors_e, "COLOR_LIGHT_BLUE", s_sdl_light_blue);
+        load_color(colors_e, "COLOR_MAGENTA", s_sdl_magenta);
+        load_color(colors_e, "COLOR_LIGHT_MAGENTA", s_sdl_light_magenta);
+        load_color(colors_e, "COLOR_CYAN", s_sdl_cyan);
+        load_color(colors_e, "COLOR_LIGHT_CYAN", s_sdl_light_cyan);
+        load_color(colors_e, "COLOR_BROWN", s_sdl_brown);
+        load_color(colors_e, "COLOR_DARK_BROWN", s_sdl_dark_brown);
+        load_color(colors_e, "COLOR_GRAY_BROWN", s_sdl_gray_brown);
+        load_color(colors_e, "COLOR_DARK_GRAY_BROWN", s_sdl_dark_gray_brown);
+        load_color(colors_e, "COLOR_VIOLET", s_sdl_violet);
+        load_color(colors_e, "COLOR_DARK_VIOLET", s_sdl_dark_violet);
+        load_color(colors_e, "COLOR_ORANGE", s_sdl_orange);
+        load_color(colors_e, "COLOR_GOLD", s_sdl_gold);
+        load_color(colors_e, "COLOR_SEPIA", s_sdl_sepia);
+        load_color(colors_e, "COLOR_LIGHT_SEPIA", s_sdl_light_sepia);
+        load_color(colors_e, "COLOR_DARK_SEPIA", s_sdl_dark_sepia);
+        load_color(colors_e, "COLOR_TEAL", s_sdl_teal);
+        load_color(colors_e, "COLOR_LIGHT_TEAL", s_sdl_light_teal);
+        load_color(colors_e, "COLOR_DARK_TEAL", s_sdl_dark_teal);
 
         s_black = Color(s_sdl_black);
         s_extra_dark_gray = Color(s_sdl_extra_dark_gray);
@@ -308,20 +308,20 @@ static void load_gui_colors()
 
         auto* gui_e = xml::first_child(doc);
 
-        load_gui_color(gui_e, "text", s_sdl_text);
-        load_gui_color(gui_e, "passive_text", s_sdl_passive_text);
-        load_gui_color(gui_e, "menu_highlight", s_sdl_menu_highlight);
-        load_gui_color(gui_e, "menu_dark", s_sdl_menu_dark);
-        load_gui_color(gui_e, "menu_key_highlight", s_sdl_menu_key_highlight);
-        load_gui_color(gui_e, "menu_key_dark", s_sdl_menu_key_dark);
-        load_gui_color(gui_e, "title", s_sdl_title);
-        load_gui_color(gui_e, "message_good", s_sdl_msg_good);
-        load_gui_color(gui_e, "message_bad", s_sdl_msg_bad);
-        load_gui_color(gui_e, "message_note", s_sdl_msg_note);
-        load_gui_color(gui_e, "message_more", s_sdl_msg_more);
-        load_gui_color(gui_e, "monster_unaware", s_sdl_mon_unaware);
-        load_gui_color(gui_e, "monster_allied", s_sdl_mon_allied);
-        load_gui_color(gui_e, "monster_temp_property", s_sdl_mon_temp_property);
+        load_gui_color(gui_e, "GUICOLOR_TEXT", s_sdl_text);
+        load_gui_color(gui_e, "GUICOLOR_PASSIVE_TEXT", s_sdl_passive_text);
+        load_gui_color(gui_e, "GUICOLOR_MENU_HIGHLIGHT", s_sdl_menu_highlight);
+        load_gui_color(gui_e, "GUICOLOR_MENU_DARK", s_sdl_menu_dark);
+        load_gui_color(gui_e, "GUICOLOR_MENU_KEY_HIGHLIGHT", s_sdl_menu_key_highlight);
+        load_gui_color(gui_e, "GUICOLOR_MENU_KEY_DARK", s_sdl_menu_key_dark);
+        load_gui_color(gui_e, "GUICOLOR_TITLE", s_sdl_title);
+        load_gui_color(gui_e, "GUICOLOR_MESSAGE_GOOD", s_sdl_msg_good);
+        load_gui_color(gui_e, "GUICOLOR_MESSAGE_BAD", s_sdl_msg_bad);
+        load_gui_color(gui_e, "GUICOLOR_MESSAGE_NOTE", s_sdl_msg_note);
+        load_gui_color(gui_e, "GUICOLOR_MESSAGE_MORE", s_sdl_msg_more);
+        load_gui_color(gui_e, "GUICOLOR_MONSTER_UNAWARE", s_sdl_mon_unaware);
+        load_gui_color(gui_e, "GUICOLOR_MONSTER_ALLIED", s_sdl_mon_allied);
+        load_gui_color(gui_e, "GUICOLOR_MONSTER_TEMP_PROPERTY", s_sdl_mon_temp_property);
 
         s_text = Color(s_sdl_text);
         s_passive_text = Color(s_sdl_passive_text);
@@ -446,11 +446,11 @@ std::optional<Color> name_to_color(const std::string& name)
                 });
 
         if (search == std::end(s_str_color_pairs)) {
-                TRACE
-                        << "WARNING: No color defined for name: " << name
-                        << std::endl;
+                TRACE_ERROR_RELEASE
+                        << "No color defined for name: "
+                        << "'" << name << "'" << std::endl;
 
-                return {};
+                PANIC;
         }
 
         return search->second;

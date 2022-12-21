@@ -69,7 +69,7 @@ static const std::string s_intro_msg_default =
         "I am determined to enter these sprawling catacombs and rob them of "
         "treasures and knowledge. At the depths of the abyss lies my true "
         "destiny, an artifact of non-human origin referred to as "
-        "{yellow}\"The shining Trapezohedron\"{reset_color} "
+        "{COLOR_YELLOW}\"The shining Trapezohedron\"{reset_color} "
         "- a window to all the secrets of the universe!";
 
 static const std::string s_intro_msg_exorcist =
@@ -79,7 +79,7 @@ static const std::string s_intro_msg_exorcist =
         "I am determined to enter these sprawling catacombs and purge them of "
         "the corruption that dwells within. At the depths of the abyss lies "
         "an artifact of non-human origin referred to as "
-        "{yellow}\"The shining Trapezohedron\"{reset_color} "
+        "{COLOR_YELLOW}\"The shining Trapezohedron\"{reset_color} "
         "- rumored to be a window to all the secrets of the universe. "
         "This must be destroyed, so that none more may be tempted by "
         "its deceitful promises!";

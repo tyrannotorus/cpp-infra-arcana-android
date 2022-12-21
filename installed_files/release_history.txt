@@ -76,6 +76,11 @@ by bumping them).
 - The user data location is now printed in the main options menu.
 
 ##############################
+# Modability
+##############################
+- Monster definitions are now to a large extent data driven - it is now possible to add new monsters purely by updating monsters.xml (removed monster ID enum values from the source code).
+
+##############################
 # Fixes
 ##############################
 - Fixed a problem with the game time system, that caused slow creatures to act slightly more often and fast/very fast creatures to act slightly less often than they were supposed to (especially noticeable when kiting a slow monster, since it would occasionally get unexpected extra moves).
@@ -84,6 +89,7 @@ by bumping them).
 - Kicking locked wooden chests would print the message "I kick the locked wooden chest! I kick the lid. The lock resists." - removed the redundant part "I kick the lid".
 - Kicking chests caused extra rolls for sprains in some cases (so the risk of a sprain was doubled, and player could get double sprains).
 - Fixed a bug where the player killing themselves with an Incinerator would freeze the game.
+
 
 ============================================================
 = v21.0.1 (April 7, 2022)
