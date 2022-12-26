@@ -106,8 +106,7 @@ static Color color_monster(const actor::Actor& actor)
                 return map::g_wall_color;
         }
 
-        const std::optional<Color> color_override =
-                actor.m_properties.override_actor_color();
+        const std::optional<Color> color_override = actor.m_properties.override_actor_color();
 
         if (color_override) {
                 return color_override.value();
@@ -125,8 +124,7 @@ static LightSize calc_light_size_player_specific()
 {
         auto light_size = LightSize::none;
 
-        const item::Explosive* active_explosive =
-                actor::player_state::g_active_explosive.get();
+        const item::Explosive* active_explosive = actor::player_state::g_active_explosive.get();
 
         if (active_explosive) {
                 const item::Id id = active_explosive->data().id;
@@ -154,14 +152,9 @@ static LightSize calc_light_size(const actor::Actor& actor)
         bool do_radiant_fov = false;
 
         if (actor.is_alive()) {
-                do_radiant_self =
-                        actor.m_properties.has(PropId::radiant_self);
-
-                do_radiant_adj =
-                        actor.m_properties.has(PropId::radiant_adjacent);
-
-                do_radiant_fov =
-                        actor.m_properties.has(PropId::radiant_fov);
+                do_radiant_self = actor.m_properties.has(PropId::radiant_self);
+                do_radiant_adj = actor.m_properties.has(PropId::radiant_adjacent);
+                do_radiant_fov = actor.m_properties.has(PropId::radiant_fov);
         }
 
         const bool is_burning = actor.m_properties.has(PropId::burning);
@@ -182,10 +175,7 @@ static LightSize calc_light_size(const actor::Actor& actor)
         }
 
         if (actor::is_player(&actor)) {
-                light_size =
-                        std::max(
-                                light_size,
-                                calc_light_size_player_specific());
+                light_size = std::max(light_size, calc_light_size_player_specific());
         }
 
         return light_size;
@@ -215,11 +205,7 @@ static void apply_light(
 
                 Array2<bool> blocked(map::dims());
 
-                map_parsers::BlocksLos()
-                        .run(
-                                blocked,
-                                fov_lmt,
-                                MapParseMode::overwrite);
+                map_parsers::BlocksLos().run(blocked, fov_lmt, MapParseMode::overwrite);
 
                 FovMap fov_map;
                 fov_map.hard_blocked = &blocked;
@@ -615,9 +601,7 @@ bool Actor::restore_sp(
         if (verbose == Verbose::yes &&
             is_spi_gained) {
                 if (is_player(this)) {
-                        msg_log::add(
-                                "I feel more spirited!",
-                                colors::msg_good());
+                        msg_log::add("I feel more spirited!", colors::msg_good());
                 }
                 else {
                         if (can_player_see_actor(*this)) {
@@ -625,9 +609,7 @@ bool Actor::restore_sp(
                                         text_format::first_to_upper(
                                                 m_data->name_the);
 
-                                msg_log::add(
-                                        actor_name_the +
-                                        " looks more spirited.");
+                                msg_log::add(actor_name_the + " looks more spirited.");
                         }
                 }
         }
@@ -645,14 +627,10 @@ void Actor::change_max_hp(const int change, const Verbose verbose)
 
         if (is_player(this)) {
                 if (change > 0) {
-                        msg_log::add(
-                                "I feel more vigorous!",
-                                colors::msg_good());
+                        msg_log::add("I feel more vigorous!", colors::msg_good());
                 }
                 else if (change < 0) {
-                        msg_log::add(
-                                "I feel frailer!",
-                                colors::msg_bad());
+                        msg_log::add("I feel frailer!", colors::msg_bad());
                 }
         }
         else if (can_player_see_actor(*this)) {
@@ -679,14 +657,10 @@ void Actor::change_max_sp(const int change, const Verbose verbose)
 
         if (is_player(this)) {
                 if (change > 0) {
-                        msg_log::add(
-                                "My spirit is stronger!",
-                                colors::msg_good());
+                        msg_log::add("My spirit is stronger!", colors::msg_good());
                 }
                 else if (change < 0) {
-                        msg_log::add(
-                                "My spirit is weaker!",
-                                colors::msg_bad());
+                        msg_log::add("My spirit is weaker!", colors::msg_bad());
                 }
         }
         else if (can_player_see_actor(*this)) {
@@ -695,14 +669,10 @@ void Actor::change_max_sp(const int change, const Verbose verbose)
                                 name_the());
 
                 if (change > 0) {
-                        msg_log::add(
-                                actor_name_the +
-                                " appears to grow in spirit.");
+                        msg_log::add(actor_name_the + " appears to grow in spirit.");
                 }
                 else if (change < 0) {
-                        msg_log::add(
-                                actor_name_the +
-                                " appears to shrink in spirit.");
+                        msg_log::add(actor_name_the + " appears to shrink in spirit.");
                 }
         }
 }

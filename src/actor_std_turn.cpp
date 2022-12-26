@@ -74,15 +74,12 @@ static int calc_player_turns_per_hp_regen_rate()
         // Items affect hp regen?
         for (const auto& slot : player.m_inv.m_slots) {
                 if (slot.item) {
-                        nr_turns_per_hp +=
-                                slot.item->hp_regen_change(
-                                        InvType::slots);
+                        nr_turns_per_hp += slot.item->hp_regen_change(InvType::slots);
                 }
         }
 
         for (const auto* const item : player.m_inv.m_backpack) {
-                nr_turns_per_hp +=
-                        item->hp_regen_change(InvType::backpack);
+                nr_turns_per_hp += item->hp_regen_change(InvType::backpack);
         }
 
         nr_turns_per_hp = std::max(1, nr_turns_per_hp);
@@ -256,8 +253,7 @@ static void player_std_turn()
         player_regen_meditative_focused();
 
         if (actor::player_state::g_active_explosive) {
-                actor::player_state::g_active_explosive
-                        ->on_std_turn_player_hold_ignited();
+                actor::player_state::g_active_explosive->on_std_turn_player_hold_ignited();
 
                 if (!map::g_player->is_alive()) {
                         return;
@@ -282,12 +278,14 @@ static void mon_std_turn(actor::Actor& mon)
 
         // NOTE: Monsters try to detect the player visually on standard turns,
         // otherwise very fast monsters are much better at finding the player.
-        if (mon.is_alive() &&
-            mon.m_data->ai[(size_t)actor::AiId::looks] &&
-            !actor::is_player(mon.m_leader) &&
-            !map::g_player->m_properties.has(PropId::sanctuary) &&
-            (actor::is_player(mon.m_ai_state.target) ||
-             !mon.m_ai_state.target)) {
+        const bool should_look =
+                mon.is_alive() &&
+                mon.m_data->ai[(size_t)actor::AiId::looks] &&
+                !actor::is_player(mon.m_leader) &&
+                !map::g_player->m_properties.has(PropId::sanctuary) &&
+                (actor::is_player(mon.m_ai_state.target) || !mon.m_ai_state.target);
+
+        if (should_look) {
                 ai::info::look(mon);
         }
 }
@@ -312,9 +310,7 @@ static void std_turn_common(actor::Actor& actor)
         bool decr_this_turn = true;
 
         if (actor::is_player(&actor)) {
-                decr_this_turn =
-                        ((game_time::turn_nr() %
-                          decr_above_max_n_turns) == 0);
+                decr_this_turn = ((game_time::turn_nr() % decr_above_max_n_turns) == 0);
         }
 
         const bool is_hp_above_max = (actor.m_hp > actor::max_hp(actor));
@@ -357,8 +353,7 @@ static void std_turn_common(actor::Actor& actor)
                 regen_sp_n_turns = 1;
         }
 
-        const bool regen_sp_this_turn =
-                ((game_time::turn_nr() % regen_sp_n_turns) == 0);
+        const bool regen_sp_this_turn = ((game_time::turn_nr() % regen_sp_n_turns) == 0);
 
         if (regen_sp_this_turn) {
                 actor.restore_sp(1, false, Verbose::no);

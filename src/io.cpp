@@ -83,10 +83,7 @@ static bool should_put_contour_at(
 {
         // Only allow drawing a contour at pixels with the same color as the
         // background color parameter.
-        const auto color =
-                io::read_px_on_surface(
-                        surface,
-                        surface_px_pos);
+        const auto color = io::read_px_on_surface(surface, surface_px_pos);
 
         if (color != bg_color) {
 #ifndef NDEBUG

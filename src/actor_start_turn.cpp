@@ -83,8 +83,7 @@ static Array2<int> calc_player_vigilant_flood()
 
                 Array2<bool> blocks_sound(map::dims());
 
-                map_parsers::BlocksSound()
-                        .run(blocks_sound, area, MapParseMode::overwrite);
+                map_parsers::BlocksSound().run(blocks_sound, area, MapParseMode::overwrite);
 
                 vigilant_flood = floodfill(player.m_pos, blocks_sound, d);
         }
@@ -298,9 +297,7 @@ static void update_player_unseen_monster(
         }
 
         const bool is_vigilant_detect_unseeable =
-                should_vigilant_make_aware_of_unseeable_mon(
-                        mon,
-                        vigilant_flood);
+                should_vigilant_make_aware_of_unseeable_mon(mon, vigilant_flood);
 
         if (is_vigilant_detect_unseeable) {
                 make_aware_of_unseeable_mon_by_vigilant(mon);
@@ -343,8 +340,7 @@ static void update_player_monster_detection()
         }
 
         if (actor::player_state::g_seen_mon_to_warn_about) {
-                warn_player_about_mon(
-                        *actor::player_state::g_seen_mon_to_warn_about);
+                warn_player_about_mon(*actor::player_state::g_seen_mon_to_warn_about);
         }
 }
 

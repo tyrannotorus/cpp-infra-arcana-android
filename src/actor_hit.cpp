@@ -45,9 +45,7 @@ static void destroy_armor(actor::Actor& actor, const item::Armor* const armor)
 
         if (actor::is_player(&actor)) {
                 const std::string armor_name =
-                        armor->name(
-                                ItemNameType::plain,
-                                ItemNameInfo::none);
+                        armor->name(ItemNameType::plain, ItemNameInfo::none);
 
                 const std::string msg = "My " + armor_name + " is torn apart!";
 
@@ -295,10 +293,7 @@ static int absorb_dmg_for_prolonged_life_player(int dmg)
         const int missing_hp = (dmg - map::g_player->m_hp) + 1;
 
         if (missing_hp > 0) {
-                const int sp_dmg =
-                        std::min(
-                                missing_hp,
-                                map::g_player->m_sp - 1);
+                const int sp_dmg = std::min(missing_hp, map::g_player->m_sp - 1);
 
                 map::g_player->m_sp -= sp_dmg;
 
@@ -311,11 +306,9 @@ static int absorb_dmg_for_prolonged_life_player(int dmg)
 static int nr_wounds(const PropHandler& properties)
 {
         if (properties.has(PropId::wound)) {
-                const auto* const prop =
-                        properties.prop(PropId::wound);
+                const auto* const prop = properties.prop(PropId::wound);
 
-                const auto* const wound =
-                        static_cast<const PropWound*>(prop);
+                const auto* const wound = static_cast<const PropWound*>(prop);
 
                 return wound->nr_wounds();
         }
@@ -365,13 +358,11 @@ static void on_player_hit(
 
                 prop->set_indefinite();
 
-                const int nr_wounds_before =
-                        nr_wounds(map::g_player->m_properties);
+                const int nr_wounds_before = nr_wounds(map::g_player->m_properties);
 
                 map::g_player->m_properties.apply(prop);
 
-                const int nr_wounds_after =
-                        nr_wounds(map::g_player->m_properties);
+                const int nr_wounds_after = nr_wounds(map::g_player->m_properties);
 
                 if (nr_wounds_after > nr_wounds_before) {
                         game::add_history_event("Sustained a severe wound");
@@ -498,8 +489,7 @@ void hit_sp(
 
         if (actor.m_sp > 0) {
                 if (actor::is_player(&actor)) {
-                        map::g_player->interrupt_actions(
-                                ForceInterruptActions::no);
+                        map::g_player->interrupt_actions(ForceInterruptActions::no);
                 }
 
                 return;

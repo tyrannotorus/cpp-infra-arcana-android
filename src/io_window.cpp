@@ -33,8 +33,7 @@ static std::string make_window_title()
 
         title += version_info::g_version_str;
 
-        const auto git_sha1_result =
-                version_info::read_git_sha1_str_from_file();
+        const auto git_sha1_result = version_info::read_git_sha1_str_from_file();
 
         if (git_sha1_result) {
                 title += " (" + git_sha1_result.value() + ")";
@@ -122,19 +121,16 @@ static void update_rendering_offsets()
 
         const int scale_factor = config::video_scale_factor();
 
-        const auto window_logical_px_dims =
-                window_px_dims.scaled_down(scale_factor);
+        const auto window_logical_px_dims = window_px_dims.scaled_down(scale_factor);
 
-        const auto screen_panel_logical_px_dims =
-                io::panel_px_dims(Panel::screen);
+        const auto screen_panel_logical_px_dims = io::panel_px_dims(Panel::screen);
 
         const auto rendering_px_offset =
                 calc_rendering_offsets(
                         window_logical_px_dims,
                         screen_panel_logical_px_dims);
 
-        io::g_rendering_px_offset =
-                rendering_px_offset.scaled_up(scale_factor);
+        io::g_rendering_px_offset = rendering_px_offset.scaled_up(scale_factor);
 }
 
 static SDL_Window* init_window_fullscreen()
@@ -145,9 +141,7 @@ static SDL_Window* init_window_fullscreen()
 
         auto window_size = native_resolution;
 
-        window_size =
-                window_size.scaled_down(
-                        config::video_scale_factor());
+        window_size = window_size.scaled_down(config::video_scale_factor());
 
         TRACE
                 << "Fullscreen window size: "
@@ -165,8 +159,9 @@ static SDL_Window* init_window_fullscreen()
 static SDL_Window* init_window_windowed()
 {
         const auto window_size =
-                P(config::window_px_w(),
-                  config::window_px_h());
+                P(
+                        config::window_px_w(),
+                        config::window_px_h());
 
         const auto window_logical_size =
                 window_size.scaled_down(
@@ -208,10 +203,11 @@ void init_window()
 
         const P native_resolution = get_native_resolution();
 
-        TRACE << "Native resolution: "
-              << native_resolution.x << "x"
-              << native_resolution.y
-              << std::endl;
+        TRACE
+                << "Native resolution: "
+                << native_resolution.x << "x"
+                << native_resolution.y
+                << std::endl;
 
         if (config::is_fullscreen()) {
                 g_sdl_window = init_window_fullscreen();

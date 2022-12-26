@@ -7,10 +7,9 @@
   (indent-tabs-mode))
  ;; For c++-mode
  (c++-mode
-  (fill-column . 80)
-  (whitespace-line-column . 80)
   (c-file-style . "bsd")
-  (eval ignore-errors
-        (require 'whitespace)
-        (whitespace-mode 0)
-        (whitespace-mode 1))))
+  (fill-column . 100)
+  (eval . (whitespace-mode 0))
+  (whitespace-line-column . 100)
+  (whitespace-style . '(face empty tabs lines-tail trailing))
+  (eval . (whitespace-mode 1))))
