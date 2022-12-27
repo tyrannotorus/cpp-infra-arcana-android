@@ -75,6 +75,7 @@ enum class TileId
         dynamite_lit,
         elder_sign,
         excl_mark,
+        failed_reanimation,
         fiend,
         flare,
         flare_gun,
