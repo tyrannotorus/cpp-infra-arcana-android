@@ -109,7 +109,7 @@
             <undead/>
             <can_bleed>true</can_bleed>
             <can_leave_corpse>true</can_leave_corpse>
-            <prioritize_destroying_corpse>true</prioritize_destroying_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
         </attributes>
 
         <attacks>
@@ -3854,8 +3854,8 @@
             <property>PROP_CORPSE_EATER</property>
             <property>PROP_R_DISEASE</property>
             <property>PROP_DARKVISION</property>
-            <property>PROP_FRENZIES_FOLLOWERS</property>
             <property>PROP_ALLIES_GHOUL_PLAYER</property>
+            <property>PROP_FRENZIES_FOLLOWERS</property>
         </properties>
 
         <ai>
