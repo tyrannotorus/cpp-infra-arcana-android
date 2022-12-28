@@ -3248,6 +3248,13 @@ PropActResult PropFrenziesFollowers::on_act()
                 return {};
         }
 
+        // Don't frenzy followers if owning actor will join the player anyway
+        // (it can look bad if they frenzy, and then immediately join the
+        // player).
+        if (m_owner->m_properties.has(PropId::allies_ghoul_player) &&
+            player_bon::is_bg(Bg::ghoul)) {
+        }
+
         if (m_cooldown > 0) {
                 --m_cooldown;
 
@@ -3272,7 +3279,8 @@ PropActResult PropFrenziesFollowers::on_act()
                 return {};
         }
 
-        // Also frenzy the owning actor, but only if there are other actors as well.
+        // Also frenzy the owning actor, but only if there are other actors as
+        // well.
         actors_to_frenzy.push_back(m_owner);
 
         Snd snd(
