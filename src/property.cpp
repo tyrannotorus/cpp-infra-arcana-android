@@ -67,7 +67,7 @@
 // -----------------------------------------------------------------------------
 static bool is_player_aware_of_hostile_mon_at(const P& pos)
 {
-        const auto* const mon = map::living_actor_at(pos);
+        const actor::Actor* const mon = map::living_actor_at(pos);
 
         return (
                 mon &&
@@ -81,7 +81,7 @@ static void bless_adjacent(const P& pos)
         for (const P& d : dir_utils::g_dir_list_w_center) {
                 const auto p_adj = pos + d;
 
-                auto* const terrain = map::g_terrain.at(p_adj);
+                terrain::Terrain* const terrain = map::g_terrain.at(p_adj);
 
                 if (terrain->id() != terrain::Id::fountain) {
                         continue;
@@ -97,7 +97,7 @@ static void curse_adjacent(const P& pos)
         for (const P& d : dir_utils::g_dir_list_w_center) {
                 const auto p_adj = pos + d;
 
-                auto* const terrain = map::g_terrain.at(p_adj);
+                terrain::Terrain* const terrain = map::g_terrain.at(p_adj);
 
                 if (terrain->id() != terrain::Id::fountain) {
                         continue;
@@ -344,7 +344,7 @@ bool PropEntangled::try_player_end_with_machete()
                 return false;
         }
 
-        auto* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
+        item::Item* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         if (item && (item->id() == item::Id::machete)) {
                 msg_log::add("I cut myself free with my Machete.");
@@ -433,7 +433,7 @@ PropEnded PropInfected::on_actor_turn()
 
         // Time to apply disease
 
-        auto* const owner = m_owner;
+        actor::Actor* const owner = m_owner;
 
         owner->m_properties.end_prop(
                 id(),
@@ -444,7 +444,7 @@ PropEnded PropInfected::on_actor_turn()
 
         // NOTE: This property is now deleted
 
-        auto* prop_diseased = new PropDiseased();
+        Prop* prop_diseased = new PropDiseased();
 
         prop_diseased->set_indefinite();
 
@@ -516,12 +516,9 @@ void PropZuulPossessPriest::on_placed()
         if (should_possess) {
                 m_owner->m_state = ActorState::destroyed;
 
-                auto* actor =
-                        actor::make(
-                                "MON_CULTIST_PRIEST",
-                                m_owner->m_pos);
+                actor::Actor* actor = actor::make("MON_CULTIST_PRIEST", m_owner->m_pos);
 
-                auto* prop = new PropPossessedByZuul();
+                Prop* prop = new PropPossessedByZuul();
 
                 prop->set_indefinite();
 
@@ -612,7 +609,7 @@ void PropShapeshifts::on_death()
         ASSERT(!spawned.monsters.empty());
 
         if (!spawned.monsters.empty()) {
-                auto* const shapeshifter = spawned.monsters[0];
+                actor::Actor* const shapeshifter = spawned.monsters[0];
 
                 shapeshifter->m_mon_aware_state.aware_counter =
                         m_owner->m_mon_aware_state.aware_counter;
@@ -629,7 +626,7 @@ void PropShapeshifts::on_death()
 
                 // Make the Shapeshifter skip a turn - it looks better if it
                 // doesn't immediately move to an adjacent cell when spawning
-                auto* const waiting = property_factory::make(PropId::waiting);
+                Prop* const waiting = property_factory::make(PropId::waiting);
 
                 waiting->set_duration(1);
 
@@ -691,7 +688,7 @@ void PropShapeshifts::shapeshift(const Verbose verbose) const
                 return;
         }
 
-        auto* const mon = spawned.monsters[0];
+        actor::Actor* const mon = spawned.monsters[0];
 
         // Set HP percentage a bit higher than the previous monster
         {
@@ -1311,7 +1308,7 @@ void PropHallucinating::apply_fake_actor_data() const
                 return;
         }
 
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if (!actor::is_player(actor)) {
                         actor->m_mimic_data = rnd::element(allowed_data);
                 }
@@ -1320,7 +1317,7 @@ void PropHallucinating::apply_fake_actor_data() const
 
 void PropHallucinating::clear_fake_actor_data() const
 {
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if (!actor::is_player(actor)) {
                         actor->m_mimic_data = nullptr;
                 }
@@ -1367,7 +1364,7 @@ void PropHallucinating::create_fake_stairs() const
         mapgen::g_is_map_valid = was_valid_before;
 
         if ((p.x > 0) && (p.y > 0)) {
-                auto* const terrain = map::g_terrain.at(p);
+                terrain::Terrain* const terrain = map::g_terrain.at(p);
 
                 if (terrain->id() != terrain::Id::stairs) {
                         ASSERT(false);
@@ -1383,15 +1380,14 @@ void PropHallucinating::create_fake_stairs() const
 
 void PropHallucinating::clear_all_fake_stairs() const
 {
-        for (auto* const terrain : map::g_terrain) {
+        for (terrain::Terrain* const terrain : map::g_terrain) {
                 if (terrain->id() != terrain::Id::stairs) {
                         continue;
                 }
 
                 // Is stairs
 
-                const auto* const stairs =
-                        static_cast<const terrain::Stairs*>(terrain);
+                const auto* const stairs = static_cast<const terrain::Stairs*>(terrain);
 
                 if (!stairs->is_fake()) {
                         continue;
@@ -1534,14 +1530,14 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
 
         // Mark the positions of all seen actors as free (the monsters may be
         // inside wall cells, e.g. worms crawling through rubble).
-        for (const auto* const actor : seen_foes) {
+        for (const actor::Actor* const actor : seen_foes) {
                 blocked.at(actor->m_pos) = false;
         }
 
         std::vector<const actor::Actor*> seen_reachable_foes;
         seen_reachable_foes.reserve(seen_foes.size());
 
-        for (const auto* const actor : seen_foes) {
+        for (const actor::Actor* const actor : seen_foes) {
                 const auto line =
                         line_calc::calc_new_line(
                                 m_owner->m_pos,
@@ -1575,7 +1571,7 @@ bool PropFrenzied::allow_move_dir(const Dir dir)
 
         // There are seen reachable seen foes
 
-        for (const auto* actor : seen_reachable_foes) {
+        for (const actor::Actor* actor : seen_reachable_foes) {
                 const int old_dist = king_dist(m_owner->m_pos, actor->m_pos);
                 const int new_dist = king_dist(new_pos, actor->m_pos);
 
@@ -1751,7 +1747,7 @@ PropActResult PropRecloaks::on_act()
         if (m_owner->is_alive() &&
             !m_owner->m_properties.has(PropId::cloaked) &&
             rnd::one_in(8)) {
-                auto* prop_cloaked = property_factory::make(PropId::cloaked);
+                Prop* prop_cloaked = property_factory::make(PropId::cloaked);
 
                 prop_cloaked->set_indefinite();
 
@@ -2216,7 +2212,7 @@ void PropSplitsOnDeath::on_death()
                 msg_log::add(name + " splits.");
         }
 
-        auto* const leader = m_owner->m_leader;
+        actor::Actor* const leader = m_owner->m_leader;
 
         const auto spawned =
                 actor::spawn(pos, {2, m_owner->id()}, map::rect())
@@ -2226,10 +2222,8 @@ void PropSplitsOnDeath::on_death()
         std::for_each(
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
-                [](auto* const mon) {
-                        auto* prop_waiting =
-                                property_factory::make(
-                                        PropId::waiting);
+                [](actor::Actor* const mon) {
+                        Prop* prop_waiting = property_factory::make(PropId::waiting);
 
                         prop_waiting->set_duration(1);
 
@@ -2237,13 +2231,11 @@ void PropSplitsOnDeath::on_death()
 
                         // The new actors should usually not also split
                         if (rnd::fraction(4, 5)) {
-                                mon->m_properties.end_prop(
-                                        PropId::splits_on_death);
+                                mon->m_properties.end_prop(PropId::splits_on_death);
                         }
 
                         // Do not print a new "monster in view" message
-                        mon->m_mon_aware_state
-                                .is_msg_mon_in_view_printed = true;
+                        mon->m_mon_aware_state.is_msg_mon_in_view_printed = true;
                 });
 
         // If no leader yet, set the first actor as leader of the second
@@ -2289,9 +2281,16 @@ void PropOthersTerrifiedOnDeath::on_death()
 
 PropActResult PropCorpseEater::on_act()
 {
+        if (!m_owner->is_alive()) {
+                return {};
+        }
+
         auto did_action = DidAction::no;
 
-        if (m_owner->is_alive() && rnd::coin_toss()) {
+        // NOTE: Always try to feed if the player is the leader of the monster
+        // (its very annoying if your pet refuses to feed when it stands on a
+        // corpse), otherwise only occasionally feed.
+        if (m_owner->is_actor_my_leader(map::g_player) || rnd::coin_toss()) {
                 actor::try_eat_corpse(*m_owner);
 
                 if (did_action == DidAction::yes) {
@@ -2373,7 +2372,7 @@ std::optional<Color> PropCorruptsEnvColor::override_actor_color() const
 
 PropActResult PropCorruptsEnvColor::on_act()
 {
-        auto* const terrain = map::g_terrain.at(m_owner->m_pos);
+        terrain::Terrain* const terrain = map::g_terrain.at(m_owner->m_pos);
 
         terrain->try_corrupt_color();
 
@@ -2411,7 +2410,7 @@ void PropAltersEnv::on_std_turn()
 
         Array2<bool> has_actor(map::dims());
 
-        for (auto* actor : game_time::g_actors) {
+        for (actor::Actor* actor : game_time::g_actors) {
                 if (actor->m_state != ActorState::destroyed) {
                         has_actor.at(actor->m_pos) = true;
                 }
@@ -2643,10 +2642,8 @@ void PropSpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
         std::for_each(
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
-                [](auto* const mon) {
-                        auto* waiting =
-                                property_factory::make(
-                                        PropId::waiting);
+                [](actor::Actor* const mon) {
+                        Prop* waiting = property_factory::make(PropId::waiting);
 
                         waiting->set_duration(1);
 
@@ -2691,7 +2688,7 @@ void PropBreeds::on_std_turn()
                 return;
         }
 
-        auto* const leader_of_spawned_mon =
+        actor::Actor* const leader_of_spawned_mon =
                 m_owner->m_leader
                 ? m_owner->m_leader
                 : m_owner;
@@ -2707,19 +2704,16 @@ void PropBreeds::on_std_turn()
         std::for_each(
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
-                [](auto* const spawned_mon) {
-                        auto* prop_waiting =
-                                property_factory::make(
-                                        PropId::waiting);
+                [](actor::Actor* const spawned_mon) {
+                        Prop* prop_waiting = property_factory::make(PropId::waiting);
 
                         prop_waiting->set_duration(2);
 
                         spawned_mon->m_properties.apply(prop_waiting);
 
                         if (actor::can_player_see_actor(*spawned_mon)) {
-                                const auto name =
-                                        text_format::first_to_upper(
-                                                spawned_mon->name_a());
+                                const std::string name =
+                                        text_format::first_to_upper(spawned_mon->name_a());
 
                                 msg_log::add(name + " is spawned.");
                         }
@@ -2776,12 +2770,12 @@ void PropVomitsOoze::on_std_turn()
 
         std::string id_to_spawn = rnd::element(id_bucket);
 
-        auto* const leader =
+        actor::Actor* const leader =
                 m_owner->m_leader
                 ? m_owner->m_leader
                 : m_owner;
 
-        auto spawned =
+        actor::MonSpawnResult spawned =
                 actor::spawn_random_position(
                         {id_to_spawn},
                         area_allowed)
@@ -2791,9 +2785,7 @@ void PropVomitsOoze::on_std_turn()
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
                 [](auto* const spawned_mon) {
-                        auto* prop_waiting =
-                                property_factory::make(
-                                        PropId::waiting);
+                        Prop* prop_waiting = property_factory::make(PropId::waiting);
 
                         prop_waiting->set_duration(1);
 
@@ -2827,7 +2819,7 @@ void PropConfusesAdjacent::on_std_turn()
                 msg_log::add(msg);
         }
 
-        auto* prop_confusd = property_factory::make(PropId::confused);
+        Prop* prop_confusd = property_factory::make(PropId::confused);
 
         prop_confusd->set_duration(rnd::range(8, 12));
 
@@ -2838,17 +2830,15 @@ void PropFrenzyPlayerOnSeen::on_player_see()
 {
         const int taunt_on_in_n = 3;
 
-        auto& properties = map::g_player->m_properties;
+        PropHandler& properties = map::g_player->m_properties;
 
         if (!properties.has(PropId::frenzied) &&
             rnd::one_in(taunt_on_in_n)) {
-                const auto name =
-                        text_format::first_to_upper(
-                                m_owner->name_the());
+                const std::string name = text_format::first_to_upper(m_owner->name_the());
 
                 msg_log::add(name + " is taunting me!");
 
-                auto* const frenzy = property_factory::make(PropId::frenzied);
+                Prop* const frenzy = property_factory::make(PropId::frenzied);
 
                 frenzy->set_duration(rnd::range(20, 35));
 
@@ -2886,7 +2876,7 @@ void PropAuraOfDecay::on_std_turn()
 
 void PropAuraOfDecay::run_effect_on_actors() const
 {
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if ((actor == m_owner) ||
                     (actor->m_state == ActorState::destroyed) ||
                     (king_dist(m_owner->m_pos, actor->m_pos) > range())) {
@@ -2898,9 +2888,7 @@ void PropAuraOfDecay::run_effect_on_actors() const
                 }
 
                 if (m_allow_instant_kill && rnd::percent(2)) {
-                        draw_blast_at_seen_actors(
-                                {actor},
-                                colors::light_red());
+                        draw_blast_at_seen_actors({actor}, colors::light_red());
 
                         actor::kill(
                                 *actor,
@@ -2924,8 +2912,8 @@ void PropAuraOfDecay::run_effect_on_actors() const
 
 void PropAuraOfDecay::run_effect_on_env() const
 {
-        for (const auto& d : dir_utils::g_dir_list) {
-                const auto p = m_owner->m_pos + d;
+        for (const P& d : dir_utils::g_dir_list) {
+                const P p = m_owner->m_pos + d;
 
                 if (!map::is_pos_inside_outer_walls(p)) {
                         continue;
@@ -2937,7 +2925,7 @@ void PropAuraOfDecay::run_effect_on_env() const
 
 void PropAuraOfDecay::run_effect_on_env_at(const P& p) const
 {
-        auto* const terrain = map::g_terrain.at(p);
+        terrain::Terrain* const terrain = map::g_terrain.at(p);
 
         switch (terrain->id()) {
         case terrain::Id::floor: {
@@ -2962,7 +2950,7 @@ void PropAuraOfDecay::run_effect_on_env_at(const P& p) const
         case terrain::Id::rubble_high: {
                 if (rnd::one_in(250)) {
                         if (map::g_seen.at(p)) {
-                                const auto name =
+                                const std::string name =
                                         text_format::first_to_upper(
                                                 terrain->name(Article::the));
 
@@ -3030,7 +3018,7 @@ PropActResult PropMajorClaphamSummon::on_act()
                 ids_to_summon.push_back(possible_random_id_choices[idx]);
         }
 
-        auto spawned =
+        const actor::MonSpawnResult spawned =
                 actor::spawn(m_owner->m_pos, ids_to_summon, map::rect())
                         .make_aware_of_player()
                         .set_leader(m_owner);
@@ -3038,17 +3026,14 @@ PropActResult PropMajorClaphamSummon::on_act()
         std::for_each(
                 std::begin(spawned.monsters),
                 std::end(spawned.monsters),
-                [](auto* const spawned_mon) {
-                        auto* prop_summoned =
-                                property_factory::make(
-                                        PropId::summoned);
+                [](actor::Actor* const spawned_mon) {
+                        Prop* prop_summoned = property_factory::make(PropId::summoned);
 
                         prop_summoned->set_indefinite();
 
                         spawned_mon->m_properties.apply(prop_summoned);
 
-                        spawned_mon->m_mon_aware_state
-                                .is_player_feeling_msg_allowed = false;
+                        spawned_mon->m_mon_aware_state.is_player_feeling_msg_allowed = false;
                 });
 
         map::update_vision();
@@ -3078,7 +3063,7 @@ PropActResult PropAlliesPlayerGhoul::on_act()
 
         Array2<bool> blocks_los(map::dims());
 
-        const auto r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
+        const R r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
 
         map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
 
@@ -3086,9 +3071,9 @@ PropActResult PropAlliesPlayerGhoul::on_act()
                 return {};
         }
 
-        const auto prop_id = id();
+        const PropId prop_id = id();
 
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if (!actor->m_properties.has(prop_id)) {
                         continue;
                 }
@@ -3096,13 +3081,16 @@ PropActResult PropAlliesPlayerGhoul::on_act()
                 if (actor::can_player_see_actor(*actor) &&
                     actor->is_alive() &&
                     !actor->is_actor_my_leader(map::g_player)) {
-                        const auto actor_name =
+                        const std::string actor_name =
                                 text_format::first_to_upper(
                                         actor->name_the());
 
-                        msg_log::add(
-                                actor_name +
-                                " recognizes me as its leader.");
+                        const std::string pronoun =
+                                actor->m_data->is_unique
+                                ? "their"
+                                : "its";
+
+                        msg_log::add(actor_name + " recognizes me as " + pronoun + " leader.");
                 }
 
                 actor::unset_actor_as_leader_and_target_for_all_mon(actor);
@@ -3164,9 +3152,9 @@ PropEnded PropMagicSearching::on_actor_turn()
                 for (int x = x0; x <= x1; ++x) {
                         const P p(x, y);
 
-                        auto* const t = map::g_terrain.at(p);
+                        terrain::Terrain* const t = map::g_terrain.at(p);
 
-                        const auto id = t->id();
+                        const terrain::Id id = t->id();
 
                         if ((id == terrain::Id::trap) ||
                             (id == terrain::Id::door) ||
@@ -3194,7 +3182,7 @@ PropEnded PropMagicSearching::on_actor_turn()
         if (m_allow_reveal_creatures) {
                 const int det_mon_multiplier = 20;
 
-                for (auto* actor : game_time::g_actors) {
+                for (actor::Actor* actor : game_time::g_actors) {
                         const auto& p = actor->m_pos;
 
                         if (actor::is_player(actor) ||
@@ -3245,13 +3233,83 @@ PropActResult PropFrenziesSelf::on_act()
 
         m_cooldown = 30;
 
-        auto* prop = property_factory::make(PropId::frenzied);
+        Prop* prop = property_factory::make(PropId::frenzied);
 
         prop->set_duration(rnd::range(6, 8));
 
         m_owner->m_properties.apply(prop);
 
         return {};
+}
+
+PropActResult PropFrenziesFollowers::on_act()
+{
+        if (!m_owner->is_alive()) {
+                return {};
+        }
+
+        if (m_cooldown > 0) {
+                --m_cooldown;
+
+                return {};
+        }
+
+        if (!m_owner->m_ai_state.target) {
+                return {};
+        }
+
+        m_cooldown = 30;
+
+        std::vector<actor::Actor*> actors_to_frenzy;
+
+        std::copy_if(
+                std::begin(game_time::g_actors),
+                std::end(game_time::g_actors),
+                std::back_insert_iterator(actors_to_frenzy),
+                [this](const actor::Actor* actor) { return m_owner->is_leader_of(actor); });
+
+        if (actors_to_frenzy.empty()) {
+                return {};
+        }
+
+        // Also frenzy the owning actor, but only if there are other actors as well.
+        actors_to_frenzy.push_back(m_owner);
+
+        Snd snd(
+                "A voice is stirring up a great frenzy!",
+                audio::SfxId::END,
+                IgnoreMsgIfOriginSeen::yes,
+                m_owner->m_pos,
+                m_owner,
+                SndVol::high,
+                AlertsMon::no);
+
+        snd.run();
+
+        if (actor::can_player_see_actor(*m_owner)) {
+                const std::string name = text_format::first_to_upper(m_owner->name_the());
+
+                msg_log::add(name + " stirs up a great frenzy!");
+        }
+
+        const int duration = rnd::range(10, 30);
+
+        for (actor::Actor* const actor : actors_to_frenzy) {
+                Prop* prop = property_factory::make(PropId::frenzied);
+
+                prop->set_duration(duration);
+
+                actor->m_properties.apply(prop);
+        }
+
+        game_time::tick();
+
+        PropActResult result;
+
+        result.did_action = DidAction::yes;
+        result.prop_ended = PropEnded::no;
+
+        return result;
 }
 
 PropActResult PropSummonsLocusts::on_act()
@@ -3264,7 +3322,7 @@ PropActResult PropSummonsLocusts::on_act()
 
         Array2<bool> blocked(map::dims());
 
-        const auto fov_rect = fov::fov_rect(m_owner->m_pos, blocked.dims());
+        const R fov_rect = fov::fov_rect(m_owner->m_pos, blocked.dims());
 
         map_parsers::BlocksLos()
                 .run(blocked,
@@ -3276,23 +3334,21 @@ PropActResult PropSummonsLocusts::on_act()
         }
 
         if (actor::can_player_see_actor(*m_owner)) {
-                const std::string name =
-                        text_format::first_to_upper(
-                                m_owner->name_the());
+                const std::string name = text_format::first_to_upper(m_owner->name_the());
 
                 msg_log::add(name + " calls a plague of Locusts!");
 
                 map::g_player->incr_shock(12.0, ShockSrc::misc);
         }
 
-        auto* const leader_of_spawned_mon =
+        actor::Actor* const leader_of_spawned_mon =
                 m_owner->m_leader
                 ? m_owner->m_leader
                 : m_owner;
 
         const size_t nr_of_spawns = 15;
 
-        auto summoned =
+        actor::MonSpawnResult summoned =
                 actor::spawn(
                         m_owner->m_pos,
                         {nr_of_spawns, "MON_LOCUST"},
@@ -3305,7 +3361,7 @@ PropActResult PropSummonsLocusts::on_act()
                 std::begin(summoned.monsters),
                 std::end(summoned.monsters),
                 [](auto* const actor) {
-                        auto* prop = property_factory::make(PropId::summoned);
+                        Prop* prop = property_factory::make(PropId::summoned);
 
                         prop->set_indefinite();
 
@@ -3334,7 +3390,7 @@ void PropSpectralWpn::on_death()
         // Remove the item from the inventory to avoid dropping it on the floor
         // (but do not yet delete the item, in case it's still being used in the
         // the call stack)
-        auto* const item =
+        item::Item* const item =
                 m_owner->m_inv.remove_item_in_slot(
                         SlotId::wpn,
                         false);  // Do not delete the item
@@ -3344,7 +3400,7 @@ void PropSpectralWpn::on_death()
 
 std::string PropSpectralWpn::get_weapon_name() const
 {
-        auto* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
+        item::Item* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         ASSERT(item);
 
@@ -3357,7 +3413,7 @@ std::string PropSpectralWpn::get_weapon_name() const
         // HACK: Remove all characters from the first comma. This is intended to
         // give unique weapons a more sensible name - e.g. "Spectral Gahana",
         // instead of "Spectral Gahana, The Black Dagger".
-        const auto comma_pos = name.find_first_of(',');
+        const size_t comma_pos = name.find_first_of(',');
 
         if (comma_pos != std::string::npos) {
                 name.erase(comma_pos, name.size());
@@ -3378,7 +3434,7 @@ std::optional<std::string> PropSpectralWpn::override_actor_name_a() const
 
 std::optional<char> PropSpectralWpn::override_actor_character() const
 {
-        auto* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
+        item::Item* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         ASSERT(item);
 
@@ -3387,7 +3443,7 @@ std::optional<char> PropSpectralWpn::override_actor_character() const
 
 std::optional<gfx::TileId> PropSpectralWpn::override_actor_tile() const
 {
-        auto* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
+        item::Item* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         ASSERT(item);
 
@@ -3396,7 +3452,7 @@ std::optional<gfx::TileId> PropSpectralWpn::override_actor_tile() const
 
 std::optional<std::string> PropSpectralWpn::override_actor_descr() const
 {
-        auto* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
+        item::Item* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         ASSERT(item);
 

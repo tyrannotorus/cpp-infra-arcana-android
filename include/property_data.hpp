@@ -90,6 +90,7 @@ enum class PropId
         reduced_pierce_dmg,  // E.g. worm masses
         short_hearing_range,
         frenzies_self,  // E.g. Apes
+        frenzies_followers,  // E.g. Pickman
         summons_locusts,  // Khephren ability
         // Monster with this property terrifies other monsters with this
         // property on death ("cowardly monsters", e.g. Troglodytes).

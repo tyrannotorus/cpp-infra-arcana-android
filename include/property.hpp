@@ -1710,6 +1710,18 @@ private:
         int m_cooldown {0};
 };
 
+class PropFrenziesFollowers : public Prop
+{
+public:
+        PropFrenziesFollowers() :
+                Prop(PropId::frenzies_followers) {}
+
+        PropActResult on_act() override;
+
+private:
+        int m_cooldown {0};
+};
+
 class PropSummonsLocusts : public Prop
 {
 public:

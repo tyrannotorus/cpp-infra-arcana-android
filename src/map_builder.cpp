@@ -51,13 +51,14 @@ static void disable_player_feeling_msg(
 static void spawn_starting_allies()
 {
         for (size_t i = 0; i < game_time::g_actors.size(); ++i) {
-                auto* const actor = game_time::g_actors[i];
+                actor::Actor* const actor = game_time::g_actors[i];
 
-                for (const auto& allies_entry : actor->m_data->starting_allies) {
-                        const auto ids =
+                for (const actor::StartingAllyEntry& allies_entry :
+                     actor->m_data->starting_allies) {
+                        const std::vector<std::string> ids =
                                 actor_ids_for_starting_allies(allies_entry);
 
-                        auto summoned =
+                        const actor::MonSpawnResult summoned =
                                 actor::spawn(
                                         actor->m_pos,
                                         ids,

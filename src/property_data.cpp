@@ -81,6 +81,7 @@ static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
         {"PROP_SEE_INVIS", PropId::see_invis},
         {"PROP_SHORT_HEARING_RANGE", PropId::short_hearing_range},
         {"PROP_FRENZIES_SELF", PropId::frenzies_self},
+        {"PROP_FRENZIES_FOLLOWERS", PropId::frenzies_followers},
         {"PROP_SUMMONS_LOCUSTS", PropId::summons_locusts},
         {"PROP_OTHERS_TERRIFIED_ON_DEATH", PropId::others_terrified_on_death},
         {"PROP_SLOWED", PropId::slowed},
@@ -1075,6 +1076,9 @@ static void init_data_list()
         add(d);
 
         d.id = PropId::frenzies_self;
+        add(d);
+
+        d.id = PropId::frenzies_followers;
         add(d);
 
         d.id = PropId::others_terrified_on_death;

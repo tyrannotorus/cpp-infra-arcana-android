@@ -3793,6 +3793,107 @@
     </monster>
 
     <!--************************************************************-->
+    <!-- MON_PICKMAN -->
+    <!--************************************************************-->
+    <monster id="MON_PICKMAN">
+        <text>
+            <name_a>Richard Upton Pickman</name_a>
+            <name_the>Richard Upton Pickman</name_the>
+            <corpse_name_a>the corpse of Richard Upton Pickman</corpse_name_a>
+            <corpse_name_the>the corpse of Richard Upton Pickman</corpse_name_the>
+            <description>Once a renowned painter, notorious for his ability to depict hauntingly photorealistic scenes of demonic creatures. Now he himself seems to be fully transformed into the likeness of those creatures he used to portray.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>looks wary.</wary_message>
+            <smell_message>It smells like an open grave here.</smell_message>
+            <aware_message_seen>growls.</aware_message_seen>
+            <aware_message_hidden>I hear a chilling growl.</aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>ghoul</tile>
+            <character>M</character>
+            <color>COLOR_BROWN</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen>ghoul_growl</aware_sfx_seen>
+            <aware_sfx_hidden>ghoul_growl</aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>30</hit_points>
+            <spirit>20</spirit>
+            <speed>MONSPEED_NORMAL</speed>
+            <shock_level>MONSHOCK_TERRIFYING</shock_level>
+            <melee>65</melee>
+            <ranged>0</ranged>
+            <dodging>20</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>true</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <size>MONSIZE_HUMANOID</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <humanoid/>
+            <ghoul/>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="ITEMINTR_CLAW">
+                <damage>9</damage>
+                <property_applied>PROP_INFECTED</property_applied>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>PROP_CORPSE_EATER</property>
+            <property>PROP_R_DISEASE</property>
+            <property>PROP_DARKVISION</property>
+            <property>PROP_FRENZIES_FOLLOWERS</property>
+            <property>PROP_ALLIES_GHOUL_PLAYER</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>5</erratic_move_percent>
+            <turns_aware>20</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>true</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>6</min_dungeon_level>
+            <max_dungeon_level>-1</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <unique/>
+            <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_MONSTER</native_room>
+            <native_room>ROOM_CRYPT</native_room>
+            <native_room>ROOM_CAVE</native_room>
+        </spawning>
+
+        <starting_allies>
+            <monster id="MON_GHOUL" min="4" max="5"/>
+        </starting_allies>
+    </monster>
+
+    <!--************************************************************-->
     <!-- MON_SHADOW -->
     <!--************************************************************-->
     <monster id="MON_SHADOW">

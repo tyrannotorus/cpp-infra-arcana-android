@@ -184,7 +184,7 @@ void put_smell_for_mon(const actor::Actor& mon)
         }
 
         // Ignore smells from ghoul monsters if player is ghoul
-        if ((mon.id() == "MON_GHOUL") && player_bon::is_bg(Bg::ghoul)) {
+        if (mon.m_data->is_ghoul && player_bon::is_bg(Bg::ghoul)) {
                 return;
         }
 

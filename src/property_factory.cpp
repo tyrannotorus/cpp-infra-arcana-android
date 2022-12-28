@@ -271,6 +271,9 @@ Prop* make(const PropId id)
         case PropId::frenzies_self:
                 return new PropFrenziesSelf();
 
+        case PropId::frenzies_followers:
+                return new PropFrenziesFollowers();
+
         case PropId::summons_locusts:
                 return new PropSummonsLocusts();
 
