@@ -316,9 +316,8 @@ void clear_screen()
 
 P get_native_resolution()
 {
-        SDL_DisplayMode display_mode;
-
-        const auto result = SDL_GetDesktopDisplayMode(0, &display_mode);
+        SDL_Rect bounds;
+        const auto result = SDL_GetDisplayUsableBounds(0, &bounds);
 
         if (result != 0) {
                 TRACE_ERROR_RELEASE
@@ -330,7 +329,7 @@ P get_native_resolution()
                 PANIC;
         }
 
-        return {display_mode.w, display_mode.h};
+        return {bounds.w, bounds.h};
 }
 
 }  // namespace io
