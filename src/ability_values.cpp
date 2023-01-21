@@ -23,9 +23,7 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-using StrToAbilityIdMap = std::unordered_map<std::string, AbilityId>;
-
-static const StrToAbilityIdMap s_str_to_ability_id_map = {
+static const std::unordered_map<std::string, AbilityId> s_str_to_ability_id_map = {
         {"melee", AbilityId::melee},
         {"ranged", AbilityId::ranged},
         {"dodging", AbilityId::dodging},
@@ -33,9 +31,7 @@ static const StrToAbilityIdMap s_str_to_ability_id_map = {
         {"searching", AbilityId::searching},
 };
 
-using AbilityIdToStrMap = std::unordered_map<AbilityId, std::string>;
-
-static const AbilityIdToStrMap s_ability_id_to_str_map = {
+static const std::unordered_map<AbilityId, std::string> s_ability_id_to_str_map = {
         {AbilityId::melee, "melee"},
         {AbilityId::ranged, "ranged"},
         {AbilityId::dodging, "dodging"},

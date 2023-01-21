@@ -583,7 +583,7 @@ std::string Pylon::name(const Article article) const
         return str;
 }
 
-void Pylon::on_hit(
+void Pylon::hit(
         DmgType dmg_type,
         actor::Actor* actor,
         const P& from_pos,

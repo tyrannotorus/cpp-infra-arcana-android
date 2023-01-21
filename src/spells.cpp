@@ -71,9 +71,7 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-using StrToSpellIdMap = std::unordered_map<std::string, SpellId>;
-
-static const StrToSpellIdMap s_str_to_spell_id_map = {
+static const std::unordered_map<std::string, SpellId> s_str_to_spell_id_map = {
         {"SPELL_AURA_OF_DECAY", SpellId::aura_of_decay},
         {"SPELL_SPECTRAL_WEAPONS", SpellId::spectral_weapons},
         {"SPELL_AZA_GAZE", SpellId::aza_gaze},
@@ -110,17 +108,13 @@ static const StrToSpellIdMap s_str_to_spell_id_map = {
         {"SPELL_TERRIFY", SpellId::terrify},
         {"SPELL_TRANSMUT", SpellId::transmut}};
 
-using StrToSpellSkillMap = std::unordered_map<std::string, SpellSkill>;
-
-static const StrToSpellSkillMap s_str_to_spell_skill_map = {
+static const std::unordered_map<std::string, SpellSkill> s_str_to_spell_skill_map = {
         {"SPELLSKILL_BASIC", SpellSkill::basic},
         {"SPELLSKILL_EXPERT", SpellSkill::expert},
         {"SPELLSKILL_MASTER", SpellSkill::master},
         {"SPELLSKILL_TRANSCENDENT", SpellSkill::transcendent}};
 
-using SpellDomainToShockTypeMap = std::unordered_map<SpellDomain, ShockSrc>;
-
-static const SpellDomainToShockTypeMap s_spell_domain_to_shock_type_map = {
+static const std::unordered_map<SpellDomain, ShockSrc> s_spell_domain_to_shock_type_map = {
         {SpellDomain::blood, ShockSrc::cast_intr_spell_blood},
         {SpellDomain::clairvoyance, ShockSrc::cast_intr_spell_clairvoyance},
         {SpellDomain::enchantment, ShockSrc::cast_intr_spell_enchantment},

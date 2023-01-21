@@ -98,25 +98,6 @@ std::string Wpn::name_info_str() const
                 ")");
 }
 
-void SpikedMace::on_melee_hit(actor::Actor& actor_hit, const int dmg)
-{
-        (void)dmg;
-
-        if (!actor_hit.is_alive()) {
-                return;
-        }
-
-        const int stun_pct = 25;
-
-        if (rnd::percent(stun_pct)) {
-                auto* prop = new PropParalyzed();
-
-                prop->set_duration(2);
-
-                actor_hit.m_properties.apply(prop);
-        }
-}
-
 void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
@@ -168,13 +149,15 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 // Poison victim from Ghoul Toxic trait?
                 if (player_bon::has_trait(Trait::toxic) &&
                     rnd::fraction(3, 4)) {
-                        actor_hit.m_properties.apply(new PropPoisoned());
+                        actor_hit.m_properties.apply(
+                                property_factory::make(PropId::poisoned));
                 }
 
                 // Terrify victim from Ghoul Indomitable Fury trait?
                 if (player_bon::has_trait(Trait::indomitable_fury) &&
                     map::g_player->m_properties.has(PropId::frenzied)) {
-                        actor_hit.m_properties.apply(new PropTerrified());
+                        actor_hit.m_properties.apply(
+                                property_factory::make(PropId::terrified));
                 }
         }
 }
@@ -324,14 +307,16 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                         &actor_hit);
 
                 if (mon->is_alive()) {
-                        mon->m_properties.apply(new PropConfused());
+                        mon->m_properties.apply(
+                                property_factory::make(PropId::confused));
 
-                        mon->m_properties.apply(new PropTerrified());
+                        mon->m_properties.apply(
+                                property_factory::make(PropId::terrified));
                 }
         }
         else {
                 // Player mind can be eaten
-                auto* prop_mind_sap = new PropMindSap();
+                Prop* prop_mind_sap = property_factory::make(PropId::mind_sap);
 
                 prop_mind_sap->set_indefinite();
 

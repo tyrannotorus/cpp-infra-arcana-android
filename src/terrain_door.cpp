@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <memory>
 #include <ostream>
 #include <vector>
 
@@ -16,25 +17,27 @@
 #include "array2.hpp"
 #include "audio_data.hpp"
 #include "bash.hpp"
+#include "common_text.hpp"
 #include "debug.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "inventory.hpp"
+#include "item.hpp"
+#include "item_data.hpp"
+#include "item_factory.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
+#include "query.hpp"
 #include "random.hpp"
 #include "sound.hpp"
 #include "terrain_data.hpp"
 #include "terrain_factory.hpp"
 #include "text_format.hpp"
-
-namespace item
-{
-class Item;
-}  // namespace item
 
 // -----------------------------------------------------------------------------
 // Private
@@ -159,7 +162,38 @@ void Door::init_type_and_state(const DoorType type, DoorSpawnState spawn_state)
         }
 }
 
-void Door::on_hit(
+bool Door::allow_player_melee_attack(
+        const DmgType dmg_type,
+        const item::Item& wpn) const
+{
+        if (m_is_open) {
+                return false;
+        }
+        else if (m_is_hidden) {
+                // Emulate walls.
+                return m_mimic_terrain->allow_player_melee_attack(dmg_type, wpn);
+        }
+        else {
+                // Revealed door.
+                switch (m_type) {
+                case terrain::DoorType::wood: {
+                        return wpn.data().melee.can_attack_door_wood;
+                } break;
+
+                case terrain::DoorType::gate: {
+                        return wpn.data().melee.can_attack_door_gate;
+                } break;
+
+                case terrain::DoorType::metal: {
+                        return false;
+                } break;
+                }
+
+                return false;
+        }
+}
+
+void Door::hit(
         DmgType dmg_type,
         actor::Actor* actor,
         const P& from_pos,
@@ -216,7 +250,11 @@ void Door::on_hit(
         case DmgType::blunt:
         case DmgType::slashing:
         case DmgType::control_object_spell: {
-                ASSERT(actor);
+                if (!actor) {
+                        ASSERT(false);
+
+                        return;
+                }
 
                 bash(dmg_type, *actor, dmg);
         } break;
@@ -232,7 +270,6 @@ void Door::on_hit(
         default: {
         } break;
         }
-
 }  // on_hit
 
 void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
@@ -283,7 +320,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                         destr_chance_pct += 30;
                 }
 
-                if (is_weak || is_hidden()) {
+                if (is_weak || m_is_hidden) {
                         destr_chance_pct = 0;
                 }
         }
@@ -333,8 +370,11 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                                 msg_log::add("I feel a door crashing" + break_desc);
                         }
 
+                        const P pos = m_pos;
+
                         map::update_terrain(make(Id::rubble_low, m_pos));
 
+                        map::memorize_terrain_at(pos);
                         map::update_vision();
                 }
                 else {
@@ -377,7 +417,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 void Door::mon_bash(actor::Actor& mon)
 {
         const bool is_weak = map::g_player->m_properties.has(PropId::weakened);
-        const bool is_cell_seen = map::g_seen.at(m_pos);
+        const bool is_pos_seen = map::g_seen.at(m_pos);
 
         auto sfx_door_bang = audio::SfxId::door_bang;
         auto sfx_door_break = audio::SfxId::door_break;
@@ -409,20 +449,28 @@ void Door::mon_bash(actor::Actor& mon)
 
                 snd.run();
 
-                if (actor::can_player_see_actor(mon)) {
+                const bool can_player_see_actor = actor::can_player_see_actor(mon);
+
+                if (can_player_see_actor) {
                         msg_log::add(
                                 "The " +
                                 base_name_short() +
                                 " crashes open!");
                 }
-                else if (is_cell_seen) {
+                else if (is_pos_seen) {
                         msg_log::add(
                                 "A " +
                                 base_name_short() +
                                 " crashes open!");
                 }
 
+                const P pos = m_pos;
+
                 map::update_terrain(make(Id::rubble_low, m_pos));
+
+                if (can_player_see_actor || is_pos_seen) {
+                        map::memorize_terrain_at(pos);
+                }
 
                 map::update_vision();
         }
@@ -742,12 +790,14 @@ void Door::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        const bool is_seen = map::g_seen.at(m_pos);
+
         if (m_is_hidden) {
                 ASSERT(m_type != DoorType::gate);
 
-                // Print messages as if this was a wall
+                // Print messages as if this was a wall.
 
-                if (map::g_seen.at(m_pos)) {
+                if (is_seen) {
                         TRACE << "Player bumped into secret door, "
                               << "with vision in cell" << std::endl;
 
@@ -768,8 +818,45 @@ void Door::bump(actor::Actor& actor_bumping)
                 return;
         }
 
+        if (!is_seen && !m_is_open) {
+                const std::string name_a = text_format::first_to_lower(name(Article::a));
+
+                msg_log::add("There is " + name_a + " here.");
+
+                const bool is_known_stuck_before = m_is_known_stuck;
+
+                reveal_stuck_status(PrintRevealMsg::yes);
+
+                map::memorize_terrain_at(m_pos);
+                map::update_vision();
+
+                if (m_is_stuck) {
+                        if (!is_known_stuck_before) {
+                                msg_log::more_prompt();
+                        }
+
+                        return;
+                }
+        }
+
         if (m_is_stuck && m_is_known_stuck) {
-                bash::bash_terrain_at_pos(m_pos);
+                // TODO: Copy pasted from bash.cpp, refactor.
+                auto kick_wpn =
+                        std::unique_ptr<item::Item>(
+                                item::make(item::Id::player_kick));
+
+                const item::Item* wpn = map::g_player->m_inv.item_in_slot(SlotId::wpn);
+
+                if (!wpn) {
+                        wpn = &map::g_player->unarmed_wpn();
+                }
+
+                if (bash::is_allowed_use_wpn_on_terrain(*wpn, *this)) {
+                        bash::attack_terrain(m_pos, *wpn);
+                }
+                else {
+                        bash::attack_terrain(m_pos, *kick_wpn);
+                }
 
                 return;
         }
@@ -777,6 +864,27 @@ void Door::bump(actor::Actor& actor_bumping)
         if (!m_is_open) {
                 map::memorize_terrain_at(m_pos);
                 map::update_vision();
+
+                if (!is_seen) {
+                        std::string msg = "Attempt to open it?";
+
+                        msg += " " + common_text::g_yes_or_no_hint;
+
+                        msg_log::add(
+                                msg,
+                                colors::light_white(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::no,
+                                CopyToMsgHistory::no);
+
+                        const BinaryAnswer answer = query::yes_or_no();
+
+                        msg_log::clear();
+
+                        if (answer == BinaryAnswer::no) {
+                                return;
+                        }
+                }
 
                 actor_try_open(actor_bumping);
 
@@ -805,7 +913,7 @@ void Door::reveal(const PrintRevealMsg print_reveal_msg)
         // they don't know is stuck).
         if (m_pos.is_adjacent(map::g_player->m_pos) &&
             (m_type != DoorType::metal)) {
-                reveal_stuck_status();
+                reveal_stuck_status(print_reveal_msg);
         }
 }
 
@@ -814,7 +922,7 @@ void Door::on_revealed_from_searching()
         game::incr_player_xp(2);
 }
 
-void Door::reveal_stuck_status()
+void Door::reveal_stuck_status(const PrintRevealMsg print_reveal_msg)
 {
         if (m_is_hidden) {
                 ASSERT(false);
@@ -834,12 +942,17 @@ void Door::reveal_stuck_status()
 
         m_is_known_stuck = true;
 
-        if (!is_known_before && map::g_seen.at(m_pos)) {
-                const auto door_name = base_name_short();
+        if (!is_known_before) {
+                const bool allow_print =
+                        ((print_reveal_msg == PrintRevealMsg::if_seen) &&
+                         map::g_seen.at(m_pos)) ||
+                        (print_reveal_msg == PrintRevealMsg::yes);
 
-                msg_log::add("The " + door_name + " seems to be stuck.");
+                if (allow_print) {
+                        const std::string door_name = base_name_short();
 
-                msg_log::more_prompt();
+                        msg_log::add("The " + door_name + " seems to be stuck.");
+                }
         }
 }
 
@@ -885,8 +998,6 @@ bool Door::actor_try_jam(actor::Actor& actor_trying)
 
 void Door::actor_try_close(actor::Actor& actor_trying)
 {
-        // TODO: Refactor this function
-
         const bool is_player = actor::is_player(&actor_trying);
         const bool tryer_is_blind = !actor_trying.m_properties.allow_see();
 
@@ -1004,6 +1115,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 if (rnd::coin_toss()) {
                         m_is_open = false;
 
+                        map::memorize_terrain_at(m_pos);
                         map::update_vision();
 
                         if (is_player) {
@@ -1084,6 +1196,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
         m_is_open = false;
 
+        map::memorize_terrain_at(m_pos);
         map::update_vision();
 
         if (is_player) {
@@ -1363,6 +1476,7 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                 game_time::tick();
 
+                map::memorize_terrain_at(m_pos);
                 map::update_vision();
         }
 

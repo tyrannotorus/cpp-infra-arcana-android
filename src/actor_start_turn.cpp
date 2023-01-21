@@ -487,9 +487,14 @@ static void player_try_spot_hidden_terrain()
 
 static void player_detect_stuck_doors()
 {
-        for (const auto& d : dir_utils::g_dir_list) {
-                const auto p = map::g_player->m_pos + d;
-                auto* const terrain = map::g_terrain.at(p);
+        for (const P& d : dir_utils::g_dir_list) {
+                const P p = map::g_player->m_pos + d;
+
+                if (!map::g_seen.at(p)) {
+                        continue;
+                }
+
+                terrain::Terrain* const terrain = map::g_terrain.at(p);
 
                 if (terrain->id() != terrain::Id::door) {
                         continue;
@@ -502,7 +507,13 @@ static void player_detect_stuck_doors()
                         continue;
                 }
 
-                door->reveal_stuck_status();
+                if (!door->is_stuck()) {
+                        continue;
+                }
+
+                door->reveal_stuck_status(terrain::PrintRevealMsg::if_seen);
+
+                msg_log::more_prompt();
         }
 }
 

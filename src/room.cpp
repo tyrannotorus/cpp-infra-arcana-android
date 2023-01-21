@@ -43,9 +43,7 @@
 // -----------------------------------------------------------------------------
 static std::vector<RoomType> s_room_bucket;
 
-using StrToRoomTypeMap = std::unordered_map<std::string, RoomType>;
-
-static const StrToRoomTypeMap s_str_to_room_type_map = {
+static const std::unordered_map<std::string, RoomType> s_str_to_room_type_map = {
         {"ROOM_PLAIN", RoomType::plain},
         {"ROOM_HUMAN", RoomType::human},
         {"ROOM_RITUAL", RoomType::ritual},

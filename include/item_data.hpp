@@ -31,11 +31,9 @@ namespace item
 {
 enum class Id
 {
-        trapez,
+        trapezohedron,
 
-        // Melee weapons and thrown weapons
-        rock,
-        iron_spike,
+        // Basic melee weapons and thrown weapons
         dagger,
         hatchet,
         club,
@@ -45,6 +43,10 @@ enum class Id
         spiked_mace,
         pitch_fork,
         sledge_hammer,
+
+        // Throwing weapons
+        rock,
+        iron_spike,
         thr_knife,
 
         // Ranged weapons, ammo
@@ -200,6 +202,7 @@ enum class Id
         horn_of_malice,
         orb_of_life,
         pharaoh_staff,
+        flagellant_whip,
         refl_talisman,
         resurrect_talisman,
         shadow_dagger,
@@ -296,17 +299,17 @@ struct MeleeData
         MeleeData();
 
         bool is_melee_wpn;
-        // NOTE: The "plus" field is ignored in the melee damage data,
-        // melee weapons have individual plus damages per class instance
         WpnDmg dmg;
         int hit_chance_mod;
         bool is_noisy;
         ItemAttackMsgs attack_msgs;
         ItemAttackProp prop_applied;
         DmgType dmg_type;
+        int reach;
         bool knocks_back;
-        bool attack_corpse;
-        bool attack_terrain;
+        bool can_attack_door_wood;
+        bool can_attack_door_gate;
+        bool can_attack_corpse;
         audio::SfxId hit_small_sfx;
         audio::SfxId hit_medium_sfx;
         audio::SfxId hit_hard_sfx;

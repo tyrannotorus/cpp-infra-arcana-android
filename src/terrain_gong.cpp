@@ -841,7 +841,7 @@ void Gong::bump(actor::Actor& actor_bumping)
         game_time::tick();
 }
 
-void Gong::on_hit(
+void Gong::hit(
         DmgType dmg_type,
         actor::Actor* actor,
         const P& from_pos,

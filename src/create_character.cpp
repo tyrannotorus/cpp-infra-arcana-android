@@ -952,7 +952,7 @@ void EnterNameState::update()
                         (input.key >= '0' && input.key <= '9');
 
                 if (is_valid_non_space_char) {
-                        m_current_str.push_back(input.key);
+                        m_current_str.push_back((char)input.key);
 
                         return;
                 }

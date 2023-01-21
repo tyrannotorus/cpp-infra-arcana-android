@@ -379,8 +379,7 @@ static void load_font()
 
 static void load_tile(const gfx::TileId id, const P& cell_px_dims)
 {
-        const auto img_name = gfx::tile_id_to_str(id);
-        const auto img_path = paths::tiles_dir() + img_name + ".png";
+        const std::string img_path = paths::tiles_dir() + gfx::tile_id_to_filename(id);
 
         TRACE << "Loading tile image: " << img_path << std::endl;
 

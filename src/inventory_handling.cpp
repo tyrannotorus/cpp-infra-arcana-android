@@ -142,6 +142,73 @@ static void print_cannot_remove_torture_collar_msg(const item::Item& item)
         msg_log::add("The " + name + " cannot be removed!");
 }
 
+static void on_equipable_backpack_item_selected(const size_t backpack_idx)
+{
+        Inventory& inv = map::g_player->m_inv;
+        item::Item* const item_to_equip = inv.m_backpack[backpack_idx];
+        const ItemType item_type = item_to_equip->data().type;
+
+        switch (item_type) {
+        case ItemType::melee_wpn:
+        case ItemType::ranged_wpn: {
+                if (inv.has_item_in_slot(SlotId::wpn)) {
+                        inv.unequip_slot(SlotId::wpn);
+
+                        actor::player_state::g_item_equipping = item_to_equip;
+                }
+                else {
+                        inv.equip_backpack_item(backpack_idx, SlotId::wpn);
+                }
+        } break;
+
+        case ItemType::head_wear: {
+                const item::Item* const item = inv.item_in_slot(SlotId::head);
+
+                if (item) {
+                        // HACK: The Flagellant Torture Collar is not allowed to
+                        // be removed.
+                        if (item->id() == item::Id::torture_collar) {
+                                print_cannot_remove_torture_collar_msg(*item);
+
+                                return;
+                        }
+
+                        inv.unequip_slot(SlotId::head);
+
+                        actor::player_state::g_item_equipping = item_to_equip;
+                }
+                else {
+                        inv.equip_backpack_item(backpack_idx, SlotId::head);
+                }
+        } break;
+
+        case ItemType::armor: {
+                if (map::g_player->m_properties.has(PropId::burning)) {
+                        msg_log::add("Not while burning.");
+
+                        return;
+                }
+
+                if (inv.has_item_in_slot(SlotId::body)) {
+                        actor::player_state::g_remove_armor_countdown =
+                                s_nr_turns_to_handle_armor;
+                }
+
+                actor::player_state::g_item_equipping = item_to_equip;
+
+                actor::player_state::g_equip_armor_countdown =
+                        s_nr_turns_to_handle_armor;
+        } break;
+
+        default:
+        {
+                ASSERT(false);
+        } break;
+        }
+
+        game_time::tick();
+}
+
 // -----------------------------------------------------------------------------
 // Abstract inventory screen state
 // -----------------------------------------------------------------------------
@@ -478,6 +545,15 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
         const item::ItemData& d = m_viewed_item->data();
 
         // -------------------------------------------------------------
+        // Long reach melee weapon?
+        // -------------------------------------------------------------
+        if (d.melee.reach > 1) {
+                lines.emplace_back(
+                        "This weapon has a long reach, "
+                        "press [f] to attack further away.");
+        }
+
+        // -------------------------------------------------------------
         // Damage and hit chance
         // -------------------------------------------------------------
         if (d.allow_display_dmg) {
@@ -496,7 +572,7 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
                 if (!dmg_str.empty() && !dmg_str_avg.empty()) {
                         text_format::append_with_space(
                                 combat_descr,
-                                ("Your damage with this weapon is " +
+                                ("The damage dealt with this weapon is " +
                                  dmg_str +
                                  " (average " +
                                  dmg_str_avg +
@@ -536,28 +612,28 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
         // -------------------------------------------------------------
         // Can be used for breaking doors or destroying corpses?
         // -------------------------------------------------------------
-        const bool can_att_terrain = d.melee.attack_terrain;
-        const bool can_att_corpse = d.melee.attack_corpse;
+        const bool can_att_door = d.melee.can_attack_door_wood;
+        const bool can_att_corpse = d.melee.can_attack_corpse;
 
         std::string att_obj_str;
 
-        if (can_att_terrain || can_att_corpse) {
+        if (can_att_door || can_att_corpse) {
                 att_obj_str = "This weapon can be used for ";
         }
 
-        if (can_att_terrain) {
+        if (can_att_door) {
                 att_obj_str += "breaching doors";
         }
 
         if (can_att_corpse) {
-                if (can_att_terrain) {
+                if (can_att_door) {
                         att_obj_str += " and ";
                 }
 
                 att_obj_str += "destroying corpses";
         }
 
-        if (can_att_terrain || can_att_corpse) {
+        if (can_att_door || can_att_corpse) {
                 att_obj_str +=
                         " more effectively (while the weapon is "
                         "wielded, its attack damage is automatically "
@@ -600,6 +676,9 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
 
         lines.emplace_back(weight_str);
 
+        // -------------------------------------------------------------
+        // Format the lines
+        // -------------------------------------------------------------
         std::vector<std::string> formatted_lines;
 
         const int w = panels::w(Panel::inventory_descr);
@@ -878,74 +957,6 @@ void BrowseInv::on_backpack_item_selected(const size_t backpack_idx) const
         else {
                 activate(backpack_idx);
         }
-}
-
-void BrowseInv::on_equipable_backpack_item_selected(
-        const size_t backpack_idx) const
-{
-        Inventory& inv = map::g_player->m_inv;
-        item::Item* const item_to_equip = inv.m_backpack[backpack_idx];
-        const ItemType item_type = item_to_equip->data().type;
-
-        switch (item_type) {
-        case ItemType::melee_wpn:
-        case ItemType::ranged_wpn: {
-                if (inv.has_item_in_slot(SlotId::wpn)) {
-                        inv.unequip_slot(SlotId::wpn);
-
-                        actor::player_state::g_item_equipping = item_to_equip;
-                }
-                else {
-                        inv.equip_backpack_item(backpack_idx, SlotId::wpn);
-                }
-        } break;
-
-        case ItemType::head_wear: {
-                const item::Item* const item = inv.item_in_slot(SlotId::head);
-
-                if (item) {
-                        // HACK: The Flagellant Torture Collar is not allowed to
-                        // be removed.
-                        if (item->id() == item::Id::torture_collar) {
-                                print_cannot_remove_torture_collar_msg(*item);
-
-                                return;
-                        }
-
-                        inv.unequip_slot(SlotId::head);
-
-                        actor::player_state::g_item_equipping = item_to_equip;
-                }
-                else {
-                        inv.equip_backpack_item(backpack_idx, SlotId::head);
-                }
-        } break;
-
-        case ItemType::armor: {
-                if (map::g_player->m_properties.has(PropId::burning)) {
-                        msg_log::add("Not while burning.");
-
-                        return;
-                }
-
-                if (inv.has_item_in_slot(SlotId::body)) {
-                        actor::player_state::g_remove_armor_countdown =
-                                s_nr_turns_to_handle_armor;
-                }
-
-                actor::player_state::g_item_equipping = item_to_equip;
-
-                actor::player_state::g_equip_armor_countdown =
-                        s_nr_turns_to_handle_armor;
-        } break;
-
-        default:
-        {
-                ASSERT(false);
-        } break;
-        }
-
-        game_time::tick();
 }
 
 // -----------------------------------------------------------------------------

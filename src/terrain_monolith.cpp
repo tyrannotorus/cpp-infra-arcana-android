@@ -29,7 +29,7 @@ Monolith::Monolith(const P& p, const TerrainData* const data) :
         Terrain(p, data),
         m_is_activated(false) {}
 
-void Monolith::on_hit(
+void Monolith::hit(
         DmgType dmg_type,
         actor::Actor* actor,
         const P& from_pos,

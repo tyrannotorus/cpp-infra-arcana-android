@@ -81,36 +81,31 @@ static void load(const audio::SfxId sfx, const std::string& filename)
         ++s_nr_files_loaded;
 }
 
-static std::string get_audio_str(const audio::SfxId id)
+static std::string get_audio_filename(const audio::SfxId id)
 {
-        auto id_str = sfx_id_to_str(id);
+        std::string audio_filename = audio::sfx_id_to_filename(id);
 
-        if (id_str.empty()) {
+        if (audio_filename.empty()) {
                 TRACE
-                        << "Could not find an id string for "
-                           "audio with id number: "
+                        << "Could not find an id string for audio with id number: "
                         << (int)id
                         << std::endl;
 
                 ASSERT(false);
         }
 
-        return id_str;
+        return audio_filename;
 }
 
-static void load_audio_id(
-        const audio::SfxId id,
-        const std::string& filename_prefix = "")
+static void load_audio_id(const audio::SfxId id)
 {
-        const std::string id_str = get_audio_str(id);
+        const std::string audio_filename = get_audio_filename(id);
 
-        if (id_str.empty()) {
+        if (audio_filename.empty()) {
                 return;
         }
 
-        const auto filename = filename_prefix + id_str + ".ogg";
-
-        load(id, filename);
+        load(id, audio_filename);
 }
 
 static void load_game_sound_effects()
@@ -118,7 +113,7 @@ static void load_game_sound_effects()
         for (int i = 0; i < (int)audio::SfxId::AMB_START; ++i) {
                 const auto id = (audio::SfxId)i;
 
-                load_audio_id(id, "sfx_");
+                load_audio_id(id);
         }
 }
 

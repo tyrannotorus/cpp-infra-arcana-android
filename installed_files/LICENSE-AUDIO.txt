@@ -563,6 +563,17 @@ Original title:      Painful Sounding Punches
 License:             Attribution 3.0 Unported (CC BY 3.0)
 Changes made:        Cut most of the sound, applied effects
 
+File:                sfx_hit_whip_scourge.ogg
+Source (1):          https://freesound.org/people/qubodup/sounds/182577/
+Author (1):          qubodup (username on freesound.org)
+Original title (1):  WHIP.flac
+License (1)          CC0 1.0 Universal (CC0 1.0)
+Source (2):          https://freesound.org/people/magnuswaker/sounds/522091/
+Author (2):          magnuswaker (username on freesound.org)
+Original title (2):  Pound of Flesh 1
+License (2):         CC0 1.0 Universal (CC0 1.0)
+Changes made:        Mixed samples of files 1 and 2 above
+
 File:                sfx_insanity_rising.ogg
 Source:              https://freesound.org/people/cameronmusic/sounds/138409/
 Author:              cameronmusic (username on freesound.org)

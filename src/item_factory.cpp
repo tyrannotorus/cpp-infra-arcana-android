@@ -124,8 +124,8 @@ Item* make(const Id item_id, const int nr_items)
         ASSERT(d->id == item_id);
 
         switch (item_id) {
-        case Id::trapez:
-                r = new Trapez(d);
+        case Id::trapezohedron:
+                r = new Trapezohedron(d);
                 break;
 
         case Id::sawed_off:
@@ -146,6 +146,8 @@ Item* make(const Id item_id, const int nr_items)
         case Id::axe:
         case Id::pitch_fork:
         case Id::sledge_hammer:
+        case Id::flagellant_whip:
+        case Id::spiked_mace:
         case Id::trap_dart:
         case Id::trap_dart_poison:
         case Id::trap_spear:
@@ -182,10 +184,6 @@ Item* make(const Id item_id, const int nr_items)
 
         case Id::mi_go_gun:
                 r = new MiGoGun(d);
-                break;
-
-        case Id::spiked_mace:
-                r = new SpikedMace(d);
                 break;
 
         case Id::revolver_bullet:

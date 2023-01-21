@@ -342,19 +342,6 @@ WasDestroyed Terrain::on_finished_burning()
         return WasDestroyed::no;
 }
 
-void Terrain::hit(
-        const DmgType dmg_type,
-        actor::Actor* const actor,
-        std::optional<P> from_pos,
-        std::optional<int> dmg)
-{
-        on_hit(
-                dmg_type,
-                actor,
-                from_pos.value_or(actor ? actor->m_pos : m_pos),
-                dmg.value_or(-1));
-}
-
 int Terrain::shock_when_adj() const
 {
         int shock = base_shock_when_adj();
@@ -557,7 +544,7 @@ Floor::Floor(const P& p, const TerrainData* const data) :
         Terrain(p, data),
         m_type(FloorType::common) {}
 
-void Floor::on_hit(
+void Floor::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -636,7 +623,7 @@ Wall::Wall(const P& p, const TerrainData* const data) :
         m_type(WallType::common),
         m_is_mossy(false) {}
 
-void Wall::on_hit(
+void Wall::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -839,7 +826,7 @@ void Wall::set_moss_grown()
 RubbleHigh::RubbleHigh(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void RubbleHigh::on_hit(
+void RubbleHigh::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -880,7 +867,7 @@ Color RubbleHigh::color_default() const
 RubbleLow::RubbleLow(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void RubbleLow::on_hit(
+void RubbleLow::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -927,7 +914,7 @@ Color RubbleLow::color_default() const
 Bones::Bones(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void Bones::on_hit(
+void Bones::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -961,7 +948,7 @@ Color Bones::color_default() const
 GraveStone::GraveStone(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void GraveStone::on_hit(
+void GraveStone::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -998,7 +985,7 @@ Color GraveStone::color_default() const
 ChurchBench::ChurchBench(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void ChurchBench::on_hit(
+void ChurchBench::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1145,7 +1132,25 @@ void Statue::topple(
         map::update_vision();
 }
 
-void Statue::on_hit(
+bool Statue::allow_player_melee_attack(
+        const DmgType dmg_type,
+        const item::Item& wpn) const
+{
+        (void)wpn;
+
+        switch (dmg_type) {
+        case DmgType::kicking:
+                return true;
+                break;
+
+        default:
+                break;
+        }
+
+        return false;
+}
+
+void Statue::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1253,7 +1258,7 @@ void Statue::set_player_bg(const Bg bg)
 Stalagmite::Stalagmite(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void Stalagmite::on_hit(
+void Stalagmite::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1293,7 +1298,7 @@ Color Stalagmite::color_default() const
 Stairs::Stairs(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void Stairs::on_hit(
+void Stairs::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1426,7 +1431,7 @@ gfx::TileId Bridge::tile() const
                         : gfx::TileId::hangbridge_ver);
 }
 
-void Bridge::on_hit(
+void Bridge::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1464,7 +1469,7 @@ Liquid::Liquid(const P& p, const TerrainData* const data) :
         Terrain(p, data),
         m_type(LiquidType::water) {}
 
-void Liquid::on_hit(
+void Liquid::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1636,7 +1641,7 @@ Color Liquid::color_default() const
 Chasm::Chasm(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void Chasm::on_hit(
+void Chasm::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1668,7 +1673,7 @@ Lever::Lever(const P& p, const TerrainData* const data) :
         m_is_left_pos(true),
         m_linked_terrain(nullptr) {}
 
-void Lever::on_hit(
+void Lever::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1795,7 +1800,7 @@ void Lever::toggle()
 Altar::Altar(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void Altar::on_hit(
+void Altar::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1884,7 +1889,7 @@ Color Altar::color_default() const
 Carpet::Carpet(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void Carpet::on_hit(
+void Carpet::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1942,7 +1947,7 @@ Grass::Grass(const P& p, const TerrainData* const data) :
         }
 }
 
-void Grass::on_hit(
+void Grass::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -2030,7 +2035,7 @@ Bush::Bush(const P& p, const TerrainData* const data) :
         }
 }
 
-void Bush::on_hit(
+void Bush::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -2111,7 +2116,7 @@ Color Bush::color_default() const
 Vines::Vines(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void Vines::on_hit(
+void Vines::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -2224,7 +2229,7 @@ void Chains::bump(actor::Actor& actor_bumping)
         }
 }
 
-void Chains::on_hit(
+void Chains::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -2252,7 +2257,7 @@ void Chains::on_hit(
 Grate::Grate(const P& p, const TerrainData* const data) :
         Terrain(p, data) {}
 
-void Grate::on_hit(
+void Grate::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -2319,7 +2324,7 @@ Tree::Tree(const P& p, const TerrainData* const data) :
         }
 }
 
-void Tree::on_hit(
+void Tree::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -2414,7 +2419,25 @@ std::string Brazier::name(const Article article) const
         return a + "brazier";
 }
 
-void Brazier::on_hit(
+bool Brazier::allow_player_melee_attack(
+        const DmgType dmg_type,
+        const item::Item& wpn) const
+{
+        (void)wpn;
+
+        switch (dmg_type) {
+        case DmgType::kicking:
+                return true;
+                break;
+
+        default:
+                break;
+        }
+
+        return false;
+}
+
+void Brazier::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -2827,7 +2850,7 @@ Tomb::Tomb(const P& p, const TerrainData* const data) :
         }
 }
 
-void Tomb::on_hit(
+void Tomb::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -3360,11 +3383,29 @@ DidOpen Chest::open(actor::Actor* const actor_opening)
         }
 }
 
+bool Chest::allow_player_melee_attack(
+        const DmgType dmg_type,
+        const item::Item& wpn) const
+{
+        (void)wpn;
+
+        switch (dmg_type) {
+        case DmgType::kicking:
+                return true;
+                break;
+
+        default:
+                break;
+        }
+
+        return false;
+}
+
 void Chest::hit(
         DmgType dmg_type,
         actor::Actor* const actor,
-        std::optional<P> from_pos,
-        std::optional<int> dmg)
+        const P& from_pos,
+        const int dmg)
 {
         (void)actor;
         (void)from_pos;
@@ -3552,7 +3593,7 @@ Fountain::Fountain(const P& p, const TerrainData* const data) :
         }
 }
 
-void Fountain::on_hit(
+void Fountain::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -3972,7 +4013,7 @@ Cabinet::Cabinet(const P& p, const TerrainData* const data) :
                 rnd::range(nr_items_min, nr_items_max));
 }
 
-void Cabinet::on_hit(
+void Cabinet::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -4166,7 +4207,7 @@ Bookshelf::Bookshelf(const P& p, const TerrainData* const data) :
                 rnd::range(nr_items_min, nr_items_max));
 }
 
-void Bookshelf::on_hit(
+void Bookshelf::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -4334,7 +4375,7 @@ AlchemistBench::AlchemistBench(const P& p, const TerrainData* const data) :
                 rnd::range(nr_items_min, nr_items_max));
 }
 
-void AlchemistBench::on_hit(
+void AlchemistBench::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -4512,7 +4553,7 @@ Cocoon::Cocoon(const P& p, const TerrainData* const data) :
         }
 }
 
-void Cocoon::on_hit(
+void Cocoon::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,

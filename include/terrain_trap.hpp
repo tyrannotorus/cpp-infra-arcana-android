@@ -91,6 +91,12 @@ public:
 
         std::string name(Article article) const override;
 
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
+
         void disarm();
 
         // Quietly destroys the trap, and either places rubble, or replaces it
@@ -128,12 +134,6 @@ public:
 
 private:
         Color color_default() const override;
-
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
 
         DidTriggerTrap trigger_trap(actor::Actor* actor) override;
 

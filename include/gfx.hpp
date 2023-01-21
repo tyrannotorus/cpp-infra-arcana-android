@@ -13,7 +13,7 @@ struct P;
 
 namespace gfx
 {
-// NOTE: When updating this, also update the translation tables in the cpp file
+// NOTE: When updating this, also update the translation tables in the cpp file.
 enum class TileId
 {
         aim_marker_head,
@@ -205,6 +205,7 @@ enum class TileId
         wall_top,
         water,
         web,
+        whip_scourge,
         witch_eye,
         witch_or_warlock,
         wolf,
@@ -222,7 +223,7 @@ P character_pos(char character);
 
 TileId str_to_tile_id(const std::string& str);
 
-std::string tile_id_to_str(TileId id);
+std::string tile_id_to_filename(TileId id);
 
 }  // namespace gfx
 

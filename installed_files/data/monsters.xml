@@ -19,7 +19,7 @@
         </text>
 
         <graphics>
-            <tile>player_firearm</tile>
+            <tile>TILE_PLAYER_FIREARM</tile>
             <character>@</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
@@ -81,14 +81,14 @@
         </text>
 
         <graphics>
-            <tile>failed_reanimation</tile>
+            <tile>TILE_FAILED_REANIMATION</tile>
             <character>Z</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>zombie_growl</aware_sfx_seen>
-            <aware_sfx_hidden>zombie_growl</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_ZOMBIE_GROWL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_ZOMBIE_GROWL</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -179,14 +179,14 @@
         </text>
 
         <graphics>
-            <tile>zombie_unarmed</tile>
+            <tile>TILE_ZOMBIE_UNARMED</tile>
             <character>Z</character>
             <color>COLOR_BROWN</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>zombie_growl</aware_sfx_seen>
-            <aware_sfx_hidden>zombie_growl</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_ZOMBIE_GROWL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_ZOMBIE_GROWL</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -279,7 +279,7 @@
         </text>
 
         <graphics>
-            <tile>zombie_bloated</tile>
+            <tile>TILE_ZOMBIE_BLOATED</tile>
             <character>Z</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
@@ -380,7 +380,7 @@
         </text>
 
         <graphics>
-            <tile>zombie_unarmed</tile>
+            <tile>TILE_ZOMBIE_UNARMED</tile>
             <character>Z</character>
             <color>COLOR_LIGHT_CYAN</color>
         </graphics>
@@ -475,7 +475,7 @@
         </text>
 
         <graphics>
-            <tile>zombie_unarmed</tile>
+            <tile>TILE_ZOMBIE_UNARMED</tile>
             <character>Z</character>
             <color>COLOR_CYAN</color>
         </graphics>
@@ -569,7 +569,7 @@
         </text>
 
         <graphics>
-            <tile>crawling_intestines</tile>
+            <tile>TILE_CRAWLING_INTESTINES</tile>
             <character>z</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -660,7 +660,7 @@
         </text>
 
         <graphics>
-            <tile>crawling_hand</tile>
+            <tile>TILE_CRAWLING_HAND</tile>
             <character>z</character>
             <color>COLOR_BROWN</color>
         </graphics>
@@ -751,7 +751,7 @@
         </text>
 
         <graphics>
-            <tile>crawling_hand</tile>
+            <tile>TILE_CRAWLING_HAND</tile>
             <character>z</character>
             <color>COLOR_MAGENTA</color>
         </graphics>
@@ -847,7 +847,7 @@
         </text>
 
         <graphics>
-            <tile>floating_skull</tile>
+            <tile>TILE_FLOATING_SKULL</tile>
             <character>z</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
@@ -1045,7 +1045,7 @@
         </text>
 
         <graphics>
-            <tile>cultist_spiked_mace</tile>
+            <tile>TILE_CULTIST_SPIKED_MACE</tile>
             <character>P</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -1082,6 +1082,7 @@
 
         <properties>
             <property>PROP_R_BLIND</property>
+            <property>PROP_R_FEAR</property>
             <property>PROP_ZEALOT_STOP</property>
         </properties>
         
@@ -1135,7 +1136,7 @@
         </text>
 
         <graphics>
-            <tile>bog_tcher</tile>
+            <tile>TILE_BOG_TCHER</tile>
             <character>p</character>
             <color>COLOR_DARK_BROWN</color>
         </graphics>
@@ -1221,7 +1222,7 @@
         </text>
 
         <graphics>
-            <tile>witch_or_warlock</tile>
+            <tile>TILE_WITCH_OR_WARLOCK</tile>
             <character>P</character>
             <color>COLOR_MAGENTA</color>
         </graphics>
@@ -1327,7 +1328,7 @@
         </text>
 
         <graphics>
-            <tile>rat_thing</tile>
+            <tile>TILE_RAT_THING</tile>
             <character>r</character>
             <color>COLOR_MAGENTA</color>
         </graphics>
@@ -1419,7 +1420,7 @@
         </text>
 
         <graphics>
-            <tile>giant_spider</tile>
+            <tile>TILE_GIANT_SPIDER</tile>
             <character>A</character>
             <color>COLOR_MAGENTA</color>
         </graphics>
@@ -1514,7 +1515,7 @@
         </text>
 
         <graphics>
-            <tile>giant_spider</tile>
+            <tile>TILE_GIANT_SPIDER</tile>
             <character>A</character>
             <color>COLOR_DARK_BROWN</color>
         </graphics>
@@ -1608,7 +1609,7 @@
         </text>
 
         <graphics>
-            <tile>giant_spider</tile>
+            <tile>TILE_GIANT_SPIDER</tile>
             <character>A</character>
             <color>COLOR_DARK_YELLOW</color>
         </graphics>
@@ -1707,7 +1708,7 @@
         </text>
 
         <graphics>
-            <tile>cultist_dagger</tile>
+            <tile>TILE_CULTIST_DAGGER</tile>
             <character>P</character>
             <color>COLOR_LIGHT_CYAN</color>
         </graphics>
@@ -1807,7 +1808,7 @@
         </text>
 
         <graphics>
-            <tile>witch_or_warlock</tile>
+            <tile>TILE_WITCH_OR_WARLOCK</tile>
             <character>P</character>
             <color>COLOR_YELLOW</color>
         </graphics>
@@ -1907,7 +1908,7 @@
         </text>
 
         <graphics>
-            <tile>witch_or_warlock</tile>
+            <tile>TILE_WITCH_OR_WARLOCK</tile>
             <character>P</character>
             <color>COLOR_LIGHT_BLUE</color>
         </graphics>
@@ -2007,7 +2008,7 @@
         </text>
 
         <graphics>
-            <tile>giant_spider</tile>
+            <tile>TILE_GIANT_SPIDER</tile>
             <character>A</character>
             <color>COLOR_LIGHT_GREEN</color>
         </graphics>
@@ -2098,7 +2099,7 @@
         </text>
 
         <graphics>
-            <tile>giant_spider</tile>
+            <tile>TILE_GIANT_SPIDER</tile>
             <character>A</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
@@ -2189,7 +2190,7 @@
         </text>
 
         <graphics>
-            <tile>giant_spider</tile>
+            <tile>TILE_GIANT_SPIDER</tile>
             <character>A</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -2280,7 +2281,7 @@
         </text>
 
         <graphics>
-            <tile>giant_spider</tile>
+            <tile>TILE_GIANT_SPIDER</tile>
             <character>a</character>
             <color>COLOR_GRAY</color>
         </graphics>
@@ -2374,7 +2375,7 @@
         </text>
 
         <graphics>
-            <tile>rat</tile>
+            <tile>TILE_RAT</tile>
             <character>r</character>
             <color>COLOR_GRAY</color>
         </graphics>
@@ -2464,7 +2465,7 @@
         </text>
 
         <graphics>
-            <tile>rat</tile>
+            <tile>TILE_RAT</tile>
             <character>r</character>
             <color>COLOR_LIGHT_CYAN</color>
         </graphics>
@@ -2556,7 +2557,7 @@
         </text>
 
         <graphics>
-            <tile>rat_thing</tile>
+            <tile>TILE_RAT_THING</tile>
             <character>r</character>
             <color>COLOR_DARK_BROWN</color>
         </graphics>
@@ -2649,14 +2650,14 @@
         </text>
 
         <graphics>
-            <tile>snake</tile>
+            <tile>TILE_SNAKE</tile>
             <character>S</character>
             <color>COLOR_LIGHT_GREEN</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>hiss</aware_sfx_seen>
-            <aware_sfx_hidden>hiss</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_HISS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_HISS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -2743,14 +2744,14 @@
         </text>
 
         <graphics>
-            <tile>snake</tile>
+            <tile>TILE_SNAKE</tile>
             <character>S</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>hiss</aware_sfx_seen>
-            <aware_sfx_hidden>hiss</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_HISS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_HISS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -2840,14 +2841,14 @@
         </text>
 
         <graphics>
-            <tile>snake</tile>
+            <tile>TILE_SNAKE</tile>
             <character>S</character>
             <color>COLOR_GRAY</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>hiss</aware_sfx_seen>
-            <aware_sfx_hidden>hiss</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_HISS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_HISS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -2934,14 +2935,14 @@
         </text>
 
         <graphics>
-            <tile>hound</tile>
+            <tile>TILE_HOUND</tile>
             <character>d</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>dog_snarl</aware_sfx_seen>
-            <aware_sfx_hidden>dog_snarl</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_DOG_SNARL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_DOG_SNARL</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -3031,14 +3032,14 @@
         </text>
 
         <graphics>
-            <tile>hound</tile>
+            <tile>TILE_HOUND</tile>
             <character>d</character>
             <color>COLOR_YELLOW</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>dog_snarl</aware_sfx_seen>
-            <aware_sfx_hidden>dog_snarl</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_DOG_SNARL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_DOG_SNARL</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -3130,14 +3131,14 @@
         </text>
 
         <graphics>
-            <tile>hound</tile>
+            <tile>TILE_HOUND</tile>
             <character>D</character>
             <color>COLOR_MAGENTA</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>dog_snarl</aware_sfx_seen>
-            <aware_sfx_hidden>dog_snarl</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_DOG_SNARL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_DOG_SNARL</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -3224,7 +3225,7 @@
         </text>
 
         <graphics>
-            <tile>mi_go</tile>
+            <tile>TILE_MI_GO</tile>
             <character>E</character>
             <color>COLOR_DARK_BROWN</color>
         </graphics>
@@ -3324,7 +3325,7 @@
         </text>
 
         <graphics>
-            <tile>mi_go</tile>
+            <tile>TILE_MI_GO</tile>
             <character>E</character>
             <color>COLOR_GREEN</color>
         </graphics>
@@ -3424,7 +3425,7 @@
         </text>
 
         <graphics>
-            <tile>polyp</tile>
+            <tile>TILE_POLYP</tile>
             <character>E</character>
             <color>COLOR_MAGENTA</color>
         </graphics>
@@ -3524,7 +3525,7 @@
         </text>
 
         <graphics>
-            <tile>polyp</tile>
+            <tile>TILE_POLYP</tile>
             <character>E</character>
             <color>COLOR_LIGHT_CYAN</color>
         </graphics>
@@ -3624,7 +3625,7 @@
         </text>
 
         <graphics>
-            <tile>leech</tile>
+            <tile>TILE_LEECH</tile>
             <character>L</character>
             <color>COLOR_DARK_YELLOW</color>
         </graphics>
@@ -3715,14 +3716,14 @@
         </text>
 
         <graphics>
-            <tile>ghoul</tile>
+            <tile>TILE_GHOUL</tile>
             <character>M</character>
             <color>COLOR_GREEN</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>ghoul_growl</aware_sfx_seen>
-            <aware_sfx_hidden>ghoul_growl</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_GHOUL_GROWL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_GHOUL_GROWL</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -3812,14 +3813,14 @@
         </text>
 
         <graphics>
-            <tile>ghoul</tile>
+            <tile>TILE_GHOUL</tile>
             <character>M</character>
             <color>COLOR_BROWN</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>ghoul_growl</aware_sfx_seen>
-            <aware_sfx_hidden>ghoul_growl</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_GHOUL_GROWL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_GHOUL_GROWL</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -3914,7 +3915,7 @@
         </text>
 
         <graphics>
-            <tile>shadow</tile>
+            <tile>TILE_SHADOW</tile>
             <character>M</character>
             <color>COLOR_GRAY</color>
         </graphics>
@@ -4004,7 +4005,7 @@
         </text>
 
         <graphics>
-            <tile>shadow</tile>
+            <tile>TILE_SHADOW</tile>
             <character>M</character>
             <color>COLOR_YELLOW</color>
         </graphics>
@@ -4097,14 +4098,14 @@
         </text>
 
         <graphics>
-            <tile>wolf</tile>
+            <tile>TILE_WOLF</tile>
             <character>d</character>
             <color>COLOR_GRAY</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>dog_snarl</aware_sfx_seen>
-            <aware_sfx_hidden>dog_snarl</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_DOG_SNARL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_DOG_SNARL</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -4188,7 +4189,7 @@
         </text>
 
         <graphics>
-            <tile>ghost</tile>
+            <tile>TILE_GHOST</tile>
             <character>G</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
@@ -4284,7 +4285,7 @@
         </text>
 
         <graphics>
-            <tile>wraith</tile>
+            <tile>TILE_WRAITH</tile>
             <character>G</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -4383,7 +4384,7 @@
         </text>
 
         <graphics>
-            <tile>void_traveler</tile>
+            <tile>TILE_VOID_TRAVELER</tile>
             <character>Y</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
@@ -4473,7 +4474,7 @@
         </text>
 
         <graphics>
-            <tile>void_traveler</tile>
+            <tile>TILE_VOID_TRAVELER</tile>
             <character>Y</character>
             <color>COLOR_ORANGE</color>
         </graphics>
@@ -4570,14 +4571,14 @@
         </text>
 
         <graphics>
-            <tile>raven</tile>
+            <tile>TILE_RAVEN</tile>
             <character>b</character>
             <color>COLOR_GRAY</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>flapping_wings</aware_sfx_seen>
-            <aware_sfx_hidden>flapping_wings</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_FLAPPING_WINGS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_FLAPPING_WINGS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -4659,14 +4660,14 @@
         </text>
 
         <graphics>
-            <tile>bat</tile>
+            <tile>TILE_BAT</tile>
             <character>B</character>
             <color>COLOR_GRAY</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>flapping_wings</aware_sfx_seen>
-            <aware_sfx_hidden>flapping_wings</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_FLAPPING_WINGS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_FLAPPING_WINGS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -4750,14 +4751,14 @@
         </text>
 
         <graphics>
-            <tile>bat</tile>
+            <tile>TILE_BAT</tile>
             <character>B</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>flapping_wings</aware_sfx_seen>
-            <aware_sfx_hidden>flapping_wings</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_FLAPPING_WINGS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_FLAPPING_WINGS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -4840,14 +4841,14 @@
         </text>
 
         <graphics>
-            <tile>bat</tile>
+            <tile>TILE_BAT</tile>
             <character>B</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>flapping_wings</aware_sfx_seen>
-            <aware_sfx_hidden>flapping_wings</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_FLAPPING_WINGS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_FLAPPING_WINGS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -4932,14 +4933,14 @@
         </text>
 
         <graphics>
-            <tile>byakhee</tile>
+            <tile>TILE_BYAKHEE</tile>
             <character>B</character>
             <color>COLOR_DARK_BROWN</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>flapping_wings</aware_sfx_seen>
-            <aware_sfx_hidden>flapping_wings</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_FLAPPING_WINGS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_FLAPPING_WINGS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -5024,7 +5025,7 @@
         </text>
 
         <graphics>
-            <tile>amoeba</tile>
+            <tile>TILE_AMOEBA</tile>
             <character>E</character>
             <color>COLOR_VIOLET</color>
         </graphics>
@@ -5120,7 +5121,7 @@
         </text>
 
         <graphics>
-            <tile>mantis</tile>
+            <tile>TILE_MANTIS</tile>
             <character>I</character>
             <color>COLOR_LIGHT_GREEN</color>
         </graphics>
@@ -5207,7 +5208,7 @@
         </text>
 
         <graphics>
-            <tile>locust</tile>
+            <tile>TILE_LOCUST</tile>
             <character>i</character>
             <color>COLOR_BROWN</color>
         </graphics>
@@ -5294,7 +5295,7 @@
         </text>
 
         <graphics>
-            <tile>mummy</tile>
+            <tile>TILE_MUMMY</tile>
             <character>P</character>
             <color>COLOR_MAGENTA</color>
         </graphics>
@@ -5391,7 +5392,7 @@
         </text>
 
         <graphics>
-            <tile>croc_head_mummy</tile>
+            <tile>TILE_CROC_HEAD_MUMMY</tile>
             <character>P</character>
             <color>COLOR_GRAY</color>
         </graphics>
@@ -5479,7 +5480,7 @@
         </text>
 
         <graphics>
-            <tile>mummy</tile>
+            <tile>TILE_MUMMY</tile>
             <character>P</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -5586,7 +5587,7 @@
         </text>
 
         <graphics>
-            <tile>mummy</tile>
+            <tile>TILE_MUMMY</tile>
             <character>P</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -5691,7 +5692,7 @@
         </text>
 
         <graphics>
-            <tile>deep_one</tile>
+            <tile>TILE_DEEP_ONE</tile>
             <character>F</character>
             <color>COLOR_WHITE</color>
         </graphics>
@@ -5782,7 +5783,7 @@
         </text>
 
         <graphics>
-            <tile>deep_one</tile>
+            <tile>TILE_DEEP_ONE</tile>
             <character>F</character>
             <color>COLOR_ORANGE</color>
         </graphics>
@@ -5872,14 +5873,14 @@
         </text>
 
         <graphics>
-            <tile>ape</tile>
+            <tile>TILE_APE</tile>
             <character>M</character>
             <color>COLOR_WHITE</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>ape</aware_sfx_seen>
-            <aware_sfx_hidden>ape</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_APE</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_APE</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -5963,7 +5964,7 @@
         </text>
 
         <graphics>
-            <tile>troglodyte</tile>
+            <tile>TILE_TROGLODYTE</tile>
             <character>M</character>
             <color>COLOR_SEPIA</color>
         </graphics>
@@ -6056,7 +6057,7 @@
         </text>
 
         <graphics>
-            <tile>troglodyte</tile>
+            <tile>TILE_TROGLODYTE</tile>
             <character>M</character>
             <color>COLOR_GRAY</color>
         </graphics>
@@ -6149,7 +6150,7 @@
         </text>
 
         <graphics>
-            <tile>mass_of_worms</tile>
+            <tile>TILE_MASS_OF_WORMS</tile>
             <character>w</character>
             <color>COLOR_WHITE</color>
         </graphics>
@@ -6245,7 +6246,7 @@
         </text>
 
         <graphics>
-            <tile>worm</tile>
+            <tile>TILE_WORM</tile>
             <character>w</character>
             <color>COLOR_VIOLET</color>
         </graphics>
@@ -6341,7 +6342,7 @@
         </text>
 
         <graphics>
-            <tile>worm</tile>
+            <tile>TILE_WORM</tile>
             <character>w</character>
             <color>COLOR_SEPIA</color>
         </graphics>
@@ -6437,7 +6438,7 @@
         </text>
 
         <graphics>
-            <tile>vortex</tile>
+            <tile>TILE_VORTEX</tile>
             <character>V</character>
             <color>COLOR_GRAY</color>
         </graphics>
@@ -6533,7 +6534,7 @@
         </text>
 
         <graphics>
-            <tile>vortex</tile>
+            <tile>TILE_VORTEX</tile>
             <character>V</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -6631,7 +6632,7 @@
         </text>
 
         <graphics>
-            <tile>vortex</tile>
+            <tile>TILE_VORTEX</tile>
             <character>V</character>
             <color>COLOR_YELLOW</color>
         </graphics>
@@ -6731,14 +6732,14 @@
         </text>
 
         <graphics>
-            <tile>ooze</tile>
+            <tile>TILE_OOZE</tile>
             <character>o</character>
             <color>COLOR_GREEN</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>ooze_gurgle</aware_sfx_seen>
-            <aware_sfx_hidden>ooze_gurgle</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_OOZE_GURGLE</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_OOZE_GURGLE</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -6830,14 +6831,14 @@
         </text>
 
         <graphics>
-            <tile>ooze</tile>
+            <tile>TILE_OOZE</tile>
             <character>o</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>ooze_gurgle</aware_sfx_seen>
-            <aware_sfx_hidden>ooze_gurgle</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_OOZE_GURGLE</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_OOZE_GURGLE</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -6928,14 +6929,14 @@
         </text>
 
         <graphics>
-            <tile>ooze</tile>
+            <tile>TILE_OOZE</tile>
             <character>o</character>
             <color>COLOR_LIGHT_GREEN</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>ooze_gurgle</aware_sfx_seen>
-            <aware_sfx_hidden>ooze_gurgle</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_OOZE_GURGLE</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_OOZE_GURGLE</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -7026,7 +7027,7 @@
         </text>
 
         <graphics>
-            <tile>glasuu</tile>
+            <tile>TILE_GLASUU</tile>
             <character>W</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
@@ -7116,7 +7117,7 @@
         </text>
 
         <graphics>
-            <tile>ooze</tile>
+            <tile>TILE_OOZE</tile>
             <character>O</character>
             <color>COLOR_LIGHT_GREEN</color>
         </graphics>
@@ -7219,7 +7220,7 @@
         </text>
 
         <graphics>
-            <tile>gas_spore</tile>
+            <tile>TILE_GAS_SPORE</tile>
             <character>Q</character>
             <color>COLOR_LIGHT_GREEN</color>
         </graphics>
@@ -7318,7 +7319,7 @@
         </text>
 
         <graphics>
-            <tile>chthonian</tile>
+            <tile>TILE_CHTHONIAN</tile>
             <character>W</character>
             <color>COLOR_DARK_BROWN</color>
         </graphics>
@@ -7408,14 +7409,14 @@
         </text>
 
         <graphics>
-            <tile>hunting_horror</tile>
+            <tile>TILE_HUNTING_HORROR</tile>
             <character>W</character>
             <color>COLOR_GRAY</color>
         </graphics>
 
         <audio>
-            <aware_sfx_seen>flapping_wings</aware_sfx_seen>
-            <aware_sfx_hidden>flapping_wings</aware_sfx_hidden>
+            <aware_sfx_seen>SFX_FLAPPING_WINGS</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_FLAPPING_WINGS</aware_sfx_hidden>
         </audio>
 
         <attributes>
@@ -7500,7 +7501,7 @@
         </text>
 
         <graphics>
-            <tile>khaga</tile>
+            <tile>TILE_KHAGA</tile>
             <character>B</character>
             <color>COLOR_LIGHT_BLUE</color>
         </graphics>
@@ -7608,7 +7609,7 @@
         </text>
 
         <graphics>
-            <tile>khaga</tile>
+            <tile>TILE_KHAGA</tile>
             <character>B</character>
             <color>COLOR_LIGHT_CYAN</color>
         </graphics>
@@ -7714,7 +7715,7 @@
         </text>
 
         <graphics>
-            <tile>device2</tile>
+            <tile>TILE_DEVICE2</tile>
             <character>T</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -7900,7 +7901,7 @@
         </text>
 
         <graphics>
-            <tile>fungi</tile>
+            <tile>TILE_FUNGI</tile>
             <character>e</character>
             <color>COLOR_LIGHT_GREEN</color>
         </graphics>
@@ -7999,7 +8000,7 @@
         </text>
 
         <graphics>
-            <tile>fungi</tile>
+            <tile>TILE_FUNGI</tile>
             <character>e</character>
             <color>COLOR_ORANGE</color>
         </graphics>
@@ -8098,7 +8099,7 @@
         </text>
 
         <graphics>
-            <tile>tentacle_cluster</tile>
+            <tile>TILE_TENTACLE_CLUSTER</tile>
             <character>e</character>
             <color>COLOR_VIOLET</color>
         </graphics>
@@ -8190,7 +8191,7 @@
         </text>
 
         <graphics>
-            <tile>gas_spore</tile>
+            <tile>TILE_GAS_SPORE</tile>
             <character>E</character>
             <color>COLOR_LIGHT_RED</color>
         </graphics>
@@ -8228,6 +8229,7 @@
             <property>PROP_R_BREATH</property>
             <property>PROP_R_DISEASE</property>
             <property>PROP_R_BLIND</property>
+            <property>PROP_R_PARA</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_FLYING</property>
         </properties>
@@ -8283,7 +8285,7 @@
         </text>
 
         <graphics>
-            <tile>fiend</tile>
+            <tile>TILE_FIEND</tile>
             <character>Y</character>
             <color>COLOR_GRAY</color>
         </graphics>
@@ -8385,7 +8387,7 @@
         </text>
 
         <graphics>
-            <tile>worm</tile>
+            <tile>TILE_WORM</tile>
             <character>W</character>
             <color>COLOR_YELLOW</color>
         </graphics>
@@ -8478,7 +8480,7 @@
         </text>
 
         <graphics>
-            <tile>the_high_priest</tile>
+            <tile>TILE_THE_HIGH_PRIEST</tile>
             <character>P</character>
             <color>COLOR_RED</color>
         </graphics>
@@ -8584,7 +8586,7 @@
         </text>
 
         <graphics>
-            <tile>player_firearm</tile>
+            <tile>TILE_PLAYER_FIREARM</tile>
             <character>P</character>
             <color>COLOR_GREEN</color>
         </graphics>
@@ -8671,7 +8673,7 @@
         </text>
 
         <graphics>
-            <tile>player_melee</tile>
+            <tile>TILE_PLAYER_MELEE</tile>
             <character>P</character>
             <color>COLOR_CYAN</color>
         </graphics>
@@ -8758,7 +8760,7 @@
         </text>
 
         <graphics>
-            <tile>ghoul</tile>
+            <tile>TILE_GHOUL</tile>
             <character>P</character>
             <color>COLOR_BROWN</color>
         </graphics>

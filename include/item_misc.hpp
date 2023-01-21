@@ -32,10 +32,10 @@ enum class MedBagAction
         END
 };
 
-class Trapez : public Item
+class Trapezohedron : public Item
 {
 public:
-        Trapez(ItemData* item_data);
+        Trapezohedron(ItemData* item_data);
 
         ItemPrePickResult pre_pickup_hook() override;
 };

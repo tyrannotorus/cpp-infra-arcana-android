@@ -20,6 +20,7 @@
 #include "actor_see.hpp"
 #include "attack.hpp"
 #include "attack_data.hpp"
+#include "bash.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "config.hpp"
@@ -123,7 +124,7 @@ void MarkerState::draw()
                 line.erase(std::begin(line));
         }
 
-        const auto effective_dist_range = effective_king_dist_range();
+        const Range effective_dist_range = effective_king_dist_range();
 
         const int orange_until_including_dist =
                 (effective_dist_range.min == -1)
@@ -135,11 +136,8 @@ void MarkerState::draw()
                 ? -1
                 : (effective_dist_range.max + 1);
 
-        auto red_from_dist = max_king_dist();
-
+        int red_from_dist = max_king_dist() + 1;
         int red_from_idx = -1;
-
-        auto blocked_parser = map_parsers::BlocksProjectiles();
 
         if (show_blocked()) {
                 for (size_t i = 0; i < line.size(); ++i) {
@@ -149,7 +147,7 @@ void MarkerState::draw()
                                 break;
                         }
 
-                        if (map::g_seen.at(p) && blocked_parser.run(p)) {
+                        if (map::g_seen.at(p) && is_pos_blocked(p)) {
                                 red_from_idx = (int)i;
                                 break;
                         }
@@ -166,6 +164,13 @@ void MarkerState::draw()
         on_draw();
 }
 
+bool MarkerState::is_pos_blocked(const P& pos) const
+{
+        map_parsers::BlocksProjectiles blocked_parser;
+
+        return blocked_parser.run(pos);
+}
+
 void MarkerState::update()
 {
         const int nr_jump_steps = 5;
@@ -176,7 +181,7 @@ void MarkerState::update()
                 input = io::read_input();
         }
 
-        const auto game_cmd = game_commands::to_cmd(input);
+        const GameCmd game_cmd = game_commands::to_cmd(input);
 
         if (game_cmd != GameCmd::none) {
                 msg_log::clear();
@@ -260,7 +265,7 @@ void MarkerState::draw_marker(
         int red_from_king_dist,
         int red_from_idx)
 {
-        auto color = colors::light_green();
+        Color color = colors::light_green();
 
         // Draw the line
 
@@ -292,7 +297,7 @@ void MarkerState::draw_marker(
                         (red_from_idx != -1) &&
                         ((int)line_idx >= red_from_idx);
 
-                // NOTE: Final color is stored for drawing the head
+                // NOTE: Final color is stored for drawing the head.
                 if (is_red_by_idx || is_red_by_dist) {
                         color = colors::light_red();
                 }
@@ -322,10 +327,7 @@ void MarkerState::draw_marker(
         }  // line loop
 
         // Draw the head
-        const P& head_pos =
-                line.empty()
-                ? m_origin
-                : line.back();
+        const P& head_pos = line.empty() ? m_origin : line.back();
 
         if (viewport::is_in_view(head_pos)) {
                 // If we are currently only drawing the head and the line is
@@ -372,10 +374,10 @@ bool MarkerState::try_go_to_tgt()
                 return false;
         }
 
-        const auto seen_foes = actor::seen_foes(*map::g_player);
+        const std::vector<actor::Actor*> seen_foes = actor::seen_foes(*map::g_player);
 
         if (!seen_foes.empty()) {
-                for (auto* const actor : seen_foes) {
+                for (actor::Actor* const actor : seen_foes) {
                         if (actor::player_state::g_target == actor) {
                                 m_pos = actor->m_pos;
 
@@ -389,7 +391,7 @@ bool MarkerState::try_go_to_tgt()
 
 void MarkerState::try_go_to_closest_enemy()
 {
-        const auto seen_foes = actor::seen_foes(*map::g_player);
+        const std::vector<actor::Actor*> seen_foes = actor::seen_foes(*map::g_player);
 
         std::vector<P> seen_foes_positions;
 
@@ -403,8 +405,7 @@ void MarkerState::try_go_to_closest_enemy()
         if (!seen_foes_positions.empty()) {
                 m_pos = closest_pos(map::g_player->m_pos, seen_foes_positions);
 
-                actor::player_state::g_target =
-                        map::living_actor_at(m_pos);
+                actor::player_state::g_target = map::living_actor_at(m_pos);
         }
 }
 
@@ -417,13 +418,13 @@ void Viewing::on_moved()
 
         view::print_location_info_msgs(m_pos);
 
-        const auto* const actor = map::living_actor_at(m_pos);
+        const actor::Actor* const actor = map::living_actor_at(m_pos);
 
         if (actor &&
             !actor::is_player(actor) &&
             actor::can_player_see_actor(*actor)) {
                 // TODO: This should not be specified here
-                const auto view_key = 'v';
+                const char view_key = 'v';
 
                 // In debug mode, confirm that this is actually the correct key,
                 // however see TODO above
@@ -432,8 +433,7 @@ void Viewing::on_moved()
                         io::InputData dummy_input;
                         dummy_input.key = view_key;
 
-                        const auto game_cmd =
-                                game_commands::to_cmd(dummy_input);
+                        const GameCmd game_cmd = game_commands::to_cmd(dummy_input);
 
                         ASSERT(game_cmd == GameCmd::look);
                 }
@@ -462,18 +462,17 @@ void Viewing::on_moved()
 
 void Viewing::handle_input(const io::InputData& input)
 {
-        const auto game_cmd = game_commands::to_cmd(input);
+        const GameCmd game_cmd = game_commands::to_cmd(input);
 
         if (game_cmd == GameCmd::look) {
-                auto* const actor = map::living_actor_at(m_pos);
+                actor::Actor* const actor = map::living_actor_at(m_pos);
 
                 if (actor &&
                     !actor::is_player(actor) &&
                     actor::can_player_see_actor(*actor)) {
                         msg_log::clear();
 
-                        auto view_actor_descr =
-                                std::make_unique<ViewActorDescr>(*actor);
+                        auto view_actor_descr = std::make_unique<ViewActorDescr>(*actor);
 
                         states::push(std::move(view_actor_descr));
                 }
@@ -538,7 +537,7 @@ void Aiming::on_moved()
         }
 
         // TODO: This should not be specified here
-        const auto fire_key = 'f';
+        const char fire_key = 'f';
 
         // In debug mode, confirm that this is actually the correct key,
         // however see TODO above
@@ -569,7 +568,7 @@ void Aiming::on_moved()
 
 void Aiming::handle_input(const io::InputData& input)
 {
-        auto game_cmd = GameCmd::undefined;
+        GameCmd game_cmd = GameCmd::undefined;
 
         if (config::is_bot_playing()) {
                 // Bot is playing, fire at a random position
@@ -591,7 +590,7 @@ void Aiming::handle_input(const io::InputData& input)
 
                 msg_log::clear();
 
-                auto* const actor = map::living_actor_at(m_pos);
+                actor::Actor* const actor = map::living_actor_at(m_pos);
 
                 if (actor && actor::can_player_see_actor(*actor)) {
                         actor::player_state::g_target = actor;
@@ -599,17 +598,13 @@ void Aiming::handle_input(const io::InputData& input)
 
                 const P pos = m_pos;
 
-                auto* const wpn = &m_wpn;
+                item::Wpn* const wpn = &m_wpn;
 
                 states::pop();
 
                 // NOTE: This object is now destroyed
 
-                attack::ranged(
-                        map::g_player,
-                        map::g_player->m_pos,
-                        pos,
-                        *wpn);
+                attack::ranged(map::g_player, map::g_player->m_pos, pos, *wpn);
         }
         else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
                 states::pop();
@@ -624,6 +619,131 @@ Range Aiming::effective_king_dist_range() const
 int Aiming::max_king_dist() const
 {
         return m_wpn.data().ranged.max_range;
+}
+
+// -----------------------------------------------------------------------------
+// Aim long reach melee weapon marker state
+// -----------------------------------------------------------------------------
+void AimingMeleeWpn::on_moved()
+{
+        view::print_living_actor_info_msg(m_pos);
+
+        const int dist = king_dist(m_origin, m_pos);
+
+        const bool is_in_max_range = (dist <= max_king_dist());
+
+        if (is_in_max_range) {
+                actor::Actor* const actor = map::living_actor_at(m_pos);
+
+                if (actor &&
+                    !actor::is_player(actor) &&
+                    actor::can_player_see_actor(*actor)) {
+                        MeleeAttData att_data(map::g_player, *actor, m_wpn);
+
+                        const int hit_chance =
+                                ability_roll::success_chance_pct_actual(
+                                        att_data.hit_chance_tot);
+
+                        msg_log::add(
+                                std::to_string(hit_chance) + "% hit chance.",
+                                colors::light_white(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::no,
+                                CopyToMsgHistory::no);
+                }
+        }
+
+        // TODO: This should not be specified here
+        const char fire_key = 'f';
+
+        // In debug mode, confirm that this is actually the correct key,
+        // however see TODO above
+#ifndef NDEBUG
+        {
+                io::InputData dummy_input;
+                dummy_input.key = fire_key;
+
+                const GameCmd game_cmd = game_commands::to_cmd(dummy_input);
+
+                ASSERT(game_cmd == GameCmd::fire);
+        }
+#endif  // NDEBUG
+
+        const std::string msg =
+                std::string("[") +
+                fire_key +
+                std::string("] to attack ") +
+                common_text::g_cancel_hint;
+
+        msg_log::add(
+                msg,
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+}
+
+void AimingMeleeWpn::handle_input(const io::InputData& input)
+{
+        GameCmd game_cmd = GameCmd::undefined;
+
+        if (config::is_bot_playing()) {
+                // Bot is playing, strike at a random position
+                game_cmd = GameCmd::fire;
+
+                m_pos.set(
+                        rnd::range(0, map::w() - 1),
+                        rnd::range(0, map::h() - 1));
+        }
+        else {
+                // Human player
+                game_cmd = game_commands::to_cmd(input);
+        }
+
+        if ((game_cmd == GameCmd::fire) || (input.key == SDLK_RETURN)) {
+                if (m_pos == map::g_player->m_pos) {
+                        return;
+                }
+
+                const int dist = king_dist(m_origin, m_pos);
+
+                const bool is_in_max_range = (dist <= max_king_dist());
+
+                if (!is_in_max_range) {
+                        // TODO: Print a message or something?
+                        return;
+                }
+
+                msg_log::clear();
+
+                actor::Actor* const actor = map::living_actor_at(m_pos);
+
+                if (actor && actor::can_player_see_actor(*actor)) {
+                        actor::player_state::g_target = actor;
+                }
+
+                const P aim_pos = m_pos;
+                item::Wpn* const wpn = &m_wpn;
+
+                states::pop();
+
+                // NOTE: This object is now destroyed
+
+                attack::melee(map::g_player, map::g_player->m_pos, aim_pos, *wpn);
+        }
+        else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
+                states::pop();
+        }
+}
+
+bool AimingMeleeWpn::is_pos_blocked(const P& pos) const
+{
+        return !bash::is_open_terrain(*map::g_terrain.at(pos));
+}
+
+int AimingMeleeWpn::max_king_dist() const
+{
+        return m_wpn.data().melee.reach;
 }
 
 // -----------------------------------------------------------------------------
@@ -710,7 +830,7 @@ void Throwing::on_moved()
 
 void Throwing::handle_input(const io::InputData& input)
 {
-        const auto game_cmd = game_commands::to_cmd(input);
+        const GameCmd game_cmd = game_commands::to_cmd(input);
 
         if ((game_cmd == GameCmd::throw_item) ||
             (input.key == SDLK_RETURN)) {
@@ -720,13 +840,13 @@ void Throwing::handle_input(const io::InputData& input)
 
                 msg_log::clear();
 
-                auto* const actor = map::living_actor_at(m_pos);
+                actor::Actor* const actor = map::living_actor_at(m_pos);
 
                 if (actor && actor::can_player_see_actor(*actor)) {
                         actor::player_state::g_target = actor;
                 }
 
-                auto* item_to_throw = item::copy_item(*m_inv_item);
+                item::Item* item_to_throw = item::copy_item(*m_inv_item);
 
                 item_to_throw->m_nr_items = 1;
 
@@ -736,17 +856,14 @@ void Throwing::handle_input(const io::InputData& input)
 
                 actor::player_state::g_last_thrown_item = m_inv_item;
 
-                const auto pos = m_pos;
+                const P pos = m_pos;
 
                 states::pop();
 
                 // NOTE: This object is now destroyed
 
                 // Perform the actual throwing
-                throwing::throw_item(
-                        *map::g_player,
-                        pos,
-                        *item_to_throw);
+                throwing::throw_item(*map::g_player, pos, *item_to_throw);
         }
         else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
                 states::pop();
@@ -813,7 +930,7 @@ void ThrowingExplosive::on_moved()
         view::print_location_info_msgs(m_pos);
 
         // TODO: This should not be specified here
-        const auto throw_key = 't';
+        const char throw_key = 't';
 
         // In debug mode, confirm that this is actually the correct key,
         // however see TODO above
@@ -822,7 +939,7 @@ void ThrowingExplosive::on_moved()
                 io::InputData dummy_input;
                 dummy_input.key = throw_key;
 
-                const auto game_cmd = game_commands::to_cmd(dummy_input);
+                const GameCmd game_cmd = game_commands::to_cmd(dummy_input);
 
                 ASSERT(game_cmd == GameCmd::throw_item);
         }
@@ -844,7 +961,7 @@ void ThrowingExplosive::on_moved()
 
 void ThrowingExplosive::handle_input(const io::InputData& input)
 {
-        const auto game_cmd = game_commands::to_cmd(input);
+        const GameCmd game_cmd = game_commands::to_cmd(input);
 
         if ((game_cmd == GameCmd::throw_item) || (input.key == SDLK_RETURN)) {
                 msg_log::clear();
@@ -986,8 +1103,8 @@ bool CtrlObjOpen::can_control(
 
         case terrain::Id::door: {
                 const auto& door = static_cast<const terrain::Door&>(terrain);
-                const bool is_metal = door.type() == terrain::DoorType::metal;
-                const bool is_basic_skill = skill == SpellSkill::basic;
+                const bool is_metal = (door.type() == terrain::DoorType::metal);
+                const bool is_basic_skill = (skill == SpellSkill::basic);
 
                 if (door.is_open() || door.is_hidden()) {
                         return false;
@@ -1014,12 +1131,14 @@ DidAction CtrlObjOpen::run(
 {
         if (terrain.id() == terrain::Id::door) {
                 auto& door = static_cast<terrain::Door&>(terrain);
-                const bool is_metal = door.type() == terrain::DoorType::metal;
+                const bool is_metal = (door.type() == terrain::DoorType::metal);
 
                 if (door.is_stuck() && !is_metal) {
                         ASSERT(!door.is_known_stuck());
 
-                        door.reveal_stuck_status();
+                        door.reveal_stuck_status(terrain::PrintRevealMsg::if_seen);
+
+                        msg_log::more_prompt();
 
                         return DidAction::yes;
                 }
@@ -1060,8 +1179,8 @@ bool CtrlObjCloseDoor::can_control(
                 return false;
         }
 
-        const bool is_metal = door.type() == terrain::DoorType::metal;
-        const bool is_basic_skill = skill == SpellSkill::basic;
+        const bool is_metal = (door.type() == terrain::DoorType::metal);
+        const bool is_basic_skill = (skill == SpellSkill::basic);
 
         if (is_metal && is_basic_skill) {
                 return false;
@@ -1074,7 +1193,7 @@ DidAction CtrlObjCloseDoor::run(
         terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
-        const auto* const actor_here = map::living_actor_at(terrain.pos());
+        const actor::Actor* const actor_here = map::living_actor_at(terrain.pos());
 
         if (actor_here) {
                 std::string actor_name;
@@ -1184,7 +1303,7 @@ DidAction CtrlObjToggleLever::run(
 
         auto& lever = static_cast<terrain::Lever&>(terrain);
 
-        const auto name_the =
+        const std::string name_the =
                 text_format::first_to_upper(
                         lever.name(Article::the));
 
@@ -1217,9 +1336,12 @@ bool CtrlObjStrike::can_control(
         switch (terrain.id()) {
         case terrain::Id::door: {
                 const auto& door = static_cast<const terrain::Door&>(terrain);
-                const bool is_metal = door.type() == terrain::DoorType::metal;
+                const bool is_metal = (door.type() == terrain::DoorType::metal);
 
-                return !door.is_open() && !door.is_hidden() && !is_metal;
+                return (
+                        !door.is_open() &&
+                        !door.is_hidden() &&
+                        !is_metal);
         } break;
 
         case terrain::Id::brazier:
@@ -1442,11 +1564,9 @@ void CtrlObj::on_moved()
                 CopyToMsgHistory::no);
 
         if (is_allowed_at_dist() && !m_possible_actions.empty()) {
-                const auto* const terrain = map::g_terrain.at(m_pos);
-                const auto name_the = terrain->name(Article::the);
-
-                const std::string control_str =
-                        "[enter] to control " + name_the;
+                const terrain::Terrain* const terrain = map::g_terrain.at(m_pos);
+                const std::string name_the = terrain->name(Article::the);
+                const std::string control_str = "[enter] to control " + name_the;
 
                 msg_log::add(
                         control_str,
@@ -1514,14 +1634,14 @@ void CtrlObj::handle_input(const io::InputData& input)
                 return;
         }
 
-        const auto action = query_control();
+        const CtrlObjActionPtr action = query_control();
 
         if (!action) {
                 return;
         }
 
         m_allow_draw = false;
-        const auto did_action = action->run(*m_terrain, m_skill);
+        const DidAction did_action = action->run(*m_terrain, m_skill);
         m_allow_draw = true;
 
         if (did_action == DidAction::yes) {
@@ -1590,7 +1710,7 @@ CtrlObjActionPtr CtrlObj::query_control() const
         menu_keys.reserve(m_possible_actions.size());
         menu_labels.reserve(m_possible_actions.size());
 
-        for (const auto& action : m_possible_actions) {
+        for (const CtrlObjActionPtr& action : m_possible_actions) {
                 menu_keys.push_back(action->menu_key());
                 menu_labels.push_back(action->menu_label(*m_terrain));
         }

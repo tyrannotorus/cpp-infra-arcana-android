@@ -294,7 +294,7 @@ DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path)
                                 "!");
                 }
 
-                door->hit(DmgType::blunt, &mon);
+                terrain->hit(DmgType::blunt, &mon);
 
                 game_time::tick();
 

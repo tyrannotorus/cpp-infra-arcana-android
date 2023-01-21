@@ -162,19 +162,6 @@ static bool is_player_handling_armor()
                 (actor::player_state::g_remove_armor_countdown));
 }
 
-static bool is_player_wielding_pitchfork()
-{
-        const auto* const item =
-                map::g_player->m_inv.item_in_slot(
-                        SlotId::wpn);
-
-        if (!item) {
-                return false;
-        }
-
-        return (item->id() == item::Id::pitch_fork);
-}
-
 // -----------------------------------------------------------------------------
 // Attack data
 // -----------------------------------------------------------------------------
@@ -205,11 +192,6 @@ MeleeAttData::MeleeAttData(
         int dodging_mod = 0;
 
         const int dodging_ability = defender->ability(AbilityId::dodging, true);
-
-        if (actor::is_player(defender) &&
-            is_player_wielding_pitchfork()) {
-                dodging_mod -= 15;
-        }
 
         const bool allow_positive_doge =
                 is_defender_aware &&

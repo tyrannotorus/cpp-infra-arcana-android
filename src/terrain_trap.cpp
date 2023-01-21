@@ -271,7 +271,7 @@ bool Trap::try_init_type(const TrapId id)
         }
 }
 
-void Trap::on_hit(
+void Trap::hit(
         DmgType dmg_type,
         actor::Actor* actor,
         const P& from_pos,
@@ -864,11 +864,7 @@ void TrapSpear::trigger()
                 }
 
                 // Attack!
-                attack::melee(
-                        nullptr,
-                        m_spear_origin,
-                        *actor_on_trap,
-                        *wpn);
+                attack::melee(nullptr, m_spear_origin, m_pos, *wpn);
 
                 delete wpn;
         }

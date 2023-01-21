@@ -7,6 +7,8 @@ Gameplay commands:
    C (@)     CHARACTER information
    d         DROP item
    f         AIM/FIRE weapon
+             (To fire a ranged weapon or to aim a melee weapon at a specific
+             position, e.g. to aim a melee weapon with long reach)
    g (,)     PICK UP item
    h (M)     MESSAGE history
    i         INVENTORY (wield, equip, remove, consume, or activate items)
@@ -16,7 +18,7 @@ Gameplay commands:
    n (o)     Make NOISE
    p         DISARM trap
    r         RELOAD
-   5 (.)     WAIT one turn (numpad 5 or period)
+   5 (.)     WAIT one turn (numpad '5' or the period key)
              (This also rearranges pistol magazines if possible, or feeds on a
              corpse if playing as the Ghoul character)
    s         WAIT five turns, or until something happens
@@ -27,7 +29,8 @@ Gameplay commands:
    z         SWAP to readied weapon
    Q         QUIT
    Shift     Hold while pressing a move key to move until interrupted
-   Tab       Melee attack adjacent monster
+   Tab       MELEE ATTACK adjacent monster (or further away if wielding a
+             melee weapon with long reach)
 
 General menu and window commands:
    Esc       In-game menu, or cancel/proceed

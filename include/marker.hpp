@@ -89,6 +89,8 @@ protected:
                 return false;
         }
 
+        virtual bool is_pos_blocked(const P& pos) const;
+
         virtual bool show_blocked() const
         {
                 return false;
@@ -170,6 +172,38 @@ protected:
         }
 
         Range effective_king_dist_range() const override;
+
+        int max_king_dist() const override;
+
+        item::Wpn& m_wpn;
+};
+
+// -----------------------------------------------------------------------------
+// Aim (and strike) melee weapon marker state (mostly for long reach weapons)
+// -----------------------------------------------------------------------------
+class AimingMeleeWpn : public MarkerState
+{
+public:
+        AimingMeleeWpn(const P& origin, item::Wpn& wpn) :
+                MarkerState(origin),
+                m_wpn(wpn) {}
+
+protected:
+        void on_moved() override;
+
+        void handle_input(const io::InputData& input) override;
+
+        bool use_player_tgt() const override
+        {
+                return true;
+        }
+
+        bool is_pos_blocked(const P& pos) const override;
+
+        bool show_blocked() const override
+        {
+                return true;
+        }
 
         int max_king_dist() const override;
 

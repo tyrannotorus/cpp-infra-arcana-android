@@ -7,6 +7,7 @@
 #include "bash.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
@@ -39,65 +40,12 @@
 #include "random.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
-#include "terrain_door.hpp"
 #include "text_format.hpp"
 #include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static bool is_allowed_use_wpn_on_terrain(
-        const item::Item& wpn,
-        const terrain::Terrain& terrain)
-{
-        bool allow_wpn_att_terrain = wpn.data().melee.attack_terrain;
-
-        if (!allow_wpn_att_terrain) {
-                return false;
-        }
-
-        const auto wpn_dmg_type = wpn.data().melee.dmg_type;
-
-        switch (terrain.id()) {
-        case terrain::Id::door: {
-                if (terrain.is_hidden()) {
-                        // Emulate walls
-                        allow_wpn_att_terrain = true;
-                }
-                else {
-                        // Revealed door
-                        const auto& door =
-                                static_cast<const terrain::Door&>(terrain);
-
-                        const auto door_type = door.type();
-
-                        if (door_type == terrain::DoorType::gate) {
-                                // Only allow blunt weapons for gates
-                                // (feels weird to attack a barred gate
-                                // with an axe...)
-                                allow_wpn_att_terrain =
-                                        (wpn_dmg_type == DmgType::blunt);
-                        }
-                        else {
-                                // Not gate (i.e. wooden, metal)
-                                allow_wpn_att_terrain = true;
-                        }
-                }
-        } break;
-
-        case terrain::Id::wall: {
-                allow_wpn_att_terrain = true;
-        } break;
-
-        default:
-        {
-                allow_wpn_att_terrain = false;
-        } break;
-        }  // Terrain id switch
-
-        return allow_wpn_att_terrain;
-}
-
 static std::unique_ptr<const item::Item> make_tmp_kick_wpn()
 {
         auto kick_wpn =
@@ -109,7 +57,7 @@ static std::unique_ptr<const item::Item> make_tmp_kick_wpn()
 
 static const item::Item* get_wielded_wpn_or_unarmed()
 {
-        const auto* wpn = map::g_player->m_inv.item_in_slot(SlotId::wpn);
+        const item::Item* wpn = map::g_player->m_inv.item_in_slot(SlotId::wpn);
 
         if (!wpn) {
                 wpn = &map::g_player->unarmed_wpn();
@@ -120,232 +68,179 @@ static const item::Item* get_wielded_wpn_or_unarmed()
         return wpn;
 }
 
-static void try_kick_living_monster(actor::Actor& mon)
+static void print_player_attack_seen_terrain_msg(
+        const terrain::Terrain& terrain,
+        const item::Item& wpn)
 {
-        const bool melee_allowed =
-                map::g_player->m_properties.allow_attack_melee(
-                        Verbose::yes);
+        const std::string terrain_name = terrain.name(Article::the);
+        const std::string melee_att_msg = wpn.data().melee.attack_msgs.player;
 
-        if (!melee_allowed) {
-                return;
+        msg_log::add("I " + melee_att_msg + " " + terrain_name + "!");
+}
+
+static void print_player_attack_unseen_terrain_msg(const item::Item& wpn)
+{
+        const std::string melee_att_msg = wpn.data().melee.attack_msgs.player;
+
+        msg_log::add("I " + melee_att_msg + " something!");
+}
+
+static void print_player_attack_terrain_msg(
+        const terrain::Terrain& terrain,
+        const P& pos,
+        const item::Item& wpn)
+{
+        if (map::g_seen.at(pos)) {
+                print_player_attack_seen_terrain_msg(terrain, wpn);
         }
+        else {
+                print_player_attack_unseen_terrain_msg(wpn);
+        }
+}
 
+static void kick_living_monster(actor::Actor& mon)
+{
         map::g_player->kick_mon(mon);
 
         bash::try_sprain_player();
 
-        // Attacking ends cloaking
+        // Attacking ends cloaking and sanctuary.
         map::g_player->m_properties.end_prop(PropId::cloaked);
+        map::g_player->m_properties.end_prop(PropId::sanctuary);
 }
 
-static void bash_corpse_with_wpn(
+static void attack_corpse_with_wpn_or_kick(
         actor::Actor& mon,
-        const P& att_pos,
         const item::Item& wpn,
         const item::Item& kick_wpn)
 {
-        const bool is_seeing_cell = map::g_seen.at(att_pos);
-
-        std::string corpse_name =
-                is_seeing_cell
-                ? mon.m_data->corpse_name_the
-                : "a corpse";
-
-        corpse_name = text_format::first_to_lower(corpse_name);
-
-        // Decide if we should kick or use wielded weapon
-        const auto& wpn_used_att_corpse =
-                wpn.data().melee.attack_corpse
+        const item::Item& wpn_used_att_corpse =
+                wpn.data().melee.can_attack_corpse
                 ? wpn
                 : kick_wpn;
 
-        const auto melee_att_msg =
-                wpn_used_att_corpse.data().melee.attack_msgs.player;
-
-        const std::string msg =
-                "I " +
-                melee_att_msg + " " +
-                corpse_name + ".";
-
-        msg_log::add(msg);
-
-        const auto dmg_range = wpn_used_att_corpse.melee_dmg(map::g_player);
-
-        const int dmg = dmg_range.total_range().roll();
-
-        actor::hit(
-                mon,
-                dmg,
-                wpn_used_att_corpse.data().melee.dmg_type,
-                map::g_player);
-
-        if (&wpn_used_att_corpse == &kick_wpn) {
-                bash::try_sprain_player();
-        }
-
-        if (mon.m_state == ActorState::destroyed) {
-                std::vector<actor::Actor*> corpses_here;
-
-                for (auto* const actor : game_time::g_actors) {
-                        if ((actor->m_pos == att_pos) &&
-                            actor->is_corpse()) {
-                                corpses_here.push_back(actor);
-                        }
-                }
-
-                if (!corpses_here.empty()) {
-                        msg_log::more_prompt();
-                }
-
-                for (auto* const other_corpse : corpses_here) {
-                        const std::string name =
-                                text_format::first_to_upper(
-                                        other_corpse
-                                                ->m_data
-                                                ->corpse_name_a);
-
-                        msg_log::add(name + ".");
-                }
-        }
-
-        // Attacking ends cloaking
-        map::g_player->m_properties.end_prop(PropId::cloaked);
-
-        game_time::tick();
+        bash::attack_corpse(mon, wpn_used_att_corpse);
 }
 
-static bool allow_bash_terrain(const terrain::Terrain* const terrain)
-{
-        return (
-                !terrain->is_walkable() &&
-                (terrain->id() != terrain::Id::stairs));
-}
-
-static void bash_terrain_with_wpn(
-        const P& att_pos,
-        const item::Item& wpn,
-        const item::Item& kick_wpn)
-{
-        auto* const terrain = map::g_terrain.at(att_pos);
-
-        const auto& wpn_used_att_terrain =
-                is_allowed_use_wpn_on_terrain(wpn, *terrain)
-                ? &wpn
-                : &kick_wpn;
-
-        const auto dmg_range = wpn_used_att_terrain->melee_dmg(map::g_player);
-        const int dmg = dmg_range.total_range().roll();
-        const auto dmg_type = wpn_used_att_terrain->data().melee.dmg_type;
-
-        switch (dmg_type) {
-        case DmgType::kicking: {
-                const std::string terrain_name =
-                        map::g_seen.at(att_pos)
-                        ? terrain->name(Article::the)
-                        : "something";
-
-                msg_log::add(
-                        "I kick " +
-                        terrain_name +
-                        "!");
-
-                bash::try_sprain_player();
-        } break;
-
-        case DmgType::blunt:
-        case DmgType::slashing: {
-                msg_log::add("*WHAM!*");
-        } break;
-
-        default:
-        {
-        } break;
-        }
-
-        terrain->hit(
-                wpn_used_att_terrain->data().melee.dmg_type,
-                map::g_player,
-                map::g_player->m_pos,
-                dmg);
-
-        // Attacking ends cloaking
-        map::g_player->m_properties.end_prop(PropId::cloaked);
-
-        game_time::tick();
-}
-
-static void bash_pos(const P& pos)
+static void bash_something_at_pos(const P& pos)
 {
         // Try kicking/bashing something (monster, corpse, terrain) in the given
         // position according to priority.
 
-        const auto kick_wpn = make_tmp_kick_wpn();
-        const item::Item* wpn = get_wielded_wpn_or_unarmed();
-
-        actor::Actor* living_actor = map::living_actor_at(pos);
-
-        // --- Kick living actor that the player is aware of? ---
-        if ((pos != map::g_player->m_pos) &&
-            living_actor &&
-            living_actor->is_player_aware_of_me()) {
-                try_kick_living_monster(*living_actor);
-
-                return;
-        }
-
-        // --- Bash terrain? ---
         terrain::Terrain* const terrain = map::g_terrain.at(pos);
+        const bool is_pos_seen = map::g_seen.at(pos);
+        const std::unique_ptr<const item::Item> kick_wpn = make_tmp_kick_wpn();
+        const item::Item* wpn = get_wielded_wpn_or_unarmed();
+        actor::Actor* actor = map::living_actor_at(pos);
+        const bool is_player_pos = (pos == map::g_player->m_pos);
 
-        if ((pos != map::g_player->m_pos) &&
-            allow_bash_terrain(terrain)) {
-                bash_terrain_with_wpn(pos, *wpn, *kick_wpn);
+        // --- Kick living actor that the player is AWARE of? ---
+        if (!is_player_pos && actor && actor->is_player_aware_of_me()) {
+                const bool is_melee_allowed =
+                        map::g_player->m_properties.allow_attack_melee(
+                                Verbose::yes);
+
+                if (is_melee_allowed) {
+                        kick_living_monster(*actor);
+                }
 
                 return;
         }
 
-        // --- Kick living actor that the player is unaware of? ---
-        if ((pos != map::g_player->m_pos) && living_actor) {
-                ASSERT(!living_actor->is_player_aware_of_me());
+        // --- Bash seen terrain? ---
+        if (is_pos_seen && !is_player_pos) {
+                // Use weapon on terrain?
+                if (bash::is_allowed_use_wpn_on_terrain(*wpn, *terrain)) {
+                        bash::attack_terrain(pos, *wpn);
 
-                try_kick_living_monster(*living_actor);
+                        return;
+                }
 
-                return;
-        }
+                // Kick terrain?
+                if (bash::is_allowed_use_wpn_on_terrain(*kick_wpn, *terrain)) {
+                        bash::attack_terrain(pos, *kick_wpn);
 
-        // --- Destroy corpse? ---
-        actor::Actor* corpse = nullptr;
-
-        // Check all corpses here, stop at any corpse which is prioritized for
-        // bashing (Zombies)
-        for (actor::Actor* const actor : game_time::g_actors) {
-                if ((actor->m_pos == pos) &&
-                    (actor->m_state == ActorState::corpse)) {
-                        corpse = actor;
-
-                        if (actor->m_data->prio_corpse_bash) {
-                                break;
-                        }
+                        return;
                 }
         }
 
-        if (corpse) {
-                bash_corpse_with_wpn(*corpse, pos, *wpn, *kick_wpn);
+        // --- Bash seen corpse? ---
+        if (is_pos_seen) {
+                actor::Actor* const corpse = bash::get_corpse_to_bash_at(pos);
+
+                if (corpse) {
+                        attack_corpse_with_wpn_or_kick(*corpse, *wpn, *kick_wpn);
+
+                        return;
+                }
+        }
+
+        // --- Kick living actor that the player is UNAWARE of? ---
+
+        // NOTE: This is only allowed on some terrain, and only if the creature
+        // is at least humanoid size - the player cannot melee attack a monster
+        // on the floor that they are unaware of (it is assumed that the player
+        // kicks into the air, not down at the floor - except possibly when
+        // bashing a corpse, but supporting bashing a corpse and accidentally
+        // hitting a creature on the floor doesn't really seem necessary).
+        if (!is_player_pos &&
+            actor &&
+            (actor->m_data->actor_size >= actor::Size::humanoid) &&
+            bash::is_open_terrain(*terrain)) {
+                // Only try an actual attack if there are no status effects
+                // preventing melee (terrified).
+                const bool melee_allowed =
+                        map::g_player->m_properties.allow_attack_melee(
+                                Verbose::no);
+
+                if (melee_allowed) {
+                        kick_living_monster(*actor);
+
+                        return;
+                }
+        }
+
+        // --- Kick unseen terrain? ---
+        if (!is_player_pos && !is_pos_seen) {
+                // NOTE: Kick is always used on unseen terrain when using the
+                // bash command.
+                if (bash::is_allowed_use_wpn_on_terrain(*kick_wpn, *terrain)) {
+                        bash::attack_terrain(pos, *kick_wpn);
+
+                        return;
+                }
+        }
+
+        if (is_player_pos) {
+                msg_log::add("I cannot find anything there to bash.");
 
                 return;
         }
 
-        // Nothing to kick here.
+        if (bash::is_open_terrain(*terrain)) {
+                // Attack "the air" (regardless of whether the position is seen
+                // or not).
+                bash::attack_air();
 
-        if (pos == map::g_player->m_pos) {
-                msg_log::add("There is nothing there to bash.");
+                return;
         }
-        else {
-                // Kick "the air".
-                msg_log::add("*Whoosh!*");
 
-                audio::play(audio::SfxId::miss_medium);
+        if (is_pos_seen) {
+                // This is a SEEN position, and it is not a terrain that the
+                // player can attempt to attack unknown monsters on (and it was
+                // not possible to attack the terrain itself).
+                const std::string terrain_name = terrain->name(Article::the);
 
-                game_time::tick();
+                msg_log::add("Kicking " + terrain_name + " would be useless.");
+
+                return;
+        }
+
+        {
+                // This is an UNSEEN position, and it is not a terrain that the
+                // player can attempt to attack unknown monsters on (i.e. it is
+                // not "floor" etc).
+                bash::do_fake_attack_on_unseen_terrain(*wpn);
         }
 }
 
@@ -354,6 +249,41 @@ static void bash_pos(const P& pos)
 // -----------------------------------------------------------------------------
 namespace bash
 {
+void run()
+{
+        msg_log::clear();
+
+        const std::string query_msg =
+                common_text::g_direction_query +
+                " " +
+                common_text::g_cancel_hint;
+
+        // Choose direction
+        msg_log::add(
+                query_msg,
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+
+        const Dir input_dir = query::dir(AllowCenter::yes);
+
+        msg_log::clear();
+
+        if (input_dir == Dir::END) {
+                // Invalid direction
+                io::update_screen();
+
+                return;
+        }
+
+        // The chosen direction is valid
+
+        const P pos = map::g_player->m_pos + dir_utils::offset(input_dir);
+
+        bash_something_at_pos(pos);
+}
+
 void try_sprain_player()
 {
         const bool is_frenzied =
@@ -386,51 +316,185 @@ void try_sprain_player()
         }
 }
 
-void run()
+void attack_terrain(const P& att_pos, const item::Item& wpn)
 {
-        msg_log::clear();
+        terrain::Terrain* const terrain = map::g_terrain.at(att_pos);
 
-        const std::string query_msg =
-                common_text::g_direction_query +
-                " " +
-                common_text::g_cancel_hint;
+        print_player_attack_terrain_msg(*terrain, att_pos, wpn);
 
-        // Choose direction
-        msg_log::add(
-                query_msg,
-                colors::light_white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
+        if (wpn.data().melee.dmg_type == DmgType::kicking) {
+                bash::try_sprain_player();
+        }
 
-        const auto input_dir = query::dir(AllowCenter::yes);
-
-        msg_log::clear();
-
-        if (input_dir == Dir::END) {
-                // Invalid direction
-                io::update_screen();
-
+        if (!map::g_player->is_alive()) {
                 return;
         }
 
-        // The chosen direction is valid
+        const WpnDmg dmg_range = wpn.melee_dmg(map::g_player);
+        const int dmg = dmg_range.total_range().roll();
 
-        const auto pos = map::g_player->m_pos + dir_utils::offset(input_dir);
+        terrain->hit(
+                wpn.data().melee.dmg_type,
+                map::g_player,
+                map::g_player->m_pos,
+                dmg);
 
-        bash_pos(pos);
+        // Attacking ends cloaking and sanctuary.
+        map::g_player->m_properties.end_prop(PropId::cloaked);
+        map::g_player->m_properties.end_prop(PropId::sanctuary);
+
+        game_time::tick();
 }
 
-void bash_terrain_at_pos(const P& pos)
+void attack_corpse(actor::Actor& mon, const item::Item& wpn)
 {
-        if (pos == map::g_player->m_pos) {
-                return;
+        const bool is_seeing_cell = map::g_seen.at(mon.m_pos);
+
+        std::string corpse_name =
+                is_seeing_cell
+                ? mon.m_data->corpse_name_the
+                : "a corpse";
+
+        corpse_name = text_format::first_to_lower(corpse_name);
+
+        const std::string melee_att_msg = wpn.data().melee.attack_msgs.player;
+
+        const std::string msg =
+                "I " +
+                melee_att_msg + " " +
+                corpse_name + ".";
+
+        msg_log::add(msg);
+
+        const WpnDmg dmg_range = wpn.melee_dmg(map::g_player);
+
+        const int dmg = dmg_range.total_range().roll();
+
+        actor::hit(mon, dmg, wpn.data().melee.dmg_type, map::g_player);
+
+        const DmgType dmg_type = wpn.data().melee.dmg_type;
+
+        if (dmg_type == DmgType::kicking) {
+                bash::try_sprain_player();
         }
 
-        const auto kick_wpn = make_tmp_kick_wpn();
-        const auto* wpn = get_wielded_wpn_or_unarmed();
+        if (mon.m_state == ActorState::destroyed) {
+                std::vector<actor::Actor*> corpses_here;
 
-        bash_terrain_with_wpn(pos, *wpn, *kick_wpn);
+                for (actor::Actor* const actor : game_time::g_actors) {
+                        if ((actor->m_pos == mon.m_pos) && actor->is_corpse()) {
+                                corpses_here.push_back(actor);
+                        }
+                }
+
+                if (!corpses_here.empty()) {
+                        msg_log::more_prompt();
+                }
+
+                for (actor::Actor* const other_corpse : corpses_here) {
+                        const std::string name =
+                                text_format::first_to_upper(
+                                        other_corpse
+                                                ->m_data
+                                                ->corpse_name_a);
+
+                        msg_log::add(name + ".");
+                }
+        }
+
+        // Attacking ends cloaking and sanctuary.
+        map::g_player->m_properties.end_prop(PropId::cloaked);
+        map::g_player->m_properties.end_prop(PropId::sanctuary);
+
+        game_time::tick();
+}
+
+actor::Actor* get_corpse_to_bash_at(const P& pos)
+{
+        actor::Actor* corpse = nullptr;
+
+        // Check all corpses here, stop at any corpse which is prioritized for
+        // bashing (Zombies).
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if ((actor->m_pos == pos) &&
+                    (actor->m_state == ActorState::corpse)) {
+                        corpse = actor;
+
+                        if (actor->m_data->prio_corpse_bash) {
+                                break;
+                        }
+                }
+        }
+
+        return corpse;
+}
+
+void do_fake_attack_on_unseen_terrain(const item::Item& wpn)
+{
+        print_player_attack_unseen_terrain_msg(wpn);
+
+        // Attacking ends cloaking and sanctuary.
+        map::g_player->m_properties.end_prop(PropId::cloaked);
+        map::g_player->m_properties.end_prop(PropId::sanctuary);
+
+        game_time::tick();
+}
+
+void attack_air()
+{
+        msg_log::add("*Whoosh!*");
+
+        audio::play(audio::SfxId::miss_medium);
+
+        // Attacking ends cloaking and sanctuary.
+        map::g_player->m_properties.end_prop(PropId::cloaked);
+        map::g_player->m_properties.end_prop(PropId::sanctuary);
+
+        game_time::tick();
+}
+
+bool is_allowed_use_wpn_on_terrain(
+        const item::Item& wpn,
+        const terrain::Terrain& terrain)
+{
+        const DmgType wpn_dmg_type = wpn.data().melee.dmg_type;
+
+        return terrain.allow_player_melee_attack(wpn_dmg_type, wpn);
+}
+
+bool is_open_terrain(
+        const terrain::Terrain& terrain)
+{
+        // Open terrain is terrain that is either:
+        // * "Floor like" terrain (floor, grass),
+        // * Terrain that is possible to walk through,
+        // * ...or terrain that is explicitly listed here as an exception.
+
+        // Open terrain is possible to attempt to attack an unknown creature
+        // inside by kicking or striking this position with a melee weapon (on
+        // non-open terrain this would instead yield a message such as "kicking
+        // the wall would be useless").
+
+        if (terrain.is_floor_like()) {
+                return true;
+        }
+
+        if (terrain.is_walkable()) {
+                return true;
+        }
+
+        const std::vector<terrain::Id> exceptions = {
+                terrain::Id::chasm,
+                terrain::Id::stairs,
+                terrain::Id::chest,
+        };
+
+        if (std::find(std::begin(exceptions), std::end(exceptions), terrain.id()) !=
+            std::end(exceptions)) {
+                return true;
+        }
+
+        return false;
 }
 
 }  // namespace bash

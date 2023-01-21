@@ -31,6 +31,7 @@ set(COMMON_SRC
         include/ai.hpp
         include/array2.hpp
         include/attack.hpp
+        include/attack_internal.hpp
         include/attack_data.hpp
         include/audio.hpp
         include/audio_data.hpp
@@ -174,6 +175,8 @@ set(COMMON_SRC
         src/actor_std_turn.cpp
         src/ai.cpp
         src/attack.cpp
+        src/attack_melee.cpp
+        src/attack_ranged.cpp
         src/attack_data.cpp
         src/audio_data.cpp
         src/bash.cpp

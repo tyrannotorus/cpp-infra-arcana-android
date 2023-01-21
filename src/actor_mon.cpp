@@ -410,7 +410,7 @@ DidAction Actor::try_attack(Actor& defender)
 
         if (att.is_melee) {
                 if (att.wpn->data().melee.is_melee_wpn) {
-                        attack::melee(this, m_pos, defender, *att.wpn);
+                        attack::melee(this, m_pos, defender.m_pos, *att.wpn);
 
                         return DidAction::yes;
                 }

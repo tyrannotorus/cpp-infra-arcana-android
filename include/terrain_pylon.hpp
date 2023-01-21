@@ -190,13 +190,13 @@ public:
 
         void add_light_hook(Array2<bool>& light) const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         pylon::PylonImpl* make_pylon_impl_from_id(pylon::PylonId id);
 
         std::unique_ptr<pylon::PylonImpl> m_pylon_impl;

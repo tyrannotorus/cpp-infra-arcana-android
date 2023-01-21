@@ -48,12 +48,12 @@ namespace item
 {
 struct ItemData;
 
-Trapez::Trapez(ItemData* item_data) :
+Trapezohedron::Trapezohedron(ItemData* item_data) :
         Item(item_data)
 {
 }
 
-ItemPrePickResult Trapez::pre_pickup_hook()
+ItemPrePickResult Trapezohedron::pre_pickup_hook()
 {
         game::add_history_event("Beheld The Shining Trapezohedron");
 

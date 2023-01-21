@@ -262,8 +262,7 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
                         const std::string potion_name =
                                 name(ItemNameType::plain, ItemNameInfo::none);
 
-                        msg_log::add(
-                                "I drink an unknown " + potion_name + "...");
+                        msg_log::add("I drink an unknown " + potion_name + "...");
                 }
 
                 map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);

@@ -17,6 +17,7 @@ enum class MusId
         END
 };
 
+// NOTE: When updating this, also update the translation tables in the cpp file.
 enum class SfxId
 {
         // Monster sounds
@@ -33,6 +34,7 @@ enum class SfxId
         hit_medium,
         hit_hard,
         hit_sharp,
+        hit_whip_scourge,
         hit_corpse_break,
         miss_light,
         miss_medium,
@@ -168,7 +170,7 @@ enum class SfxId
 
 SfxId str_to_sfx_id(const std::string& str);
 
-std::string sfx_id_to_str(SfxId id);
+std::string sfx_id_to_filename(SfxId id);
 
 }  // namespace audio
 

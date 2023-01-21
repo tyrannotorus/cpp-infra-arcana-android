@@ -81,13 +81,13 @@ static BinaryAnswer query_player_attack_mon_with_ranged_wpn(
 
 static void player_bump_known_hostile_mon(actor::Actor& mon)
 {
-        auto& player = *map::g_player;
+        actor::Actor& player = *map::g_player;
 
         if (!player.m_properties.allow_attack_melee(Verbose::yes)) {
                 return;
         }
 
-        auto* const wpn_item = player.m_inv.item_in_slot(SlotId::wpn);
+        item::Item* const wpn_item = player.m_inv.item_in_slot(SlotId::wpn);
 
         if (!wpn_item) {
                 player.hand_att(mon);
@@ -101,10 +101,7 @@ static void player_bump_known_hostile_mon(actor::Actor& mon)
         // intended to use it as melee weapon
         if (wpn.data().ranged.is_ranged_wpn &&
             config::warn_on_ranged_wpn_melee()) {
-                const auto answer =
-                        query_player_attack_mon_with_ranged_wpn(
-                                wpn,
-                                mon);
+                const BinaryAnswer answer = query_player_attack_mon_with_ranged_wpn(wpn, mon);
 
                 msg_log::clear();
 
@@ -115,7 +112,7 @@ static void player_bump_known_hostile_mon(actor::Actor& mon)
 
         actor::player_state::g_target = &mon;
 
-        attack::melee(&player, player.m_pos, mon, wpn);
+        attack::melee(&player, player.m_pos, mon.m_pos, wpn);
 }
 
 static void player_bump_unkown_hostile_mon(actor::Actor& mon)

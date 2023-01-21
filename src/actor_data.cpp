@@ -44,9 +44,7 @@ static std::vector<std::string> get_keys_sorted(
         return keys;
 }
 
-using StrToMonShockLvlMap = std::unordered_map<std::string, MonShockLvl>;
-
-static const StrToMonShockLvlMap str_to_shock_lvl_map = {
+static const std::unordered_map<std::string, MonShockLvl> str_to_shock_lvl_map = {
         {"MONSHOCK_NONE", MonShockLvl::none},
         {"MONSHOCK_UNSETTLING", MonShockLvl::unsettling},
         {"MONSHOCK_FRIGHTENING", MonShockLvl::frightening},
@@ -59,27 +57,18 @@ static const std::unordered_map<std::string, actor::Speed> str_to_speed_map = {
         {"MONSPEED_FAST", actor::Speed::fast},
         {"MONSPEED_VERY_FAST", actor::Speed::very_fast}};
 
-using StrToMonGroupSizeMap =
-        std::unordered_map<std::string, actor::MonGroupSize>;
-
-static const StrToMonGroupSizeMap s_str_to_group_size_map = {
+static const std::unordered_map<std::string, actor::MonGroupSize> s_str_to_group_size_map = {
         {"MONGROUPSIZE_ALONE", actor::MonGroupSize::alone},
         {"MONGROUPSIZE_FEW", actor::MonGroupSize::few},
         {"MONGROUPSIZE_PACK", actor::MonGroupSize::pack},
         {"MONGROUPSIZE_SWARM", actor::MonGroupSize::swarm}};
 
-using StrToSizeMap =
-        std::unordered_map<std::string, actor::Size>;
-
-static const StrToSizeMap s_str_to_actor_size_map = {
+static const std::unordered_map<std::string, actor::Size> s_str_to_actor_size_map = {
         {"MONSIZE_FLOOR", actor::Size::floor},
         {"MONSIZE_HUMANOID", actor::Size::humanoid},
         {"MONSIZE_GIANT", actor::Size::giant}};
 
-using AiIdToTagNameMap =
-        std::unordered_map<actor::AiId, std::string>;
-
-static const AiIdToTagNameMap s_ai_id_to_tag_name_map = {
+static const std::unordered_map<actor::AiId, std::string> s_ai_id_to_tag_name_map = {
         {actor::AiId::looks, "looks"},
         {actor::AiId::avoids_blocking_friend, "avoids_blocking_friend"},
         {actor::AiId::attacks, "attacks"},

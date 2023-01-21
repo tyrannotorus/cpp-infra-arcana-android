@@ -6,10 +6,14 @@
 
 #include "game_commands.hpp"
 
+#include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <memory>
 #include <ostream>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "SDL_keycode.h"
@@ -68,6 +72,7 @@
 #include "teleport.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
+#include "terrain_door.hpp"
 #include "terrain_factory.hpp"
 #include "terrain_trap.hpp"
 
@@ -106,48 +111,35 @@ static bool allow_player_fire_mi_go_gun()
         else {
                 // Not enough HP - allow firing the gun if player has the
                 // Prolonged Life trait and enough SP instead
-                const bool has_prolonged_life =
-                        player_bon::has_trait(Trait::prolonged_life);
+                const bool has_prolonged_life = player_bon::has_trait(Trait::prolonged_life);
 
                 const int hp = map::g_player->m_hp;
                 const int sp = map::g_player->m_sp;
 
-                const bool has_enough_hp_and_sp =
-                        ((hp + sp - 1) > g_mi_go_gun_hp_drained);
+                const bool has_enough_hp_and_sp = ((hp + sp - 1) > g_mi_go_gun_hp_drained);
 
                 return (has_prolonged_life && has_enough_hp_and_sp);
         }
 }
 
-static void handle_fire_command()
+static void handle_fire_command_melee(item::Wpn& wpn)
+{
+        states::push(std::make_unique<AimingMeleeWpn>(map::g_player->m_pos, wpn));
+}
+
+static void handle_fire_command_firearm(item::Wpn& wpn)
 {
         if (!map::g_player->m_properties.allow_attack_ranged(Verbose::yes)) {
                 return;
         }
 
-        auto* const item = map::g_player->m_inv.item_in_slot(SlotId::wpn);
+        const item::ItemData& item_data = wpn.data();
 
-        if (!item) {
-                msg_log::add("I am not wielding a weapon.");
-
-                return;
-        }
-
-        const auto& item_data = item->data();
-
-        if (!item_data.ranged.is_ranged_wpn) {
-                msg_log::add("I am not wielding a firearm.");
-
-                return;
-        }
-
-        auto* wpn = static_cast<item::Wpn*>(item);
-
-        if ((wpn->m_ammo_loaded <= 0) &&
+        if ((wpn.m_ammo_loaded <= 0) &&
             !item_data.ranged.has_infinite_ammo) {
                 // Not enough ammo loaded - auto reload?
                 if (config::is_ranged_wpn_auto_reload()) {
-                        reload::try_reload(*map::g_player, item);
+                        reload::try_reload(*map::g_player, &wpn);
                 }
                 else {
                         msg_log::add("There is no ammo loaded.");
@@ -156,7 +148,7 @@ static void handle_fire_command()
                 return;
         }
 
-        if ((wpn->data().id == item::Id::mi_go_gun) &&
+        if ((item_data.id == item::Id::mi_go_gun) &&
             !allow_player_fire_mi_go_gun()) {
                 msg_log::add("Firing the gun now would destroy me.");
 
@@ -167,7 +159,37 @@ static void handle_fire_command()
         states::push(
                 std::make_unique<Aiming>(
                         map::g_player->m_pos,
-                        *wpn));
+                        wpn));
+}
+
+static void handle_fire_command()
+{
+        item::Wpn* weapon = nullptr;
+
+        item::Item* wielded_item = map::g_player->m_inv.item_in_slot(SlotId::wpn);
+
+        if (wielded_item) {
+                weapon = static_cast<item::Wpn*>(wielded_item);
+        }
+        else {
+                weapon = &map::g_player->unarmed_wpn();
+        }
+
+        if (!weapon) {
+                ASSERT(false);
+
+                return;
+        }
+
+        // TODO: Pressing "F" could perhaps force an aimed melee attack for
+        // ranged weapons (i.e. buttstroke).
+
+        if (weapon->data().ranged.is_ranged_wpn) {
+                handle_fire_command_firearm(*weapon);
+        }
+        else {
+                handle_fire_command_melee(*weapon);
+        }
 }
 
 static void handle_toggle_lantern_command()
@@ -533,13 +555,28 @@ static GameCmd to_cmd_default(const io::InputData& input)
                 // Some cheat commands enabled in debug builds
 #ifndef NDEBUG
         case SDLK_F2:
-                return GameCmd::debug_f2;
+                if (input.is_shift_held) {
+                        return GameCmd::debug_shift_f2;
+                }
+                else {
+                        return GameCmd::debug_f2;
+                }
 
         case SDLK_F3:
-                return GameCmd::debug_f3;
+                if (input.is_shift_held) {
+                        return GameCmd::debug_shift_f3;
+                }
+                else {
+                        return GameCmd::debug_f3;
+                }
 
         case SDLK_F4:
-                return GameCmd::debug_f4;
+                if (input.is_shift_held) {
+                        return GameCmd::debug_shift_f4;
+                }
+                else {
+                        return GameCmd::debug_f4;
+                }
 
         case SDLK_F5:
                 return GameCmd::debug_f5;
@@ -748,8 +785,7 @@ void handle(const GameCmd cmd)
                         // pressing 'wait')
                         const int turns_to_apply = 5;
 
-                        actor::player_state::g_wait_turns_left =
-                                (turns_to_apply - 1);
+                        actor::player_state::g_wait_turns_left = (turns_to_apply - 1);
 
                         game_time::tick();
                 }
@@ -848,8 +884,7 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::throw_item: {
-                const item::Item* explosive =
-                        actor::player_state::g_active_explosive.get();
+                const item::Item* explosive = actor::player_state::g_active_explosive.get();
 
                 if (explosive) {
                         states::push(
@@ -938,13 +973,78 @@ void handle(const GameCmd cmd)
                 map_travel::go_to_nxt();
         } break;
 
+        case GameCmd::debug_shift_f2: {
+                // TODO: It would be more convenient to query for a string
+                // instead, so that the monster ID string could be entered
+                // directly, instead of an index number (perhaps with partial
+                // matches allowed).
+
+                std::string msg = "Listing all properties (IDX    NAME):";
+
+                for (size_t i = 0; i < (size_t)PropId::END; ++i) {
+                        msg +=
+                                "\n" +
+                                std::to_string(i) +
+                                "    " +
+                                property_data::g_data[i].name;
+                }
+
+                TRACE << msg << std::endl;
+
+                const std::string query_str = "Apply property";
+
+                query::QueryNumberConfig query_config;
+
+                query_config.allowed_range = {1, (int)actor::g_data.size() - 1};
+                query_config.cancel_returns_default = false;
+
+                const int id_to_apply = query::number(query_config, query_str);
+
+                if (id_to_apply == -1) {
+                        return;
+                }
+
+                map::g_player->m_properties.apply(
+                        property_factory::make(
+                                (PropId)id_to_apply));
+
+        } break;
+
         case GameCmd::debug_f3: {
                 game::incr_player_xp(100, Verbose::no);
         } break;
 
+        case GameCmd::debug_shift_f3: {
+                const std::vector<terrain::DoorSpawnState> door_states = {
+                        terrain::DoorSpawnState::closed,
+                        terrain::DoorSpawnState::stuck,
+                        terrain::DoorSpawnState::secret,
+                        terrain::DoorSpawnState::secret_and_stuck,
+                        terrain::DoorSpawnState::open,
+                };
+
+                P pos = map::g_player->m_pos.with_x_offset(2);
+
+                for (const terrain::DoorSpawnState door_state : door_states) {
+                        auto* door =
+                                static_cast<terrain::Door*>(
+                                        terrain::make(terrain::Id::door, pos));
+
+                        door->set_mimic_terrain(terrain::make(terrain::Id::wall, pos));
+                        door->init_type_and_state(terrain::DoorType::wood, door_state);
+
+                        map::update_terrain(door);
+
+                        map::update_vision();
+
+                        pos.x += 2;
+                }
+
+        } break;
+
         case GameCmd::debug_f4: {
                 if (init::g_is_cheat_vision_enabled) {
-                        for (const auto& p : map::rect().positions()) {
+                        for (const P& p : map::rect().positions()) {
                                 map::g_seen.at(p) = false;
 
                                 map::clear_player_memory_at(p);
@@ -960,16 +1060,22 @@ void handle(const GameCmd cmd)
                 map::g_player->update_fov();
         } break;
 
+        case GameCmd::debug_shift_f4: {
+                map::update_terrain(
+                        terrain::make(
+                                terrain::Id::chest,
+                                map::g_player->m_pos.with_x_offset(1)));
+        } break;
+
         case GameCmd::debug_f5: {
                 map::g_player->incr_shock(50.0, ShockSrc::misc);
         } break;
 
         case GameCmd::debug_f6: {
                 for (size_t i = 0; i < (size_t)item::Id::END; ++i) {
-                        const auto& item_data = item::g_data[i];
+                        const item::ItemData& item_data = item::g_data[i];
 
-                        if (!item_data.is_intr &&
-                            (item_data.tile != gfx::TileId::END)) {
+                        if (!item_data.is_intr && (item_data.tile != gfx::TileId::END)) {
                                 item::make_item_on_floor(
                                         (item::Id)i,
                                         map::g_player->m_pos);
@@ -1006,8 +1112,12 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f9: {
-                std::string msg =
-                        "Listing all monsters (IDX    ID):";
+                // TODO: It would be more convenient to query for a string
+                // instead, so that the monster ID string could be entered
+                // directly, instead of an index number (perhaps with partial
+                // matches allowed).
+
+                std::string msg = "Listing all monsters (IDX    ID):";
 
                 std::vector<std::string> mon_ids;
                 mon_ids.reserve(actor::g_data.size());
@@ -1043,14 +1153,7 @@ void handle(const GameCmd cmd)
                 query_config.default_value = default_idx;
                 query_config.cancel_returns_default = false;
 
-                // TODO: It would be more convenient to query for a string
-                // instead, so that the monster ID string could be entered
-                // directly, instead of an index number (perhaps with partial
-                // matches allowed).
-                const int idx_to_spawn =
-                        query::number(
-                                query_config,
-                                query_str);
+                const int idx_to_spawn = query::number(query_config, query_str);
 
                 if (idx_to_spawn == -1) {
                         return;
@@ -1083,8 +1186,10 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f10: {
-                // Unused
-        }
+                for (item::Item* const item : map::g_player->m_inv.m_backpack) {
+                        item->identify(Verbose::yes);
+                }
+        } break;
 
 #endif  // NDEBUG
 

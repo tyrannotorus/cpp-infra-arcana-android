@@ -315,8 +315,7 @@ void Actor::load()
 
         ASSERT(unarmed_item);
 
-        player_state::g_unarmed_wpn.reset(
-                static_cast<item::Wpn*>(unarmed_item));
+        player_state::g_unarmed_wpn.reset(static_cast<item::Wpn*>(unarmed_item));
 
         for (int i = 0; i < (int)AbilityId::END; ++i) {
                 const int v = saving::get_int();
@@ -875,7 +874,7 @@ void Actor::kick_mon(Actor& defender)
                                 item::make(item::Id::player_kick));
         }
 
-        attack::melee(this, m_pos, defender, *kick_wpn);
+        attack::melee(this, m_pos, defender.m_pos, *kick_wpn);
 
         delete kick_wpn;
 }
@@ -896,7 +895,7 @@ void Actor::hand_att(Actor& defender)
 {
         item::Wpn& wpn = unarmed_wpn();
 
-        attack::melee(this, m_pos, defender, wpn);
+        attack::melee(this, m_pos, defender.m_pos, wpn);
 }
 
 void Actor::update_fov()

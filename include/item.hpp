@@ -72,8 +72,7 @@ public:
         std::string name(
                 ItemNameType name_type,
                 ItemNameInfo info = ItemNameInfo::yes,
-                ItemNameAttackInfo attack_info =
-                        ItemNameAttackInfo::none) const;
+                ItemNameAttackInfo attack_info = ItemNameAttackInfo::none) const;
 
         std::vector<std::string> descr() const;
 
@@ -178,11 +177,8 @@ public:
         WpnDmg ranged_dmg(const actor::Actor* attacker) const;
         WpnDmg thrown_dmg(const actor::Actor* attacker) const;
 
-        ItemAttackProp& prop_applied_on_melee(
-                const actor::Actor* attacker) const;
-
-        ItemAttackProp& prop_applied_on_ranged(
-                const actor::Actor* attacker) const;
+        ItemAttackProp& prop_applied_on_melee(const actor::Actor* attacker) const;
+        ItemAttackProp& prop_applied_on_ranged(const actor::Actor* attacker) const;
 
         virtual void on_melee_kill(actor::Actor& actor_killed)
         {
@@ -298,8 +294,7 @@ protected:
                 (void)actor;
         }
 
-        ItemAttackProp* prop_applied_intr_attack(
-                const actor::Actor* attacker) const;
+        ItemAttackProp* prop_applied_intr_attack(const actor::Actor* attacker) const;
 
         ItemData* m_data;
 

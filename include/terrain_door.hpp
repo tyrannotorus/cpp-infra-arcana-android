@@ -12,8 +12,9 @@
 #include "colors.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
+#include "item.hpp"
+#include "property_data.hpp"
 #include "terrain.hpp"
-#include "terrain_data.hpp"
 
 namespace actor
 {
@@ -23,6 +24,8 @@ struct P;
 
 namespace terrain
 {
+struct TerrainData;
+
 enum class DoorSpawnState
 {
         open,
@@ -67,11 +70,21 @@ public:
 
         std::string name(Article article) const override;
 
-        WasDestroyed on_finished_burning() override;
-
         char character() const override;
 
         gfx::TileId tile() const override;
+
+        WasDestroyed on_finished_burning() override;
+
+        bool allow_player_melee_attack(
+                DmgType dmg_type,
+                const item::Item& wpn) const override;
+
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
 
         void bump(actor::Actor& actor_bumping) override;
 
@@ -114,7 +127,7 @@ public:
 
         void on_revealed_from_searching() override;
 
-        void reveal_stuck_status();
+        void reveal_stuck_status(PrintRevealMsg print_reveal_msg);
 
         void set_secret();
 
@@ -152,12 +165,6 @@ public:
 
 private:
         Color color_default() const override;
-
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
 
         void bash(DmgType dmg_type, actor::Actor& actor, int dmg);
         void player_bash(DmgType dmg_type, int dmg);

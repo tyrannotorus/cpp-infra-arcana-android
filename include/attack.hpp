@@ -23,11 +23,10 @@ struct P;
 
 namespace attack
 {
-// NOTE: Attacker origin is needed since attacker may be a null pointer.
 void melee(
         actor::Actor* attacker,
-        const P& attacker_origin,
-        actor::Actor& defender,
+        const P& origin,
+        const P& aim_pos,
         item::Wpn& wpn);
 
 DidAction ranged(

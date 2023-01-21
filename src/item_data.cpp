@@ -9,9 +9,11 @@
 #include <unordered_map>
 
 #include "colors.hpp"
+#include "common_text.hpp"
 #include "debug.hpp"
 #include "item_att_property.hpp"
 #include "property.hpp"
+#include "property_factory.hpp"
 #include "random.hpp"
 #include "saving.hpp"
 #include "sound.hpp"
@@ -58,16 +60,13 @@ static const StrToItemSetIdMap s_str_to_item_set_id_map = {
         {"ITEMSET_FIREARM", item::ItemSetId::firearm},
         {"ITEMSET_SPIKE_GUN", item::ItemSetId::spike_gun},
         {"ITEMSET_WITCH_EYE", item::ItemSetId::witch_eye},
-        {"ITEMSET_FLUCTUATING_MATERIAL",
-         item::ItemSetId::fluctuating_material},
+        {"ITEMSET_FLUCTUATING_MATERIAL", item::ItemSetId::fluctuating_material},
         {"ITEMSET_ZEALOT_SPIKED_MACE", item::ItemSetId::zealot_spiked_mace},
         {"ITEMSET_PRIEST_DAGGER", item::ItemSetId::priest_dagger},
         {"ITEMSET_MI_GO_GUN", item::ItemSetId::mi_go_gun},
         {"ITEMSET_MI_GO_ARMOR", item::ItemSetId::mi_go_armor},
-        {"ITEMSET_HIGH_PRIEST_GUARD_WAR_VET",
-         item::ItemSetId::high_priest_guard_war_vet},
-        {"ITEMSET_HIGH_PRIEST_GUARD_ROGUE",
-         item::ItemSetId::high_priest_guard_rogue}};
+        {"ITEMSET_HIGH_PRIEST_GUARD_WAR_VET", item::ItemSetId::high_priest_guard_war_vet},
+        {"ITEMSET_HIGH_PRIEST_GUARD_ROGUE", item::ItemSetId::high_priest_guard_rogue}};
 
 static void mod_spawn_chance(item::ItemData& data, const double factor)
 {
@@ -329,7 +328,7 @@ void init()
         ItemData d;
 
         reset_data(d, ItemType::general);
-        d.id = Id::trapez;
+        d.id = Id::trapezohedron;
         d.base_name = {
                 "Shining Trapezohedron",
                 "Shining Trapezohedrons",
@@ -682,7 +681,7 @@ void init()
         d.ranged.hit_chance_mod = 5;
         d.ranged.effective_range = {0, 4};
         {
-                auto* prop = new PropParalyzed();
+                Prop* prop = property_factory::make(PropId::paralyzed);
 
                 prop->set_duration(2);
 
@@ -715,7 +714,7 @@ void init()
         reset_data(d, ItemType::ranged_wpn);
         d = g_data[(size_t)Id::trap_dart];
         d.id = Id::trap_dart_poison;
-        d.ranged.prop_applied = ItemAttackProp(new PropPoisoned());
+        d.ranged.prop_applied = ItemAttackProp(property_factory::make(PropId::poisoned));
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn);
@@ -733,7 +732,7 @@ void init()
         reset_data(d, ItemType::ranged_wpn);
         d = g_data[(size_t)Id::trap_spear];
         d.id = Id::trap_spear_poison;
-        d.ranged.prop_applied = ItemAttackProp(new PropPoisoned());
+        d.ranged.prop_applied = ItemAttackProp(property_factory::make(PropId::poisoned));
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::explosive);
@@ -886,7 +885,7 @@ void init()
         d.melee.attack_msgs = {"strike", "strikes"};
         d.melee.dmg = WpnDmg(1, 6);
         d.melee.hit_chance_mod = 15;
-        d.melee.attack_corpse = true;
+        d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
         d.melee.is_noisy = false;
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
@@ -915,7 +914,7 @@ void init()
         d.melee.attack_msgs = {"strike", "strikes"};
         d.melee.dmg = WpnDmg(2, 7);
         d.melee.hit_chance_mod = 10;
-        d.melee.attack_corpse = true;
+        d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::blunt;
         d.melee.is_noisy = false;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
@@ -940,7 +939,7 @@ void init()
         d.melee.attack_msgs = {"smash", "smashes"};
         d.melee.dmg = WpnDmg(3, 7);
         d.melee.hit_chance_mod = 5;
-        d.melee.attack_corpse = true;
+        d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::blunt;
         d.melee.is_noisy = true;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
@@ -965,7 +964,7 @@ void init()
         d.melee.attack_msgs = {"chop", "chops"};
         d.melee.dmg = WpnDmg(3, 9);
         d.melee.hit_chance_mod = 0;
-        d.melee.attack_corpse = true;
+        d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
         d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
@@ -993,8 +992,8 @@ void init()
         d.melee.attack_msgs = {"strike", "strikes"};
         d.melee.dmg = WpnDmg(3, 12);
         d.melee.hit_chance_mod = -5;
-        d.melee.attack_corpse = true;
-        d.melee.attack_terrain = true;
+        d.melee.can_attack_corpse = true;
+        d.melee.can_attack_door_wood = true;
         d.melee.dmg_type = DmgType::slashing;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         d.melee.is_noisy = true;
@@ -1023,11 +1022,18 @@ void init()
         d.melee.attack_msgs = {"strike", "strikes"};
         d.melee.dmg = WpnDmg(1, 14);
         d.melee.hit_chance_mod = -10;
-        d.melee.attack_corpse = true;
-        d.melee.attack_terrain = false;
+        d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::piercing;
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
         d.melee.is_noisy = true;
+        {
+                Prop* prop = property_factory::make(PropId::paralyzed);
+
+                prop->set_duration(2);
+
+                d.melee.prop_applied.prop.reset(prop);
+                d.melee.prop_applied.pct_chance_to_apply = 25;
+        }
         d.ranged.throw_hit_chance_mod = -5;
         d.ranged.effective_range = {0, 3};
         d.ranged.max_range = d.ranged.effective_range.max + 3;
@@ -1041,17 +1047,18 @@ void init()
         d.id = Id::pitch_fork;
         d.base_name = {"Pitchfork", "Pitchforks", "a Pitchfork"};
         d.base_descr = {
-                "A long staff with a forked, four-pronged end.",
+                "A long staff with a forked, four-pronged end. "
+                "Pitchforks are useful in keeping attackers at bay.",
 
-                "Pitchforks are useful in keeping attackers at bay (+15% "
-                "chance to evade melee attacks, victims are pushed back when "
-                "stabbed)."};
+                "If attacked from an adjacent position, "
+                "the victim is pushed back when stabbed."};
         d.weight = Weight::heavy;
         d.tile = gfx::TileId::pitchfork;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(1, 13);
-        d.melee.hit_chance_mod = -15;
-        d.melee.attack_corpse = true;
+        d.melee.dmg = WpnDmg(1, 10);
+        d.melee.hit_chance_mod = -10;
+        d.melee.can_attack_corpse = true;
+        d.melee.reach = 2;
         d.melee.knocks_back = true;
         d.melee.dmg_type = DmgType::piercing;
         d.melee.is_noisy = true;
@@ -1070,17 +1077,16 @@ void init()
         d.id = Id::sledge_hammer;
         d.base_name = {"Sledgehammer", "Sledgehammers", "a Sledgehammer"};
         d.base_descr = {
-                "Often used in destruction work for breaking through walls. "
-                "It can deal a great amount of damage, although it is "
-                "cumbersome to carry, and it requires some skill to use "
-                "effectively."};
+                "It can deal devastating damage, although it is cumbersome "
+                "to carry, and it requires some skill to use effectively."};
         d.weight = Weight::heavy;
         d.tile = gfx::TileId::sledge_hammer;
         d.melee.attack_msgs = {"smash", "smashes"};
         d.melee.dmg = WpnDmg(4, 15);
         d.melee.hit_chance_mod = -15;
-        d.melee.attack_corpse = true;
-        d.melee.attack_terrain = true;
+        d.melee.can_attack_corpse = true;
+        d.melee.can_attack_door_wood = true;
+        d.melee.can_attack_door_gate = true;
         d.melee.dmg_type = DmgType::blunt;
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
         d.ranged.throw_hit_chance_mod = -10;
@@ -1119,8 +1125,9 @@ void init()
         d.melee.dmg = WpnDmg(1, 2);
         d.melee.knocks_back = true;
         d.melee.dmg_type = DmgType::kicking;
-        d.melee.attack_terrain = true;
-        d.melee.attack_corpse = true;
+        d.melee.can_attack_door_wood = true;
+        d.melee.can_attack_door_gate = true;
+        d.melee.can_attack_corpse = true;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         g_data[(size_t)d.id] = d;
 
@@ -1135,13 +1142,11 @@ void init()
                 g_data[(size_t)Id::player_kick].melee.miss_sfx;
         d.melee.dmg_type = DmgType::kicking;
         d.melee.knocks_back = false;
-        d.melee.attack_terrain = false;
-        d.melee.attack_corpse = false;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn_intr);
         d.id = Id::player_punch;
-        d.base_name = {"Punch", "", ""};
+        d.base_name = {"Punch", "", "a punch"};
         d.melee.attack_msgs = {"punch", ""};
         d.melee.hit_chance_mod = 20;
         d.melee.dmg = WpnDmg(1, 1);
@@ -1150,12 +1155,12 @@ void init()
 
         reset_data(d, ItemType::melee_wpn_intr);
         d.id = Id::player_ghoul_claw;
-        d.base_name = {"Claw", "", ""};
+        d.base_name = {"Claw", "", "clawing"};
         d.melee.attack_msgs = {"claw", ""};
         d.melee.hit_chance_mod = 20;
         d.melee.dmg = WpnDmg(1, 8);
         d.melee.is_noisy = false;
-        d.melee.attack_corpse = true;
+        d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
         d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
@@ -1795,8 +1800,7 @@ void init()
                 "Any mummy beholding the owner will eventually be converted "
                 "(10% chance per turn while the weapon is carried).",
 
-                "Also, a devastating curse may fall upon those struck by "
-                "this weapon "
+                "Also, a devastating curse may fall upon those struck by this weapon "
                 "(50% chance to apply doom, greatly reducing the victim's "
                 "hit chances, evasion, and searching ability, and also causes "
                 "a small chance to fail when casting spells)."};
@@ -1804,10 +1808,11 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::pharaoh_staff;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(4, 12);
-        d.melee.hit_chance_mod = 10;
+        d.melee.dmg = WpnDmg(1, 12);
+        d.melee.hit_chance_mod = 02;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         d.melee.dmg_type = DmgType::blunt;
+        d.melee.reach = 2;
         d.ranged.throw_hit_chance_mod = -10;
         d.ranged.effective_range = {0, 3};
         d.ranged.max_range = d.ranged.effective_range.max + 3;
@@ -1817,6 +1822,44 @@ void init()
         d.value = Value::supreme_treasure;
         d.allow_cursed = true;
         d.chance_to_incl_in_spawn_list = 1;
+        d.native_containers.push_back(terrain::Id::tomb);
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::melee_wpn);
+        d.id = Id::flagellant_whip;
+        d.base_name = {
+                "Scourge",
+                "",
+                "a Scourge"};
+        d.base_descr = {
+                "A brutal whip affixed with sharpened bones and metal spikes.",
+
+                "Victims struck by its flesh-tearing bite may be paralyzed "
+                "with pain (20% chance)."};
+        d.color = colors::red();
+        d.weight = Weight::light;
+        d.tile = gfx::TileId::whip_scourge;
+        d.melee.attack_msgs = {"strike", "strikes"};
+        d.melee.dmg = WpnDmg(1, 10);
+        d.melee.hit_chance_mod = 10;
+        d.melee.miss_sfx = audio::SfxId::miss_medium;
+        d.melee.hit_small_sfx = audio::SfxId::hit_whip_scourge;
+        d.melee.hit_medium_sfx = audio::SfxId::hit_whip_scourge;
+        d.melee.hit_hard_sfx = audio::SfxId::hit_whip_scourge;
+        d.melee.dmg_type = DmgType::slashing;
+        d.melee.reach = 2;
+        {
+                Prop* prop = property_factory::make(PropId::paralyzed);
+
+                prop->set_duration(2);
+
+                d.melee.prop_applied.prop.reset(prop);
+                d.melee.prop_applied.pct_chance_to_apply = 20;
+        }
+        d.is_unique = true;
+        d.value = Value::supreme_treasure;
+        d.chance_to_incl_in_spawn_list = 0;
+        d.allow_spawn = false;
         d.native_containers.push_back(terrain::Id::tomb);
         g_data[(size_t)d.id] = d;
 
@@ -2347,9 +2390,11 @@ MeleeData::MeleeData() :
         is_noisy(true),
 
         dmg_type(DmgType::slashing),
+        reach(1),
         knocks_back(false),
-        attack_corpse(false),
-        attack_terrain(false),
+        can_attack_door_wood(false),
+        can_attack_door_gate(false),
+        can_attack_corpse(false),
         hit_small_sfx(audio::SfxId::END),
         hit_medium_sfx(audio::SfxId::END),
         hit_hard_sfx(audio::SfxId::END),

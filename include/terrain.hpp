@@ -275,11 +275,27 @@ public:
 
         virtual WasDestroyed on_finished_burning();
 
+        virtual bool allow_player_melee_attack(
+                const DmgType dmg_type,
+                const item::Item& wpn) const
+        {
+                (void)dmg_type;
+                (void)wpn;
+
+                return false;
+        }
+
         virtual void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                std::optional<P> from_pos = std::nullopt,
-                std::optional<int> dmg = std::nullopt);
+                const P& from_pos = {-1, -1},
+                int dmg = -1)
+        {
+                (void)dmg_type;
+                (void)actor;
+                (void)from_pos;
+                (void)dmg;
+        }
 
         virtual void reveal(const PrintRevealMsg print_reveal_msg)
         {
@@ -327,18 +343,6 @@ public:
 
 protected:
         virtual void on_new_turn_hook() {}
-
-        virtual void on_hit(
-                const DmgType dmg_type,
-                actor::Actor* const actor,
-                const P& from_pos,
-                const int dmg)
-        {
-                (void)dmg_type;
-                (void)actor;
-                (void)from_pos;
-                (void)dmg;
-        }
 
         void try_start_burning(Verbose verbose);
 
@@ -391,14 +395,13 @@ public:
 
         std::string name(Article article) const override;
 
-        FloorType m_type;
-
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
+
+        FloorType m_type;
 };
 
 class Carpet : public Terrain
@@ -414,8 +417,7 @@ public:
 
         WasDestroyed on_finished_burning() override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -440,14 +442,13 @@ public:
 
         Color color_default() const override;
 
-        GrassType m_type;
-
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
+
+        GrassType m_type;
 };
 
 class Bush : public Terrain
@@ -463,14 +464,13 @@ public:
 
         WasDestroyed on_finished_burning() override;
 
-        GrassType m_type;
-
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
+
+        GrassType m_type;
 };
 
 class Vines : public Terrain
@@ -486,8 +486,7 @@ public:
 
         WasDestroyed on_finished_burning() override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -507,8 +506,7 @@ public:
 
         void bump(actor::Actor& actor_bumping) override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -526,8 +524,7 @@ public:
 
         Color color_default() const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -546,13 +543,17 @@ public:
 
         Color color_default() const override;
 
-private:
-        void on_hit(
+        bool allow_player_melee_attack(
+                DmgType dmg_type,
+                const item::Item& wpn) const override;
+
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         void add_light_hook(Array2<bool>& light) const override;
 };
 
@@ -586,15 +587,14 @@ public:
         void set_rnd_common_wall();
         void set_moss_grown();
 
-        WallType m_type;
-        bool m_is_mossy;
-
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
+
+        WallType m_type;
+        bool m_is_mossy;
 };
 
 class RubbleLow : public Terrain
@@ -608,8 +608,7 @@ public:
 
         Color color_default() const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -627,8 +626,7 @@ public:
 
         Color color_default() const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -646,8 +644,7 @@ public:
 
         Color color_default() const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -672,13 +669,13 @@ public:
 
         void bump(actor::Actor& actor_bumping) override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         std::string m_inscr {};
 };
 
@@ -693,12 +690,13 @@ public:
 
         Color color_default() const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
+
+private:
 };
 
 enum class StatueType
@@ -735,13 +733,17 @@ public:
 
         void topple(Dir direction, actor::Actor* actor_toppling = nullptr);
 
-private:
-        void on_hit(
+        bool allow_player_melee_attack(
+                DmgType dmg_type,
+                const item::Item& wpn) const override;
+
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         int base_shock_when_adj() const override;
 
         StatueType m_type;
@@ -759,8 +761,7 @@ public:
 
         Color color_default() const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -783,6 +784,12 @@ public:
 
         void add_light_hook(Array2<bool>& light) const override;
 
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
+
         void set_fake()
         {
                 m_is_fake = true;
@@ -794,12 +801,6 @@ public:
         }
 
 private:
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
-
         void player_use_fake_stairs();
 
         bool m_is_fake {false};
@@ -817,8 +818,13 @@ public:
         std::string name(Article article) const override;
         gfx::TileId tile() const override;
         char character() const override;
-
         Color color_default() const override;
+
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
 
         void set_axis(const Axis axis)
         {
@@ -826,12 +832,6 @@ public:
         }
 
 private:
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
-
         Axis m_axis;
 };
 
@@ -847,15 +847,15 @@ public:
 
         void bump(actor::Actor& actor_bumping) override;
 
-        LiquidType m_type;
-
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+        LiquidType m_type;
+
+private:
         void run_magic_pool_effects_on_player();
 };
 
@@ -869,8 +869,7 @@ public:
 
         Color color_default() const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -893,6 +892,12 @@ public:
         void toggle();
 
         void bump(actor::Actor& actor_bumping) override;
+
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
 
         bool is_left_pos() const
         {
@@ -921,12 +926,6 @@ public:
         }
 
 private:
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
-
         bool m_is_left_pos;
 
         Terrain* m_linked_terrain;
@@ -949,8 +948,7 @@ public:
 
         std::string name(Article article) const override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
@@ -971,13 +969,13 @@ public:
 
         WasDestroyed on_finished_burning() override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         bool is_fungi() const;
 
         Color m_color {};
@@ -1028,13 +1026,13 @@ public:
 
         DidOpen open(actor::Actor* actor_opening) override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         DidTriggerTrap trigger_trap(actor::Actor* actor) override;
 
         void player_loot();
@@ -1075,11 +1073,15 @@ public:
 
         DidOpen open(actor::Actor* actor_opening) override;
 
+        bool allow_player_melee_attack(
+                DmgType dmg_type,
+                const item::Item& wpn) const override;
+
         void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
-                std::optional<P> from_pos = std::nullopt,
-                std::optional<int> dmg = std::nullopt) override;
+                const P& from_pos,
+                int dmg) override;
 
 private:
         void on_player_kick();
@@ -1115,13 +1117,13 @@ public:
 
         WasDestroyed on_finished_burning() override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         void player_loot();
 
         bool m_is_open;
@@ -1143,13 +1145,13 @@ public:
 
         WasDestroyed on_finished_burning() override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         void player_loot();
 
         bool m_is_looted;
@@ -1171,13 +1173,13 @@ public:
 
         WasDestroyed on_finished_burning() override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         void player_loot();
 
         bool m_is_looted;
@@ -1214,6 +1216,12 @@ public:
 
         void bump(actor::Actor& actor_bumping) override;
 
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
+
         bool has_drinks_left() const
         {
                 return m_has_drinks_left;
@@ -1237,12 +1245,6 @@ private:
         std::string type_name() const;
 
         std::string type_indefinite_article() const;
-
-        void on_hit(
-                DmgType dmg_type,
-                actor::Actor* actor,
-                const P& from_pos,
-                int dmg) override;
 
         FountainEffect m_fountain_effect {FountainEffect::END};
         bool m_has_drinks_left {true};
@@ -1268,13 +1270,13 @@ public:
 
         WasDestroyed on_finished_burning() override;
 
-private:
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
 
+private:
         void player_loot();
 
         DidTriggerTrap trigger_trap(actor::Actor* actor) override;

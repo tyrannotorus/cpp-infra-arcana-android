@@ -99,9 +99,9 @@ static void make_for_player_flagellant()
                 item::make(item::Id::torture_collar),
                 Verbose::no);
 
-        item::Item* const dagger = item::make(item::Id::dagger);
+        item::Item* const whip = item::make(item::Id::flagellant_whip);
 
-        inv.put_in_slot(SlotId::wpn, dagger, Verbose::no);
+        inv.put_in_slot(SlotId::wpn, whip, Verbose::no);
 
         inv.put_in_backpack(item::make(item::Id::iron_spike, 6));
 

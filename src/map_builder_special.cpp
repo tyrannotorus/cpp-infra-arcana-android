@@ -844,7 +844,7 @@ void MapBuilderTrapez::handle_template_pos(const P& p, const char c)
                         map::g_player->m_pos = p;
                 }
                 else if (c == 'o') {
-                        item::make_item_on_floor(item::Id::trapez, p);
+                        item::make_item_on_floor(item::Id::trapezohedron, p);
                 }
         } break;
 

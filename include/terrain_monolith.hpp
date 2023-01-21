@@ -33,14 +33,14 @@ public:
 
         void bump(actor::Actor& actor_bumping) override;
 
-private:
-        Color color_default() const override;
-
-        void on_hit(
+        void hit(
                 DmgType dmg_type,
                 actor::Actor* actor,
                 const P& from_pos,
                 int dmg) override;
+
+private:
+        Color color_default() const override;
 
         void activate();
 
