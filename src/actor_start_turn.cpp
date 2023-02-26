@@ -511,9 +511,13 @@ static void player_detect_stuck_doors()
                         continue;
                 }
 
+                const bool is_known_stuck_before = door->is_known_stuck();
+
                 door->reveal_stuck_status(terrain::PrintRevealMsg::if_seen);
 
-                msg_log::more_prompt();
+                if (!is_known_stuck_before) {
+                        msg_log::more_prompt();
+                }
         }
 }
 
