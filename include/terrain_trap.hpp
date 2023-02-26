@@ -540,7 +540,7 @@ public:
 
         std::string disarm_msg() const override
         {
-                return "I dispel a magic trap.";
+                return "I dispel a magic symbol.";
         }
 
         Range nr_turns_range_to_trigger() const override

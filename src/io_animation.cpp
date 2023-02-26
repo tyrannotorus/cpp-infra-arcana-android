@@ -35,8 +35,8 @@ static int s_graphics_cycle_nr[nr_graphics_cycle_types];
 static std::vector<io::FlashData> s_flashes;
 
 static const uint32_t s_flash_animation_delay_ms = 40U;
-static const int s_flash_alpha_start_value = 80;
-static const int s_flash_alpha_decr = 12;
+static const int s_flash_alpha_pct_start_value = 80;
+static const int s_flash_alpha_pct_default_decr = 12;
 static uint32_t s_last_flash_animation_step_ms = 0U;
 
 // Convert map position to a pixel area on the screen for drawing a flash
@@ -72,7 +72,7 @@ static void update_flash_with_seen_actor(io::FlashData& flash)
 
         if (!flash.actor_flashed_at->is_alive()) {
                 // The actor is dead - fade out faster.
-                flash.alpha_pct -= s_flash_alpha_decr;
+                flash.alpha_pct -= flash.alpha_pct_decr_step;
         }
 }
 
@@ -95,7 +95,7 @@ static void update_flash_with_actor(io::FlashData& flash)
         }
         else {
                 // Actor no longer exists - fade out faster.
-                flash.alpha_pct -= s_flash_alpha_decr;
+                flash.alpha_pct -= flash.alpha_pct_decr_step;
         }
 }
 
@@ -103,6 +103,18 @@ static void erase_finished_flahes()
 {
         for (auto it = std::begin(s_flashes); it != std::end(s_flashes);) {
                 if (it->alpha_pct <= 0) {
+                        s_flashes.erase(it);
+                }
+                else {
+                        ++it;
+                }
+        }
+}
+
+static void erase_flahes_at(const P& pos)
+{
+        for (auto it = std::begin(s_flashes); it != std::end(s_flashes);) {
+                if (it->pos == pos) {
                         s_flashes.erase(it);
                 }
                 else {
@@ -196,7 +208,22 @@ int graphics_cycle_nr(const GraphicsCycle cycle_type)
         return s_graphics_cycle_nr[(size_t)cycle_type];
 }
 
-void flash_at_actor(const actor::Actor& actor, const Color& color)
+void flash_at(const P& pos, const Color& color, const int speed_pct)
+{
+        erase_flahes_at(pos);
+
+        FlashData flash;
+
+        flash.pos = pos;
+        flash.px_rect = map_pos_to_px_rect(pos);
+        flash.color = color;
+        flash.alpha_pct = s_flash_alpha_pct_start_value;
+        flash.alpha_pct_decr_step = (s_flash_alpha_pct_default_decr * speed_pct) / 100;
+
+        s_flashes.push_back(flash);
+}
+
+void flash_at_actor(const actor::Actor& actor, const Color& color, const int speed_pct)
 {
         erase_flahes_with_actor(&actor);
 
@@ -205,7 +232,8 @@ void flash_at_actor(const actor::Actor& actor, const Color& color)
         flash.actor_flashed_at = &actor;
         flash.px_rect = map_pos_to_px_rect(actor.m_pos);
         flash.color = color;
-        flash.alpha_pct = s_flash_alpha_start_value;
+        flash.alpha_pct = s_flash_alpha_pct_start_value;
+        flash.alpha_pct_decr_step = (s_flash_alpha_pct_default_decr * speed_pct) / 100;
 
         s_flashes.push_back(flash);
 }
@@ -227,7 +255,7 @@ bool step_flash_animations()
         for (FlashData& flash : s_flashes) {
                 should_redraw = true;
 
-                flash.alpha_pct -= s_flash_alpha_decr;
+                flash.alpha_pct -= flash.alpha_pct_decr_step;
 
                 update_flash_with_actor(flash);
         }

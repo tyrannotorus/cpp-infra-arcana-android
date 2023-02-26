@@ -26,6 +26,7 @@
 #include "explosion.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "io.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "item_weapon.hpp"
@@ -50,17 +51,17 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static void print_magic_trap_trigger_messages(
+static void announce_magic_trap_trigger(
         const actor::Actor& actor,
+        const P& pos,
         const bool is_hidden)
 {
-        const bool is_player = actor::is_player(&actor);
-        const bool can_see = actor.m_properties.allow_see();
-        const bool player_sees_actor = actor::can_player_see_actor(actor);
-        const std::string actor_name = actor.name_the();
+        map::update_vision();
 
-        if (is_player) {
-                if (can_see) {
+        const bool can_player_see_trap = map::g_seen.at(pos);
+
+        if (actor::is_player(&actor)) {
+                if (can_player_see_trap) {
                         std::string msg = "A beam of light shoots out from";
 
                         if (!is_hidden) {
@@ -74,17 +75,76 @@ static void print_magic_trap_trigger_messages(
                 else {
                         msg_log::add("I feel a peculiar energy around me!");
                 }
-
-                msg_log::more_prompt();
         }
         else {
                 // Is a monster
-                if (player_sees_actor) {
-                        msg_log::add(
-                                "A beam of light shoots out under " +
-                                actor_name +
-                                ".");
+
+                const bool can_player_see_actor = actor::can_player_see_actor(actor);
+
+                if (can_player_see_actor || can_player_see_trap) {
+                        const std::string actor_name =
+                                can_player_see_actor
+                                ? actor.name_the()
+                                : "it";
+
+                        msg_log::add("A beam of light shoots out under " + actor_name + ".");
                 }
+        }
+
+        Snd snd(
+                "I hear an otherworldly blaze.",
+                audio::SfxId::magic_trap_trigger,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                nullptr,
+                SndVol::low,
+                AlertsMon::no);
+
+        snd.run();
+
+        if (can_player_see_trap) {
+                const int flash_speed_pct = 15;
+
+                io::flash_at(pos, colors::yellow(), flash_speed_pct);
+        }
+
+        if (actor::is_player(&actor)) {
+                msg_log::more_prompt();
+        }
+}
+
+static void announce_mechanical_trap_trigger(const actor::Actor& actor, const P& pos)
+{
+        std::string msg = "I hear a click.";
+
+        auto alerts = AlertsMon::no;
+
+        if (actor::is_player(&actor)) {
+                alerts = AlertsMon::yes;
+
+                // Use a amore foreboding message when the player is triggering.
+                msg += "..";
+        }
+
+        Snd snd(
+                msg,
+                audio::SfxId::mechanical_trap_trigger,
+                IgnoreMsgIfOriginSeen::no,
+                pos,
+                nullptr,
+                SndVol::low,
+                alerts);
+
+        snd.run();
+
+        if (actor::is_player(&actor)) {
+                const bool is_deaf = map::g_player->m_properties.has(PropId::deaf);
+
+                if (is_deaf) {
+                        msg_log::add("I feel the ground shifting slightly under my foot.");
+                }
+
+                msg_log::more_prompt();
         }
 }
 
@@ -338,45 +398,10 @@ void Trap::trigger_start(const actor::Actor* actor)
         }
 
         if (is_magical()) {
-                // TODO: Play sfx for magic traps.
+                announce_magic_trap_trigger(*actor, m_pos, is_hidden());
         }
         else if (type() != TrapId::web) {
-                // Not magical, not spider web
-                std::string msg = "I hear a click.";
-
-                auto alerts = AlertsMon::no;
-
-                if (actor::is_player(actor)) {
-                        alerts = AlertsMon::yes;
-
-                        // If player triggering, use more foreboding message
-                        msg += "..";
-                }
-
-                Snd snd(
-                        msg,
-                        audio::SfxId::mechanical_trap_trigger,
-                        IgnoreMsgIfOriginSeen::no,
-                        m_pos,
-                        nullptr,
-                        SndVol::low,
-                        alerts);
-
-                snd.run();
-
-                if (actor::is_player(actor)) {
-                        const bool is_deaf =
-                                map::g_player->m_properties.has(
-                                        PropId::deaf);
-
-                        if (is_deaf) {
-                                msg_log::add(
-                                        "I feel the ground shifting "
-                                        "slightly under my foot.");
-                        }
-
-                        msg_log::more_prompt();
-                }
+                announce_mechanical_trap_trigger(*actor, m_pos);
         }
 
         // Get a randomized value for number of remaining turns
@@ -927,12 +952,6 @@ void TrapTeleport::trigger()
                 return;
         }
 
-        map::update_vision();
-
-        print_magic_trap_trigger_messages(
-                *actor_here,
-                m_base_trap->is_hidden());
-
         teleport(*actor_here);
 
         TRACE_FUNC_END;
@@ -951,12 +970,6 @@ void TrapSummonMon::trigger()
                 ASSERT(false);
                 return;
         }
-
-        map::update_vision();
-
-        print_magic_trap_trigger_messages(
-                *actor_here,
-                m_base_trap->is_hidden());
 
         TRACE << "Finding summon candidates" << std::endl;
         std::vector<std::string> summon_bucket;
@@ -1032,12 +1045,6 @@ void TrapHpSap::trigger()
                 return;
         }
 
-        map::update_vision();
-
-        print_magic_trap_trigger_messages(
-                *actor_here,
-                m_base_trap->is_hidden());
-
         auto* const hp_sap =
                 static_cast<PropHpSap*>(
                         property_factory::make(PropId::hp_sap));
@@ -1071,12 +1078,6 @@ void TrapSpiSap::trigger()
                 ASSERT(false);
                 return;
         }
-
-        map::update_vision();
-
-        print_magic_trap_trigger_messages(
-                *actor_here,
-                m_base_trap->is_hidden());
 
         Prop* const sp_sap = property_factory::make(PropId::spi_sap);
 
@@ -1236,8 +1237,7 @@ void TrapSlow::trigger()
                 return;
         }
 
-        actor_here->m_properties.apply(
-                property_factory::make(PropId::slowed));
+        actor_here->m_properties.apply(property_factory::make(PropId::slowed));
 
         TRACE_FUNC_END;
 }
@@ -1256,14 +1256,7 @@ void TrapCurse::trigger()
                 return;
         }
 
-        map::update_vision();
-
-        print_magic_trap_trigger_messages(
-                *actor_here,
-                m_base_trap->is_hidden());
-
-        actor_here->m_properties.apply(
-                property_factory::make(PropId::cursed));
+        actor_here->m_properties.apply(property_factory::make(PropId::cursed));
 
         TRACE_FUNC_END;
 }
@@ -1279,12 +1272,6 @@ void TrapUnlearnSpell::trigger()
                 ASSERT(false);
                 return;
         }
-
-        map::update_vision();
-
-        print_magic_trap_trigger_messages(
-                *actor_here,
-                m_base_trap->is_hidden());
 
         if (actor::is_player(actor_here)) {
                 try_unlearn_for_player();

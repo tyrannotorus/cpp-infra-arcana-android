@@ -205,8 +205,11 @@ void draw_logo();
 //
 void draw_descr_box(const std::vector<ColoredString>& lines);
 
-// Run a flash animation at actor.
-void flash_at_actor(const actor::Actor& actor, const Color& color);
+// Run a flash animation at position.
+void flash_at(const P& pos, const Color& color, int speed_pct = 100);
+
+// Run a flash animation at actor. The flash will follow the actor if it moves.
+void flash_at_actor(const actor::Actor& actor, const Color& color, int speed_pct = 100);
 
 // Draw all currently active flash animations.
 void draw_flash_animations();

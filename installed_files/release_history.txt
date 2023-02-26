@@ -31,6 +31,7 @@
 - It is no longer possible to disarm a trap that has started triggering ("I hear a click...").
 - Magic traps (strange shape on the ground) may now spawn anywhere, previously they were not allowed to spawn next to blocking terrain, which made these trap types rare to encounter.
 - Magic traps are always revealed, i.e. there is no need to detect them.
+- When a magic trap triggers there is now a sound, and a flash of light on the map.
 - Added item "Bone Charm" that grants spell resistance for a few turns when activated, and dispels all seen magic traps.
 - Occultist characters no longer have the ability to dispel magic traps, instead they start with a number of Bone Charms.
 - All magic traps now have an effect when triggered by a monster (previously most of them would not do anything at all).

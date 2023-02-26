@@ -30,12 +30,14 @@ namespace io
 {
 struct FlashData
 {
+        P pos {};
         // Actor is optional, if set, the flash will "follow" the actor (e.g. if
         // knocked back).
         const actor::Actor* actor_flashed_at {nullptr};
         R px_rect {};
         Color color {};
         int alpha_pct {0};
+        int alpha_pct_decr_step {-1};
 };
 
 extern SDL_Window* g_sdl_window;

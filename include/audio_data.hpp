@@ -86,6 +86,7 @@ enum class SfxId
         monolith,
         thunder,
         gong,
+        magic_trap_trigger,
         mechanical_trap_trigger,
         wade,
         swim,
