@@ -864,14 +864,10 @@ void Actor::kick_mon(Actor& defender)
              (d.id == "MON_CRAWLING_INTESTINES") ||
              (d.id == "MON_CRAWLING_HAND") ||
              (d.id == "MON_THING"))) {
-                kick_wpn =
-                        static_cast<item::Wpn*>(
-                                item::make(item::Id::player_stomp));
+                kick_wpn = static_cast<item::Wpn*>(item::make(item::Id::player_stomp));
         }
         else {
-                kick_wpn =
-                        static_cast<item::Wpn*>(
-                                item::make(item::Id::player_kick));
+                kick_wpn = static_cast<item::Wpn*>(item::make(item::Id::player_kick));
         }
 
         attack::melee(this, m_pos, defender.m_pos, *kick_wpn);

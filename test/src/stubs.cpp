@@ -198,10 +198,12 @@ int graphics_cycle_nr(const GraphicsCycle)
         return 0;
 }
 
-void flash_at_actor(const actor::Actor& actor, const Color& color)
+void flash_at(const P&, const Color&, const int)
 {
-        (void)actor;
-        (void)color;
+}
+
+void flash_at_actor(const actor::Actor&, const Color&, const int)
+{
 }
 
 void draw_flash_animations() {}

@@ -94,7 +94,7 @@ TEST_CASE("Seen hostile monster attacking seen friendly monster")
                 static_cast<item::Wpn&>(
                         *mon_hostile->m_inv.m_intrinsics[0]);
 
-        attack::melee(mon_hostile, mon_hostile->m_pos, *mon_allied, wpn);
+        attack::melee(mon_hostile, mon_hostile->m_pos, mon_allied->m_pos, wpn);
 
         // Send the current message to history
         msg_log::clear();
@@ -150,7 +150,7 @@ TEST_CASE("Hostile monster outside FOV attacking friendly monster outside FOV")
                 static_cast<item::Wpn&>(
                         *mon_hostile->m_inv.m_intrinsics[0]);
 
-        attack::melee(mon_hostile, mon_hostile->m_pos, *mon_allied, wpn);
+        attack::melee(mon_hostile, mon_hostile->m_pos, mon_allied->m_pos, wpn);
 
         // Send the current message to history
         msg_log::clear();
@@ -209,7 +209,7 @@ TEST_CASE("Invisible hostile monster attacking seen friendly monster")
                 static_cast<item::Wpn&>(
                         *mon_hostile->m_inv.m_intrinsics[0]);
 
-        attack::melee(mon_hostile, mon_hostile->m_pos, *mon_allied, wpn);
+        attack::melee(mon_hostile, mon_hostile->m_pos, mon_allied->m_pos, wpn);
 
         // Send the current message to history
         msg_log::clear();
@@ -285,7 +285,7 @@ TEST_CASE("Invisible hostile monster attacking invisible friendly monster")
                 static_cast<item::Wpn&>(
                         *mon_hostile->m_inv.m_intrinsics[0]);
 
-        attack::melee(mon_hostile, mon_hostile->m_pos, *mon_allied, wpn);
+        attack::melee(mon_hostile, mon_hostile->m_pos, mon_allied->m_pos, wpn);
 
         // Send the current message to history
         msg_log::clear();
@@ -345,7 +345,7 @@ TEST_CASE("Visible friendly monster attacking invisible hostile monster")
                 static_cast<item::Wpn&>(
                         *mon_allied->m_inv.m_intrinsics[0]);
 
-        attack::melee(mon_allied, mon_allied->m_pos, *mon_hostile, wpn);
+        attack::melee(mon_allied, mon_allied->m_pos, mon_hostile->m_pos, wpn);
 
         // Send the current message to history
         msg_log::clear();
@@ -374,6 +374,8 @@ TEST_CASE("Player kicking invisible monster")
         init_terrain();
 
         map::g_player->m_pos.set(7, 5);
+
+        map::update_terrain(terrain::make(terrain::Id::floor, {8, 5}));
 
         auto* mon = actor::make("MON_ZOMBIE", {8, 5});
 
@@ -433,6 +435,8 @@ TEST_CASE("Test player killing invisible monster")
 
         map::g_player->m_inv.put_in_slot(SlotId::wpn, wpn, Verbose::no);
 
+        map::update_terrain(terrain::make(terrain::Id::floor, {8, 5}));
+
         auto* mon = actor::make("MON_ZOMBIE", {8, 5});
 
         mon->m_properties.apply(property_factory::make(PropId::invis));
@@ -450,7 +454,7 @@ TEST_CASE("Test player killing invisible monster")
         REQUIRE(!mon->m_data->has_player_seen);
 
         while (true) {
-                attack::melee(map::g_player, map::g_player->m_pos, *mon, *wpn);
+                attack::melee(map::g_player, map::g_player->m_pos, mon->m_pos, *wpn);
 
                 game_time::g_allow_tick = true;
 
