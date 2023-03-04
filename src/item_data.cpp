@@ -1856,6 +1856,7 @@ void init()
                 d.melee.prop_applied.prop.reset(prop);
                 d.melee.prop_applied.pct_chance_to_apply = 20;
         }
+        d.ranged.is_throwable_wpn = false;
         d.is_unique = true;
         d.value = Value::supreme_treasure;
         d.chance_to_incl_in_spawn_list = 0;
