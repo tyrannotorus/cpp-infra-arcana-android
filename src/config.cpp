@@ -79,6 +79,7 @@ static bool s_is_ranged_wpn_auto_reload = false;
 static bool s_is_intro_lvl_skipped = false;
 static bool s_is_intro_popup_skipped = false;
 static bool s_is_any_key_confirm_more = false;
+static bool s_auto_select_menu = false;
 static HintsMode s_hints_mode = HintsMode::once;
 static bool s_has_seen_hint_global[(size_t)hints::Id::END];
 static bool s_always_warn_new_mon = false;
@@ -307,6 +308,7 @@ static void set_default_variables()
         s_is_intro_lvl_skipped = false;
         s_is_intro_popup_skipped = false;
         s_is_any_key_confirm_more = false;
+        s_auto_select_menu = false;
         s_hints_mode = HintsMode::once;
         s_always_warn_new_mon = true;
         s_warn_on_throw_valuable = true;
@@ -422,6 +424,9 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_is_any_key_confirm_more = lines.front() == "1";
         remove_line(lines);
 
+        s_auto_select_menu = lines.front() == "1";
+        remove_line(lines);
+
         s_hints_mode = (HintsMode)to_int(lines.front());
         remove_line(lines);
 
@@ -512,6 +517,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(s_is_intro_lvl_skipped ? "1" : "0");
         lines.emplace_back(s_is_intro_popup_skipped ? "1" : "0");
         lines.emplace_back(s_is_any_key_confirm_more ? "1" : "0");
+        lines.emplace_back(s_auto_select_menu ? "1" : "0");
         lines.emplace_back(std::to_string((int)s_hints_mode));
         lines.emplace_back(s_always_warn_new_mon ? "1" : "0");
         lines.emplace_back(s_warn_on_throw_valuable ? "1" : "0");
@@ -594,6 +600,7 @@ void init()
         // Input
         s_options.emplace_back(std::make_unique<InputModeOption>());
         s_options.emplace_back(std::make_unique<AnyKeyConfirmMoreOption>());
+        s_options.emplace_back(std::make_unique<AutoSelectMenuOption>());
         s_options.emplace_back(std::make_unique<AutoReloadOption>());
 
         // Gameplay
@@ -824,6 +831,11 @@ bool is_intro_popup_skipped()
 bool is_any_key_confirm_more()
 {
         return s_is_any_key_confirm_more;
+}
+
+bool is_auto_select_menu()
+{
+        return s_auto_select_menu;
 }
 
 HintsMode hints_mode()
@@ -1523,6 +1535,38 @@ void AnyKeyConfirmMoreOption::change(OptionChangeCommand command) const
         s_is_any_key_confirm_more = !s_is_any_key_confirm_more;
 }
 
+std::string AutoSelectMenuOption::name() const
+{
+        return "Auto select menu entries";
+}
+
+std::string AutoSelectMenuOption::descr() const
+{
+        return (
+                "If disabled, pressing a letter key while in a menu only jumps "
+                "to that position, and a second press (or enter) is required "
+                "to select it (this is only applicable for menus where the options "
+                "have descriptions, such as the trait selection menu). "
+                "If enabled, pressing a letter immediately selects that entry.");
+}
+
+std::string AutoSelectMenuOption::value_str() const
+{
+        return s_auto_select_menu ? "Yes" : "No";
+}
+
+OptionSubmenuType AutoSelectMenuOption::submenu_type() const
+{
+        return OptionSubmenuType::input;
+}
+
+void AutoSelectMenuOption::change(OptionChangeCommand command) const
+{
+        (void)command;
+
+        s_auto_select_menu = !s_auto_select_menu;
+}
+
 std::string DisplayHintsOption::name() const
 {
         return "Display hints";
@@ -1923,7 +1967,10 @@ void OptionsState::update()
         const io::InputData input = io::read_input();
 
         const MenuAction action =
-                m_browser.read(input, MenuInputMode::scrolling_and_letters);
+                m_browser.read(
+                        input,
+                        MenuInputMode::scrolling_and_letters,
+                        ForceAutoSelect::yes);
 
         switch (action) {
         case MenuAction::esc:

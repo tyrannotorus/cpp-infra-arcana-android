@@ -261,7 +261,8 @@ void MainMenuState::update()
                 action =
                         m_browser.read(
                                 input,
-                                MenuInputMode::scrolling_and_letters);
+                                MenuInputMode::scrolling_and_letters,
+                                ForceAutoSelect::yes);
         }
 
         switch (action) {

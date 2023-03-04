@@ -90,6 +90,7 @@ bool is_ranged_wpn_auto_reload();
 bool is_intro_lvl_skipped();
 bool is_intro_popup_skipped();
 bool is_any_key_confirm_more();
+bool is_auto_select_menu();
 HintsMode hints_mode();
 bool has_seen_hint_global(hints::Id id);
 void set_hint_seen_global(hints::Id id);

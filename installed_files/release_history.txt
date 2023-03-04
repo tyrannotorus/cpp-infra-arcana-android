@@ -80,6 +80,7 @@ by bumping them).
 - Split the options menu into several sub-menus (Video, Audio, Input, Gameplay).
 - Made some changes to reduce the risk of registering key presses when the game window regains focus (e.g. accidentally doing a melee attack due to the game registering a tab press when alt-tabbing back to the game)
 - The user data location is now printed in the main options menu.
+- By default, selecting a menu entry with a letter key only jumps to that location, and a second press (or enter) is required to select it. This behavior only happens in menus that have descriptions for the different entries. Added an option to always immediately select entries when pressing letter keys (the old way).
 
 ##############################
 # Modability

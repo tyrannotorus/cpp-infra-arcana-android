@@ -35,6 +35,12 @@ enum class MenuInputMode
         scrolling
 };
 
+enum class ForceAutoSelect
+{
+        no,
+        yes
+};
+
 // TODO: Define in cpp file instead
 const std::vector<char> std_menu_keys = {
         // NOTE: j k l is used for browsing and selecting in menus in vi mode
@@ -104,7 +110,10 @@ public:
 
         MenuBrowser& operator=(const MenuBrowser&) = default;
 
-        MenuAction read(const io::InputData& input, MenuInputMode mode);
+        MenuAction read(
+                const io::InputData& input,
+                MenuInputMode mode,
+                ForceAutoSelect force_auto_select = ForceAutoSelect::no);
 
         void move(VerDir dir);
 

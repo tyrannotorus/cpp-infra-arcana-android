@@ -12,6 +12,7 @@
 #include "SDL_keycode.h"
 #include "audio.hpp"
 #include "audio_data.hpp"
+#include "config.hpp"
 #include "debug.hpp"
 #include "global.hpp"
 #include "io.hpp"
@@ -38,7 +39,10 @@ static bool is_printable_ascii_char(const int key)
 // -----------------------------------------------------------------------------
 // MenuBrowser
 // -----------------------------------------------------------------------------
-MenuAction MenuBrowser::read(const io::InputData& input, MenuInputMode mode)
+MenuAction MenuBrowser::read(
+        const io::InputData& input,
+        const MenuInputMode mode,
+        const ForceAutoSelect force_auto_select)
 {
         // NOTE: j k l are reserved for browsing with vi keys (not included in
         // the standard menu key letters)
@@ -125,7 +129,7 @@ MenuAction MenuBrowser::read(const io::InputData& input, MenuInputMode mode)
                 return MenuAction::esc;
         }
 
-        // Handle shortcut keys
+        // Handle shortcut keys.
         if ((mode == MenuInputMode::scrolling_and_letters) &&
             is_printable_ascii_char(input.key)) {
                 const auto c = (char)input.key;
@@ -137,12 +141,12 @@ MenuAction MenuBrowser::read(const io::InputData& input, MenuInputMode mode)
                                 c);
 
                 if (find_result == std::cend(m_menu_keys)) {
-                        // Not a valid menu key, ever
+                        // Not a valid menu key, ever.
                         return MenuAction::none;
                 }
 
 #ifndef NDEBUG
-                // Should never be used as letters (reserved for browsing)
+                // Should never be used as letters (reserved for browsing).
                 if ((c == 'j') || (c == 'k') || (c == 'l')) {
                         PANIC;
                 }
@@ -154,17 +158,29 @@ MenuAction MenuBrowser::read(const io::InputData& input, MenuInputMode mode)
                                 find_result);
 
                 if (relative_idx >= nr_items_shown()) {
-                        // The key is not in the range of shown items
+                        // The key is not in the range of shown items.
                         return MenuAction::none;
                 }
 
-                // OK, the user did select an item
+                // OK, the user did select an item.
                 const int global_idx = top_idx_shown() + relative_idx;
+
+                const bool is_new_idx_selected = (m_y != global_idx);
 
                 set_y(global_idx);
 
                 if (m_play_selection_audio) {
                         audio::play(audio::SfxId::menu_select);
+                }
+
+                if ((mode == MenuInputMode::scrolling_and_letters) &&
+                    is_new_idx_selected &&
+                    !config::is_auto_select_menu() &&
+                    (force_auto_select == ForceAutoSelect::no)) {
+                        // A different position than the current position was
+                        // selected with a letter key, and auto select is
+                        // disabled - only jump to this location.
+                        return MenuAction::none;
                 }
 
                 return MenuAction::selected;
