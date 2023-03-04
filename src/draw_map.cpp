@@ -521,7 +521,10 @@ void run()
         // NOTE: This will also setup the whole array with default values.
         s_bg_color_obscured.resize(map::dims());
 
-        draw_unseen_cells_from_player_memory();
+        if (!map::g_player->m_properties.has(PropId::terrified)) {
+                draw_unseen_cells_from_player_memory();
+        }
+
         draw_terrains();
         draw_dead_actors();
         draw_items();

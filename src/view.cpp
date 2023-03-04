@@ -34,6 +34,11 @@ static void print_player_memory_at(const P& p)
                 return;
         }
 
+        if (map::g_player->m_properties.has(PropId::terrified)) {
+                // Don't remember anything
+                return;
+        }
+
         std::vector<map::PlayerMemoryAppearance> memory_list = {
                 map::g_terrain_memory.at(p).appearance,
                 map::g_item_memory.at(p).appearance};
