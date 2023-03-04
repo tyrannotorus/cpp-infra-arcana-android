@@ -46,39 +46,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static BinaryAnswer query_player_attack_mon_with_ranged_wpn(
-        const item::Wpn& wpn,
-        const actor::Actor& mon)
-{
-        const std::string wpn_name = wpn.name(ItemNameType::a);
-
-        const bool can_see_mon = can_player_see_actor(mon);
-
-        const std::string mon_name =
-                can_see_mon
-                ? mon.name_the()
-                : "it";
-
-        const std::string msg =
-                "Attack " +
-                mon_name +
-                " with " +
-                wpn_name +
-                "? " +
-                common_text::g_yes_or_no_hint;
-
-        msg_log::add(
-                msg,
-                colors::light_white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
-
-        const auto answer = query::yes_or_no();
-
-        return answer;
-}
-
 static void player_bump_known_hostile_mon(actor::Actor& mon)
 {
         actor::Actor& player = *map::g_player;
@@ -87,21 +54,22 @@ static void player_bump_known_hostile_mon(actor::Actor& mon)
                 return;
         }
 
-        item::Item* const wpn_item = player.m_inv.item_in_slot(SlotId::wpn);
+        item::Item* wpn_item = player.m_inv.item_in_slot(SlotId::wpn);
 
         if (!wpn_item) {
-                player.hand_att(mon);
-
-                return;
+                wpn_item = &player.unarmed_wpn();
         }
 
         auto& wpn = static_cast<item::Wpn&>(*wpn_item);
 
-        // If this is also a ranged weapon, ask if player really
-        // intended to use it as melee weapon
+        // If this is also a ranged weapon, ask if player really intended to use
+        // it as melee weapon.
         if (wpn.data().ranged.is_ranged_wpn &&
             config::warn_on_ranged_wpn_melee()) {
-                const BinaryAnswer answer = query_player_attack_mon_with_ranged_wpn(wpn, mon);
+                const BinaryAnswer answer =
+                        attack::query_player_attack_mon_with_ranged_wpn(
+                                wpn,
+                                mon);
 
                 msg_log::clear();
 

@@ -188,11 +188,9 @@ public:
         void restore_shock(int amount_restored, bool is_temp_shock_restored);
         int shock_tot() const;
         int insanity() const;
-        void auto_melee();
         item::Wpn& unarmed_wpn() const;
         void set_unarmed_wpn(item::Wpn* wpn) const;
         void kick_mon(Actor& defender);
-        void hand_att(Actor& defender);
         // Only interrupts repeated commands like waiting.
         void on_log_msg_printed();
         // Aborts e.g. healing. "is_forced" controlls if querying is allowed

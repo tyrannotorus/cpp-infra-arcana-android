@@ -10,10 +10,15 @@
 #include <string>
 
 #include "actor.hpp"
+#include "actor_see.hpp"
 #include "attack_internal.hpp"
+#include "common_text.hpp"
 #include "game_time.hpp"
+#include "item.hpp"
 #include "item_att_property.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
+#include "msg_log.hpp"
 #include "property.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
@@ -98,6 +103,36 @@ void try_apply_attack_property_on_actor(
 
                 actor.m_properties.apply(prop_cpy);
         }
+}
+
+BinaryAnswer query_player_attack_mon_with_ranged_wpn(
+        const item::Wpn& wpn,
+        const actor::Actor& mon)
+{
+        const std::string wpn_name = wpn.name(ItemNameType::a);
+
+        const bool can_see_mon = can_player_see_actor(mon);
+
+        const std::string mon_name = can_see_mon ? mon.name_the() : "it";
+
+        const std::string msg =
+                "Attack " +
+                mon_name +
+                " with " +
+                wpn_name +
+                "? " +
+                common_text::g_yes_or_no_hint;
+
+        msg_log::add(
+                msg,
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+
+        const BinaryAnswer answer = query::yes_or_no();
+
+        return answer;
 }
 
 }  // namespace attack

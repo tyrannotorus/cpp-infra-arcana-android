@@ -25,6 +25,7 @@
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
+#include "auto_melee.hpp"
 #include "bash.hpp"
 #include "character_descr.hpp"
 #include "close.hpp"
@@ -914,7 +915,7 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::auto_melee: {
-                map::g_player->auto_melee();
+                auto_melee::run();
         } break;
 
         case GameCmd::cast_spell: {

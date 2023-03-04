@@ -18,7 +18,6 @@
 #include "ability_values.hpp"
 #include "actor_data.hpp"
 #include "actor_death.hpp"
-#include "actor_move.hpp"
 #include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
@@ -42,7 +41,6 @@
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "minimap.hpp"
-#include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "popup.hpp"
@@ -815,37 +813,6 @@ void Actor::interrupt_actions(const ForceInterruptActions is_forced)
         player_state::g_auto_move_dir = Dir::END;
 }
 
-void Actor::auto_melee()
-{
-        if (player_state::g_target &&
-            player_state::g_target->is_alive() &&
-            is_pos_adj(m_pos, player_state::g_target->m_pos, false) &&
-            can_player_see_actor(*player_state::g_target)) {
-                const P delta = player_state::g_target->m_pos - m_pos;
-                const Dir dir = dir_utils::dir(delta);
-
-                do_move_action(*this, dir);
-
-                return;
-        }
-
-        // If this line reached, there is no adjacent current target.
-
-        for (const auto& d : dir_utils::g_dir_list) {
-                auto* const actor = map::living_actor_at(m_pos + d);
-
-                if (actor &&
-                    !is_leader_of(actor) &&
-                    can_player_see_actor(*actor)) {
-                        player_state::g_target = actor;
-
-                        do_move_action(*this, dir_utils::dir(d));
-
-                        return;
-                }
-        }
-}
-
 void Actor::kick_mon(Actor& defender)
 {
         item::Wpn* kick_wpn = nullptr;
@@ -885,13 +852,6 @@ item::Wpn& Actor::unarmed_wpn() const
 void Actor::set_unarmed_wpn(item::Wpn* wpn) const
 {
         player_state::g_unarmed_wpn.reset(wpn);
-}
-
-void Actor::hand_att(Actor& defender)
-{
-        item::Wpn& wpn = unarmed_wpn();
-
-        attack::melee(this, m_pos, defender.m_pos, wpn);
 }
 
 void Actor::update_fov()

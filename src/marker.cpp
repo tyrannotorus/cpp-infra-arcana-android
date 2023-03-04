@@ -136,7 +136,12 @@ void MarkerState::draw()
                 ? -1
                 : (effective_dist_range.max + 1);
 
-        int red_from_dist = max_king_dist() + 1;
+        // NOTE: Maximum distance "-1" means "no maximum distance". If the thing
+        // being aimed HAS a maximum distance (greater than -1), then the marker
+        // should be red from distances greater than the maximum distance.
+        const int max_dist = max_king_dist();
+        const int red_from_dist = (max_dist == -1) ? -1 : (max_dist + 1);
+
         int red_from_idx = -1;
 
         if (show_blocked()) {
