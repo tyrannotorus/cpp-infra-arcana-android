@@ -557,6 +557,15 @@ static void apply_melee_attack_props(
         }
 }
 
+static void knock_back_target(actor::Actor& defender, const P& attacker_origin)
+{
+        const P d = defender.m_pos - attacker_origin;
+
+        const P knock_origin = defender.m_pos - d.signs();
+
+        knockback::run(defender, knock_origin, knockback::KnockbackSource::other);
+}
+
 static void melee_hit_actor(
         const int dmg,
         actor::Actor& defender,
@@ -591,14 +600,8 @@ static void melee_hit_actor(
         if (defender.is_alive()) {
                 apply_melee_attack_props(defender, attacker, wpn);
 
-                // NOTE: Only run knockback if attacker is adjacent to the
-                // defender.
-                if (wpn.data().melee.knocks_back &&
-                    attacker->m_pos.is_adjacent(defender.m_pos)) {
-                        knockback::run(
-                                defender,
-                                attacker_origin,
-                                knockback::KnockbackSource::other);
+                if (wpn.data().melee.knocks_back) {
+                        knock_back_target(defender, attacker_origin);
                 }
         }
         else {

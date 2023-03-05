@@ -41,6 +41,7 @@ enum class Id
         machete,
         axe,
         spiked_mace,
+        spear,
         pitch_fork,
         sledge_hammer,
 

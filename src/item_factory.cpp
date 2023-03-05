@@ -145,6 +145,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::machete:
         case Id::axe:
         case Id::pitch_fork:
+        case Id::spear:
         case Id::sledge_hammer:
         case Id::flagellant_whip:
         case Id::spiked_mace:

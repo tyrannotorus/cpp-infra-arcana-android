@@ -175,6 +175,7 @@ enum class TileId
         sledge_hammer,
         smoke,
         snake,
+        spear,
         spider,
         spiked_mace,
         square_checkered,

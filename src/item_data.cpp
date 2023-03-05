@@ -1047,16 +1047,42 @@ void init()
         d.id = Id::pitch_fork;
         d.base_name = {"Pitchfork", "Pitchforks", "a Pitchfork"};
         d.base_descr = {
-                "A long staff with a forked, four-pronged end. "
-                "Pitchforks are useful in keeping attackers at bay.",
+                "A long staff with a forked, four-pronged end.",
 
-                "If attacked from an adjacent position, "
+                "Pitchforks are useful in keeping attackers at bay - "
                 "the victim is pushed back when stabbed."};
-        d.weight = Weight::heavy;
+        d.weight = (Weight::medium + Weight::heavy) / 2;
         d.tile = gfx::TileId::pitchfork;
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(1, 10);
+        d.melee.dmg = WpnDmg(1, 7);
         d.melee.hit_chance_mod = -10;
+        d.melee.can_attack_corpse = true;
+        d.melee.reach = 2;
+        d.melee.knocks_back = true;
+        d.melee.dmg_type = DmgType::piercing;
+        d.melee.is_noisy = true;
+        d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
+        d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
+        d.melee.miss_sfx = audio::SfxId::miss_heavy;
+        d.ranged.throw_hit_chance_mod = -10;
+        d.ranged.effective_range = {0, 3};
+        d.ranged.max_range = d.ranged.effective_range.max + 3;
+        d.ranged.dmg_type = DmgType::piercing;
+        d.native_containers.push_back(terrain::Id::cabinet);
+        d.native_containers.push_back(terrain::Id::cocoon);
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::melee_wpn);
+        d.id = Id::spear;
+        d.base_name = {"Spear", "Spears", "a Spear"};
+        d.base_descr = {
+                "A pole weapon consisting of a wooden shaft and a steel head."};
+        d.weight = (Weight::medium + Weight::heavy) / 2;
+        d.tile = gfx::TileId::spear;
+        d.color = colors::brown();
+        d.melee.attack_msgs = {"strike", "strikes"};
+        d.melee.dmg = WpnDmg(1, 8);
+        d.melee.hit_chance_mod = 0;
         d.melee.can_attack_corpse = true;
         d.melee.reach = 2;
         d.melee.knocks_back = true;
