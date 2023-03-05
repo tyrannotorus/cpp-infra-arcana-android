@@ -59,7 +59,7 @@ void Monolith::hit(
                         game::incr_player_xp(8);
 
                         map::g_player->restore_sp(999, false, Verbose::no);
-                        map::g_player->restore_sp(10, true);
+                        map::g_player->restore_sp(5, true);
                 }
                 break;
 
