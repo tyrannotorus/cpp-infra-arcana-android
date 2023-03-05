@@ -346,10 +346,16 @@ void MainMenuState::on_start()
 
         s_current_quote = messages::get_random_menu_quote();
 
+        // Do not play the music in debug mode (it gets extremely repetitive).
+#ifdef NDEBUG
         audio::play_music(audio::MusId::cthulhiana_madness);
+#endif
 }
 
 void MainMenuState::on_resume()
 {
+        // Do not play the music in debug mode (it gets extremely repetitive).
+#ifdef NDEBUG
         audio::play_music(audio::MusId::cthulhiana_madness);
+#endif
 }

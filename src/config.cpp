@@ -291,13 +291,7 @@ static void set_default_variables()
         s_window_px_w = native_res.x;
         s_window_px_h = native_res.y;
 
-#ifdef NDEBUG
         s_master_volume_pct_option = s_master_volume_pct_adjusted = 100;
-#else
-        // Hearing the audio all the time while debug testing gets old...
-        s_master_volume_pct_option = s_master_volume_pct_adjusted = 0;
-#endif  // NDEBUG
-
         s_is_ambient_audio_enabled = true;
         s_is_ambient_audio_preloaded = false;
         s_renderer_type = RendererType::auto_select;
