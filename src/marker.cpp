@@ -627,7 +627,7 @@ int Aiming::max_king_dist() const
 }
 
 // -----------------------------------------------------------------------------
-// Aim long reach melee weapon marker state
+// Aim melee weapon marker state
 // -----------------------------------------------------------------------------
 void AimingMeleeWpn::on_moved()
 {
@@ -743,7 +743,9 @@ void AimingMeleeWpn::handle_input(const io::InputData& input)
 
 bool AimingMeleeWpn::is_pos_blocked(const P& pos) const
 {
-        return !bash::is_open_terrain(*map::g_terrain.at(pos));
+        // NOTE: It is possible to attack through terrain that projectiles can
+        // pass through (such as barred gates).
+        return !map::g_terrain.at(pos)->is_projectile_passable();
 }
 
 int AimingMeleeWpn::max_king_dist() const

@@ -684,6 +684,16 @@ static bool melee_should_break_wpn(
 
 static terrain::Terrain* get_blocking_terrain_on_path_to_target(const P& origin, const P& target)
 {
+        // Terrain on the path to the target is considered blocking if it blocks
+        // projectiles.
+        //
+        // Rationale: We do not want to check for "open terrain" (floor-like
+        // terrain) here, since the player should be able to attack through some
+        // non-open terrain such as barred gate. It is probably a good enough
+        // approximation that you can attack with a long reach weapon through
+        // terrain that you can also shoot through.
+        //
+
         std::vector<P> line = line_calc::calc_new_line(origin, target, true, 999, false);
 
         // Do not travel into the target position, only check positions on the
@@ -706,7 +716,7 @@ static terrain::Terrain* get_blocking_terrain_on_path_to_target(const P& origin,
 
                 terrain::Terrain* const terrain = map::g_terrain.at(p);
 
-                if (!bash::is_open_terrain(*terrain)) {
+                if (!terrain->is_projectile_passable()) {
                         return terrain;
                 }
         }
