@@ -1091,7 +1091,7 @@ void init()
         d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
-        d.ranged.throw_hit_chance_mod = -10;
+        d.ranged.throw_hit_chance_mod = -5;
         d.ranged.effective_range = {0, 3};
         d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::piercing;
