@@ -216,7 +216,7 @@ static void init_data_list()
 
         d.id = terrain::Id::chasm;
         d.character = '.';
-        d.tile = gfx::TileId::floor;
+        d.tile = gfx::TileId::square_checkered;
         d.move_rules.props_allow_move.push_back(PropId::ethereal);
         d.move_rules.props_allow_move.push_back(PropId::flying);
         d.move_rules.props_allow_move.push_back(PropId::tiny_flying);

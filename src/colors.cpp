@@ -39,6 +39,7 @@ static SDL_Color s_sdl_dark_yellow;
 static SDL_Color s_sdl_yellow;
 static SDL_Color s_sdl_blue;
 static SDL_Color s_sdl_light_blue;
+static SDL_Color s_sdl_dark_blue;
 static SDL_Color s_sdl_magenta;
 static SDL_Color s_sdl_light_magenta;
 static SDL_Color s_sdl_cyan;
@@ -91,6 +92,7 @@ static Color s_dark_yellow;
 static Color s_yellow;
 static Color s_blue;
 static Color s_light_blue;
+static Color s_dark_blue;
 static Color s_magenta;
 static Color s_light_magenta;
 static Color s_cyan;
@@ -246,6 +248,7 @@ static void load_colors()
         load_color(colors_e, "COLOR_YELLOW", s_sdl_yellow);
         load_color(colors_e, "COLOR_BLUE", s_sdl_blue);
         load_color(colors_e, "COLOR_LIGHT_BLUE", s_sdl_light_blue);
+        load_color(colors_e, "COLOR_DARK_BLUE", s_sdl_dark_blue);
         load_color(colors_e, "COLOR_MAGENTA", s_sdl_magenta);
         load_color(colors_e, "COLOR_LIGHT_MAGENTA", s_sdl_light_magenta);
         load_color(colors_e, "COLOR_CYAN", s_sdl_cyan);
@@ -280,6 +283,7 @@ static void load_colors()
         s_yellow = Color(s_sdl_yellow);
         s_blue = Color(s_sdl_blue);
         s_light_blue = Color(s_sdl_light_blue);
+        s_dark_blue = Color(s_sdl_dark_blue);
         s_magenta = Color(s_sdl_magenta);
         s_light_magenta = Color(s_sdl_light_magenta);
         s_cyan = Color(s_sdl_cyan);
@@ -559,6 +563,11 @@ const Color& blue()
 const Color& light_blue()
 {
         return s_light_blue;
+}
+
+const Color& dark_blue()
+{
+        return s_dark_blue;
 }
 
 const Color& magenta()

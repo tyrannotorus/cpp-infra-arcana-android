@@ -33,6 +33,7 @@
     <color name="COLOR_BLUE" rgb_hex="0000a8"/>
     <!-- Color 12 -->
     <color name="COLOR_LIGHT_BLUE" rgb_hex="1e90ff"/>
+    <color name="COLOR_DARK_BLUE" rgb_hex="00007c"/>
 
     <!-- MAGENTA / PURPLE -->
     <!-- Color 5 -->

@@ -71,6 +71,7 @@ by bumping them).
 - When the game asks for a number (e.g. number of items to drop) this is now done in a popup screen instead.
 - When entering text or numbers, the underscore cursor is blinking
 - The explosion area hint when aiming explosives is drawn as a blended overlay instead.
+- Chasms are now drawn with a dark blue checkered rectangle instead of a blue dot (if using tiles).
 - Changed color of grates to gray, to clarify that they are made of metal (and not wood)
 - Improved the tiles for stairs down (thanks to Andy Walker) and magic traps.
 - Added more sound effects (thanks Andy Walker for various gate sounds, item container opening sounds, and a horn sound).

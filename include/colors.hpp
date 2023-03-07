@@ -118,6 +118,7 @@ const Color& dark_yellow();
 const Color& yellow();
 const Color& blue();
 const Color& light_blue();
+const Color& dark_blue();
 const Color& magenta();
 const Color& light_magenta();
 const Color& cyan();

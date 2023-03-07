@@ -1662,7 +1662,7 @@ std::string Chasm::name(const Article article) const
 
 Color Chasm::color_default() const
 {
-        return colors::blue();
+        return colors::dark_blue();
 }
 
 // -----------------------------------------------------------------------------
