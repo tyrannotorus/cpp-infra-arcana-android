@@ -133,7 +133,6 @@ ChokePointData& ChokePointData::operator=(const ChokePointData& other)
 // -----------------------------------------------------------------------------
 namespace map
 {
-Array2<bool> g_explored(0, 0);
 Array2<bool> g_seen(0, 0);
 Array2<LosResult> g_los(0, 0);
 Array2<bool> g_light(0, 0);

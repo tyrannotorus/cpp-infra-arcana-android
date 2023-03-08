@@ -22,7 +22,7 @@
 
 namespace mapgen
 {
-void reserve_river(Region regions[3][3])
+void reserve_river(Array2<Region>& regions)
 {
         TRACE_FUNC_BEGIN;
 
@@ -40,12 +40,12 @@ void reserve_river(Region regions[3][3])
                                       const P& reg0,
                                       const P& reg2) {
                 const R regions_tot_rect(
-                        regions[reg0.x][reg0.y].r.p0,
-                        regions[reg2.x][reg2.y].r.p1);
+                        regions.at(reg0.x, reg0.y).r.p0,
+                        regions.at(reg2.x, reg2.y).r.p1);
 
                 room_rect = regions_tot_rect;
 
-                river_region = &regions[reg0.x][reg0.y];
+                river_region = &regions.at(reg0.x, reg0.y);
 
                 const int c = (breadth1 + breadth0) / 2;
 
@@ -95,11 +95,11 @@ void reserve_river(Region regions[3][3])
 
         if (axis == Axis::hor) {
                 // Horizontal
-                regions[1][1] = regions[2][1] = *river_region;
+                regions.at(1, 1) = regions.at(2, 1) = *river_region;
         }
         else {
                 // Vertical
-                regions[1][1] = regions[1][2] = *river_region;
+                regions.at(1, 1) = regions.at(1, 2) = *river_region;
         }
 
         map::g_room_list.push_back(room);

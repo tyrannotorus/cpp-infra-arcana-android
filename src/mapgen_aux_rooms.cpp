@@ -131,7 +131,7 @@ static bool try_make_aux_room(
 
 namespace mapgen
 {
-void make_aux_rooms(Region regions[3][3])
+void make_aux_rooms(Array2<Region>& regions)
 {
         TRACE_FUNC_BEGIN;
 
@@ -159,7 +159,7 @@ void make_aux_rooms(Region regions[3][3])
 
         for (int region_x = 0; region_x < 3; region_x++) {
                 for (int region_y = 0; region_y < 3; region_y++) {
-                        const Region& region = regions[region_x][region_y];
+                        const Region& region = regions.at(region_x, region_y);
 
                         if (region.main_room) {
                                 Room& main_r = *region.main_room;

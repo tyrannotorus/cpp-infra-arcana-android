@@ -53,11 +53,11 @@ bool make_std_lvl();
 //------------------------------------------------------------------------------
 // Map generation steps (in no particular order)
 //------------------------------------------------------------------------------
-void merge_regions(Region regions[3][3]);
+void merge_regions(Array2<Region>& regions);
 
-void make_aux_rooms(Region regions[3][3]);
+void make_aux_rooms(Array2<Region>& regions);
 
-void reserve_river(Region regions[3][3]);
+void reserve_river(Array2<Region>& regions);
 
 void make_sub_rooms();
 

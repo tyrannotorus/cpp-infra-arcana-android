@@ -37,15 +37,65 @@
 #include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static Array2<Region> init_regions()
+{
+        TRACE << "Init regions" << std::endl;
+
+        const int split_x_interval = map::w() / 3;
+        const int split_y_interval = map::h() / 3;
+
+        const int split_x1 = split_x_interval;
+        const int split_x2 = (split_x_interval * 2) + 1;
+
+        const int split_y1 = split_y_interval;
+        const int split_y2 = split_y_interval * 2;
+
+        std::vector<int> x0_list = {1, split_x1 + 1, split_x2 + 1};
+        std::vector<int> x1_list = {split_x1 - 1, split_x2 - 1, map::w() - 2};
+        std::vector<int> y0_list = {1, split_y1 + 1, split_y2 + 1};
+        std::vector<int> y1_list = {split_y1 - 1, split_y2 - 1, map::h() - 2};
+
+        Array2<Region> regions(3, 3);
+
+        for (int x_region = 0; x_region < 3; ++x_region) {
+                const int x0 = x0_list[x_region];
+                const int x1 = x1_list[x_region];
+
+                for (int y_region = 0; y_region < 3; ++y_region) {
+                        const int y0 = y0_list[y_region];
+                        const int y1 = y1_list[y_region];
+
+                        regions.at(x_region, y_region) = Region({x0, y0, x1, y1});
+                }
+        }
+
+        return regions;
+}
+
+// -----------------------------------------------------------------------------
 // MapBuilderStd
 // -----------------------------------------------------------------------------
 bool MapBuilderStd::build_specific()
 {
         TRACE_FUNC_BEGIN;
 
-        // TODO: Using hard coded values for now
-        if (map::g_dlvl >= g_dlvl_first_late_game) {
-                // Make late game levels slightly bigger
+        const int river_one_in_n = 1;
+
+        const bool is_river_level =
+                (map::g_dlvl >= g_dlvl_first_mid_game) &&
+                rnd::one_in(river_one_in_n);
+
+        // TODO: Using hard coded values for now. The values could probably be
+        // randomized within a range.
+
+        if (is_river_level) {
+                // "River" levels need to be big so there won't be a tiny chasm.
+                map::reset({60, 60});
+        }
+        else if (map::g_dlvl >= g_dlvl_first_late_game) {
+                // Make late game levels slightly bigger.
                 map::reset({54, 54});
         }
         else {
@@ -59,50 +109,7 @@ bool MapBuilderStd::build_specific()
         // NOTE: This must be called before any rooms are created
         room_factory::init_room_bucket();
 
-        TRACE << "Init regions" << std::endl;
-
-        const int split_x_interval = map::w() / 3;
-        const int split_y_interval = map::h() / 3;
-
-        const int split_x1 = split_x_interval;
-        const int split_x2 = (split_x_interval * 2) + 1;
-
-        const int split_y1 = split_y_interval;
-        const int split_y2 = split_y_interval * 2;
-
-        std::vector<int> x0_list = {
-                1,
-                split_x1 + 1,
-                split_x2 + 1};
-
-        std::vector<int> x1_list = {
-                split_x1 - 1,
-                split_x2 - 1,
-                map::w() - 2};
-
-        std::vector<int> y0_list = {
-                1,
-                split_y1 + 1,
-                split_y2 + 1};
-
-        std::vector<int> y1_list = {
-                split_y1 - 1,
-                split_y2 - 1,
-                map::h() - 2};
-
-        Region regions[3][3];
-
-        for (int x_region = 0; x_region < 3; ++x_region) {
-                const int x0 = x0_list[x_region];
-                const int x1 = x1_list[x_region];
-
-                for (int y_region = 0; y_region < 3; ++y_region) {
-                        const int y0 = y0_list[y_region];
-                        const int y1 = y1_list[y_region];
-
-                        regions[x_region][y_region] = Region({x0, y0, x1, y1});
-                }
-        }
+        Array2<Region> regions = init_regions();
 
         if (!mapgen::g_is_map_valid) {
                 return false;
@@ -111,10 +118,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Reserve regions for a "river"
         // ---------------------------------------------------------------------
-        const int river_one_in_n = 12;
-
-        if ((map::g_dlvl >= g_dlvl_first_mid_game) &&
-            rnd::one_in(river_one_in_n)) {
+        if (is_river_level) {
                 mapgen::reserve_river(regions);
         }
 
@@ -138,7 +142,7 @@ bool MapBuilderStd::build_specific()
 
         for (int x = 0; x < 3; ++x) {
                 for (int y = 0; y < 3; ++y) {
-                        auto& region = regions[x][y];
+                        auto& region = regions.at(x, y);
 
                         if (!region.main_room && region.is_free) {
                                 mapgen::make_room(region);

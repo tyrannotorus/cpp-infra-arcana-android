@@ -17,7 +17,7 @@
 
 namespace mapgen
 {
-void merge_regions(Region regions[3][3])
+void merge_regions(Array2<Region>& regions)
 {
         TRACE_FUNC_BEGIN;
 
@@ -70,7 +70,7 @@ void merge_regions(Region regions[3][3])
         auto is_regions_free = [&regions](const R& r) {
                 for (int x = r.p0.x; x <= r.p1.x; ++x) {
                         for (int y = r.p0.y; y <= r.p1.y; ++y) {
-                                if (!regions[x][y].is_free) {
+                                if (!regions.at(x, y).is_free) {
                                         return false;
                                 }
                         }
@@ -109,8 +109,8 @@ void merge_regions(Region regions[3][3])
                       << std::endl;
 
                 // NOTE: Region 0 is the top left region, region 1 is the bottom right
-                auto& region_0 = regions[idx_r.p0.x][idx_r.p0.y];
-                auto& region_1 = regions[idx_r.p1.x][idx_r.p1.y];
+                auto& region_0 = regions.at(idx_r.p0.x, idx_r.p0.y);
+                auto& region_1 = regions.at(idx_r.p1.x, idx_r.p1.y);
 
                 // Expand region 1 over all areas
                 region_0.r = R(region_0.r.p0, region_1.r.p1);
@@ -120,7 +120,7 @@ void merge_regions(Region regions[3][3])
                         for (int y = idx_r.p0.y; y <= idx_r.p1.y; ++y) {
                                 const P idx_p(x, y);
 
-                                auto& reg = regions[idx_p.x][idx_p.y];
+                                auto& reg = regions.at(idx_p.x, idx_p.y);
 
                                 if (idx_p != idx_r.p0) {
                                         reg.is_free = false;
