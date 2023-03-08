@@ -19,7 +19,7 @@
     <color name="COLOR_GREEN" rgb_hex="008000"/>
     <!-- Color 10 -->
     <color name="COLOR_LIGHT_GREEN" rgb_hex="19ff19"/>
-    <color name="COLOR_DARK_GREEN" rgb_hex="004000"/>
+    <color name="COLOR_DARK_GREEN" rgb_hex="005700"/>
 
     <!-- YELLOW -->
     <!-- TODO: Rename to yellow and dark yellow -->
