@@ -1085,7 +1085,6 @@ void init()
         d.melee.hit_chance_mod = 0;
         d.melee.can_attack_corpse = true;
         d.melee.reach = 2;
-        d.melee.knocks_back = true;
         d.melee.dmg_type = DmgType::piercing;
         d.melee.is_noisy = true;
         d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
