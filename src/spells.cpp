@@ -5455,12 +5455,9 @@ int SpellCrimsonPassage::base_max_cost(const SpellSkill skill) const
         (void)skill;
 
         // If the effect is already active, the spell is free to cast.
-        //
+
         // HACK: Assuming only the player can cast this spell.
-        return (
-                map::g_player->m_properties.has(PropId::crimson_passage)
-                        ? 0
-                        : 3);
+        return map::g_player->m_properties.has(PropId::crimson_passage) ? 0 : 3;
 }
 
 int SpellCrimsonPassage::nr_steps_allowed(const SpellSkill skill) const

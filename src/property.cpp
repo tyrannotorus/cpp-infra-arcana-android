@@ -3666,7 +3666,8 @@ PropEnded PropCrimsonPassage::on_moved_non_center_dir()
 
         ++m_nr_steps_taken;
 
-        if (m_nr_steps_taken >= m_nr_steps_allowed) {
+        if ((m_nr_steps_allowed != -1) &&
+            m_nr_steps_taken >= m_nr_steps_allowed) {
                 m_owner->m_properties.end_prop(id());
 
                 return PropEnded::yes;
