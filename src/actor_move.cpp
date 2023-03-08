@@ -188,11 +188,8 @@ static void print_ooze_enter_terrain_msg(
         const actor::Actor& actor,
         const terrain::Terrain& terrain)
 {
-        const auto mon_name =
-                text_format::first_to_upper(actor.name_the());
-
-        const auto ter_name =
-                terrain.name(Article::the);
+        const auto mon_name = text_format::first_to_upper(actor.name_the());
+        const auto ter_name = terrain.name(Article::the);
 
         std::string preposition = "through";
 
@@ -218,11 +215,8 @@ static void print_small_creature_enter_terrain_msg(
         const actor::Actor& actor,
         const terrain::Terrain& terrain)
 {
-        const auto mon_name =
-                text_format::first_to_upper(actor.name_the());
-
-        const auto ter_name =
-                terrain.name(Article::the);
+        const auto mon_name = text_format::first_to_upper(actor.name_the());
+        const auto ter_name = terrain.name(Article::the);
 
         msg_log::add(mon_name + " squirms through " + ter_name + ".");
 }
@@ -260,6 +254,7 @@ static void bump_terrains(actor::Actor& actor, const P& target)
         if (!actor::is_player(&actor) &&
             !terrain->is_walkable() &&
             (terrain->m_data->matl_type != Matl::fluid) &&
+            (terrain->id() != terrain::Id::chasm) &&
             can_player_see_actor(actor)) {
                 print_mon_enter_non_walkable_terrain_msg(actor, *terrain);
         }
