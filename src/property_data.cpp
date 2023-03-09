@@ -352,7 +352,7 @@ static void init_data_list()
         d.msg_start_mon = "is blinded.";
         d.msg_end_player = "I can see again!";
         d.msg_end_mon = "can see again.";
-        d.historic_msg_start_permanent = "I became permanently blind";
+        d.historic_msg_start_permanent = "Became permanently blind";
         d.historic_msg_end_permanent = "My sight came back";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
@@ -366,7 +366,7 @@ static void init_data_list()
         d.descr = "Cannot hear sounds.";
         d.msg_start_player = "I am deaf!";
         d.msg_end_player = "I can hear again.";
-        d.historic_msg_start_permanent = "I became permanently deaf";
+        d.historic_msg_start_permanent = "Became permanently deaf";
         d.historic_msg_end_permanent = "My hearing came back";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
@@ -595,7 +595,7 @@ static void init_data_list()
         d.msg_end_mon = "speeds up.";
         d.msg_res_player = "I resist slowing.";
         d.msg_res_mon = "resists slowing.";
-        d.historic_msg_start_permanent = "I became perpetually slowed";
+        d.historic_msg_start_permanent = "Became perpetually slowed";
         d.historic_msg_end_permanent = "My slowness ceased";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
@@ -611,7 +611,7 @@ static void init_data_list()
         d.msg_start_mon = "speeds up.";
         d.msg_end_player = "Everything around me seems to speed up.";
         d.msg_end_mon = "slows down.";
-        d.historic_msg_start_permanent = "I became perpetually hasted";
+        d.historic_msg_start_permanent = "Became perpetually hasted";
         d.historic_msg_end_permanent = "My hastiness ceased";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
@@ -728,8 +728,8 @@ static void init_data_list()
         d.msg_end_mon = "is no longer diseased.";
         d.msg_res_player = "I resist disease.";
         d.msg_res_mon = "resists disease.";
-        d.historic_msg_start_permanent = "I caught a horrible disease";
-        d.historic_msg_end_permanent = "I was cured from a horrible disease";
+        d.historic_msg_start_permanent = "Caught a horrible disease";
+        d.historic_msg_end_permanent = "Was cured from a horrible disease";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
         d.alignment = PropAlignment::bad;
@@ -790,7 +790,7 @@ static void init_data_list()
         d.descr = "+10% to hit chance, evasion, stealth, and searching.";
         d.msg_start_player = "I feel luckier.";
         d.msg_end_player = "I have normal luck.";
-        d.historic_msg_start_permanent = "I received an everlasting blessing";
+        d.historic_msg_start_permanent = "Received an everlasting blessing";
         d.historic_msg_end_permanent = "My great blessing ceased";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;

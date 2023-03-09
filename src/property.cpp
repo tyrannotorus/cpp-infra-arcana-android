@@ -518,7 +518,7 @@ void PropZuulPossessPriest::on_placed()
 
                 actor::Actor* actor = actor::make("MON_CULTIST_PRIEST", m_owner->m_pos);
 
-                Prop* prop = new PropPossessedByZuul();
+                Prop* prop = property_factory::make(PropId::possessed_by_zuul);
 
                 prop->set_indefinite();
 
