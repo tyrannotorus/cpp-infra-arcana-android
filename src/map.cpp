@@ -336,22 +336,25 @@ void memorize_terrain_at(const P& p)
                 memory.appearance.minimap_color = colors::yellow();
         }
         else if (id == terrain::Id::door) {
-                const auto* const door =
-                        static_cast<const terrain::Door*>(terrain);
+                const auto* const door = static_cast<const terrain::Door*>(terrain);
 
                 if (door->is_hidden()) {
                         memory.appearance.minimap_color = minimap_wall_color;
                 }
                 else {
                         if (door->type() == terrain::DoorType::metal) {
-                                memory.appearance.minimap_color =
-                                        colors::light_teal();
+                                memory.appearance.minimap_color = colors::light_teal();
                         }
                         else {
-                                memory.appearance.minimap_color =
-                                        colors::light_white();
+                                memory.appearance.minimap_color = colors::light_white();
                         }
                 }
+        }
+        else if (id == terrain::Id::fountain) {
+                memory.appearance.minimap_color = terrain->color_default();
+        }
+        else if (id == terrain::Id::monolith) {
+                memory.appearance.minimap_color = terrain->color_default();
         }
         else if (id == terrain::Id::lever) {
                 memory.appearance.minimap_color = colors::teal();

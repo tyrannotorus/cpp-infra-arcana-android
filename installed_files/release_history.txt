@@ -50,6 +50,7 @@ by bumping them).
 
 # Other
 - Current turn number is now displayed in the gui.
+- Fountains and Monoliths are now marked on the minimap.
 
 ##############################
 # User interface

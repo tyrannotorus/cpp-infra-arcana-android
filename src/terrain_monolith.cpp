@@ -80,9 +80,7 @@ std::string Monolith::name(const Article article) const
 
 Color Monolith::color_default() const
 {
-        return m_is_activated
-                ? colors::gray()
-                : colors::light_cyan();
+        return m_is_activated ? colors::gray() : colors::light_cyan();
 }
 
 void Monolith::bump(actor::Actor& actor_bumping)

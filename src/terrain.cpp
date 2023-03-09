@@ -3628,9 +3628,7 @@ Color Fountain::color_default() const
                                 m_fountain_effect >
                                 FountainEffect::START_OF_BAD_EFFECTS;
 
-                        return is_bad
-                                ? colors::magenta()
-                                : colors::light_cyan();
+                        return is_bad ? colors::magenta() : colors::light_cyan();
                 }
                 else {
                         // Has drinks left, not tried
