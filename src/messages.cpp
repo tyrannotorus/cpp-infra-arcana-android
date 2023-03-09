@@ -57,10 +57,7 @@ namespace messages
 {
 void init()
 {
-        menu_quotes =
-                read_message_file(
-                        paths::messages_dir() +
-                        "menu_quotes.txt");
+        menu_quotes = read_message_file(paths::messages_dir() + "menu_quotes.txt");
 }
 
 std::string get_random_menu_quote()
