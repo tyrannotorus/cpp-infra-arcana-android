@@ -548,7 +548,8 @@ static std::string temporary_negative_properties_str(actor::Actor& actor)
         std::string str;
 
         // Properties
-        auto prop_list = actor.m_properties.temporary_negative_properties();
+        std::vector<PropListEntry> prop_list =
+                actor.m_properties.temporary_negative_properties();
 
         for (const auto& entry : prop_list) {
                 if (!str.empty()) {

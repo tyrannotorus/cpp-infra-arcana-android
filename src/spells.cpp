@@ -127,6 +127,8 @@ static const std::string s_spell_resist_msg = "The spell is resisted!";
 
 static const std::string s_spell_reflect_msg = "The spell is reflected!";
 
+static DmgType s_bolt_dmg_type = DmgType::blunt;
+
 namespace spell_side_effects
 {
 struct Context
@@ -163,8 +165,7 @@ static void spawn_monsters(const Context& context)
                         printed_msg = true;
                 }
 
-                auto* const conflicted =
-                        property_factory::make(PropId::conflict);
+                Prop* const conflicted = property_factory::make(PropId::conflict);
 
                 conflicted->set_indefinite();
 
@@ -174,15 +175,13 @@ static void spawn_monsters(const Context& context)
                         false,
                         Verbose::no);
 
-                auto* const waiting =
-                        property_factory::make(PropId::waiting);
+                Prop* const waiting = property_factory::make(PropId::waiting);
 
                 waiting->set_duration(2);
 
                 actor->m_properties.apply(waiting);
 
-                auto* const summoned =
-                        property_factory::make(PropId::summoned);
+                Prop* const summoned = property_factory::make(PropId::summoned);
 
                 summoned->set_duration(rnd::range(3, 20));
 
@@ -294,7 +293,7 @@ static void ignite_terrain(const Context& context)
                         printed_msg = true;
                 }
 
-                auto* const terrain = map::g_terrain.at(p);
+                terrain::Terrain* const terrain = map::g_terrain.at(p);
 
                 terrain->hit(DmgType::fire, nullptr);
         }
@@ -1270,8 +1269,7 @@ void Spell::cast(
                 if (actor::is_player(caster) &&
                     player_bon::has_trait(Trait::galvanization) &&
                     (domain() == SpellDomain::blood)) {
-                        Prop* const regen =
-                                property_factory::make(PropId::regenerating);
+                        Prop* const regen = property_factory::make(PropId::regenerating);
 
                         regen->set_duration(rnd::range(4, 6));
 
@@ -1654,18 +1652,20 @@ void Darkbolt::on_hit(
                 return;
         }
 
-        auto* paralyzed = property_factory::make(PropId::paralyzed);
+        if (!actor_hit.m_properties.is_resisting_dmg(s_bolt_dmg_type, Verbose::no)) {
+                Prop* paralyzed = property_factory::make(PropId::paralyzed);
 
-        paralyzed->set_duration(rnd::range(1, 2));
+                paralyzed->set_duration(rnd::range(1, 2));
 
-        actor_hit.m_properties.apply(paralyzed);
+                actor_hit.m_properties.apply(paralyzed);
 
-        if (skill >= SpellSkill::master) {
-                auto* burning = property_factory::make(PropId::burning);
+                if (skill >= SpellSkill::master) {
+                        Prop* burning = property_factory::make(PropId::burning);
 
-                burning->set_duration(rnd::range(2, 3));
+                        burning->set_duration(rnd::range(2, 3));
 
-                actor_hit.m_properties.apply(burning);
+                        actor_hit.m_properties.apply(burning);
+                }
         }
 }
 
@@ -1697,7 +1697,7 @@ void SpellBolt::run_effect(
                 snd.run();
         }
 
-        auto* const target =
+        actor::Actor* const target =
                 map::random_closest_actor(
                         caster->m_pos,
                         seen_targets);
@@ -1739,7 +1739,7 @@ void SpellBolt::run_effect(
                 snd.run();
         }
 
-        const auto& target_p = target->m_pos;
+        const P& target_p = target->m_pos;
         const bool player_see_pos = map::g_seen.at(target_p);
         const bool player_see_tgt = actor::can_player_see_actor(*target);
 
@@ -1757,8 +1757,7 @@ void SpellBolt::run_effect(
                         // Target is monster
                         const std::string name_the =
                                 player_see_tgt
-                                ? text_format::first_to_upper(
-                                          target->name_the())
+                                ? text_format::first_to_upper(target->name_the())
                                 : "It";
 
                         str_begin = name_the + " is";
@@ -1781,7 +1780,7 @@ void SpellBolt::run_effect(
         actor::hit(
                 *target,
                 dmg_range.roll(),
-                DmgType::blunt,
+                s_bolt_dmg_type,
                 caster,
                 AllowWound::no);
 
@@ -2211,11 +2210,9 @@ void SpellCataclysm::run_effect(
 
                         snd.run();
 
-                        map::update_terrain(
-                                terrain::make(terrain::Id::rubble_low, p));
+                        map::update_terrain(terrain::make(terrain::Id::rubble_low, p));
 
-                        auto* const burning =
-                                property_factory::make(PropId::burning);
+                        Prop* const burning = property_factory::make(PropId::burning);
 
                         explosion::run(
                                 p,
@@ -2247,9 +2244,7 @@ void SpellCataclysm::run_effect(
                         }
 
                         if (is_adj_to_walkable_cell) {
-                                map::g_terrain.at(p)->hit(
-                                        DmgType::explosion,
-                                        nullptr);
+                                map::g_terrain.at(p)->hit(DmgType::explosion, nullptr);
                         }
                 }
         }
@@ -2815,13 +2810,11 @@ void SpellCleansingFire::run_effect(
                         // Hit the terrain with burning several times, to
                         // increase the chance of it catching fire
                         for (int i = 0; i < 6; ++i) {
-                                map::g_terrain.at(p)->hit(
-                                        DmgType::fire,
-                                        nullptr);
+                                map::g_terrain.at(p)->hit(DmgType::fire, nullptr);
                         }
                 }
 
-                auto* const burning = property_factory::make(PropId::burning);
+                Prop* const burning = property_factory::make(PropId::burning);
 
                 burning->set_duration(burn_duration_range().roll());
 
@@ -2938,9 +2931,7 @@ void SpellPurge::run_effect(
                 case terrain::Id::monolith:
                 case terrain::Id::gong: {
                         if (map::g_seen.at(p)) {
-                                draw_blast_at_cells(
-                                        {p},
-                                        colors::light_white());
+                                draw_blast_at_cells({p}, colors::light_white());
                         }
 
                         terrain->hit(DmgType::pure, caster);
@@ -2962,17 +2953,11 @@ void SpellPurge::run_effect(
                 // Is adjacent undead creature
 
                 if (actor::can_player_see_actor(*actor)) {
-                        const auto name =
-                                text_format::first_to_upper(
-                                        actor->name_the());
+                        const auto name = text_format::first_to_upper(actor->name_the());
 
-                        msg_log::add(
-                                name + " is struck.",
-                                colors::msg_good());
+                        msg_log::add(name + " is struck.", colors::msg_good());
 
-                        draw_blast_at_cells(
-                                {actor->m_pos},
-                                colors::light_white());
+                        draw_blast_at_cells({actor->m_pos}, colors::light_white());
                 }
 
                 actor::hit(
@@ -2982,9 +2967,7 @@ void SpellPurge::run_effect(
                         caster);
 
                 if (actor->is_alive()) {
-                        auto* const fear =
-                                property_factory::make(
-                                        PropId::terrified);
+                        Prop* const fear = property_factory::make(PropId::terrified);
 
                         fear->set_duration(fear_duration_range().roll());
 
