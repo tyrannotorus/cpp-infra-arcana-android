@@ -83,7 +83,7 @@ static std::vector<actor::Actor*> seen_actors_player()
 {
         std::vector<actor::Actor*> result;
 
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if (actor::is_player(actor)) {
                         continue;
                 }
@@ -205,7 +205,7 @@ bool can_player_see_actor(const Actor& other)
                 return true;
         }
 
-        const auto& player = *map::g_player;
+        const Actor& player = *map::g_player;
 
         if (init::g_is_cheat_vision_enabled) {
                 return true;

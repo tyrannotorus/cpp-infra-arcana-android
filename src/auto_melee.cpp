@@ -26,6 +26,7 @@
 #include "msg_log.hpp"
 #include "pos.hpp"
 #include "query.hpp"
+#include "terrain.hpp"
 
 namespace item
 {
@@ -130,7 +131,9 @@ static actor::Actor* find_reachable_actor(
                                 break;
                         }
 
-                        if (!bash::is_open_terrain(*map::g_terrain.at(p))) {
+                        terrain::Terrain* const terrain = map::g_terrain.at(p);
+
+                        if (!terrain->is_projectile_passable()) {
                                 break;
                         }
                 }
@@ -150,6 +153,8 @@ namespace auto_melee
 {
 void run()
 {
+        map::update_vision();
+
         std::vector<actor::Actor*> actors = get_all_foes_aware_of();
 
         if (actors.empty()) {

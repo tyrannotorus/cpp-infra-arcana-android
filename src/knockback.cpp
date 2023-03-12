@@ -152,7 +152,7 @@ void run(
                 }
         }
 
-        // Leave current cell
+        // Leave current position.
         map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
         actor.m_pos = new_pos;
@@ -188,16 +188,16 @@ void run(
 
         map::update_vision();
 
-        auto* prop = property_factory::make(PropId::paralyzed);
+        Prop* prop = property_factory::make(PropId::paralyzed);
 
         prop->set_duration(1 + paralyze_extra_turns);
 
         actor.m_properties.apply(prop);
 
         // Bump target cell
-        const auto mobs = game_time::mobs_at(actor.m_pos);
+        const std::vector<terrain::Terrain*> mobs = game_time::mobs_at(actor.m_pos);
 
-        for (auto* const mob : mobs) {
+        for (terrain::Terrain* const mob : mobs) {
                 mob->bump(actor);
         }
 

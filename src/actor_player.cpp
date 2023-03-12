@@ -1016,9 +1016,9 @@ void Actor::fov_hack() const
 
 void Actor::update_mon_awareness() const
 {
-        const auto my_seen_actors = seen_actors(*this);
+        const std::vector<Actor*> my_seen_actors = seen_actors(*this);
 
-        for (auto* const actor : my_seen_actors) {
+        for (Actor* const actor : my_seen_actors) {
                 actor->make_player_aware_of_me();
         }
 }
