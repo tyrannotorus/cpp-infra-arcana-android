@@ -17,7 +17,6 @@
 - Status effects that will end immediately after the next action are shown as e.g. "Premonition (ending)" in the gui, so that it is possible to know whether it will last until the next player turn or not (previously seeing an active status effect listed could be misleading since it could end before any monster acts).
 - The Cursed status effect no longer causes a chance to fail spell casting (but "Doomed" still causes a chance to fail).
 - The "Regenerating" status effect no longer heals wounds (it caused bad gameplay design combined with certain Flagellant mechanics).
-- While terrified, all unseen positions are shown as black (no memory drawn), and the minimap is disabled.
 
 # Items
 - Changed Potion of Invisibility into a "tenebrous" spell instead.

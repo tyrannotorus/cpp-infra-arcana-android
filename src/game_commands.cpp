@@ -927,12 +927,7 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::minimap: {
-                if (map::g_player->m_properties.has(PropId::terrified)) {
-                        msg_log::add("Not while terrified.");
-                }
-                else {
-                        states::push(std::make_unique<ViewMinimap>());
-                }
+                states::push(std::make_unique<ViewMinimap>());
         } break;
 
         case GameCmd::msg_history: {
