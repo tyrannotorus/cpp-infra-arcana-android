@@ -1834,7 +1834,7 @@ void init()
         d.tile = gfx::TileId::pharaoh_staff;
         d.melee.attack_msgs = {"strike", "strikes"};
         d.melee.dmg = WpnDmg(1, 12);
-        d.melee.hit_chance_mod = 02;
+        d.melee.hit_chance_mod = 0;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         d.melee.dmg_type = DmgType::blunt;
         d.melee.reach = 2;
