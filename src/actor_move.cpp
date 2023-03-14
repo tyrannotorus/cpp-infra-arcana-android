@@ -399,7 +399,7 @@ static void move_player_non_center_direction(const P& target)
 
 static void do_move_action_player(Dir dir)
 {
-        auto& player = *map::g_player;
+        actor::Actor& player = *map::g_player;
 
         if (!player.is_alive()) {
                 return;
@@ -409,11 +409,13 @@ static void do_move_action_player(Dir dir)
                 return;
         }
 
-        const auto intended_dir = dir;
+        const Dir intended_dir = dir;
 
         player.m_properties.affect_move_dir(dir);
 
-        const auto target = player.m_pos + dir_utils::offset(dir);
+        const P target = player.m_pos + dir_utils::offset(dir);
+
+        const bool has_crimson_passage = player.m_properties.has(PropId::crimson_passage);
 
         if (intended_dir == Dir::center) {
                 on_player_waiting();
@@ -440,9 +442,9 @@ static void do_move_action_player(Dir dir)
                 // * the player was stuck (e.g. in a spider web)
 
                 const bool is_free_move =
-                        (player.m_properties.has(PropId::crimson_passage) &&
-                         (dir != Dir::center) &&
-                         (dir != Dir::END));
+                        has_crimson_passage &&
+                        (dir != Dir::center) &&
+                        (dir != Dir::END);
 
                 if (!is_free_move) {
                         game_time::tick();
