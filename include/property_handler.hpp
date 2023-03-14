@@ -134,6 +134,7 @@ public:
 
         std::vector<PropListEntry> temporary_negative_properties();
 
+        bool is_temporary_negative_prop(const Prop& prop) const;
         bool has_temporary_negative_prop_mon() const;
 
         //----------------------------------------------------------------------
@@ -219,11 +220,7 @@ private:
         void print_resist_msg(const Prop& prop);
         void print_start_msg(const Prop& prop);
 
-        bool try_apply_more_on_existing_intr_prop(
-                const Prop& new_prop,
-                Verbose verbose);
-
-        bool is_temporary_negative_prop(const Prop& prop) const;
+        bool try_apply_more_on_existing_intr_prop(const Prop& new_prop, Verbose verbose);
 
         bool is_resisting_prop(PropId id) const;
 

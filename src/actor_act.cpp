@@ -413,8 +413,7 @@ static void mon_act(actor::Actor& mon)
         // This could perhaps lead to especially dumb situations if the monster
         // does not move by pathding, and considers an enemy behind a wall to be
         // closer than another enemy who is in the same room.
-        mon.m_ai_state.target =
-                map::random_closest_actor(mon.m_pos, target_bucket);
+        mon.m_ai_state.target = map::random_closest_actor(mon.m_pos, target_bucket);
 
         if (mon.is_aware_of_player() || mon.is_wary_of_player()) {
                 mon.m_ai_state.is_roaming_allowed = MonRoamingAllowed::yes;
@@ -449,6 +448,7 @@ static void mon_act(actor::Actor& mon)
             !is_player_leader &&
             actor::is_player(mon.m_ai_state.target) &&
             mon.m_ai_state.is_target_seen &&
+            !mon.m_properties.has(PropId::frenzied) &&
             rnd::coin_toss()) {
                 const auto did_act = ai::action::make_room_for_friend(mon);
 
@@ -484,6 +484,8 @@ static void mon_act(actor::Actor& mon)
                 }
         }
 
+        // Occasionally move erratically
+
         int erratic_move_pct = (int)mon.m_data->erratic_move_pct;
 
         // Never move erratically if frenzied
@@ -504,7 +506,6 @@ static void mon_act(actor::Actor& mon)
 
         erratic_move_pct = std::clamp(erratic_move_pct, 0, 95);
 
-        // Occasionally move erratically
         if (mon.m_data->ai[(size_t)actor::AiId::moves_randomly_when_unaware] &&
             rnd::percent(erratic_move_pct)) {
                 const auto did_act = ai::action::move_to_random_adj_cell(mon);
@@ -550,8 +551,8 @@ static void mon_act(actor::Actor& mon)
                 }
         }
 
-        if ((mon.m_data->ai[(size_t)actor::AiId::moves_to_leader] ||
-             is_player_leader) &&
+        if ((mon.m_data->ai[(size_t)actor::AiId::moves_to_leader] || is_player_leader) &&
+            !mon.m_properties.has(PropId::frenzied) &&
             !is_terrified) {
                 path = ai::info::find_path_to_leader(mon);
 
@@ -564,6 +565,7 @@ static void mon_act(actor::Actor& mon)
 
         if (mon.m_data->ai[(size_t)actor::AiId::moves_to_lair] &&
             !is_player_leader &&
+            !mon.m_properties.has(PropId::frenzied) &&
             (!mon.m_ai_state.target ||
              actor::is_player(mon.m_ai_state.target))) {
                 auto did_act =

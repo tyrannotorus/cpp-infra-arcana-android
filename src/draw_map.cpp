@@ -343,13 +343,11 @@ static void draw_living_seen_monster(const actor::Actor& mon)
                 // The monster is hostile
                 if (mon.is_aware_of_player()) {
                         // Monster is aware of player
-                        const bool has_temporary_negative_prop =
-                                mon.m_properties
-                                        .has_temporary_negative_prop_mon();
-
-                        if (has_temporary_negative_prop) {
-                                draw_obj.color_bg =
-                                        colors::mon_temp_property();
+                        if (mon.m_properties.has_temporary_negative_prop_mon()) {
+                                draw_obj.color_bg = colors::mon_temp_property();
+                        }
+                        else if (mon.m_properties.has(PropId::frenzied)) {
+                                draw_obj.color_bg = colors::red();
                         }
                 }
                 else {

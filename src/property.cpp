@@ -3212,9 +3212,7 @@ PropActResult PropFrenziesSelf::on_act()
                 return {};
         }
 
-        const bool is_low_hp =
-                m_owner->m_hp <=
-                (actor::max_hp(*m_owner) / 2);
+        const bool is_low_hp = (m_owner->m_hp <= (actor::max_hp(*m_owner) / 2));
 
         if (!is_low_hp) {
                 return {};

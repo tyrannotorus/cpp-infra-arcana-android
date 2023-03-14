@@ -156,9 +156,7 @@ static std::string get_mon_speed_descr(
         const actor::ActorData& actor_data,
         const actor::Actor& actor)
 {
-        const std::string speed_type_str =
-                mon_speed_type_to_str(
-                        actor_data.speed);
+        const std::string speed_type_str = mon_speed_type_to_str(actor_data.speed);
 
         if (speed_type_str.empty()) {
                 return "";
@@ -543,20 +541,56 @@ static std::string auto_description_str(actor::Actor& actor)
         return str;
 }
 
-static std::string temporary_negative_properties_str(actor::Actor& actor)
+static bool should_show_property(const actor::Actor& actor, const Prop& property)
+{
+        // Show all temporary negative properties (burning, fear etc), and
+        // Frenzy (special case, it is typically very important to know, and
+        // would be reasonable for the player character to notice this).
+        //
+        // We do not want to show temporary positive properties, since those are
+        // not marked on the creature symbol on the map (perhaps they should,
+        // but currently they are not), and also because it should not be known
+        // whether a monster has Spell Shield active (and perhaps other
+        // properties as well).
+        //
+        return (
+                actor.m_properties.is_temporary_negative_prop(property) ||
+                property.id() == PropId::frenzied);
+}
+
+static std::vector<PropListEntry> temporary_properties_to_show(const actor::Actor& actor)
+{
+        std::vector<PropListEntry> prop_list = actor.m_properties.property_names_and_descr();
+
+        for (auto it = std::begin(prop_list); it != std::end(prop_list);) {
+                const auto* const prop = it->prop;
+
+                if (should_show_property(actor, *prop)) {
+                        ++it;
+                }
+                else {
+                        it = prop_list.erase(it);
+                }
+        }
+
+        return prop_list;
+}
+
+static std::string temporary_properties_str(actor::Actor& actor)
 {
         std::string str;
 
         // Properties
-        std::vector<PropListEntry> prop_list =
-                actor.m_properties.temporary_negative_properties();
+        std::vector<PropListEntry> prop_list = temporary_properties_to_show(actor);
 
         for (const auto& entry : prop_list) {
                 if (!str.empty()) {
                         str += "\n";
                 }
 
-                // TODO: This is VERY hacky (maybe Text should support RGB?):
+                // HACK: This assumes the good/bad/text colors, which is defined
+                // in a data file. However the text formatter does not recognize
+                // those IDs.
                 if (entry.title.color == colors::msg_good()) {
                         str += "{COLOR_LIGHT_GREEN}";
                 }
@@ -624,14 +658,14 @@ void ViewActorDescr::draw()
                 }
         }
 
-        // Temporary negative properties
+        // Current properties (not all are shown)
         {
                 ++y;
 
                 Text text;
 
                 text.set_w(panels::w(Panel::info_screen_content));
-                text.set_str(temporary_negative_properties_str(m_actor));
+                text.set_str(temporary_properties_str(m_actor));
                 text.set_color(colors::text());
 
                 text.draw(Panel::info_screen_content, {0, y});

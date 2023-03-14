@@ -725,34 +725,11 @@ bool PropHandler::is_temporary_negative_prop(const Prop& prop) const
 
         const bool is_natural_prop = m_owner->m_data->natural_props[(size_t)id];
 
-        return (
+        const bool is_temporary =
                 !is_natural_prop &&
-                (prop.m_duration_mode != PropDurationMode::indefinite) &&
-                (prop.alignment() == PropAlignment::bad));
-}
+                (prop.m_duration_mode != PropDurationMode::indefinite);
 
-std::vector<PropListEntry> PropHandler::temporary_negative_properties()
-{
-        ASSERT(!actor::is_player(m_owner));
-
-        auto prop_list = property_names_and_descr();
-
-        // Remove all non-negative properties (we should not show temporary
-        // spell resistance for example), and all natural properties (properties
-        // which all monsters of this type starts with)
-        for (auto it = std::begin(prop_list); it != std::end(prop_list);) {
-                const auto* const prop = it->prop;
-
-                if (is_temporary_negative_prop(*prop)) {
-                        ++it;
-                }
-                else {
-                        // Not a temporary negative property
-                        it = prop_list.erase(it);
-                }
-        }
-
-        return prop_list;
+        return is_temporary && (prop.alignment() == PropAlignment::bad);
 }
 
 bool PropHandler::has_temporary_negative_prop_mon() const
