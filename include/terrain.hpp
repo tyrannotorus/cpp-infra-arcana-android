@@ -207,11 +207,6 @@ public:
                 return m_data->is_sound_passable;
         }
 
-        virtual bool is_floor_like() const
-        {
-                return m_data->is_floor_like;
-        }
-
         virtual bool is_los_passable() const
         {
                 return m_data->is_los_passable;

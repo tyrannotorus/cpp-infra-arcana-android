@@ -211,7 +211,7 @@ static void get_positions_in_room_relative_to_walls(
 
                         auto* const t = map::g_terrain.at(x, y);
 
-                        if (t->is_walkable() && t->is_floor_like()) {
+                        if (t->is_walkable() && t->m_data->is_floor_like) {
                                 pos_bucket.emplace_back(x, y);
                         }
                 }
@@ -983,7 +983,7 @@ void CrawlingPitRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                         const P p(x, y);
 
-                        if (!map::g_terrain.at(p)->is_floor_like() ||
+                        if (!map::g_terrain.at(p)->m_data->is_floor_like ||
                             !rnd::coin_toss()) {
                                 continue;
                         }

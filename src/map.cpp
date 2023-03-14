@@ -99,6 +99,20 @@ static void free_layers_owned_memory()
         }
 }
 
+static bool allow_memorize_terrain(const terrain::Terrain& terrain)
+{
+        const bool blocks_walking = !terrain.is_walkable();
+        const bool is_dark = map::g_dark.at(terrain.pos());
+        const bool is_floor = terrain.m_data->is_floor_like;
+        const bool is_hidden = terrain.is_hidden();
+
+        // Memorize the terrain if:
+        // * It is not dark, or
+        // * It is not floor, and not hidden (e.g. walls, revealed traps, water, open doors), or
+        // * It blocks walking (e.g. hidden doors)
+        return !is_dark || (!is_floor && !is_hidden) || blocks_walking;
+}
+
 // -----------------------------------------------------------------------------
 // ChokePointData
 // -----------------------------------------------------------------------------
@@ -326,11 +340,11 @@ void set_terrain(terrain::Terrain* terrain)
 
 void memorize_terrain_at(const P& p)
 {
-        const auto* const terrain = g_terrain.at(p);
-        auto& memory = g_terrain_memory.at(p);
-        const auto id = terrain->id();
+        const terrain::Terrain* const terrain = g_terrain.at(p);
+        PlayerMemoryTerrain& memory = g_terrain_memory.at(p);
+        const terrain::Id id = terrain->id();
         const bool blocks_walking = !terrain->is_walkable();
-        const auto minimap_wall_color = colors::sepia();
+        const Color& minimap_wall_color = colors::sepia();
 
         if (id == terrain::Id::stairs) {
                 memory.appearance.minimap_color = colors::yellow();
@@ -369,22 +383,8 @@ void memorize_terrain_at(const P& p)
                 memory.appearance.minimap_color = colors::dark_gray_brown();
         }
 
-        const bool is_dark = g_dark.at(p);
-
-        const bool blocks_los =
-                map_parsers::BlocksLos().run(p);
-
-        const bool allow_memorize_terrain =
-                !is_dark ||
-                blocks_los ||
-                blocks_walking ||
-                (id == terrain::Id::door) ||
-                (id == terrain::Id::liquid);
-
-        if (allow_memorize_terrain) {
-                const std::string name =
-                        text_format::first_to_upper(
-                                terrain->name(Article::a));
+        if (allow_memorize_terrain(*terrain)) {
+                const std::string name = text_format::first_to_upper(terrain->name(Article::a));
 
                 memory.id = terrain->id();
                 memory.blocks_walking = blocks_walking;
@@ -398,9 +398,9 @@ void memorize_terrain_at(const P& p)
 
 void memorize_item_at(const P& p)
 {
-        const auto* const item = g_items.at(p);
+        const item::Item* const item = g_items.at(p);
 
-        auto& memory = g_item_memory.at(p);
+        PlayerMemoryItem& memory = g_item_memory.at(p);
 
         if (!item) {
                 memory = {};

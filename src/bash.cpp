@@ -475,7 +475,7 @@ bool is_open_terrain(
         // non-open terrain this would instead yield a message such as "kicking
         // the wall would be useless").
 
-        if (terrain.is_floor_like()) {
+        if (terrain.m_data->is_floor_like) {
                 return true;
         }
 

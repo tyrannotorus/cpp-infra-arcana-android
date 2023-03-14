@@ -3132,21 +3132,10 @@ PropEnded PropMagicSearching::on_actor_turn()
         const int orig_x = map::g_player->m_pos.x;
         const int orig_y = map::g_player->m_pos.y;
 
-        const int x0 = std::max(
-                0,
-                orig_x - m_range);
-
-        const int y0 = std::max(
-                0,
-                orig_y - m_range);
-
-        const int x1 = std::min(
-                map::w() - 1,
-                orig_x + m_range);
-
-        const int y1 = std::min(
-                map::h() - 1,
-                orig_y + m_range);
+        const int x0 = std::max(0, orig_x - m_range);
+        const int y0 = std::max(0, orig_y - m_range);
+        const int x1 = std::min(map::w() - 1, orig_x + m_range);
+        const int y1 = std::min(map::h() - 1, orig_y + m_range);
 
         for (int y = y0; y <= y1; ++y) {
                 for (int x = x0; x <= x1; ++x) {

@@ -285,22 +285,16 @@ bool BlocksItems::parse_mob(const terrain::Terrain& f) const
         return !f.can_have_item();
 }
 
-bool IsFloorLike::parse_terrain(
-        const terrain::Terrain& t,
-        const P& pos) const
+bool IsFloorLike::parse_terrain(const terrain::Terrain& t, const P& pos) const
 {
-        return (
-                map::is_pos_inside_outer_walls(pos) &&
-                t.is_floor_like());
+        return map::is_pos_inside_outer_walls(pos) && t.m_data->is_floor_like;
 }
 
-bool IsNotFloorLike::parse_terrain(
-        const terrain::Terrain& t,
-        const P& pos) const
+bool IsNotFloorLike::parse_terrain(const terrain::Terrain& t, const P& pos) const
 {
         return (
                 !map::is_pos_inside_outer_walls(pos) ||
-                !t.is_floor_like());
+                !t.m_data->is_floor_like);
 }
 
 bool IsNotTerrain::parse_terrain(
@@ -312,9 +306,7 @@ bool IsNotTerrain::parse_terrain(
         return t.id() != m_terrain;
 }
 
-bool IsAnyOfTerrains::parse_terrain(
-        const terrain::Terrain& t,
-        const P& pos) const
+bool IsAnyOfTerrains::parse_terrain(const terrain::Terrain& t, const P& pos) const
 {
         (void)pos;
 

@@ -469,9 +469,8 @@ static void create_trees(const Context& context)
 
         std::vector<P> tree_pos_bucket;
 
-        for (const auto& p : context.nearby_positions) {
-                const bool is_floor_like =
-                        map::g_terrain.at(p)->m_data->is_floor_like;
+        for (const P& p : context.nearby_positions) {
+                const bool is_floor_like = map::g_terrain.at(p)->m_data->is_floor_like;
 
                 const bool is_adj_to_lever =
                         map_parsers::AnyAdjIsAnyOfTerrains(terrain::Id::lever)

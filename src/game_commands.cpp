@@ -1093,17 +1093,16 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f8: {
-                const P p = map::g_player->m_pos.with_x_offset(1);
+                const P p = map::g_player->m_pos.with_x_offset(2);
 
                 if (map::g_terrain.at(p)->can_have_trap()) {
                         auto* const trap =
                                 static_cast<terrain::Trap*>(
                                         terrain::make(terrain::Id::trap, p));
 
-                        trap->set_mimic_terrain(
-                                terrain::make(terrain::Id::floor, p));
+                        trap->set_mimic_terrain(terrain::make(terrain::Id::floor, p));
 
-                        if (trap->try_init_type(terrain::TrapId::unlearn_spell)) {
+                        if (trap->try_init_type(terrain::TrapId::any)) {
                                 map::update_terrain(trap);
                         }
                         else {
