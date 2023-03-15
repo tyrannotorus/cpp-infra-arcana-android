@@ -206,6 +206,10 @@ static terrain::TrapImpl* make_trap_impl_from_id(
                 return new terrain::TrapSlow(pos, parent_trap);
                 break;
 
+        case terrain::TrapId::haste:
+                return new terrain::TrapHaste(pos, parent_trap);
+                break;
+
         case terrain::TrapId::curse:
                 return new terrain::TrapCurse(pos, parent_trap);
                 break;
@@ -1238,6 +1242,25 @@ void TrapSlow::trigger()
         }
 
         actor_here->m_properties.apply(property_factory::make(PropId::slowed));
+
+        TRACE_FUNC_END;
+}
+
+void TrapHaste::trigger()
+{
+        TRACE_FUNC_BEGIN;
+
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
+
+        ASSERT(actor_here);
+
+        if (!actor_here) {
+                // Should never happen.
+                ASSERT(false);
+                return;
+        }
+
+        actor_here->m_properties.apply(property_factory::make(PropId::hasted));
 
         TRACE_FUNC_END;
 }

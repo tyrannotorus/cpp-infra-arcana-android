@@ -33,25 +33,33 @@ class TrapImpl;
 enum class TrapId
 {
         // Mechanical traps
-        blinding,
-        deafening,
-        dart,
-        smoke,
-        fire,
+
         alarm,
+        blinding,
+        dart,
+        deafening,
+        fire,
+        smoke,
         spear,
         web,
 
         END_MECHANICAL,
 
         // Magical traps
-        teleport,
-        summon,
-        hp_sap,
-        spi_sap,
-        slow,
+
+        // Negative
         curse,
+        hp_sap,
+        slow,
+        spi_sap,
+        summon,
+        teleport,
         unlearn_spell,
+
+        // Positive
+        haste,
+
+        // Neutral
 
         END,
 
@@ -589,6 +597,15 @@ class TrapSlow : public MagicTrapImpl
 {
 public:
         TrapSlow(P pos, Trap* const base_trap) :
+                MagicTrapImpl(pos, TrapId::slow, base_trap) {}
+
+        void trigger() override;
+};
+
+class TrapHaste : public MagicTrapImpl
+{
+public:
+        TrapHaste(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::slow, base_trap) {}
 
         void trigger() override;

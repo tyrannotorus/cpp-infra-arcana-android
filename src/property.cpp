@@ -2424,21 +2424,18 @@ void PropAltersEnv::on_std_turn()
                 std::min(map::w() - 2, m_owner->m_pos.x + r),
                 std::min(map::h() - 2, m_owner->m_pos.y + r));
 
-        for (const auto& p : area.positions()) {
-                if (has_actor.at(p) ||
-                    map::g_items.at(p) ||
-                    !rnd::one_in(6)) {
+        for (const P& p : area.positions()) {
+                if (has_actor.at(p) || map::g_items.at(p) || !rnd::one_in(6)) {
                         continue;
                 }
 
-                const auto terrain_id = map::g_terrain.at(p)->id();
+                const terrain::Id terrain_id = map::g_terrain.at(p)->id();
 
                 if (terrain_id == terrain::Id::wall) {
                         blocked.at(p) = false;
 
                         if (map_parsers::is_map_connected(blocked)) {
-                                map::update_terrain(
-                                        terrain::make(terrain::Id::floor, p));
+                                map::update_terrain(terrain::make(terrain::Id::floor, p));
                         }
                         else {
                                 blocked.at(p) = true;
@@ -2448,8 +2445,7 @@ void PropAltersEnv::on_std_turn()
                         blocked.at(p) = true;
 
                         if (map_parsers::is_map_connected(blocked)) {
-                                map::update_terrain(
-                                        terrain::make(terrain::Id::wall, p));
+                                map::update_terrain(terrain::make(terrain::Id::wall, p));
                         }
                         else {
                                 blocked.at(p) = false;
