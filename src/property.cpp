@@ -2436,7 +2436,7 @@ void PropAltersEnv::on_std_turn()
                 std::min(map::h() - 2, m_owner->m_pos.y + r));
 
         for (const P& p : area.positions()) {
-                if (has_actor.at(p) || map::g_items.at(p) || !rnd::one_in(6)) {
+                if (!rnd::one_in(6) || has_actor.at(p) || map::g_items.at(p)) {
                         continue;
                 }
 

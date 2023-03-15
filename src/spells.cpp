@@ -469,7 +469,7 @@ static void create_trees(const Context& context)
         for (const P& p : context.nearby_positions) {
                 const bool is_floor_like = map::g_terrain.at(p)->m_data->is_floor_like;
 
-                if (is_floor_like && !blocked.at(p)) {
+                if (!blocked.at(p) && is_floor_like) {
                         tree_pos_bucket.push_back(p);
 
                         map::update_terrain(terrain::make(terrain::Id::grass, p));
@@ -515,11 +515,7 @@ static void create_trees(const Context& context)
 
                 tree_pos_bucket.pop_back();
 
-                if (!rnd::one_in(tree_one_in_n)) {
-                        continue;
-                }
-
-                if (has_actor.at(p)) {
+                if (!rnd::one_in(tree_one_in_n) || has_actor.at(p) || map::g_items.at(p)) {
                         continue;
                 }
 
