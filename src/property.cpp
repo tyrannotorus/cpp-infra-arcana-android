@@ -2387,8 +2387,7 @@ void PropAltersEnv::on_std_turn()
                 .run(blocked, blocked.rect());
 
         const std::vector<terrain::Id> free_terrains = {
-                terrain::Id::stairs,
-                terrain::Id::door,
+                terrain::Id::door,  // Can be toggled to passable
         };
 
         const int blocked_w = blocked.w();
@@ -2398,11 +2397,7 @@ void PropAltersEnv::on_std_turn()
                 for (int y = 0; y < blocked_h; ++y) {
                         const P p(x, y);
 
-                        const bool is_free_terrain =
-                                map_parsers::IsAnyOfTerrains(free_terrains)
-                                        .run(p);
-
-                        if (is_free_terrain) {
+                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
                                 blocked.at(p) = false;
                         }
                 }
@@ -2413,6 +2408,22 @@ void PropAltersEnv::on_std_turn()
         for (actor::Actor* actor : game_time::g_actors) {
                 if (actor->m_state != ActorState::destroyed) {
                         has_actor.at(actor->m_pos) = true;
+                }
+        }
+
+        // Some blocking terrain must be reachable so that the player is not
+        // prevented from progressing (other blocking terrain such as Monoliths
+        // may be walled in however).
+        const std::vector<terrain::Id> terrains_must_be_reachable = {
+                terrain::Id::stairs,
+                terrain::Id::lever,
+        };
+
+        std::vector<P> positions_must_be_reachable;
+
+        for (const P& p : blocked.rect().positions()) {
+                if (map_parsers::IsAnyOfTerrains(terrains_must_be_reachable).run(p)) {
+                        positions_must_be_reachable.push_back(p);
                 }
         }
 
@@ -2434,7 +2445,7 @@ void PropAltersEnv::on_std_turn()
                 if (terrain_id == terrain::Id::wall) {
                         blocked.at(p) = false;
 
-                        if (map_parsers::is_map_connected(blocked)) {
+                        if (map_parsers::is_map_connected(blocked, positions_must_be_reachable)) {
                                 map::update_terrain(terrain::make(terrain::Id::floor, p));
                         }
                         else {
@@ -2444,7 +2455,7 @@ void PropAltersEnv::on_std_turn()
                 else if (terrain_id == terrain::Id::floor) {
                         blocked.at(p) = true;
 
-                        if (map_parsers::is_map_connected(blocked)) {
+                        if (map_parsers::is_map_connected(blocked, positions_must_be_reachable)) {
                                 map::update_terrain(terrain::make(terrain::Id::wall, p));
                         }
                         else {

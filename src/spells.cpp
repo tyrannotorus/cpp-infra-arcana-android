@@ -454,66 +454,79 @@ static void create_trees(const Context& context)
                 .run(blocked, blocked.rect());
 
         const std::vector<terrain::Id> free_terrains = {
-                terrain::Id::door,
+                terrain::Id::door,  // Can be toggled to passable
         };
 
         for (const P& p : blocked.rect().positions()) {
-                const bool is_free_terrain =
-                        map_parsers::IsAnyOfTerrains(free_terrains)
-                                .run(p);
-
-                if (is_free_terrain) {
+                if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
                         blocked.at(p) = false;
                 }
         }
 
         std::vector<P> tree_pos_bucket;
+        tree_pos_bucket.reserve(context.nearby_positions.size());
 
         for (const P& p : context.nearby_positions) {
                 const bool is_floor_like = map::g_terrain.at(p)->m_data->is_floor_like;
 
-                const bool is_adj_to_lever =
-                        map_parsers::AnyAdjIsAnyOfTerrains(terrain::Id::lever)
-                                .run(p);
+                if (is_floor_like && !blocked.at(p)) {
+                        tree_pos_bucket.push_back(p);
 
-                if (blocked.at(p) || !is_floor_like || is_adj_to_lever) {
-                        continue;
+                        map::update_terrain(terrain::make(terrain::Id::grass, p));
                 }
-
-                tree_pos_bucket.push_back(p);
-
-                map::update_terrain(terrain::make(terrain::Id::grass, p));
         }
+
+        if (tree_pos_bucket.empty()) {
+                TRACE_FUNC_END;
+
+                return;
+        }
+
+        rnd::shuffle(tree_pos_bucket);
 
         Array2<bool> has_actor(map::dims());
 
-        for (auto* actor : game_time::g_actors) {
+        for (actor::Actor* actor : game_time::g_actors) {
                 if (actor->m_state != ActorState::destroyed) {
                         has_actor.at(actor->m_pos) = true;
                 }
         }
 
-        int nr_trees_placed = 0;
+        // Some blocking terrain must be reachable so that the player is not
+        // prevented from progressing (other blocking terrain such as Monoliths
+        // may be walled in however).
+        const std::vector<terrain::Id> terrains_must_be_reachable = {
+                terrain::Id::stairs,
+                terrain::Id::lever,
+        };
+
+        std::vector<P> positions_must_be_reachable;
+
+        for (const P& p : blocked.rect().positions()) {
+                if (map_parsers::IsAnyOfTerrains(terrains_must_be_reachable).run(p)) {
+                        positions_must_be_reachable.push_back(p);
+                }
+        }
 
         const int tree_one_in_n = rnd::range(1, 20);
 
-        TRACE << "tree_one_in_n: " << tree_one_in_n << std::endl;
-
         while (!tree_pos_bucket.empty()) {
-                const auto p = tree_pos_bucket.back();
+                const P p = tree_pos_bucket.back();
 
                 tree_pos_bucket.pop_back();
 
-                if (has_actor.at(p) || !rnd::one_in(tree_one_in_n)) {
+                if (!rnd::one_in(tree_one_in_n)) {
+                        continue;
+                }
+
+                if (has_actor.at(p)) {
                         continue;
                 }
 
                 blocked.at(p) = true;
 
-                if (map_parsers::is_map_connected(blocked)) {
+                if (map_parsers::is_map_connected(blocked, positions_must_be_reachable)) {
                         map::update_terrain(terrain::make(terrain::Id::tree, p));
-
-                        ++nr_trees_placed;
                 }
                 else {
                         blocked.at(p) = false;

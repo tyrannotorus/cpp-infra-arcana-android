@@ -614,9 +614,11 @@ Array2<bool> expand(const Array2<bool>& in, const int dist)
 
 }  // expand
 
-bool is_map_connected(const Array2<bool>& blocked)
+bool is_map_connected(
+        const Array2<bool>& blocked,
+        const std::vector<P>& positions_must_be_reachable)
 {
-        const auto dims = blocked.dims();
+        const P dims = blocked.dims();
 
         const int x0 = 1;
         const int y0 = 1;
@@ -641,13 +643,7 @@ bool is_map_connected(const Array2<bool>& blocked)
 
         ASSERT(map::is_pos_inside_outer_walls(origin));
 
-        const auto flood =
-                floodfill(
-                        origin,
-                        blocked,
-                        INT_MAX,
-                        {-1, -1},
-                        true);
+        const Array2<int> flood = floodfill(origin, blocked, INT_MAX, {-1, -1}, true);
 
         // Check if there is any free position not reached by the flood - if so,
         // the map is not connected.
@@ -655,11 +651,28 @@ bool is_map_connected(const Array2<bool>& blocked)
                 for (int y = y0; y <= y1; ++y) {
                         const P p(x, y);
 
-                        if ((p != origin) &&
-                            !blocked.at(p) &&
-                            (flood.at(p) == 0)) {
+                        if ((p != origin) && !blocked.at(p) && (flood.at(p) == 0)) {
                                 return false;
                         }
+                }
+        }
+
+        // Check that all positions that must be reachable (probably the stairs,
+        // levers) have at least one reachable adjacent position.
+        for (const P& p : positions_must_be_reachable) {
+                bool is_reachable = false;
+
+                for (const P& d : dir_utils::g_dir_list) {
+                        const P p_adj = p + d;
+
+                        if ((p_adj == origin) || (!blocked.at(p_adj) && (flood.at(p_adj) != 0))) {
+                                is_reachable = true;
+                        }
+                }
+
+                if (!is_reachable) {
+                        // No adjacent reachable positions.
+                        return false;
                 }
         }
 

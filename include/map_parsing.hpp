@@ -389,7 +389,9 @@ Array2<bool> expand(
         const Array2<bool>& in,
         int dist);
 
-bool is_map_connected(const Array2<bool>& blocked);
+bool is_map_connected(
+        const Array2<bool>& blocked,
+        const std::vector<P>& positions_must_be_reachable = {});
 
 }  // namespace map_parsers
 
