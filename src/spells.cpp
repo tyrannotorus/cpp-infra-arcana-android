@@ -4873,9 +4873,13 @@ void SpellMiGoHypno::run_effect(
 {
         (void)skill;
 
-        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
+        actor::Actor* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
-        ASSERT(target);
+        if (!target) {
+                ASSERT(false);
+
+                return;
+        }
 
         // Spell resistance?
         if (target->m_properties.has(PropId::r_spell)) {
@@ -4904,14 +4908,16 @@ void SpellMiGoHypno::run_effect(
         }
 
         if (rnd::coin_toss()) {
-                auto* prop_fainted = property_factory::make(PropId::fainted);
+                Prop* prop_fainted = property_factory::make(PropId::fainted);
 
                 prop_fainted->set_duration(rnd::range(2, 10));
 
                 target->m_properties.apply(prop_fainted);
         }
         else {
-                msg_log::add("I feel dizzy.");
+                if (actor::is_player(target)) {
+                        msg_log::add("I feel dizzy.");
+                }
         }
 
         if (!actor::is_player(target)) {
