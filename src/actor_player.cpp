@@ -339,7 +339,7 @@ int Actor::carry_weight_lmt() const
         }
 
         if (m_properties.has(PropId::weakened)) {
-                carry_weight_mod -= 15;
+                carry_weight_mod -= g_weakened_carry_weight_penalty;
         }
 
         return (g_player_carry_weight_base * (carry_weight_mod + 100)) / 100;

@@ -45,39 +45,6 @@ static Color info_color()
         return colors::text();
 }
 
-// static void draw_bar(
-//         int pct_filled,
-//         const P& pos,
-//         const int w_tot,
-//         const Panel panel,
-//         const Color& color)
-// {
-//         if (pct_filled <= 0) {
-//                 return;
-//         }
-
-//         pct_filled = std::min(pct_filled, 100);
-
-//         const auto px_x0y0 =
-//                 io::gui_to_px_coords(panel, pos)
-//                         .with_offsets(0, 3);
-
-//         const auto px_x1y1 =
-//                 io::gui_to_px_coords(
-//                         panel,
-//                         {pos.x + w_tot, pos.y + 1})
-//                         .with_offsets(-1, -3);
-
-//         const int px_w_tot = px_x1y1.x - px_x0y0.x + 1;
-//         const int px_w_filled = (px_w_tot * pct_filled) / 100;
-//         const int px_x1_filled = px_x0y0.x + px_w_filled - 1;
-//         const P px_x1y1_filled(px_x1_filled, px_x1y1.y);
-
-//         io::draw_rectangle_filled(
-//                 {px_x0y0, px_x1y1_filled},
-//                 color);
-// }
-
 static std::string make_wpn_stats_str(const item::Item& wpn)
 {
         const ItemNameAttackInfo att_inf =
@@ -86,11 +53,8 @@ static std::string make_wpn_stats_str(const item::Item& wpn)
                 : ItemNameAttackInfo::main_attack_mode;
 
         const std::string plus_str = wpn.plus_str(att_inf);
-
         const std::string dmg_str = wpn.dmg_str(att_inf, ItemNameDmg::average);
-
-        const std::string hit_mod_str =
-                wpn.hit_mod_str(att_inf, AbbrevItemAttackInfo::yes);
+        const std::string hit_mod_str = wpn.hit_mod_str(att_inf, AbbrevItemAttackInfo::yes);
 
         const std::string inf_str = wpn.name_info_str();
 
@@ -193,13 +157,6 @@ static void draw_hp(const int y, const Panel panel)
         const int max_hp = actor::max_hp(*map::g_player);
         const int hp_pct = (hp * 100) / max_hp;
 
-        // draw_bar(
-        //         hp_pct,
-        //         {0, y},
-        //         panels::w(panel),
-        //         panel,
-        //         colors::red().fraction(1.5));
-
         io::draw_text(
                 "Health",
                 panel,
@@ -238,13 +195,6 @@ static void draw_sp(const int y, const Panel panel)
         const int max_sp = actor::max_sp(*map::g_player);
         const int sp_pct = (sp * 100) / max_sp;
 
-        // draw_bar(
-        //         sp_pct,
-        //         {0, y},
-        //         panels::w(panel),
-        //         panel,
-        //         colors::blue().fraction(1.5));
-
         io::draw_text(
                 "Spirit",
                 panel,
@@ -281,13 +231,6 @@ static void draw_shock(const int y, const Panel panel)
 {
         const int shock_pct = std::min(999, map::g_player->shock_tot());
 
-        // draw_bar(
-        //         shock_pct,
-        //         {0, y},
-        //         panels::w(panel),
-        //         panel,
-        //         colors::magenta().fraction(2));
-
         io::draw_text(
                 "Shock",
                 panel,
@@ -308,13 +251,6 @@ static void draw_shock(const int y, const Panel panel)
 static void draw_insanity(const int y, const Panel panel)
 {
         const int ins_pct = map::g_player->insanity();
-
-        // draw_bar(
-        //         ins_pct,
-        //         {0, y},
-        //         panels::w(panel),
-        //         panel,
-        //         colors::magenta().fraction(2));
 
         io::draw_text(
                 "Insanity",
@@ -337,13 +273,6 @@ static void draw_weight(const int y, const Panel panel)
 {
         const int weight_pct = map::g_player->enc_percent();
 
-        // draw_bar(
-        //         weight_pct,
-        //         {0, y},
-        //         panels::w(panel),
-        //         panel,
-        //         colors::cyan().fraction(2.0));
-
         io::draw_text(
                 "Weight",
                 panel,
@@ -353,11 +282,23 @@ static void draw_weight(const int y, const Panel panel)
 
         const std::string enc_str = std::to_string(weight_pct) + "%";
 
+        Color color = info_color();
+
+        if (weight_pct >= g_enc_immobile_lvl) {
+                color = colors::light_red();
+        }
+        else if (weight_pct >= 100) {
+                color = colors::orange();
+        }
+        else if ((weight_pct + g_weakened_carry_weight_penalty) >= 100) {
+                color = colors::yellow().tinted(25);
+        }
+
         io::draw_text_right(
                 enc_str,
                 panel,
                 {panels::w(panel) - 1, y},
-                info_color(),
+                color,
                 io::DrawBg::no);
 }
 
@@ -443,13 +384,6 @@ static void draw_char_lvl_and_xp(const int y, const Panel panel)
 
         const int xp_pct = std::clamp(game::xp_pct(), 0, 100);
 
-        // draw_bar(
-        //         xp_pct,
-        //         {0, y},
-        //         panels::w(panel),
-        //         panel,
-        //         colors::green().fraction(1.25));
-
         io::draw_text(
                 "Level",
                 panel,
@@ -521,8 +455,7 @@ static void draw_lantern(const int y, const Panel panel)
                 label_color(),
                 io::DrawBg::no);
 
-        const item::Item* const item =
-                map::g_player->m_inv.item_in_backpack(item::Id::lantern);
+        const item::Item* const item = map::g_player->m_inv.item_in_backpack(item::Id::lantern);
 
         Color color = info_color();
 
@@ -559,11 +492,11 @@ static void draw_med_suppl(const int y, const Panel panel)
         std::string suppl_str = "-";
 
         const item::Item* const item =
-                map::g_player->m_inv.item_in_backpack(item::Id::medical_bag);
+                map::g_player->m_inv
+                        .item_in_backpack(item::Id::medical_bag);
 
         if (item) {
-                const auto* const medical_bag =
-                        static_cast<const item::MedicalBag*>(item);
+                const auto* const medical_bag = static_cast<const item::MedicalBag*>(item);
 
                 suppl_str = std::to_string(medical_bag->nr_supplies());
         }

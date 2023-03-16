@@ -84,6 +84,7 @@ by bumping them).
 - Made some changes to reduce the risk of registering key presses when the game window regains focus (e.g. accidentally doing a melee attack due to the game registering a tab press when alt-tabbing back to the game)
 - The user data location is now printed in the main options menu.
 - By default, selecting a menu entry with a letter key only jumps to that location, and a second press (or enter) is required to select it. This behavior only happens in menus that have descriptions for the different entries. Added an option to always immediately select entries when pressing letter keys (the old way).
+- When carry weight is high enough that becoming weakened would cause the weight to go over 100% (i.e. at 85%) the current carry weight percentage is drawn with (tinted) yellow color, orange at 100% or above (staggering), and red at 125% and above (immobile).
 
 ##############################
 # Modability
