@@ -774,9 +774,9 @@ static void init_data_list()
                 "fear, and weakening, cannot read or cast spells, becomes "
                 "weakened when the frenzy ends.";
         d.msg_start_player = "I feel ferocious!!!";
-        d.msg_start_mon = "Looks ferocious!";
+        d.msg_start_mon = "looks ferocious!";
         d.msg_end_player = "I calm down.";
-        d.msg_end_mon = "Calms down a little.";
+        d.msg_end_mon = "calms down a little.";
         d.allow_display_turns = true;
         d.force_interrupt_player_on_start = true;
         d.allow_test_on_bot = true;
