@@ -76,7 +76,7 @@ static void draw_descr_box(const std::vector<ColoredString>& lines)
 
 static void try_cast(Spell* const spell)
 {
-        const PropHandler& props = map::g_player->m_properties;
+        const prop::PropHandler& props = map::g_player->m_properties;
 
         if (!props.allow_cast_intr_spell_absolute(Verbose::yes)) {
                 return;
@@ -527,7 +527,7 @@ SpellSkill spell_skill(const SpellId id)
 
         // Erudition skill bonus - max level is master.
         if ((skill < SpellSkill::master) &&
-            map::g_player->m_properties.has(PropId::erudition)) {
+            map::g_player->m_properties.has(prop::Id::erudition)) {
                 skill = (SpellSkill)((int)skill + 1);
         }
 

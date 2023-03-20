@@ -407,8 +407,8 @@ void HitChancePenalty::on_start(const item::Item& item)
 {
         (void)item;
 
-        auto* const prop = property_factory::make(
-                PropId::hit_chance_penalty_curse);
+        auto* const prop = prop::make(
+                prop::Id::hit_chance_penalty_curse);
 
         prop->set_indefinite();
 
@@ -418,7 +418,7 @@ void HitChancePenalty::on_start(const item::Item& item)
 void HitChancePenalty::on_stop()
 {
         map::g_player->m_properties.end_prop(
-                PropId::hit_chance_penalty_curse);
+                prop::Id::hit_chance_penalty_curse);
 }
 
 std::string HitChancePenalty::descr() const
@@ -434,8 +434,8 @@ void IncreasedShock::on_start(const item::Item& item)
 {
         (void)item;
 
-        auto* const prop = property_factory::make(
-                PropId::increased_shock_curse);
+        auto* const prop = prop::make(
+                prop::Id::increased_shock_curse);
 
         prop->set_indefinite();
 
@@ -445,7 +445,7 @@ void IncreasedShock::on_start(const item::Item& item)
 void IncreasedShock::on_stop()
 {
         map::g_player->m_properties.end_prop(
-                PropId::increased_shock_curse);
+                prop::Id::increased_shock_curse);
 }
 
 std::string IncreasedShock::descr() const
@@ -775,8 +775,8 @@ void CannotRead::on_start(const item::Item& item)
 {
         (void)item;
 
-        auto* const prop = property_factory::make(
-                PropId::cannot_read_curse);
+        auto* const prop = prop::make(
+                prop::Id::cannot_read_curse);
 
         prop->set_indefinite();
 
@@ -786,7 +786,7 @@ void CannotRead::on_start(const item::Item& item)
 void CannotRead::on_stop()
 {
         map::g_player->m_properties.end_prop(
-                PropId::cannot_read_curse);
+                prop::Id::cannot_read_curse);
 }
 
 std::string CannotRead::descr() const
@@ -801,8 +801,8 @@ void LightSensitive::on_start(const item::Item& item)
 {
         (void)item;
 
-        auto* const prop = property_factory::make(
-                PropId::light_sensitive_curse);
+        auto* const prop = prop::make(
+                prop::Id::light_sensitive_curse);
 
         prop->set_indefinite();
 
@@ -812,7 +812,7 @@ void LightSensitive::on_start(const item::Item& item)
 void LightSensitive::on_stop()
 {
         map::g_player->m_properties.end_prop(
-                PropId::light_sensitive_curse);
+                prop::Id::light_sensitive_curse);
 }
 
 std::string LightSensitive::descr() const

@@ -17,13 +17,13 @@ struct ItemAttackProp
                 prop(nullptr),
                 pct_chance_to_apply(100) {}
 
-        ItemAttackProp(Prop* const property) :
+        ItemAttackProp(prop::Prop* const property) :
                 prop(property),
                 pct_chance_to_apply(100) {}
 
         ~ItemAttackProp() = default;
 
-        std::shared_ptr<Prop> prop;
+        std::shared_ptr<prop::Prop> prop;
 
         int pct_chance_to_apply;
 };

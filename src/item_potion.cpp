@@ -441,23 +441,23 @@ std::string Potion::name_info_str() const
 
 void Vitality::quaff_impl(actor::Actor& actor)
 {
-        std::vector<PropId> props_can_heal = {
-                PropId::blind,
-                PropId::deaf,
-                PropId::poisoned,
-                PropId::infected,
-                PropId::diseased,
-                PropId::weakened,
-                PropId::hp_sap,
-                PropId::wound};
+        std::vector<prop::Id> props_can_heal = {
+                prop::Id::blind,
+                prop::Id::deaf,
+                prop::Id::poisoned,
+                prop::Id::infected,
+                prop::Id::diseased,
+                prop::Id::weakened,
+                prop::Id::hp_sap,
+                prop::Id::wound};
 
-        for (PropId prop_id : props_can_heal) {
+        for (prop::Id prop_id : props_can_heal) {
                 actor.m_properties.end_prop(prop_id);
         }
 
         actor.restore_hp(999, false);
 
-        actor.m_properties.apply(property_factory::make(PropId::regenerating));
+        actor.m_properties.apply(prop::make(prop::Id::regenerating));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -475,7 +475,7 @@ void Vitality::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Spirit::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.end_prop(PropId::spi_sap);
+        actor.m_properties.end_prop(prop::Id::spi_sap);
 
         // SP is always restored at least up to maximum, but can go beyond
         const int sp_max = actor::max_sp(actor);
@@ -501,7 +501,7 @@ void Spirit::collide_hook(const P& pos, actor::Actor* const actor)
 void Blindness::quaff_impl(actor::Actor& actor)
 {
         actor.m_properties.apply(
-                property_factory::make(PropId::blind));
+                prop::make(prop::Id::blind));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -519,7 +519,7 @@ void Blindness::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Paral::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(new PropParalyzed());
+        actor.m_properties.apply(prop::make(prop::Id::paralyzed));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -537,7 +537,7 @@ void Paral::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Disease::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(new PropDiseased());
+        actor.m_properties.apply(prop::make(prop::Id::diseased));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -546,7 +546,7 @@ void Disease::quaff_impl(actor::Actor& actor)
 
 void Conf::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(new PropConfused());
+        actor.m_properties.apply(prop::make(prop::Id::confused));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -564,9 +564,9 @@ void Conf::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Fortitude::quaff_impl(actor::Actor& actor)
 {
-        auto* prop_r_fear = property_factory::make(PropId::r_fear);
-        auto* prop_r_conf = property_factory::make(PropId::r_conf);
-        auto* prop_r_sleep = property_factory::make(PropId::r_sleep);
+        auto* prop_r_fear = prop::make(prop::Id::r_fear);
+        auto* prop_r_conf = prop::make(prop::Id::r_conf);
+        auto* prop_r_sleep = prop::make(prop::Id::r_sleep);
 
         // The duration of the last two properties is decided by the randomized
         // duration of the first property
@@ -579,9 +579,9 @@ void Fortitude::quaff_impl(actor::Actor& actor)
         actor.m_properties.apply(prop_r_conf);
         actor.m_properties.apply(prop_r_sleep);
 
-        actor.m_properties.end_prop(PropId::frenzied);
-        actor.m_properties.end_prop(PropId::hallucinating);
-        actor.m_properties.end_prop(PropId::mind_sap);
+        actor.m_properties.end_prop(prop::Id::frenzied);
+        actor.m_properties.end_prop(prop::Id::hallucinating);
+        actor.m_properties.end_prop(prop::Id::mind_sap);
 
         if (actor::is_player(&actor)) {
                 const std::vector<const InsSympt*> sympts =
@@ -614,7 +614,7 @@ void Fortitude::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Poison::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(new PropPoisoned());
+        actor.m_properties.apply(prop::make(prop::Id::poisoned));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -632,7 +632,7 @@ void Poison::collide_hook(const P& pos, actor::Actor* const actor)
 
 void RFire::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(property_factory::make(PropId::r_fire));
+        actor.m_properties.apply(prop::make(prop::Id::r_fire));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -650,18 +650,18 @@ void RFire::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Curing::quaff_impl(actor::Actor& actor)
 {
-        std::vector<PropId> props_can_heal = {
-                PropId::blind,
-                PropId::deaf,
-                PropId::poisoned,
-                PropId::infected,
-                PropId::diseased,
-                PropId::weakened,
-                PropId::hp_sap};
+        std::vector<prop::Id> props_can_heal = {
+                prop::Id::blind,
+                prop::Id::deaf,
+                prop::Id::poisoned,
+                prop::Id::infected,
+                prop::Id::diseased,
+                prop::Id::weakened,
+                prop::Id::hp_sap};
 
         bool is_noticable = false;
 
-        for (PropId prop_id : props_can_heal) {
+        for (prop::Id prop_id : props_can_heal) {
                 if (actor.m_properties.end_prop(prop_id)) {
                         is_noticable = true;
                 }
@@ -694,7 +694,7 @@ void Curing::collide_hook(const P& pos, actor::Actor* const actor)
 
 void RElec::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(new PropRElec());
+        actor.m_properties.apply(prop::make(prop::Id::r_elec));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -737,8 +737,8 @@ void Descent::quaff_impl(actor::Actor& actor)
         (void)actor;
 
         if (map::g_dlvl < (g_dlvl_last - 1)) {
-                if (!map::g_player->m_properties.has(PropId::descend)) {
-                        map::g_player->m_properties.apply(new PropDescend());
+                if (!map::g_player->m_properties.has(prop::Id::descend)) {
+                        map::g_player->m_properties.apply(prop::make(prop::Id::descend));
                 }
         }
         else {

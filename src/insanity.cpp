@@ -105,7 +105,7 @@ std::string InsReduceXp::start_msg() const
 
 bool InsScream::is_allowed() const
 {
-        return !map::g_player->m_properties.has(PropId::r_fear);
+        return !map::g_player->m_properties.has(prop::Id::r_fear);
 }
 
 void InsScream::on_start_hook()
@@ -175,7 +175,7 @@ bool InsFaint::is_allowed() const
 void InsFaint::on_start_hook()
 {
         map::g_player->m_properties.apply(
-                property_factory::make(PropId::fainted));
+                prop::make(prop::Id::fainted));
 }
 
 void InsLaugh::on_start_hook()
@@ -194,7 +194,7 @@ void InsLaugh::on_start_hook()
 bool InsPhobiaRat::is_allowed() const
 {
         const bool has_phobia = insanity::has_sympt_type(InsSymptType::phobia);
-        const bool is_rfear = map::g_player->m_properties.has(PropId::r_fear);
+        const bool is_rfear = map::g_player->m_properties.has(prop::Id::r_fear);
 
         return !is_rfear && (!has_phobia || rnd::one_in(20));
 }
@@ -211,7 +211,7 @@ void InsPhobiaRat::on_new_player_turn(
                         msg_log::add("I am plagued by my phobia of rats!");
 
                         map::g_player->m_properties.apply(
-                                property_factory::make(PropId::terrified));
+                                prop::make(prop::Id::terrified));
 
                         break;
                 }
@@ -226,7 +226,7 @@ void InsPhobiaRat::on_permanent_rfear()
 bool InsPhobiaSpider::is_allowed() const
 {
         const bool has_phobia = insanity::has_sympt_type(InsSymptType::phobia);
-        const bool is_rfear = map::g_player->m_properties.has(PropId::r_fear);
+        const bool is_rfear = map::g_player->m_properties.has(prop::Id::r_fear);
 
         return !is_rfear && (!has_phobia || rnd::one_in(20));
 }
@@ -243,7 +243,7 @@ void InsPhobiaSpider::on_new_player_turn(
                         msg_log::add("I am plagued by my phobia of spiders!");
 
                         map::g_player->m_properties.apply(
-                                property_factory::make(PropId::terrified));
+                                prop::make(prop::Id::terrified));
 
                         break;
                 }
@@ -258,7 +258,7 @@ void InsPhobiaSpider::on_permanent_rfear()
 bool InsPhobiaReptileAndAmph::is_allowed() const
 {
         const bool has_phobia = insanity::has_sympt_type(InsSymptType::phobia);
-        const bool is_rfear = map::g_player->m_properties.has(PropId::r_fear);
+        const bool is_rfear = map::g_player->m_properties.has(prop::Id::r_fear);
 
         return !is_rfear && (!has_phobia || rnd::one_in(20));
 }
@@ -296,7 +296,7 @@ void InsPhobiaReptileAndAmph::on_new_player_turn(
                 msg_log::add("I am plagued by my phobia of " + animal_str + "!");
 
                 map::g_player->m_properties.apply(
-                        property_factory::make(PropId::terrified));
+                        prop::make(prop::Id::terrified));
         }
 }
 
@@ -308,7 +308,7 @@ void InsPhobiaReptileAndAmph::on_permanent_rfear()
 bool InsPhobiaCanine::is_allowed() const
 {
         const bool has_phobia = insanity::has_sympt_type(InsSymptType::phobia);
-        const bool is_rfear = map::g_player->m_properties.has(PropId::r_fear);
+        const bool is_rfear = map::g_player->m_properties.has(prop::Id::r_fear);
 
         return !is_rfear && (!has_phobia || rnd::one_in(20));
 }
@@ -325,7 +325,7 @@ void InsPhobiaCanine::on_new_player_turn(
                         msg_log::add("I am plagued by my phobia of canines!");
 
                         map::g_player->m_properties.apply(
-                                property_factory::make(PropId::terrified));
+                                prop::make(prop::Id::terrified));
 
                         break;
                 }
@@ -340,7 +340,7 @@ void InsPhobiaCanine::on_permanent_rfear()
 bool InsPhobiaDead::is_allowed() const
 {
         const bool has_phobia = insanity::has_sympt_type(InsSymptType::phobia);
-        const bool is_rfear = map::g_player->m_properties.has(PropId::r_fear);
+        const bool is_rfear = map::g_player->m_properties.has(prop::Id::r_fear);
 
         return !is_rfear && (!has_phobia || rnd::one_in(20));
 }
@@ -357,7 +357,7 @@ void InsPhobiaDead::on_new_player_turn(
                         msg_log::add("I am plagued by my phobia of the dead!");
 
                         map::g_player->m_properties.apply(
-                                property_factory::make(PropId::terrified));
+                                prop::make(prop::Id::terrified));
 
                         break;
                 }
@@ -373,7 +373,7 @@ bool InsPhobiaDeep::is_allowed() const
 {
         const bool has_phobia = insanity::has_sympt_type(InsSymptType::phobia);
 
-        const bool is_rfear = map::g_player->m_properties.has(PropId::r_fear);
+        const bool is_rfear = map::g_player->m_properties.has(prop::Id::r_fear);
 
         return !is_rfear && (!has_phobia || rnd::one_in(20));
 }
@@ -398,7 +398,7 @@ void InsPhobiaDeep::on_new_player_turn(
                 msg_log::add("I am plagued by my phobia of deep places!");
 
                 map::g_player->m_properties.apply(
-                        property_factory::make(PropId::terrified));
+                        prop::make(prop::Id::terrified));
         }
 }
 
@@ -410,7 +410,7 @@ void InsPhobiaDeep::on_permanent_rfear()
 bool InsPhobiaDark::is_allowed() const
 {
         const bool has_phobia = insanity::has_sympt_type(InsSymptType::phobia);
-        const bool is_rfear = map::g_player->m_properties.has(PropId::r_fear);
+        const bool is_rfear = map::g_player->m_properties.has(prop::Id::r_fear);
 
         return (
                 !player_bon::is_bg(Bg::ghoul) &&
@@ -425,14 +425,14 @@ void InsPhobiaDark::on_new_player_turn(
 
         if (rnd::one_in(10)) {
                 const P p(map::g_player->m_pos);
-                const PropHandler& props = map::g_player->m_properties;
+                const prop::PropHandler& props = map::g_player->m_properties;
 
                 if ((props.allow_act() && !props.allow_see()) ||
                     (map::g_dark.at(p) && !map::g_light.at(p))) {
                         msg_log::add("I am plagued by my phobia of the dark!");
 
                         map::g_player->m_properties.apply(
-                                property_factory::make(PropId::terrified));
+                                prop::make(prop::Id::terrified));
                 }
         }
 }
@@ -472,7 +472,7 @@ void InsShadows::on_start_hook()
                 std::begin(summoned.monsters),
                 std::end(summoned.monsters),
                 [](auto* const mon) {
-                        auto* prop = property_factory::make(PropId::waiting);
+                        auto* prop = prop::make(prop::Id::waiting);
 
                         prop->set_duration(1);
 
@@ -510,7 +510,7 @@ void InsParanoia::on_start_hook()
                 std::begin(summoned.monsters),
                 std::end(summoned.monsters),
                 [](auto* const mon) {
-                        auto* prop = property_factory::make(PropId::waiting);
+                        auto* prop = prop::make(prop::Id::waiting);
 
                         prop->set_duration(1);
 
@@ -520,13 +520,13 @@ void InsParanoia::on_start_hook()
 
 bool InsConfusion::is_allowed() const
 {
-        return !map::g_player->m_properties.has(PropId::r_conf);
+        return !map::g_player->m_properties.has(prop::Id::r_conf);
 }
 
 void InsConfusion::on_start_hook()
 {
         map::g_player->m_properties.apply(
-                property_factory::make(PropId::confused));
+                prop::make(prop::Id::confused));
 }
 
 bool InsFrenzy::is_allowed() const
@@ -537,7 +537,7 @@ bool InsFrenzy::is_allowed() const
 void InsFrenzy::on_start_hook()
 {
         map::g_player->m_properties.apply(
-                property_factory::make(PropId::frenzied));
+                prop::make(prop::Id::frenzied));
 }
 
 // -----------------------------------------------------------------------------

@@ -336,15 +336,15 @@ static void handle_auto_move_command(const Dir dir)
                 is_allowed = false;
                 prevent_msg = "Not while blind.";
         }
-        else if (map::g_player->m_properties.has(PropId::poisoned)) {
+        else if (map::g_player->m_properties.has(prop::Id::poisoned)) {
                 is_allowed = false;
                 prevent_msg = "Not while poisoned.";
         }
-        else if (map::g_player->m_properties.has(PropId::confused)) {
+        else if (map::g_player->m_properties.has(prop::Id::confused)) {
                 is_allowed = false;
                 prevent_msg = "Not while confused.";
         }
-        else if (map::g_player->m_properties.has(PropId::infected)) {
+        else if (map::g_player->m_properties.has(prop::Id::infected)) {
                 is_allowed = false;
                 prevent_msg = "Not while infected.";
         }
@@ -745,7 +745,7 @@ void handle(const GameCmd cmd)
         case GameCmd::wait: {
                 if (player_bon::has_trait(Trait::steady_aimer)) {
                         auto* const aiming =
-                                property_factory::make(PropId::aiming);
+                                prop::make(prop::Id::aiming);
 
                         aiming->set_duration(1);
 
@@ -770,7 +770,7 @@ void handle(const GameCmd cmd)
                         is_allowed = false;
                         prevent_msg = common_text::g_shock_prevent_cmd;
                 }
-                else if (map::g_player->m_properties.has(PropId::infected)) {
+                else if (map::g_player->m_properties.has(prop::Id::infected)) {
                         is_allowed = false;
                         prevent_msg = "Not while infected.";
                 }
@@ -982,12 +982,12 @@ void handle(const GameCmd cmd)
 
                 std::string msg = "Listing all properties (IDX    NAME):";
 
-                for (size_t i = 0; i < (size_t)PropId::END; ++i) {
+                for (size_t i = 0; i < (size_t)prop::Id::END; ++i) {
                         msg +=
                                 "\n" +
                                 std::to_string(i) +
                                 "    " +
-                                property_data::g_data[i].name;
+                                prop::g_data[i].name;
                 }
 
                 TRACE << msg << std::endl;
@@ -1006,8 +1006,8 @@ void handle(const GameCmd cmd)
                 }
 
                 map::g_player->m_properties.apply(
-                        property_factory::make(
-                                (PropId)id_to_apply));
+                        prop::make(
+                                (prop::Id)id_to_apply));
 
         } break;
 
@@ -1086,8 +1086,8 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f7: {
                 map::g_player->m_properties.apply(
-                        property_factory::make(
-                                PropId::r_conf));
+                        prop::make(
+                                prop::Id::r_conf));
 
                 teleport(*map::g_player);
         } break;

@@ -321,10 +321,10 @@ static void dump_intr_attack_property(
         actor::IntrAttData& attack_data)
 {
         const auto prop_id =
-                property_data::str_to_prop_id(
+                prop::str_to_prop_id(
                         xml::get_text_str(property_e));
 
-        attack_data.prop_applied.prop.reset(property_factory::make(prop_id));
+        attack_data.prop_applied.prop.reset(prop::make(prop_id));
 
         xml::try_get_attribute_int(
                 property_e,
@@ -455,7 +455,7 @@ static void dump_properties(xml::Element* properties_e, actor::ActorData& data)
              e;
              e = xml::next_sibling(e)) {
                 const auto prop_id =
-                        property_data::str_to_prop_id(
+                        prop::str_to_prop_id(
                                 xml::get_text_str(e));
 
                 data.natural_props[(size_t)prop_id] = true;
@@ -701,7 +701,7 @@ void ActorData::reset()
         spi = 0;
         speed = Speed::normal;
 
-        for (size_t i = 0; i < (size_t)PropId::END; ++i) {
+        for (size_t i = 0; i < (size_t)prop::Id::END; ++i) {
                 natural_props[i] = false;
         }
 

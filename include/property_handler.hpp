@@ -37,6 +37,8 @@ class Actor;
 
 struct P;
 
+namespace prop
+{
 enum class PropEndAllowCallEndHook
 {
         no,
@@ -119,14 +121,14 @@ public:
         void remove_props_for_item(const item::Item* item);
 
         // Fast method for checking if a certain property id is applied
-        bool has(const PropId id) const
+        bool has(const Id id) const
         {
                 return m_prop_count_cache[(size_t)id] > 0;
         }
 
-        Prop* prop(PropId id) const;
+        Prop* prop(Id id) const;
 
-        bool end_prop(PropId id, const PropEndConfig& config = {});
+        bool end_prop(Id id, const PropEndConfig& config = {});
 
         std::vector<ColoredString> property_names_short() const;
 
@@ -222,7 +224,7 @@ private:
 
         bool try_apply_more_on_existing_intr_prop(const Prop& new_prop, Verbose verbose);
 
-        bool is_resisting_prop(PropId id) const;
+        bool is_resisting_prop(Id id) const;
 
         // A hook that prints messages, updates FOV, etc, and also calls the
         // on_end() property hook.
@@ -230,16 +232,18 @@ private:
         // the active property info. The caller is responsible for this.
         void on_prop_end(Prop* prop, const PropEndConfig& end_config);
 
-        void incr_prop_count(PropId id);
-        void decr_prop_count(PropId id);
+        void incr_prop_count(Id id);
+        void decr_prop_count(Id id);
 
         std::vector<std::shared_ptr<Prop>> m_props;
 
         // This array is only used as an optimization when requesting which
         // properties are currently active (see the "has()" method above).
-        int m_prop_count_cache[(size_t)PropId::END];
+        int m_prop_count_cache[(size_t)Id::END];
 
         actor::Actor* m_owner;
 };
+
+}  // namespace prop
 
 #endif  // PROPERTY_HANDLER_HPP

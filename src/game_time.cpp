@@ -98,25 +98,25 @@ static actor::Speed current_actor_speed(const actor::Actor& actor)
 {
         // Paralyzed actors always act at normal speed (otherwise paralysis will
         // barely affect super fast monsters at all).
-        if (actor.m_properties.has(PropId::paralyzed)) {
+        if (actor.m_properties.has(prop::Id::paralyzed)) {
                 return actor::Speed::normal;
         }
 
-        if (actor.m_properties.has(PropId::extra_hasted)) {
+        if (actor.m_properties.has(prop::Id::extra_hasted)) {
                 return actor::Speed::very_fast;
         }
 
         actor::Speed speed = actor.m_data->speed;
 
-        if (actor.m_properties.has(PropId::slowed)) {
+        if (actor.m_properties.has(prop::Id::slowed)) {
                 speed = decr_speed_category(speed);
         }
 
-        if (actor.m_properties.has(PropId::hasted)) {
+        if (actor.m_properties.has(prop::Id::hasted)) {
                 speed = incr_speed_category(speed);
         }
 
-        if (actor.m_properties.has(PropId::frenzied)) {
+        if (actor.m_properties.has(prop::Id::frenzied)) {
                 speed = incr_speed_category(speed);
         }
 
@@ -153,17 +153,17 @@ static void run_std_turn_events()
         if (game_time::g_is_magic_descend_nxt_std_turn) {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
 
-                const PropEndConfig prop_end_config(
-                        PropEndAllowCallEndHook::no,
-                        PropEndAllowMsg::no,
-                        PropEndAllowHistoricMsg::no);
+                const prop::PropEndConfig prop_end_config(
+                        prop::PropEndAllowCallEndHook::no,
+                        prop::PropEndAllowMsg::no,
+                        prop::PropEndAllowHistoricMsg::no);
 
                 map::g_player->m_properties.end_prop(
-                        PropId::nailed,
+                        prop::Id::nailed,
                         prop_end_config);
 
                 map::g_player->m_properties.end_prop(
-                        PropId::entangled,
+                        prop::Id::entangled,
                         prop_end_config);
 
                 msg_log::add(
@@ -251,7 +251,7 @@ static void run_std_turn_events()
         snd_emit::reset_nr_snd_msg_printed_current_turn();
 
         if ((map::g_dlvl > 0) &&
-            !map::g_player->m_properties.has(PropId::deaf)) {
+            !map::g_player->m_properties.has(prop::Id::deaf)) {
                 const int play_one_in_n = 200;
 
                 audio::try_play_ambient(play_one_in_n);
@@ -264,9 +264,9 @@ static void run_atomic_turn_events()
         for (auto* const actor : game_time::g_actors) {
                 auto& props = actor->m_properties;
 
-                if (props.has(PropId::flying) ||
-                    props.has(PropId::tiny_flying) ||
-                    !props.has(PropId::burning)) {
+                if (props.has(prop::Id::flying) ||
+                    props.has(prop::Id::tiny_flying) ||
+                    !props.has(prop::Id::burning)) {
                         continue;
                 }
 
@@ -277,7 +277,7 @@ static void run_atomic_turn_events()
                 if (terrain->m_data->matl_type == Matl::fluid) {
                         // TODO: Add a message here.
 
-                        actor->m_properties.end_prop(PropId::burning);
+                        actor->m_properties.end_prop(prop::Id::burning);
 
                         map::update_light_map();
                 }

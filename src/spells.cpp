@@ -165,23 +165,23 @@ static void spawn_monsters(const Context& context)
                         printed_msg = true;
                 }
 
-                Prop* const conflicted = property_factory::make(PropId::conflict);
+                prop::Prop* const conflicted = prop::make(prop::Id::conflict);
 
                 conflicted->set_indefinite();
 
                 actor->m_properties.apply(
                         conflicted,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         false,
                         Verbose::no);
 
-                Prop* const waiting = property_factory::make(PropId::waiting);
+                prop::Prop* const waiting = prop::make(prop::Id::waiting);
 
                 waiting->set_duration(2);
 
                 actor->m_properties.apply(waiting);
 
-                Prop* const summoned = property_factory::make(PropId::summoned);
+                prop::Prop* const summoned = prop::make(prop::Id::summoned);
 
                 summoned->set_duration(rnd::range(3, 20));
 
@@ -374,9 +374,9 @@ static void flay_human(const Context& context)
                     actor_data->is_humanoid &&
                     !actor_data->is_undead &&
                     !actor_data->is_unique &&
-                    !properties.has(PropId::ethereal) &&
-                    !properties.has(PropId::possessed_by_zuul) &&
-                    !properties.has(PropId::spawns_zombie_parts_on_destroyed)) {
+                    !properties.has(prop::Id::ethereal) &&
+                    !properties.has(prop::Id::possessed_by_zuul) &&
+                    !properties.has(prop::Id::spawns_zombie_parts_on_destroyed)) {
                         target_actor = actor;
 
                         break;
@@ -760,7 +760,7 @@ static std::string get_skill_descr(
                 bon_words.emplace_back("altar");
         }
 
-        if (map::g_player->m_properties.has(PropId::erudition)) {
+        if (map::g_player->m_properties.has(prop::Id::erudition)) {
                 bon_words.emplace_back("erudition");
         }
 
@@ -802,24 +802,23 @@ static void end_properties_for_casting_spell(
         // the invisibility spell is an exception from spells breaking cloaking.
         //
         if (spell_id != SpellId::invis) {
-                caster.m_properties.end_prop(PropId::cloaked);
+                caster.m_properties.end_prop(prop::Id::cloaked);
         }
 
         // End focused
-        caster.m_properties.end_prop(PropId::meditative_focused);
+        caster.m_properties.end_prop(prop::Id::meditative_focused);
 
         // End erudition (unless that was the spell that was cast now).
         if (spell_id != SpellId::erudition) {
                 const auto* const prop =
-                        caster.m_properties.prop(PropId::erudition);
+                        caster.m_properties.prop(prop::Id::erudition);
 
                 const bool should_end =
                         prop &&
-                        static_cast<const PropErudition*>(prop)
-                                ->should_end_on_spell_cast();
+                        static_cast<const prop::Erudition*>(prop)->should_end_on_spell_cast();
 
                 if (should_end) {
-                        caster.m_properties.end_prop(PropId::erudition);
+                        caster.m_properties.end_prop(prop::Id::erudition);
                 }
         }
 }
@@ -1106,7 +1105,7 @@ Range Spell::cost_range(
         Range range(cost_min, cost_max);
 
         if (actor::is_player(caster) &&
-            caster->m_properties.has(PropId::meditative_focused)) {
+            caster->m_properties.has(prop::Id::meditative_focused)) {
                 --range.min;
                 --range.max;
         }
@@ -1127,7 +1126,7 @@ void Spell::cast(
 
         ASSERT(caster);
 
-        PropHandler& properties = caster->m_properties;
+        prop::PropHandler& properties = caster->m_properties;
 
         // If this is an intrinsic cast, check properties which NEVER allows
         // casting or speaking.
@@ -1260,7 +1259,7 @@ void Spell::cast(
 
         const bool is_focused_player =
                 actor::is_player(caster) &&
-                caster->m_properties.has(PropId::meditative_focused);
+                caster->m_properties.has(prop::Id::meditative_focused);
 
         if (allow_cast && caster->is_alive()) {
                 TRACE
@@ -1277,7 +1276,7 @@ void Spell::cast(
                 if (actor::is_player(caster) &&
                     player_bon::has_trait(Trait::galvanization) &&
                     (domain() == SpellDomain::blood)) {
-                        Prop* const regen = property_factory::make(PropId::regenerating);
+                        prop::Prop* const regen = prop::make(prop::Id::regenerating);
 
                         regen->set_duration(rnd::range(4, 6));
 
@@ -1345,8 +1344,8 @@ void Spell::on_resist(actor::Actor& target) const
         }
 
         // End spell resistance if not a natural property.
-        if (!target.m_data->natural_props[(size_t)PropId::r_spell]) {
-                target.m_properties.end_prop(PropId::r_spell);
+        if (!target.m_data->natural_props[(size_t)prop::Id::r_spell]) {
+                target.m_properties.end_prop(prop::Id::r_spell);
         }
 
         if (is_player && player_bon::has_trait(Trait::absorb)) {
@@ -1494,9 +1493,9 @@ void SpellAuraOfDecay::run_effect(
         (void)seen_targets;
 
         auto* prop =
-                static_cast<PropAuraOfDecay*>(
-                        property_factory::make(
-                                PropId::aura_of_decay));
+                static_cast<prop::AuraOfDecay*>(
+                        prop::make(
+                                prop::Id::aura_of_decay));
 
         prop->set_duration(duration_range(skill).roll());
 
@@ -1548,7 +1547,7 @@ bool SpellAuraOfDecay::allow_mon_cast_now(
 {
         return (
                 !seen_targets.empty() &&
-                !mon.m_properties.has(PropId::aura_of_decay));
+                !mon.m_properties.has(prop::Id::aura_of_decay));
 }
 
 // -----------------------------------------------------------------------------
@@ -1661,14 +1660,14 @@ void Darkbolt::on_hit(
         }
 
         if (!actor_hit.m_properties.is_resisting_dmg(s_bolt_dmg_type, Verbose::no)) {
-                Prop* paralyzed = property_factory::make(PropId::paralyzed);
+                prop::Prop* paralyzed = prop::make(prop::Id::paralyzed);
 
                 paralyzed->set_duration(rnd::range(1, 2));
 
                 actor_hit.m_properties.apply(paralyzed);
 
                 if (skill >= SpellSkill::master) {
-                        Prop* burning = property_factory::make(PropId::burning);
+                        prop::Prop* burning = prop::make(prop::Id::burning);
 
                         burning->set_duration(rnd::range(2, 3));
 
@@ -1711,11 +1710,11 @@ void SpellBolt::run_effect(
                         seen_targets);
 
         // Spell resistance?
-        if (target->m_properties.has(PropId::r_spell)) {
+        if (target->m_properties.has(prop::Id::r_spell)) {
                 on_resist(*target);
 
                 // Spell reflection?
-                if (target->m_properties.has(PropId::spell_reflect)) {
+                if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
                                 msg_log::add(
                                         s_spell_reflect_msg,
@@ -1926,7 +1925,7 @@ void SpellAzaGaze::apply_properties_on_target(
         }
 
         {
-                auto* prop = property_factory::make(PropId::fainted);
+                auto* prop = prop::make(prop::Id::fainted);
 
                 const int duration = faint_duration_range(skill).roll();
 
@@ -1936,7 +1935,7 @@ void SpellAzaGaze::apply_properties_on_target(
         }
 
         if (skill >= SpellSkill::transcendent) {
-                auto* prop = property_factory::make(PropId::conflict);
+                auto* prop = prop::make(prop::Id::conflict);
 
                 const int duration = conflict_duration_range(skill).roll();
 
@@ -1952,11 +1951,11 @@ void SpellAzaGaze::run_effect_on_target(
         const SpellSkill skill) const
 {
         // Spell resistance?
-        if (target.m_properties.has(PropId::r_spell)) {
+        if (target.m_properties.has(prop::Id::r_spell)) {
                 on_resist(target);
 
                 // Spell reflection?
-                if (target.m_properties.has(PropId::spell_reflect)) {
+                if (target.m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(target)) {
                                 msg_log::add(
                                         s_spell_reflect_msg,
@@ -2220,7 +2219,7 @@ void SpellCataclysm::run_effect(
 
                         map::update_terrain(terrain::make(terrain::Id::rubble_low, p));
 
-                        Prop* const burning = property_factory::make(PropId::burning);
+                        prop::Prop* const burning = prop::make(prop::Id::burning);
 
                         explosion::run(
                                 p,
@@ -2337,10 +2336,10 @@ void SpellPestilence::on_rat_summoned(
         actor::Actor* const mon,
         const SpellSkill skill) const
 {
-        mon->m_properties.apply(property_factory::make(PropId::summoned));
+        mon->m_properties.apply(prop::make(prop::Id::summoned));
 
         {
-                auto* prop = property_factory::make(PropId::waiting);
+                auto* prop = prop::make(prop::Id::waiting);
 
                 prop->set_duration(2);
 
@@ -2348,13 +2347,13 @@ void SpellPestilence::on_rat_summoned(
         }
 
         if (skill == SpellSkill::master) {
-                auto* prop = property_factory::make(PropId::hasted);
+                auto* prop = prop::make(prop::Id::hasted);
 
                 prop->set_indefinite();
 
                 mon->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         }
@@ -2511,44 +2510,44 @@ void SpellSpectralWeapons::on_mon_summoned(
         mon->m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 
         {
-                auto* prop = property_factory::make(PropId::spectral_wpn);
+                auto* prop = prop::make(prop::Id::spectral_wpn);
                 prop->set_indefinite();
                 mon->m_properties.apply(prop);
         }
 
         {
-                auto* prop = property_factory::make(PropId::summoned);
+                auto* prop = prop::make(prop::Id::summoned);
                 const int duration = duration_range(skill).roll();
                 prop->set_duration(duration);
                 mon->m_properties.apply(prop);
         }
 
         {
-                auto* prop = property_factory::make(PropId::waiting);
+                auto* prop = prop::make(prop::Id::waiting);
                 prop->set_duration(1);
                 mon->m_properties.apply(prop);
         }
 
         if (skill >= SpellSkill::master) {
-                auto* prop = property_factory::make(PropId::see_invis);
+                auto* prop = prop::make(prop::Id::see_invis);
 
                 prop->set_indefinite();
 
                 mon->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         }
 
         if (skill == SpellSkill::transcendent) {
-                auto* prop = property_factory::make(PropId::r_phys);
+                auto* prop = prop::make(prop::Id::r_phys);
 
                 prop->set_indefinite();
 
                 mon->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         }
@@ -2791,11 +2790,11 @@ void SpellCleansingFire::run_effect(
 
         for (auto* const actor : targets) {
                 // Spell resistance?
-                if (actor->m_properties.has(PropId::r_spell)) {
+                if (actor->m_properties.has(prop::Id::r_spell)) {
                         on_resist(*actor);
 
                         // Spell reflection?
-                        if (actor->m_properties.has(PropId::spell_reflect)) {
+                        if (actor->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*actor)) {
                                         msg_log::add(
                                                 s_spell_reflect_msg,
@@ -2822,7 +2821,7 @@ void SpellCleansingFire::run_effect(
                         }
                 }
 
-                Prop* const burning = property_factory::make(PropId::burning);
+                prop::Prop* const burning = prop::make(prop::Id::burning);
 
                 burning->set_duration(burn_duration_range().roll());
 
@@ -2879,7 +2878,7 @@ void SpellSanctuary::run_effect(
 
         const auto prop_duration = duration(skill);
 
-        auto* const sanctuary = property_factory::make(PropId::sanctuary);
+        auto* const sanctuary = prop::make(prop::Id::sanctuary);
 
         sanctuary->set_duration(prop_duration.roll());
 
@@ -2975,7 +2974,7 @@ void SpellPurge::run_effect(
                         caster);
 
                 if (actor->is_alive()) {
-                        Prop* const fear = property_factory::make(PropId::terrified);
+                        prop::Prop* const fear = prop::make(prop::Id::terrified);
 
                         fear->set_duration(fear_duration_range().roll());
 
@@ -3017,7 +3016,7 @@ void SpellFrenzy::run_effect(
         (void)skill;
         (void)seen_targets;
 
-        auto* prop = property_factory::make(PropId::frenzied);
+        auto* prop = prop::make(prop::Id::frenzied);
 
         prop->set_duration(rnd::range(30, 40));
 
@@ -3066,7 +3065,7 @@ void SpellBless::run_effect(
 {
         (void)seen_targets;
 
-        auto* prop = property_factory::make(PropId::blessed);
+        auto* prop = prop::make(prop::Id::blessed);
 
         if (skill == SpellSkill::transcendent) {
                 prop->set_indefinite();
@@ -3154,16 +3153,16 @@ void SpellLight::run_effect(
 {
         (void)seen_targets;
 
-        auto* radiant = property_factory::make(PropId::radiant_fov);
+        auto* radiant = prop::make(prop::Id::radiant_fov);
 
         radiant->set_duration(light_duration_range(skill).roll());
 
         caster->m_properties.apply(radiant);
 
-        std::vector<Prop*> properties;
+        std::vector<prop::Prop*> properties;
 
         if (skill >= SpellSkill::master) {
-                auto* const prop = property_factory::make(PropId::blind);
+                auto* const prop = prop::make(prop::Id::blind);
 
                 prop->set_duration(blind_duration_range(skill).roll());
 
@@ -3171,7 +3170,7 @@ void SpellLight::run_effect(
         }
 
         if (skill == SpellSkill::transcendent) {
-                auto* const prop = property_factory::make(PropId::burning);
+                auto* const prop = prop::make(prop::Id::burning);
 
                 prop->set_duration(burning_duration_range().roll());
 
@@ -3267,12 +3266,12 @@ void SpellInvis::run_effect(
 {
         (void)seen_targets;
 
-        const PropId prop_id =
+        const prop::Id prop_id =
                 (skill == SpellSkill::basic)
-                ? PropId::cloaked
-                : PropId::invis;
+                ? prop::Id::cloaked
+                : prop::Id::invis;
 
-        Prop* const prop = property_factory::make(prop_id);
+        prop::Prop* const prop = prop::make(prop_id);
 
         prop->set_duration(duration_range(skill).roll());
 
@@ -3345,7 +3344,7 @@ void SpellSeeInvis::run_effect(
 {
         (void)seen_targets;
 
-        Prop* prop = property_factory::make(PropId::see_invis);
+        prop::Prop* prop = prop::make(prop::Id::see_invis);
 
         prop->set_duration(duration_range(skill).roll());
 
@@ -3375,7 +3374,7 @@ bool SpellSeeInvis::allow_mon_cast_now(
         (void)seen_targets;
 
         return (
-                !mon.m_properties.has(PropId::see_invis) &&
+                !mon.m_properties.has(prop::Id::see_invis) &&
                 mon.is_aware_of_player() &&
                 rnd::one_in(8));
 }
@@ -3396,7 +3395,7 @@ void SpellSpellShield::run_effect(
         (void)skill;
         (void)seen_targets;
 
-        auto* prop = property_factory::make(PropId::r_spell);
+        auto* prop = prop::make(prop::Id::r_spell);
 
         prop->set_indefinite();
 
@@ -3423,7 +3422,7 @@ bool SpellSpellShield::allow_mon_cast_now(
 {
         (void)seen_targets;
 
-        return !mon.m_properties.has(PropId::r_spell);
+        return !mon.m_properties.has(prop::Id::r_spell);
 }
 
 // -----------------------------------------------------------------------------
@@ -3464,7 +3463,7 @@ void SpellHaste::run_effect(
 {
         (void)seen_targets;
 
-        auto* prop = property_factory::make(PropId::hasted);
+        auto* prop = prop::make(prop::Id::hasted);
 
         prop->set_duration(duration_range(skill).roll());
 
@@ -3498,7 +3497,7 @@ bool SpellHaste::allow_mon_cast_now(
 {
         return (
                 !seen_targets.empty() &&
-                !mon.m_properties.has(PropId::hasted));
+                !mon.m_properties.has(prop::Id::hasted));
 }
 
 // -----------------------------------------------------------------------------
@@ -3539,7 +3538,7 @@ void SpellPremonition::run_effect(
 {
         (void)seen_targets;
 
-        auto* prop = property_factory::make(PropId::premonition);
+        auto* prop = prop::make(prop::Id::premonition);
 
         prop->set_duration(duration_range(skill).roll());
 
@@ -3599,7 +3598,7 @@ void SpellErudition::run_effect(
         (void)seen_targets;
 
         {
-                auto* prop = property_factory::make(PropId::erudition);
+                auto* prop = prop::make(prop::Id::erudition);
 
                 prop->set_duration(get_duration_range(skill).roll());
 
@@ -3608,7 +3607,7 @@ void SpellErudition::run_effect(
 
         if (skill == SpellSkill::transcendent) {
                 auto* const prop =
-                        caster->m_properties.prop(PropId::erudition);
+                        caster->m_properties.prop(prop::Id::erudition);
 
                 if (!prop) {
                         ASSERT(false);
@@ -3616,7 +3615,7 @@ void SpellErudition::run_effect(
                         return;
                 }
 
-                auto* const erudition = static_cast<PropErudition*>(prop);
+                auto* const erudition = static_cast<prop::Erudition*>(prop);
 
                 erudition->disable_end_on_spell_cast();
         }
@@ -3768,7 +3767,7 @@ void SpellTeleport::run_effect(
         (void)seen_targets;
 
         if (skill >= SpellSkill::master) {
-                auto* const invis = property_factory::make(PropId::invis);
+                auto* const invis = prop::make(prop::Id::invis);
 
                 invis->set_duration(invis_duration(skill));
 
@@ -3848,8 +3847,8 @@ void SpellResistance::run_effect(
 
         int nr_turns = duration_range(skill).roll();
 
-        auto* prop_r_fire = property_factory::make(PropId::r_fire);
-        auto* prop_r_elec = property_factory::make(PropId::r_elec);
+        auto* prop_r_fire = prop::make(prop::Id::r_fire);
+        auto* prop_r_elec = prop::make(prop::Id::r_elec);
 
         prop_r_fire->set_duration(nr_turns);
         prop_r_elec->set_duration(nr_turns);
@@ -3880,8 +3879,8 @@ bool SpellResistance::allow_mon_cast_now(
 {
         (void)seen_targets;
 
-        const bool has_r_fire = mon.m_properties.has(PropId::r_fire);
-        const bool has_r_elec = mon.m_properties.has(PropId::r_elec);
+        const bool has_r_fire = mon.m_properties.has(prop::Id::r_fire);
+        const bool has_r_elec = mon.m_properties.has(prop::Id::r_elec);
 
         return ((!has_r_fire || !has_r_elec) && mon.m_ai_state.target);
 }
@@ -3901,11 +3900,11 @@ void SpellKnockBack::run_effect(
         ASSERT(target);
 
         // Spell resistance?
-        if (target->m_properties.has(PropId::r_spell)) {
+        if (target->m_properties.has(prop::Id::r_spell)) {
                 on_resist(*target);
 
                 // Spell reflection?
-                if (target->m_properties.has(PropId::spell_reflect)) {
+                if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
                                 msg_log::add(
                                         s_spell_reflect_msg,
@@ -4008,11 +4007,11 @@ void SpellCurse::run_effect(
 
         for (auto* const target : targets) {
                 // Spell resistance?
-                if (target->m_properties.has(PropId::r_spell)) {
+                if (target->m_properties.has(prop::Id::r_spell)) {
                         on_resist(*target);
 
                         // Spell reflection?
-                        if (target->m_properties.has(PropId::spell_reflect)) {
+                        if (target->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*target)) {
                                         msg_log::add(
                                                 s_spell_reflect_msg,
@@ -4029,13 +4028,13 @@ void SpellCurse::run_effect(
                         continue;
                 }
 
-                auto id = PropId::cursed;
+                auto id = prop::Id::cursed;
 
                 if (skill == SpellSkill::master) {
-                        id = PropId::doomed;
+                        id = prop::Id::doomed;
                 }
 
-                auto* const prop = property_factory::make(id);
+                auto* const prop = prop::make(id);
 
                 prop->set_duration(duration);
 
@@ -4122,11 +4121,11 @@ void SpellEnfeeble::run_effect(
 
         for (auto* const target : targets) {
                 // Spell resistance?
-                if (target->m_properties.has(PropId::r_spell)) {
+                if (target->m_properties.has(prop::Id::r_spell)) {
                         on_resist(*target);
 
                         // Spell reflection?
-                        if (target->m_properties.has(PropId::spell_reflect)) {
+                        if (target->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*target)) {
                                         msg_log::add(
                                                 s_spell_reflect_msg,
@@ -4143,7 +4142,7 @@ void SpellEnfeeble::run_effect(
                         continue;
                 }
 
-                auto* const prop = property_factory::make(PropId::weakened);
+                auto* const prop = prop::make(prop::Id::weakened);
 
                 prop->set_duration(duration);
 
@@ -4253,11 +4252,11 @@ void SpellSlow::run_effect(
 
         for (auto* const target : targets) {
                 // Spell resistance?
-                if (target->m_properties.has(PropId::r_spell)) {
+                if (target->m_properties.has(prop::Id::r_spell)) {
                         on_resist(*target);
 
                         // Spell reflection?
-                        if (target->m_properties.has(PropId::spell_reflect)) {
+                        if (target->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*target)) {
                                         msg_log::add(
                                                 s_spell_reflect_msg,
@@ -4274,7 +4273,7 @@ void SpellSlow::run_effect(
                         continue;
                 }
 
-                auto* const prop = property_factory::make(PropId::slowed);
+                auto* const prop = prop::make(prop::Id::slowed);
 
                 prop->set_duration(duration);
 
@@ -4390,11 +4389,11 @@ void SpellTerrify::run_effect(
 
         for (auto* const target : targets) {
                 // Spell resistance?
-                if (target->m_properties.has(PropId::r_spell)) {
+                if (target->m_properties.has(prop::Id::r_spell)) {
                         on_resist(*target);
 
                         // Spell reflection?
-                        if (target->m_properties.has(PropId::spell_reflect)) {
+                        if (target->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*target)) {
                                         msg_log::add(
                                                 s_spell_reflect_msg,
@@ -4411,7 +4410,7 @@ void SpellTerrify::run_effect(
                         continue;
                 }
 
-                auto* const prop = property_factory::make(PropId::terrified);
+                auto* const prop = prop::make(prop::Id::terrified);
 
                 prop->set_duration(duration_range(skill).roll());
 
@@ -4476,11 +4475,11 @@ void SpellDisease::run_effect(
         ASSERT(target);
 
         // Spell resistance?
-        if (target->m_properties.has(PropId::r_spell)) {
+        if (target->m_properties.has(prop::Id::r_spell)) {
                 on_resist(*target);
 
                 // Spell reflection?
-                if (target->m_properties.has(PropId::spell_reflect)) {
+                if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
                                 msg_log::add(
                                         s_spell_reflect_msg,
@@ -4510,8 +4509,8 @@ void SpellDisease::run_effect(
         }
 
         target->m_properties.apply(
-                property_factory::make(
-                        PropId::diseased));
+                prop::make(
+                        prop::Id::diseased));
 
         if (!actor::is_player(target)) {
                 target->become_aware_player(actor::AwareSource::spell_victim);
@@ -4562,7 +4561,7 @@ void SpellSummonMon::run_effect(
         }
 
 #ifndef NDEBUG
-        for (const std::string id : summon_bucket) {
+        for (const std::string& id : summon_bucket) {
                 ASSERT(actor::g_data[id].can_be_summoned_by_mon);
         }
 #endif  // NDEBUG
@@ -4651,10 +4650,10 @@ void SpellSummonMon::summon(const std::string& id, actor::Actor* caster) const
                 std::end(summoned.monsters),
                 [](auto* const mon) {
                         mon->m_properties.apply(
-                                property_factory::make(PropId::summoned));
+                                prop::make(prop::Id::summoned));
 
                         auto* prop_waiting =
-                                property_factory::make(PropId::waiting);
+                                prop::make(prop::Id::waiting);
 
                         prop_waiting->set_duration(2);
 
@@ -4732,10 +4731,10 @@ void SpellSummonTentacles::run_effect(
                 std::end(summoned.monsters),
                 [](auto* const mon) {
                         mon->m_properties.apply(
-                                property_factory::make(PropId::summoned));
+                                prop::make(prop::Id::summoned));
 
                         auto* prop_waiting =
-                                property_factory::make(PropId::waiting);
+                                prop::make(prop::Id::waiting);
 
                         prop_waiting->set_duration(2);
 
@@ -4793,24 +4792,23 @@ void SpellHeal::run_effect(
         (void)seen_targets;
 
         if ((int)skill >= (int)SpellSkill::expert) {
-                caster->m_properties.end_prop(PropId::infected);
-                caster->m_properties.end_prop(PropId::diseased);
-                caster->m_properties.end_prop(PropId::weakened);
-                caster->m_properties.end_prop(PropId::hp_sap);
-                caster->m_properties.end_prop(PropId::poisoned);
+                caster->m_properties.end_prop(prop::Id::infected);
+                caster->m_properties.end_prop(prop::Id::diseased);
+                caster->m_properties.end_prop(prop::Id::weakened);
+                caster->m_properties.end_prop(prop::Id::hp_sap);
+                caster->m_properties.end_prop(prop::Id::poisoned);
         }
 
         if (skill >= SpellSkill::master) {
-                caster->m_properties.end_prop(PropId::blind);
-                caster->m_properties.end_prop(PropId::deaf);
+                caster->m_properties.end_prop(prop::Id::blind);
+                caster->m_properties.end_prop(prop::Id::deaf);
 
                 if (actor::is_player(caster)) {
                         auto* const wound_prop =
-                                map::g_player->m_properties.prop(PropId::wound);
+                                map::g_player->m_properties.prop(prop::Id::wound);
 
                         if (wound_prop) {
-                                auto* const wound =
-                                        static_cast<PropWound*>(wound_prop);
+                                auto* const wound = static_cast<prop::Wound*>(wound_prop);
 
                                 wound->heal_one_wound();
                         }
@@ -4819,8 +4817,8 @@ void SpellHeal::run_effect(
 
         if (skill == SpellSkill::transcendent) {
                 auto* const prop =
-                        property_factory::make(
-                                PropId::regenerating);
+                        prop::make(
+                                prop::Id::regenerating);
 
                 prop->set_duration(regen_duration().roll());
 
@@ -4891,11 +4889,11 @@ void SpellMiGoHypno::run_effect(
         }
 
         // Spell resistance?
-        if (target->m_properties.has(PropId::r_spell)) {
+        if (target->m_properties.has(prop::Id::r_spell)) {
                 on_resist(*target);
 
                 // Spell reflection?
-                if (target->m_properties.has(PropId::spell_reflect)) {
+                if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
                                 msg_log::add(
                                         s_spell_reflect_msg,
@@ -4917,7 +4915,7 @@ void SpellMiGoHypno::run_effect(
         }
 
         if (rnd::coin_toss()) {
-                Prop* prop_fainted = property_factory::make(PropId::fainted);
+                prop::Prop* prop_fainted = prop::make(prop::Id::fainted);
 
                 prop_fainted->set_duration(rnd::range(2, 10));
 
@@ -4956,11 +4954,11 @@ void SpellBurn::run_effect(
         ASSERT(target);
 
         // Spell resistance?
-        if (target->m_properties.has(PropId::r_spell)) {
+        if (target->m_properties.has(prop::Id::r_spell)) {
                 on_resist(*target);
 
                 // Spell reflection?
-                if (target->m_properties.has(PropId::spell_reflect)) {
+                if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
                                 msg_log::add(
                                         s_spell_reflect_msg,
@@ -4986,7 +4984,7 @@ void SpellBurn::run_effect(
                 msg_log::add("Flames are rising around " + actor_name + "!");
         }
 
-        auto* prop = property_factory::make(PropId::burning);
+        auto* prop = prop::make(prop::Id::burning);
 
         prop->set_duration(2 + (int)skill);
 
@@ -5019,11 +5017,11 @@ void SpellDeafen::run_effect(
         ASSERT(target);
 
         // Spell resistance?
-        if (target->m_properties.has(PropId::r_spell)) {
+        if (target->m_properties.has(prop::Id::r_spell)) {
                 on_resist(*target);
 
                 // Spell reflection?
-                if (target->m_properties.has(PropId::spell_reflect)) {
+                if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
                                 msg_log::add(
                                         s_spell_reflect_msg,
@@ -5040,7 +5038,7 @@ void SpellDeafen::run_effect(
                 return;
         }
 
-        auto* prop = property_factory::make(PropId::deaf);
+        auto* prop = prop::make(prop::Id::deaf);
 
         prop->set_duration(75 + (int)skill * 75);
 
@@ -5328,7 +5326,7 @@ void SpellBloodTempering::run_effect(
 
         int nr_turns = duration_range(skill).roll();
 
-        Prop* r_phys = property_factory::make(PropId::r_phys);
+        prop::Prop* r_phys = prop::make(prop::Id::r_phys);
 
         r_phys->set_duration(nr_turns);
 
@@ -5395,9 +5393,7 @@ void SpellThorns::run_effect(
 {
         (void)seen_targets;
 
-        auto* const prop =
-                static_cast<PropThorns*>(
-                        property_factory::make(PropId::thorns));
+        auto* const prop = static_cast<prop::Thorns*>(prop::make(prop::Id::thorns));
 
         prop->set_duration(duration_range(skill).roll());
 
@@ -5412,8 +5408,7 @@ std::vector<std::string> SpellThorns::descr_specific(
         std::vector<std::string> descr;
 
         // Re-using the property description as spell description.
-        descr.push_back(
-                property_data::g_data[(size_t)PropId::thorns].descr);
+        descr.push_back(prop::g_data[(size_t)prop::Id::thorns].descr);
 
         descr.push_back(
                 "The spell returns " +
@@ -5442,7 +5437,7 @@ SpellShock SpellCrimsonPassage::shock_type() const
         //
         // HACK: Assuming only the player can cast this spell.
         return (
-                map::g_player->m_properties.has(PropId::crimson_passage)
+                map::g_player->m_properties.has(prop::Id::crimson_passage)
                         ? SpellShock::none
                         : SpellShock::disturbing);
 }
@@ -5454,7 +5449,7 @@ int SpellCrimsonPassage::base_max_cost(const SpellSkill skill) const
         // If the effect is already active, the spell is free to cast.
 
         // HACK: Assuming only the player can cast this spell.
-        return map::g_player->m_properties.has(PropId::crimson_passage) ? 0 : 3;
+        return map::g_player->m_properties.has(prop::Id::crimson_passage) ? 0 : 3;
 }
 
 int SpellCrimsonPassage::nr_steps_allowed(const SpellSkill skill) const
@@ -5474,16 +5469,16 @@ void SpellCrimsonPassage::run_effect(
 {
         (void)seen_targets;
 
-        if (caster->m_properties.has(PropId::crimson_passage)) {
+        if (caster->m_properties.has(prop::Id::crimson_passage)) {
                 // Effect already active, cancel it instead.
-                caster->m_properties.end_prop(PropId::crimson_passage);
+                caster->m_properties.end_prop(prop::Id::crimson_passage);
 
                 return;
         }
 
         auto* const prop =
-                static_cast<PropCrimsonPassage*>(
-                        property_factory::make(PropId::crimson_passage));
+                static_cast<prop::CrimsonPassage*>(
+                        prop::make(prop::Id::crimson_passage));
 
         prop->set_indefinite();
 
@@ -5498,8 +5493,7 @@ std::vector<std::string> SpellCrimsonPassage::descr_specific(
         std::vector<std::string> descr;
 
         // Re-using the property description as spell description.
-        descr.push_back(
-                property_data::g_data[(size_t)PropId::crimson_passage].descr);
+        descr.push_back(prop::g_data[(size_t)prop::Id::crimson_passage].descr);
 
         const int nr_steps = nr_steps_allowed(skill);
 

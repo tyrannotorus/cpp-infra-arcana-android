@@ -443,12 +443,12 @@ void GameState::on_start()
             (m_entry_mode == GameEntryMode::new_game)) {
                 // Start with some disadvantages
                 auto* const cursed =
-                        property_factory::make(PropId::cursed);
+                        prop::make(prop::Id::cursed);
 
                 cursed->set_indefinite();
 
                 auto* const diseased =
-                        property_factory::make(PropId::diseased);
+                        prop::make(prop::Id::diseased);
 
                 diseased->set_indefinite();
 

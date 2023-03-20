@@ -183,12 +183,12 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
 MedBagAction MedicalBag::choose_action() const
 {
         // Infection?
-        if (map::g_player->m_properties.has(PropId::infected)) {
+        if (map::g_player->m_properties.has(prop::Id::infected)) {
                 return MedBagAction::sanitize_infection;
         }
 
         // Wound?
-        if (map::g_player->m_properties.has(PropId::wound)) {
+        if (map::g_player->m_properties.has(prop::Id::wound)) {
                 return MedBagAction::treat_wound;
         }
 
@@ -202,7 +202,7 @@ void MedicalBag::continue_action()
         // Check if current action should be stopped.
         switch (m_current_action) {
         case MedBagAction::treat_wound: {
-                if (!map::g_player->m_properties.has(PropId::wound)) {
+                if (!map::g_player->m_properties.has(prop::Id::wound)) {
                         // Player is no longer wounded, presumably it was healed
                         // by something else.
                         stop_action();
@@ -212,7 +212,7 @@ void MedicalBag::continue_action()
         } break;
 
         case MedBagAction::sanitize_infection: {
-                if (!map::g_player->m_properties.has(PropId::infected)) {
+                if (!map::g_player->m_properties.has(prop::Id::infected)) {
                         // Player is no longer infected, presumably it was
                         // healed by something else.
                         stop_action();
@@ -244,7 +244,7 @@ void MedicalBag::finish_current_action()
         case MedBagAction::treat_wound: {
                 auto* const prop =
                         map::g_player->m_properties.prop(
-                                PropId::wound);
+                                prop::Id::wound);
 
                 if (!prop) {
                         ASSERT(false);
@@ -254,13 +254,13 @@ void MedicalBag::finish_current_action()
                         return;
                 }
 
-                auto* const wound = static_cast<PropWound*>(prop);
+                auto* const wound = static_cast<prop::Wound*>(prop);
 
                 wound->heal_one_wound();
         } break;
 
         case MedBagAction::sanitize_infection: {
-                if (!map::g_player->m_properties.has(PropId::infected)) {
+                if (!map::g_player->m_properties.has(prop::Id::infected)) {
                         ASSERT(false);
 
                         stop_action();
@@ -268,7 +268,7 @@ void MedicalBag::finish_current_action()
                         return;
                 }
 
-                map::g_player->m_properties.end_prop(PropId::infected);
+                map::g_player->m_properties.end_prop(prop::Id::infected);
         } break;
 
         case MedBagAction::END:
@@ -387,7 +387,7 @@ ReflTalisman::ReflTalisman(ItemData* const item_data) :
 
 void ReflTalisman::on_pickup_hook()
 {
-        auto* prop = property_factory::make(PropId::spell_reflect);
+        auto* prop = prop::make(prop::Id::spell_reflect);
 
         prop->set_indefinite();
 
@@ -411,7 +411,7 @@ TeleCtrlTalisman::TeleCtrlTalisman(ItemData* const item_data) :
 
 void TeleCtrlTalisman::on_pickup_hook()
 {
-        auto* prop = property_factory::make(PropId::tele_ctrl);
+        auto* prop = prop::make(prop::Id::tele_ctrl);
 
         prop->set_indefinite();
 
@@ -427,7 +427,7 @@ void HornOfMaliceHeard::run(actor::Actor& actor) const
 {
         if (!actor::is_player(&actor)) {
                 actor.m_properties.apply(
-                        property_factory::make(PropId::conflict));
+                        prop::make(prop::Id::conflict));
         }
 }
 
@@ -487,7 +487,7 @@ ConsumeItem HornOfMalice::activate(actor::Actor* const actor)
 
 void HornOfBanishmentHeard::run(actor::Actor& actor) const
 {
-        if (actor.m_properties.has(PropId::summoned)) {
+        if (actor.m_properties.has(prop::Id::summoned)) {
                 if (actor::can_player_see_actor(actor)) {
                         const std::string name_the =
                                 text_format::first_to_upper(
@@ -586,7 +586,7 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
 
         std::string pray_msg;
 
-        if (map::g_player->m_properties.has(PropId::terrified)) {
+        if (map::g_player->m_properties.has(prop::Id::terrified)) {
                 pray_msg = "With trembling hands ";
         }
 
@@ -696,8 +696,8 @@ void HolySymbol::run_effect()
 
         const int prop_duration = rnd::range(6, 12);
 
-        auto* r_fear = property_factory::make(PropId::r_fear);
-        auto* r_shock = property_factory::make(PropId::r_shock);
+        auto* r_fear = prop::make(prop::Id::r_fear);
+        auto* r_shock = prop::make(prop::Id::r_shock);
 
         r_fear->set_duration(prop_duration);
         r_shock->set_duration(prop_duration);
@@ -742,7 +742,7 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
                 return ConsumeItem::no;
         }
 
-        if (map::g_player->m_properties.has(PropId::extra_hasted)) {
+        if (map::g_player->m_properties.has(prop::Id::extra_hasted)) {
                 msg_log::add("It will not move.");
 
                 return ConsumeItem::no;
@@ -757,8 +757,8 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
         }
 
         map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::extra_hasted));
+                prop::make(
+                        prop::Id::extra_hasted));
 
         --m_charges;
 
@@ -776,11 +776,11 @@ void OrbOfLife::on_pickup_hook()
 {
         map::g_player->change_max_hp(4, Verbose::yes);
 
-        auto* prop_r_poison = property_factory::make(PropId::r_poison);
+        auto* prop_r_poison = prop::make(prop::Id::r_poison);
         prop_r_poison->set_indefinite();
         add_carrier_prop(prop_r_poison, Verbose::yes);
 
-        auto* prop_r_disease = property_factory::make(PropId::r_disease);
+        auto* prop_r_disease = prop::make(prop::Id::r_disease);
         prop_r_disease->set_indefinite();
         add_carrier_prop(prop_r_disease, Verbose::yes);
 }
@@ -846,8 +846,8 @@ ConsumeItem WitchEye::activate(actor::Actor* actor)
         msg_log::add("I clutch the " + item_name + "...");
 
         auto* const search =
-                static_cast<PropMagicSearching*>(
-                        property_factory::make(PropId::magic_searching));
+                static_cast<prop::MagicSearching*>(
+                        prop::make(prop::Id::magic_searching));
 
         search->set_range(g_fov_radi_int);
 
@@ -874,7 +874,7 @@ ConsumeItem BoneCharm::activate(actor::Actor* actor)
 {
         (void)actor;
 
-        Prop* const r_spell = property_factory::make(PropId::r_spell);
+        prop::Prop* const r_spell = prop::make(prop::Id::r_spell);
 
         r_spell->set_duration(rnd::range(6, 12));
 
@@ -972,25 +972,25 @@ ConsumeItem AstralOpium::activate(actor::Actor* actor)
         msg_log::add("I use the " + item_name + "...");
 
         map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::astral_opium_addiction));
+                prop::make(
+                        prop::Id::astral_opium_addiction));
 
         map::g_player->m_properties.end_prop(
-                PropId::frenzied);
+                prop::Id::frenzied);
 
         map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::r_shock));
+                prop::make(
+                        prop::Id::r_shock));
 
         map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::r_fear));
+                prop::make(
+                        prop::Id::r_fear));
 
         map::g_player->restore_shock(999, false);
 
         auto* const halluc =
-                property_factory::make(
-                        PropId::hallucinating);
+                prop::make(
+                        prop::Id::hallucinating);
 
         map::g_player->m_properties.apply(halluc);
 

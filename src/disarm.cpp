@@ -36,7 +36,7 @@ void player_disarm()
                 return;
         }
 
-        if (map::g_player->m_properties.has(PropId::entangled)) {
+        if (map::g_player->m_properties.has(prop::Id::entangled)) {
                 msg_log::add("Not while entangled.");
 
                 return;

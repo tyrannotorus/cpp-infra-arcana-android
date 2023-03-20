@@ -130,7 +130,7 @@ void init_session()
 
         actor::init();
         terrain::init();
-        property_data::init();
+        prop::init();
         item::init();
         scroll::init();
         potion::init();

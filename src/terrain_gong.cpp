@@ -462,14 +462,14 @@ bool Healed::is_allowed() const
 {
         const auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::poisoned) && (player.m_hp <= 6)) {
+        if (player.m_properties.has(prop::Id::poisoned) && (player.m_hp <= 6)) {
                 return true;
         }
 
-        const auto* const prop = player.m_properties.prop(PropId::wound);
+        const auto* const prop = player.m_properties.prop(prop::Id::wound);
 
         if (prop) {
-                const auto* const wound = static_cast<const PropWound*>(prop);
+                const auto* const wound = static_cast<const prop::Wound*>(prop);
 
                 if (wound->nr_wounds() >= 3) {
                         return true;
@@ -481,17 +481,17 @@ bool Healed::is_allowed() const
 
 void Healed::run_effect()
 {
-        std::vector<PropId> props_can_heal = {
-                PropId::blind,
-                PropId::deaf,
-                PropId::poisoned,
-                PropId::infected,
-                PropId::diseased,
-                PropId::weakened,
-                PropId::hp_sap,
-                PropId::wound};
+        std::vector<prop::Id> props_can_heal = {
+                prop::Id::blind,
+                prop::Id::deaf,
+                prop::Id::poisoned,
+                prop::Id::infected,
+                prop::Id::diseased,
+                prop::Id::weakened,
+                prop::Id::hp_sap,
+                prop::Id::wound};
 
-        for (PropId prop_id : props_can_heal) {
+        for (prop::Id prop_id : props_can_heal) {
                 map::g_player->m_properties.end_prop(prop_id);
         }
 
@@ -506,7 +506,7 @@ void Healed::run_effect()
 bool Blessed::is_allowed() const
 {
         const bool is_blessed =
-                map::g_player->m_properties.has(PropId::blessed);
+                map::g_player->m_properties.has(prop::Id::blessed);
 
         const bool has_cursed_item =
                 (get_random_cursed_item() != nullptr);
@@ -516,7 +516,7 @@ bool Blessed::is_allowed() const
 
 void Blessed::run_effect()
 {
-        auto* const blessed = property_factory::make(PropId::blessed);
+        auto* const blessed = prop::make(prop::Id::blessed);
 
         blessed->set_indefinite();
 
@@ -613,14 +613,14 @@ void XpReduced::run_effect()
 // -----------------------------------------------------------------------------
 bool Deaf::is_allowed() const
 {
-        auto* const prop = map::g_player->m_properties.prop(PropId::deaf);
+        auto* const prop = map::g_player->m_properties.prop(prop::Id::deaf);
 
-        return !prop || (prop->duration_mode() != PropDurationMode::indefinite);
+        return !prop || (prop->duration_mode() != prop::PropDurationMode::indefinite);
 }
 
 void Deaf::run_effect()
 {
-        auto* const deaf = property_factory::make(PropId::deaf);
+        auto* const deaf = prop::make(prop::Id::deaf);
 
         deaf->set_indefinite();
 
@@ -632,9 +632,9 @@ void Deaf::run_effect()
 // -----------------------------------------------------------------------------
 bool Cursed::is_allowed() const
 {
-        auto* const prop = map::g_player->m_properties.prop(PropId::cursed);
+        auto* const prop = map::g_player->m_properties.prop(prop::Id::cursed);
 
-        return !prop || (prop->duration_mode() != PropDurationMode::indefinite);
+        return !prop || (prop->duration_mode() != prop::PropDurationMode::indefinite);
 }
 
 std::vector<BonusId> Cursed::bonuses_not_allowed_with() const
@@ -644,7 +644,7 @@ std::vector<BonusId> Cursed::bonuses_not_allowed_with() const
 
 void Cursed::run_effect()
 {
-        auto* const cursed = property_factory::make(PropId::cursed);
+        auto* const cursed = prop::make(prop::Id::cursed);
 
         cursed->set_indefinite();
 

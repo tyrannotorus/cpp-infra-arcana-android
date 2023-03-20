@@ -151,13 +151,12 @@ static void print_corpses_at_player_msgs()
 
 static bool is_player_staggering_from_wounds()
 {
-        Prop* const wound_prop =
-                map::g_player->m_properties.prop(PropId::wound);
+        prop::Prop* const wound_prop = map::g_player->m_properties.prop(prop::Id::wound);
 
         int nr_wounds = 0;
 
         if (wound_prop) {
-                nr_wounds = static_cast<PropWound*>(wound_prop)->nr_wounds();
+                nr_wounds = static_cast<prop::Wound*>(wound_prop)->nr_wounds();
         }
 
         const int min_nr_wounds_for_stagger = 3;
@@ -227,11 +226,11 @@ static void print_mon_enter_non_walkable_terrain_msg(
 {
         const auto& props = actor.m_properties;
 
-        const bool is_ooze = props.has(PropId::ooze);
+        const bool is_ooze = props.has(prop::Id::ooze);
 
         const bool is_small =
-                props.has(PropId::small_crawling) ||
-                props.has(PropId::tiny_flying);
+                props.has(prop::Id::small_crawling) ||
+                props.has(prop::Id::tiny_flying);
 
         if (is_ooze) {
                 print_ooze_enter_terrain_msg(actor, terrain);
@@ -276,7 +275,7 @@ static void on_player_waiting()
                 const auto seen_foes = actor::seen_foes(*map::g_player);
 
                 const bool is_burning =
-                        map::g_player->m_properties.has(PropId::burning);
+                        map::g_player->m_properties.has(prop::Id::burning);
 
                 if (seen_foes.empty() && !is_burning) {
                         reload::player_arrange_pistol_mags();
@@ -306,7 +305,7 @@ static bool is_player_torture_collared()
 
 static void handle_player_slowed_movement(const P& target)
 {
-        if (map::g_player->m_properties.has(PropId::crimson_passage)) {
+        if (map::g_player->m_properties.has(prop::Id::crimson_passage)) {
                 return;
         }
 
@@ -329,8 +328,8 @@ static void handle_player_slowed_movement(const P& target)
 
         if (should_wait) {
                 map::g_player->m_properties.apply(
-                        property_factory::make(
-                                PropId::waiting));
+                        prop::make(
+                                prop::Id::waiting));
         }
 }
 
@@ -415,7 +414,7 @@ static void do_move_action_player(Dir dir)
 
         const P target = player.m_pos + dir_utils::offset(dir);
 
-        const bool has_crimson_passage = player.m_properties.has(PropId::crimson_passage);
+        const bool has_crimson_passage = player.m_properties.has(prop::Id::crimson_passage);
 
         if (intended_dir == Dir::center) {
                 on_player_waiting();

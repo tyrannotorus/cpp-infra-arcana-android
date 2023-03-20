@@ -83,8 +83,8 @@ static void collide_potion_on_terrain(item::Item& item, const P& pos)
 static void on_attack_performed(actor::Actor& actor)
 {
         // Attacking ends cloaking and sanctuary
-        actor.m_properties.end_prop(PropId::cloaked);
-        actor.m_properties.end_prop(PropId::sanctuary);
+        actor.m_properties.end_prop(prop::Id::cloaked);
+        actor.m_properties.end_prop(prop::Id::sanctuary);
 }
 
 static bool is_noisy_terrain(const terrain::Terrain& terrain)
@@ -199,8 +199,8 @@ void player_throw_lit_explosive(const P& aim_cell)
         actor::player_state::g_active_explosive.reset();
 
         // Attacking ends cloaking and sanctuary
-        map::g_player->m_properties.end_prop(PropId::cloaked);
-        map::g_player->m_properties.end_prop(PropId::sanctuary);
+        map::g_player->m_properties.end_prop(prop::Id::cloaked);
+        map::g_player->m_properties.end_prop(prop::Id::sanctuary);
 
         game_time::tick();
 }

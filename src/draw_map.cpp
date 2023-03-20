@@ -84,7 +84,7 @@ static void set_bg_color_when_obscured_dead_actor(const actor::Actor& actor)
         }
 
         const bool is_corpse_rises =
-                actor.m_properties.has(PropId::corpse_rises);
+                actor.m_properties.has(prop::Id::corpse_rises);
 
         const Color& new_color =
                 is_corpse_rises
@@ -346,7 +346,7 @@ static void draw_living_seen_monster(const actor::Actor& mon)
                         if (mon.m_properties.has_temporary_negative_prop_mon()) {
                                 draw_obj.color_bg = colors::mon_temp_property();
                         }
-                        else if (mon.m_properties.has(PropId::frenzied)) {
+                        else if (mon.m_properties.has(prop::Id::frenzied)) {
                                 draw_obj.color_bg = colors::red();
                         }
                 }

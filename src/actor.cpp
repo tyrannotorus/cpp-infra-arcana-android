@@ -74,8 +74,8 @@ static Color color_player()
                 return colors::magenta();
         }
 
-        if (map::g_player->m_properties.has(PropId::invis) ||
-            map::g_player->m_properties.has(PropId::cloaked)) {
+        if (map::g_player->m_properties.has(prop::Id::invis) ||
+            map::g_player->m_properties.has(prop::Id::cloaked)) {
                 return colors::gray();
         }
 
@@ -152,12 +152,12 @@ static LightSize calc_light_size(const actor::Actor& actor)
         bool do_radiant_fov = false;
 
         if (actor.is_alive()) {
-                do_radiant_self = actor.m_properties.has(PropId::radiant_self);
-                do_radiant_adj = actor.m_properties.has(PropId::radiant_adjacent);
-                do_radiant_fov = actor.m_properties.has(PropId::radiant_fov);
+                do_radiant_self = actor.m_properties.has(prop::Id::radiant_self);
+                do_radiant_adj = actor.m_properties.has(prop::Id::radiant_adjacent);
+                do_radiant_fov = actor.m_properties.has(prop::Id::radiant_fov);
         }
 
-        const bool is_burning = actor.m_properties.has(PropId::burning);
+        const bool is_burning = actor.m_properties.has(prop::Id::burning);
 
         auto light_size = LightSize::none;
 
@@ -717,10 +717,10 @@ std::string Actor::death_msg() const
 {
         // Do not print a standard split message if this monster will split on
         // death (it will print a split message instead)
-        if (m_properties.has(PropId::splits_on_death)) {
+        if (m_properties.has(prop::Id::splits_on_death)) {
                 const auto* const splits =
-                        static_cast<const PropSplitsOnDeath*>(
-                                m_properties.prop(PropId::splits_on_death));
+                        static_cast<const prop::SplitsOnDeath*>(
+                                m_properties.prop(prop::Id::splits_on_death));
 
                 if (splits->prevent_std_death_msg()) {
                         return "";

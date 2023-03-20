@@ -200,11 +200,11 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
                 }
 
                 // Bonus damage from Flagellant Moribund?
-                if (attacker && attacker->m_properties.has(PropId::moribund)) {
+                if (attacker && attacker->m_properties.has(prop::Id::moribund)) {
                         auto* const moribund =
-                                static_cast<PropMoribund*>(
+                                static_cast<prop::Moribund*>(
                                         attacker->m_properties.prop(
-                                                PropId::moribund));
+                                                prop::Id::moribund));
 
                         const bool has_moribund_bon = moribund->has_bonus();
 
@@ -221,7 +221,7 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
         }
 
         // Bonus damage from being frenzied?
-        if (attacker && attacker->m_properties.has(PropId::frenzied)) {
+        if (attacker && attacker->m_properties.has(prop::Id::frenzied)) {
                 range.set_plus(range.plus() + 1);
         }
 
@@ -684,7 +684,7 @@ std::string Item::plus_str(const ItemNameAttackInfo attack_info) const
         return "";
 }
 
-void Item::add_carrier_prop(Prop* const prop, const Verbose verbose)
+void Item::add_carrier_prop(prop::Prop* const prop, const Verbose verbose)
 {
         ASSERT(m_actor_carrying);
         ASSERT(prop);

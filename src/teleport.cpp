@@ -111,7 +111,7 @@ static void confuse_player()
 {
         msg_log::add("I suddenly find myself in a different location!");
 
-        auto* prop = property_factory::make(PropId::confused);
+        auto* prop = prop::make(prop::Id::confused);
 
         prop->set_duration(8);
 
@@ -131,10 +131,10 @@ static bool should_player_ctrl_tele(const ShouldCtrlTele ctrl_tele)
 
         case ShouldCtrlTele::if_tele_ctrl_prop: {
                 const bool has_tele_ctrl =
-                        map::g_player->m_properties.has(PropId::tele_ctrl);
+                        map::g_player->m_properties.has(prop::Id::tele_ctrl);
 
                 const bool is_confused =
-                        map::g_player->m_properties.has(PropId::confused);
+                        map::g_player->m_properties.has(prop::Id::confused);
 
                 return has_tele_ctrl && !is_confused;
         }
@@ -297,15 +297,15 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                 actor.m_mon_aware_state.player_aware_of_me_counter = 0;
         }
 
-        const std::vector<PropId> props_ended = {
-                PropId::entangled,
-                PropId::nailed};
+        const std::vector<prop::Id> props_ended = {
+                prop::Id::entangled,
+                prop::Id::nailed};
 
         for (const auto id : props_ended) {
-                const PropEndConfig cfg(
-                        PropEndAllowCallEndHook::no,
-                        PropEndAllowMsg::no,
-                        PropEndAllowHistoricMsg::yes);
+                const prop::PropEndConfig cfg(
+                        prop::PropEndAllowCallEndHook::no,
+                        prop::PropEndAllowMsg::no,
+                        prop::PropEndAllowHistoricMsg::yes);
 
                 actor.m_properties.end_prop(id, cfg);
         }
@@ -392,9 +392,9 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         actor::make_player_aware_seen_monsters();
 
-        const bool has_tele_ctrl = actor.m_properties.has(PropId::tele_ctrl);
+        const bool has_tele_ctrl = actor.m_properties.has(prop::Id::tele_ctrl);
 
-        const bool is_confused = actor.m_properties.has(PropId::confused);
+        const bool is_confused = actor.m_properties.has(prop::Id::confused);
 
         if (actor::is_player(&actor) &&
             (!has_tele_ctrl ||

@@ -23,6 +23,7 @@
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
 #include "random.hpp"
@@ -45,7 +46,7 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
 {
         (void)actor;
 
-        if (map::g_player->m_properties.has(PropId::burning)) {
+        if (map::g_player->m_properties.has(prop::Id::burning)) {
                 msg_log::add("Not while burning.");
 
                 return ConsumeItem::no;
@@ -234,7 +235,7 @@ void Molotov::on_std_turn_player_hold_ignited()
                         EmitExplSnd::no,
                         0,
                         ExplExclCenter::no,
-                        {new PropBurning()});
+                        {prop::make(prop::Id::burning)});
         }
 }
 
@@ -257,7 +258,7 @@ void Molotov::on_thrown_ignited_landing(const P& p)
                 EmitExplSnd::no,
                 0,
                 ExplExclCenter::no,
-                {new PropBurning()});
+                {prop::make(prop::Id::burning)});
 }
 
 void Molotov::on_player_paralyzed()
@@ -287,7 +288,7 @@ void Molotov::on_player_paralyzed()
                 EmitExplSnd::no,
                 0,
                 ExplExclCenter::no,
-                {new PropBurning()});
+                {prop::make(prop::Id::burning)});
 }
 
 void Flare::on_player_ignite() const

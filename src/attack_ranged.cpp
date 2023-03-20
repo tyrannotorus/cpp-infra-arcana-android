@@ -1074,8 +1074,8 @@ DidAction ranged(
 
         if ((did_attack == DidAction::yes) && attacker) {
                 // Attacking ends cloaking and sanctuary.
-                attacker->m_properties.end_prop(PropId::cloaked);
-                attacker->m_properties.end_prop(PropId::sanctuary);
+                attacker->m_properties.end_prop(prop::Id::cloaked);
+                attacker->m_properties.end_prop(prop::Id::sanctuary);
 
                 if (actor::is_player(attacker) ||
                     attacker->is_actor_my_leader(map::g_player)) {

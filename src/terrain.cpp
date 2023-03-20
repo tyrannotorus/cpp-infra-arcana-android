@@ -171,7 +171,7 @@ static WasDestroyed on_new_turn_terrain_burning(terrain::Terrain& terrain)
                 // Occasionally try to set actor on fire, otherwise just do
                 // small fire damage.
                 if (rnd::one_in(4)) {
-                        actor->m_properties.apply(new PropBurning());
+                        actor->m_properties.apply(prop::make(prop::Id::burning));
                 }
                 else {
                         scorch_actor(*actor);
@@ -260,16 +260,16 @@ void Terrain::bump(actor::Actor& actor_bumping)
 AllowAction Terrain::pre_bump(actor::Actor& actor_bumping)
 {
         if (!actor::is_player(&actor_bumping) ||
-            actor_bumping.m_properties.has(PropId::confused)) {
+            actor_bumping.m_properties.has(prop::Id::confused)) {
                 return AllowAction::yes;
         }
 
-        const PropHandler& props = actor_bumping.m_properties;
+        const prop::PropHandler& props = actor_bumping.m_properties;
 
         if ((m_burn_state == BurnState::burning) &&
-            !props.has(PropId::r_fire) &&
-            !props.has(PropId::flying) &&
-            !props.has(PropId::tiny_flying) &&
+            !props.has(prop::Id::r_fire) &&
+            !props.has(prop::Id::flying) &&
+            !props.has(prop::Id::tiny_flying) &&
             can_move(actor_bumping) &&
             map::g_seen.at(m_pos)) {
                 const std::string msg =
@@ -1085,7 +1085,7 @@ void Statue::topple(
 
         if (actor_behind &&
             actor_behind->is_alive() &&
-            !actor_behind->m_properties.has(PropId::ethereal)) {
+            !actor_behind->m_properties.has(prop::Id::ethereal)) {
                 if (actor::is_player(actor_behind)) {
                         msg_log::add("It falls on me!");
                 }
@@ -1111,7 +1111,7 @@ void Statue::topple(
 
                 if (actor_behind->is_alive()) {
                         auto* const paralyzed =
-                                property_factory::make(PropId::paralyzed);
+                                prop::make(prop::Id::paralyzed);
 
                         paralyzed->set_duration(rnd::range(2, 3));
 
@@ -1164,7 +1164,7 @@ void Statue::hit(
                 ASSERT(actor);
 
                 if ((dmg_type == DmgType::kicking) &&
-                    actor->m_properties.has(PropId::weakened)) {
+                    actor->m_properties.has(prop::Id::weakened)) {
                         msg_log::add("It wiggles a bit.");
 
                         return;
@@ -1394,7 +1394,7 @@ void Stairs::player_use_fake_stairs()
 
         map::update_terrain(make(Id::floor, m_pos));
 
-        auto* prop = property_factory::make(PropId::confused);
+        auto* prop = prop::make(prop::Id::confused);
 
         prop->set_duration(8);
 
@@ -1483,18 +1483,18 @@ void Liquid::hit(
 
 void Liquid::bump(actor::Actor& actor_bumping)
 {
-        const PropHandler& props = actor_bumping.m_properties;
+        const prop::PropHandler& props = actor_bumping.m_properties;
 
-        if (props.has(PropId::ethereal) ||
-            props.has(PropId::flying) ||
-            props.has(PropId::tiny_flying) ||
+        if (props.has(prop::Id::ethereal) ||
+            props.has(prop::Id::flying) ||
+            props.has(prop::Id::tiny_flying) ||
             actor_bumping.m_data->is_amphibian) {
                 return;
         }
 
-        if (!props.has(PropId::crimson_passage)) {
+        if (!props.has(prop::Id::crimson_passage)) {
                 actor_bumping.m_properties.apply(
-                        property_factory::make(PropId::delayed_by_liquid));
+                        prop::make(prop::Id::delayed_by_liquid));
 
                 // Print message if player, unless player is wearing torture
                 // collar (in that case the message is redundant since the
@@ -1571,10 +1571,10 @@ void Liquid::run_magic_pool_effects_on_player()
                 }
         }
 
-        map::g_player->m_properties.end_prop(PropId::cursed);
-        map::g_player->m_properties.end_prop(PropId::infected);
-        map::g_player->m_properties.end_prop(PropId::diseased);
-        map::g_player->m_properties.end_prop(PropId::wound);
+        map::g_player->m_properties.end_prop(prop::Id::cursed);
+        map::g_player->m_properties.end_prop(prop::Id::infected);
+        map::g_player->m_properties.end_prop(prop::Id::diseased);
+        map::g_player->m_properties.end_prop(prop::Id::wound);
 
         for (auto* const item : cursed_items) {
                 const auto name =
@@ -2200,8 +2200,8 @@ Color Chains::color_default() const
 void Chains::bump(actor::Actor& actor_bumping)
 {
         if (actor_bumping.m_data->actor_size > actor::Size::floor &&
-            !actor_bumping.m_properties.has(PropId::ethereal) &&
-            !actor_bumping.m_properties.has(PropId::ooze)) {
+            !actor_bumping.m_properties.has(prop::Id::ethereal) &&
+            !actor_bumping.m_properties.has(prop::Id::ooze)) {
                 std::string msg;
 
                 if (map::g_seen.at(m_pos)) {
@@ -2451,7 +2451,7 @@ void Brazier::hit(
                 ASSERT(actor);
 
                 if ((dmg_type == DmgType::kicking) &&
-                    actor->m_properties.has(PropId::weakened)) {
+                    actor->m_properties.has(prop::Id::weakened)) {
                         msg_log::add("It wiggles a bit.");
 
                         return;
@@ -2509,7 +2509,7 @@ void Brazier::hit(
                                 EmitExplSnd::no,
                                 expl_d,
                                 ExplExclCenter::no,
-                                {new PropBurning()});
+                                {prop::make(prop::Id::burning)});
                 }
 
                 map::update_vision();
@@ -2985,7 +2985,7 @@ void Tomb::bump(actor::Actor& actor_bumping)
 
         msg_log::add("I attempt to push the lid.");
 
-        if (actor_bumping.m_properties.has(PropId::weakened)) {
+        if (actor_bumping.m_properties.has(prop::Id::weakened)) {
                 msg_log::add("It seems futile.");
 
                 game_time::tick();
@@ -3156,24 +3156,24 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
 
                         snd_emit::run(snd);
 
-                        Prop* prop = nullptr;
+                        prop::Prop* prop = nullptr;
 
                         Color fume_color = colors::magenta();
 
                         const int rnd = rnd::range(1, 100);
 
                         if (rnd < 20) {
-                                prop = new PropPoisoned();
+                                prop = prop::make(prop::Id::poisoned);
 
                                 fume_color = colors::light_green();
                         }
                         else if (rnd < 40) {
-                                prop = new PropDiseased();
+                                prop = prop::make(prop::Id::diseased);
 
                                 fume_color = colors::green();
                         }
                         else {
-                                prop = new PropParalyzed();
+                                prop = prop::make(prop::Id::paralyzed);
 
                                 prop->set_duration(prop->nr_turns_left() * 2);
                         }
@@ -3195,7 +3195,7 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
                         for (const auto& it : actor::g_data) {
                                 const actor::ActorData& d = it.second;
 
-                                if (d.natural_props[(size_t)PropId::ooze] &&
+                                if (d.natural_props[(size_t)prop::Id::ooze] &&
                                     d.is_auto_spawn_allowed &&
                                     !d.is_unique) {
                                         mon_bucket.push_back(d.id);
@@ -3217,7 +3217,7 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
         } break;
 
         case TombTrait::cursed: {
-                map::g_player->m_properties.apply(new PropCursed());
+                map::g_player->m_properties.apply(prop::make(prop::Id::cursed));
 
                 did_trigger_trap = DidTriggerTrap::yes;
         } break;
@@ -3236,8 +3236,8 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
                         std::end(summoned.monsters),
                         [this](auto* const mon) {
                                 auto* prop =
-                                        property_factory::make(
-                                                PropId::waiting);
+                                        prop::make(
+                                                prop::Id::waiting);
 
                                 prop->set_duration(1);
 
@@ -3458,7 +3458,7 @@ void Chest::on_player_kick()
 
         // Is locked
 
-        if (map::g_player->m_properties.has(PropId::weakened) ||
+        if (map::g_player->m_properties.has(prop::Id::weakened) ||
             (m_matl == ChestMatl::iron)) {
                 msg_log::add("It seems futile.");
 
@@ -3761,31 +3761,31 @@ void Fountain::bump(actor::Actor& actor_bumping)
         } break;
 
         case FountainEffect::curse: {
-                properties.apply(new PropCursed());
+                properties.apply(prop::make(prop::Id::cursed));
         } break;
 
         case FountainEffect::disease: {
-                properties.apply(new PropDiseased());
+                properties.apply(prop::make(prop::Id::diseased));
         } break;
 
         case FountainEffect::poison: {
-                properties.apply(new PropPoisoned());
+                properties.apply(prop::make(prop::Id::poisoned));
         } break;
 
         case FountainEffect::frenzy: {
-                properties.apply(new PropFrenzied());
+                properties.apply(prop::make(prop::Id::frenzied));
         } break;
 
         case FountainEffect::paralyze: {
-                properties.apply(new PropParalyzed());
+                properties.apply(prop::make(prop::Id::paralyzed));
         } break;
 
         case FountainEffect::blind: {
-                properties.apply(new PropBlind());
+                properties.apply(prop::make(prop::Id::blind));
         } break;
 
         case FountainEffect::faint: {
-                auto* prop = new PropFainted();
+                prop::Prop* prop = prop::make(prop::Id::fainted);
 
                 prop->set_duration(10);
 
@@ -4627,8 +4627,7 @@ void Cocoon::bump(actor::Actor& actor_bumping)
         }
 
         if (insanity::has_sympt(InsSymptId::phobia_spider)) {
-                map::g_player->m_properties.apply(
-                        new PropTerrified());
+                map::g_player->m_properties.apply(prop::make(prop::Id::terrified));
         }
 
         if (m_is_open) {

@@ -30,13 +30,13 @@
 // -----------------------------------------------------------------------------
 static bool can_heal_from_eating_now(const actor::Actor& actor)
 {
-        PropWound* wound = nullptr;
+        prop::Wound* wound = nullptr;
 
         if (is_player(&actor)) {
-                auto* prop = actor.m_properties.prop(PropId::wound);
+                auto* prop = actor.m_properties.prop(prop::Id::wound);
 
                 if (prop) {
-                        wound = static_cast<PropWound*>(prop);
+                        wound = static_cast<prop::Wound*>(prop);
                 }
         }
 
@@ -196,10 +196,10 @@ void heal_from_eating(actor::Actor& actor)
         actor.restore_hp(hp_restored, false, Verbose::no);
 
         if (is_player(&actor)) {
-                auto* const prop = actor.m_properties.prop(PropId::wound);
+                auto* const prop = actor.m_properties.prop(prop::Id::wound);
 
                 if (prop && rnd::one_in(6)) {
-                        auto* const wound = static_cast<PropWound*>(prop);
+                        auto* const wound = static_cast<prop::Wound*>(prop);
 
                         wound->heal_one_wound();
                 }

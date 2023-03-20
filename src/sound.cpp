@@ -224,7 +224,7 @@ void run(Snd snd)
                 // Not hearing the sound due to short hearing range property?
                 const int max_dist_short_hearing_range = 2;
 
-                if (actor->m_properties.has(PropId::short_hearing_range) &&
+                if (actor->m_properties.has(prop::Id::short_hearing_range) &&
                     (flood_val_at_actor > max_dist_short_hearing_range)) {
                         continue;
                 }

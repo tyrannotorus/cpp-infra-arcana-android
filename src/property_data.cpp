@@ -15,98 +15,98 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static const std::unordered_map<std::string, PropId> s_str_to_prop_id_map = {
-        {"PROP_ALTERS_ENVIRONMENT", PropId::alters_env},
-        {"PROP_AURA OF DECAY", PropId::aura_of_decay},
-        {"PROP_BLESSED", PropId::blessed},
-        {"PROP_BLIND", PropId::blind},
-        {"PROP_BREEDS", PropId::breeds},
-        {"PROP_VOMITS_OOZE", PropId::vomits_ooze},
-        {"PROP_BURNING", PropId::burning},
-        {"PROP_BURROWING", PropId::burrowing},
-        {"PROP_CLOAKED", PropId::cloaked},
-        {"PROP_CONFLICT", PropId::conflict},
-        {"PROP_CONFUSED", PropId::confused},
-        {"PROP_CONFUSES_ADJACENT", PropId::confuses_adjacent},
-        {"PROP_FRENZY_PLAYER_ON_SEEN", PropId::frenzy_player_on_seen},
-        {"PROP_CORPSE_EATER", PropId::corpse_eater},
-        {"PROP_CORPSE_RISES", PropId::corpse_rises},
-        {"PROP_CORRUPTS_ENVIRONMENT_COLOR", PropId::corrupts_env_color},
-        {"PROP_CURSED", PropId::cursed},
-        {"PROP_DARKVISION", PropId::darkvision},
-        {"PROP_DEAF", PropId::deaf},
-        {"PROP_DISEASED", PropId::diseased},
-        {"PROP_ENTANGLED", PropId::entangled},
-        {"PROP_ETHEREAL", PropId::ethereal},
-        {"PROP_EXPLODES_ON_DEATH", PropId::explodes_on_death},
-        {"PROP_FAINTED", PropId::fainted},
-        {"PROP_FLYING", PropId::flying},
-        {"PROP_TINY_FLYING", PropId::tiny_flying},
-        {"PROP_FRENZIED", PropId::frenzied},
-        {"PROP_HASTED", PropId::hasted},
-        {"PROP_INFECTED", PropId::infected},
-        {"PROP_INVIS", PropId::invis},
-        {"PROP_LIGHT_SENSITIVE", PropId::light_sensitive},
-        {"PROP_MAGIC_SEARCHING", PropId::magic_searching},
-        {"PROP_MAJOR_CLAPHAM_SUMMON", PropId::major_clapham_summon},
-        {"PROP_ALLIES_GHOUL_PLAYER", PropId::allies_ghoul_player},
-        {"PROP_ACTOR_SPECTRAL_WPN", PropId::spectral_wpn},
-        {"PROP_OOZE", PropId::ooze},
-        {"PROP_PARALYZED", PropId::paralyzed},
-        {"PROP_POISONED", PropId::poisoned},
-        {"PROP_HALLUCINATING", PropId::hallucinating},
-        {"PROP_PREMONITION", PropId::premonition},
-        {"PROP_ERUDITION", PropId::erudition},
-        {"PROP_R_ACID", PropId::r_acid},
-        {"PROP_R_BLIND", PropId::r_blind},
-        {"PROP_R_BREATH", PropId::r_breath},
-        {"PROP_R_CONF", PropId::r_conf},
-        {"PROP_R_DISEASE", PropId::r_disease},
-        {"PROP_R_ELEC", PropId::r_elec},
-        {"PROP_R_FEAR", PropId::r_fear},
-        {"PROP_R_FIRE", PropId::r_fire},
-        {"PROP_R_PARA", PropId::r_para},
-        {"PROP_R_PHYS", PropId::r_phys},
-        {"PROP_R_POISON", PropId::r_poison},
-        {"PROP_R_SLEEP", PropId::r_sleep},
-        {"PROP_R_SLOW", PropId::r_slow},
-        {"PROP_R_SPELL", PropId::r_spell},
-        {"PROP_R_SHOCK", PropId::r_shock},
-        {"PROP_RADIANT_SELF", PropId::radiant_self},
-        {"PROP_RADIANT_ADJACENT", PropId::radiant_adjacent},
-        {"PROP_RADIANT_FOV", PropId::radiant_fov},
-        {"PROP_RECLOAKS", PropId::recloaks},
-        {"PROP_REDUCED_PIERCE_DMG", PropId::reduced_pierce_dmg},
-        {"PROP_REGENERATING", PropId::regenerating},
-        {"PROP_SEE_INVIS", PropId::see_invis},
-        {"PROP_SHORT_HEARING_RANGE", PropId::short_hearing_range},
-        {"PROP_FRENZIES_SELF", PropId::frenzies_self},
-        {"PROP_FRENZIES_FOLLOWERS", PropId::frenzies_followers},
-        {"PROP_SUMMONS_LOCUSTS", PropId::summons_locusts},
-        {"PROP_OTHERS_TERRIFIED_ON_DEATH", PropId::others_terrified_on_death},
-        {"PROP_SLOWED", PropId::slowed},
-        {"PROP_SMALL_CRAWLING", PropId::small_crawling},
-        {"PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED", PropId::spawns_zombie_parts_on_destroyed},
-        {"PROP_SPELL_REFLECT", PropId::spell_reflect},
-        {"PROP_SPLITS_ON_DEATH", PropId::splits_on_death},
-        {"PROP_STUNNED", PropId::stunned},
-        {"PROP_TELE_CTRL", PropId::tele_ctrl},
-        {"PROP_TELEPORTS", PropId::teleports},
-        {"PROP_TELEPORTS_AWAY", PropId::teleports_away},
-        {"PROP_ALWAYS_AWARE", PropId::always_aware},
-        {"PROP_TERRIFIED", PropId::terrified},
-        {"PROP_VORTEX", PropId::vortex},
-        {"PROP_WEAKENED", PropId::weakened},
-        {"PROP_ZUUL_POSSESS_PRIEST", PropId::zuul_possess_priest},
-        {"PROP_SHAPESHIFTS", PropId::shapeshifts},
-        {"PROP_ZEALOT_STOP", PropId::zealot_stop}};
+static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
+        {"PROP_ALTERS_ENVIRONMENT", prop::Id::alters_env},
+        {"PROP_AURA OF DECAY", prop::Id::aura_of_decay},
+        {"PROP_BLESSED", prop::Id::blessed},
+        {"PROP_BLIND", prop::Id::blind},
+        {"PROP_BREEDS", prop::Id::breeds},
+        {"PROP_VOMITS_OOZE", prop::Id::vomits_ooze},
+        {"PROP_BURNING", prop::Id::burning},
+        {"PROP_BURROWING", prop::Id::burrowing},
+        {"PROP_CLOAKED", prop::Id::cloaked},
+        {"PROP_CONFLICT", prop::Id::conflict},
+        {"PROP_CONFUSED", prop::Id::confused},
+        {"PROP_CONFUSES_ADJACENT", prop::Id::confuses_adjacent},
+        {"PROP_FRENZY_PLAYER_ON_SEEN", prop::Id::frenzy_player_on_seen},
+        {"PROP_CORPSE_EATER", prop::Id::corpse_eater},
+        {"PROP_CORPSE_RISES", prop::Id::corpse_rises},
+        {"PROP_CORRUPTS_ENVIRONMENT_COLOR", prop::Id::corrupts_env_color},
+        {"PROP_CURSED", prop::Id::cursed},
+        {"PROP_DARKVISION", prop::Id::darkvision},
+        {"PROP_DEAF", prop::Id::deaf},
+        {"PROP_DISEASED", prop::Id::diseased},
+        {"PROP_ENTANGLED", prop::Id::entangled},
+        {"PROP_ETHEREAL", prop::Id::ethereal},
+        {"PROP_EXPLODES_ON_DEATH", prop::Id::explodes_on_death},
+        {"PROP_FAINTED", prop::Id::fainted},
+        {"PROP_FLYING", prop::Id::flying},
+        {"PROP_TINY_FLYING", prop::Id::tiny_flying},
+        {"PROP_FRENZIED", prop::Id::frenzied},
+        {"PROP_HASTED", prop::Id::hasted},
+        {"PROP_INFECTED", prop::Id::infected},
+        {"PROP_INVIS", prop::Id::invis},
+        {"PROP_LIGHT_SENSITIVE", prop::Id::light_sensitive},
+        {"PROP_MAGIC_SEARCHING", prop::Id::magic_searching},
+        {"PROP_MAJOR_CLAPHAM_SUMMON", prop::Id::major_clapham_summon},
+        {"PROP_ALLIES_GHOUL_PLAYER", prop::Id::allies_ghoul_player},
+        {"PROP_ACTOR_SPECTRAL_WPN", prop::Id::spectral_wpn},
+        {"PROP_OOZE", prop::Id::ooze},
+        {"PROP_PARALYZED", prop::Id::paralyzed},
+        {"PROP_POISONED", prop::Id::poisoned},
+        {"PROP_HALLUCINATING", prop::Id::hallucinating},
+        {"PROP_PREMONITION", prop::Id::premonition},
+        {"PROP_ERUDITION", prop::Id::erudition},
+        {"PROP_R_ACID", prop::Id::r_acid},
+        {"PROP_R_BLIND", prop::Id::r_blind},
+        {"PROP_R_BREATH", prop::Id::r_breath},
+        {"PROP_R_CONF", prop::Id::r_conf},
+        {"PROP_R_DISEASE", prop::Id::r_disease},
+        {"PROP_R_ELEC", prop::Id::r_elec},
+        {"PROP_R_FEAR", prop::Id::r_fear},
+        {"PROP_R_FIRE", prop::Id::r_fire},
+        {"PROP_R_PARA", prop::Id::r_para},
+        {"PROP_R_PHYS", prop::Id::r_phys},
+        {"PROP_R_POISON", prop::Id::r_poison},
+        {"PROP_R_SLEEP", prop::Id::r_sleep},
+        {"PROP_R_SLOW", prop::Id::r_slow},
+        {"PROP_R_SPELL", prop::Id::r_spell},
+        {"PROP_R_SHOCK", prop::Id::r_shock},
+        {"PROP_RADIANT_SELF", prop::Id::radiant_self},
+        {"PROP_RADIANT_ADJACENT", prop::Id::radiant_adjacent},
+        {"PROP_RADIANT_FOV", prop::Id::radiant_fov},
+        {"PROP_RECLOAKS", prop::Id::recloaks},
+        {"PROP_REDUCED_PIERCE_DMG", prop::Id::reduced_pierce_dmg},
+        {"PROP_REGENERATING", prop::Id::regenerating},
+        {"PROP_SEE_INVIS", prop::Id::see_invis},
+        {"PROP_SHORT_HEARING_RANGE", prop::Id::short_hearing_range},
+        {"PROP_FRENZIES_SELF", prop::Id::frenzies_self},
+        {"PROP_FRENZIES_FOLLOWERS", prop::Id::frenzies_followers},
+        {"PROP_SUMMONS_LOCUSTS", prop::Id::summons_locusts},
+        {"PROP_OTHERS_TERRIFIED_ON_DEATH", prop::Id::others_terrified_on_death},
+        {"PROP_SLOWED", prop::Id::slowed},
+        {"PROP_SMALL_CRAWLING", prop::Id::small_crawling},
+        {"PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED", prop::Id::spawns_zombie_parts_on_destroyed},
+        {"PROP_SPELL_REFLECT", prop::Id::spell_reflect},
+        {"PROP_SPLITS_ON_DEATH", prop::Id::splits_on_death},
+        {"PROP_STUNNED", prop::Id::stunned},
+        {"PROP_TELE_CTRL", prop::Id::tele_ctrl},
+        {"PROP_TELEPORTS", prop::Id::teleports},
+        {"PROP_TELEPORTS_AWAY", prop::Id::teleports_away},
+        {"PROP_ALWAYS_AWARE", prop::Id::always_aware},
+        {"PROP_TERRIFIED", prop::Id::terrified},
+        {"PROP_VORTEX", prop::Id::vortex},
+        {"PROP_WEAKENED", prop::Id::weakened},
+        {"PROP_ZUUL_POSSESS_PRIEST", prop::Id::zuul_possess_priest},
+        {"PROP_SHAPESHIFTS", prop::Id::shapeshifts},
+        {"PROP_ZEALOT_STOP", prop::Id::zealot_stop}};
 
-static void add(PropData& d)
+static void add(prop::PropData& d)
 {
 #ifndef NDEBUG
         const std::string worst_case_str =
                 d.name_short +
-                g_property_ending_suffix;
+                prop::g_property_ending_suffix;
 
         const size_t worst_case_w = worst_case_str.length();
 
@@ -128,16 +128,16 @@ static void add(PropData& d)
 
 #endif  // NDEBUG
 
-        property_data::g_data[(size_t)d.id] = d;
+        prop::g_data[(size_t)d.id] = d;
 
         d = {};
 }
 
 static void init_data_list()
 {
-        PropData d;
+        prop::PropData d;
 
-        d.id = PropId::r_phys;
+        d.id = prop::Id::r_phys;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Physical Resistance";
         d.name_short = "Phys Res";
@@ -148,10 +148,10 @@ static void init_data_list()
         d.msg_end_mon = "looks less tough.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_fire;
+        d.id = prop::Id::r_fire;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Fire Resistance";
         d.name_short = "Fire Res";
@@ -162,10 +162,10 @@ static void init_data_list()
         d.msg_end_mon = "is vulnerable to fire.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_poison;
+        d.id = prop::Id::r_poison;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Poison Resistance";
         d.name_short = "Poison Res";
@@ -176,10 +176,10 @@ static void init_data_list()
         d.msg_end_mon = "is vulnerable to poison.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_elec;
+        d.id = prop::Id::r_elec;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Electric Resistance";
         d.name_short = "Elec Res";
@@ -190,10 +190,10 @@ static void init_data_list()
         d.msg_end_mon = "is vulnerable to electricity.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_acid;
+        d.id = prop::Id::r_acid;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Acid Resistance";
         d.name_short = "Acid Res";
@@ -204,10 +204,10 @@ static void init_data_list()
         d.msg_end_mon = "is vulnerable to acid.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_sleep;
+        d.id = prop::Id::r_sleep;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Sleep Resistance";
         d.name_short = "Sleep Res";
@@ -218,10 +218,10 @@ static void init_data_list()
         d.msg_end_mon = "is less awake.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_fear;
+        d.id = prop::Id::r_fear;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Fear Resistance";
         d.name_short = "Fear Res";
@@ -232,10 +232,10 @@ static void init_data_list()
         d.msg_end_mon = "is vulnerable to fear.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_slow;
+        d.id = prop::Id::r_slow;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Slow Resistance";
         d.name_short = "Slow Res";
@@ -244,10 +244,10 @@ static void init_data_list()
         d.msg_end_player = "I feel more susceptible to time.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_conf;
+        d.id = prop::Id::r_conf;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Confusion Resistance";
         d.name_short = "Conf Res";
@@ -258,10 +258,10 @@ static void init_data_list()
         d.msg_end_mon = "is vulnerable to confusion.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_disease;
+        d.id = prop::Id::r_disease;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Disease Resistance";
         d.name_short = "Disease Res";
@@ -272,38 +272,38 @@ static void init_data_list()
         d.msg_end_mon = "is vulnerable to disease.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_blind;
+        d.id = prop::Id::r_blind;
         d.name = "Blindness Resistance";
         d.name_short = "Blind Res";
         d.descr = "Cannot be blinded.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_para;
+        d.id = prop::Id::r_para;
         d.name = "Paralysis Resistance";
         d.name_short = "Paralys Res";
         d.descr = "Cannot be paralyzed.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_breath;
+        d.id = prop::Id::r_breath;
         d.std_rnd_turns = Range(50, 100);
         d.descr = "Cannot be harmed by constricted breathing.";
         d.msg_start_player = "I can breath without harm.";
         d.msg_start_mon = "can breath without harm.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_spell;
+        d.id = prop::Id::r_spell;
         d.name = "Spell Resistance";
         d.name_short = "Spell Res";
         d.descr = "Cannot be affected by harmful spells.";
@@ -312,10 +312,10 @@ static void init_data_list()
         d.msg_end_player = "I feel vulnerable to spells.";
         d.msg_end_mon = "is vulnerable to spells.";
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::r_shock;
+        d.id = prop::Id::r_shock;
         d.std_rnd_turns = Range(8, 12);
         d.name = "Shock Resistance";
         d.name_short = "Shock Res";
@@ -327,10 +327,10 @@ static void init_data_list()
         d.msg_end_mon = "";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::light_sensitive;
+        d.id = prop::Id::light_sensitive;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Light Sensitive";
         d.name_short = "Lgt Sens";
@@ -340,10 +340,10 @@ static void init_data_list()
         d.msg_end_player = "I no longer feel vulnerable to light.";
         d.msg_end_mon = "no longer is vulnerable to light.";
         d.allow_display_turns = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::blind;
+        d.id = prop::Id::blind;
         d.std_rnd_turns = Range(6, 12);
         d.name = "Blind";
         d.name_short = "Blind";
@@ -356,10 +356,10 @@ static void init_data_list()
         d.historic_msg_end_permanent = "My sight came back";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::deaf;
+        d.id = prop::Id::deaf;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Deaf";
         d.name_short = "Deaf";
@@ -370,10 +370,10 @@ static void init_data_list()
         d.historic_msg_end_permanent = "My hearing came back";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::fainted;
+        d.id = prop::Id::fainted;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Fainted";
         d.name_short = "Fainted";
@@ -389,10 +389,10 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.force_interrupt_player_on_start = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::burning;
+        d.id = prop::Id::burning;
         d.std_rnd_turns = Range(6, 8);
         d.name = "Burning";
         d.name_short = "Burning";
@@ -410,10 +410,10 @@ static void init_data_list()
         d.update_vision_on_toggled = true;
         d.is_preventable_by_player_trait = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::poisoned;
+        d.id = prop::Id::poisoned;
         d.std_rnd_turns = Range(40, 80);
         d.name = "Poisoned";
         d.name_short = "Poisoned";
@@ -427,10 +427,10 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.is_preventable_by_player_trait = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::paralyzed;
+        d.id = prop::Id::paralyzed;
         d.std_rnd_turns = Range(3, 5);
         d.name = "Paralyzed";
         d.name_short = "Paralyzed";
@@ -445,16 +445,16 @@ static void init_data_list()
         d.force_interrupt_player_on_start = true;
         d.is_preventable_by_player_trait = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::delayed_by_liquid;
+        d.id = prop::Id::delayed_by_liquid;
         d.std_rnd_turns = Range(1, 1);
         d.allow_display_turns = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::terrified;
+        d.id = prop::Id::terrified;
         d.std_rnd_turns = Range(20, 30);
         d.name = "Terrified";
         d.name_short = "Terrified";
@@ -469,10 +469,10 @@ static void init_data_list()
         d.msg_res_mon = "resists fear.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::confused;
+        d.id = prop::Id::confused;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Confused";
         d.name_short = "Confused";
@@ -487,10 +487,10 @@ static void init_data_list()
         d.msg_res_mon = "resists confusion.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::hallucinating;
+        d.id = prop::Id::hallucinating;
         d.std_rnd_turns = Range(75, 150);
         d.name = "Hallucinating";
         d.name_short = "Halluc";
@@ -503,10 +503,10 @@ static void init_data_list()
         d.msg_res_mon = "";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::astral_opium_addiction;
+        d.id = prop::Id::astral_opium_addiction;
         d.std_rnd_turns = Range(100, 200);
         d.std_rnd_dlvls = Range(3, 6);
         d.name = "Astral Opium Addiction";
@@ -525,10 +525,10 @@ static void init_data_list()
         d.msg_res_mon = "";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::meditative_focused;
+        d.id = prop::Id::meditative_focused;
         d.name = "Focused";
         d.name_short = "Focused";
         d.descr =
@@ -537,10 +537,10 @@ static void init_data_list()
         d.msg_start_player = "I feel very focused.";
         d.msg_end_player = "I feel less focused.";
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::thorns;
+        d.id = prop::Id::thorns;
         d.name = "Thorns";
         d.name_short = "Thorns";
         d.descr =
@@ -550,10 +550,10 @@ static void init_data_list()
         d.msg_start_player = "Reprisal is sealed!";
         d.msg_end_player = "I cease to return harm.";
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::crimson_passage;
+        d.id = prop::Id::crimson_passage;
         d.name = "Crimson Passage";
         d.name_short = "Crims Psg";
         d.descr =
@@ -566,10 +566,10 @@ static void init_data_list()
         d.msg_start_player = "A gruesome path lies ahead.";
         d.msg_end_player = "My movement is normal again.";
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::stunned;
+        d.id = prop::Id::stunned;
         d.std_rnd_turns = Range(5, 9);
         d.name = "Stunned";
         d.name_short = "Stunned";
@@ -581,10 +581,10 @@ static void init_data_list()
         d.msg_res_mon = "resists stunning.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::slowed;
+        d.id = prop::Id::slowed;
         d.std_rnd_turns = Range(16, 24);
         d.name = "Slowed";
         d.name_short = "Slowed";
@@ -599,10 +599,10 @@ static void init_data_list()
         d.historic_msg_end_permanent = "My slowness ceased";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::hasted;
+        d.id = prop::Id::hasted;
         d.std_rnd_turns = Range(12, 16);
         d.name = "Hasted";
         d.name_short = "Hasted";
@@ -615,10 +615,10 @@ static void init_data_list()
         d.historic_msg_end_permanent = "My hastiness ceased";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::extra_hasted;
+        d.id = prop::Id::extra_hasted;
         d.std_rnd_turns = Range(7, 11);
         d.name = "Extra Hasted";
         d.name_short = "Extra Hasted";
@@ -627,18 +627,18 @@ static void init_data_list()
         d.msg_end_player = "Everything around me seems to speed up a lot.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::summoned;
+        d.id = prop::Id::summoned;
         d.std_rnd_turns = Range(80, 120);
         d.msg_end_mon = "suddenly disappears.";
         d.name = "Summoned";
         d.descr = "Was magically summoned here.";
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::nailed;
+        d.id = prop::Id::nailed;
         d.name = "Nailed";
         d.descr =
                 "Fastened by a spike. Tearing it out will be rather painful.";
@@ -647,10 +647,10 @@ static void init_data_list()
         d.msg_end_player = "I tear free!";
         d.msg_end_mon = "tears free!";
         d.allow_display_turns = false;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::wound;
+        d.id = prop::Id::wound;
         d.name = "Wounded";
         d.descr =
                 "For each wound: -5% melee hit chance, -5% chance to evade "
@@ -661,10 +661,10 @@ static void init_data_list()
         d.msg_res_player = "I resist wounding!";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::hp_sap;
+        d.id = prop::Id::hp_sap;
         d.name = "Life Sapped";
         d.descr = "Fewer hit points.";
         d.msg_start_player = "My life force is sapped!";
@@ -675,10 +675,10 @@ static void init_data_list()
         d.msg_res_mon = "resists sapping.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::spi_sap;
+        d.id = prop::Id::spi_sap;
         d.name = "Spirit Sapped";
         d.descr = "Fewer spirit points.";
         d.msg_start_player = "My spirit is sapped!";
@@ -689,10 +689,10 @@ static void init_data_list()
         d.msg_res_mon = "resists sapping.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::mind_sap;
+        d.id = prop::Id::mind_sap;
         d.name = "Mind Sapped";
         d.descr = "Increased Shock.";
         d.msg_start_player = "My mind is sapped!";
@@ -700,10 +700,10 @@ static void init_data_list()
         d.msg_res_player = "I resist sapping.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::infected;
+        d.id = prop::Id::infected;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Infected";
         d.name_short = "Infected";
@@ -714,10 +714,10 @@ static void init_data_list()
         d.msg_end_mon = "is no longer infected.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::diseased;
+        d.id = prop::Id::diseased;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Diseased";
         d.name_short = "Diseased";
@@ -732,10 +732,10 @@ static void init_data_list()
         d.historic_msg_end_permanent = "Was cured from a horrible disease";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::descend;
+        d.id = prop::Id::descend;
         d.std_rnd_turns = Range(20, 30);
         d.name = "Descending";
         d.name_short = "Descending";
@@ -743,10 +743,10 @@ static void init_data_list()
         d.msg_start_player = "I feel a sinking sensation.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::weakened;
+        d.id = prop::Id::weakened;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Weakened";
         d.name_short = "Weakened";
@@ -761,10 +761,10 @@ static void init_data_list()
         d.msg_res_mon = "resists weakness.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::frenzied;
+        d.id = prop::Id::frenzied;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Frenzied";
         d.name_short = "Frenzied";
@@ -780,10 +780,10 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.force_interrupt_player_on_start = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::blessed;
+        d.id = prop::Id::blessed;
         d.std_rnd_turns = Range(400, 600);
         d.name = "Blessed";
         d.name_short = "Blessed";
@@ -794,10 +794,10 @@ static void init_data_list()
         d.historic_msg_end_permanent = "My great blessing ceased";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::cursed;
+        d.id = prop::Id::cursed;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Cursed";
         d.name_short = "Cursed";
@@ -812,10 +812,10 @@ static void init_data_list()
         d.historic_msg_end_permanent = "A terrible curse was lifted from me";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::doomed;
+        d.id = prop::Id::doomed;
         d.std_rnd_turns = Range(30, 60);
         d.name = "Doomed";
         d.name_short = "Doomed";
@@ -831,10 +831,10 @@ static void init_data_list()
         d.historic_msg_end_permanent = "Hope returned again";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::premonition;
+        d.id = prop::Id::premonition;
         d.std_rnd_turns = Range(5, 9);
         d.name = "Premonition";
         d.name_short = "Premonition";
@@ -843,10 +843,10 @@ static void init_data_list()
         d.msg_end_player = "I feel more vulnerable.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::erudition;
+        d.id = prop::Id::erudition;
         d.name = "Erudition";
         d.name_short = "Erudition";
         d.descr = "Spell skill is improved by one level.";
@@ -854,10 +854,10 @@ static void init_data_list()
         d.msg_end_player = "I feel ignorant.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::magic_searching;
+        d.id = prop::Id::magic_searching;
         d.std_rnd_turns = Range(20, 60);
         d.name = "Magic Searching";
         d.name_short = "Magic Search";
@@ -868,10 +868,10 @@ static void init_data_list()
         d.msg_end_player = "I can no longer see hidden things.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::entangled;
+        d.id = prop::Id::entangled;
         d.name = "Entangled";
         d.name_short = "Entangled";
         d.descr = "Entangled in something.";
@@ -881,26 +881,26 @@ static void init_data_list()
         d.msg_end_mon = "tears free!";
         d.allow_display_turns = false;
         d.force_interrupt_player_on_start = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::radiant_self;
+        d.id = prop::Id::radiant_self;
         d.std_rnd_turns = Range(50, 100);
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::radiant_adjacent;
+        d.id = prop::Id::radiant_adjacent;
         d.std_rnd_turns = Range(50, 100);
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::radiant_fov;
+        d.id = prop::Id::radiant_fov;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Radiant";
         d.name_short = "Radiant";
@@ -910,10 +910,10 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::invis;
+        d.id = prop::Id::invis;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Invisible";
         d.name_short = "Invisible";
@@ -925,10 +925,10 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::cloaked;
+        d.id = prop::Id::cloaked;
         d.std_rnd_turns = Range(5, 7);
         d.name = "Cloaked";
         d.name_short = "Cloaked";
@@ -942,13 +942,13 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::recloaks;
+        d.id = prop::Id::recloaks;
         add(d);
 
-        d.id = PropId::see_invis;
+        d.id = prop::Id::see_invis;
         d.std_rnd_turns = Range(50, 100);
         d.name = "See Invisible";
         d.name_short = "See Invis";
@@ -960,18 +960,18 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::darkvision;
+        d.id = prop::Id::darkvision;
         d.std_rnd_turns = Range(50, 100);
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::tele_ctrl;
+        d.id = prop::Id::tele_ctrl;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Teleport control";
         d.name_short = "Tele Ctrl";
@@ -980,26 +980,26 @@ static void init_data_list()
         d.msg_end_player = "I feel less in control.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::spell_reflect;
+        d.id = prop::Id::spell_reflect;
         d.std_rnd_turns = Range(50, 100);
         d.allow_display_turns = false;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::aiming;
+        d.id = prop::Id::aiming;
         d.std_rnd_turns = Range(1, 1);
         d.name = "Aiming";
         d.name_short = "Aiming";
         d.descr = "Increased range attack effectiveness.";
         d.allow_display_turns = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::conflict;
+        d.id = prop::Id::conflict;
         d.name = "Conflicted";
         d.name_short = "Conflicted";
         d.descr = "Considers every creature as an enemy.";
@@ -1007,10 +1007,10 @@ static void init_data_list()
         d.msg_start_mon = "Looks conflicted.";
         d.msg_end_mon = "Looks more determined.";
         d.allow_display_turns = false;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::aura_of_decay;
+        d.id = prop::Id::aura_of_decay;
         d.std_rnd_turns = Range(6, 12);
         d.name = "Aura of Decay";
         d.name_short = "Decay Aura";
@@ -1021,40 +1021,40 @@ static void init_data_list()
         d.msg_end_mon = "no longer exudes decay.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::reduced_pierce_dmg;
+        d.id = prop::Id::reduced_pierce_dmg;
         add(d);
 
-        d.id = PropId::vortex;
+        d.id = prop::Id::vortex;
         add(d);
 
-        d.id = PropId::explodes_on_death;
+        d.id = prop::Id::explodes_on_death;
         add(d);
 
-        d.id = PropId::splits_on_death;
+        d.id = prop::Id::splits_on_death;
         add(d);
 
-        d.id = PropId::corpse_eater;
+        d.id = prop::Id::corpse_eater;
         add(d);
 
-        d.id = PropId::teleports;
+        d.id = prop::Id::teleports;
         add(d);
 
-        d.id = PropId::teleports_away;
+        d.id = prop::Id::teleports_away;
         add(d);
 
-        d.id = PropId::always_aware;
+        d.id = prop::Id::always_aware;
         add(d);
 
-        d.id = PropId::corrupts_env_color;
+        d.id = prop::Id::corrupts_env_color;
         add(d);
 
-        d.id = PropId::alters_env;
+        d.id = prop::Id::alters_env;
         add(d);
 
-        d.id = PropId::regenerating;
+        d.id = prop::Id::regenerating;
         d.std_rnd_turns = Range(50, 100);
         d.name = "Regenerating";
         d.name_short = "Regenerating";
@@ -1065,73 +1065,73 @@ static void init_data_list()
         d.msg_end_mon = "stops regenerating damage quickly.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::corpse_rises;
+        d.id = prop::Id::corpse_rises;
         add(d);
 
-        d.id = PropId::breeds;
+        d.id = prop::Id::breeds;
         add(d);
 
-        d.id = PropId::frenzies_self;
+        d.id = prop::Id::frenzies_self;
         add(d);
 
-        d.id = PropId::frenzies_followers;
+        d.id = prop::Id::frenzies_followers;
         add(d);
 
-        d.id = PropId::others_terrified_on_death;
+        d.id = prop::Id::others_terrified_on_death;
         add(d);
 
-        d.id = PropId::summons_locusts;
+        d.id = prop::Id::summons_locusts;
         add(d);
 
-        d.id = PropId::vomits_ooze;
+        d.id = prop::Id::vomits_ooze;
         add(d);
 
-        d.id = PropId::confuses_adjacent;
+        d.id = prop::Id::confuses_adjacent;
         add(d);
 
-        d.id = PropId::frenzy_player_on_seen;
+        d.id = prop::Id::frenzy_player_on_seen;
         add(d);
 
-        d.id = PropId::zuul_possess_priest;
+        d.id = prop::Id::zuul_possess_priest;
         add(d);
 
-        d.id = PropId::possessed_by_zuul;
+        d.id = prop::Id::possessed_by_zuul;
         add(d);
 
-        d.id = PropId::shapeshifts;
+        d.id = prop::Id::shapeshifts;
         add(d);
 
-        d.id = PropId::zealot_stop;
+        d.id = prop::Id::zealot_stop;
         add(d);
 
-        d.id = PropId::major_clapham_summon;
+        d.id = prop::Id::major_clapham_summon;
         add(d);
 
-        d.id = PropId::allies_ghoul_player;
+        d.id = prop::Id::allies_ghoul_player;
         add(d);
 
-        d.id = PropId::flying;
+        d.id = prop::Id::flying;
         d.name = "";
         d.name_short = "";
         d.descr = "";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::tiny_flying;
+        d.id = prop::Id::tiny_flying;
         d.name = "";
         d.name_short = "";
         d.descr = "";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::ethereal;
+        d.id = prop::Id::ethereal;
         d.name = "Ethereal";
         d.name_short = "Ethereal";
         d.descr =
@@ -1139,50 +1139,50 @@ static void init_data_list()
                 "+50% chance to evade attacks.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::ooze;
+        d.id = prop::Id::ooze;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::small_crawling;
+        d.id = prop::Id::small_crawling;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::burrowing;
+        d.id = prop::Id::burrowing;
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::waiting;
+        d.id = prop::Id::waiting;
         d.std_rnd_turns = Range(1, 1);
         d.allow_display_turns = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::disabled_attack;
+        d.id = prop::Id::disabled_attack;
         d.std_rnd_turns = Range(1, 1);
         d.allow_display_turns = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::disabled_melee;
+        d.id = prop::Id::disabled_melee;
         d.std_rnd_turns = Range(1, 1);
         d.allow_display_turns = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::disabled_ranged;
+        d.id = prop::Id::disabled_ranged;
         d.std_rnd_turns = Range(1, 1);
         d.allow_display_turns = false;
-        d.alignment = PropAlignment::neutral;
+        d.alignment = prop::PropAlignment::neutral;
         add(d);
 
-        d.id = PropId::hit_chance_penalty_curse;
+        d.id = prop::Id::hit_chance_penalty_curse;
         d.std_rnd_turns = Range(1, 1);
         d.name = "";
         d.name_short = "";
@@ -1191,10 +1191,10 @@ static void init_data_list()
         d.msg_end_player = "My aiming feels better.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::increased_shock_curse;
+        d.id = prop::Id::increased_shock_curse;
         d.std_rnd_turns = Range(1, 1);
         d.name = "";
         d.name_short = "";
@@ -1203,10 +1203,10 @@ static void init_data_list()
         d.msg_end_player = "I feel less anxious.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::cannot_read_curse;
+        d.id = prop::Id::cannot_read_curse;
         d.std_rnd_turns = Range(1, 1);
         d.name = "";
         d.name_short = "";
@@ -1215,38 +1215,38 @@ static void init_data_list()
         d.msg_end_player = "I can read again.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
         // NOTE: This property reuses messages from 'light_sensitive', so order
         // is important here
-        d.id = PropId::light_sensitive_curse;
+        d.id = prop::Id::light_sensitive_curse;
         d.std_rnd_turns = Range(1, 1);
         d.name = "";
         d.name_short = "";
         d.descr = "";
         d.msg_start_player =
-                property_data::g_data[(size_t)PropId::light_sensitive]
+                prop::g_data[(size_t)prop::Id::light_sensitive]
                         .msg_start_player;
         d.msg_end_player =
-                property_data::g_data[(size_t)PropId::light_sensitive]
+                prop::g_data[(size_t)prop::Id::light_sensitive]
                         .msg_end_player;
         d.allow_display_turns = false;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::disabled_hp_regen;
+        d.id = prop::Id::disabled_hp_regen;
         d.std_rnd_turns = Range(1, 1);
         d.name = "";
         d.name_short = "";
         d.descr = "";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::bad;
+        d.alignment = prop::PropAlignment::bad;
         add(d);
 
-        d.id = PropId::sanctuary;
+        d.id = prop::Id::sanctuary;
         d.std_rnd_turns = Range(5, 7);
         d.name = "Sanctuary";
         d.name_short = "Sanctuary";
@@ -1258,42 +1258,42 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.update_vision_on_toggled = false;
         d.allow_test_on_bot = true;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = PropId::moribund;
+        d.id = prop::Id::moribund;
         d.descr =
                 "While health is reduced to 6 hit points or below, "
                 "the following bonuses are received: "
                 "+3 melee damage, +30% melee hit chance, +3 armor points.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
-        d.alignment = PropAlignment::good;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 }
 
 // -----------------------------------------------------------------------------
 // property_data
 // -----------------------------------------------------------------------------
-namespace property_data
+namespace prop
 {
-PropData g_data[(size_t)PropId::END];
+PropData g_data[(size_t)prop::Id::END];
 
 void init()
 {
         init_data_list();
 }
 
-PropId str_to_prop_id(const std::string& str)
+prop::Id str_to_prop_id(const std::string& str)
 {
         return s_str_to_prop_id_map.at(str);
 }
 
-std::string descr(PropId id)
+std::string descr(prop::Id id)
 {
-        ASSERT(id != PropId::END);
+        ASSERT(id != prop::Id::END);
 
         return g_data[(size_t)id].descr;
 }
 
-}  // namespace property_data
+}  // namespace prop

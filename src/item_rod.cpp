@@ -29,6 +29,7 @@
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "rect.hpp"
@@ -352,18 +353,18 @@ void Curing::run_effect()
 {
         auto& player = *map::g_player;
 
-        std::vector<PropId> props_can_heal = {
-                PropId::blind,
-                PropId::deaf,
-                PropId::poisoned,
-                PropId::infected,
-                PropId::diseased,
-                PropId::weakened,
-                PropId::hp_sap};
+        std::vector<prop::Id> props_can_heal = {
+                prop::Id::blind,
+                prop::Id::deaf,
+                prop::Id::poisoned,
+                prop::Id::infected,
+                prop::Id::diseased,
+                prop::Id::weakened,
+                prop::Id::hp_sap};
 
         bool is_something_healed = false;
 
-        for (PropId prop_id : props_can_heal) {
+        for (prop::Id prop_id : props_can_heal) {
                 if (player.m_properties.end_prop(prop_id)) {
                         is_something_healed = true;
                 }
@@ -408,7 +409,7 @@ void Bless::run_effect()
 {
         const int nr_turns = rnd::range(8, 12);
 
-        auto* prop = new PropBlessed();
+        prop::Prop* prop = prop::make(prop::Id::blessed);
 
         prop->set_duration(nr_turns);
 

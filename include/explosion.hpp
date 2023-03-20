@@ -13,8 +13,12 @@
 #include "colors.hpp"
 #include "rect.hpp"
 
-class Prop;
 struct P;
+
+namespace prop
+{
+class Prop;
+}  // namespace prop
 
 enum class ExplType
 {
@@ -54,7 +58,7 @@ void run(
         EmitExplSnd emit_expl_snd = EmitExplSnd::yes,
         int radi_change = 0,
         ExplExclCenter exclude_center = ExplExclCenter::no,
-        const std::vector<Prop*>& properties_applied = {},
+        const std::vector<prop::Prop*>& properties_applied = {},
         const std::optional<Color>& color_override = {},
         ExplIsGas is_gas = ExplIsGas::no);
 

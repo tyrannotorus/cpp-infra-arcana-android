@@ -223,18 +223,18 @@ static void update_trait_data()
         d.title = "Fearless";
         d.descr = "You cannot become terrified, +10% shock resistance";
         d.on_picked = []() {
-                auto* prop = property_factory::make(PropId::r_fear);
+                prop::Prop* prop = prop::make(prop::Id::r_fear);
 
                 prop->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         };
         d.on_removed = []() {
-                map::g_player->m_properties.end_prop(PropId::r_fear);
+                map::g_player->m_properties.end_prop(prop::Id::r_fear);
         };
         d.trait_prereqs = {Trait::cool_headed};
         set_trait_data(d);
@@ -292,18 +292,18 @@ static void update_trait_data()
                 "You cannot become confused, the number of remaining turns "
                 "for status effects are displayed";
         d.on_picked = []() {
-                auto* prop = property_factory::make(PropId::r_conf);
+                prop::Prop* prop = prop::make(prop::Id::r_conf);
 
                 prop->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         };
         d.on_removed = []() {
-                map::g_player->m_properties.end_prop(PropId::r_conf);
+                map::g_player->m_properties.end_prop(prop::Id::r_conf);
         };
         d.trait_prereqs = {Trait::stout_spirit, Trait::cool_headed};
         set_trait_data(d);
@@ -333,18 +333,18 @@ static void update_trait_data()
                 "abilities, and their negative effect on hit points and "
                 "regeneration is halved";
         d.on_picked = []() {
-                auto* prop = property_factory::make(PropId::r_disease);
+                prop::Prop* prop = prop::make(prop::Id::r_disease);
 
                 prop->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         };
         d.on_removed = []() {
-                map::g_player->m_properties.end_prop(PropId::r_disease);
+                map::g_player->m_properties.end_prop(prop::Id::r_disease);
         };
         d.trait_prereqs = {Trait::healer};
         d.blocked_for_bgs = {Bg::ghoul, Bg::flagellant};
@@ -358,13 +358,13 @@ static void update_trait_data()
                 "can defy harmful spells (it takes 125-150 turns to regain "
                 "spell resistance after a spell is blocked)";
         d.on_picked = []() {
-                auto* prop = property_factory::make(PropId::r_spell);
+                prop::Prop* prop = prop::make(prop::Id::r_spell);
 
                 prop->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
 
@@ -415,13 +415,13 @@ static void update_trait_data()
                 "reduced by 1 point - it takes 125-150 turns to regain this "
                 "state after a spell is cast";
         d.on_picked = []() {
-                auto* prop = property_factory::make(PropId::meditative_focused);
+                prop::Prop* prop = prop::make(prop::Id::meditative_focused);
 
                 prop->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         };
@@ -798,18 +798,18 @@ static void update_trait_data()
                 "+1 claw damage, you are immune to poison, and attacks with "
                 "your claws often poisons your victims";
         d.on_picked = []() {
-                auto* prop = property_factory::make(PropId::r_poison);
+                prop::Prop* prop = prop::make(prop::Id::r_poison);
 
                 prop->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         };
         d.on_removed = []() {
-                map::g_player->m_properties.end_prop(PropId::r_poison);
+                map::g_player->m_properties.end_prop(prop::Id::r_poison);
         };
         d.trait_prereqs = {Trait::foul};
         d.bg_prereq = Bg::ghoul;
@@ -1523,35 +1523,35 @@ void pick_bg(const Bg bg)
                 pick_trait(Trait::self_aware);
                 pick_trait(Trait::tough);
 
-                Prop* moribund = property_factory::make(PropId::moribund);
+                prop::Prop* moribund = prop::make(prop::Id::moribund);
 
                 moribund->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         moribund,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         } break;
 
         case Bg::ghoul: {
-                Prop* r_disease = property_factory::make(PropId::r_disease);
+                prop::Prop* r_disease = prop::make(prop::Id::r_disease);
 
                 r_disease->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         r_disease,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
 
-                Prop* darkvis = property_factory::make(PropId::darkvision);
+                prop::Prop* darkvis = prop::make(prop::Id::darkvision);
 
                 darkvis->set_indefinite();
 
                 map::g_player->m_properties.apply(
                         darkvis,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
 
@@ -1593,9 +1593,9 @@ void pick_occultist_domain(const OccultistDomain domain)
         switch (domain) {
         case OccultistDomain::clairvoyant: {
                 auto* prop =
-                        static_cast<PropMagicSearching*>(
-                                property_factory::make(
-                                        PropId::magic_searching));
+                        static_cast<prop::MagicSearching*>(
+                                prop::make(
+                                        prop::Id::magic_searching));
 
                 prop->set_indefinite();
 
@@ -1603,7 +1603,7 @@ void pick_occultist_domain(const OccultistDomain domain)
 
                 map::g_player->m_properties.apply(
                         prop,
-                        PropSrc::intr,
+                        prop::PropSrc::intr,
                         true,
                         Verbose::no);
         } break;
@@ -1657,14 +1657,14 @@ void on_player_gained_lvl(const int new_lvl)
                                 incr_spell_skills(SpellDomain::clairvoyance);
                         }
 
-                        Prop* const prop =
+                        prop::Prop* const prop =
                                 map::g_player->m_properties.prop(
-                                        PropId::magic_searching);
+                                        prop::Id::magic_searching);
 
                         ASSERT(prop);
 
                         auto* const searching =
-                                static_cast<PropMagicSearching*>(prop);
+                                static_cast<prop::MagicSearching*>(prop);
 
                         if (new_lvl == s_spell_upgrade_lvl_1) {
                                 searching->set_allow_reveal_items();

@@ -139,8 +139,8 @@ Actor* make(const std::string& id, const P& pos)
 
                         ASSERT(
                                 door->is_open() ||
-                                actor->m_properties.has(PropId::ooze) ||
-                                actor->m_properties.has(PropId::ethereal));
+                                actor->m_properties.has(prop::Id::ooze) ||
+                                actor->m_properties.has(prop::Id::ethereal));
                 }
         }
 #endif  // NDEBUG

@@ -547,9 +547,9 @@ static void apply_melee_attack_props(
             // TODO: This prevents applying on Worm Masses, but it's
             // hacky, and only makes sense *right now*, there should be
             // some better attribute to control this.
-            !defender.m_properties.has(PropId::splits_on_death) &&
+            !defender.m_properties.has(prop::Id::splits_on_death) &&
             rnd::percent(60)) {
-                Prop* weak = property_factory::make(PropId::weakened);
+                prop::Prop* weak = prop::make(prop::Id::weakened);
 
                 weak->set_duration(rnd::range(2, 3));
 
@@ -667,8 +667,8 @@ static bool melee_should_break_wpn(
         }
 
         const bool is_player_cursed =
-                (map::g_player->m_properties.has(PropId::cursed) ||
-                 map::g_player->m_properties.has(PropId::doomed));
+                (map::g_player->m_properties.has(prop::Id::cursed) ||
+                 map::g_player->m_properties.has(prop::Id::doomed));
 
         if (!is_player_cursed) {
                 return false;
@@ -796,8 +796,8 @@ static void attack_actor(
                 bump_awareness_after_melee_attack(*attacker, defender, att_data);
 
                 // Attacking ends cloaking and sanctuary.
-                attacker->m_properties.end_prop(PropId::cloaked);
-                attacker->m_properties.end_prop(PropId::sanctuary);
+                attacker->m_properties.end_prop(prop::Id::cloaked);
+                attacker->m_properties.end_prop(prop::Id::sanctuary);
 
                 game_time::tick();
         }

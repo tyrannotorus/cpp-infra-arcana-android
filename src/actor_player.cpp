@@ -174,7 +174,7 @@ static void interrupt_equip_armor(ForceInterruptActions is_forced)
 
         auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::burning)) {
+        if (player.m_properties.has(prop::Id::burning)) {
                 is_forced = ForceInterruptActions::yes;
         }
 
@@ -338,7 +338,7 @@ int Actor::carry_weight_lmt() const
                 carry_weight_mod += 50;
         }
 
-        if (m_properties.has(PropId::weakened)) {
+        if (m_properties.has(prop::Id::weakened)) {
                 carry_weight_mod -= g_weakened_carry_weight_penalty;
         }
 
@@ -414,7 +414,7 @@ double Actor::shock_taken_after_mods(
 
 void Actor::incr_shock(double shock, ShockSrc shock_src)
 {
-        if (m_properties.has(PropId::r_shock)) {
+        if (m_properties.has(prop::Id::r_shock)) {
                 // Player is shock resistant.
                 return;
         }
@@ -580,7 +580,7 @@ void Actor::mon_feeling() const
 
                 // This message only makes sense if the player is fearful
                 if (!player_bon::has_trait(Trait::fearless) &&
-                    !m_properties.has(PropId::frenzied)) {
+                    !m_properties.has(prop::Id::frenzied)) {
                         msg_bucket.emplace_back("I feel anxious.");
                 }
 
@@ -666,7 +666,7 @@ void Actor::add_shock_from_seen_monsters()
 
 double Actor::increased_tmp_chock_on_blind() const
 {
-        auto* const blind = m_properties.prop(PropId::blind);
+        auto* const blind = m_properties.prop(prop::Id::blind);
 
         const int blind_shock = std::min(blind->nr_turns_active(), 30);
 
@@ -737,7 +737,7 @@ void Actor::update_tmp_shock()
                 increased_tmp_shock += (double)g_shock_from_obsession;
         }
 
-        if (m_properties.has(PropId::blind)) {
+        if (m_properties.has(prop::Id::blind)) {
                 // NOTE: Here we assume that blindness is the ONLY property that
                 // prevents the player from seeing, that should cause shock
                 // (fainting also prevents seeing, but should not cause shock).
@@ -754,7 +754,7 @@ void Actor::update_tmp_shock()
                         increased_tmp_shock_from_adjacent_terrain();
         }
 
-        if (m_properties.has(PropId::r_shock)) {
+        if (m_properties.has(prop::Id::r_shock)) {
                 // Player is shock resistant, only allow reducing shock.
                 increased_tmp_shock = 0.0;
         }
@@ -866,7 +866,7 @@ void Actor::update_fov()
                 los.is_blocked_by_dark = false;
         }
 
-        const bool has_darkvision = m_properties.has(PropId::darkvision);
+        const bool has_darkvision = m_properties.has(prop::Id::darkvision);
 
         if (m_properties.allow_see()) {
                 Array2<bool> hard_blocked(map::dims());
@@ -976,7 +976,7 @@ void Actor::fov_hack() const
                 }
         }
 
-        const bool has_darkvision = m_properties.has(PropId::darkvision);
+        const bool has_darkvision = m_properties.has(prop::Id::darkvision);
 
         for (int x = 0; x < map::w(); ++x) {
                 for (int y = 0; y < map::h(); ++y) {

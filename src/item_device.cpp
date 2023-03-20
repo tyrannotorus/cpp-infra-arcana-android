@@ -326,17 +326,17 @@ ConsumeItem Rejuvenator::run_effect()
 {
         msg_log::add("It repairs my body.");
 
-        std::vector<PropId> props_can_heal = {
-                PropId::blind,
-                PropId::deaf,
-                PropId::poisoned,
-                PropId::infected,
-                PropId::diseased,
-                PropId::weakened,
-                PropId::hp_sap,
-                PropId::wound};
+        std::vector<prop::Id> props_can_heal = {
+                prop::Id::blind,
+                prop::Id::deaf,
+                prop::Id::poisoned,
+                prop::Id::infected,
+                prop::Id::diseased,
+                prop::Id::weakened,
+                prop::Id::hp_sap,
+                prop::Id::wound};
 
-        for (PropId prop_id : props_can_heal) {
+        for (prop::Id prop_id : props_can_heal) {
                 map::g_player->m_properties.end_prop(prop_id);
         }
 
@@ -419,7 +419,7 @@ ConsumeItem Deafening::run_effect()
                         continue;
                 }
 
-                actor->m_properties.apply(property_factory::make(PropId::deaf));
+                actor->m_properties.apply(prop::make(prop::Id::deaf));
         }
 
         return ConsumeItem::no;

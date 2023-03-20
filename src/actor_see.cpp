@@ -62,16 +62,16 @@ static bool is_seeable_for_mon(
         }
 
         // Actor is invisible, and monster cannot see invisible?
-        if ((other_properties.has(PropId::invis) ||
-             other_properties.has(PropId::cloaked)) &&
-            !properties.has(PropId::see_invis)) {
+        if ((other_properties.has(prop::Id::invis) ||
+             other_properties.has(prop::Id::cloaked)) &&
+            !properties.has(prop::Id::see_invis)) {
                 return false;
         }
 
         // Blocked by darkness, and not seeing actor with infravision?
         if (los.is_blocked_by_dark &&
-            !properties.has(PropId::darkvision) &&
-            !properties.has(PropId::see_invis)) {
+            !properties.has(prop::Id::darkvision) &&
+            !properties.has(prop::Id::see_invis)) {
                 return false;
         }
 
@@ -227,11 +227,11 @@ bool can_player_see_actor(const Actor& other)
         }
 
         const bool can_see_invis =
-                player.m_properties.has(PropId::see_invis);
+                player.m_properties.has(prop::Id::see_invis);
 
         const bool is_mon_invis =
-                (other.m_properties.has(PropId::invis) ||
-                 other.m_properties.has(PropId::cloaked));
+                (other.m_properties.has(prop::Id::invis) ||
+                 other.m_properties.has(prop::Id::cloaked));
 
         if (is_mon_invis && !can_see_invis) {
                 // Monster is invisible, and player cannot see invisible
@@ -239,7 +239,7 @@ bool can_player_see_actor(const Actor& other)
         }
 
         const bool has_darkvision =
-                player.m_properties.has(PropId::darkvision);
+                player.m_properties.has(prop::Id::darkvision);
 
         const bool can_see_other_in_drk = can_see_invis || has_darkvision;
 

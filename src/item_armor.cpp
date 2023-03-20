@@ -82,9 +82,9 @@ void ArmorAsbSuit::on_equip_hook(const Verbose verbose)
 {
         (void)verbose;
 
-        Prop* prop_r_fire = property_factory::make(PropId::r_fire);
-        Prop* prop_r_acid = property_factory::make(PropId::r_acid);
-        Prop* prop_r_elec = property_factory::make(PropId::r_elec);
+        prop::Prop* prop_r_fire = prop::make(prop::Id::r_fire);
+        prop::Prop* prop_r_acid = prop::make(prop::Id::r_acid);
+        prop::Prop* prop_r_elec = prop::make(prop::Id::r_elec);
 
         prop_r_fire->set_indefinite();
         prop_r_acid->set_indefinite();

@@ -681,7 +681,7 @@ void init()
         d.ranged.hit_chance_mod = 5;
         d.ranged.effective_range = {0, 4};
         {
-                Prop* prop = property_factory::make(PropId::paralyzed);
+                prop::Prop* prop = prop::make(prop::Id::paralyzed);
 
                 prop->set_duration(2);
 
@@ -714,7 +714,7 @@ void init()
         reset_data(d, ItemType::ranged_wpn);
         d = g_data[(size_t)Id::trap_dart];
         d.id = Id::trap_dart_poison;
-        d.ranged.prop_applied = ItemAttackProp(property_factory::make(PropId::poisoned));
+        d.ranged.prop_applied = ItemAttackProp(prop::make(prop::Id::poisoned));
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn);
@@ -732,7 +732,7 @@ void init()
         reset_data(d, ItemType::ranged_wpn);
         d = g_data[(size_t)Id::trap_spear];
         d.id = Id::trap_spear_poison;
-        d.ranged.prop_applied = ItemAttackProp(property_factory::make(PropId::poisoned));
+        d.ranged.prop_applied = ItemAttackProp(prop::make(prop::Id::poisoned));
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::explosive);
@@ -1027,7 +1027,7 @@ void init()
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
         d.melee.is_noisy = true;
         {
-                Prop* prop = property_factory::make(PropId::paralyzed);
+                prop::Prop* prop = prop::make(prop::Id::paralyzed);
 
                 prop->set_duration(2);
 
@@ -1874,7 +1874,7 @@ void init()
         d.melee.dmg_type = DmgType::slashing;
         d.melee.reach = 2;
         {
-                Prop* prop = property_factory::make(PropId::paralyzed);
+                prop::Prop* prop = prop::make(prop::Id::paralyzed);
 
                 prop->set_duration(2);
 

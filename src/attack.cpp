@@ -87,17 +87,17 @@ void try_apply_attack_property_on_actor(
 
         if (!is_resisting_dmg) {
                 auto* const prop_cpy =
-                        property_factory::make(
+                        prop::make(
                                 att_prop.prop->id());
 
                 const auto duration_mode =
                         att_prop.prop->duration_mode();
 
-                if (duration_mode == PropDurationMode::specific) {
+                if (duration_mode == prop::PropDurationMode::specific) {
                         prop_cpy->set_duration(
                                 att_prop.prop->nr_turns_left());
                 }
-                else if (duration_mode == PropDurationMode::indefinite) {
+                else if (duration_mode == prop::PropDurationMode::indefinite) {
                         prop_cpy->set_indefinite();
                 }
 

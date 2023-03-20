@@ -65,8 +65,8 @@ static void init_data_list()
         d.id = terrain::Id::wall;
         d.character = '#';  // NOTE: A filled rectangle may be used instead.
         d.tile = gfx::TileId::wall_top;
-        d.move_rules.props_allow_move.push_back(PropId::ethereal);
-        d.move_rules.props_allow_move.push_back(PropId::burrowing);
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.move_rules.props_allow_move.push_back(prop::Id::burrowing);
         d.is_sound_passable = false;
         d.is_projectile_passable = false;
         d.is_los_passable = false;
@@ -80,7 +80,7 @@ static void init_data_list()
         d.id = terrain::Id::tree;
         d.character = '|';
         d.tile = gfx::TileId::tree;
-        d.move_rules.props_allow_move.push_back(PropId::ethereal);
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
         d.is_sound_passable = false;
         d.is_projectile_passable = false;
         d.is_los_passable = false;
@@ -135,11 +135,11 @@ static void init_data_list()
         d.id = terrain::Id::grate;
         d.character = ':';  // NOTE: '#' may be automatically used instead.
         d.tile = gfx::TileId::grate;
-        d.move_rules.props_allow_move.push_back(PropId::ethereal);
-        d.move_rules.props_allow_move.push_back(PropId::burrowing);
-        d.move_rules.props_allow_move.push_back(PropId::ooze);
-        d.move_rules.props_allow_move.push_back(PropId::small_crawling);
-        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.move_rules.props_allow_move.push_back(prop::Id::burrowing);
+        d.move_rules.props_allow_move.push_back(prop::Id::ooze);
+        d.move_rules.props_allow_move.push_back(prop::Id::small_crawling);
+        d.move_rules.props_allow_move.push_back(prop::Id::tiny_flying);
         d.is_los_passable = true;
         d.can_have_blood = false;  // Looks weird
         d.can_have_gore = false;
@@ -217,9 +217,9 @@ static void init_data_list()
         d.id = terrain::Id::chasm;
         d.character = '.';
         d.tile = gfx::TileId::square_checkered;
-        d.move_rules.props_allow_move.push_back(PropId::ethereal);
-        d.move_rules.props_allow_move.push_back(PropId::flying);
-        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.move_rules.props_allow_move.push_back(prop::Id::flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::tiny_flying);
         d.can_have_item = false;
         d.can_have_blood = false;
         d.can_have_gore = false;
@@ -235,9 +235,9 @@ static void init_data_list()
         d.id = terrain::Id::gravestone;
         d.character = ']';
         d.tile = gfx::TileId::grave_stone;
-        d.move_rules.props_allow_move.push_back(PropId::ethereal);
-        d.move_rules.props_allow_move.push_back(PropId::flying);
-        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.move_rules.props_allow_move.push_back(prop::Id::flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::tiny_flying);
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.can_have_corpse = false;
@@ -249,10 +249,10 @@ static void init_data_list()
         d.id = terrain::Id::church_bench;
         d.character = '[';
         d.tile = gfx::TileId::church_bench;
-        d.move_rules.props_allow_move.push_back(PropId::ethereal);
-        d.move_rules.props_allow_move.push_back(PropId::flying);
-        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
-        d.move_rules.props_allow_move.push_back(PropId::ooze);
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.move_rules.props_allow_move.push_back(prop::Id::flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::tiny_flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::ooze);
         d.is_projectile_passable = false;
         d.is_los_passable = false;
         d.can_have_blood = false;
@@ -276,11 +276,11 @@ static void init_data_list()
         d.id = terrain::Id::rubble_high;
         d.character = ';';
         d.tile = gfx::TileId::rubble_high;
-        d.move_rules.props_allow_move.push_back(PropId::ethereal);
-        d.move_rules.props_allow_move.push_back(PropId::ooze);
-        d.move_rules.props_allow_move.push_back(PropId::burrowing);
-        d.move_rules.props_allow_move.push_back(PropId::small_crawling);
-        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.move_rules.props_allow_move.push_back(prop::Id::ooze);
+        d.move_rules.props_allow_move.push_back(prop::Id::burrowing);
+        d.move_rules.props_allow_move.push_back(prop::Id::small_crawling);
+        d.move_rules.props_allow_move.push_back(prop::Id::tiny_flying);
         d.is_projectile_passable = false;
         d.is_los_passable = false;
         d.is_smoke_passable = false;
@@ -442,9 +442,9 @@ static void init_data_list()
         d.id = terrain::Id::tomb;
         d.character = '7';
         d.tile = gfx::TileId::tomb_closed;
-        d.move_rules.props_allow_move.push_back(PropId::ethereal);
-        d.move_rules.props_allow_move.push_back(PropId::flying);
-        d.move_rules.props_allow_move.push_back(PropId::tiny_flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.move_rules.props_allow_move.push_back(prop::Id::flying);
+        d.move_rules.props_allow_move.push_back(prop::Id::tiny_flying);
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.can_have_corpse = false;
@@ -533,14 +533,14 @@ bool MoveRules::can_move(const actor::Actor& actor) const
                 std::find_if(
                         std::begin(props_allow_move),
                         std::end(props_allow_move),
-                        [&actor](const PropId id) {
+                        [&actor](const prop::Id id) {
                                 return actor.m_properties.has(id);
                         });
 
         return match != std::end(props_allow_move);
 }
 
-bool MoveRules::is_property_allowing_move(const PropId id) const
+bool MoveRules::is_property_allowing_move(const prop::Id id) const
 {
         return (
                 std::find(

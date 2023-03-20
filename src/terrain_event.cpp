@@ -403,7 +403,7 @@ void EventSnakeEmerge::on_new_turn()
 
                 auto* const actor = actor::make(id, p);
 
-                auto* prop = property_factory::make(PropId::waiting);
+                auto* prop = prop::make(prop::Id::waiting);
 
                 prop->set_duration(2);
 
@@ -438,8 +438,8 @@ void EventSpawnMonstersDelayed::on_new_turn()
                 std::end(mon_summoned.monsters),
                 [](auto* const mon) {
                         auto* prop_waiting =
-                                property_factory::make(
-                                        PropId::waiting);
+                                prop::make(
+                                        prop::Id::waiting);
 
                         prop_waiting->set_duration(1);
 

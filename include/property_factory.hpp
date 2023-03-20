@@ -9,12 +9,12 @@
 
 #include "property_data.hpp"
 
+namespace prop
+{
 class Prop;
 
-namespace property_factory
-{
-Prop* make(PropId id);
+Prop* make(prop::Id id);
 
-}  // namespace property_factory
+}  // namespace prop
 
 #endif  // PROPERTY_FACTORY_HPP

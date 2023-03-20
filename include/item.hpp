@@ -26,7 +26,10 @@ namespace actor
 class Actor;
 }  // namespace actor
 
+namespace prop
+{
 class Prop;
+}  // namespace prop
 
 namespace item
 {
@@ -190,7 +193,7 @@ public:
                 (void)actor_hit;
         }
 
-        void add_carrier_prop(Prop* prop, Verbose verbose);
+        void add_carrier_prop(prop::Prop* prop, Verbose verbose);
 
         void clear_carrier_props();
 
@@ -210,7 +213,7 @@ public:
                 m_actor_carrying = nullptr;
         }
 
-        const std::vector<Prop*>& carrier_props() const
+        const std::vector<prop::Prop*>& carrier_props() const
         {
                 return m_carrier_props;
         }
@@ -309,7 +312,7 @@ protected:
 private:
         // Properties to apply on owning actor (when e.g. wearing the item, or
         // just keeping it in the inventory).
-        std::vector<Prop*> m_carrier_props {};
+        std::vector<prop::Prop*> m_carrier_props {};
 
         item_curse::Curse m_curse {};
 };

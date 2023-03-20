@@ -177,7 +177,7 @@ void put_smell_for_mon(const actor::Actor& mon)
         }
 
         const bool allow_corpse_smell =
-                mon.m_properties.has(PropId::corpse_rises);
+                mon.m_properties.has(prop::Id::corpse_rises);
 
         if ((mon.m_state == ActorState::corpse) && !allow_corpse_smell) {
                 return;

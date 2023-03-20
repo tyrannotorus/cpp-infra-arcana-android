@@ -183,7 +183,7 @@ static void on_equipable_backpack_item_selected(const size_t backpack_idx)
         } break;
 
         case ItemType::armor: {
-                if (map::g_player->m_properties.has(PropId::burning)) {
+                if (map::g_player->m_properties.has(prop::Id::burning)) {
                         msg_log::add("Not while burning.");
 
                         return;
@@ -921,7 +921,7 @@ void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot) const
                 print_cannot_remove_torture_collar_msg(*slot.item);
         }
         else if (slot.id == SlotId::body) {
-                if (map::g_player->m_properties.has(PropId::burning)) {
+                if (map::g_player->m_properties.has(prop::Id::burning)) {
                         msg_log::add("Not while burning.");
 
                         return;
@@ -1479,7 +1479,7 @@ void Equip::update()
                 states::pop_until(StateId::game);
 
                 if (slot_id == SlotId::body) {
-                        if (map::g_player->m_properties.has(PropId::burning)) {
+                        if (map::g_player->m_properties.has(prop::Id::burning)) {
                                 msg_log::add("Not while burning.");
 
                                 return;

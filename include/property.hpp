@@ -34,6 +34,8 @@ struct ActorData;
 
 struct P;
 
+namespace prop
+{
 // -----------------------------------------------------------------------------
 // Support types
 // -----------------------------------------------------------------------------
@@ -76,9 +78,6 @@ struct PropActResult
         PropEnded prop_ended {PropEnded::no};
 };
 
-// TODO: There should be a property namespace, and the "Prop" prefix should be
-// removed from the property classes.
-
 extern const std::string g_property_ending_suffix;
 
 // -----------------------------------------------------------------------------
@@ -87,11 +86,11 @@ extern const std::string g_property_ending_suffix;
 class Prop
 {
 public:
-        Prop(PropId id);
+        Prop(Id id);
 
         virtual ~Prop() = default;
 
-        PropId id() const
+        Id id() const
         {
                 return m_id;
         }
@@ -372,7 +371,7 @@ public:
                 return PropEnded::no;
         }
 
-        virtual bool is_resisting_other_prop(const PropId prop_id) const
+        virtual bool is_resisting_other_prop(const Id prop_id) const
         {
                 (void)prop_id;
                 return false;
@@ -388,7 +387,7 @@ public:
 protected:
         friend class PropHandler;
 
-        const PropId m_id;
+        const Id m_id;
         const PropData& m_data;
 
         int m_nr_turns_left;
@@ -406,11 +405,11 @@ protected:
 // -----------------------------------------------------------------------------
 // Specific properties
 // -----------------------------------------------------------------------------
-class PropTerrified : public Prop
+class Terrified : public Prop
 {
 public:
-        PropTerrified() :
-                Prop(PropId::terrified) {}
+        Terrified() :
+                Prop(Id::terrified) {}
 
         int ability_mod(const AbilityId ability) const override
         {
@@ -433,11 +432,11 @@ public:
         void on_applied() override;
 };
 
-class PropInfected : public Prop
+class Infected : public Prop
 {
 public:
-        PropInfected() :
-                Prop(PropId::infected) {}
+        Infected() :
+                Prop(Id::infected) {}
 
         std::optional<Color> override_property_color() const override
         {
@@ -452,51 +451,51 @@ private:
         bool has_warned {false};
 };
 
-class PropDiseased : public Prop
+class Diseased : public Prop
 {
 public:
-        PropDiseased() :
-                Prop(PropId::diseased) {}
+        Diseased() :
+                Prop(Id::diseased) {}
 
         int affect_max_hp(int hp_max) const override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 
         void on_applied() override;
 };
 
-class PropDescend : public Prop
+class Descend : public Prop
 {
 public:
-        PropDescend() :
-                Prop(PropId::descend) {}
+        Descend() :
+                Prop(Id::descend) {}
 
         PropEnded on_actor_turn() override;
 };
 
-class PropBurrowing : public Prop
+class Burrowing : public Prop
 {
 public:
-        PropBurrowing() :
-                Prop(PropId::burrowing) {}
+        Burrowing() :
+                Prop(Id::burrowing) {}
 
         PropEnded on_actor_turn() override;
 };
 
-class PropZuulPossessPriest : public Prop
+class ZuulPossessPriest : public Prop
 {
 public:
-        PropZuulPossessPriest() :
-                Prop(PropId::zuul_possess_priest) {}
+        ZuulPossessPriest() :
+                Prop(Id::zuul_possess_priest) {}
 
         void on_placed() override;
 };
 
-class PropPossessedByZuul : public Prop
+class PossessedByZuul : public Prop
 {
 public:
-        PropPossessedByZuul() :
-                Prop(PropId::possessed_by_zuul) {}
+        PossessedByZuul() :
+                Prop(Id::possessed_by_zuul) {}
 
         void on_death() override;
 
@@ -506,11 +505,11 @@ public:
         }
 };
 
-class PropShapeshifts : public Prop
+class Shapeshifts : public Prop
 {
 public:
-        PropShapeshifts() :
-                Prop(PropId::shapeshifts) {}
+        Shapeshifts() :
+                Prop(Id::shapeshifts) {}
 
         void on_placed() override;
 
@@ -524,29 +523,29 @@ private:
         int m_countdown {-1};
 };
 
-class PropZealotStop : public Prop
+class ZealotStop : public Prop
 {
 public:
-        PropZealotStop() :
-                Prop(PropId::zealot_stop) {}
+        ZealotStop() :
+                Prop(Id::zealot_stop) {}
 
         PropEnded affect_move_dir(Dir& dir) override;
 };
 
-class PropPoisoned : public Prop
+class Poisoned : public Prop
 {
 public:
-        PropPoisoned() :
-                Prop(PropId::poisoned) {}
+        Poisoned() :
+                Prop(Id::poisoned) {}
 
         PropEnded on_actor_turn() override;
 };
 
-class PropAiming : public Prop
+class Aiming : public Prop
 {
 public:
-        PropAiming() :
-                Prop(PropId::aiming) {}
+        Aiming() :
+                Prop(Id::aiming) {}
 
         int ability_mod(const AbilityId ability) const override
         {
@@ -564,11 +563,11 @@ public:
                 actor::Actor* attacker) override;
 };
 
-class PropBlind : public Prop
+class Blind : public Prop
 {
 public:
-        PropBlind() :
-                Prop(PropId::blind) {}
+        Blind() :
+                Prop(Id::blind) {}
 
         bool should_update_vision_on_toggled() const override;
 
@@ -600,31 +599,31 @@ public:
         }
 };
 
-class PropRecloaks : public Prop
+class Recloaks : public Prop
 {
 public:
-        PropRecloaks() :
-                Prop(PropId::recloaks) {}
+        Recloaks() :
+                Prop(Id::recloaks) {}
 
         PropActResult on_act() override;
 };
 
-class PropSeeInvis : public Prop
+class SeeInvis : public Prop
 {
 public:
-        PropSeeInvis() :
-                Prop(PropId::see_invis) {}
+        SeeInvis() :
+                Prop(Id::see_invis) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropBlessed : public Prop
+class Blessed : public Prop
 {
 public:
-        PropBlessed() :
-                Prop(PropId::blessed) {}
+        Blessed() :
+                Prop(Id::blessed) {}
 
         void on_applied() override;
 
@@ -633,11 +632,11 @@ public:
         int ability_mod(AbilityId ability) const override;
 };
 
-class PropCursed : public Prop
+class Cursed : public Prop
 {
 public:
-        PropCursed() :
-                Prop(PropId::cursed) {}
+        Cursed() :
+                Prop(Id::cursed) {}
 
         int ability_mod(AbilityId ability) const override;
 
@@ -646,11 +645,11 @@ public:
         void on_more(const Prop& new_prop) override;
 };
 
-class PropDoomed : public Prop
+class Doomed : public Prop
 {
 public:
-        PropDoomed() :
-                Prop(PropId::doomed) {}
+        Doomed() :
+                Prop(Id::doomed) {}
 
         bool allow_read_chance(
                 Verbose verbose) const override;
@@ -665,11 +664,11 @@ public:
         void on_more(const Prop& new_prop) override;
 };
 
-class PropPremonition : public Prop
+class Premonition : public Prop
 {
 public:
-        PropPremonition() :
-                Prop(PropId::premonition) {}
+        Premonition() :
+                Prop(Id::premonition) {}
 
         int ability_mod(const AbilityId ability) const override
         {
@@ -684,11 +683,11 @@ public:
         }
 };
 
-class PropMagicSearching : public Prop
+class MagicSearching : public Prop
 {
 public:
-        PropMagicSearching() :
-                Prop(PropId::magic_searching) {}
+        MagicSearching() :
+                Prop(Id::magic_searching) {}
 
         void save() const override;
 
@@ -717,11 +716,11 @@ private:
         bool m_allow_reveal_creatures {false};
 };
 
-class PropEntangled : public Prop
+class Entangled : public Prop
 {
 public:
-        PropEntangled() :
-                Prop(PropId::entangled) {}
+        Entangled() :
+                Prop(Id::entangled) {}
 
         void on_applied() override;
 
@@ -731,11 +730,11 @@ private:
         bool try_player_end_with_machete();
 };
 
-class PropBurning : public Prop
+class Burning : public Prop
 {
 public:
-        PropBurning() :
-                Prop(PropId::burning) {}
+        Burning() :
+                Prop(Id::burning) {}
 
         PropEnded on_actor_turn() override;
 
@@ -758,11 +757,11 @@ public:
         std::optional<Color> override_actor_color() const override;
 };
 
-class PropConfused : public Prop
+class Confused : public Prop
 {
 public:
-        PropConfused() :
-                Prop(PropId::confused) {}
+        Confused() :
+                Prop(Id::confused) {}
 
         PropEnded affect_move_dir(Dir& dir) override;
 
@@ -773,11 +772,11 @@ public:
         bool allow_pray(Verbose verbose) const override;
 };
 
-class PropHallucinating : public Prop
+class Hallucinating : public Prop
 {
 public:
-        PropHallucinating() :
-                Prop(PropId::hallucinating) {}
+        Hallucinating() :
+                Prop(Id::hallucinating) {}
 
         void on_applied() override;
 
@@ -797,11 +796,11 @@ private:
         std::vector<const actor::ActorData*> get_allowed_fake_mon_data() const;
 };
 
-class PropAstralOpiumAddict : public Prop
+class AstralOpiumAddict : public Prop
 {
 public:
-        PropAstralOpiumAddict() :
-                Prop(PropId::astral_opium_addiction) {}
+        AstralOpiumAddict() :
+                Prop(Id::astral_opium_addiction) {}
 
         void save() const override;
 
@@ -829,11 +828,11 @@ private:
         int m_nr_turns_to_penalty {-1};
 };
 
-class PropNailed : public Prop
+class Nailed : public Prop
 {
 public:
-        PropNailed() :
-                Prop(PropId::nailed) {}
+        Nailed() :
+                Prop(Id::nailed) {}
 
         std::string name_short() const override
         {
@@ -860,11 +859,11 @@ private:
         int m_nr_spikes {1};
 };
 
-class PropWound : public Prop
+class Wound : public Prop
 {
 public:
-        PropWound() :
-                Prop(PropId::wound) {}
+        Wound() :
+                Prop(Id::wound) {}
 
         void save() const override;
 
@@ -901,11 +900,11 @@ private:
         int m_nr_wounds {1};
 };
 
-class PropMoribund : public Prop
+class Moribund : public Prop
 {
 public:
-        PropMoribund() :
-                Prop(PropId::moribund) {}
+        Moribund() :
+                Prop(Id::moribund) {}
 
         std::string name() const override;
 
@@ -918,10 +917,10 @@ public:
         bool has_bonus() const;
 };
 
-class PropHpSap : public Prop
+class HpSap : public Prop
 {
 public:
-        PropHpSap();
+        HpSap();
 
         void save() const override;
 
@@ -942,10 +941,10 @@ private:
         int m_nr_drained;
 };
 
-class PropSpiSap : public Prop
+class SpiSap : public Prop
 {
 public:
-        PropSpiSap();
+        SpiSap();
 
         void save() const override;
 
@@ -964,10 +963,10 @@ private:
         int m_nr_drained;
 };
 
-class PropMindSap : public Prop
+class MindSap : public Prop
 {
 public:
-        PropMindSap();
+        MindSap();
 
         void save() const override;
 
@@ -986,11 +985,11 @@ private:
         int m_nr_drained;
 };
 
-class PropWaiting : public Prop
+class Waiting : public Prop
 {
 public:
-        PropWaiting() :
-                Prop(PropId::waiting) {}
+        Waiting() :
+                Prop(Id::waiting) {}
 
         bool allow_move() const override
         {
@@ -1015,11 +1014,11 @@ public:
         }
 };
 
-class PropDelayedByLiquid : public Prop
+class DelayedByLiquid : public Prop
 {
 public:
-        PropDelayedByLiquid() :
-                Prop(PropId::delayed_by_liquid) {}
+        DelayedByLiquid() :
+                Prop(Id::delayed_by_liquid) {}
 
         bool allow_move() const override
         {
@@ -1044,11 +1043,11 @@ public:
         }
 };
 
-class PropDisabledAttack : public Prop
+class DisabledAttack : public Prop
 {
 public:
-        PropDisabledAttack() :
-                Prop(PropId::disabled_attack) {}
+        DisabledAttack() :
+                Prop(Id::disabled_attack) {}
 
         bool allow_attack_ranged(const Verbose verbose) const override
         {
@@ -1063,11 +1062,11 @@ public:
         }
 };
 
-class PropDisabledMelee : public Prop
+class DisabledMelee : public Prop
 {
 public:
-        PropDisabledMelee() :
-                Prop(PropId::disabled_melee) {}
+        DisabledMelee() :
+                Prop(Id::disabled_melee) {}
 
         bool allow_attack_melee(const Verbose verbose) const override
         {
@@ -1076,11 +1075,11 @@ public:
         }
 };
 
-class PropDisabledRanged : public Prop
+class DisabledRanged : public Prop
 {
 public:
-        PropDisabledRanged() :
-                Prop(PropId::disabled_ranged) {}
+        DisabledRanged() :
+                Prop(Id::disabled_ranged) {}
 
         bool allow_attack_ranged(const Verbose verbose) const override
         {
@@ -1089,11 +1088,11 @@ public:
         }
 };
 
-class PropParalyzed : public Prop
+class Paralyzed : public Prop
 {
 public:
-        PropParalyzed() :
-                Prop(PropId::paralyzed) {}
+        Paralyzed() :
+                Prop(Id::paralyzed) {}
 
         void on_applied() override;
 
@@ -1125,11 +1124,11 @@ public:
         }
 };
 
-class PropFainted : public Prop
+class Fainted : public Prop
 {
 public:
-        PropFainted() :
-                Prop(PropId::fainted) {}
+        Fainted() :
+                Prop(Id::fainted) {}
 
         bool should_update_vision_on_toggled() const override;
 
@@ -1171,47 +1170,47 @@ public:
                 actor::Actor* attacker) override;
 };
 
-class PropSlowed : public Prop
+class Slowed : public Prop
 {
 public:
-        PropSlowed() :
-                Prop(PropId::slowed) {}
+        Slowed() :
+                Prop(Id::slowed) {}
 
         void on_applied() override;
 };
 
-class PropHasted : public Prop
+class Hasted : public Prop
 {
 public:
-        PropHasted() :
-                Prop(PropId::hasted) {}
+        Hasted() :
+                Prop(Id::hasted) {}
 
         void on_applied() override;
 };
 
-class PropExtraHasted : public Prop
+class ExtraHasted : public Prop
 {
 public:
-        PropExtraHasted() :
-                Prop(PropId::extra_hasted) {}
+        ExtraHasted() :
+                Prop(Id::extra_hasted) {}
 
         void on_applied() override;
 };
 
-class PropSummoned : public Prop
+class Summoned : public Prop
 {
 public:
-        PropSummoned() :
-                Prop(PropId::summoned) {}
+        Summoned() :
+                Prop(Id::summoned) {}
 
         void on_end() override;
 };
 
-class PropFrenzied : public Prop
+class Frenzied : public Prop
 {
 public:
-        PropFrenzied() :
-                Prop(PropId::frenzied) {}
+        Frenzied() :
+                Prop(Id::frenzied) {}
 
         void on_applied() override;
         void on_end() override;
@@ -1222,164 +1221,164 @@ public:
         bool allow_cast_intr_spell_absolute(Verbose verbose) const override;
         bool allow_pray(Verbose verbose) const override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 
         int ability_mod(AbilityId ability) const override;
 };
 
-class PropRShock : public Prop
+class RShock : public Prop
 {
 public:
-        PropRShock() :
-                Prop(PropId::r_shock) {}
+        RShock() :
+                Prop(Id::r_shock) {}
 
         void on_applied() override;
 };
 
-class PropRAcid : public Prop
+class RAcid : public Prop
 {
 public:
-        PropRAcid() :
-                Prop(PropId::r_acid) {}
+        RAcid() :
+                Prop(Id::r_acid) {}
 
         DmgResistData is_resisting_dmg(DmgType dmg_type) const override;
 };
 
-class PropRConf : public Prop
+class RConf : public Prop
 {
 public:
-        PropRConf() :
-                Prop(PropId::r_conf) {}
+        RConf() :
+                Prop(Id::r_conf) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropRElec : public Prop
+class RElec : public Prop
 {
 public:
-        PropRElec() :
-                Prop(PropId::r_elec) {}
+        RElec() :
+                Prop(Id::r_elec) {}
 
         DmgResistData is_resisting_dmg(DmgType dmg_type) const override;
 };
 
-class PropRFear : public Prop
+class RFear : public Prop
 {
 public:
-        PropRFear() :
-                Prop(PropId::r_fear) {}
+        RFear() :
+                Prop(Id::r_fear) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropRSlow : public Prop
+class RSlow : public Prop
 {
 public:
-        PropRSlow() :
-                Prop(PropId::r_slow) {}
+        RSlow() :
+                Prop(Id::r_slow) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropRPhys : public Prop
+class RPhys : public Prop
 {
 public:
-        PropRPhys() :
-                Prop(PropId::r_phys) {}
+        RPhys() :
+                Prop(Id::r_phys) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 
         DmgResistData is_resisting_dmg(DmgType dmg_type) const override;
 };
 
-class PropRFire : public Prop
+class RFire : public Prop
 {
 public:
-        PropRFire() :
-                Prop(PropId::r_fire) {}
+        RFire() :
+                Prop(Id::r_fire) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 
         DmgResistData is_resisting_dmg(DmgType dmg_type) const override;
 };
 
-class PropRPoison : public Prop
+class RPoison : public Prop
 {
 public:
-        PropRPoison() :
-                Prop(PropId::r_poison) {}
+        RPoison() :
+                Prop(Id::r_poison) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropRSleep : public Prop
+class RSleep : public Prop
 {
 public:
-        PropRSleep() :
-                Prop(PropId::r_sleep) {}
+        RSleep() :
+                Prop(Id::r_sleep) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropRDisease : public Prop
+class RDisease : public Prop
 {
 public:
-        PropRDisease() :
-                Prop(PropId::r_disease) {}
+        RDisease() :
+                Prop(Id::r_disease) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropRBlind : public Prop
+class RBlind : public Prop
 {
 public:
-        PropRBlind() :
-                Prop(PropId::r_blind) {}
+        RBlind() :
+                Prop(Id::r_blind) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropRPara : public Prop
+class RPara : public Prop
 {
 public:
-        PropRPara() :
-                Prop(PropId::r_para) {}
+        RPara() :
+                Prop(Id::r_para) {}
 
         void on_applied() override;
 
-        bool is_resisting_other_prop(PropId prop_id) const override;
+        bool is_resisting_other_prop(Id prop_id) const override;
 };
 
-class PropRBreath : public Prop
+class RBreath : public Prop
 {
 public:
-        PropRBreath() :
-                Prop(PropId::r_breath) {}
+        RBreath() :
+                Prop(Id::r_breath) {}
 };
 
-class PropLgtSens : public Prop
+class LgtSens : public Prop
 {
 public:
-        PropLgtSens() :
-                Prop(PropId::light_sensitive) {}
+        LgtSens() :
+                Prop(Id::light_sensitive) {}
 
         int get_extra_damage() const
         {
@@ -1392,11 +1391,11 @@ private:
         int m_extra_dmg {0};
 };
 
-class PropVortex : public Prop
+class Vortex : public Prop
 {
 public:
-        PropVortex() :
-                Prop(PropId::vortex) {}
+        Vortex() :
+                Prop(Id::vortex) {}
 
         PropActResult on_act() override;
 
@@ -1404,20 +1403,20 @@ private:
         int m_cooldown {0};
 };
 
-class PropExplodesOnDeath : public Prop
+class ExplodesOnDeath : public Prop
 {
 public:
-        PropExplodesOnDeath() :
-                Prop(PropId::explodes_on_death) {}
+        ExplodesOnDeath() :
+                Prop(Id::explodes_on_death) {}
 
         void on_death() override;
 };
 
-class PropSplitsOnDeath : public Prop
+class SplitsOnDeath : public Prop
 {
 public:
-        PropSplitsOnDeath() :
-                Prop(PropId::splits_on_death) {}
+        SplitsOnDeath() :
+                Prop(Id::splits_on_death) {}
 
         void on_death() override;
 
@@ -1430,56 +1429,56 @@ private:
         bool m_prevent_std_death_msg {true};
 };
 
-class PropOthersTerrifiedOnDeath : public Prop
+class OthersTerrifiedOnDeath : public Prop
 {
 public:
-        PropOthersTerrifiedOnDeath() :
-                Prop(PropId::others_terrified_on_death) {}
+        OthersTerrifiedOnDeath() :
+                Prop(Id::others_terrified_on_death) {}
 
         void on_death() override;
 };
 
-class PropCorpseEater : public Prop
+class CorpseEater : public Prop
 {
 public:
-        PropCorpseEater() :
-                Prop(PropId::corpse_eater) {}
+        CorpseEater() :
+                Prop(Id::corpse_eater) {}
 
         PropActResult on_act() override;
 };
 
-class PropTeleports : public Prop
+class Teleports : public Prop
 {
 public:
-        PropTeleports() :
-                Prop(PropId::teleports) {}
+        Teleports() :
+                Prop(Id::teleports) {}
 
         PropActResult on_act() override;
 };
 
-class PropTeleportsAway : public Prop
+class TeleportsAway : public Prop
 {
 public:
-        PropTeleportsAway() :
-                Prop(PropId::teleports_away) {}
+        TeleportsAway() :
+                Prop(Id::teleports_away) {}
 
         PropActResult on_act() override;
 };
 
-class PropAlwaysAware : public Prop
+class AlwaysAware : public Prop
 {
 public:
-        PropAlwaysAware() :
-                Prop(PropId::always_aware) {}
+        AlwaysAware() :
+                Prop(Id::always_aware) {}
 
         void on_std_turn() override;
 };
 
-class PropCorruptsEnvColor : public Prop
+class CorruptsEnvColor : public Prop
 {
 public:
-        PropCorruptsEnvColor() :
-                Prop(PropId::corrupts_env_color) {}
+        CorruptsEnvColor() :
+                Prop(Id::corrupts_env_color) {}
 
         void cycle_graphics() override;
 
@@ -1491,29 +1490,29 @@ private:
         Color m_color {255, 255, 255};
 };
 
-class PropAltersEnv : public Prop
+class AltersEnv : public Prop
 {
 public:
-        PropAltersEnv() :
-                Prop(PropId::alters_env) {}
+        AltersEnv() :
+                Prop(Id::alters_env) {}
 
         void on_std_turn() override;
 };
 
-class PropRegenerating : public Prop
+class Regenerating : public Prop
 {
 public:
-        PropRegenerating() :
-                Prop(PropId::regenerating) {}
+        Regenerating() :
+                Prop(Id::regenerating) {}
 
         void on_std_turn() override;
 };
 
-class PropCorpseRises : public Prop
+class CorpseRises : public Prop
 {
 public:
-        PropCorpseRises() :
-                Prop(PropId::corpse_rises),
+        CorpseRises() :
+                Prop(Id::corpse_rises),
                 m_has_risen(false),
                 m_nr_turns_until_allow_rise(2) {}
 
@@ -1526,11 +1525,11 @@ private:
         int m_nr_turns_until_allow_rise;
 };
 
-class PropSpawnsZombiePartsOnDestroyed : public Prop
+class SpawnsZombiePartsOnDestroyed : public Prop
 {
 public:
-        PropSpawnsZombiePartsOnDestroyed() :
-                Prop(PropId::spawns_zombie_parts_on_destroyed) {}
+        SpawnsZombiePartsOnDestroyed() :
+                Prop(Id::spawns_zombie_parts_on_destroyed) {}
 
         void on_destroyed_alive() override;
         void on_destroyed_corpse() override;
@@ -1543,20 +1542,20 @@ private:
         bool is_allowed_to_spawn_parts_here() const;
 };
 
-class PropBreeds : public Prop
+class Breeds : public Prop
 {
 public:
-        PropBreeds() :
-                Prop(PropId::breeds) {}
+        Breeds() :
+                Prop(Id::breeds) {}
 
         void on_std_turn() override;
 };
 
-class PropVomitsOoze : public Prop
+class VomitsOoze : public Prop
 {
 public:
-        PropVomitsOoze() :
-                Prop(PropId::vomits_ooze) {}
+        VomitsOoze() :
+                Prop(Id::vomits_ooze) {}
 
         void on_std_turn() override;
 
@@ -1564,29 +1563,29 @@ private:
         bool m_has_triggered_before {false};
 };
 
-class PropConfusesAdjacent : public Prop
+class ConfusesAdjacent : public Prop
 {
 public:
-        PropConfusesAdjacent() :
-                Prop(PropId::confuses_adjacent) {}
+        ConfusesAdjacent() :
+                Prop(Id::confuses_adjacent) {}
 
         void on_std_turn() override;
 };
 
-class PropFrenzyPlayerOnSeen : public Prop
+class FrenzyPlayerOnSeen : public Prop
 {
 public:
-        PropFrenzyPlayerOnSeen() :
-                Prop(PropId::frenzy_player_on_seen) {}
+        FrenzyPlayerOnSeen() :
+                Prop(Id::frenzy_player_on_seen) {}
 
         void on_player_see() override;
 };
 
-class PropAuraOfDecay : public Prop
+class AuraOfDecay : public Prop
 {
 public:
-        PropAuraOfDecay() :
-                Prop(PropId::aura_of_decay) {}
+        AuraOfDecay() :
+                Prop(Id::aura_of_decay) {}
 
         void save() const override;
 
@@ -1620,29 +1619,29 @@ private:
         bool m_allow_instant_kill {false};
 };
 
-class PropMajorClaphamSummon : public Prop
+class MajorClaphamSummon : public Prop
 {
 public:
-        PropMajorClaphamSummon() :
-                Prop(PropId::major_clapham_summon) {}
+        MajorClaphamSummon() :
+                Prop(Id::major_clapham_summon) {}
 
         PropActResult on_act() override;
 };
 
-class PropAlliesPlayerGhoul : public Prop
+class AlliesPlayerGhoul : public Prop
 {
 public:
-        PropAlliesPlayerGhoul() :
-                Prop(PropId::allies_ghoul_player) {}
+        AlliesPlayerGhoul() :
+                Prop(Id::allies_ghoul_player) {}
 
         PropActResult on_act() override;
 };
 
-class PropHitChancePenaltyCurse : public Prop
+class HitChancePenaltyCurse : public Prop
 {
 public:
-        PropHitChancePenaltyCurse() :
-                Prop(PropId::hit_chance_penalty_curse) {}
+        HitChancePenaltyCurse() :
+                Prop(Id::hit_chance_penalty_curse) {}
 
         int ability_mod(const AbilityId ability) const override
         {
@@ -1657,11 +1656,11 @@ public:
         }
 };
 
-class PropIncreasedShockCurse : public Prop
+class IncreasedShockCurse : public Prop
 {
 public:
-        PropIncreasedShockCurse() :
-                Prop(PropId::increased_shock_curse) {}
+        IncreasedShockCurse() :
+                Prop(Id::increased_shock_curse) {}
 
         int player_extra_min_shock() const override
         {
@@ -1669,20 +1668,20 @@ public:
         }
 };
 
-class PropCannotReadCurse : public Prop
+class CannotReadCurse : public Prop
 {
 public:
-        PropCannotReadCurse() :
-                Prop(PropId::cannot_read_curse) {}
+        CannotReadCurse() :
+                Prop(Id::cannot_read_curse) {}
 
         bool allow_read_absolute(Verbose verbose) const override;
 };
 
-class PropErudition : public Prop
+class Erudition : public Prop
 {
 public:
-        PropErudition() :
-                Prop(PropId::erudition) {}
+        Erudition() :
+                Prop(Id::erudition) {}
 
         bool should_end_on_spell_cast() const
         {
@@ -1698,11 +1697,11 @@ private:
         bool m_end_on_spell_cast {true};
 };
 
-class PropFrenziesSelf : public Prop
+class FrenziesSelf : public Prop
 {
 public:
-        PropFrenziesSelf() :
-                Prop(PropId::frenzies_self) {}
+        FrenziesSelf() :
+                Prop(Id::frenzies_self) {}
 
         PropActResult on_act() override;
 
@@ -1710,11 +1709,11 @@ private:
         int m_cooldown {0};
 };
 
-class PropFrenziesFollowers : public Prop
+class FrenziesFollowers : public Prop
 {
 public:
-        PropFrenziesFollowers() :
-                Prop(PropId::frenzies_followers) {}
+        FrenziesFollowers() :
+                Prop(Id::frenzies_followers) {}
 
         PropActResult on_act() override;
 
@@ -1722,11 +1721,11 @@ private:
         int m_cooldown {0};
 };
 
-class PropSummonsLocusts : public Prop
+class SummonsLocusts : public Prop
 {
 public:
-        PropSummonsLocusts() :
-                Prop(PropId::summons_locusts) {}
+        SummonsLocusts() :
+                Prop(Id::summons_locusts) {}
 
         PropActResult on_act() override;
 
@@ -1734,10 +1733,10 @@ private:
         bool m_has_summoned {false};
 };
 
-class PropSpectralWpn : public Prop
+class SpectralWpn : public Prop
 {
 public:
-        PropSpectralWpn();
+        SpectralWpn();
 
         void on_death() override;
 
@@ -1757,11 +1756,11 @@ private:
         std::string get_weapon_name() const;
 };
 
-class PropThorns : public Prop
+class Thorns : public Prop
 {
 public:
-        PropThorns() :
-                Prop(PropId::thorns) {}
+        Thorns() :
+                Prop(Id::thorns) {}
 
         void save() const override;
         void load() override;
@@ -1786,20 +1785,20 @@ private:
         int m_dmg {1};
 };
 
-class PropSanctuary : public Prop
+class Sanctuary : public Prop
 {
 public:
-        PropSanctuary() :
-                Prop(PropId::sanctuary) {}
+        Sanctuary() :
+                Prop(Id::sanctuary) {}
 
         PropEnded on_moved_non_center_dir() override;
 };
 
-class PropCrimsonPassage : public Prop
+class CrimsonPassage : public Prop
 {
 public:
-        PropCrimsonPassage() :
-                Prop(PropId::crimson_passage) {}
+        CrimsonPassage() :
+                Prop(Id::crimson_passage) {}
 
         void save() const override;
         void load() override;
@@ -1815,5 +1814,7 @@ private:
         int m_nr_steps_allowed {1};
         int m_nr_steps_taken {0};
 };
+
+}  // namespace prop
 
 #endif  // PROPERTY_HPP

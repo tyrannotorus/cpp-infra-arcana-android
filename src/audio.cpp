@@ -309,7 +309,7 @@ void play(const SfxId sfx, int vol_pct_tot, const int vol_pct_l)
 
         // TODO: Ugly hack, this low level code should not know about player
         // status effects.
-        if (map::g_player && map::g_player->m_properties.has(PropId::deaf)) {
+        if (map::g_player && map::g_player->m_properties.has(prop::Id::deaf)) {
                 return;
         }
 

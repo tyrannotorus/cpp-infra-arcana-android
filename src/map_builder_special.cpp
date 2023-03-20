@@ -29,6 +29,7 @@
 #include "populate_monsters.hpp"
 #include "pos.hpp"
 #include "property.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "room.hpp"
@@ -671,13 +672,13 @@ void MapBuilderRatCave::handle_template_pos(const P& p, const char c)
                                 actor = actor::make("MON_RAT", p);
                         }
 
-                        auto* prop = new PropFrenzied();
+                        prop::Prop* prop = prop::make(prop::Id::frenzied);
 
                         prop->set_indefinite();
 
                         actor->m_properties.apply(
                                 prop,
-                                PropSrc::intr,
+                                prop::PropSrc::intr,
                                 false,
                                 Verbose::no);
                 }

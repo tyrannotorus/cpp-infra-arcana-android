@@ -384,7 +384,7 @@ ConsumeItem Scroll::activate(actor::Actor* const actor)
 
         if (map::g_dark.at(player_pos) &&
             !map::g_light.at(player_pos) &&
-            !map::g_player->m_properties.has(PropId::darkvision)) {
+            !map::g_player->m_properties.has(prop::Id::darkvision)) {
                 msg_log::add("It's too dark to read here.");
 
                 TRACE_FUNC_END;

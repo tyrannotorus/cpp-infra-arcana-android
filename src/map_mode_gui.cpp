@@ -511,7 +511,7 @@ static void draw_med_suppl(const int y, const Panel panel)
 
 static void draw_properties(int y, const Panel panel)
 {
-        const PropHandler& properties = map::g_player->m_properties;
+        const prop::PropHandler& properties = map::g_player->m_properties;
 
         auto property_names = properties.property_names_short();
 

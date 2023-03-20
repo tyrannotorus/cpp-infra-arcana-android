@@ -197,7 +197,7 @@ public:
 
         // Is this given property allowing movement into this terrain, when it
         // normally wouldn't be?
-        virtual bool is_property_allowing_move(PropId id) const
+        virtual bool is_property_allowing_move(prop::Id id) const
         {
                 return m_data->move_rules.is_property_allowing_move(id);
         }

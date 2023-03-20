@@ -259,7 +259,7 @@ void PylonInvis::on_new_turn()
         const std::vector<actor::Actor*> actors = living_actors_reached();
 
         for (actor::Actor* actor : actors) {
-                if (actor->m_properties.has(PropId::cloaked)) {
+                if (actor->m_properties.has(prop::Id::cloaked)) {
                         continue;
                 }
 
@@ -267,7 +267,7 @@ void PylonInvis::on_new_turn()
                         actor::can_player_see_actor(*actor);
 
                 actor->m_properties.apply(
-                        property_factory::make(PropId::cloaked));
+                        prop::make(prop::Id::cloaked));
 
                 if (can_player_see_actor_before) {
                         reveal();
@@ -302,12 +302,12 @@ void PylonSlow::on_new_turn()
         const std::vector<actor::Actor*> actors = living_actors_reached();
 
         for (actor::Actor* actor : actors) {
-                if (actor->m_properties.has(PropId::slowed)) {
+                if (actor->m_properties.has(prop::Id::slowed)) {
                         continue;
                 }
 
                 actor->m_properties.apply(
-                        property_factory::make(PropId::slowed));
+                        prop::make(prop::Id::slowed));
 
                 if (actor::can_player_see_actor(*actor)) {
                         reveal();
@@ -342,12 +342,12 @@ void PylonHaste::on_new_turn()
         const std::vector<actor::Actor*> actors = living_actors_reached();
 
         for (actor::Actor* actor : actors) {
-                if (actor->m_properties.has(PropId::hasted)) {
+                if (actor->m_properties.has(prop::Id::hasted)) {
                         continue;
                 }
 
                 actor->m_properties.apply(
-                        property_factory::make(PropId::hasted));
+                        prop::make(prop::Id::hasted));
 
                 if (actor::can_player_see_actor(*actor)) {
                         reveal();
@@ -475,12 +475,12 @@ void PylonTerrify::on_new_turn()
         const std::vector<actor::Actor*> actors = living_actors_reached();
 
         for (actor::Actor* actor : actors) {
-                if (actor->m_properties.has(PropId::terrified)) {
+                if (actor->m_properties.has(prop::Id::terrified)) {
                         continue;
                 }
 
                 actor->m_properties.apply(
-                        property_factory::make(PropId::terrified));
+                        prop::make(prop::Id::terrified));
 
                 if (actor::can_player_see_actor(*actor)) {
                         reveal();

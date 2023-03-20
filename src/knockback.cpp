@@ -35,10 +35,10 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static const std::vector<PropId> s_props_cannot_knock_back = {
-        PropId::entangled,
-        PropId::ethereal,
-        PropId::ooze,
+static const std::vector<prop::Id> s_props_cannot_knock_back = {
+        prop::Id::entangled,
+        prop::Id::ethereal,
+        prop::Id::ooze,
 };
 
 // -----------------------------------------------------------------------------
@@ -108,13 +108,13 @@ void run(
 
         if (!actor_can_move_into_tgt_pos &&
             !is_tgt_pos_deep &&
-            !actor.m_properties.has(PropId::r_phys)) {
+            !actor.m_properties.has(prop::Id::r_phys)) {
                 // Actor nailed to a wall from a spike gun?
                 if (source == KnockbackSource::spike_gun) {
                         if (!tgt_terrain->is_projectile_passable()) {
                                 auto* prop =
-                                        property_factory::make(
-                                                PropId::nailed);
+                                        prop::make(
+                                                prop::Id::nailed);
 
                                 prop->set_indefinite();
 
@@ -188,7 +188,7 @@ void run(
 
         map::update_vision();
 
-        Prop* prop = property_factory::make(PropId::paralyzed);
+        prop::Prop* prop = prop::make(prop::Id::paralyzed);
 
         prop->set_duration(1 + paralyze_extra_turns);
 

@@ -105,8 +105,8 @@ static void kick_living_monster(actor::Actor& mon)
         bash::try_sprain_player();
 
         // Attacking ends cloaking and sanctuary.
-        map::g_player->m_properties.end_prop(PropId::cloaked);
-        map::g_player->m_properties.end_prop(PropId::sanctuary);
+        map::g_player->m_properties.end_prop(prop::Id::cloaked);
+        map::g_player->m_properties.end_prop(prop::Id::sanctuary);
 }
 
 static void attack_corpse_with_wpn_or_kick(
@@ -287,7 +287,7 @@ void run()
 void try_sprain_player()
 {
         const bool is_frenzied =
-                map::g_player->m_properties.has(PropId::frenzied);
+                map::g_player->m_properties.has(prop::Id::frenzied);
 
         const bool is_player_ghoul = player_bon::bg() == Bg::ghoul;
 
@@ -340,8 +340,8 @@ void attack_terrain(const P& att_pos, const item::Item& wpn)
                 dmg);
 
         // Attacking ends cloaking and sanctuary.
-        map::g_player->m_properties.end_prop(PropId::cloaked);
-        map::g_player->m_properties.end_prop(PropId::sanctuary);
+        map::g_player->m_properties.end_prop(prop::Id::cloaked);
+        map::g_player->m_properties.end_prop(prop::Id::sanctuary);
 
         game_time::tick();
 }
@@ -403,8 +403,8 @@ void attack_corpse(actor::Actor& mon, const item::Item& wpn)
         }
 
         // Attacking ends cloaking and sanctuary.
-        map::g_player->m_properties.end_prop(PropId::cloaked);
-        map::g_player->m_properties.end_prop(PropId::sanctuary);
+        map::g_player->m_properties.end_prop(prop::Id::cloaked);
+        map::g_player->m_properties.end_prop(prop::Id::sanctuary);
 
         game_time::tick();
 }
@@ -434,8 +434,8 @@ void do_fake_attack_on_unseen_terrain(const item::Item& wpn)
         print_player_attack_unseen_terrain_msg(wpn);
 
         // Attacking ends cloaking and sanctuary.
-        map::g_player->m_properties.end_prop(PropId::cloaked);
-        map::g_player->m_properties.end_prop(PropId::sanctuary);
+        map::g_player->m_properties.end_prop(prop::Id::cloaked);
+        map::g_player->m_properties.end_prop(prop::Id::sanctuary);
 
         game_time::tick();
 }
@@ -447,8 +447,8 @@ void attack_air()
         audio::play(audio::SfxId::miss_medium);
 
         // Attacking ends cloaking and sanctuary.
-        map::g_player->m_properties.end_prop(PropId::cloaked);
-        map::g_player->m_properties.end_prop(PropId::sanctuary);
+        map::g_player->m_properties.end_prop(prop::Id::cloaked);
+        map::g_player->m_properties.end_prop(prop::Id::sanctuary);
 
         game_time::tick();
 }

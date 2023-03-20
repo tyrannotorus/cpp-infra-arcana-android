@@ -141,11 +141,11 @@ static bool should_vigilant_make_aware_of_unseeable_mon(
         const bool is_cell_seen = map::g_seen.at(mon.m_pos);
 
         const bool is_mon_invis =
-                mon.m_properties.has(PropId::invis) ||
-                mon.m_properties.has(PropId::cloaked);
+                mon.m_properties.has(prop::Id::invis) ||
+                mon.m_properties.has(prop::Id::cloaked);
 
         const bool can_player_see_invis =
-                map::g_player->m_properties.has(PropId::see_invis);
+                map::g_player->m_properties.has(prop::Id::see_invis);
 
         if (is_mon_invis && !can_player_see_invis) {
                 // The monster is invisible, and player cannot see invisible
@@ -168,8 +168,8 @@ static void make_aware_of_unseeable_mon_by_vigilant(actor::Actor& mon)
                 if (is_cell_seen) {
                         // The cell is seen - the monster must be invisible
                         ASSERT(
-                                mon.m_properties.has(PropId::invis) ||
-                                mon.m_properties.has(PropId::cloaked));
+                                mon.m_properties.has(prop::Id::invis) ||
+                                mon.m_properties.has(prop::Id::cloaked));
 
                         print_aware_invis_mon_msg(mon);
                 }
@@ -348,7 +348,7 @@ static void on_player_shock_over_limit()
 {
         auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::r_shock)) {
+        if (player.m_properties.has(prop::Id::r_shock)) {
                 // Player is shock resistant, pause the countdown
                 return;
         }
@@ -424,7 +424,7 @@ static void player_try_spot_hidden_terrain()
 {
         auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::confused) ||
+        if (player.m_properties.has(prop::Id::confused) ||
             !player.m_properties.allow_see()) {
                 return;
         }

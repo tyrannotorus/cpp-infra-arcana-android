@@ -151,7 +151,7 @@ static bool is_reduced_pierce_dmg(
         const actor::Actor& defender)
 {
         return (
-                defender.m_properties.has(PropId::reduced_pierce_dmg) &&
+                defender.m_properties.has(prop::Id::reduced_pierce_dmg) &&
                 (dmg_type == DmgType::piercing));
 }
 
@@ -227,15 +227,15 @@ MeleeAttData::MeleeAttData(
                 // Check if attacker gets a bonus due to a defender property.
 
                 const bool has_big_bon_prop =
-                        defender->m_properties.has(PropId::paralyzed) ||
-                        defender->m_properties.has(PropId::nailed) ||
-                        defender->m_properties.has(PropId::fainted) ||
-                        defender->m_properties.has(PropId::entangled);
+                        defender->m_properties.has(prop::Id::paralyzed) ||
+                        defender->m_properties.has(prop::Id::nailed) ||
+                        defender->m_properties.has(prop::Id::fainted) ||
+                        defender->m_properties.has(prop::Id::entangled);
 
                 const bool has_small_bon_prop =
-                        defender->m_properties.has(PropId::confused) ||
-                        defender->m_properties.has(PropId::slowed) ||
-                        defender->m_properties.has(PropId::burning) ||
+                        defender->m_properties.has(prop::Id::confused) ||
+                        defender->m_properties.has(prop::Id::slowed) ||
+                        defender->m_properties.has(prop::Id::burning) ||
                         !defender->m_properties.allow_see();
 
                 if (has_big_bon_prop) {
@@ -265,7 +265,7 @@ MeleeAttData::MeleeAttData(
                         *defender->m_data);
 
         const bool apply_ethereal_defender_pen =
-                defender->m_properties.has(PropId::ethereal) &&
+                defender->m_properties.has(prop::Id::ethereal) &&
                 !apply_undead_bane_bon;
 
         if (apply_ethereal_defender_pen) {
@@ -290,7 +290,7 @@ MeleeAttData::MeleeAttData(
                 dmg_range.set_plus(dmg_range.plus() + 2);
         }
 
-        if (attacker && attacker->m_properties.has(PropId::weakened)) {
+        if (attacker && attacker->m_properties.has(prop::Id::weakened)) {
                 // Weak attack (halved damage)
                 dmg_range = dmg_range.scaled_pct(50);
 
@@ -447,7 +447,7 @@ RangedAttData::RangedAttData(
                         *defender->m_data);
 
         const bool apply_ethereal_defender_pen =
-                defender->m_properties.has(PropId::ethereal) &&
+                defender->m_properties.has(prop::Id::ethereal) &&
                 !apply_undead_bane_bon;
 
         if (apply_ethereal_defender_pen) {
@@ -475,7 +475,7 @@ RangedAttData::RangedAttData(
 
         const bool is_player_with_aiming_prop =
                 actor::is_player(attacker) &&
-                attacker->m_properties.has(PropId::aiming);
+                attacker->m_properties.has(prop::Id::aiming);
 
         if (is_player_with_aiming_prop) {
                 dmg_range.set_base_min(dmg_range.base_max());
@@ -571,7 +571,7 @@ ThrowAttData::ThrowAttData(
                         *defender->m_data);
 
         const bool apply_ethereal_defender_pen =
-                defender->m_properties.has(PropId::ethereal) &&
+                defender->m_properties.has(prop::Id::ethereal) &&
                 !apply_undead_bane_bon;
 
         if (apply_ethereal_defender_pen) {
@@ -599,7 +599,7 @@ ThrowAttData::ThrowAttData(
 
         const bool is_player_with_aiming_prop =
                 actor::is_player(attacker) &&
-                attacker->m_properties.has(PropId::aiming);
+                attacker->m_properties.has(prop::Id::aiming);
 
         if (is_player_with_aiming_prop) {
                 dmg_range.set_base_min(dmg_range.base_max());

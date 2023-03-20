@@ -286,8 +286,8 @@ static void bot_act()
         }
 
         // Apply permanent paralysis resistance, to avoid getting stuck.
-        if (!map::g_player->m_properties.has(PropId::r_para)) {
-                auto* prop = new PropRPara();
+        if (!map::g_player->m_properties.has(prop::Id::r_para)) {
+                prop::Prop* prop = prop::make(prop::Id::r_para);
 
                 prop->set_indefinite();
 
@@ -296,7 +296,7 @@ static void bot_act()
 
         // Apply fear resistance to avoid getting stuck.
         if (rnd::one_in(7)) {
-                auto* prop = new PropRFear();
+                prop::Prop* prop = prop::make(prop::Id::r_fear);
 
                 prop->set_duration(4);
 
@@ -305,13 +305,12 @@ static void bot_act()
 
         // Apply burning to a random actor (to avoid getting stuck).
         if (rnd::one_in(10)) {
-                const auto element =
-                        rnd::range(0, (int)game_time::g_actors.size() - 1);
+                const auto element = rnd::range(0, (int)game_time::g_actors.size() - 1);
 
                 auto* const actor = game_time::g_actors[element];
 
                 if (!actor::is_player(actor)) {
-                        actor->m_properties.apply(new PropBurning());
+                        actor->m_properties.apply(prop::make(prop::Id::burning));
                 }
         }
 
@@ -351,16 +350,16 @@ static void bot_act()
 
         // Apply a random property (to exercise the prop code).
         if (rnd::one_in(30)) {
-                std::vector<PropId> prop_bucket;
+                std::vector<prop::Id> prop_bucket;
 
-                for (size_t i = 0; i < (size_t)PropId::END; ++i) {
-                        if (property_data::g_data[i].allow_test_on_bot) {
-                                prop_bucket.push_back(PropId(i));
+                for (size_t i = 0; i < (size_t)prop::Id::END; ++i) {
+                        if (prop::g_data[i].allow_test_on_bot) {
+                                prop_bucket.push_back(prop::Id(i));
                         }
                 }
 
                 const auto prop_id = rnd::element(prop_bucket);
-                auto* const prop = property_factory::make(prop_id);
+                auto* const prop = prop::make(prop_id);
 
                 prop->set_duration(5);
 
@@ -370,7 +369,7 @@ static void bot_act()
         // End a random property (helps clearing out properties that cause
         // spammy or interrupting effects like mind sapping).
         if (rnd::one_in(100)) {
-                const auto id = (PropId)rnd::range(0, (int)PropId::END - 1);
+                const auto id = (prop::Id)rnd::range(0, (int)prop::Id::END - 1);
 
                 map::g_player->m_properties.end_prop(id);
         }
@@ -443,7 +442,7 @@ static void bot_act()
         }
 
         // If we are terrified, wait in place.
-        if (map::g_player->m_properties.has(PropId::terrified)) {
+        if (map::g_player->m_properties.has(prop::Id::terrified)) {
                 if (walk_to_adj_cell(map::g_player->m_pos)) {
                         return;
                 }
@@ -461,9 +460,9 @@ static void stress_test_act()
         static bool move_right = true;
         static bool is_hostile = true;
 
-        map::g_player->m_properties.end_prop(PropId::terrified);
-        map::g_player->m_properties.end_prop(PropId::frenzied);
-        map::g_player->m_properties.end_prop(PropId::confused);
+        map::g_player->m_properties.end_prop(prop::Id::terrified);
+        map::g_player->m_properties.end_prop(prop::Id::frenzied);
+        map::g_player->m_properties.end_prop(prop::Id::confused);
 
         if ((stress_test_step % 150) == 0) {
                 actor::Actor* const leader =

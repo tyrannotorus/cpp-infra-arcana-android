@@ -117,12 +117,12 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         // Worms don't leave a corpse, and you SHOULD be able to feed on those.
         const auto& d = *actor_hit.m_data;
 
-        const bool is_ethereal = actor_hit.m_properties.has(PropId::ethereal);
+        const bool is_ethereal = actor_hit.m_properties.has(prop::Id::ethereal);
 
         const bool is_hp_missing =
                 map::g_player->m_hp < actor::max_hp(*map::g_player);
 
-        const bool is_wounded = map::g_player->m_properties.has(PropId::wound);
+        const bool is_wounded = map::g_player->m_properties.has(prop::Id::wound);
 
         const bool is_feed_needed = is_hp_missing || is_wounded;
 
@@ -150,14 +150,14 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 if (player_bon::has_trait(Trait::toxic) &&
                     rnd::fraction(3, 4)) {
                         actor_hit.m_properties.apply(
-                                property_factory::make(PropId::poisoned));
+                                prop::make(prop::Id::poisoned));
                 }
 
                 // Terrify victim from Ghoul Indomitable Fury trait?
                 if (player_bon::has_trait(Trait::indomitable_fury) &&
-                    map::g_player->m_properties.has(PropId::frenzied)) {
+                    map::g_player->m_properties.has(prop::Id::frenzied)) {
                         actor_hit.m_properties.apply(
-                                property_factory::make(PropId::terrified));
+                                prop::make(prop::Id::terrified));
                 }
         }
 }
@@ -170,7 +170,7 @@ void PlayerGhoulClaw::on_melee_kill(actor::Actor& actor_killed)
         const auto& d = *actor_killed.m_data;
 
         const bool is_ethereal =
-                actor_killed.m_properties.has(PropId::ethereal);
+                actor_killed.m_properties.has(prop::Id::ethereal);
 
         if (player_bon::has_trait(Trait::foul) &&
             !is_ethereal &&
@@ -221,7 +221,7 @@ void MiGoGun::pre_ranged_attack()
                 AllowWound::no);
 
         auto* disabled_regen =
-                property_factory::make(PropId::disabled_hp_regen);
+                prop::make(prop::Id::disabled_hp_regen);
 
         disabled_regen->set_duration(
                 rnd::range(
@@ -257,7 +257,7 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         }
 
         if (rnd::coin_toss()) {
-                Prop* const prop = property_factory::make(PropId::blind);
+                prop::Prop* const prop = prop::make(prop::Id::blind);
 
                 prop->set_duration(2);
 
@@ -289,8 +289,8 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         auto* const mon = m_actor_carrying;
 
         if (map::g_player->insanity() >= 50 ||
-            map::g_player->m_properties.has(PropId::confused) ||
-            map::g_player->m_properties.has(PropId::frenzied)) {
+            map::g_player->m_properties.has(prop::Id::confused) ||
+            map::g_player->m_properties.has(prop::Id::frenzied)) {
                 const bool player_see_mon = actor::can_player_see_actor(*mon);
 
                 if (player_see_mon) {
@@ -308,22 +308,22 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
                 if (mon->is_alive()) {
                         mon->m_properties.apply(
-                                property_factory::make(PropId::confused));
+                                prop::make(prop::Id::confused));
 
                         mon->m_properties.apply(
-                                property_factory::make(PropId::terrified));
+                                prop::make(prop::Id::terrified));
                 }
         }
         else {
                 // Player mind can be eaten
-                Prop* prop_mind_sap = property_factory::make(PropId::mind_sap);
+                prop::Prop* prop_mind_sap = prop::make(prop::Id::mind_sap);
 
                 prop_mind_sap->set_indefinite();
 
                 map::g_player->m_properties.apply(prop_mind_sap);
 
                 // Make the monster pause, so things don't get too crazy
-                auto* prop_waiting = property_factory::make(PropId::waiting);
+                auto* prop_waiting = prop::make(prop::Id::waiting);
 
                 prop_waiting->set_duration(2);
 
@@ -348,7 +348,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
-        Prop* const prop = property_factory::make(PropId::blind);
+        prop::Prop* const prop = prop::make(prop::Id::blind);
 
         actor_hit.m_properties.apply(prop);
 }
@@ -368,7 +368,7 @@ void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
                 return;
         }
 
-        Prop* const prop = property_factory::make(PropId::blind);
+        prop::Prop* const prop = prop::make(prop::Id::blind);
 
         prop->set_duration(7);
 
@@ -456,7 +456,7 @@ void PharaohStaff::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         const int doomed_pct = 50;
 
         if (rnd::percent(doomed_pct)) {
-                auto* prop = property_factory::make(PropId::doomed);
+                auto* prop = prop::make(prop::Id::doomed);
 
                 prop->set_duration(rnd::range(3, 4));
 
@@ -494,10 +494,10 @@ void ShadowDagger::on_ranged_hit(actor::Actor& actor_hit)
 
 bool ShadowDagger::is_radiant_creature(const actor::Actor& actor) const
 {
-        const std::vector<PropId> radiant_props = {
-                PropId::radiant_self,
-                PropId::radiant_adjacent,
-                PropId::radiant_fov};
+        const std::vector<prop::Id> radiant_props = {
+                prop::Id::radiant_self,
+                prop::Id::radiant_adjacent,
+                prop::Id::radiant_fov};
 
         return std::any_of(
                 std::cbegin(radiant_props),
@@ -511,8 +511,8 @@ void ShadowDagger::hit_normal_creature(actor::Actor& actor) const
 {
         {
                 auto* const prop =
-                        property_factory::make(
-                                PropId::light_sensitive);
+                        prop::make(
+                                prop::Id::light_sensitive);
 
                 prop->set_indefinite();
 
@@ -522,7 +522,7 @@ void ShadowDagger::hit_normal_creature(actor::Actor& actor) const
         {
                 auto* const prop =
                         actor.m_properties.prop(
-                                PropId::light_sensitive);
+                                prop::Id::light_sensitive);
 
                 if (!prop) {
                         ASSERT(false);
@@ -530,7 +530,7 @@ void ShadowDagger::hit_normal_creature(actor::Actor& actor) const
                         return;
                 }
 
-                auto* const lgt_sens = static_cast<PropLgtSens*>(prop);
+                auto* const lgt_sens = static_cast<prop::LgtSens*>(prop);
 
                 lgt_sens->raise_extra_damage_to(1);
         }
@@ -565,7 +565,7 @@ void ZombieDust::on_ranged_hit(actor::Actor& actor_hit)
 {
         if (actor_hit.is_alive() && !actor_hit.m_data->is_undead) {
                 actor_hit.m_properties.apply(
-                        property_factory::make(PropId::paralyzed));
+                        prop::make(prop::Id::paralyzed));
         }
 }
 

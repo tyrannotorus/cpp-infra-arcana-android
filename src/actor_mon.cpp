@@ -177,7 +177,7 @@ bool Actor::is_sneaking() const
 
 void Actor::speak_phrase(AlertsMon alerts_others)
 {
-        if (m_properties.has(PropId::always_aware)) {
+        if (m_properties.has(prop::Id::always_aware)) {
                 // This monster is always aware of the player - avoid
                 // continuously alerting other mosnters.
                 alerts_others = AlertsMon::no;
@@ -287,7 +287,7 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
                 // the actual attack is executed, which would apply a waiting
                 // status (as becoming aware by hearing sounds do), but if the
                 // monster is attacked we want it to act immediately.
-                m_properties.end_prop(PropId::waiting);
+                m_properties.end_prop(prop::Id::waiting);
         }
 
         if (!was_aware_before) {
@@ -305,8 +305,7 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
                 if (do_reaction_time) {
                         // Give the monster some reaction time
                         if (!is_actor_my_leader(map::g_player)) {
-                                auto* const prop =
-                                        property_factory::make(PropId::waiting);
+                                auto* const prop = prop::make(prop::Id::waiting);
 
                                 prop->set_duration(1);
 
@@ -431,8 +430,8 @@ DidAction Actor::try_attack(Actor& defender)
 
                 if (m_data->ranged_cooldown_turns > 0) {
                         auto* prop =
-                                property_factory::make(
-                                        PropId::disabled_ranged);
+                                prop::make(
+                                        prop::Id::disabled_ranged);
 
                         prop->set_duration(m_data->ranged_cooldown_turns);
 

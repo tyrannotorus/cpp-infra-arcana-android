@@ -26,7 +26,7 @@ void hear_sound_player(
         const Dir dir_to_origin,
         const int percent_audible_distance)
 {
-        if (map::g_player->m_properties.has(PropId::deaf)) {
+        if (map::g_player->m_properties.has(prop::Id::deaf)) {
                 return;
         }
 
@@ -68,7 +68,7 @@ void hear_sound_mon(Actor& actor, const Snd& snd)
                 return;
         }
 
-        if (actor.m_properties.has(PropId::deaf)) {
+        if (actor.m_properties.has(prop::Id::deaf)) {
                 return;
         }
 
@@ -76,7 +76,7 @@ void hear_sound_mon(Actor& actor, const Snd& snd)
 
         // NOTE: The monster may have become deaf through the sound callback
         // above (e.g. from the Horn of Deafening artifact).
-        if (actor.m_properties.has(PropId::deaf)) {
+        if (actor.m_properties.has(prop::Id::deaf)) {
                 return;
         }
 

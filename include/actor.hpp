@@ -241,7 +241,7 @@ public:
         int m_base_max_hp {-1};
         int m_sp {-1};
         int m_base_max_sp {-1};
-        PropHandler m_properties {this};
+        prop::PropHandler m_properties {this};
         Inventory m_inv {this};
         ActorData* m_data {nullptr};
         int m_delay {0};

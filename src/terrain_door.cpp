@@ -300,7 +300,7 @@ void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
 
 void Door::player_bash(const DmgType dmg_type, const int dmg)
 {
-        const bool is_weak = map::g_player->m_properties.has(PropId::weakened);
+        const bool is_weak = map::g_player->m_properties.has(prop::Id::weakened);
         const bool is_cell_seen = map::g_seen.at(m_pos);
 
         int destr_chance_pct = 25 + (dmg * 5) - (m_jam_level * 4);
@@ -316,7 +316,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                         destr_chance_pct += 15;
                 }
 
-                if (map::g_player->m_properties.has(PropId::frenzied)) {
+                if (map::g_player->m_properties.has(prop::Id::frenzied)) {
                         destr_chance_pct += 30;
                 }
 
@@ -416,7 +416,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 
 void Door::mon_bash(actor::Actor& mon)
 {
-        const bool is_weak = map::g_player->m_properties.has(PropId::weakened);
+        const bool is_weak = map::g_player->m_properties.has(prop::Id::weakened);
         const bool is_pos_seen = map::g_seen.at(m_pos);
 
         auto sfx_door_bang = audio::SfxId::door_bang;
@@ -522,24 +522,24 @@ bool Door::can_move(const actor::Actor& actor) const
         const auto& properties = actor.m_properties;
 
         // Can move through all door types
-        if (properties.has(PropId::ethereal) ||
-            properties.has(PropId::ooze)) {
+        if (properties.has(prop::Id::ethereal) ||
+            properties.has(prop::Id::ooze)) {
                 return true;
         }
 
         // Small crawling creatures can pass through gates
         if ((m_type == DoorType::gate) &&
-            properties.has(PropId::small_crawling)) {
+            properties.has(prop::Id::small_crawling)) {
                 return true;
         }
 
         return false;
 }
 
-bool Door::is_property_allowing_move(PropId id) const
+bool Door::is_property_allowing_move(prop::Id id) const
 {
         // Can move through all door types
-        if ((id == PropId::ethereal) || (id == PropId::ooze)) {
+        if ((id == prop::Id::ethereal) || (id == prop::Id::ooze)) {
                 return true;
         }
 
@@ -548,8 +548,8 @@ bool Door::is_property_allowing_move(PropId id) const
                 (m_type == DoorType::gate);
 
         const bool is_small_creature =
-                (id == PropId::small_crawling) ||
-                (id == PropId::tiny_flying);
+                (id == prop::Id::small_crawling) ||
+                (id == prop::Id::tiny_flying);
 
         if (is_gate && is_small_creature) {
                 return true;

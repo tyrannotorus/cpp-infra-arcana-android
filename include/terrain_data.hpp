@@ -94,10 +94,10 @@ struct MoveRules
 
         // Is this given property allowing movement into this terrain, when it
         // normally wouldn't be?
-        bool is_property_allowing_move(PropId id) const;
+        bool is_property_allowing_move(prop::Id id) const;
 
         bool is_walkable {false};
-        std::vector<PropId> props_allow_move {};
+        std::vector<prop::Id> props_allow_move {};
 };
 
 struct TerrainData

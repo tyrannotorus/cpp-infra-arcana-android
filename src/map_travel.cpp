@@ -28,6 +28,7 @@
 #include "msg_log.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "saving.hpp"
@@ -44,7 +45,7 @@ static void trigger_insanity_sympts_for_descent()
         if (insanity::has_sympt(InsSymptId::phobia_deep)) {
                 msg_log::add("I am plagued by my phobia of deep places!");
 
-                map::g_player->m_properties.apply(new PropTerrified());
+                map::g_player->m_properties.apply(prop::make(prop::Id::terrified));
         }
 
         // Babbling
@@ -128,15 +129,15 @@ void go_to_nxt()
 
         map_builder->build();
 
-        if (map::g_player->m_properties.has(PropId::descend)) {
+        if (map::g_player->m_properties.has(prop::Id::descend)) {
                 msg_log::add("My sinking feeling disappears.");
 
                 map::g_player->m_properties.end_prop(
-                        PropId::descend,
-                        PropEndConfig(
-                                PropEndAllowCallEndHook::no,
-                                PropEndAllowMsg::no,
-                                PropEndAllowHistoricMsg::no));
+                        prop::Id::descend,
+                        prop::PropEndConfig(
+                                prop::PropEndAllowCallEndHook::no,
+                                prop::PropEndAllowMsg::no,
+                                prop::PropEndAllowHistoricMsg::no));
         }
 
         game_time::g_is_magic_descend_nxt_std_turn = false;

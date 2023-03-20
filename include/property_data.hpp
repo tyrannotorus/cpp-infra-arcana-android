@@ -12,8 +12,10 @@
 
 #include "random.hpp"
 
+namespace prop
+{
 // NOTE: When updating this, also update the string -> id map
-enum class PropId
+enum class Id
 {
         r_phys,
         r_fire,
@@ -153,7 +155,7 @@ enum class PropAlignment
 
 struct PropData
 {
-        PropId id {PropId::END};
+        Id id {Id::END};
         Range std_rnd_turns {10, 10};
         Range std_rnd_dlvls {0, 0};
         std::string name {};
@@ -175,16 +177,14 @@ struct PropData
         PropAlignment alignment {PropAlignment::neutral};
 };
 
-namespace property_data
-{
-extern PropData g_data[(size_t)PropId::END];
+extern PropData g_data[(size_t)Id::END];
 
 void init();
 
-PropId str_to_prop_id(const std::string& str);
+Id str_to_prop_id(const std::string& str);
 
-std::string descr(PropId id);
+std::string descr(Id id);
 
-}  // namespace property_data
+}  // namespace prop
 
 #endif  // PROPERTY_DATA_HPP

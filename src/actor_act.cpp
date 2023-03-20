@@ -49,7 +49,7 @@
 // -----------------------------------------------------------------------------
 static void remove_player_with_sanctuary(std::vector<actor::Actor*>& actors)
 {
-        if (!map::g_player->m_properties.has(PropId::sanctuary)) {
+        if (!map::g_player->m_properties.has(prop::Id::sanctuary)) {
                 return;
         }
 
@@ -345,15 +345,15 @@ static void mon_act(actor::Actor& mon)
                               << "'"
                               << std::endl
                               << "Monster is summoned?: "
-                              << mon.m_properties.has(PropId::summoned)
+                              << mon.m_properties.has(prop::Id::summoned)
                               << std::endl
                               << "Leader is summoned?: "
                               << mon.m_leader->m_properties.has(
-                                         PropId::summoned)
+                                         prop::Id::summoned)
                               << std::endl
                               << "Leader's leader is summoned?: "
                               << leader_leader->m_properties.has(
-                                         PropId::summoned)
+                                         prop::Id::summoned)
                               << std::endl;
 
                         ASSERT(false);
@@ -380,7 +380,7 @@ static void mon_act(actor::Actor& mon)
         // Pick a target
         std::vector<actor::Actor*> target_bucket;
 
-        if (mon.m_properties.has(PropId::conflict)) {
+        if (mon.m_properties.has(prop::Id::conflict)) {
                 target_bucket = seen_actors(mon);
 
                 remove_player_with_sanctuary(target_bucket);
@@ -448,7 +448,7 @@ static void mon_act(actor::Actor& mon)
             !is_player_leader &&
             actor::is_player(mon.m_ai_state.target) &&
             mon.m_ai_state.is_target_seen &&
-            !mon.m_properties.has(PropId::frenzied) &&
+            !mon.m_properties.has(prop::Id::frenzied) &&
             rnd::coin_toss()) {
                 const auto did_act = ai::action::make_room_for_friend(mon);
 
@@ -489,7 +489,7 @@ static void mon_act(actor::Actor& mon)
         int erratic_move_pct = (int)mon.m_data->erratic_move_pct;
 
         // Never move erratically if frenzied
-        if (mon.m_properties.has(PropId::frenzied)) {
+        if (mon.m_properties.has(prop::Id::frenzied)) {
                 erratic_move_pct = 0;
         }
 
@@ -499,7 +499,7 @@ static void mon_act(actor::Actor& mon)
         }
 
         // Move more erratically if confused
-        if (mon.m_properties.has(PropId::confused) &&
+        if (mon.m_properties.has(prop::Id::confused) &&
             (erratic_move_pct > 0)) {
                 erratic_move_pct += 50;
         }
@@ -515,7 +515,7 @@ static void mon_act(actor::Actor& mon)
                 }
         }
 
-        const bool is_terrified = mon.m_properties.has(PropId::terrified);
+        const bool is_terrified = mon.m_properties.has(prop::Id::terrified);
 
         if (mon.m_data->ai[(size_t)actor::AiId::moves_to_target_when_los] &&
             !is_terrified) {
@@ -552,7 +552,7 @@ static void mon_act(actor::Actor& mon)
         }
 
         if ((mon.m_data->ai[(size_t)actor::AiId::moves_to_leader] || is_player_leader) &&
-            !mon.m_properties.has(PropId::frenzied) &&
+            !mon.m_properties.has(prop::Id::frenzied) &&
             !is_terrified) {
                 path = ai::info::find_path_to_leader(mon);
 
@@ -565,7 +565,7 @@ static void mon_act(actor::Actor& mon)
 
         if (mon.m_data->ai[(size_t)actor::AiId::moves_to_lair] &&
             !is_player_leader &&
-            !mon.m_properties.has(PropId::frenzied) &&
+            !mon.m_properties.has(prop::Id::frenzied) &&
             (!mon.m_ai_state.target ||
              actor::is_player(mon.m_ai_state.target))) {
                 auto did_act =

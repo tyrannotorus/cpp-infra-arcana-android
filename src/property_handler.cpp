@@ -52,15 +52,15 @@ static int calc_resist_chance_from_player_traits()
         return resist_chance;
 }
 
-static Color get_property_gui_color(const Prop& property)
+static Color get_property_gui_color(const prop::Prop& property)
 {
-        const PropAlignment alignment = property.alignment();
+        const prop::PropAlignment alignment = property.alignment();
 
         const std::optional<Color> color_override =
                 property.override_property_color();
 
         const bool is_ending =
-                (property.duration_mode() != PropDurationMode::indefinite) &&
+                (property.duration_mode() != prop::PropDurationMode::indefinite) &&
                 (property.nr_turns_left() == 0);
 
         if (is_ending) {
@@ -69,10 +69,10 @@ static Color get_property_gui_color(const Prop& property)
         else if (color_override) {
                 return color_override.value();
         }
-        else if (alignment == PropAlignment::good) {
+        else if (alignment == prop::PropAlignment::good) {
                 return colors::msg_good();
         }
-        else if (alignment == PropAlignment::bad) {
+        else if (alignment == prop::PropAlignment::bad) {
                 return colors::msg_bad();
         }
         else {
@@ -80,7 +80,7 @@ static Color get_property_gui_color(const Prop& property)
         }
 }
 
-static std::string get_property_nr_turns_suffix(const Prop& property)
+static std::string get_property_nr_turns_suffix(const prop::Prop& property)
 {
         // NOTE: Since turns left are decremented at the start of an actor's
         // turn, and checked when they end the turn - "turns left" practically
@@ -99,8 +99,10 @@ static std::string get_property_nr_turns_suffix(const Prop& property)
 }
 
 // -----------------------------------------------------------------------------
-// Globals
+// prop
 // -----------------------------------------------------------------------------
+namespace prop
+{
 const std::string g_property_ending_suffix = " (ending)";
 
 // -----------------------------------------------------------------------------
@@ -121,11 +123,11 @@ void PropHandler::apply_natural_props_from_actor_data()
         const auto& d = *m_owner->m_data;
 
         // Add natural properties
-        for (size_t i = 0; i < (size_t)PropId::END; ++i) {
+        for (size_t i = 0; i < (size_t)Id::END; ++i) {
                 m_prop_count_cache[i] = 0;
 
                 if (d.natural_props[i]) {
-                        Prop* const prop = property_factory::make(PropId(i));
+                        Prop* const prop = make(Id(i));
 
                         prop->set_indefinite();
 
@@ -171,12 +173,12 @@ void PropHandler::load()
         const int nr_props = saving::get_int();
 
         for (int i = 0; i < nr_props; ++i) {
-                const auto prop_id = (PropId)saving::get_int();
+                const auto prop_id = (Id)saving::get_int();
                 const int nr_turns_left = saving::get_int();
                 const int nr_dlvls_left = saving::get_int();
                 const int nr_turns_active = saving::get_int();
 
-                auto* const prop = property_factory::make(prop_id);
+                auto* const prop = make(prop_id);
 
                 if (nr_turns_left == -1) {
                         prop->set_indefinite();
@@ -392,7 +394,7 @@ bool PropHandler::try_apply_more_on_existing_intr_prop(
 
                         // TODO: This is a hack to avoid resetting infection
                         // countdown when another infection is applied
-                        if (new_prop.id() == PropId::infected) {
+                        if (new_prop.id() == Id::infected) {
                                 // Use shortest duration
                                 old_prop->m_nr_turns_left =
                                         std::min(
@@ -453,7 +455,7 @@ void PropHandler::add_prop_from_equipped_item(
                 verbose);
 }
 
-Prop* PropHandler::prop(const PropId id) const
+Prop* PropHandler::prop(const Id id) const
 {
         if (has(id)) {
                 for (const auto& prop : m_props) {
@@ -492,7 +494,7 @@ void PropHandler::remove_props_for_item(const item::Item* const item)
         }
 }
 
-void PropHandler::incr_prop_count(const PropId id)
+void PropHandler::incr_prop_count(const Id id)
 {
         int& v = m_prop_count_cache[(size_t)id];
 
@@ -508,7 +510,7 @@ void PropHandler::incr_prop_count(const PropId id)
         ++v;
 }
 
-void PropHandler::decr_prop_count(const PropId id)
+void PropHandler::decr_prop_count(const Id id)
 {
         int& v = m_prop_count_cache[(size_t)id];
 
@@ -576,7 +578,7 @@ void PropHandler::on_prop_end(
 }
 
 bool PropHandler::end_prop(
-        const PropId id,
+        const Id id,
         const PropEndConfig& prop_end_config)
 {
         for (auto it = std::begin(m_props); it != std::end(m_props); ++it) {
@@ -833,7 +835,7 @@ std::vector<PropListEntry> PropHandler::property_names_and_descr() const
         return list;
 }
 
-bool PropHandler::is_resisting_prop(const PropId id) const
+bool PropHandler::is_resisting_prop(const Id id) const
 {
         for (const auto& prop : m_props) {
                 if (prop->is_resisting_other_prop(id)) {
@@ -1286,3 +1288,5 @@ std::optional<Color> PropHandler::override_actor_color() const
 
         return color;
 }
+
+}  // namespace prop

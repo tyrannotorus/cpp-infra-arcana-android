@@ -79,9 +79,9 @@ void Smoke::on_new_turn()
 
                 bool allow_blind = true;
 
-                bool allow_cough = !actor->m_properties.has(PropId::r_breath);
+                bool allow_cough = !actor->m_properties.has(prop::Id::r_breath);
 
-                if (actor->m_properties.has(PropId::fainted)) {
+                if (actor->m_properties.has(prop::Id::fainted)) {
                         // A fainted creature supposedly has their eyes closed.
                         // Also, while a fainted creatures would still need to
                         // breathe, they at least should not cough.
@@ -124,7 +124,7 @@ void Smoke::on_new_turn()
                         }
 
                         auto* const prop =
-                                property_factory::make(PropId::blind);
+                                prop::make(prop::Id::blind);
 
                         prop->set_duration(rnd::range(1, 3));
 

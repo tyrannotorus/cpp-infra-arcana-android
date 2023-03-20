@@ -138,7 +138,7 @@ static void announce_mechanical_trap_trigger(const actor::Actor& actor, const P&
         snd.run();
 
         if (actor::is_player(&actor)) {
-                const bool is_deaf = map::g_player->m_properties.has(PropId::deaf);
+                const bool is_deaf = map::g_player->m_properties.has(prop::Id::deaf);
 
                 if (is_deaf) {
                         msg_log::add("I feel the ground shifting slightly under my foot.");
@@ -434,17 +434,17 @@ void Trap::trigger_start(const actor::Actor* actor)
 AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
 {
         if (!actor::is_player(&actor_bumping) ||
-            actor_bumping.m_properties.has(PropId::confused)) {
+            actor_bumping.m_properties.has(prop::Id::confused)) {
                 return AllowAction::yes;
         }
 
-        const PropHandler& props = actor_bumping.m_properties;
+        const prop::PropHandler& props = actor_bumping.m_properties;
 
         if (map::g_seen.at(m_pos) &&
             !m_is_hidden &&
-            !props.has(PropId::ethereal) &&
-            !props.has(PropId::flying) &&
-            !props.has(PropId::tiny_flying)) {
+            !props.has(prop::Id::ethereal) &&
+            !props.has(prop::Id::flying) &&
+            !props.has(prop::Id::tiny_flying)) {
                 // The trap is known, and would be triggered by the player.
 
                 const std::string name_the = name(Article::the);
@@ -488,11 +488,11 @@ void Trap::bump(actor::Actor& actor_bumping)
 
         const actor::ActorData& d = *actor_bumping.m_data;
 
-        const PropHandler& props = actor_bumping.m_properties;
+        const prop::PropHandler& props = actor_bumping.m_properties;
 
-        if (props.has(PropId::ethereal) ||
-            props.has(PropId::flying) ||
-            props.has(PropId::tiny_flying) ||
+        if (props.has(prop::Id::ethereal) ||
+            props.has(prop::Id::flying) ||
+            props.has(prop::Id::tiny_flying) ||
             (d.actor_size < actor::Size::humanoid) ||
             d.is_spider) {
                 TRACE_FUNC_END_VERBOSE;
@@ -915,7 +915,7 @@ void TrapBlindingFlash::trigger()
                 EmitExplSnd::no,
                 -1,
                 ExplExclCenter::no,
-                {property_factory::make(PropId::blind)},
+                {prop::make(prop::Id::blind)},
                 colors::yellow());
 
         TRACE_FUNC_END;
@@ -936,7 +936,7 @@ void TrapDeafening::trigger()
                 EmitExplSnd::no,
                 -1,
                 ExplExclCenter::no,
-                {property_factory::make(PropId::deaf)},
+                {prop::make(prop::Id::deaf)},
                 colors::light_white());
 
         TRACE_FUNC_END;
@@ -1004,17 +1004,13 @@ void TrapSummonMon::trigger()
                         std::begin(summoned.monsters),
                         std::end(summoned.monsters),
                         [](actor::Actor* const mon) {
-                                Prop* prop_summoned =
-                                        property_factory::make(
-                                                PropId::summoned);
+                                prop::Prop* prop_summoned = prop::make(prop::Id::summoned);
 
                                 prop_summoned->set_indefinite();
 
                                 mon->m_properties.apply(prop_summoned);
 
-                                Prop* prop_waiting =
-                                        property_factory::make(
-                                                PropId::waiting);
+                                prop::Prop* prop_waiting = prop::make(prop::Id::waiting);
 
                                 prop_waiting->set_duration(2);
 
@@ -1049,9 +1045,7 @@ void TrapHpSap::trigger()
                 return;
         }
 
-        auto* const hp_sap =
-                static_cast<PropHpSap*>(
-                        property_factory::make(PropId::hp_sap));
+        auto* const hp_sap = static_cast<prop::HpSap*>(prop::make(prop::Id::hp_sap));
 
         if (!actor::is_player(actor_here)) {
                 // This is a monster triggering the trap - drain half of the
@@ -1083,7 +1077,7 @@ void TrapSpiSap::trigger()
                 return;
         }
 
-        Prop* const sp_sap = property_factory::make(PropId::spi_sap);
+        prop::Prop* const sp_sap = prop::make(prop::Id::spi_sap);
 
         sp_sap->set_indefinite();
 
@@ -1143,7 +1137,7 @@ void TrapFire::trigger()
                 EmitExplSnd::no,
                 -1,
                 ExplExclCenter::no,
-                {property_factory::make(PropId::burning)});
+                {prop::make(prop::Id::burning)});
 
         TRACE_FUNC_END;
 }
@@ -1202,13 +1196,13 @@ void TrapWeb::trigger()
                 }
         }
 
-        Prop* const entangled = property_factory::make(PropId::entangled);
+        prop::Prop* const entangled = prop::make(prop::Id::entangled);
 
         entangled->set_indefinite();
 
         actor_here->m_properties.apply(
                 entangled,
-                PropSrc::intr,
+                prop::PropSrc::intr,
                 false,
                 Verbose::no);
 
@@ -1241,7 +1235,7 @@ void TrapSlow::trigger()
                 return;
         }
 
-        actor_here->m_properties.apply(property_factory::make(PropId::slowed));
+        actor_here->m_properties.apply(prop::make(prop::Id::slowed));
 
         TRACE_FUNC_END;
 }
@@ -1260,7 +1254,7 @@ void TrapHaste::trigger()
                 return;
         }
 
-        actor_here->m_properties.apply(property_factory::make(PropId::hasted));
+        actor_here->m_properties.apply(prop::make(prop::Id::hasted));
 
         TRACE_FUNC_END;
 }
@@ -1279,7 +1273,7 @@ void TrapCurse::trigger()
                 return;
         }
 
-        actor_here->m_properties.apply(property_factory::make(PropId::cursed));
+        actor_here->m_properties.apply(prop::make(prop::Id::cursed));
 
         TRACE_FUNC_END;
 }

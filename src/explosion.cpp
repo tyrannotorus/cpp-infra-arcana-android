@@ -74,7 +74,7 @@ static bool is_player_protected_from_gas()
 
 static bool is_actor_gas_immune(const actor::Actor& actor)
 {
-        if (actor.m_properties.has(PropId::r_breath)) {
+        if (actor.m_properties.has(prop::Id::r_breath)) {
                 return true;
         }
 
@@ -255,7 +255,7 @@ static void apply_explosion_on_pos(
 
 static void apply_explosion_property_on_pos(
         const P& pos,
-        Prop* property,
+        prop::Prop* property,
         actor::Actor* living_actor,
         const std::vector<actor::Actor*>& corpses_here,
         const ExplIsGas is_gas)
@@ -267,7 +267,7 @@ static void apply_explosion_property_on_pos(
                   is_actor_gas_immune(*living_actor));
 
         if (should_apply_on_living_actor) {
-                auto* const prop_cpy = property_factory::make(property->id());
+                prop::Prop* const prop_cpy = prop::make(property->id());
 
                 prop_cpy->set_duration(property->nr_turns_left());
 
@@ -275,12 +275,12 @@ static void apply_explosion_property_on_pos(
         }
 
         // If property is burning, also apply it to corpses and the environment
-        if (property->id() == PropId::burning) {
+        if (property->id() == prop::Id::burning) {
                 map::g_terrain.at(pos)->hit(DmgType::fire, nullptr);
 
                 for (auto* corpse : corpses_here) {
                         auto* const prop_cpy =
-                                property_factory::make(property->id());
+                                prop::make(property->id());
 
                         prop_cpy->set_duration(property->nr_turns_left());
 
@@ -300,7 +300,7 @@ void run(
         const EmitExplSnd emit_expl_snd,
         const int radi_change,
         const ExplExclCenter exclude_center,
-        const std::vector<Prop*>& properties_applied,
+        const std::vector<prop::Prop*>& properties_applied,
         const std::optional<Color>& color_override,
         const ExplIsGas is_gas)
 {

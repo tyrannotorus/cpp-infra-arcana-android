@@ -9,351 +9,351 @@
 #include "debug.hpp"
 #include "property.hpp"
 
-namespace property_factory
+namespace prop
 {
-Prop* make(const PropId id)
+Prop* make(const prop::Id id)
 {
-        ASSERT(id != PropId::END);
+        ASSERT(id != prop::Id::END);
 
         switch (id) {
-        case PropId::nailed:
-                return new PropNailed();
+        case prop::Id::nailed:
+                return new Nailed();
 
-        case PropId::wound:
-                return new PropWound();
+        case prop::Id::wound:
+                return new Wound();
 
-        case PropId::moribund:
-                return new PropMoribund();
+        case prop::Id::moribund:
+                return new Moribund();
 
-        case PropId::blind:
-                return new PropBlind();
+        case prop::Id::blind:
+                return new Blind();
 
-        case PropId::deaf:
+        case prop::Id::deaf:
                 return new Prop(id);
 
-        case PropId::burning:
-                return new PropBurning();
+        case prop::Id::burning:
+                return new Burning();
 
-        case PropId::paralyzed:
-                return new PropParalyzed();
+        case prop::Id::paralyzed:
+                return new Paralyzed();
 
-        case PropId::delayed_by_liquid:
-                return new PropDelayedByLiquid();
+        case prop::Id::delayed_by_liquid:
+                return new DelayedByLiquid();
 
-        case PropId::terrified:
-                return new PropTerrified();
+        case prop::Id::terrified:
+                return new Terrified();
 
-        case PropId::weakened:
+        case prop::Id::weakened:
                 return new Prop(id);
 
-        case PropId::confused:
-                return new PropConfused();
+        case prop::Id::confused:
+                return new Confused();
 
-        case PropId::hallucinating:
-                return new PropHallucinating();
+        case prop::Id::hallucinating:
+                return new Hallucinating();
 
-        case PropId::astral_opium_addiction:
-                return new PropAstralOpiumAddict();
+        case prop::Id::astral_opium_addiction:
+                return new AstralOpiumAddict();
 
-        case PropId::stunned:
+        case prop::Id::stunned:
                 return new Prop(id);
 
-        case PropId::waiting:
-                return new PropWaiting();
+        case prop::Id::waiting:
+                return new Waiting();
 
-        case PropId::slowed:
-                return new PropSlowed();
+        case prop::Id::slowed:
+                return new Slowed();
 
-        case PropId::hasted:
-                return new PropHasted();
+        case prop::Id::hasted:
+                return new Hasted();
 
-        case PropId::extra_hasted:
-                return new PropExtraHasted();
+        case prop::Id::extra_hasted:
+                return new ExtraHasted();
 
-        case PropId::summoned:
-                return new PropSummoned();
+        case prop::Id::summoned:
+                return new Summoned();
 
-        case PropId::infected:
-                return new PropInfected();
+        case prop::Id::infected:
+                return new Infected();
 
-        case PropId::diseased:
-                return new PropDiseased();
+        case prop::Id::diseased:
+                return new Diseased();
 
-        case PropId::descend:
-                return new PropDescend();
+        case prop::Id::descend:
+                return new Descend();
 
-        case PropId::poisoned:
-                return new PropPoisoned();
+        case prop::Id::poisoned:
+                return new Poisoned();
 
-        case PropId::fainted:
-                return new PropFainted();
+        case prop::Id::fainted:
+                return new Fainted();
 
-        case PropId::frenzied:
-                return new PropFrenzied();
+        case prop::Id::frenzied:
+                return new Frenzied();
 
-        case PropId::aiming:
-                return new PropAiming();
+        case prop::Id::aiming:
+                return new Aiming();
 
-        case PropId::disabled_attack:
-                return new PropDisabledAttack();
+        case prop::Id::disabled_attack:
+                return new DisabledAttack();
 
-        case PropId::disabled_melee:
-                return new PropDisabledMelee();
+        case prop::Id::disabled_melee:
+                return new DisabledMelee();
 
-        case PropId::disabled_ranged:
-                return new PropDisabledRanged();
+        case prop::Id::disabled_ranged:
+                return new DisabledRanged();
 
-        case PropId::blessed:
-                return new PropBlessed();
+        case prop::Id::blessed:
+                return new Blessed();
 
-        case PropId::doomed:
-                return new PropDoomed();
+        case prop::Id::doomed:
+                return new Doomed();
 
-        case PropId::cursed:
-                return new PropCursed();
+        case prop::Id::cursed:
+                return new Cursed();
 
-        case PropId::premonition:
-                return new PropPremonition();
+        case prop::Id::premonition:
+                return new Premonition();
 
-        case PropId::erudition:
-                return new PropErudition();
+        case prop::Id::erudition:
+                return new Erudition();
 
-        case PropId::magic_searching:
-                return new PropMagicSearching();
+        case prop::Id::magic_searching:
+                return new MagicSearching();
 
-        case PropId::entangled:
-                return new PropEntangled();
+        case prop::Id::entangled:
+                return new Entangled();
 
-        case PropId::r_acid:
-                return new PropRAcid();
+        case prop::Id::r_acid:
+                return new RAcid();
 
-        case PropId::r_conf:
-                return new PropRConf();
+        case prop::Id::r_conf:
+                return new RConf();
 
-        case PropId::r_breath:
-                return new PropRBreath();
+        case prop::Id::r_breath:
+                return new RBreath();
 
-        case PropId::r_elec:
-                return new PropRElec();
+        case prop::Id::r_elec:
+                return new RElec();
 
-        case PropId::r_fear:
-                return new PropRFear();
+        case prop::Id::r_fear:
+                return new RFear();
 
-        case PropId::r_slow:
-                return new PropRSlow();
+        case prop::Id::r_slow:
+                return new RSlow();
 
-        case PropId::r_phys:
-                return new PropRPhys();
+        case prop::Id::r_phys:
+                return new RPhys();
 
-        case PropId::r_fire:
-                return new PropRFire();
+        case prop::Id::r_fire:
+                return new RFire();
 
-        case PropId::r_spell:
+        case prop::Id::r_spell:
                 return new Prop(id);
 
-        case PropId::r_poison:
-                return new PropRPoison();
+        case prop::Id::r_poison:
+                return new RPoison();
 
-        case PropId::r_sleep:
-                return new PropRSleep();
+        case prop::Id::r_sleep:
+                return new RSleep();
 
-        case PropId::light_sensitive:
-                return new PropLgtSens();
+        case prop::Id::light_sensitive:
+                return new LgtSens();
 
-        case PropId::zuul_possess_priest:
-                return new PropZuulPossessPriest();
+        case prop::Id::zuul_possess_priest:
+                return new ZuulPossessPriest();
 
-        case PropId::possessed_by_zuul:
-                return new PropPossessedByZuul();
+        case prop::Id::possessed_by_zuul:
+                return new PossessedByZuul();
 
-        case PropId::shapeshifts:
-                return new PropShapeshifts();
+        case prop::Id::shapeshifts:
+                return new Shapeshifts();
 
-        case PropId::spectral_wpn:
-                return new PropSpectralWpn();
+        case prop::Id::spectral_wpn:
+                return new SpectralWpn();
 
-        case PropId::zealot_stop:
-                return new PropZealotStop();
+        case prop::Id::zealot_stop:
+                return new ZealotStop();
 
-        case PropId::major_clapham_summon:
-                return new PropMajorClaphamSummon();
+        case prop::Id::major_clapham_summon:
+                return new MajorClaphamSummon();
 
-        case PropId::allies_ghoul_player:
-                return new PropAlliesPlayerGhoul();
+        case prop::Id::allies_ghoul_player:
+                return new AlliesPlayerGhoul();
 
-        case PropId::flying:
+        case prop::Id::flying:
                 return new Prop(id);
 
-        case PropId::tiny_flying:
+        case prop::Id::tiny_flying:
                 return new Prop(id);
 
-        case PropId::ethereal:
+        case prop::Id::ethereal:
                 return new Prop(id);
 
-        case PropId::ooze:
+        case prop::Id::ooze:
                 return new Prop(id);
 
-        case PropId::small_crawling:
+        case prop::Id::small_crawling:
                 return new Prop(id);
 
-        case PropId::burrowing:
-                return new PropBurrowing();
+        case prop::Id::burrowing:
+                return new Burrowing();
 
-        case PropId::radiant_self:
+        case prop::Id::radiant_self:
                 return new Prop(id);
 
-        case PropId::radiant_adjacent:
+        case prop::Id::radiant_adjacent:
                 return new Prop(id);
 
-        case PropId::radiant_fov:
+        case prop::Id::radiant_fov:
                 return new Prop(id);
 
-        case PropId::darkvision:
+        case prop::Id::darkvision:
                 return new Prop(id);
 
-        case PropId::r_disease:
-                return new PropRDisease();
+        case prop::Id::r_disease:
+                return new RDisease();
 
-        case PropId::r_blind:
-                return new PropRBlind();
+        case prop::Id::r_blind:
+                return new RBlind();
 
-        case PropId::r_para:
-                return new PropRPara();
+        case prop::Id::r_para:
+                return new RPara();
 
-        case PropId::r_shock:
-                return new PropRShock();
+        case prop::Id::r_shock:
+                return new RShock();
 
-        case PropId::tele_ctrl:
+        case prop::Id::tele_ctrl:
                 return new Prop(id);
 
-        case PropId::spell_reflect:
+        case prop::Id::spell_reflect:
                 return new Prop(id);
 
-        case PropId::conflict:
+        case prop::Id::conflict:
                 return new Prop(id);
 
-        case PropId::vortex:
-                return new PropVortex();
+        case prop::Id::vortex:
+                return new Vortex();
 
-        case PropId::explodes_on_death:
-                return new PropExplodesOnDeath();
+        case prop::Id::explodes_on_death:
+                return new ExplodesOnDeath();
 
-        case PropId::splits_on_death:
-                return new PropSplitsOnDeath();
+        case prop::Id::splits_on_death:
+                return new SplitsOnDeath();
 
-        case PropId::corpse_eater:
-                return new PropCorpseEater();
+        case prop::Id::corpse_eater:
+                return new CorpseEater();
 
-        case PropId::teleports:
-                return new PropTeleports();
+        case prop::Id::teleports:
+                return new Teleports();
 
-        case PropId::teleports_away:
-                return new PropTeleportsAway();
+        case prop::Id::teleports_away:
+                return new TeleportsAway();
 
-        case PropId::always_aware:
-                return new PropAlwaysAware();
+        case prop::Id::always_aware:
+                return new AlwaysAware();
 
-        case PropId::alters_env:
-                return new PropAltersEnv();
+        case prop::Id::alters_env:
+                return new AltersEnv();
 
-        case PropId::corrupts_env_color:
-                return new PropCorruptsEnvColor();
+        case prop::Id::corrupts_env_color:
+                return new CorruptsEnvColor();
 
-        case PropId::regenerating:
-                return new PropRegenerating();
+        case prop::Id::regenerating:
+                return new Regenerating();
 
-        case PropId::corpse_rises:
-                return new PropCorpseRises();
+        case prop::Id::corpse_rises:
+                return new CorpseRises();
 
-        case PropId::breeds:
-                return new PropBreeds();
+        case prop::Id::breeds:
+                return new Breeds();
 
-        case PropId::frenzies_self:
-                return new PropFrenziesSelf();
+        case prop::Id::frenzies_self:
+                return new FrenziesSelf();
 
-        case PropId::frenzies_followers:
-                return new PropFrenziesFollowers();
+        case prop::Id::frenzies_followers:
+                return new FrenziesFollowers();
 
-        case PropId::summons_locusts:
-                return new PropSummonsLocusts();
+        case prop::Id::summons_locusts:
+                return new SummonsLocusts();
 
-        case PropId::others_terrified_on_death:
-                return new PropOthersTerrifiedOnDeath();
+        case prop::Id::others_terrified_on_death:
+                return new OthersTerrifiedOnDeath();
 
-        case PropId::vomits_ooze:
-                return new PropVomitsOoze();
+        case prop::Id::vomits_ooze:
+                return new VomitsOoze();
 
-        case PropId::confuses_adjacent:
-                return new PropConfusesAdjacent();
+        case prop::Id::confuses_adjacent:
+                return new ConfusesAdjacent();
 
-        case PropId::frenzy_player_on_seen:
-                return new PropFrenzyPlayerOnSeen();
+        case prop::Id::frenzy_player_on_seen:
+                return new FrenzyPlayerOnSeen();
 
-        case PropId::aura_of_decay:
-                return new PropAuraOfDecay();
+        case prop::Id::aura_of_decay:
+                return new AuraOfDecay();
 
-        case PropId::reduced_pierce_dmg:
+        case prop::Id::reduced_pierce_dmg:
                 return new Prop(id);
 
-        case PropId::short_hearing_range:
+        case prop::Id::short_hearing_range:
                 return new Prop(id);
 
-        case PropId::spawns_zombie_parts_on_destroyed:
-                return new PropSpawnsZombiePartsOnDestroyed();
+        case prop::Id::spawns_zombie_parts_on_destroyed:
+                return new SpawnsZombiePartsOnDestroyed();
 
-        case PropId::invis:
+        case prop::Id::invis:
                 return new Prop(id);
 
-        case PropId::cloaked:
+        case prop::Id::cloaked:
                 return new Prop(id);
 
-        case PropId::recloaks:
-                return new PropRecloaks();
+        case prop::Id::recloaks:
+                return new Recloaks();
 
-        case PropId::see_invis:
-                return new PropSeeInvis();
+        case prop::Id::see_invis:
+                return new SeeInvis();
 
-        case PropId::hp_sap:
-                return new PropHpSap();
+        case prop::Id::hp_sap:
+                return new HpSap();
 
-        case PropId::spi_sap:
-                return new PropSpiSap();
+        case prop::Id::spi_sap:
+                return new SpiSap();
 
-        case PropId::mind_sap:
-                return new PropMindSap();
+        case prop::Id::mind_sap:
+                return new MindSap();
 
-        case PropId::hit_chance_penalty_curse:
-                return new PropHitChancePenaltyCurse();
+        case prop::Id::hit_chance_penalty_curse:
+                return new HitChancePenaltyCurse();
 
-        case PropId::increased_shock_curse:
-                return new PropIncreasedShockCurse();
+        case prop::Id::increased_shock_curse:
+                return new IncreasedShockCurse();
 
-        case PropId::cannot_read_curse:
-                return new PropCannotReadCurse();
+        case prop::Id::cannot_read_curse:
+                return new CannotReadCurse();
 
-        case PropId::light_sensitive_curse:
+        case prop::Id::light_sensitive_curse:
                 return new Prop(id);
 
-        case PropId::disabled_hp_regen:
+        case prop::Id::disabled_hp_regen:
                 return new Prop(id);
 
-        case PropId::sanctuary:
-                return new PropSanctuary();
+        case prop::Id::sanctuary:
+                return new Sanctuary();
 
-        case PropId::meditative_focused:
+        case prop::Id::meditative_focused:
                 return new Prop(id);
 
-        case PropId::thorns:
-                return new PropThorns();
+        case prop::Id::thorns:
+                return new Thorns();
 
-        case PropId::crimson_passage:
-                return new PropCrimsonPassage();
+        case prop::Id::crimson_passage:
+                return new CrimsonPassage();
 
-        case PropId::END:
+        case prop::Id::END:
                 break;
         }
 
         return nullptr;
 }
 
-}  // namespace property_factory
+}  // namespace prop

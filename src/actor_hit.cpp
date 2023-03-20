@@ -209,7 +209,7 @@ static void kill_actor_by_hit(actor::Actor& actor, const int dmg)
         const auto is_destroyed =
                 (!actor.m_data->can_leave_corpse ||
                  is_on_bottomless ||
-                 actor.m_properties.has(PropId::summoned) ||
+                 actor.m_properties.has(prop::Id::summoned) ||
                  (dmg >= dmg_threshold_relative) ||
                  (dmg >= dmg_threshold_absolute))
                 ? IsDestroyed::yes
@@ -254,8 +254,8 @@ static void on_actor_not_killed_by_hit(
 static bool is_light_sensitive(const actor::Actor& actor)
 {
         return (
-                actor.m_properties.has(PropId::light_sensitive) ||
-                actor.m_properties.has(PropId::light_sensitive_curse));
+                actor.m_properties.has(prop::Id::light_sensitive) ||
+                actor.m_properties.has(prop::Id::light_sensitive_curse));
 }
 
 static int calc_new_dmg_for_light_sensitive(
@@ -264,10 +264,10 @@ static int calc_new_dmg_for_light_sensitive(
 {
         // NOTE: Only the basic "light sensitive" property has a damage
         // modifier, not the player light sensitive curse.
-        auto* const prop = actor.m_properties.prop(PropId::light_sensitive);
+        auto* const prop = actor.m_properties.prop(prop::Id::light_sensitive);
 
         if (prop) {
-                auto* const lgt_sens = static_cast<PropLgtSens*>(prop);
+                auto* const lgt_sens = static_cast<prop::LgtSens*>(prop);
 
                 return dmg + lgt_sens->get_extra_damage();
         }
@@ -303,12 +303,12 @@ static int absorb_dmg_for_prolonged_life_player(int dmg)
         return dmg;
 }
 
-static int nr_wounds(const PropHandler& properties)
+static int nr_wounds(const prop::PropHandler& properties)
 {
-        if (properties.has(PropId::wound)) {
-                const auto* const prop = properties.prop(PropId::wound);
+        if (properties.has(prop::Id::wound)) {
+                const auto* const prop = properties.prop(prop::Id::wound);
 
-                const auto* const wound = static_cast<const PropWound*>(prop);
+                const auto* const wound = static_cast<const prop::Wound*>(prop);
 
                 return wound->nr_wounds();
         }
@@ -343,7 +343,7 @@ static void on_player_hit(
         // Ghoul trait Indomitable Fury grants immunity to wounds while frenzied
         const bool is_ghoul_resist_wound =
                 player_bon::has_trait(Trait::indomitable_fury) &&
-                map::g_player->m_properties.has(PropId::frenzied);
+                map::g_player->m_properties.has(prop::Id::frenzied);
 
         const bool is_wounded =
                 (allow_wound == AllowWound::yes) &&
@@ -354,7 +354,7 @@ static void on_player_hit(
                 !config::is_bot_playing();
 
         if (is_wounded) {
-                Prop* const prop = property_factory::make(PropId::wound);
+                prop::Prop* const prop = prop::make(prop::Id::wound);
 
                 prop->set_indefinite();
 
@@ -517,7 +517,7 @@ void hit_sp(
         const auto is_destroyed =
                 (!actor.m_data->can_leave_corpse ||
                  is_on_bottomless ||
-                 actor.m_properties.has(PropId::summoned))
+                 actor.m_properties.has(prop::Id::summoned))
                 ? IsDestroyed::yes
                 : IsDestroyed::no;
 

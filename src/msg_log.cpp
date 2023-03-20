@@ -417,7 +417,7 @@ void add(
         }
 
         // If frenzied, change the message
-        if (map::g_player->m_properties.has(PropId::frenzied) &&
+        if (map::g_player->m_properties.has(prop::Id::frenzied) &&
             (copy_to_history == CopyToMsgHistory::yes) &&
             allow_convert_to_frenzied_str(str)) {
                 const auto frenzied_str = convert_to_frenzied_str(str);

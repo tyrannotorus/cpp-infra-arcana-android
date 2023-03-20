@@ -130,7 +130,7 @@ struct ActorData
         std::vector<ActorSpellData> spells;
         Speed speed;
         AbilityValues ability_values;
-        bool natural_props[(size_t)PropId::END];
+        bool natural_props[(size_t)prop::Id::END];
         bool ai[(size_t)AiId::END];
         int nr_turns_aware;
         int ranged_cooldown_turns;

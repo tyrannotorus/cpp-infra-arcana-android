@@ -55,10 +55,10 @@ static int calc_player_turns_per_hp_regen_rate()
         // Wounds affect hp regen?
         int nr_wounds = 0;
 
-        if (player.m_properties.has(PropId::wound)) {
+        if (player.m_properties.has(prop::Id::wound)) {
                 auto* const wound =
-                        static_cast<PropWound*>(
-                                player.m_properties.prop(PropId::wound));
+                        static_cast<prop::Wound*>(
+                                player.m_properties.prop(prop::Id::wound));
 
                 nr_wounds = wound->nr_wounds();
         }
@@ -93,8 +93,8 @@ static void player_regen_hp()
 
         if ((player.m_hp >= actor::max_hp(player)) ||
             (game_time::turn_nr() <= 1) ||
-            player.m_properties.has(PropId::poisoned) ||
-            player.m_properties.has(PropId::disabled_hp_regen) ||
+            player.m_properties.has(prop::Id::poisoned) ||
+            player.m_properties.has(prop::Id::disabled_hp_regen) ||
             (player_bon::bg() == Bg::ghoul)) {
                 return;
         }
@@ -136,7 +136,7 @@ static void player_regen_spell_shield()
 {
         auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::r_spell)) {
+        if (player.m_properties.has(prop::Id::r_spell)) {
                 // Player already has spell resistance. Keep resetting the
                 // countdown to "uninitialized" while in this state, and do
                 // nothing else. This will trigger a reroll of the duration when
@@ -159,7 +159,7 @@ static void player_regen_spell_shield()
 
                 if (actor::player_state::g_nr_turns_until_r_spell == 0) {
                         // Cooldown has finished
-                        auto* prop = property_factory::make(PropId::r_spell);
+                        auto* prop = prop::make(prop::Id::r_spell);
 
                         prop->set_indefinite();
 
@@ -173,7 +173,7 @@ static void player_regen_spell_shield()
                                 .roll();
         }
 
-        if (!player.m_properties.has(PropId::r_spell) &&
+        if (!player.m_properties.has(prop::Id::r_spell) &&
             (actor::player_state::g_nr_turns_until_r_spell > 0)) {
                 // Spell resistance is in cooldown state, decrement number of
                 // remaining turns.
@@ -185,8 +185,8 @@ static void player_regen_meditative_focused()
 {
         auto& player = *map::g_player;
 
-        if (player.m_properties.has(PropId::meditative_focused) ||
-            player.m_properties.has(PropId::frenzied)) {
+        if (player.m_properties.has(prop::Id::meditative_focused) ||
+            player.m_properties.has(prop::Id::frenzied)) {
                 // Player is already focused, or is frenzied. Keep resetting the
                 // countdown to "uninitialized" while in this state, and do
                 // nothing else. This will trigger a reroll of the duration when
@@ -212,9 +212,7 @@ static void player_regen_meditative_focused()
 
                 if (nr_turns_until_focused == 0) {
                         // Cooldown has finished
-                        Prop* prop =
-                                property_factory::make(
-                                        PropId::meditative_focused);
+                        prop::Prop* prop = prop::make(prop::Id::meditative_focused);
 
                         prop->set_indefinite();
 
@@ -226,7 +224,7 @@ static void player_regen_meditative_focused()
                 nr_turns_until_focused = rnd::range(125, 150);
         }
 
-        if (!player.m_properties.has(PropId::meditative_focused) &&
+        if (!player.m_properties.has(prop::Id::meditative_focused) &&
             (nr_turns_until_focused > 0)) {
                 // Meditative focused is in cooldown state, decrement number of
                 // remaining turns.
@@ -240,8 +238,8 @@ static void player_std_turn()
 
 #ifndef NDEBUG
         // Disease and infection should not be active at the same time
-        ASSERT(!player.m_properties.has(PropId::diseased) ||
-               !player.m_properties.has(PropId::infected));
+        ASSERT(!player.m_properties.has(prop::Id::diseased) ||
+               !player.m_properties.has(prop::Id::infected));
 #endif  // NDEBUG
 
         if (!player.is_alive()) {
@@ -282,7 +280,7 @@ static void mon_std_turn(actor::Actor& mon)
                 mon.is_alive() &&
                 mon.m_data->ai[(size_t)actor::AiId::looks] &&
                 !actor::is_player(mon.m_leader) &&
-                !map::g_player->m_properties.has(PropId::sanctuary) &&
+                !map::g_player->m_properties.has(prop::Id::sanctuary) &&
                 (actor::is_player(mon.m_ai_state.target) || !mon.m_ai_state.target);
 
         if (should_look) {

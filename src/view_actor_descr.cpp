@@ -42,54 +42,54 @@
 static const std::string s_cannot_be_harmed_by_start =
         "They cannot be harmed by";
 
-static const std::pair<PropId, std::string> s_cannot_be_harmed_by_props[] = {
-        {PropId::r_phys, "{COLOR_GRAY}physical damage{reset_color}"},
-        {PropId::r_fire, "{COLOR_LIGHT_RED}fire{reset_color}"},
-        {PropId::r_elec, "{COLOR_YELLOW}electricity{reset_color}"},
-        {PropId::r_poison, "{COLOR_LIGHT_GREEN}poison{reset_color}"},
-        {PropId::r_disease, "{COLOR_GREEN}disease{reset_color}"},
-        {PropId::r_spell, "{COLOR_MAGENTA}magic{reset_color}"},
+static const std::pair<prop::Id, std::string> s_cannot_be_harmed_by_props[] = {
+        {prop::Id::r_phys, "{COLOR_GRAY}physical damage{reset_color}"},
+        {prop::Id::r_fire, "{COLOR_LIGHT_RED}fire{reset_color}"},
+        {prop::Id::r_elec, "{COLOR_YELLOW}electricity{reset_color}"},
+        {prop::Id::r_poison, "{COLOR_LIGHT_GREEN}poison{reset_color}"},
+        {prop::Id::r_disease, "{COLOR_GREEN}disease{reset_color}"},
+        {prop::Id::r_spell, "{COLOR_MAGENTA}magic{reset_color}"},
 };
 
 static const std::string s_unaffected_by_start =
         "They are unaffected by";
 
-static const std::pair<PropId, std::string> s_unaffected_by_props[] = {
-        {PropId::r_fear, "fear"},
-        {PropId::r_conf, "confusion"},
+static const std::pair<prop::Id, std::string> s_unaffected_by_props[] = {
+        {prop::Id::r_fear, "fear"},
+        {prop::Id::r_conf, "confusion"},
 };
 
 static const std::string s_cannot_be_start =
         "They cannot be";
 
-static const std::pair<PropId, std::string> s_cannot_be_props[] = {
-        {PropId::r_slow, "slowed"},
-        {PropId::r_para, "paralyzed"},
+static const std::pair<prop::Id, std::string> s_cannot_be_props[] = {
+        {prop::Id::r_slow, "slowed"},
+        {prop::Id::r_para, "paralyzed"},
 };
 
 static const std::string s_cannot_start =
         "They cannot";
 
-static const std::pair<PropId, std::string> s_cannot_props[] = {
-        {PropId::r_sleep, "faint"},
+static const std::pair<prop::Id, std::string> s_cannot_props[] = {
+        {prop::Id::r_sleep, "faint"},
 };
 
 static const std::string s_can_start =
         "They can";
 
-static const std::pair<PropId, std::string> s_can_props[] = {
-        {PropId::darkvision, "see in darkness"},
+static const std::pair<prop::Id, std::string> s_can_props[] = {
+        {prop::Id::darkvision, "see in darkness"},
 };
 
-static const std::pair<PropId, std::string> s_custom_props[] = {
-        {PropId::reduced_pierce_dmg,
+static const std::pair<prop::Id, std::string> s_custom_props[] = {
+        {prop::Id::reduced_pierce_dmg,
          "Piercing attacks such as pistol shots or dagger strikes are "
          "very ineffective against them"},
-        {PropId::radiant_self,
+        {prop::Id::radiant_self,
          "They emit light and can be seen in darkness"},
-        {PropId::radiant_adjacent,
+        {prop::Id::radiant_adjacent,
          "They emit light and can be seen in darkness"},
-        {PropId::radiant_fov,
+        {prop::Id::radiant_fov,
          "They emit light and can be seen in darkness"},
 };
 
@@ -324,7 +324,7 @@ static std::string get_sneak_chance_descr(actor::Actor& actor)
 
 static bool has_natural_property(
         const actor::ActorData& actor_data,
-        const PropId id)
+        const prop::Id id)
 {
         return actor_data.natural_props[(size_t)id];
 }
@@ -541,7 +541,7 @@ static std::string auto_description_str(actor::Actor& actor)
         return str;
 }
 
-static bool should_show_property(const actor::Actor& actor, const Prop& property)
+static bool should_show_property(const actor::Actor& actor, const prop::Prop& property)
 {
         // Show all temporary negative properties (burning, fear etc), and
         // Frenzy (special case, it is typically very important to know, and
@@ -555,12 +555,12 @@ static bool should_show_property(const actor::Actor& actor, const Prop& property
         //
         return (
                 actor.m_properties.is_temporary_negative_prop(property) ||
-                property.id() == PropId::frenzied);
+                property.id() == prop::Id::frenzied);
 }
 
-static std::vector<PropListEntry> temporary_properties_to_show(const actor::Actor& actor)
+static std::vector<prop::PropListEntry> temporary_properties_to_show(const actor::Actor& actor)
 {
-        std::vector<PropListEntry> prop_list = actor.m_properties.property_names_and_descr();
+        std::vector<prop::PropListEntry> prop_list = actor.m_properties.property_names_and_descr();
 
         for (auto it = std::begin(prop_list); it != std::end(prop_list);) {
                 const auto* const prop = it->prop;
@@ -581,7 +581,7 @@ static std::string temporary_properties_str(actor::Actor& actor)
         std::string str;
 
         // Properties
-        std::vector<PropListEntry> prop_list = temporary_properties_to_show(actor);
+        std::vector<prop::PropListEntry> prop_list = temporary_properties_to_show(actor);
 
         for (const auto& entry : prop_list) {
                 if (!str.empty()) {

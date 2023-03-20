@@ -165,7 +165,7 @@ static DidAction try_cast_spell(
 
 static void remove_player_with_sanctuary(std::vector<actor::Actor*>& actors)
 {
-        if (!map::g_player->m_properties.has(PropId::sanctuary)) {
+        if (!map::g_player->m_properties.has(prop::Id::sanctuary)) {
                 return;
         }
 
