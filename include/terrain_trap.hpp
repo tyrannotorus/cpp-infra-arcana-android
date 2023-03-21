@@ -60,6 +60,7 @@ enum class TrapId
         haste,
 
         // Neutral
+        alter_env,
 
         END,
 
@@ -606,6 +607,15 @@ class TrapHaste : public MagicTrapImpl
 {
 public:
         TrapHaste(P pos, Trap* const base_trap) :
+                MagicTrapImpl(pos, TrapId::slow, base_trap) {}
+
+        void trigger() override;
+};
+
+class TrapAlterEnv : public MagicTrapImpl
+{
+public:
+        TrapAlterEnv(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::slow, base_trap) {}
 
         void trigger() override;

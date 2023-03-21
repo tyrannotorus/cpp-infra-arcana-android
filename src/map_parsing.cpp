@@ -314,7 +314,7 @@ bool IsAnyOfTerrains::parse_terrain(const terrain::Terrain& t, const P& pos) con
                 std::any_of(
                         std::cbegin(m_terrains),
                         std::cend(m_terrains),
-                        [&t](const auto search_id) {
+                        [&t](const terrain::Id search_id) {
                                 return search_id == t.id();
                         }));
 }

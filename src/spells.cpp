@@ -442,92 +442,13 @@ static void create_water(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void create_trees(const Context& context)
+static void alter_env(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
         print_side_effect_trigger_message();
 
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksWalking(ParseActors::no)
-                .run(blocked, blocked.rect());
-
-        const std::vector<terrain::Id> free_terrains = {
-                terrain::Id::door,  // Can be toggled to passable
-        };
-
-        for (const P& p : blocked.rect().positions()) {
-                if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
-                        blocked.at(p) = false;
-                }
-        }
-
-        std::vector<P> tree_pos_bucket;
-        tree_pos_bucket.reserve(context.nearby_positions.size());
-
-        for (const P& p : context.nearby_positions) {
-                const bool is_floor_like = map::g_terrain.at(p)->m_data->is_floor_like;
-
-                if (!blocked.at(p) && is_floor_like) {
-                        tree_pos_bucket.push_back(p);
-
-                        map::update_terrain(terrain::make(terrain::Id::grass, p));
-                }
-        }
-
-        if (tree_pos_bucket.empty()) {
-                TRACE_FUNC_END;
-
-                return;
-        }
-
-        rnd::shuffle(tree_pos_bucket);
-
-        Array2<bool> has_actor(map::dims());
-
-        for (actor::Actor* actor : game_time::g_actors) {
-                if (actor->m_state != ActorState::destroyed) {
-                        has_actor.at(actor->m_pos) = true;
-                }
-        }
-
-        // Some blocking terrain must be reachable so that the player is not
-        // prevented from progressing (other blocking terrain such as Monoliths
-        // may be walled in however).
-        const std::vector<terrain::Id> terrains_must_be_reachable = {
-                terrain::Id::stairs,
-                terrain::Id::lever,
-        };
-
-        std::vector<P> positions_must_be_reachable;
-
-        for (const P& p : blocked.rect().positions()) {
-                if (map_parsers::IsAnyOfTerrains(terrains_must_be_reachable).run(p)) {
-                        positions_must_be_reachable.push_back(p);
-                }
-        }
-
-        const int tree_one_in_n = rnd::range(1, 20);
-
-        while (!tree_pos_bucket.empty()) {
-                const P p = tree_pos_bucket.back();
-
-                tree_pos_bucket.pop_back();
-
-                if (!rnd::one_in(tree_one_in_n) || has_actor.at(p) || map::g_items.at(p)) {
-                        continue;
-                }
-
-                blocked.at(p) = true;
-
-                if (map_parsers::is_map_connected(blocked, positions_must_be_reachable)) {
-                        map::update_terrain(terrain::make(terrain::Id::tree, p));
-                }
-                else {
-                        blocked.at(p) = false;
-                }
-        }
+        prop::run_alter_env_effect(context.caster.m_pos);
 
         TRACE_FUNC_END;
 }
@@ -536,11 +457,8 @@ static void create_doors(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
-        const auto adj_door_checker =
-                map_parsers::AnyAdjIsAnyOfTerrains(terrain::Id::door);
-
-        const auto adj_floor_checker =
-                map_parsers::AnyAdjIsAnyOfTerrains(terrain::Id::floor);
+        const auto adj_door_checker = map_parsers::AnyAdjIsAnyOfTerrains(terrain::Id::door);
+        const auto adj_floor_checker = map_parsers::AnyAdjIsAnyOfTerrains(terrain::Id::floor);
 
         bool printed_msg = false;
         for (const auto& p : context.nearby_positions) {
@@ -675,7 +593,7 @@ WeightedItems<SpellSideEffect> s_spell_side_effects {
         {
                 create_dark_void,
                 create_doors,
-                create_trees,
+                alter_env,
                 create_water,
                 flay_human,
                 ignite_terrain,

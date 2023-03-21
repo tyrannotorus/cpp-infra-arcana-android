@@ -36,9 +36,6 @@ struct P;
 
 namespace prop
 {
-// -----------------------------------------------------------------------------
-// Support types
-// -----------------------------------------------------------------------------
 enum class PropSrc
 {
         // Properties applied by potions, spells, etc, or "natural" properties
@@ -80,9 +77,8 @@ struct PropActResult
 
 extern const std::string g_property_ending_suffix;
 
-// -----------------------------------------------------------------------------
-// Property base class
-// -----------------------------------------------------------------------------
+void run_alter_env_effect(const P& origin, int change_pos_one_in_n = 6);
+
 class Prop
 {
 public:
@@ -402,9 +398,6 @@ protected:
         const item::Item* m_item_applying {nullptr};
 };
 
-// -----------------------------------------------------------------------------
-// Specific properties
-// -----------------------------------------------------------------------------
 class Terrified : public Prop
 {
 public:

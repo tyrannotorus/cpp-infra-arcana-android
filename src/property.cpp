@@ -109,9 +109,127 @@ static void curse_adjacent(const P& pos)
 
 namespace prop
 {
-// -----------------------------------------------------------------------------
-// Property base class
-// -----------------------------------------------------------------------------
+void run_alter_env_effect(const P& origin, const int change_pos_one_in_n)
+{
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksWalking(ParseActors::no)
+                .run(blocked, blocked.rect());
+
+        const std::vector<terrain::Id> free_terrains = {
+                terrain::Id::door,  // Can be toggled to passable
+        };
+
+        const int blocked_w = blocked.w();
+        const int blocked_h = blocked.h();
+
+        for (int x = 0; x < blocked_w; ++x) {
+                for (int y = 0; y < blocked_h; ++y) {
+                        const P p(x, y);
+
+                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
+                                blocked.at(p) = false;
+                        }
+                }
+        }
+
+        Array2<bool> has_actor(map::dims());
+
+        for (actor::Actor* actor : game_time::g_actors) {
+                if (actor->m_state != ActorState::destroyed) {
+                        has_actor.at(actor->m_pos) = true;
+                }
+        }
+
+        // Some blocking terrain must be reachable so that the player is not
+        // prevented from progressing (other blocking terrain such as Monoliths
+        // may be walled in however).
+        const std::vector<terrain::Id> terrains_must_be_reachable = {
+                terrain::Id::stairs,
+                terrain::Id::lever,
+        };
+
+        std::vector<P> positions_must_be_reachable;
+
+        for (const P& p : blocked.rect().positions()) {
+                if (map_parsers::IsAnyOfTerrains(terrains_must_be_reachable).run(p)) {
+                        positions_must_be_reachable.push_back(p);
+                }
+        }
+
+        const int r = 3;
+
+        // NOTE: The first elements of these two vectors have a special meaning,
+        // see comment below.
+        const std::vector<terrain::Id> spawnable_passable_terrains = {
+                terrain::Id::floor,
+                terrain::Id::rubble_low,
+                terrain::Id::grass,
+                terrain::Id::vines,
+                terrain::Id::chains,
+                terrain::Id::liquid,
+        };
+
+        const std::vector<terrain::Id> spawnable_blocking_terrains = {
+                terrain::Id::wall,
+                terrain::Id::rubble_high,
+                terrain::Id::grate,
+                terrain::Id::stalagmite,
+        };
+
+        const map_parsers::IsAnyOfTerrains is_spawnable_passable(spawnable_passable_terrains);
+        const map_parsers::IsAnyOfTerrains is_spawnable_blocking(spawnable_blocking_terrains);
+
+        // Use the first element of the above vectors with this chance, instead
+        // of a random element. Putting too many different terrains looks messy.
+        const Fraction normal_terrain_chance(5, 8);
+
+        const R area(
+                std::max(1, origin.x - r),
+                std::max(1, origin.y - r),
+                std::min(map::w() - 2, origin.x + r),
+                std::min(map::h() - 2, origin.y + r));
+
+        for (const P& p : area.positions()) {
+                if (!rnd::one_in(change_pos_one_in_n) ||
+                    has_actor.at(p) ||
+                    map::g_items.at(p)) {
+                        continue;
+                }
+
+                if (is_spawnable_blocking.run(p)) {
+                        blocked.at(p) = false;
+
+                        if (map_parsers::is_map_connected(blocked, positions_must_be_reachable)) {
+                                const terrain::Id id =
+                                        normal_terrain_chance.roll()
+                                        ? spawnable_passable_terrains.at(0)
+                                        : rnd::element(spawnable_passable_terrains);
+
+                                map::update_terrain(terrain::make(id, p));
+                        }
+                        else {
+                                blocked.at(p) = true;
+                        }
+                }
+                else if (is_spawnable_passable.run(p)) {
+                        blocked.at(p) = true;
+
+                        if (map_parsers::is_map_connected(blocked, positions_must_be_reachable)) {
+                                const terrain::Id id =
+                                        normal_terrain_chance.roll()
+                                        ? spawnable_blocking_terrains.at(0)
+                                        : rnd::element(spawnable_blocking_terrains);
+
+                                map::update_terrain(terrain::make(id, p));
+                        }
+                        else {
+                                blocked.at(p) = false;
+                        }
+                }
+        }
+}
+
 Prop::Prop(Id id) :
         m_id(id),
         m_data(g_data[(size_t)id]),
@@ -129,9 +247,6 @@ void Prop::set_duration(const int nr_turns)
         m_nr_turns_left = nr_turns;
 }
 
-// -----------------------------------------------------------------------------
-// Specific properties
-// -----------------------------------------------------------------------------
 void Blessed::on_applied()
 {
         m_owner->m_properties.end_prop(
@@ -2376,88 +2491,7 @@ PropActResult CorruptsEnvColor::on_act()
 
 void AltersEnv::on_std_turn()
 {
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksWalking(ParseActors::no)
-                .run(blocked, blocked.rect());
-
-        const std::vector<terrain::Id> free_terrains = {
-                terrain::Id::door,  // Can be toggled to passable
-        };
-
-        const int blocked_w = blocked.w();
-        const int blocked_h = blocked.h();
-
-        for (int x = 0; x < blocked_w; ++x) {
-                for (int y = 0; y < blocked_h; ++y) {
-                        const P p(x, y);
-
-                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
-                                blocked.at(p) = false;
-                        }
-                }
-        }
-
-        Array2<bool> has_actor(map::dims());
-
-        for (actor::Actor* actor : game_time::g_actors) {
-                if (actor->m_state != ActorState::destroyed) {
-                        has_actor.at(actor->m_pos) = true;
-                }
-        }
-
-        // Some blocking terrain must be reachable so that the player is not
-        // prevented from progressing (other blocking terrain such as Monoliths
-        // may be walled in however).
-        const std::vector<terrain::Id> terrains_must_be_reachable = {
-                terrain::Id::stairs,
-                terrain::Id::lever,
-        };
-
-        std::vector<P> positions_must_be_reachable;
-
-        for (const P& p : blocked.rect().positions()) {
-                if (map_parsers::IsAnyOfTerrains(terrains_must_be_reachable).run(p)) {
-                        positions_must_be_reachable.push_back(p);
-                }
-        }
-
-        const int r = 3;
-
-        const R area(
-                std::max(1, m_owner->m_pos.x - r),
-                std::max(1, m_owner->m_pos.y - r),
-                std::min(map::w() - 2, m_owner->m_pos.x + r),
-                std::min(map::h() - 2, m_owner->m_pos.y + r));
-
-        for (const P& p : area.positions()) {
-                if (!rnd::one_in(6) || has_actor.at(p) || map::g_items.at(p)) {
-                        continue;
-                }
-
-                const terrain::Id terrain_id = map::g_terrain.at(p)->id();
-
-                if (terrain_id == terrain::Id::wall) {
-                        blocked.at(p) = false;
-
-                        if (map_parsers::is_map_connected(blocked, positions_must_be_reachable)) {
-                                map::update_terrain(terrain::make(terrain::Id::floor, p));
-                        }
-                        else {
-                                blocked.at(p) = true;
-                        }
-                }
-                else if (terrain_id == terrain::Id::floor) {
-                        blocked.at(p) = true;
-
-                        if (map_parsers::is_map_connected(blocked, positions_must_be_reachable)) {
-                                map::update_terrain(terrain::make(terrain::Id::wall, p));
-                        }
-                        else {
-                                blocked.at(p) = false;
-                        }
-                }
-        }
+        run_alter_env_effect(m_owner->m_pos);
 }
 
 void Regenerating::on_std_turn()

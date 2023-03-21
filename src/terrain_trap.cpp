@@ -51,6 +51,21 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static bool is_player_seeing_trap_trigger(
+        const actor::Actor& actor,
+        const P& pos)
+{
+        if (actor::is_player(&actor)) {
+                return true;
+        }
+        else {
+                const bool can_player_see_trap = map::g_seen.at(pos);
+                const bool can_player_see_actor = actor::can_player_see_actor(actor);
+
+                return can_player_see_trap || can_player_see_actor;
+        }
+}
+
 static void announce_magic_trap_trigger(
         const actor::Actor& actor,
         const P& pos,
@@ -210,6 +225,10 @@ static terrain::TrapImpl* make_trap_impl_from_id(
                 return new terrain::TrapHaste(pos, parent_trap);
                 break;
 
+        case terrain::TrapId::alter_env:
+                return new terrain::TrapAlterEnv(pos, parent_trap);
+                break;
+
         case terrain::TrapId::curse:
                 return new terrain::TrapCurse(pos, parent_trap);
                 break;
@@ -303,8 +322,7 @@ bool Trap::try_init_type(const TrapId id)
                 while (true) {
                         const TrapId random_id = get_random_id_to_spawn();
 
-                        TrapImpl* const impl =
-                                try_make_impl(random_id, m_pos, this);
+                        TrapImpl* const impl = try_make_impl(random_id, m_pos, this);
 
                         if (impl) {
                                 // Trap placement is good!
@@ -1255,6 +1273,31 @@ void TrapHaste::trigger()
         }
 
         actor_here->m_properties.apply(prop::make(prop::Id::hasted));
+
+        TRACE_FUNC_END;
+}
+
+void TrapAlterEnv::trigger()
+{
+        TRACE_FUNC_BEGIN;
+
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
+
+        ASSERT(actor_here);
+
+        if (!actor_here) {
+                // Should never happen.
+                ASSERT(false);
+                return;
+        }
+
+        if (is_player_seeing_trap_trigger(*actor_here, m_pos)) {
+                msg_log::add("The surroundings change!");
+        }
+
+        const int change_one_in_n = 2;
+
+        prop::run_alter_env_effect(m_pos, change_one_in_n);
 
         TRACE_FUNC_END;
 }
