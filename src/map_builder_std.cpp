@@ -81,7 +81,7 @@ bool MapBuilderStd::build_specific()
 {
         TRACE_FUNC_BEGIN;
 
-        const int river_one_in_n = 1;
+        const int river_one_in_n = 12;
 
         const bool is_river_level =
                 (map::g_dlvl >= g_dlvl_first_mid_game) &&
