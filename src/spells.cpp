@@ -147,11 +147,11 @@ static void print_side_effect_trigger_message()
         msg_log::add("An unexpected effect was induced by the spell.");
 }
 
-static void spawn_monsters(const Context& context)
+static void side_effect_spawn_monsters(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
-        const auto p = rnd::element(context.nearby_positions);
+        const P p = rnd::element(context.nearby_positions);
 
         const std::string id = "MON_TENTACLE_CLUSTER";
 
@@ -194,7 +194,7 @@ static void spawn_monsters(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void swap_wall_floor(const Context& context)
+static void side_effect_swap_wall_floor(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -266,7 +266,7 @@ static void swap_wall_floor(const Context& context)
         TRACE_FUNC_END;
 }  // swap_wall_floor
 
-static void ignite_terrain(const Context& context)
+static void side_effect_ignite_terrain(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -301,7 +301,7 @@ static void ignite_terrain(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void open_close_doors(const Context& context)
+static void side_effect_open_close_doors(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -310,26 +310,25 @@ static void open_close_doors(const Context& context)
 
         Array2<bool> has_actor(map::dims());
 
-        for (auto* actor : game_time::g_actors) {
+        for (actor::Actor* actor : game_time::g_actors) {
                 if (actor->m_state != ActorState::destroyed) {
                         has_actor.at(actor->m_pos) = true;
                 }
         }
 
         bool printed_msg = false;
-        for (const auto& p : context.nearby_positions) {
-                if (has_actor.at(p) || map::g_items.at(p)) {
+        for (const P& pos : context.nearby_positions) {
+                if (has_actor.at(pos) || map::g_items.at(pos)) {
                         continue;
                 }
 
-                auto* const terrain = map::g_terrain.at(p);
+                terrain::Terrain* const terrain = map::g_terrain.at(pos);
 
                 if (terrain->id() != terrain::Id::door) {
                         continue;
                 }
 
-                if (static_cast<terrain::Door*>(terrain)->type() ==
-                    terrain::DoorType::metal) {
+                if (static_cast<terrain::Door*>(terrain)->is_warded()) {
                         continue;
                 }
 
@@ -338,8 +337,8 @@ static void open_close_doors(const Context& context)
                         printed_msg = true;
                 }
 
-                // NOTE: Metal doors are skipped, so it's OK to just run
-                // open/close here
+                // NOTE: Warded doors are skipped, so it's OK to just run
+                // open/close here.
                 if (should_open) {
                         terrain->open(nullptr);
                 }
@@ -351,7 +350,7 @@ static void open_close_doors(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void flay_human(const Context& context)
+static void side_effect_flay_human(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -411,7 +410,7 @@ static void flay_human(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void create_water(const Context& context)
+static void side_effect_create_water(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -442,7 +441,7 @@ static void create_water(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void alter_env(const Context& context)
+static void side_effect_alter_env(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -453,7 +452,7 @@ static void alter_env(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void create_doors(const Context& context)
+static void side_effect_create_doors(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -496,7 +495,7 @@ static void create_doors(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void create_dark_void(const Context& context)
+static void side_effect_create_dark_void(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -559,7 +558,7 @@ static void create_dark_void(const Context& context)
         TRACE_FUNC_END;
 }
 
-static void push_statue(const Context& context)
+static void side_effect_push_statue(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
@@ -591,16 +590,16 @@ using SpellSideEffect = std::function<void(const Context&)>;
 
 WeightedItems<SpellSideEffect> s_spell_side_effects {
         {
-                create_dark_void,
-                create_doors,
-                alter_env,
-                create_water,
-                flay_human,
-                ignite_terrain,
-                open_close_doors,
-                push_statue,
-                spawn_monsters,
-                swap_wall_floor,
+                side_effect_create_dark_void,
+                side_effect_create_doors,
+                side_effect_alter_env,
+                side_effect_create_water,
+                side_effect_flay_human,
+                side_effect_ignite_terrain,
+                side_effect_open_close_doors,
+                side_effect_push_statue,
+                side_effect_spawn_monsters,
+                side_effect_swap_wall_floor,
         },
         {
                 10,  // create_dark_void
@@ -616,38 +615,6 @@ WeightedItems<SpellSideEffect> s_spell_side_effects {
         }};
 
 }  // namespace spell_side_effects
-
-static DidAction toggle_metal_door(const terrain::Terrain& door)
-{
-        // Find ANY lever for this door, and toggle it.
-        //
-        // NOTE: If there are more levers connected to this door, this is OK
-        // since the lever will set its sibblings to the same position.
-        //
-        for (const auto& p : map::rect().positions()) {
-                auto* const terrain = map::g_terrain.at(p);
-
-                if (terrain->id() != terrain::Id::lever) {
-                        continue;
-                }
-
-                auto* const lever = static_cast<terrain::Lever*>(terrain);
-
-                if (!lever->is_linked_to(door)) {
-                        continue;
-                }
-
-                lever->toggle();
-
-                return DidAction::yes;
-        }
-
-        // Reaching this point means we didn't find a lever for the metal door,
-        // which is not supposed to happen.
-        ASSERT(false);
-
-        return DidAction::no;
-}
 
 static std::string get_noise_descr(const bool is_noisy)
 {
@@ -940,34 +907,18 @@ terrain::DidOpen run_opening_spell_effect_at(
         const P& pos,
         const SpellSkill skill)
 {
-        auto* const terrain = map::g_terrain.at(pos);
+        (void)skill;
 
-        terrain::Door* door = nullptr;
+        terrain::Terrain* const terrain = map::g_terrain.at(pos);
 
         if (terrain->id() == terrain::Id::door) {
-                door = static_cast<terrain::Door*>(terrain);
+                auto* const door = static_cast<terrain::Door*>(terrain);
 
                 if (door->is_open()) {
                         return terrain::DidOpen::no;
                 }
-
-                if ((door->type() == terrain::DoorType::metal)) {
-                        if (skill == SpellSkill::basic) {
-                                return terrain::DidOpen::no;
-                        }
-
-                        const auto did_toggle = toggle_metal_door(*door);
-
-                        const auto did_open =
-                                (did_toggle == DidAction::yes)
-                                ? terrain::DidOpen::yes
-                                : terrain::DidOpen::no;
-
-                        return did_open;
-                }
         }
 
-        // TODO: Shouldn't the actor parameter be the caster here?
         const auto did_open = terrain->open(nullptr);
 
         return did_open;
@@ -977,28 +928,13 @@ terrain::DidClose run_close_spell_effect_at(
         const P& pos,
         const SpellSkill skill)
 {
-        auto* const terrain = map::g_terrain.at(pos);
+        (void)skill;
+
+        terrain::Terrain* const terrain = map::g_terrain.at(pos);
 
         if (terrain->id() == terrain::Id::door) {
-                auto* const door = static_cast<terrain::Door*>(terrain);
-
-                if (!door->is_open()) {
+                if (!static_cast<terrain::Door*>(terrain)->is_open()) {
                         return terrain::DidClose::no;
-                }
-
-                if ((door->type() == terrain::DoorType::metal)) {
-                        if (skill == SpellSkill::basic) {
-                                return terrain::DidClose::no;
-                        }
-
-                        const auto did_toggle = toggle_metal_door(*door);
-
-                        const auto did_close =
-                                (did_toggle == DidAction::yes)
-                                ? terrain::DidClose::yes
-                                : terrain::DidClose::no;
-
-                        return did_close;
                 }
         }
 
@@ -2639,17 +2575,6 @@ std::vector<std::string> SpellControlObject::descr_specific(
                 "Opens doors, chests, tombs, or cabinets. "
                 "Closes or jams doors. "
                 "Strikes doors, braziers, or statues.";
-
-        if (skill == SpellSkill::basic) {
-                control_descr +=
-                        " (Heavy doors operated externally by a switch cannot "
-                        "be opened or closed.)";
-        }
-        else {
-                control_descr +=
-                        " Heavy doors operated externally by a switch can also "
-                        "be opened or closed.";
-        }
 
         if (skill == SpellSkill::transcendent) {
                 control_descr +=

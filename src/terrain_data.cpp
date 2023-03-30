@@ -184,14 +184,15 @@ static void init_data_list()
         d.matl_type = Matl::metal;
         add_to_list_and_reset(d);
 
-        d.id = terrain::Id::lever;
+        d.id = terrain::Id::crystal_key;
         d.character = '%';
-        d.tile = gfx::TileId::lever_left;
+        d.tile = gfx::TileId::END;  // This is set elsewhere
         d.can_have_blood = false;
         d.can_have_gore = false;
         d.can_have_corpse = false;
         d.can_have_item = false;
-        d.matl_type = Matl::metal;
+        d.matl_type = Matl::stone;  // Whatever...
+        d.shock_when_adjacent = 5;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::brazier;
@@ -507,6 +508,10 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::event_snake_emerge;
+        d.move_rules.is_walkable = true;
+        add_to_list_and_reset(d);
+
+        d.id = terrain::Id::event_spawn_monsters_delayed;
         d.move_rules.is_walkable = true;
         add_to_list_and_reset(d);
 

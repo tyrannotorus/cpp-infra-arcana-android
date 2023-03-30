@@ -55,13 +55,13 @@ static void player_try_close_or_jam_terrain(terrain::Terrain* const terrain)
 
         // Door is closed - try to jam it
 
-        if (door->type() == terrain::DoorType::metal) {
+        if ((door->type() == terrain::DoorType::metal) ||
+            door->is_warded()) {
                 if (can_see_terrain) {
                         msg_log::add("This door cannot be jammed.");
                 }
                 else {
-                        msg_log::add(
-                                "I find nothing there to close or jam shut.");
+                        msg_log::add("I find nothing there to close or jam shut.");
                 }
 
                 return;

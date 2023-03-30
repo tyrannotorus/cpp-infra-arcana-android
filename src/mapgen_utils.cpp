@@ -1001,52 +1001,34 @@ void make_explore_spawn_weights(
                                 continue;
                         }
 
-                        const int other_side_idx =
-                                (choke_point.player_side == 0)
-                                ? 1
-                                : 0;
+                        const int other_side_idx = (choke_point.player_side == 0) ? 1 : 0;
 
-                        const auto& other_side_positions =
-                                choke_point.sides[other_side_idx];
+                        const auto& other_side_positions = choke_point.sides[other_side_idx];
 
                         // NOTE: To avoid leaning heavily towards only putting
                         // stuff in big hidden areas, we divide the weight given
                         // per cell based on the total number of cells in the
                         // area.
 
-                        const int weight_div = std::max(
-                                1,
-                                (int)other_side_positions.size() / 2);
+                        const int weight_div = std::max(1, (int)other_side_positions.size() / 2);
 
                         // Increase weight for being in an optional map branch
-                        int weight_inc = std::max(
-                                1,
-                                (250 / weight_div));
+                        int weight_inc = std::max(1, (250 / weight_div));
 
-                        auto* const terrain =
-                                map::g_terrain.at(choke_point.p);
+                        terrain::Terrain* const terrain = map::g_terrain.at(choke_point.p);
 
-                        // Increase weight if behind hidden/stuck/metal doors
+                        // Increase weight if behind hidden/stuck/warded doors
                         if (terrain->id() == terrain::Id::door) {
-                                auto* const door =
-                                        static_cast<terrain::Door*>(terrain);
+                                auto* const door = static_cast<terrain::Door*>(terrain);
 
                                 if (door->is_hidden()) {
-                                        weight_inc += std::max(
-                                                1,
-                                                200 / weight_div);
+                                        weight_inc += std::max(1, 200 / weight_div);
                                 }
-
-                                if (door->is_stuck()) {
-                                        weight_inc += std::max(
-                                                1,
-                                                200 / weight_div);
+                                else if (door->is_warded()) {
+                                        weight_inc += std::max(1, 500 / weight_div);
                                 }
-
-                                if (door->type() == terrain::DoorType::metal) {
-                                        weight_inc += std::max(
-                                                1,
-                                                500 / weight_div);
+                                else if (door->is_stuck()) {
+                                        weight_inc += std::max(1, 200 / weight_div);
                                 }
                         }
 

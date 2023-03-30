@@ -198,25 +198,11 @@ void teleport(
 
         const size_t nr_positions = map::nr_positions();
 
-        // Allow teleporting past non-metal doors for the player, and past any
-        // door for monsters
+        // Allow teleporting past doors.
         for (size_t i = 0; i < nr_positions; ++i) {
-                const auto* const r = map::g_terrain.at(i);
-
-                if (r->id() != terrain::Id::door) {
-                        // Not a door
-                        continue;
+                if (map::g_terrain.at(i)->id() == terrain::Id::door) {
+                        blocked.at(i) = false;
                 }
-
-                const auto* const door = static_cast<const terrain::Door*>(r);
-
-                if ((door->type() == terrain::DoorType::metal) &&
-                    actor::is_player(&actor)) {
-                        // Metal door, player teleporting - keep it blocked
-                        continue;
-                }
-
-                blocked.at(i) = false;
         }
 
         // Allow teleporting past Force Fields, since they are temporary

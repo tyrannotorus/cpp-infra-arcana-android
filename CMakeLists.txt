@@ -247,6 +247,7 @@ set(COMMON_SRC
         src/mapgen_connect_rooms.cpp
         src/mapgen_decorate.cpp
         src/mapgen_doors.cpp
+        src/mapgen_doors_and_keys.cpp
         src/mapgen_merge_regions.cpp
         src/mapgen_monolith.cpp
         src/mapgen_pylon.cpp

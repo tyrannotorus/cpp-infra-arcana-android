@@ -858,13 +858,12 @@ void Gong::hit(
                         msg_log::add("The gong is destroyed.");
                 }
 
-                map::update_terrain(
-                        terrain::make(terrain::Id::rubble_low, m_pos));
+                map::update_terrain(terrain::make(terrain::Id::rubble_low, m_pos));
 
                 map::update_vision();
 
                 if (player_bon::is_bg(Bg::exorcist)) {
-                        const auto msg =
+                        const std::string msg =
                                 rnd::element(
                                         common_text::g_exorcist_purge_phrases);
 

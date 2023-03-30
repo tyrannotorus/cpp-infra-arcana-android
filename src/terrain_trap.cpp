@@ -66,7 +66,7 @@ static bool is_player_seeing_trap_trigger(
         }
 }
 
-static void announce_magic_trap_trigger(
+static void communicate_magic_trap_trigger(
         const actor::Actor& actor,
         const P& pos,
         const bool is_hidden)
@@ -128,7 +128,7 @@ static void announce_magic_trap_trigger(
         }
 }
 
-static void announce_mechanical_trap_trigger(const actor::Actor& actor, const P& pos)
+static void communicate_mechanical_trap_trigger(const actor::Actor& actor, const P& pos)
 {
         std::string msg = "I hear a click.";
 
@@ -420,10 +420,10 @@ void Trap::trigger_start(const actor::Actor* actor)
         }
 
         if (is_magical()) {
-                announce_magic_trap_trigger(*actor, m_pos, is_hidden());
+                communicate_magic_trap_trigger(*actor, m_pos, is_hidden());
         }
         else if (type() != TrapId::web) {
-                announce_mechanical_trap_trigger(*actor, m_pos);
+                communicate_mechanical_trap_trigger(*actor, m_pos);
         }
 
         // Get a randomized value for number of remaining turns

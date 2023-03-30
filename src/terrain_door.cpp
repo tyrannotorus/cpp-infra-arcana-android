@@ -10,11 +10,15 @@
 #include <cstddef>
 #include <memory>
 #include <ostream>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "actor.hpp"
+#include "actor_data.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
+#include "audio.hpp"
 #include "audio_data.hpp"
 #include "bash.hpp"
 #include "common_text.hpp"
@@ -31,32 +35,117 @@
 #include "player_bon.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
+#include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
 #include "random.hpp"
 #include "sound.hpp"
 #include "terrain_data.hpp"
+#include "terrain_event.hpp"
 #include "terrain_factory.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static audio::SfxId get_bang_sfx(const terrain::DoorType type)
+{
+        switch (type) {
+        case terrain::DoorType::wood:
+                return audio::SfxId::door_bang;
+                break;
+
+        case terrain::DoorType::gate:
+                return audio::SfxId::door_bang_gate;
+                break;
+
+        case terrain::DoorType::metal:
+                return audio::SfxId::door_bang_metal;
+                break;
+        }
+
+        ASSERT(false);
+        return audio::SfxId::END;
+}
+
+static audio::SfxId get_break_sfx(const terrain::DoorType type)
+{
+        switch (type) {
+        case terrain::DoorType::wood:
+                return audio::SfxId::door_break;
+                break;
+
+        case terrain::DoorType::gate:
+                return audio::SfxId::door_break_gate;
+                break;
+
+        case terrain::DoorType::metal:
+                // Cannot be bashed open.
+                return audio::SfxId::END;
+                break;
+        }
+
+        ASSERT(false);
+        return audio::SfxId::END;
+}
+
+static audio::SfxId get_close_sfx(const terrain::DoorType type)
+{
+        switch (type) {
+        case terrain::DoorType::wood:
+                return audio::SfxId::door_close;
+                break;
+
+        case terrain::DoorType::gate:
+                return audio::SfxId::door_close_gate;
+                break;
+
+        case terrain::DoorType::metal:
+                return audio::SfxId::door_close_metal;
+                break;
+        }
+
+        ASSERT(false);
+        return audio::SfxId::END;
+}
+
+static audio::SfxId get_open_sfx(const terrain::DoorType type)
+{
+        switch (type) {
+        case terrain::DoorType::wood:
+                return audio::SfxId::door_open;
+                break;
+
+        case terrain::DoorType::gate:
+                return audio::SfxId::door_open_gate;
+                break;
+
+        case terrain::DoorType::metal:
+                return audio::SfxId::door_open_metal;
+                break;
+        }
+
+        ASSERT(false);
+        return audio::SfxId::END;
+}
+
 static terrain::DoorSpawnState get_random_spawn_state(
         const terrain::DoorType door_type)
 {
         // NOTE: The chances below are just generic default behavior for random
         // doors placed wherever. Doors may be explicitly set to other states
-        // elsewhere during map generation (e.g. set to secret to hide an
-        // optional branch of the map).
+        // elsewhere during map generation.
 
         const int pct_secret = 10 + (map::g_dlvl - 1);
         const int pct_stuck = 10;
 
-        if ((door_type != terrain::DoorType::gate) && rnd::percent(pct_secret)) {
-                // Secret
+        const bool is_gate = (door_type == terrain::DoorType::gate);
+        const bool is_metal = (door_type == terrain::DoorType::metal);
 
-                if (rnd::percent(pct_stuck)) {
+        if (!is_gate && rnd::percent(pct_secret)) {
+                // Secret.
+
+                if (!is_metal && rnd::percent(pct_stuck)) {
                         return terrain::DoorSpawnState::secret_and_stuck;
                 }
                 else {
@@ -64,19 +153,101 @@ static terrain::DoorSpawnState get_random_spawn_state(
                 }
         }
         else {
-                // Not secret
+                // Not secret.
 
                 if (rnd::coin_toss()) {
-                        // Open
                         return terrain::DoorSpawnState::open;
                 }
-                else if (rnd::percent(pct_stuck)) {
+                else if (!is_metal && rnd::percent(pct_stuck)) {
                         return terrain::DoorSpawnState::stuck;
                 }
                 else {
                         return terrain::DoorSpawnState::closed;
                 }
         }
+}
+
+static int calc_player_bash_chance(
+        const int dmg,
+        const DmgType dmg_type,
+        const int jam_lvl)
+{
+        int destr_chance_pct = 25 + (dmg * 5) - (jam_lvl * 4);
+
+        destr_chance_pct = std::max(1, destr_chance_pct);
+
+        if (dmg_type != DmgType::control_object_spell) {
+                if (player_bon::has_trait(Trait::tough)) {
+                        destr_chance_pct += 15;
+                }
+
+                if (player_bon::has_trait(Trait::rugged)) {
+                        destr_chance_pct += 15;
+                }
+
+                if (map::g_player->m_properties.has(prop::Id::frenzied)) {
+                        destr_chance_pct += 30;
+                }
+        }
+
+        destr_chance_pct = std::min(100, destr_chance_pct);
+
+        return destr_chance_pct;
+}
+
+static void communicate_player_bash_futile(const audio::SfxId sfx)
+{
+        Snd snd("",
+                sfx,
+                IgnoreMsgIfOriginSeen::no,
+                map::g_player->m_pos,
+                map::g_player,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd.run();
+
+        msg_log::add("It seems futile.");
+}
+
+static void communicate_player_bash_success(
+        const P& pos,
+        const bool is_hidden,
+        const audio::SfxId sfx,
+        const std::string& door_name,
+        const std::string& break_descr)
+{
+        Snd snd(
+                "",
+                sfx,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                map::g_player,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd.run();
+
+        if (is_hidden) {
+                msg_log::add("A " + door_name + " crashes " + break_descr);
+        }
+        else {
+                msg_log::add("The " + door_name + " crashes " + break_descr);
+        }
+}
+
+static void communicate_player_bash_failed(const P& pos, const audio::SfxId sfx)
+{
+        Snd snd(
+                "",
+                sfx,
+                IgnoreMsgIfOriginSeen::no,
+                pos,
+                map::g_player,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd.run();
 }
 
 // -----------------------------------------------------------------------------
@@ -86,18 +257,17 @@ namespace terrain
 {
 Door::~Door()
 {
-        // Unlink all levers
-        if (m_type == DoorType::metal) {
+        if (m_ward_state == WardState::warded) {
                 const size_t nr_positions = map::nr_positions();
+
                 for (size_t i = 0; i < nr_positions; ++i) {
-                        auto* const terrain = map::g_terrain.at(i);
+                        Terrain* const terrain = map::g_terrain.at(i);
 
-                        if (terrain && (terrain->id() == terrain::Id::lever)) {
-                                auto* const lever =
-                                        static_cast<Lever*>(terrain);
+                        if (terrain && (terrain->id() == terrain::Id::crystal_key)) {
+                                auto* const crystal = static_cast<CrystalKey*>(terrain);
 
-                                if (lever->is_linked_to(*this)) {
-                                        lever->unlink();
+                                if (crystal->is_linked_to(this)) {
+                                        crystal->unlink();
                                 }
                         }
                 }
@@ -110,12 +280,22 @@ void Door::init_type_and_state(const DoorType type, DoorSpawnState spawn_state)
 {
         m_type = type;
 
-        // Gates should never be secret
+        // Gates should never be secret.
         ASSERT(!((m_type == DoorType::gate) && m_mimic_terrain));
+
         ASSERT(
                 !((m_type == DoorType::gate) &&
                   ((spawn_state == DoorSpawnState::secret) ||
                    (spawn_state == DoorSpawnState::secret_and_stuck))));
+
+        // Metal doors should never be stuck.
+        ASSERT(
+                !((m_type == DoorType::metal) &&
+                  ((spawn_state == DoorSpawnState::stuck) ||
+                   (spawn_state == DoorSpawnState::secret_and_stuck))));
+
+        // Only wooden doors can be warded.
+        ASSERT(!((spawn_state == DoorSpawnState::warded) && (m_type != DoorType::wood)));
 
         if (spawn_state == DoorSpawnState::any) {
                 spawn_state = get_random_spawn_state(m_type);
@@ -126,38 +306,51 @@ void Door::init_type_and_state(const DoorType type, DoorSpawnState spawn_state)
                 m_is_open = true;
                 m_is_stuck = false;
                 m_is_hidden = false;
+                m_ward_state = WardState::not_warded;
                 break;
 
         case DoorSpawnState::closed:
                 m_is_open = false;
                 m_is_stuck = false;
                 m_is_hidden = false;
+                m_ward_state = WardState::not_warded;
                 break;
 
         case DoorSpawnState::stuck:
                 m_is_open = false;
                 m_is_stuck = true;
                 m_is_hidden = false;
+                m_ward_state = WardState::not_warded;
                 break;
 
         case DoorSpawnState::secret:
                 m_is_open = false;
                 m_is_stuck = false;
                 m_is_hidden = true;
+                m_ward_state = WardState::not_warded;
                 break;
 
         case DoorSpawnState::secret_and_stuck:
                 m_is_open = false;
                 m_is_stuck = true;
                 m_is_hidden = true;
+                m_ward_state = WardState::not_warded;
                 break;
 
-        case DoorSpawnState::any:
-                ASSERT(false);
-
+        case DoorSpawnState::warded:
                 m_is_open = false;
                 m_is_stuck = false;
                 m_is_hidden = false;
+                m_ward_state = WardState::warded;
+                break;
+
+        case DoorSpawnState::any:
+                // Should have been set to specific state previously.
+                ASSERT(false);
+                m_is_open = false;
+                m_is_stuck = false;
+                m_is_hidden = false;
+                m_ward_state = WardState::not_warded;
                 break;
         }
 }
@@ -203,8 +396,8 @@ void Door::hit(
 
         switch (dmg_type) {
         case DmgType::pure: {
+                try_trigger_ward_trap();
                 map::update_terrain(make(Id::rubble_low, m_pos));
-
                 map::update_vision();
 
                 return;
@@ -227,8 +420,8 @@ void Door::hit(
                                                 " is blown to pieces!");
                                 }
 
+                                try_trigger_ward_trap();
                                 map::update_terrain(make(Id::rubble_low, m_pos));
-
                                 map::update_vision();
 
                                 return;
@@ -241,7 +434,11 @@ void Door::hit(
         } break;
 
         case DmgType::explosion: {
-                // TODO:
+                try_trigger_ward_trap();
+
+                map::update_terrain(terrain::make(terrain::Id::rubble_low, m_pos));
+
+                map::update_vision();
         } break;
 
         // Kicking, blunt (sledgehammers), slashing (axes), or the control
@@ -260,7 +457,9 @@ void Door::hit(
         } break;
 
         case DmgType::fire: {
-                if (matl() == Matl::wood) {
+                // TODO: Warded doors do not burn, but consider printing some
+                // message about the door resisting fire.
+                if ((matl() == Matl::wood) && (m_ward_state != WardState::warded)) {
                         reveal(PrintRevealMsg::if_seen);
 
                         try_start_burning(Verbose::yes);
@@ -277,10 +476,7 @@ void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
         const bool is_player = actor::is_player(&actor);
         const bool is_cell_seen = map::g_seen.at(m_pos);
 
-        if ((m_type == DoorType::metal) &&
-            is_player &&
-            is_cell_seen &&
-            !m_is_hidden) {
+        if ((m_type == DoorType::metal) && is_player && is_cell_seen && !m_is_hidden) {
                 msg_log::add(
                         "It seems futile.",
                         colors::msg_note(),
@@ -301,138 +497,72 @@ void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
 void Door::player_bash(const DmgType dmg_type, const int dmg)
 {
         const bool is_weak = map::g_player->m_properties.has(prop::Id::weakened);
-        const bool is_cell_seen = map::g_seen.at(m_pos);
+        const bool is_ctrl_obj = (dmg_type == DmgType::control_object_spell);
 
-        int destr_chance_pct = 25 + (dmg * 5) - (m_jam_level * 4);
+        int destr_chance_pct = 0;
 
-        destr_chance_pct = std::max(1, destr_chance_pct);
-
-        if (dmg_type != DmgType::control_object_spell) {
-                if (player_bon::has_trait(Trait::tough)) {
-                        destr_chance_pct += 15;
-                }
-
-                if (player_bon::has_trait(Trait::rugged)) {
-                        destr_chance_pct += 15;
-                }
-
-                if (map::g_player->m_properties.has(prop::Id::frenzied)) {
-                        destr_chance_pct += 30;
-                }
-
-                if (is_weak || m_is_hidden) {
-                        destr_chance_pct = 0;
-                }
+        // Calculate a (non-zero) chance if:
+        // * The door is seen, AND
+        // * The player is not weak, or is using the "control object" spell
+        if (!m_is_hidden && (!is_weak || is_ctrl_obj)) {
+                destr_chance_pct = calc_player_bash_chance(dmg, dmg_type, m_jam_level);
         }
 
-        destr_chance_pct = std::min(100, destr_chance_pct);
+        const audio::SfxId sfx_door_bang = get_bang_sfx(m_type);
+        const audio::SfxId sfx_door_break = get_break_sfx(m_type);
 
-        auto sfx_door_bang = audio::SfxId::door_bang;
-        auto sfx_door_break = audio::SfxId::door_break;
-        std::string break_desc = " open!";
-        if (m_type == DoorType::gate) {
-                break_desc = " to the floor!";
-                sfx_door_bang = audio::SfxId::door_bang_metallic;
-                sfx_door_break = audio::SfxId::door_break_metallic;
+        const std::string break_descr = (m_type == DoorType::gate) ? "to the floor!" : "open!";
+
+        if (destr_chance_pct <= 0) {
+                if (map::g_seen.at(m_pos) && !m_is_hidden) {
+                        communicate_player_bash_futile(sfx_door_bang);
+                }
         }
+        else if (rnd::percent(destr_chance_pct)) {
+                communicate_player_bash_success(
+                        m_pos,
+                        m_is_hidden,
+                        sfx_door_break,
+                        base_name_short(),
+                        break_descr);
 
-        if (destr_chance_pct > 0) {
-                if (rnd::percent(destr_chance_pct)) {
-                        Snd snd(
-                                "",
-                                sfx_door_break,
-                                IgnoreMsgIfOriginSeen::yes,
-                                m_pos,
-                                map::g_player,
-                                SndVol::low,
-                                AlertsMon::yes);
+                try_trigger_ward_trap();
 
-                        snd.run();
+                const P pos = m_pos;
 
-                        if (is_cell_seen) {
-                                if (m_is_hidden) {
-                                        msg_log::add(
-                                                "A " +
-                                                base_name_short() +
-                                                " crashes" +
-                                                break_desc);
-                                }
-                                else {
-                                        msg_log::add(
-                                                "The " +
-                                                base_name_short() +
-                                                " crashes" +
-                                                break_desc);
-                                }
-                        }
-                        else {
-                                // Cell not seen
-                                msg_log::add("I feel a door crashing" + break_desc);
-                        }
+                map::update_terrain(make(Id::rubble_low, m_pos));
 
-                        const P pos = m_pos;
-
-                        map::update_terrain(make(Id::rubble_low, m_pos));
-
-                        map::memorize_terrain_at(pos);
-                        map::update_vision();
-                }
-                else {
-                        // Not destroyed
-                        const audio::SfxId sfx =
-                                m_is_hidden
-                                ? audio::SfxId::END
-                                : sfx_door_bang;
-
-                        Snd snd(
-                                "",
-                                sfx,
-                                IgnoreMsgIfOriginSeen::no,
-                                m_pos,
-                                map::g_player,
-                                SndVol::low,
-                                AlertsMon::yes);
-
-                        snd.run();
-                }
+                map::memorize_terrain_at(pos);
+                map::update_vision();
         }
         else {
-                // No chance of success
-                if (is_cell_seen && !m_is_hidden) {
-                        Snd snd("",
-                                sfx_door_bang,
-                                IgnoreMsgIfOriginSeen::no,
-                                map::g_player->m_pos,
-                                map::g_player,
-                                SndVol::low,
-                                AlertsMon::yes);
+                const audio::SfxId sfx = m_is_hidden ? audio::SfxId::END : sfx_door_bang;
 
-                        snd.run();
-
-                        msg_log::add("It seems futile.");
-                }
+                communicate_player_bash_failed(m_pos, sfx);
         }
 }
 
 void Door::mon_bash(actor::Actor& mon)
 {
-        const bool is_weak = map::g_player->m_properties.has(prop::Id::weakened);
-        const bool is_pos_seen = map::g_seen.at(m_pos);
+        // TODO: Refactor similarly to the player_bash function.
 
-        auto sfx_door_bang = audio::SfxId::door_bang;
-        auto sfx_door_break = audio::SfxId::door_break;
-        if (m_type == DoorType::gate) {
-                sfx_door_bang = audio::SfxId::door_bang_metallic;
-                sfx_door_break = audio::SfxId::door_break_metallic;
+        ASSERT(m_ward_state != WardState::warded);
+
+        const bool is_weak = mon.m_properties.has(prop::Id::weakened);
+
+        int destr_chance_pct = 0;
+
+        // NOTE: Unlike the player, monsters can (and will), attempt to bash
+        // open metal doors, which should never succeed.
+        if (!is_weak && (m_type != DoorType::metal)) {
+                destr_chance_pct = 7 - (m_jam_level * 2);
+                destr_chance_pct = std::max(1, destr_chance_pct);
         }
 
-        int destr_chance_pct = 7 - (m_jam_level * 2);
+        const audio::SfxId sfx_door_bang = get_bang_sfx(m_type);
+        const audio::SfxId sfx_door_break = get_break_sfx(m_type);
 
-        destr_chance_pct = std::max(1, destr_chance_pct);
-
-        if (is_weak) {
-                destr_chance_pct = 0;
-        }
+        const std::string break_descr = (m_type == DoorType::gate) ? "to the floor!" : "open!";
 
         if (rnd::percent(destr_chance_pct)) {
                 // NOTE: When it's a monster bashing down the door, we make the
@@ -450,18 +580,23 @@ void Door::mon_bash(actor::Actor& mon)
                 snd.run();
 
                 const bool can_player_see_actor = actor::can_player_see_actor(mon);
+                const bool is_pos_seen = map::g_seen.at(m_pos);
 
                 if (can_player_see_actor) {
                         msg_log::add(
                                 "The " +
                                 base_name_short() +
-                                " crashes open!");
+                                " crashes " +
+                                break_descr +
+                                "!");
                 }
                 else if (is_pos_seen) {
                         msg_log::add(
                                 "A " +
                                 base_name_short() +
-                                " crashes open!");
+                                " crashes " +
+                                break_descr +
+                                "!");
                 }
 
                 const P pos = m_pos;
@@ -491,11 +626,14 @@ void Door::mon_bash(actor::Actor& mon)
 
 WasDestroyed Door::on_finished_burning()
 {
+        // Warded doors do not burn.
+        ASSERT(m_ward_state != WardState::warded);
+
         if (map::g_seen.at(m_pos)) {
                 msg_log::add("The door burns down.");
         }
 
-        auto* const t = make(Id::rubble_low, m_pos);
+        terrain::Terrain* const t = make(Id::rubble_low, m_pos);
 
         t->m_burn_state = BurnState::has_burned;
 
@@ -519,17 +657,15 @@ bool Door::can_move(const actor::Actor& actor) const
 
         // The door is closed
 
-        const auto& properties = actor.m_properties;
+        const prop::PropHandler& properties = actor.m_properties;
 
-        // Can move through all door types
-        if (properties.has(prop::Id::ethereal) ||
-            properties.has(prop::Id::ooze)) {
+        // Can move through all door types.
+        if (properties.has(prop::Id::ethereal) || properties.has(prop::Id::ooze)) {
                 return true;
         }
 
-        // Small crawling creatures can pass through gates
-        if ((m_type == DoorType::gate) &&
-            properties.has(prop::Id::small_crawling)) {
+        // Small crawling creatures can pass through gates.
+        if ((m_type == DoorType::gate) && properties.has(prop::Id::small_crawling)) {
                 return true;
         }
 
@@ -538,14 +674,13 @@ bool Door::can_move(const actor::Actor& actor) const
 
 bool Door::is_property_allowing_move(prop::Id id) const
 {
-        // Can move through all door types
+        // Can move through all door types.
         if ((id == prop::Id::ethereal) || (id == prop::Id::ooze)) {
                 return true;
         }
 
         // Small creatures can pass through gates
-        const bool is_gate =
-                (m_type == DoorType::gate);
+        const bool is_gate = (m_type == DoorType::gate);
 
         const bool is_small_creature =
                 (id == prop::Id::small_crawling) ||
@@ -579,7 +714,19 @@ std::string Door::base_name() const
 
         switch (m_type) {
         case DoorType::wood:
-                ret = "wooden door";
+                switch (m_ward_state) {
+                case WardState::not_warded:
+                        return "wooden door";
+                        break;
+
+                case WardState::warded:
+                        return "warded door";
+                        break;
+
+                case WardState::unwarded:
+                        return "unwarded door";
+                        break;
+                };
                 break;
 
         case DoorType::metal:
@@ -628,36 +775,30 @@ std::string Door::name(const Article article) const
         std::string mod;
 
         if (m_burn_state == BurnState::burning) {
-                a =
-                        (article == Article::a)
-                        ? "a "
-                        : "the ";
+                a = (article == Article::a) ? "a " : "the ";
 
                 mod = "burning ";
         }
 
         if (m_is_open) {
                 if (a.empty()) {
-                        a =
-                                (article == Article::a)
-                                ? "an "
-                                : "the ";
+                        a = (article == Article::a) ? "an " : "the ";
                 }
 
                 mod += "open ";
         }
 
-        const bool is_metal = type() == DoorType::metal;
-
-        if (m_is_stuck && m_is_known_stuck && !is_metal) {
+        if (m_is_stuck && m_is_known_stuck) {
                 mod = "stuck ";
         }
 
         if (a.empty()) {
-                a =
-                        (article == Article::a)
-                        ? "a "
-                        : "the ";
+                if (m_ward_state == WardState::unwarded) {
+                        a = (article == Article::a) ? "an " : "the ";
+                }
+                else {
+                        a = (article == Article::a) ? "a " : "the ";
+                }
         }
 
         return a + mod + base_name();
@@ -674,7 +815,19 @@ Color Door::color_default() const
 
         switch (m_type) {
         case DoorType::wood:
-                color = colors::dark_brown();
+                switch (m_ward_state) {
+                case WardState::not_warded:
+                        return colors::dark_brown();
+                        break;
+
+                case WardState::warded:
+                        return colors::light_red();
+                        break;
+
+                case WardState::unwarded:
+                        return colors::gray_brown();
+                        break;
+                };
                 break;
 
         case DoorType::metal:
@@ -707,6 +860,9 @@ char Door::character() const
         if (m_is_open) {
                 return 39;
         }
+        else if (m_ward_state != WardState::not_warded) {
+                return '+';
+        }
         else if (m_is_stuck && m_is_known_stuck && !is_metal) {
                 return 'X';
         }
@@ -730,6 +886,9 @@ gfx::TileId Door::tile() const
         case DoorType::wood: {
                 if (m_is_open) {
                         return gfx::TileId::door_open;
+                }
+                else if (m_ward_state != WardState::not_warded) {
+                        return gfx::TileId::door_warded;
                 }
                 else if (m_is_stuck && m_is_known_stuck) {
                         return gfx::TileId::door_stuck;
@@ -819,6 +978,12 @@ void Door::bump(actor::Actor& actor_bumping)
         }
 
         if (!is_seen && !m_is_open) {
+                if (m_ward_state == WardState::warded) {
+                        // Print a message as a rationale as to how a blind
+                        // player can know that the door is warded.
+                        msg_log::add("Something gives me a foreboding feeling.");
+                }
+
                 const std::string name_a = text_format::first_to_lower(name(Article::a));
 
                 msg_log::add("There is " + name_a + " here.");
@@ -865,13 +1030,27 @@ void Door::bump(actor::Actor& actor_bumping)
                 map::memorize_terrain_at(m_pos);
                 map::update_vision();
 
-                if (!is_seen) {
-                        std::string msg = "Attempt to open it?";
+                bool do_query = false;
+                std::string query_msg;
 
-                        msg += " " + common_text::g_yes_or_no_hint;
+                if (!is_seen) {
+                        // NOTE: If the door is unseen and warded, it would be
+                        // redundant to refer to it as a warded door here
+                        // (already done previously).
+                        do_query = true;
+                        query_msg = "Attempt to open it?";
+                }
+                else if (m_ward_state == WardState::warded) {
+                        do_query = true;
+                        std::string door_name = text_format::first_to_lower(name(Article::a));
+                        query_msg = "Open " + door_name + "?";
+                }
+
+                if (do_query) {
+                        query_msg += " " + common_text::g_yes_or_no_hint;
 
                         msg_log::add(
-                                msg,
+                                query_msg,
                                 colors::light_white(),
                                 MsgInterruptPlayer::no,
                                 MorePromptOnMsg::no,
@@ -911,8 +1090,7 @@ void Door::reveal(const PrintRevealMsg print_reveal_msg)
         // If the player is adjacent, also reveal stuck status to avoid an
         // inconsistent state (the player standing next to a revealed door that
         // they don't know is stuck).
-        if (m_pos.is_adjacent(map::g_player->m_pos) &&
-            (m_type != DoorType::metal)) {
+        if (m_pos.is_adjacent(map::g_player->m_pos)) {
                 reveal_stuck_status(print_reveal_msg);
         }
 }
@@ -925,11 +1103,6 @@ void Door::on_revealed_from_searching()
 void Door::reveal_stuck_status(const PrintRevealMsg print_reveal_msg)
 {
         if (m_is_hidden) {
-                ASSERT(false);
-                return;
-        }
-
-        if (m_type == DoorType::metal) {
                 ASSERT(false);
                 return;
         }
@@ -959,9 +1132,19 @@ void Door::reveal_stuck_status(const PrintRevealMsg print_reveal_msg)
 void Door::set_secret()
 {
         ASSERT(m_type != DoorType::gate);
+        ASSERT(m_ward_state == WardState::not_warded);
 
         m_is_open = false;
         m_is_hidden = true;
+}
+
+void Door::set_stuck()
+{
+        ASSERT(m_type != DoorType::metal);
+        ASSERT(m_ward_state == WardState::not_warded);
+
+        m_is_open = false;
+        m_is_stuck = true;
 }
 
 bool Door::actor_try_jam(actor::Actor& actor_trying)
@@ -970,26 +1153,20 @@ bool Door::actor_try_jam(actor::Actor& actor_trying)
                 return false;
         }
 
+        // Door is in correct state for jamming (known, closed).
+
         const bool is_player = actor::is_player(&actor_trying);
         const bool tryer_is_blind = !actor_trying.m_properties.allow_see();
 
-        // Door is in correct state for jamming (known, closed)
         ++m_jam_level;
         m_is_stuck = true;
 
         if (is_player) {
                 m_is_known_stuck = true;
 
-                std::string a =
-                        tryer_is_blind
-                        ? "a "
-                        : "the ";
+                std::string a = tryer_is_blind ? "a " : "the ";
 
-                msg_log::add(
-                        "I jam " +
-                        a +
-                        base_name_short() +
-                        " with a spike.");
+                msg_log::add("I jam " + a + base_name_short() + " with a spike.");
         }
 
         game_time::tick();
@@ -1000,20 +1177,6 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 {
         const bool is_player = actor::is_player(&actor_trying);
         const bool tryer_is_blind = !actor_trying.m_properties.allow_see();
-
-        if (is_player && (m_type == DoorType::metal)) {
-                if (tryer_is_blind) {
-                        msg_log::add(
-                                "There is a metal door here, but it's stuck.");
-                }
-                else {
-                        msg_log::add("The door is stuck.");
-                }
-
-                msg_log::add("Perhaps it is handled elsewhere.");
-
-                return;
-        }
 
         const bool player_see_tryer =
                 is_player
@@ -1045,7 +1208,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
                 bool is_opening_actor_alive = false;
 
-                for (const auto* const actor : game_time::g_actors) {
+                for (const actor::Actor* const actor : game_time::g_actors) {
                         if ((actor == m_actor_currently_opening) &&
                             actor->is_alive()) {
                                 is_opening_actor_alive = true;
@@ -1105,11 +1268,8 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 return;
         }
 
-        // Door can be closed
-        auto sfx_door_close = audio::SfxId::door_close;
-        if (m_type == DoorType::gate) {
-                sfx_door_close = audio::SfxId::door_close_metallic;
-        }
+        // Door can be closed.
+        const audio::SfxId sfx_door_close = get_close_sfx(m_type);
 
         if (tryer_is_blind) {
                 if (rnd::coin_toss()) {
@@ -1222,7 +1382,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
                 // Monster closing
                 Snd snd(
                         "I hear a door closing.",
-                        audio::SfxId::door_close,
+                        sfx_door_close,
                         IgnoreMsgIfOriginSeen::yes,
                         m_pos,
                         &actor_trying,
@@ -1260,38 +1420,20 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                 ? true
                 : actor::can_player_see_actor(actor_trying);
 
-        if (is_player && (m_type == DoorType::metal)) {
-                if (!player_see_door) {
-                        msg_log::add("There is a closed metal door here.");
-                }
-
-                msg_log::add("I find no way to open it.");
-
-                msg_log::add("Perhaps it is handled elsewhere.");
-
-                return;
-        }
-        auto sfx_door_open = audio::SfxId::door_open;
-        if (m_type == DoorType::gate) {
-                sfx_door_open = audio::SfxId::door_open_metallic;
-        }
+        const audio::SfxId sfx_door_open = get_open_sfx(m_type);
 
         if (m_is_stuck) {
                 TRACE << "Is stuck" << std::endl;
 
                 if (is_player) {
-                        msg_log::add(
-                                "The " +
-                                base_name_short() +
-                                " seems to be stuck.");
+                        msg_log::add("The " + base_name_short() + " seems to be stuck.");
                 }
         }
         else {
                 // Not stuck
                 TRACE << "Is not stuck" << std::endl;
 
-                const bool tryer_can_see =
-                        actor_trying.m_properties.allow_see();
+                const bool tryer_can_see = actor_trying.m_properties.allow_see();
 
                 if (tryer_can_see) {
                         TRACE << "Tryer can see, opening" << std::endl;
@@ -1474,6 +1616,8 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                 actor_trying.m_opening_door_pos = m_pos;
 
+                try_trigger_ward_trap();
+
                 game_time::tick();
 
                 map::memorize_terrain_at(m_pos);
@@ -1481,18 +1625,6 @@ void Door::actor_try_open(actor::Actor& actor_trying)
         }
 
 }  // actor_try_open
-
-void Door::on_lever_pulled(Lever* const lever)
-{
-        (void)lever;
-
-        if (m_is_open) {
-                close(nullptr);
-        }
-        else {
-                open(nullptr);
-        }
-}
 
 DidOpen Door::open(actor::Actor* const actor_opening)
 {
@@ -1512,18 +1644,7 @@ DidOpen Door::open(actor::Actor* const actor_opening)
                 actor_opening->m_opening_door_pos = m_pos;
         }
 
-        if (m_type == DoorType::metal) {
-                Snd snd(
-                        "",
-                        audio::SfxId::END,
-                        IgnoreMsgIfOriginSeen::yes,
-                        m_pos,
-                        nullptr,
-                        SndVol::low,
-                        AlertsMon::yes);
-
-                snd.run();
-        }
+        try_trigger_ward_trap();
 
         return DidOpen::yes;
 }
@@ -1540,19 +1661,6 @@ DidClose Door::close(actor::Actor* const actor_closing)
                 msg_log::add("The " + name + " closes.");
         }
 
-        if (m_type == DoorType::metal) {
-                Snd snd(
-                        "",
-                        audio::SfxId::END,
-                        IgnoreMsgIfOriginSeen::yes,
-                        m_pos,
-                        nullptr,
-                        SndVol::low,
-                        AlertsMon::yes);
-
-                snd.run();
-        }
-
         return DidClose::yes;
 }
 
@@ -1560,7 +1668,6 @@ void Door::jam(actor::Actor* const actor_jamming)
 {
         if (m_is_open || (m_type == DoorType::metal)) {
                 ASSERT(false);
-
                 return;
         }
 
@@ -1569,6 +1676,88 @@ void Door::jam(actor::Actor* const actor_jamming)
 
         if (actor_jamming && actor::is_player(actor_jamming)) {
                 m_is_known_stuck = true;
+        }
+}
+
+void Door::try_trigger_ward_trap()
+{
+        if (m_ward_state != WardState::warded) {
+                return;
+        }
+
+        // Disable any linked crystals.
+        for (terrain::Terrain* const terrain : map::g_terrain) {
+                if (terrain->id() != Id::crystal_key) {
+                        continue;
+                }
+
+                auto* const crystal = static_cast<CrystalKey*>(terrain);
+
+                if (crystal->is_linked_to(this)) {
+                        // NOTE: This will make the lever remove the ward status
+                        // on this door. The lever will also disable any
+                        // "siblings", so no need call any other crystals.
+                        crystal->deactivate();
+
+                        break;
+                }
+        }
+
+        const P pos = m_pos;
+
+        // Destroying the door, otherwise it causes a dumb situation where the
+        // player can close the door to avoid or split the monsters that spawn.
+        map::update_terrain(terrain::make(Id::rubble_low, pos));
+
+        // NOTE: This object is now destroyed.
+
+        // NOTE: This will play regardless of whether the door is seen or not,
+        // or whether it is actually the player that caused the ward to
+        // trigger. This should be acceptable howeever since it will always be
+        // coupled with the "something approaches" message below.
+        audio::play(audio::SfxId::thunder);
+
+        std::vector<std::string> summon_bucket;
+
+        summon_bucket.reserve(actor::g_data.size());
+
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& data = it.second;
+
+                if (data.can_be_summoned_by_mon) {
+                        if (data.spawn_min_dlvl <= (map::g_dlvl + 1)) {
+                                summon_bucket.push_back(data.id);
+                        }
+                }
+        }
+
+        if (!summon_bucket.empty()) {
+                msg_log::add("Something approaches...");
+
+                const std::string id_to_spawn = rnd::element(summon_bucket);
+
+                const size_t nr_mon = rnd::range(1, 3);
+
+                auto* const event =
+                        static_cast<terrain::EventSpawnMonstersDelayed*>(
+                                make(terrain::Id::event_spawn_monsters_delayed, pos));
+
+                event->set_mon_id(id_to_spawn);
+
+                event->set_nr_mon((int)nr_mon);
+
+                game_time::add_mob(event);
+        }
+
+        if (rnd::one_in(3)) {
+                map::g_player->m_properties.apply(prop::make(prop::Id::cursed));
+        }
+}
+
+void Door::remove_ward()
+{
+        if (m_ward_state == WardState::warded) {
+                m_ward_state = WardState::unwarded;
         }
 }
 

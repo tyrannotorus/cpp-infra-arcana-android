@@ -91,11 +91,7 @@ struct Fraction
 };
 
 template <typename T>
-struct WeightedItems
-{
-        std::vector<T> items = {};
-        std::vector<int> weights = {};
-};
+struct WeightedItems;
 
 //------------------------------------------------------------------------------
 // Random number generation
@@ -157,5 +153,17 @@ void shuffle(std::vector<T>& v)
 }
 
 }  // namespace rnd
+
+template <typename T>
+struct WeightedItems
+{
+        T roll() const
+        {
+                return rnd::weighted_choice(*this);
+        }
+
+        std::vector<T> items = {};
+        std::vector<int> weights = {};
+};
 
 #endif  // RANDOM_HPP

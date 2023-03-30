@@ -70,10 +70,7 @@ void Monolith::hit(
 
 std::string Monolith::name(const Article article) const
 {
-        std::string ret =
-                article == Article::a
-                ? "a "
-                : "the ";
+        std::string ret = article == Article::a ? "a " : "the ";
 
         return ret + "carved monolith";
 }

@@ -69,7 +69,7 @@ bool allow_make_grate_at(const P& pos, const Array2<bool>& blocked);
 
 void make_doors();
 
-void make_metal_doors_and_levers();
+void make_warded_doors_and_keys();
 
 void make_monoliths();
 

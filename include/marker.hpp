@@ -367,7 +367,7 @@ public:
         char menu_key() const override;
 };
 
-class CtrlObjToggleLever : public CtrlObjAction
+class CtrlObjDeactivateCrystal : public CtrlObjAction
 {
 public:
         bool can_control(

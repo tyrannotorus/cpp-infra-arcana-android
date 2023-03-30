@@ -63,8 +63,8 @@ Terrain* make(const Id id, const P& pos)
                 return new Stairs(pos, d);
                 break;
 
-        case Id::lever:
-                return new Lever(pos, d);
+        case Id::crystal_key:
+                return new CrystalKey(pos, d);
                 break;
 
         case Id::brazier:

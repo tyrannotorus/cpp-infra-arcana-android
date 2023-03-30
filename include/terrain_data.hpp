@@ -38,7 +38,7 @@ enum class Id
         chains,
         grate,
         stairs,
-        lever,
+        crystal_key,
         brazier,
         gravestone,
         tomb,

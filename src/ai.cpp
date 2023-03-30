@@ -240,10 +240,10 @@ DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path)
 
         auto* const door = static_cast<terrain::Door*>(terrain);
 
-        // There should never be a path past metal doors
-        ASSERT(door->type() != terrain::DoorType::metal);
+        // There should never be a path past warded doors.
+        if (door->is_warded()) {
+                ASSERT(false);
 
-        if (door->type() == terrain::DoorType::metal) {
                 return DidAction::no;
         }
 
@@ -254,7 +254,7 @@ DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path)
         const bool mon_can_open = mon.m_data->can_open_doors;
 
         // There should never be a path past a door if the monster can neither
-        // bash nor open
+        // bash nor open.
         ASSERT(mon_can_bash || mon_can_open);
 
         if (!mon_can_bash && !mon_can_open) {
@@ -273,7 +273,7 @@ DidAction handle_closed_blocking_door(actor::Actor& mon, std::vector<P>& path)
                 // When bashing doors, give the bashing monster some bonus
                 // awareness time (because monsters trying to bash down doors is
                 // a pretty central part of the game, and they should not give
-                // up so easily)
+                // up so easily).
                 if (!mon.is_actor_my_leader(map::g_player) &&
                     rnd::fraction(3, 5)) {
                         ++mon.m_mon_aware_state.aware_counter;
@@ -811,25 +811,22 @@ std::vector<P> find_path_to_target(actor::Actor& mon)
                         const terrain::Terrain* const t = map::g_terrain.at(p);
 
                         if (t->id() == terrain::Id::door) {
-                                const auto* const door =
-                                        static_cast<const terrain::Door*>(t);
+                                const auto* const door = static_cast<const terrain::Door*>(t);
 
-                                if (door->type() == terrain::DoorType::metal) {
-                                        // Metal door - none shall pass!
+                                if (door->is_warded()) {
+                                        // Warded door - none shall pass!
                                         continue;
                                 }
 
-                                if (door->is_stuck() &&
-                                    !mon.m_data->can_bash_doors) {
-                                        // Stuck non-metal door, and the actor
-                                        // cannot bash doors.
+                                if (door->is_stuck() && !mon.m_data->can_bash_doors) {
+                                        // Stuck door, and the actor cannot bash
+                                        // doors.
                                         continue;
                                 }
 
                                 if (!mon.m_data->can_bash_doors &&
                                     !mon.m_data->can_open_doors) {
-                                        // Non-stuck, non-metal door, but the
-                                        // actor cannot handle doors at all.
+                                        // The actor cannot handle doors at all.
                                         continue;
                                 }
 

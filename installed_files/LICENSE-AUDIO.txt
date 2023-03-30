@@ -451,11 +451,36 @@ Original title:      dungeondoorknock.wav
 License:             CC0 1.0 Universal (CC0 1.0)
 Changes made:        Cut most of the sound
 
+File:                sfx_door_bang_gate.ogg
+Source:              https://freesound.org/people/mickyman5000/sounds/340575/
+Author:              mickyman5000 (username on freesound.org)
+Original title:      Scrap_Metal_Rummaging.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut most of the sound, reverb.
+
+File:                sfx_door_bang_metal.ogg
+Source:              https://freesound.org/people/qubodup/sounds/448947/
+Author:              qubodup (username on freesound.org)
+Original title:      Creepy Metal Door Bang
+License:             Attribution 4.0 International (CC BY 4.0) 
+Changes made:        Cut most of the sound
+
 File:                sfx_door_break.ogg
 Source:              https://freesound.org/people/Eneasz/sounds/161873/
 Author:              Eneasz
 Original title:      wooden door smash open.wav
 License:             Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)
+
+File:                sfx_door_break_gate.ogg
+Source:              https://freesound.org/people/SamsterBirdies/sounds/587443/
+Author:              SamsterBirdies (username on freesound.org)
+Original title:      Scrap metal dropping / crashing
+License:             CC0 1.0 Universal (CC0 1.0)
+Source:              https://freesound.org/people/DJT4NN3R/sounds/449992/
+Author:              DJT4NN3R (username on freesound.org)
+Original title:      whoosh_short_low.wav
+License:             CC0 1.0 Universal (CC0 1.0
+Changes made:        Cut most of the sounds, mix, reverb.
 
 File:                sfx_door_close.ogg
 Source:              https://freesound.org/people/arnaud%20coutancier/sounds/46201/
@@ -464,12 +489,40 @@ Original title:      wooden door & steps porte en bois & pas
 License:             Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)
 Changes made:        Cut most of the sound
 
+File:                sfx_door_close_gate.ogg
+Source:              https://freesound.org/people/Profispiesser/sounds/583059/
+Author:              Profispiesser (username on freesound.org)
+Original title:      FX SaSc Door 01 Metal Rattle Open Close 2 Versions.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut most of the sound, distort/amplify, reverb.
+
+File:                sfx_door_close_metal.ogg
+Source:              https://freesound.org/people/Sheyvan/sounds/524231/
+Author:              Sheyvan (username on freesound.org)
+Original title:      Heavy Metal Door 2
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut parts of the sound
+
 File:                sfx_door_open.ogg
 Source:              https://freesound.org/people/arnaud%20coutancier/sounds/46201/
 Author:              arnaud coutancier (username on freesound.org)
 Original title:      wooden door & steps porte en bois & pas
 License:             Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)
 Changes made:        Cut most of the sound
+
+File:                sfx_door_open_gate.ogg
+Source:              https://freesound.org/people/kyles/sounds/637481/
+Author:              kyles (username on freesound.org)
+Original title:      door metal locker gate grill open.flac
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut most of the sound, reverb.
+
+File:                sfx_door_open_metal.ogg
+Source:              https://freesound.org/people/DWOBoyle/sounds/474176/
+Author:              DWOBoyle (username on freesound.org)
+Original title:      Spaceship_Door_Open.wav
+License:             Attribution 4.0 International (CC BY 4.0) 
+Changes made:        Cut parts of the sound
 
 File:                sfx_electric_lantern.ogg
 Source:              https://freesound.org/people/joedeshon/sounds/139062/
@@ -576,6 +629,13 @@ Author (2):          magnuswaker (username on freesound.org)
 Original title (2):  Pound of Flesh 1
 License (2):         CC0 1.0 Universal (CC0 1.0)
 Changes made:        Mixed samples of files 1 and 2 above
+
+File:                sfx_horn.ogg
+Source:              https://freesound.org/people/Kostrava/sounds/320789/
+Author:              Kostrava (username on freesound.org)
+License:             CC0 1.0 Universal (CC0 1.0)
+Original title:      horn 01
+Changes made:        Trim sound. Cubic distorion. Reverb.
 
 File:                sfx_insanity_rising.ogg
 Source:              https://freesound.org/people/cameronmusic/sounds/138409/
@@ -743,6 +803,13 @@ Original title:      chains.wav
 License:             Attribution 3.0 Unported (CC BY 3.0)
 Changes made:        Cut most of the sound
 
+File:                sfx_crystal_key_disable.ogg
+Source:              https://freesound.org/people/florianreichelt/sounds/447806/
+Author:              florianreichelt (username on freesound.org)
+Original title:      Light wooshes
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut most of the sound
+
 File:                sfx_menu_browse.ogg
 Source:              https://www.freesound.org/people/sandyrb/sounds/84346
 Author:              sandyrb (username on freesound.org)
@@ -822,47 +889,8 @@ License:             Attribution 3.0 Unported (CC BY 3.0)
 Original title:      Splash, Jumping, C.wav
 Changes made:        Cut most of the sound, reduced the speed
 
-File:                sfx_door_bang_metallic.ogg
-Source:              https://freesound.org/people/mickyman5000/sounds/340575/
-Author:              mickyman5000 (username on freesound.org)
-Original title:      Scrap_Metal_Rummaging.wav
-License:             CC0 1.0 Universal (CC0 1.0)
-Changes made:        Cut most of the sound, reverb.
-
-File:                sfx_door_open_metallic.ogg
-Source:              https://freesound.org/people/kyles/sounds/637481/
-Author:              kyles (username on freesound.org)
-Original title:      door metal locker gate grill open.flac
-License:             CC0 1.0 Universal (CC0 1.0)
-Changes made:        Cut most of the sound, reverb.
-
-File:                sfx_door_close_metallic.ogg
-Source:              https://freesound.org/people/Profispiesser/sounds/583059/
-Author:              Profispiesser (username on freesound.org)
-Original title:      FX SaSc Door 01 Metal Rattle Open Close 2 Versions.wav
-License:             CC0 1.0 Universal (CC0 1.0)
-Changes made:        Cut most of the sound, distort/amplify, reverb.
-
-File:                sfx_door_break_metallic.ogg
-Source:              https://freesound.org/people/SamsterBirdies/sounds/587443/
-Author:              SamsterBirdies (username on freesound.org)
-Original title:      Scrap metal dropping / crashing
-License:             CC0 1.0 Universal (CC0 1.0)
-Source:              https://freesound.org/people/DJT4NN3R/sounds/449992/
-Author:              DJT4NN3R (username on freesound.org)
-Original title:      whoosh_short_low.wav
-License:             CC0 1.0 Universal (CC0 1.0
-Changes made:        Cut most of the sounds, mix, reverb.
-
 File:                musica_cthulhiana_fragment_madness.ogg
 Source:              Track "Madness" from music album "Fragment" (2010, Prowler/Ghost Records)
 Author:              Musica Cthulhiana
 Original title:      -
 Used with permission from Musica Cthulhiana
-
-File:                sfx_horn.ogg
-Source:              https://freesound.org/people/Kostrava/sounds/320789/
-Author:              Kostrava (username on freesound.org)
-License:             CC0 1.0 Universal (CC0 1.0)
-Original title:      horn 01
-Changes made:        Trim sound. Cubic distorion. Reverb.

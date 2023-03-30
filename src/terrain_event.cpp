@@ -426,7 +426,7 @@ void EventSpawnMonstersDelayed::on_new_turn()
                 return;
         }
 
-        const auto mon_summoned =
+        const actor::MonSpawnResult mon_summoned =
                 actor::spawn(
                         m_pos,
                         {m_nr_mon, m_id},
@@ -436,10 +436,8 @@ void EventSpawnMonstersDelayed::on_new_turn()
         std::for_each(
                 std::begin(mon_summoned.monsters),
                 std::end(mon_summoned.monsters),
-                [](auto* const mon) {
-                        auto* prop_waiting =
-                                prop::make(
-                                        prop::Id::waiting);
+                [](actor::Actor* const mon) {
+                        prop::Prop* prop_waiting = prop::make(prop::Id::waiting);
 
                         prop_waiting->set_duration(1);
 

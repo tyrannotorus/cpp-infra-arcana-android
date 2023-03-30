@@ -359,6 +359,9 @@ void memorize_terrain_at(const P& p)
                         if (door->type() == terrain::DoorType::metal) {
                                 memory.appearance.minimap_color = colors::light_teal();
                         }
+                        else if (door->is_warded()) {
+                                memory.appearance.minimap_color = colors::light_red();
+                        }
                         else {
                                 memory.appearance.minimap_color = colors::light_white();
                         }
@@ -370,8 +373,8 @@ void memorize_terrain_at(const P& p)
         else if (id == terrain::Id::monolith) {
                 memory.appearance.minimap_color = terrain->color_default();
         }
-        else if (id == terrain::Id::lever) {
-                memory.appearance.minimap_color = colors::teal();
+        else if (id == terrain::Id::crystal_key) {
+                memory.appearance.minimap_color = terrain->color_default();
         }
         else if (id == terrain::Id::liquid) {
                 memory.appearance.minimap_color = colors::blue();

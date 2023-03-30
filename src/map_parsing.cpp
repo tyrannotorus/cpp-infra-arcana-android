@@ -658,7 +658,7 @@ bool is_map_connected(
         }
 
         // Check that all positions that must be reachable (probably the stairs,
-        // levers) have at least one reachable adjacent position.
+        // "keys", ...) have at least one reachable adjacent position.
         for (const P& p : positions_must_be_reachable) {
                 bool is_reachable = false;
 

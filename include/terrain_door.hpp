@@ -33,6 +33,7 @@ enum class DoorSpawnState
         stuck,
         secret,
         secret_and_stuck,
+        warded,
         any
 };
 
@@ -41,6 +42,13 @@ enum class DoorType
         wood,
         metal,
         gate
+};
+
+enum class WardState
+{
+        not_warded,  // Has never been warded.
+        warded,  // Is warded.
+        unwarded,  // Was warded, but ward has been removed.
 };
 
 class Door : public Terrain
@@ -104,8 +112,6 @@ public:
         void actor_try_close(actor::Actor& actor_trying);
         bool actor_try_jam(actor::Actor& actor_trying);
 
-        void on_lever_pulled(Lever* lever) override;
-
         bool is_open() const
         {
                 return m_is_open;
@@ -121,6 +127,15 @@ public:
                 return m_is_known_stuck;
         }
 
+        bool is_warded() const
+        {
+                return (m_ward_state == WardState::warded);
+        }
+
+        void try_trigger_ward_trap();
+
+        void remove_ward();
+
         Matl matl() const override;
 
         void reveal(PrintRevealMsg print_reveal_msg) override;
@@ -130,12 +145,7 @@ public:
         void reveal_stuck_status(PrintRevealMsg print_reveal_msg);
 
         void set_secret();
-
-        void set_stuck()
-        {
-                m_is_open = false;
-                m_is_stuck = true;
-        }
+        void set_stuck();
 
         // NOTE: These do not affect levers - they only open or close the door.
         DidOpen open(actor::Actor* actor_opening) override;
@@ -175,6 +185,7 @@ private:
         bool m_is_open {false};
         bool m_is_stuck {false};
         bool m_is_known_stuck {false};
+        WardState m_ward_state {WardState::not_warded};
 
         int m_jam_level {0};
 

@@ -146,7 +146,7 @@ void run_alter_env_effect(const P& origin, const int change_pos_one_in_n)
         // may be walled in however).
         const std::vector<terrain::Id> terrains_must_be_reachable = {
                 terrain::Id::stairs,
-                terrain::Id::lever,
+                terrain::Id::crystal_key,
         };
 
         std::vector<P> positions_must_be_reachable;

@@ -450,7 +450,7 @@ static void mon_act(actor::Actor& mon)
             mon.m_ai_state.is_target_seen &&
             !mon.m_properties.has(prop::Id::frenzied) &&
             rnd::coin_toss()) {
-                const auto did_act = ai::action::make_room_for_friend(mon);
+                const DidAction did_act = ai::action::make_room_for_friend(mon);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -459,7 +459,7 @@ static void mon_act(actor::Actor& mon)
 
         // Cast instead of attacking?
         if (rnd::one_in(5)) {
-                const auto did_act = ai::action::try_cast_random_spell(mon);
+                const DidAction did_act = ai::action::try_cast_random_spell(mon);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -469,7 +469,7 @@ static void mon_act(actor::Actor& mon)
         if (mon.m_data->ai[(size_t)actor::AiId::attacks] &&
             mon.m_ai_state.target &&
             mon.m_ai_state.is_target_seen) {
-                const auto did_act = mon.try_attack(*mon.m_ai_state.target);
+                const DidAction did_act = mon.try_attack(*mon.m_ai_state.target);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -477,7 +477,7 @@ static void mon_act(actor::Actor& mon)
         }
 
         if (rnd::fraction(3, 4)) {
-                const auto did_act = ai::action::try_cast_random_spell(mon);
+                const DidAction did_act = ai::action::try_cast_random_spell(mon);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -508,7 +508,7 @@ static void mon_act(actor::Actor& mon)
 
         if (mon.m_data->ai[(size_t)actor::AiId::moves_randomly_when_unaware] &&
             rnd::percent(erratic_move_pct)) {
-                const auto did_act = ai::action::move_to_random_adj_cell(mon);
+                const DidAction did_act = ai::action::move_to_random_adj_cell(mon);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -519,7 +519,7 @@ static void mon_act(actor::Actor& mon)
 
         if (mon.m_data->ai[(size_t)actor::AiId::moves_to_target_when_los] &&
             !is_terrified) {
-                const auto did_act = ai::action::move_to_target_simple(mon);
+                const DidAction did_act = ai::action::move_to_target_simple(mon);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -535,8 +535,7 @@ static void mon_act(actor::Actor& mon)
         }
 
         {
-                const auto did_act =
-                        ai::action::handle_closed_blocking_door(mon, path);
+                const DidAction did_act = ai::action::handle_closed_blocking_door(mon, path);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -544,7 +543,7 @@ static void mon_act(actor::Actor& mon)
         }
 
         {
-                const auto did_act = ai::action::step_path(mon, path);
+                const DidAction did_act = ai::action::step_path(mon, path);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -556,7 +555,7 @@ static void mon_act(actor::Actor& mon)
             !is_terrified) {
                 path = ai::info::find_path_to_leader(mon);
 
-                const auto did_act = ai::action::step_path(mon, path);
+                const DidAction did_act = ai::action::step_path(mon, path);
 
                 if (did_act == DidAction::yes) {
                         return;
@@ -568,7 +567,7 @@ static void mon_act(actor::Actor& mon)
             !mon.m_properties.has(prop::Id::frenzied) &&
             (!mon.m_ai_state.target ||
              actor::is_player(mon.m_ai_state.target))) {
-                auto did_act =
+                DidAction did_act =
                         ai::action::step_to_lair_if_los(
                                 mon,
                                 mon.m_ai_state.spawn_pos);
@@ -595,7 +594,7 @@ static void mon_act(actor::Actor& mon)
 
         if (mon.m_data->ai[(size_t)actor::AiId::moves_randomly_when_unaware] &&
             (!is_player_leader || rnd::one_in(8))) {
-                const auto did_act = ai::action::move_to_random_adj_cell(mon);
+                const DidAction did_act = ai::action::move_to_random_adj_cell(mon);
 
                 if (did_act == DidAction::yes) {
                         return;

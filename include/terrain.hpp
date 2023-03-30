@@ -48,6 +48,8 @@ enum class Verbose;
 
 namespace terrain
 {
+class Door;
+
 enum class BurnState
 {
         not_burned,
@@ -81,7 +83,6 @@ enum class PrintRevealMsg
 };
 
 enum class Id;
-class Lever;
 
 void make_blood(const P& origin);
 void make_gore(const P& origin);
@@ -320,11 +321,6 @@ public:
                 (void)actor_closing;
 
                 return DidClose::no;
-        }
-
-        virtual void on_lever_pulled(Lever* const lever)
-        {
-                (void)lever;
         }
 
         virtual void add_light(Array2<bool>& light) const;
@@ -871,12 +867,12 @@ public:
                 int dmg) override;
 };
 
-class Lever : public Terrain
+class CrystalKey : public Terrain
 {
 public:
-        Lever(const P& p, const TerrainData* data);
+        CrystalKey(const P& p, const TerrainData* data);
 
-        Lever() = delete;
+        CrystalKey() = delete;
 
         std::string name(Article article) const override;
 
@@ -884,9 +880,13 @@ public:
 
         Color color_default() const override;
 
-        void toggle();
-
         void bump(actor::Actor& actor_bumping) override;
+
+        // Prints message, gives XP etc, and deactivates the crystal.
+        void player_deactivate();
+
+        // Only deactives the crystal (no messages etc).
+        void deactivate();
 
         void hit(
                 DmgType dmg_type,
@@ -894,38 +894,38 @@ public:
                 const P& from_pos,
                 int dmg) override;
 
-        bool is_left_pos() const
+        bool is_active() const
         {
-                return m_is_left_pos;
+                return m_is_active;
         }
 
-        bool is_linked_to(const Terrain& terrain) const
+        bool is_linked_to(const Door* const door) const
         {
-                return m_linked_terrain == &terrain;
+                return m_linked_door == door;
         }
 
-        void set_linked_terrain(Terrain& terrain)
+        void set_linked_door(Door& door)
         {
-                m_linked_terrain = &terrain;
+                m_linked_door = &door;
         }
 
         void unlink()
         {
-                m_linked_terrain = nullptr;
+                m_linked_door = nullptr;
         }
 
-        // Levers linked to the same terrain
-        void add_sibbling(Lever* const lever)
+        // Crystals linked to the same door.
+        void add_sibbling(CrystalKey* const crystal)
         {
-                m_sibblings.push_back(lever);
+                m_sibblings.push_back(crystal);
         }
 
 private:
-        bool m_is_left_pos;
+        void add_light_hook(Array2<bool>& light) const override;
 
-        Terrain* m_linked_terrain;
-
-        std::vector<Lever*> m_sibblings;
+        bool m_is_active {true};
+        Door* m_linked_door {nullptr};
+        std::vector<CrystalKey*> m_sibblings {};
 };
 
 class Altar : public Terrain

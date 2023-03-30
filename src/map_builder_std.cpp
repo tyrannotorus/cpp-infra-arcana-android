@@ -435,9 +435,9 @@ bool MapBuilderStd::build_specific()
         }
 
         // ---------------------------------------------------------------------
-        // Make metal doors and levers
+        // Make warded doors and crystals
         // ---------------------------------------------------------------------
-        mapgen::make_metal_doors_and_levers();
+        mapgen::make_warded_doors_and_keys();
 
         if (!mapgen::g_is_map_valid) {
                 return false;
@@ -457,12 +457,14 @@ bool MapBuilderStd::build_specific()
                         auto* const door = static_cast<terrain::Door*>(terrain);
 
                         if ((door->type() != terrain::DoorType::gate) &&
-                            (door->type() != terrain::DoorType::metal) &&
+                            !door->is_warded() &&
                             rnd::one_in(6)) {
                                 door->set_secret();
                         }
 
-                        if (rnd::one_in(6)) {
+                        if ((door->type() != terrain::DoorType::metal) &&
+                            !door->is_warded() &&
+                            rnd::one_in(6)) {
                                 door->set_stuck();
                         }
                 }

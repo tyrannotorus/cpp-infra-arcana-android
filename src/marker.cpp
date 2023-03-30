@@ -1095,6 +1095,8 @@ bool CtrlObjOpen::can_control(
         const terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
+        (void)skill;
+
         switch (terrain.id()) {
         case terrain::Id::chest: {
                 return !static_cast<const terrain::Chest&>(terrain).is_open();
@@ -1110,14 +1112,9 @@ bool CtrlObjOpen::can_control(
 
         case terrain::Id::door: {
                 const auto& door = static_cast<const terrain::Door&>(terrain);
-                const bool is_metal = (door.type() == terrain::DoorType::metal);
-                const bool is_basic_skill = (skill == SpellSkill::basic);
 
                 if (door.is_open() || door.is_hidden()) {
                         return false;
-                }
-                else if (is_metal) {
-                        return !is_basic_skill;
                 }
                 else {
                         return !door.is_known_stuck();
@@ -1138,9 +1135,8 @@ DidAction CtrlObjOpen::run(
 {
         if (terrain.id() == terrain::Id::door) {
                 auto& door = static_cast<terrain::Door&>(terrain);
-                const bool is_metal = (door.type() == terrain::DoorType::metal);
 
-                if (door.is_stuck() && !is_metal) {
+                if (door.is_stuck()) {
                         ASSERT(!door.is_known_stuck());
 
                         door.reveal_stuck_status(terrain::PrintRevealMsg::if_seen);
@@ -1293,45 +1289,51 @@ char CtrlObjJamDoor::menu_key() const
         return 'c';
 }
 
-bool CtrlObjToggleLever::can_control(
+bool CtrlObjDeactivateCrystal::can_control(
         const terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
         (void)skill;
 
-        return terrain.id() == terrain::Id::lever;
+        if (terrain.id() != terrain::Id::crystal_key) {
+                return false;
+        }
+
+        const auto& crystal = static_cast<const terrain::CrystalKey&>(terrain);
+
+        return crystal.is_active();
 }
 
-DidAction CtrlObjToggleLever::run(
+DidAction CtrlObjDeactivateCrystal::run(
         terrain::Terrain& terrain,
         const SpellSkill skill) const
 {
         (void)skill;
 
-        auto& lever = static_cast<terrain::Lever&>(terrain);
+        auto& lever = static_cast<terrain::CrystalKey&>(terrain);
 
         const std::string name_the =
                 text_format::first_to_upper(
                         lever.name(Article::the));
 
-        msg_log::add(name_the + " is toggled.");
+        msg_log::add(name_the + " is deactivated.");
 
-        lever.toggle();
+        lever.player_deactivate();
 
         return DidAction::yes;
 }
 
-std::string CtrlObjToggleLever::menu_label(
+std::string CtrlObjDeactivateCrystal::menu_label(
         const terrain::Terrain& terrain) const
 {
         (void)terrain;
 
-        return "(t) Toggle lever";
+        return "(d) Deactivate crystal";
 }
 
-char CtrlObjToggleLever::menu_key() const
+char CtrlObjDeactivateCrystal::menu_key() const
 {
-        return 't';
+        return 'd';
 }
 
 bool CtrlObjStrike::can_control(
@@ -1668,23 +1670,12 @@ void CtrlObj::set_possible_actions()
         // ---------------------------------------------------------------------
         // Add all possible control actions here
         // ---------------------------------------------------------------------
-        all_actions.emplace_back(
-                std::make_shared<CtrlObjOpen>());
-
-        all_actions.emplace_back(
-                std::make_shared<CtrlObjCloseDoor>());
-
-        all_actions.emplace_back(
-                std::make_shared<CtrlObjJamDoor>());
-
-        all_actions.emplace_back(
-                std::make_shared<CtrlObjToggleLever>());
-
-        all_actions.emplace_back(
-                std::make_shared<CtrlObjStrike>());
-
-        all_actions.emplace_back(
-                std::make_shared<CtrlObjDestrWall>());
+        all_actions.emplace_back(std::make_shared<CtrlObjOpen>());
+        all_actions.emplace_back(std::make_shared<CtrlObjCloseDoor>());
+        all_actions.emplace_back(std::make_shared<CtrlObjJamDoor>());
+        all_actions.emplace_back(std::make_shared<CtrlObjDeactivateCrystal>());
+        all_actions.emplace_back(std::make_shared<CtrlObjStrike>());
+        all_actions.emplace_back(std::make_shared<CtrlObjDestrWall>());
         // ---------------------------------------------------------------------
 
         m_possible_actions.clear();

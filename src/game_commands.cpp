@@ -1016,29 +1016,67 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_shift_f3: {
+                const std::vector<terrain::DoorType> door_types = {
+                        terrain::DoorType::wood,
+                        terrain::DoorType::gate,
+                        terrain::DoorType::metal};
+
                 const std::vector<terrain::DoorSpawnState> door_states = {
                         terrain::DoorSpawnState::closed,
                         terrain::DoorSpawnState::stuck,
+                        terrain::DoorSpawnState::warded,
                         terrain::DoorSpawnState::secret,
                         terrain::DoorSpawnState::secret_and_stuck,
                         terrain::DoorSpawnState::open,
                 };
 
-                P pos = map::g_player->m_pos.with_x_offset(2);
+                P pos = map::g_player->m_pos.with_x_offset(1);
 
-                for (const terrain::DoorSpawnState door_state : door_states) {
-                        auto* door =
-                                static_cast<terrain::Door*>(
-                                        terrain::make(terrain::Id::door, pos));
+                for (const terrain::DoorType door_type : door_types) {
+                        for (const terrain::DoorSpawnState door_state : door_states) {
+                                if (door_type == terrain::DoorType::gate) {
+                                        // Gates shall never be secret or warded.
+                                        switch (door_state) {
+                                        case terrain::DoorSpawnState::secret:
+                                        case terrain::DoorSpawnState::secret_and_stuck:
+                                        case terrain::DoorSpawnState::warded:
+                                                continue;
 
-                        door->set_mimic_terrain(terrain::make(terrain::Id::wall, pos));
-                        door->init_type_and_state(terrain::DoorType::wood, door_state);
+                                        default:
+                                                break;
+                                        }
+                                }
 
-                        map::update_terrain(door);
+                                if (door_type == terrain::DoorType::metal) {
+                                        // Metal doors shall never be stuck or warded.
+                                        switch (door_state) {
+                                        case terrain::DoorSpawnState::stuck:
+                                        case terrain::DoorSpawnState::secret_and_stuck:
+                                        case terrain::DoorSpawnState::warded:
+                                                continue;
 
-                        map::update_vision();
+                                        default:
+                                                break;
+                                        }
+                                }
 
-                        pos.x += 2;
+                                auto* door =
+                                        static_cast<terrain::Door*>(
+                                                terrain::make(terrain::Id::door, pos));
+
+                                if (door_type != terrain::DoorType::gate) {
+                                        door->set_mimic_terrain(
+                                                terrain::make(terrain::Id::wall, pos));
+                                }
+
+                                door->init_type_and_state(door_type, door_state);
+
+                                map::update_terrain(door);
+
+                                map::update_vision();
+
+                                pos.x += 1;
+                        }
                 }
 
         } break;

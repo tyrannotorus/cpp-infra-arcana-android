@@ -42,6 +42,8 @@
 - Removed all gas trap types (confusion gas etc)
 
 # Terrain objects
+- Instead of metal/doors levers there are now warded doors that can be unwarded by crystals. The difference is that warded doors can be opened at any time like regular doors, but if the player does so without unwarding it first they will receive a penalty, and miss out on a reward (XP bonus for using the crystal).
+- Metal doors can now be opened and closed regularly (there are no levers). This is an advantage for the player, as metal doors can never be bashed open.
 - Monoliths are roughly twice as common (typically ~1 per floor instead of ~0.5 per floor), but only yield half as much XP.
 - Reverted Pylons to make them always active again (they start permanently activated, instead of being activated
 by bumping them).
@@ -77,6 +79,7 @@ by bumping them).
 - Changed color of grates to gray, to clarify that they are made of metal (and not wood)
 - Improved the tiles for stairs down (thanks to Andy Walker) and magic traps.
 - Added more sound effects (thanks Andy Walker for various gate sounds, item container opening sounds, and a horn sound).
+- Added sound effects for opening/closing/bashing metal doors.
 
 # Convenience / quality of life features
 - Made some improvements to how the game represents multiple things in the same position, mainly that a different background color is used when there are multiple corpses, or when a corpse is hidden under an item.
@@ -101,7 +104,7 @@ by bumping them).
 - Kicking locked wooden chests would print the message "I kick the locked wooden chest! I kick the lid. The lock resists." - removed the redundant part "I kick the lid".
 - Kicking chests caused extra rolls for sprains in some cases (so the risk of a sprain was doubled, and player could get double sprains).
 - Fixed a bug where the player killing themselves with an Incinerator would freeze the game.
-- Many more minor bug fixes...
+- And many more minor bug fixes...
 
 ============================================================
 = v21.0.1 (April 7, 2022)

@@ -58,6 +58,7 @@
 #include "sound.hpp"
 #include "state.hpp"
 #include "terrain_dmg.hpp"
+#include "terrain_door.hpp"
 #include "terrain_factory.hpp"
 #include "terrain_mob.hpp"
 #include "text_format.hpp"
@@ -1666,14 +1667,12 @@ Color Chasm::color_default() const
 }
 
 // -----------------------------------------------------------------------------
-// Lever
+// Crystal Key
 // -----------------------------------------------------------------------------
-Lever::Lever(const P& p, const TerrainData* const data) :
-        Terrain(p, data),
-        m_is_left_pos(true),
-        m_linked_terrain(nullptr) {}
+CrystalKey::CrystalKey(const P& p, const TerrainData* const data) :
+        Terrain(p, data) {}
 
-void Lever::hit(
+void CrystalKey::hit(
         const DmgType dmg_type,
         actor::Actor* const actor,
         const P& from_pos,
@@ -1685,43 +1684,32 @@ void Lever::hit(
         (void)dmg;
 }
 
-std::string Lever::name(const Article article) const
+std::string CrystalKey::name(const Article article) const
 {
         std::string ret = (article == Article::a) ? "a" : "the";
 
-        ret += " lever (in ";
+        ret += " ";
 
-        ret +=
-                m_is_left_pos
-                ? "left"
-                : "right";
+        ret += m_is_active ? "gleaming" : "dead";
 
-        ret += " position)";
+        ret += " crystal";
 
         return ret;
 }
 
-Color Lever::color_default() const
+Color CrystalKey::color_default() const
 {
-        if (m_is_left_pos) {
-                return colors::gray();
-        }
-        else {
-                return colors::white();
-        }
+        return m_is_active ? colors::light_red() : colors::gray();
 }
 
-gfx::TileId Lever::tile() const
+gfx::TileId CrystalKey::tile() const
 {
-        if (m_is_left_pos) {
-                return gfx::TileId::lever_left;
-        }
-        else {
-                return gfx::TileId::lever_right;
-        }
+        return gfx::TileId::crystal;
+
+        // return m_is_active ? gfx::TileId::crystal : gfx::TileId::crystal_destroyed;
 }
 
-void Lever::bump(actor::Actor& actor_bumping)
+void CrystalKey::bump(actor::Actor& actor_bumping)
 {
         (void)actor_bumping;
 
@@ -1730,67 +1718,71 @@ void Lever::bump(actor::Actor& actor_bumping)
         map::memorize_terrain_at(m_pos);
         map::update_vision();
 
-        // If player is blind, ask it they really want to pull the lever
-        if (!map::g_seen.at(m_pos)) {
+        const bool is_seen = map::g_seen.at(m_pos);
+
+        const std::string terrain_name = text_format::first_to_lower(name(Article::the));
+
+        if (is_seen) {
+                msg_log::add("I touch " + terrain_name + ".");
+        }
+        else {
                 msg_log::clear();
 
-                const std::string msg =
-                        "There is a lever here. Pull it? " +
-                        common_text::g_yes_or_no_hint;
-
-                msg_log::add(
-                        msg,
-                        colors::light_white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
-
-                const auto answer = query::yes_or_no();
-
-                if (answer == BinaryAnswer::no) {
-                        msg_log::clear();
-
-                        TRACE_FUNC_END;
-
-                        return;
-                }
+                msg_log::add("I touch some crystal object.");
         }
 
-        msg_log::add("I pull the lever.");
+        if (!m_is_active) {
+                if (is_seen) {
+                        msg_log::add("Nothing happens.");
+                }
 
-        Snd snd(
-                "",
-                audio::SfxId::lever_pull,
-                IgnoreMsgIfOriginSeen::yes,
-                m_pos,
-                map::g_player,
-                SndVol::low,
-                AlertsMon::yes);
+                return;
+        }
 
-        snd.run();
+        if (is_seen) {
+                msg_log::add("The light inside fades.");
+        }
 
-        toggle();
-
-        map::memorize_terrain_at(m_pos);
-        map::update_vision();
+        player_deactivate();
 
         game_time::tick();
 
         TRACE_FUNC_END;
 }
 
-void Lever::toggle()
+void CrystalKey::player_deactivate()
 {
-        m_is_left_pos = !m_is_left_pos;
+        audio::play(audio::SfxId::crystal_key_disable);
 
-        // Signal that the lever has been pulled to any linked terrain
-        if (m_linked_terrain) {
-                m_linked_terrain->on_lever_pulled(this);
+        msg_log::add("I sense that a path has opened somewhere.");
+
+        game::incr_player_xp(3, Verbose::yes);
+
+        deactivate();
+
+        map::memorize_terrain_at(m_pos);
+        map::update_vision();
+}
+
+void CrystalKey::deactivate()
+{
+        m_is_active = false;
+
+        // Signal that the crystal has been deactivated to the linked door.
+        if (m_linked_door) {
+                m_linked_door->remove_ward();
         }
 
-        // Set all sibblings to same status as this lever
-        for (auto* const sibbling : m_sibblings) {
-                sibbling->m_is_left_pos = m_is_left_pos;
+        // Deactivate all siblings.
+        for (CrystalKey* const sibbling : m_sibblings) {
+                sibbling->m_is_active = false;
+        }
+}
+
+void CrystalKey::add_light_hook(Array2<bool>& light) const
+{
+        if (m_is_active) {
+                light.at(m_pos) = true;
         }
 }
 
