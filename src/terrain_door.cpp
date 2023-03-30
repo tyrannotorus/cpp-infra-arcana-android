@@ -1752,6 +1752,8 @@ void Door::try_trigger_ward_trap()
         if (rnd::one_in(3)) {
                 map::g_player->m_properties.apply(prop::make(prop::Id::cursed));
         }
+
+        map::g_player->incr_shock(12.0, ShockSrc::misc);
 }
 
 void Door::remove_ward()
