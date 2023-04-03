@@ -2145,7 +2145,7 @@ public:
 
         SpellShock shock_type() const override
         {
-                return SpellShock::disturbing;
+                return SpellShock::mild;
         }
 
         std::vector<std::string> descr_specific(
