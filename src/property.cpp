@@ -161,13 +161,16 @@ void run_alter_env_effect(const P& origin, const int change_pos_one_in_n)
 
         // NOTE: The first elements of these two vectors have a special meaning,
         // see comment below.
+        //
+        // NOTE: Do not include "liquid" terrain here, as then the "magic pool"
+        // (LiquidType "magic_water") can be destroyed.
+        //
         const std::vector<terrain::Id> spawnable_passable_terrains = {
                 terrain::Id::floor,
                 terrain::Id::rubble_low,
                 terrain::Id::grass,
                 terrain::Id::vines,
                 terrain::Id::chains,
-                terrain::Id::liquid,
         };
 
         const std::vector<terrain::Id> spawnable_blocking_terrains = {
