@@ -1147,6 +1147,7 @@ void Spell::cast(
 
         if (actor::is_player(caster) &&
             caster->is_alive() &&
+            !player_bon::is_bg(Bg::exorcist) &&
             allow_cast &&
             (base_max_cost(skill) > 0) &&
             rnd::one_in(7)) {
@@ -1163,9 +1164,8 @@ void Spell::cast(
 
                 rnd::shuffle(nearby_positions);
 
-                const auto& side_effect =
-                        rnd::weighted_choice(
-                                spell_side_effects::s_spell_side_effects);
+                const spell_side_effects::SpellSideEffect& side_effect =
+                        spell_side_effects::s_spell_side_effects.roll();
 
                 TRACE << "Running spell side effect" << std::endl;
 
