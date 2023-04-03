@@ -354,7 +354,7 @@ static void side_effect_flay_human(const Context& context)
 {
         TRACE_FUNC_BEGIN;
 
-        auto actors = actor::seen_actors(context.caster);
+        std::vector<actor::Actor*> actors = actor::seen_actors(context.caster);
 
         actors.push_back(&context.caster);
 
@@ -362,15 +362,18 @@ static void side_effect_flay_human(const Context& context)
 
         actor::Actor* target_actor = nullptr;
 
-        for (auto* const actor : actors) {
-                const auto* const actor_data = actor->m_data;
+        for (actor::Actor* const actor : actors) {
+                const actor::ActorData* const actor_data = actor->m_data;
 
-                const auto& properties = actor->m_properties;
+                const prop::PropHandler& properties = actor->m_properties;
 
-                // NOTE: The target may be the caster, if caster is a monster
+                // NOTE: The target of the spell side effect may be the caster
+                // itself, if caster is a monster.
                 if (!actor::is_player(actor) &&
                     actor->is_alive() &&
                     actor_data->is_humanoid &&
+                    actor_data->can_leave_corpse &&
+                    (actor_data->mon_shock_lvl <= MonShockLvl::frightening) &&
                     !actor_data->is_undead &&
                     !actor_data->is_unique &&
                     !properties.has(prop::Id::ethereal) &&
