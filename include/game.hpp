@@ -23,12 +23,14 @@ class Actor;
 
 struct HistoryEvent
 {
+        HistoryEvent() = default;
+
         HistoryEvent(std::string history_msg, const int turn_nr) :
                 msg(std::move(history_msg)),
                 turn(turn_nr) {}
 
-        const std::string msg;
-        const int turn;
+        std::string msg {};
+        int turn {0};
 };
 
 namespace game
@@ -41,6 +43,8 @@ void load();
 int clvl();
 int xp_pct();
 int xp_accumulated();
+IsWin is_win();
+void set_is_win();
 TimeData start_time();
 
 void player_discover_monster(actor::Actor& actor);

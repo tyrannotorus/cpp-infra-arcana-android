@@ -20,7 +20,7 @@ const std::string g_screen_exit_hint =
 const std::string g_minimap_exit_hint =
         "[space, esc, m] to exit";
 
-const std::string g_postmortem_exit_hint =
+const std::string g_game_over_summary_exit_hint =
         "[space, esc] to show high scores";
 
 const std::string g_set_option_hint =

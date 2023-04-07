@@ -61,6 +61,8 @@ set(COMMON_SRC
         include/game.hpp
         include/game_commands.hpp
         include/game_over.hpp
+        include/game_over_summary.hpp
+        include/game_summary_data.hpp
         include/game_time.hpp
         include/gfx.hpp
         include/global.hpp
@@ -117,7 +119,6 @@ set(COMMON_SRC
         include/populate_traps.hpp
         include/popup.hpp
         include/pos.hpp
-        include/postmortem.hpp
         include/property.hpp
         include/property_data.hpp
         include/property_factory.hpp
@@ -205,6 +206,8 @@ set(COMMON_SRC
         src/game.cpp
         src/game_commands.cpp
         src/game_over.cpp
+        src/game_over_summary.cpp
+        src/game_summary_data.cpp
         src/game_time.cpp
         src/gfx.cpp
         src/gods.cpp
@@ -272,7 +275,6 @@ set(COMMON_SRC
         src/populate_traps.cpp
         src/popup.cpp
         src/pos.cpp
-        src/postmortem.cpp
         src/property.cpp
         src/property_data.cpp
         src/property_factory.cpp

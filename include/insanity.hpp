@@ -83,7 +83,7 @@ public:
                 return "";
         }
 
-        virtual std::string postmortem_msg() const
+        virtual std::string game_over_summary_msg() const
         {
                 return "";
         }
@@ -211,7 +211,7 @@ public:
                 return "Babbling";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a tendency to babble";
         }
@@ -359,7 +359,7 @@ public:
                 return "Phobia of rats";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a phobia of rats";
         }
@@ -423,7 +423,7 @@ public:
                 return "Phobia of spiders";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a phobia of spiders";
         }
@@ -487,7 +487,7 @@ public:
                 return "Phobia of reptiles and amphibians";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a phobia of reptiles and amphibians";
         }
@@ -551,7 +551,7 @@ public:
                 return "Phobia of canines";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a phobia of canines";
         }
@@ -615,7 +615,7 @@ public:
                 return "Phobia of the dead";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a phobia of the dead";
         }
@@ -679,7 +679,7 @@ public:
                 return "Phobia of deep places";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a phobia of deep places";
         }
@@ -743,7 +743,7 @@ public:
                 return "Phobia of darkness";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a phobia of darkness";
         }
@@ -802,7 +802,7 @@ public:
                 return "Sadistic obsession";
         }
 
-        std::string postmortem_msg() const override
+        std::string game_over_summary_msg() const override
         {
                 return "Had a sadistic obsession";
         }

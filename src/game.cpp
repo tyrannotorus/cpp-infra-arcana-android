@@ -59,6 +59,7 @@ static int s_clvl = 0;
 static int s_xp_pct = 0;
 static int s_xp_accum = 0;
 static TimeData s_start_time;
+static IsWin s_is_win = IsWin::no;
 
 static std::vector<HistoryEvent> s_history_events;
 
@@ -114,6 +115,7 @@ void init()
         s_clvl = 0;
         s_xp_pct = 0;
         s_xp_accum = 0;
+        s_is_win = IsWin::no;
 
         s_history_events.clear();
 }
@@ -173,6 +175,16 @@ int xp_pct()
 int xp_accumulated()
 {
         return s_xp_accum;
+}
+
+IsWin is_win()
+{
+        return s_is_win;
+}
+
+void set_is_win()
+{
+        s_is_win = IsWin::yes;
 }
 
 TimeData start_time()
@@ -565,7 +577,7 @@ void GameState::update()
 
                 states::pop();
 
-                on_game_over(IsWin::no);
+                on_game_over();
 
                 return;
         }

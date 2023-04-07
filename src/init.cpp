@@ -146,7 +146,6 @@ void init_session()
         game::init();
         bot::init();
         player_spells::init();
-        highscore::init();
         hints::init();
         smell::init();
 
@@ -159,7 +158,6 @@ void cleanup_session()
 
         map_templates::clear_base_room_templates_used();
 
-        highscore::cleanup();
         player_spells::cleanup();
         insanity::cleanup();
         map::cleanup();

@@ -36,6 +36,7 @@
 #include "direction.hpp"
 #include "disarm.hpp"
 #include "game.hpp"
+#include "game_summary_data.hpp"
 #include "game_time.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
@@ -909,9 +910,7 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::look: {
-                states::push(
-                        std::make_unique<Viewing>(
-                                map::g_player->m_pos));
+                states::push(std::make_unique<Viewing>(map::g_player->m_pos));
         } break;
 
         case GameCmd::auto_melee: {
@@ -923,7 +922,15 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::char_descr: {
-                states::push(std::make_unique<CharacterDescr>());
+                // Collect data from the game session.
+                const game_summary_data::GameSummaryData game_data =
+                        game_summary_data::collect();
+
+                // Create the object that can present the data.
+                auto character_descr = std::make_unique<CharacterDescr>();
+                character_descr->setup(game_data);
+
+                states::push(std::move(character_descr));
         } break;
 
         case GameCmd::minimap: {

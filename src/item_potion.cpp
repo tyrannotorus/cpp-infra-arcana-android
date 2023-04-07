@@ -96,8 +96,7 @@ void init()
                 }
 
                 // Color and false name
-                const size_t idx =
-                        rnd::range(0, (int)s_potion_appearances.size() - 1);
+                const size_t idx = rnd::range(0, (int)s_potion_appearances.size() - 1);
 
                 auto& look = s_potion_appearances[idx];
 
@@ -112,8 +111,7 @@ void init()
 
                 d.color = look.color;
 
-                s_potion_appearances.erase(
-                        std::begin(s_potion_appearances) + (int)idx);
+                s_potion_appearances.erase(std::begin(s_potion_appearances) + (int)idx);
 
                 // True name
                 const auto* const potion =
@@ -155,14 +153,9 @@ void save()
                         continue;
                 }
 
-                saving::put_str(
-                        d.base_name_un_id.names[(size_t)ItemNameType::plain]);
-
-                saving::put_str(
-                        d.base_name_un_id.names[(size_t)ItemNameType::plural]);
-
-                saving::put_str(
-                        d.base_name_un_id.names[(size_t)ItemNameType::a]);
+                saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::plain]);
+                saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::plural]);
+                saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::a]);
 
                 saving::put_str(colors::color_to_name(d.color));
         }
@@ -177,17 +170,10 @@ void load()
                         continue;
                 }
 
-                d.base_name_un_id.names[(size_t)ItemNameType::plain] =
-                        saving::get_str();
-
-                d.base_name_un_id.names[(size_t)ItemNameType::plural] =
-                        saving::get_str();
-
-                d.base_name_un_id.names[(size_t)ItemNameType::a] =
-                        saving::get_str();
-
-                d.color =
-                        colors::name_to_color(saving::get_str()).value();
+                d.base_name_un_id.names[(size_t)ItemNameType::plain] = saving::get_str();
+                d.base_name_un_id.names[(size_t)ItemNameType::plural] = saving::get_str();
+                d.base_name_un_id.names[(size_t)ItemNameType::a] = saving::get_str();
+                d.color = colors::name_to_color(saving::get_str()).value();
         }
 }
 

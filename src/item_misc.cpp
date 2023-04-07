@@ -13,6 +13,7 @@
 #include "actor.hpp"
 #include "actor_player_state.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
@@ -25,6 +26,7 @@
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
+#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
@@ -34,6 +36,7 @@
 #include "saving.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
+#include "terrain_data.hpp"
 #include "terrain_trap.hpp"
 #include "text_format.hpp"
 
@@ -61,7 +64,9 @@ ItemPrePickResult Trapezohedron::pre_pickup_hook()
 
         states::pop();
 
-        on_game_over(IsWin::yes);
+        game::set_is_win();
+
+        on_game_over();
 
         states::push(std::make_unique<WinGameState>());
 

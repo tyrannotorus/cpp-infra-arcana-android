@@ -7,8 +7,6 @@
 #ifndef GAME_OVER_HPP
 #define GAME_OVER_HPP
 
-#include "global.hpp"
-
-void on_game_over(IsWin is_win);
+void on_game_over();
 
 #endif  // GAME_OVER_HPP

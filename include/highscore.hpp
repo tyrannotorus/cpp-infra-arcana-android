@@ -36,14 +36,10 @@ struct HighscoreEntry
 
 namespace highscore
 {
-void init();
-void cleanup();
-
-// NOTE: All this does is construct a HighscoreEntry object, populated with
-// highscore info based on the current game - it has no side effects
-HighscoreEntry make_entry_from_current_game_data(
-        const std::string& game_summary_file_path,
-        IsWin is_win);
+// Constructs a HighscoreEntry data object based on data from the current game
+// session.
+HighscoreEntry make_entry_from_current_session(
+        const std::string& game_summary_file_path = "");
 
 void append_entry_to_highscores_file(HighscoreEntry& entry);
 

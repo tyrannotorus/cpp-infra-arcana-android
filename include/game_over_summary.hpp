@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#ifndef CHARACTER_DESCR_HPP
-#define CHARACTER_DESCR_HPP
+#ifndef GAME_OVER_SUMMARY_HPP
+#define GAME_OVER_SUMMARY_HPP
 
 #include <string>
 #include <vector>
@@ -19,20 +19,25 @@ namespace game_summary_data
 struct GameSummaryData;
 }  // namespace game_summary_data
 
-// This is a class for presenting a "player character description", it can
-// present this in the following formats:
+// This is a class for presenting a game over summary, it can present this in
+// the following formats:
 //
 // * As its own game state in a separate screen.
+// * Written to a text file.
 // * Copied to the clipboard.
 //
-class CharacterDescr : public InfoScreenState
+class GameOverSummary : public InfoScreenState
 {
 public:
-        CharacterDescr() :
-                m_top_idx(0) {}
+        // NOTE: A setup function must be called before the state runs.
 
-        // NOTE: This must be called before the state runs.
         void setup(const game_summary_data::GameSummaryData& data);
+
+        // Used for lines read from a text file (showing game over summary for
+        // previous characters).
+        void setup(std::vector<ColoredString> lines);
+
+        void dump_to_file(const std::string& path) const;
 
         void dump_to_clipboard() const;
 
@@ -45,7 +50,7 @@ public:
 private:
         std::string title() const override
         {
-                return "Character description";
+                return "Game summary";
         }
 
         InfoScreenType type() const override
@@ -53,9 +58,8 @@ private:
                 return InfoScreenType::scrolling;
         }
 
-        std::vector<ColoredString> m_lines;
-
-        int m_top_idx;
+        std::vector<ColoredString> m_lines {};
+        int m_top_idx {0};
 };
 
-#endif  // CHARACTER_DESCR_HPP
+#endif  // GAME_OVER_SUMMARY_HPP

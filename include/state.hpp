@@ -18,9 +18,8 @@ enum class StateId
 {
         browse_highscore_entry,
         browse_spells,
-        options,
-        options_submenu,
         game,
+        game_over_summary,
         highscore,
         inventory,
         main_menu,
@@ -30,18 +29,19 @@ enum class StateId
         message_history,
         new_game,
         new_level,
+        options,
+        options_submenu,
         pick_background,
         pick_background_occultist,
         pick_name,
         pick_trait,
         player_character_descr,
         popup,
-        postmortem_info,
+        query_number,
         remove_trait,
         view_actor,
         view_minimap,
         win_game,  // TODO: This should just be a popup
-        query_number,
 };
 
 class State

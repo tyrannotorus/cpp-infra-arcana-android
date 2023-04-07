@@ -187,17 +187,8 @@ int HighscoreEntry::calculate_score() const
 // -----------------------------------------------------------------------------
 namespace highscore
 {
-void init()
-{
-}
-
-void cleanup()
-{
-}
-
-HighscoreEntry make_entry_from_current_game_data(
-        const std::string& game_summary_file_path,
-        const IsWin is_win)
+HighscoreEntry make_entry_from_current_session(
+        const std::string& game_summary_file_path)
 {
         HighscoreEntry e;
 
@@ -209,7 +200,7 @@ HighscoreEntry make_entry_from_current_game_data(
         e.dlvl = map::g_dlvl;
         e.turn_count = game_time::turn_nr();
         e.ins = map::g_player->insanity();
-        e.is_win = is_win;
+        e.is_win = game::is_win();
         e.bg = player_bon::bg();
         e.player_occultist_domain = player_bon::occultist_domain();
 
@@ -435,11 +426,9 @@ void BrowseHighscore::update()
 
                 const auto& entry_marked = m_entries[browser_y];
 
-                const std::string file_path =
-                        entry_marked.game_summary_file_path;
+                const std::string file_path = entry_marked.game_summary_file_path;
 
-                states::push(
-                        std::make_unique<BrowseHighscoreEntry>(file_path));
+                states::push(std::make_unique<BrowseHighscoreEntry>(file_path));
         } break;
 
         case MenuAction::space:
