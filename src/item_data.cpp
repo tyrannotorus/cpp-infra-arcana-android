@@ -1759,23 +1759,6 @@ void init()
         d.native_containers.push_back(terrain::Id::cocoon);
         g_data[(size_t)d.id] = d;
 
-        reset_data(d, ItemType::device);
-        d.id = Id::lantern;
-        d.is_prio_in_backpack_list = true;
-        d.base_name = {
-                "Electric Lantern", "Electric Lanterns", "an Electric Lantern"};
-        d.base_descr = {
-                "A portable light source."};
-        d.spawn_std_range = Range(1, 10);
-        d.chance_to_incl_in_spawn_list = 100;
-        d.is_identified = true;
-        d.tile = gfx::TileId::lantern;
-        d.color = colors::yellow();
-        d.native_containers.push_back(terrain::Id::chest);
-        d.native_containers.push_back(terrain::Id::cabinet);
-        d.native_containers.push_back(terrain::Id::cocoon);
-        g_data[(size_t)d.id] = d;
-
         reset_data(d, ItemType::rod);
         d.id = Id::rod_curing;
         g_data[(size_t)d.id] = d;
@@ -1811,6 +1794,28 @@ void init()
         d.character = '%';
         d.color = colors::dark_brown();
         d.tile = gfx::TileId::medical_bag;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::general);
+        d.id = Id::lantern;
+        d.has_std_activate = true;
+        d.is_prio_in_backpack_list = true;
+        d.base_name = {
+                "Electric Lantern", "Electric Lanterns", "an Electric Lantern"};
+        d.base_descr = {
+                "A portable light source."};
+        d.weight = item::Weight::light;
+        d.character = '%';
+        d.spawn_std_range = Range(1, 10);
+        d.is_stackable = false;
+        d.chance_to_incl_in_spawn_list = 100;
+        d.tile = gfx::TileId::lantern;
+        d.color = colors::yellow();
+        d.land_on_hard_snd_msg = "I hear a clanking sound.";
+        d.land_on_hard_sfx = audio::SfxId::metal_clank;
+        d.native_containers.push_back(terrain::Id::chest);
+        d.native_containers.push_back(terrain::Id::cabinet);
+        d.native_containers.push_back(terrain::Id::cocoon);
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn);

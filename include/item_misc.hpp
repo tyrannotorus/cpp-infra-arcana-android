@@ -91,6 +91,48 @@ protected:
         MedBagAction m_current_action {MedBagAction::END};
 };
 
+class Lantern : public Item
+{
+public:
+        Lantern(item::ItemData* item_data);
+
+        ~Lantern() override = default;
+
+        void save_hook() const override;
+
+        void load_hook() override;
+
+        std::string name_info_str() const override;
+
+        ConsumeItem activate(actor::Actor* actor) override;
+
+        bool is_activated() const
+        {
+                return m_is_activated;
+        }
+
+        int nr_turns_left() const
+        {
+                return m_nr_turns_left;
+        }
+
+        void on_std_turn_in_inv_hook(InvType inv_type) override;
+
+        void on_pickup_hook() override;
+
+        LightSize light_size() const override;
+
+        void randomize_duration();
+
+private:
+        void toggle();
+
+        static const int m_max_turns_left {150};
+
+        int m_nr_turns_left {m_max_turns_left};
+        bool m_is_activated {false};
+};
+
 class ReflTalisman : public Item
 {
 public:

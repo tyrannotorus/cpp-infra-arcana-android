@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "global.hpp"
 #include "player_bon.hpp"
 #include "random.hpp"
 
@@ -140,6 +141,8 @@ std::string spell_domain_title(SpellDomain domain);
 SpellSkill str_to_spell_skill_id(const std::string& str);
 
 std::string skill_to_str(SpellSkill skill);
+
+ShockSrc spell_domain_to_shock_type(SpellDomain domain);
 
 terrain::DidOpen run_opening_spell_effect_at(
         const P& pos,

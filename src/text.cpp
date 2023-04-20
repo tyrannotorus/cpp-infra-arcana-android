@@ -81,7 +81,7 @@ std::vector<TextAction> TextCompiler::compile()
 
         while (true) {
                 const auto token_result = next_token(m_raw_str_pos);
-                const auto str = token_result.first;
+                const std::string str = token_result.first;
                 m_raw_str_pos = token_result.second;
 
                 const auto action = token_to_action(str);

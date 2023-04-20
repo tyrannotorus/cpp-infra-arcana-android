@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "SDL_clipboard.h"
 #include "SDL_keycode.h"
 #include "game.hpp"
 #include "game_summary_data.hpp"
@@ -16,47 +17,42 @@
 #include "io.hpp"
 #include "panel.hpp"
 #include "property_handler.hpp"
+#include "spells.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static Color color_heading()
-{
-        return colors::menu_highlight();
-}
-
-static Color color_text_dark()
-{
-        return colors::gray();
-}
+static const Color& s_color_heading = colors::menu_highlight();
+static const Color& s_color_text_dark = colors::gray();
+static const std::string s_indent = "  ";
 
 static int max_descr_w()
 {
-        return panels::w(Panel::info_screen_content);
+        return panels::w(Panel::info_screen_content) - (int)s_indent.size();
 }
 
 static void add_properties_descr(
         const game_summary_data::GameSummaryData& data,
         std::vector<ColoredString>& lines)
 {
-        lines.emplace_back("Current status effects", color_heading());
+        lines.emplace_back("Current status effects", s_color_heading);
 
         if (data.properties.empty()) {
-                lines.emplace_back("None", colors::text());
+                lines.emplace_back(s_indent + "None", colors::text());
                 lines.emplace_back("", colors::text());
         }
         else {
                 for (const prop::PropListEntry& prop : data.properties) {
                         const ColoredString& title = prop.title;
 
-                        lines.emplace_back(title.str, title.color);
+                        lines.emplace_back(s_indent + title.str, title.color);
 
                         const std::vector<std::string> descr_formatted =
                                 text_format::split(prop.descr, max_descr_w());
 
                         for (const std::string& descr_line : descr_formatted) {
-                                lines.emplace_back(descr_line, color_text_dark());
+                                lines.emplace_back(s_indent + descr_line, s_color_text_dark);
                         }
 
                         lines.emplace_back("", colors::text());
@@ -64,97 +60,165 @@ static void add_properties_descr(
         }
 }
 
+static int shock_from_src(
+        const game_summary_data::GameSummaryData& data,
+        const ShockSrc src)
+{
+        return data.total_shock_from_src[(size_t)src];
+}
+
+static std::string to_pct_str_padded(const int value, const int padding)
+{
+        return text_format::pad_after(std::to_string(value) + "%", padding);
+}
+
 static void add_insanity_descr(
         const game_summary_data::GameSummaryData& data,
         std::vector<ColoredString>& lines)
 {
-        lines.emplace_back("Mental disorders", color_heading());
+        lines.emplace_back("Sanity of mind", s_color_heading);
+
+        lines.emplace_back(
+                s_indent + std::to_string(data.insanity) + "% insane",
+                colors::text());
 
         if (data.insanity_symptons.empty()) {
-                lines.emplace_back("None", colors::text());
+                lines.emplace_back(s_indent + "No specific mental disorders", colors::text());
         }
         else {
                 for (const InsSympt* const sympt : data.insanity_symptons) {
                         const std::string sympt_descr = sympt->char_descr_msg();
 
                         if (!sympt_descr.empty()) {
-                                lines.emplace_back(sympt_descr, colors::text());
+                                lines.emplace_back(s_indent + sympt_descr, colors::text());
                         }
                 }
         }
 
+        lines.emplace_back(
+                (
+                        s_indent +
+                        "Current shock level (including temporary sources) is " +
+                        std::to_string(data.current_shock) +
+                        "% "),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 "Total shock received is " +
+                 std::to_string(data.total_shock) +
+                 "%, derived from (rounded values):"),
+                colors::text());
+
+        const int padding = 10;
+
+        lines.emplace_back(
+                (s_indent +
+                 s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::time), padding) +
+                 "from the passing of time"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::see_mon), padding) +
+                 "from observing creatures"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::take_damage), padding) +
+                 "from being harmed"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::use_strange_item), padding) +
+                 "from using items"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 s_indent +
+                 to_pct_str_padded(data.total_shock_from_casting_spells, padding) +
+                 "from casting learned spells"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::misc), padding) +
+                 "from other sources"),
+                colors::text());
+
         lines.emplace_back("", colors::text());
 }
 
-static void add_potion_descr(
+static void add_item_knowledge_descr(
         const game_summary_data::GameSummaryData& data,
         std::vector<ColoredString>& lines)
 {
-        lines.emplace_back("Potion knowledge", color_heading());
+        lines.emplace_back("Item knowledge", s_color_heading);
 
-        std::vector<ColoredString> potion_knowledge = data.potion_knowledge;
+        std::vector<ColoredString> item_knowledge = data.item_knowledge;
 
-        if (data.potion_knowledge.empty()) {
-                lines.emplace_back("No known potions", colors::text());
+        if (data.item_knowledge.empty()) {
+                lines.emplace_back(s_indent + "None", colors::text());
         }
         else {
-                std::sort(
-                        std::begin(potion_knowledge),
-                        std::end(potion_knowledge),
-                        [](const ColoredString& e1, const ColoredString& e2) {
-                                return e1.str < e2.str;
-                        });
-
-                for (const ColoredString& e : potion_knowledge) {
-                        lines.push_back(e);
+                for (const ColoredString& e : item_knowledge) {
+                        lines.emplace_back(s_indent + e.str, e.color);
                 }
         }
 
         lines.emplace_back("", colors::text());
 }
 
-static void add_scroll_descr(
-        const game_summary_data::GameSummaryData& data,
-        std::vector<ColoredString>& lines)
-{
-        lines.emplace_back("Manuscript knowledge", color_heading());
+// static void add_scroll_descr(
+//         const game_summary_data::GameSummaryData& data,
+//         std::vector<ColoredString>& lines)
+// {
+//         lines.emplace_back("Manuscript knowledge", s_color_heading);
 
-        std::vector<ColoredString> scroll_knowledge = data.scroll_knowledge;
+//         std::vector<ColoredString> scroll_knowledge = data.scroll_knowledge;
 
-        if (data.scroll_knowledge.empty()) {
-                lines.emplace_back("No known manuscripts", colors::text());
-        }
-        else {
-                std::sort(
-                        std::begin(scroll_knowledge),
-                        std::end(scroll_knowledge),
-                        [](const ColoredString& e1,
-                           const ColoredString& e2) {
-                                return e1.str < e2.str;
-                        });
+//         if (data.scroll_knowledge.empty()) {
+//                 lines.emplace_back(s_indent + "No known manuscripts", colors::text());
+//         }
+//         else {
+//                 std::sort(
+//                         std::begin(scroll_knowledge),
+//                         std::end(scroll_knowledge),
+//                         [](const ColoredString& e1,
+//                            const ColoredString& e2) {
+//                                 return e1.str < e2.str;
+//                         });
 
-                for (const ColoredString& e : scroll_knowledge) {
-                        lines.push_back(e);
-                }
-        }
+//                 for (const ColoredString& e : scroll_knowledge) {
+//                         lines.emplace_back(s_indent + e.str, e.color);
+//                 }
+//         }
 
-        lines.emplace_back("", colors::text());
-}
+//         lines.emplace_back("", colors::text());
+// }
 
 static void add_traits_descr(
         const game_summary_data::GameSummaryData& data,
         std::vector<ColoredString>& lines)
 {
-        lines.emplace_back("Traits gained", color_heading());
+        lines.emplace_back("Traits gained", s_color_heading);
 
         for (const game_summary_data::TraitData& trait : data.current_traits) {
-                lines.emplace_back(trait.name, colors::text());
+                lines.emplace_back(s_indent + trait.name, colors::text());
 
                 const std::vector<std::string> descr_lines =
                         text_format::split(trait.descr, max_descr_w());
 
                 for (const std::string& descr_line : descr_lines) {
-                        lines.emplace_back(descr_line, color_text_dark());
+                        lines.emplace_back(s_indent + descr_line, s_color_text_dark);
                 }
 
                 lines.emplace_back("", colors::text());
@@ -165,7 +229,7 @@ static void add_history_descr(
         const game_summary_data::GameSummaryData& data,
         std::vector<ColoredString>& lines)
 {
-        lines.emplace_back("History of " + data.player_name, color_heading());
+        lines.emplace_back("History of " + data.player_name, s_color_heading);
 
         int longest_turn_w = 0;
 
@@ -184,7 +248,7 @@ static void add_history_descr(
 
                 ev_str += " " + event.msg;
 
-                lines.emplace_back(ev_str, colors::text());
+                lines.emplace_back(s_indent + ev_str, colors::text());
         }
 
         lines.emplace_back("", colors::text());
@@ -199,18 +263,9 @@ void CharacterDescr::setup(const game_summary_data::GameSummaryData& data)
 
         add_properties_descr(data, m_lines);
         add_insanity_descr(data, m_lines);
-        add_potion_descr(data, m_lines);
-        add_scroll_descr(data, m_lines);
+        add_item_knowledge_descr(data, m_lines);
         add_traits_descr(data, m_lines);
         add_history_descr(data, m_lines);
-}
-
-void CharacterDescr::dump_to_clipboard() const
-{
-        // TODO: Implement.
-
-        // TODO: Perhaps this should only dump an abbreviated version of the
-        // lines (to fit in a Discord message (2000 character limit).
 }
 
 StateId CharacterDescr::id() const

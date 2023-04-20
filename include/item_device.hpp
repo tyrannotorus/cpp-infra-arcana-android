@@ -32,48 +32,36 @@ public:
 
         virtual ~Device() = default;
 
-        ConsumeItem activate(actor::Actor* actor) override = 0;
+        void save_hook() const final;
+        void load_hook() final;
+
+        std::string name_info_str() const final;
+
+        std::vector<std::string> descr_hook() const final;
 
         Color interface_color() const final
         {
                 return colors::cyan();
         }
 
-        void on_std_turn_in_inv_hook(const InvType inv_type) override
-        {
-                (void)inv_type;
-        }
+        ConsumeItem activate(actor::Actor* actor) final;
 
-        void identify(Verbose verbose) override;
-};
+        void identify(Verbose verbose) final;
 
-class StrangeDevice : public Device
-{
-public:
-        StrangeDevice(item::ItemData* item_data);
-
-        std::vector<std::string> descr_hook() const final;
-
-        ConsumeItem activate(actor::Actor* actor) override;
-
-        std::string name_info_str() const override;
-
-        void save_hook() const override;
-        void load_hook() override;
-
-        Condition condition;
-
-private:
+protected:
         virtual std::string descr_identified() const = 0;
 
         virtual ConsumeItem run_effect() = 0;
+
+private:
+        Condition m_condition;
 };
 
-class Blaster : public StrangeDevice
+class Blaster : public Device
 {
 public:
         Blaster(item::ItemData* const item_data) :
-                StrangeDevice(item_data) {}
+                Device(item_data) {}
 
         ~Blaster() override = default;
 
@@ -83,11 +71,11 @@ private:
         ConsumeItem run_effect() override;
 };
 
-class Rejuvenator : public StrangeDevice
+class Rejuvenator : public Device
 {
 public:
         Rejuvenator(item::ItemData* const item_data) :
-                StrangeDevice(item_data) {}
+                Device(item_data) {}
 
         ~Rejuvenator() override = default;
 
@@ -97,11 +85,11 @@ private:
         ConsumeItem run_effect() override;
 };
 
-class Translocator : public StrangeDevice
+class Translocator : public Device
 {
 public:
         Translocator(item::ItemData* const item_data) :
-                StrangeDevice(item_data) {}
+                Device(item_data) {}
 
         ~Translocator() override = default;
 
@@ -111,11 +99,11 @@ private:
         ConsumeItem run_effect() override;
 };
 
-class SentryDrone : public StrangeDevice
+class SentryDrone : public Device
 {
 public:
         SentryDrone(item::ItemData* const item_data) :
-                StrangeDevice(item_data) {}
+                Device(item_data) {}
 
         ~SentryDrone() override = default;
 
@@ -129,11 +117,11 @@ private:
         ConsumeItem run_effect() override;
 };
 
-class Deafening : public StrangeDevice
+class Deafening : public Device
 {
 public:
         Deafening(item::ItemData* const item_data) :
-                StrangeDevice(item_data) {}
+                Device(item_data) {}
 
         ~Deafening() override = default;
 
@@ -143,11 +131,11 @@ private:
         ConsumeItem run_effect() override;
 };
 
-class ForceField : public StrangeDevice
+class ForceField : public Device
 {
 public:
         ForceField(item::ItemData* const item_data) :
-                StrangeDevice(item_data) {}
+                Device(item_data) {}
 
         ~ForceField() override = default;
 
@@ -155,48 +143,6 @@ private:
         std::string descr_identified() const override;
 
         ConsumeItem run_effect() override;
-};
-
-// TODO: This should not be a device
-class Lantern : public Device
-{
-public:
-        Lantern(item::ItemData* item_data);
-
-        ~Lantern() override = default;
-
-        std::string name_info_str() const override;
-
-        ConsumeItem activate(actor::Actor* actor) override;
-
-        bool is_activated() const
-        {
-                return m_is_activated;
-        }
-
-        int nr_turns_left() const
-        {
-                return m_nr_turns_left;
-        }
-
-        void on_std_turn_in_inv_hook(InvType inv_type) override;
-
-        void on_pickup_hook() override;
-
-        LightSize light_size() const override;
-
-        void save_hook() const override;
-        void load_hook() override;
-
-        void randomize_duration();
-
-private:
-        void toggle();
-
-        static const int m_max_turns_left {150};
-
-        int m_nr_turns_left {m_max_turns_left};
-        bool m_is_activated {false};
 };
 
 }  // namespace device

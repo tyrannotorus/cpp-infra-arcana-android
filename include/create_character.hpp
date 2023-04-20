@@ -21,6 +21,12 @@ enum class TraitScreenMode
         view_unavail
 };
 
+enum class IsCharacterCreationTraitPick
+{
+        no,
+        yes
+};
+
 class NewGameState : public State
 {
 public:
@@ -77,8 +83,9 @@ private:
 class PickTraitState : public State
 {
 public:
-        PickTraitState(std::string title) :
-                m_title(std::move(title))
+        PickTraitState(std::string title, IsCharacterCreationTraitPick is_char_creation) :
+                m_title(std::move(title)),
+                m_is_char_creation(is_char_creation)
         {
         }
 
@@ -118,6 +125,7 @@ private:
         TraitScreenMode m_screen_mode {TraitScreenMode::pick_new};
 
         std::string m_title;
+        IsCharacterCreationTraitPick m_is_char_creation;
 };
 
 class RemoveTraitState : public State

@@ -52,6 +52,9 @@ by bumping them).
 - Added more monsters
 
 # Other
+- Added a command in the trait selection menu to show information about the current game, such as character information or inventory (intended to help in choosing trait to pick).
+- In the character info screen, knowledge about rods and devices is now also shown (not just potions and manuscripts), and there is information about how much shock the player has received from different sources (seeing monsters, using items, etc).
+- In the game over summary screen there is now also information about item knowledge, inventory, and shock received from different sources.
 - Current turn number is now displayed in the gui.
 - Fountains and Monoliths are now marked on the minimap.
 

@@ -288,6 +288,12 @@ void Actor::save() const
 
                 saving::put_int(v);
         }
+
+        saving::put_int((int)player_state::g_player_total_shock_taken);
+
+        for (size_t src_idx = 0; src_idx < (size_t)ShockSrc::END; ++src_idx) {
+                saving::put_int((int)player_state::g_player_total_shock_from_src[src_idx]);
+        }
 }
 
 void Actor::load()
@@ -319,6 +325,12 @@ void Actor::load()
                 const int v = saving::get_int();
 
                 m_data->ability_values.set_val((AbilityId)i, v);
+        }
+
+        player_state::g_player_total_shock_taken = saving::get_int();
+
+        for (int src_idx = 0; src_idx < (int)ShockSrc::END; ++src_idx) {
+                player_state::g_player_total_shock_from_src[src_idx] = saving::get_int();
         }
 }
 
@@ -421,6 +433,9 @@ void Actor::incr_shock(double shock, ShockSrc shock_src)
 
         shock = shock_taken_after_mods(shock, shock_src);
 
+        player_state::g_player_total_shock_taken += shock;
+        player_state::g_player_total_shock_from_src[(size_t)shock_src] += shock;
+
         player_state::g_shock += shock;
 
         player_state::g_shock = std::max(0.0, player_state::g_shock);
@@ -430,8 +445,7 @@ void Actor::restore_shock(
         const int amount_restored,
         const bool is_temp_shock_restored)
 {
-        player_state::g_shock =
-                std::max(0.0, player_state::g_shock - amount_restored);
+        player_state::g_shock = std::max(0.0, player_state::g_shock - amount_restored);
 
         if (is_temp_shock_restored) {
                 player_state::g_shock_tmp = 0.0;

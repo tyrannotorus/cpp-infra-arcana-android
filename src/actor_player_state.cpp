@@ -34,6 +34,9 @@ double g_shock {0.0};
 double g_shock_tmp {0.0};
 int g_nr_turns_until_insanity {-1};
 
+double g_player_total_shock_taken = 0.0;
+double g_player_total_shock_from_src[(size_t)ShockSrc::END] {};
+
 int g_nr_turns_until_r_spell {-1};
 int g_nr_turns_until_meditative_focused {-1};
 
@@ -64,6 +67,12 @@ void init()
         g_shock = 0.0;
         g_shock_tmp = 0.0;
         g_nr_turns_until_insanity = -1;
+
+        g_player_total_shock_taken = 0.0;
+
+        for (size_t src_idx = 0; src_idx < (size_t)ShockSrc::END; ++src_idx) {
+                g_player_total_shock_from_src[src_idx] = 0.0;
+        }
 
         g_nr_turns_until_r_spell = -1;
         g_nr_turns_until_meditative_focused = -1;

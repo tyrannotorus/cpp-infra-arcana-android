@@ -251,7 +251,8 @@ void incr_player_xp(const int xp_gained, const Verbose verbose)
 
                         states::push(
                                 std::make_unique<PickTraitState>(
-                                        "Which trait do you gain?"));
+                                        "Which trait do you gain?",
+                                        IsCharacterCreationTraitPick::no));
                 }
 
                 s_xp_pct -= 100;

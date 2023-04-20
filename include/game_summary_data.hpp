@@ -27,6 +27,12 @@ struct TraitData
         std::string descr {};
 };
 
+struct InventoryItemData
+{
+        std::string slot_name {};
+        std::string item_name {};
+};
+
 struct GameSummaryData
 {
         HighscoreEntry highscore {};
@@ -37,6 +43,12 @@ struct GameSummaryData
         int dlvl {0};
         int turns {0};
         int insanity {0};
+        int current_shock {0};
+        int total_shock {0};
+        int total_shock_from_src[(size_t)ShockSrc::END];
+        // Each spell domain is a separate "shock source", this represents the
+        // aggregated shock from casting spells (for convenient presentation):
+        int total_shock_from_casting_spells {0};
         std::string background_title {};
         int nr_kills_tot {0};
         std::vector<std::string> unique_monsters_killed {};
@@ -46,8 +58,8 @@ struct GameSummaryData
         std::vector<HistoryEvent> player_history {};
         std::vector<Msg> msg_history {};
         std::vector<prop::PropListEntry> properties {};
-        std::vector<ColoredString> potion_knowledge {};
-        std::vector<ColoredString> scroll_knowledge {};
+        std::vector<ColoredString> item_knowledge {};
+        std::vector<InventoryItemData> inventory {};
 };
 
 // Collects data from the current game session, to be used for presenting a

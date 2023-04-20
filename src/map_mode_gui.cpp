@@ -462,8 +462,7 @@ static void draw_lantern(const int y, const Panel panel)
         std::string lantern_str = "None";
 
         if (item) {
-                const auto* const lantern =
-                        static_cast<const device::Lantern*>(item);
+                const auto* const lantern = static_cast<const item::Lantern*>(item);
 
                 if (lantern->is_activated()) {
                         color = colors::yellow();

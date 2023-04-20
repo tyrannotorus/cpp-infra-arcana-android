@@ -39,8 +39,6 @@ public:
 
         void dump_to_file(const std::string& path) const;
 
-        void dump_to_clipboard() const;
-
         void draw() override;
 
         void update() override;

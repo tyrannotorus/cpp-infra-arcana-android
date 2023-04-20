@@ -14,7 +14,7 @@ Gameplay commands:
    i         INVENTORY (wield, equip, remove, consume, or activate items)
    k (w)     KICK or strike objects, or DESTROY CORPSES
    l (e)     Toggle LANTERN
-   m         MINIMAP
+   m         Show MAP
    n (o)     Make NOISE
    p         DISARM trap
    r         RELOAD

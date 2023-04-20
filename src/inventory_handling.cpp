@@ -393,8 +393,7 @@ void InvState::draw_backpack_item(
         p.x += (int)key_str.length() + 1;
 
         // Draw item
-        const item::Item* const item =
-                map::g_player->m_inv.m_backpack[backpack_idx];
+        const item::Item* const item = map::g_player->m_inv.m_backpack[backpack_idx];
 
         // draw_item_symbol(*item, p);
 
@@ -789,9 +788,15 @@ void BrowseInv::draw()
         const auto nr_slots = (size_t)SlotId::END;
 
         io::draw_text_center(
-                " Browsing inventory " + common_text::g_screen_exit_hint + " ",
+                " Browsing inventory ",
                 Panel::screen,
                 {panels::center_x(Panel::screen), 0},
+                colors::title());
+
+        io::draw_text_center(
+                " " + common_text::g_screen_exit_hint + " ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
                 colors::title());
 
         const Range idx_range_shown = m_browser.range_shown();
@@ -852,23 +857,26 @@ void BrowseInv::update()
 
         if (input.key == 'i') {
                 // Exit screen
-                states::pop_until(StateId::game);
+
+                states::pop();
 
                 return;
         }
 
-        const MenuAction action =
-                m_browser.read(input, MenuInputMode::scrolling_and_letters);
+        const MenuAction action = m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
         switch (action) {
         case MenuAction::selected: {
-                on_selected();
+                if (m_allow_inv_action) {
+                        on_selected();
+                }
         } break;
 
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
-                states::pop_until(StateId::game);
+
+                states::pop();
         } break;
 
         default:
@@ -910,7 +918,7 @@ void BrowseInv::on_inventory_slot_selected(InvSlot& slot) const
 
 void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot) const
 {
-        states::pop_until(StateId::game);
+        states::pop();
 
         msg_log::clear();
 
@@ -942,7 +950,7 @@ void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot) const
 void BrowseInv::on_backpack_item_selected(const size_t backpack_idx) const
 {
         // Exit screen
-        states::pop_until(StateId::game);
+        states::pop();
 
         item::Item* item = map::g_player->m_inv.m_backpack[backpack_idx];
 
@@ -984,7 +992,7 @@ void Apply::on_start()
 
         if (m_filtered_backpack_indexes.empty()) {
                 // Exit screen
-                states::pop_until(StateId::game);
+                states::pop();
 
                 msg_log::add("I carry nothing to apply.");
 
@@ -1013,9 +1021,15 @@ void Apply::draw()
         const int browser_y = m_browser.y();
 
         io::draw_text_center(
-                " Apply which item? " + common_text::g_screen_exit_hint + " ",
+                " Apply which item? ",
                 Panel::screen,
                 {panels::center_x(Panel::screen), 0},
+                colors::title());
+
+        io::draw_text_center(
+                " " + common_text::g_screen_exit_hint + " ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
                 colors::title());
 
         const Range idx_range_shown = m_browser.range_shown();
@@ -1071,7 +1085,7 @@ void Apply::update()
                                 m_filtered_backpack_indexes[m_browser.y()];
 
                         // Exit screen
-                        states::pop_until(StateId::game);
+                        states::pop();
 
                         activate(backpack_idx);
 
@@ -1082,7 +1096,7 @@ void Apply::update()
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
-                states::pop_until(StateId::game);
+                states::pop();
                 return;
         } break;
 
@@ -1120,9 +1134,15 @@ void Drop::draw()
         draw_box(panels::area(Panel::screen));
 
         io::draw_text_center(
-                " Drop which item? " + common_text::g_screen_exit_hint + " ",
+                " Drop which item? ",
                 Panel::screen,
                 {panels::center_x(Panel::screen), 0},
+                colors::title());
+
+        io::draw_text_center(
+                " " + common_text::g_screen_exit_hint + " ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
                 colors::title());
 
         const int browser_y = m_browser.y();
@@ -1195,7 +1215,7 @@ void Drop::update()
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
-                states::pop_until(StateId::game);
+                states::pop();
         } break;
 
         default:
@@ -1237,7 +1257,7 @@ void Drop::on_selected() const
         ASSERT(item);
 
         // Exit screen
-        states::pop_until(StateId::game);
+        states::pop();
 
         // HACK: The Flagellant Torture Collar is not allowed to be removed.
         if (item->id() == item::Id::torture_collar) {
@@ -1391,9 +1411,15 @@ void Equip::draw()
         // An item is available
 
         io::draw_text_center(
-                " " + heading + " " + common_text::g_screen_exit_hint + " ",
+                " " + heading + " ",
                 Panel::screen,
                 {panels::center_x(Panel::screen), 0},
+                colors::title());
+
+        io::draw_text_center(
+                " " + common_text::g_screen_exit_hint + " ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
                 colors::title());
 
         const int browser_y = m_browser.y();
@@ -1404,17 +1430,10 @@ void Equip::draw()
 
         for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
                 const char key = m_browser.menu_keys()[y];
-
                 const bool is_marked = browser_y == i;
-
-                const size_t backpack_idx =
-                        m_filtered_backpack_indexes[i];
-
-                item::Item* const item =
-                        map::g_player->m_inv.m_backpack[backpack_idx];
-
+                const size_t backpack_idx = m_filtered_backpack_indexes[i];
+                item::Item* const item = map::g_player->m_inv.m_backpack[backpack_idx];
                 const item::ItemData& d = item->data();
-
                 ItemNameAttackInfo att_inf = ItemNameAttackInfo::none;
 
                 if ((m_slot_to_equip.id == SlotId::wpn) ||
@@ -1532,8 +1551,7 @@ void SelectThrow::on_start()
         }
 
         // Filter backpack
-        const std::vector<item::Item*>& backpack =
-                map::g_player->m_inv.m_backpack;
+        const std::vector<item::Item*>& backpack = map::g_player->m_inv.m_backpack;
 
         for (size_t i = 0; i < backpack.size(); ++i) {
                 const item::Item* const item = backpack[i];
@@ -1562,7 +1580,7 @@ void SelectThrow::on_start()
 
         if (list_size == 0) {
                 // Nothing to throw, exit screen.
-                states::pop_until(StateId::game);
+                states::pop();
 
                 msg_log::add("I carry no throwing weapons.");
 
@@ -1599,12 +1617,15 @@ void SelectThrow::draw()
         draw_box(panels::area(Panel::screen));
 
         io::draw_text_center(
-                std::string(
-                        " Throw which item? " +
-                        common_text::g_screen_exit_hint) +
-                        " ",
+                " Throw which item? ",
                 Panel::screen,
                 {panels::center_x(Panel::screen), 0},
+                colors::title());
+
+        io::draw_text_center(
+                " " + common_text::g_screen_exit_hint + " ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
                 colors::title());
 
         const int browser_y = m_browser.y();
@@ -1689,7 +1710,7 @@ void SelectThrow::update()
 
         switch (action) {
         case MenuAction::selected: {
-                states::pop_until(StateId::game);
+                states::pop();
 
                 const std::string name =
                         item->name(
@@ -1744,7 +1765,7 @@ void SelectThrow::update()
         case MenuAction::esc:
         case MenuAction::space: {
                 // Exit screen
-                states::pop_until(StateId::game);
+                states::pop();
 
                 return;
         } break;
@@ -1819,7 +1840,7 @@ void SelectIdentify::on_start()
 
         if (list_size == 0) {
                 // Nothing to identify, exit screen
-                states::pop_until(StateId::game);
+                states::pop();
 
                 msg_log::add("There is nothing to identify.");
 
@@ -1930,7 +1951,7 @@ void SelectIdentify::update()
                 }
 
                 // Exit screen
-                states::pop_until(StateId::game);
+                states::pop();
 
                 io::clear_screen();
 

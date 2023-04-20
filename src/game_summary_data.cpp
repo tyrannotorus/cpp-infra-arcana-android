@@ -14,6 +14,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
+#include "actor_player_state.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
@@ -23,6 +24,7 @@
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -30,8 +32,6 @@
 static void collect_nr_kills_tot(
         game_summary_data::GameSummaryData& d)
 {
-        d.nr_kills_tot = 0;
-
         for (const auto& e : actor::g_data) {
                 const actor::ActorData& actor_data = e.second;
 
@@ -68,42 +68,55 @@ static void collect_background_title(
         }
 }
 
-static void collect_potion_knowledge(
-        game_summary_data::GameSummaryData& d)
+static std::vector<ColoredString> get_item_knowledge_names_for_type(
+        const ItemType item_type)
 {
-        d.potion_knowledge.clear();
+        std::vector<ColoredString> names;
 
         for (int i = 0; i < (int)item::Id::END; ++i) {
                 const item::ItemData& item_data = item::g_data[i];
 
-                if ((item_data.type == ItemType::potion) &&
+                if ((item_data.type == item_type) &&
                     (item_data.is_tried || item_data.is_identified)) {
                         std::unique_ptr<item::Item> item(item::make(item_data.id));
 
                         const std::string name = item->name(ItemNameType::plain);
 
-                        d.potion_knowledge.emplace_back(name, item_data.color);
+                        names.emplace_back(name, item_data.color);
                 }
         }
+
+        // Sort the result so that the player cannot identify tried items from
+        // the order they appear in (e.g. if the first item is only tried and
+        // the next item is known, the player can know what the first item is if
+        // it always comes before the second item).
+
+        std::sort(
+                std::begin(names),
+                std::end(names),
+                [](
+                        const ColoredString& v1,
+                        const ColoredString& v2) {
+                        return v1.str < v2.str;
+                });
+
+        return names;
 }
 
-static void collect_scroll_knowledge(
-        game_summary_data::GameSummaryData& d)
+template <typename T>
+static void append_to_vector(std::vector<T>& a, const std::vector<T>& b)
 {
-        d.scroll_knowledge.clear();
+        a.insert(std::end(a), std::begin(b), std::end(b));
+}
 
-        for (int i = 0; i < (int)item::Id::END; ++i) {
-                const item::ItemData& item_data = item::g_data[i];
+static void collect_item_knowledge(game_summary_data::GameSummaryData& d)
+{
+        d.item_knowledge.clear();
 
-                if ((item_data.type == ItemType::scroll) &&
-                    (item_data.is_tried || item_data.is_identified)) {
-                        std::unique_ptr<item::Item> item(item::make(item_data.id));
-
-                        const std::string name = item->name(ItemNameType::plain);
-
-                        d.scroll_knowledge.emplace_back(name, item_data.color);
-                }
-        }
+        append_to_vector(d.item_knowledge, get_item_knowledge_names_for_type(ItemType::potion));
+        append_to_vector(d.item_knowledge, get_item_knowledge_names_for_type(ItemType::scroll));
+        append_to_vector(d.item_knowledge, get_item_knowledge_names_for_type(ItemType::rod));
+        append_to_vector(d.item_knowledge, get_item_knowledge_names_for_type(ItemType::device));
 }
 
 static void collect_current_traits(
@@ -124,6 +137,55 @@ static void collect_current_traits(
         }
 }
 
+static void collect_inventory(game_summary_data::GameSummaryData& d)
+{
+        auto get_item_name = [](const item::Item& item) {
+                return (
+                        item.name(
+                                ItemNameType::plain,
+                                ItemNameInfo::yes,
+                                ItemNameAttackInfo::main_attack_mode));
+        };
+
+        for (const InvSlot& slot : map::g_player->m_inv.m_slots) {
+                game_summary_data::InventoryItemData item_data;
+
+                item_data.slot_name = slot.name;
+
+                if (slot.item) {
+                        item_data.item_name = get_item_name(*slot.item);
+                }
+
+                d.inventory.push_back(item_data);
+        }
+
+        for (const item::Item* const item : map::g_player->m_inv.m_backpack) {
+                game_summary_data::InventoryItemData item_data;
+
+                item_data.item_name = get_item_name(*item);
+
+                d.inventory.push_back(item_data);
+        }
+}
+
+static void collect_total_shock_taken(game_summary_data::GameSummaryData& d)
+{
+        d.total_shock = (int)actor::player_state::g_player_total_shock_taken;
+
+        // Retrieve total shock for each shock source type.
+        for (size_t src_idx = 0; src_idx < (size_t)ShockSrc::END; ++src_idx) {
+                d.total_shock_from_src[src_idx] =
+                        (int)actor::player_state::g_player_total_shock_from_src[src_idx];
+        }
+
+        // Calculate total shock from casting spells.
+        for (int domain_idx = 0; domain_idx < (int)SpellDomain::END; ++domain_idx) {
+                const ShockSrc src = spells::spell_domain_to_shock_type((SpellDomain)domain_idx);
+
+                d.total_shock_from_casting_spells += d.total_shock_from_src[(size_t)src];
+        }
+}
+
 // -----------------------------------------------------------------------------
 // game_summary_data
 // -----------------------------------------------------------------------------
@@ -141,6 +203,8 @@ GameSummaryData collect()
         d.dlvl = map::g_dlvl;
         d.turns = game_time::turn_nr();
         d.insanity = map::g_player->insanity();
+        d.current_shock = map::g_player->shock_tot();
+        collect_total_shock_taken(d);
         collect_background_title(d);
         collect_nr_kills_tot(d);
         collect_unique_monsters_killed(d);
@@ -149,9 +213,9 @@ GameSummaryData collect()
         d.player_history = game::history();
         d.msg_history = msg_log::history();
         d.properties = map::g_player->m_properties.property_names_and_descr();
-        collect_potion_knowledge(d);
-        collect_scroll_knowledge(d);
+        collect_item_knowledge(d);
         collect_current_traits(d);
+        collect_inventory(d);
 
         return d;
 }

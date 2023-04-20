@@ -23,7 +23,7 @@ void InfoScreenState::draw_interface() const
         io::draw_text_center(
                 " " + title() + " ",
                 Panel::screen,
-                P(screen_center_x, 0),
+                {screen_center_x, 0},
                 colors::title());
 
         const std::string cmd_info =
@@ -34,6 +34,6 @@ void InfoScreenState::draw_interface() const
         io::draw_text_center(
                 " " + cmd_info + " ",
                 Panel::screen,
-                P(screen_center_x, panels::y1(Panel::screen)),
+                {screen_center_x, panels::y1(Panel::screen)},
                 colors::title());
 }

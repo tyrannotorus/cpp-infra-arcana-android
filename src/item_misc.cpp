@@ -14,6 +14,7 @@
 #include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
+#include "audio.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
@@ -383,6 +384,126 @@ void MedicalBag::stop_action()
         m_current_action = MedBagAction::END;
 
         actor::player_state::g_active_medical_bag = nullptr;
+}
+
+Lantern::Lantern(item::ItemData* const item_data) :
+        Item(item_data) {}
+
+void Lantern::randomize_duration()
+{
+        const int duration_max = m_max_turns_left;
+        const int duration_min = duration_max / 2;
+
+        m_nr_turns_left = rnd::range(duration_min, duration_max);
+}
+
+std::string Lantern::name_info_str() const
+{
+        std::string inf = "(" + std::to_string(m_nr_turns_left) + " turns";
+
+        if (m_is_activated) {
+                inf += ", Lit";
+        }
+
+        return inf + ")";
+}
+
+ConsumeItem Lantern::activate(actor::Actor* const actor)
+{
+        (void)actor;
+
+        toggle();
+
+        map::update_vision();
+
+        game_time::tick();
+
+        return ConsumeItem::no;
+}
+
+void Lantern::save_hook() const
+{
+        saving::put_int(m_nr_turns_left);
+        saving::put_bool(m_is_activated);
+}
+
+void Lantern::load_hook()
+{
+        m_nr_turns_left = saving::get_int();
+        m_is_activated = saving::get_bool();
+}
+
+void Lantern::on_pickup_hook()
+{
+        ASSERT(m_actor_carrying);
+
+        // Check for existing electric lantern in inventory
+        for (Item* const other : m_actor_carrying->m_inv.m_backpack) {
+                if ((other == this) || (other->id() != id())) {
+                        continue;
+                }
+
+                auto* other_lantern = static_cast<Lantern*>(other);
+
+                other_lantern->m_nr_turns_left += m_nr_turns_left;
+
+                m_actor_carrying->m_inv
+                        .remove_item_in_backpack_with_ptr(this, true);
+
+                return;
+        }
+}
+
+void Lantern::toggle()
+{
+        const std::string toggle_str =
+                m_is_activated
+                ? "I turn off"
+                : "I turn on";
+
+        msg_log::add(toggle_str + " an Electric Lantern.");
+
+        m_is_activated = !m_is_activated;
+
+        // Discourage flipping on and off frequently
+        if (m_is_activated && (m_nr_turns_left >= 4)) {
+                m_nr_turns_left -= 2;
+        }
+
+        audio::play(audio::SfxId::electric_lantern);
+}
+
+void Lantern::on_std_turn_in_inv_hook(const InvType inv_type)
+{
+        (void)inv_type;
+
+        if (!m_is_activated) {
+                return;
+        }
+
+        if (!(player_bon::has_trait(Trait::elec_incl) &&
+              ((game_time::turn_nr() % 2) == 0))) {
+                --m_nr_turns_left;
+        }
+
+        if (m_nr_turns_left <= 0) {
+                msg_log::add(
+                        "My Electric Lantern has expired.",
+                        colors::msg_note(),
+                        MsgInterruptPlayer::yes,
+                        MorePromptOnMsg::yes);
+
+                game::add_history_event("My Electric Lantern expired");
+
+                // NOTE: The this deletes the object
+                map::g_player->m_inv.remove_item_in_backpack_with_ptr(
+                        this, true);
+        }
+}
+
+LightSize Lantern::light_size() const
+{
+        return m_is_activated ? LightSize::fov : LightSize::none;
 }
 
 ReflTalisman::ReflTalisman(ItemData* const item_data) :
@@ -948,7 +1069,8 @@ ConsumeItem FluctuatingMaterial::activate(actor::Actor* actor)
 
         states::push(
                 std::make_unique<PickTraitState>(
-                        "Which trait do you gain?"));
+                        "Which trait do you gain?",
+                        IsCharacterCreationTraitPick::no));
 
         states::push(std::make_unique<RemoveTraitState>());
 

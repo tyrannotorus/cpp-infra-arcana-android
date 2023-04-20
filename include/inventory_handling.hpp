@@ -25,14 +25,6 @@ class Item;
 }  // namespace item
 struct P;
 
-enum class InvScr
-{
-        inv,
-        equip,
-        apply,
-        none
-};
-
 struct FilteredInvEntry
 {
         // Index relatie to slot list or relative to backpack list
@@ -104,6 +96,11 @@ public:
 
         void update() override;
 
+        void disable_allow_inventory_actions()
+        {
+                m_allow_inv_action = false;
+        }
+
 private:
         void on_selected() const;
 
@@ -112,6 +109,8 @@ private:
         void on_inventory_slot_with_item_selected(InvSlot& slot) const;
 
         void on_backpack_item_selected(size_t backpack_idx) const;
+
+        bool m_allow_inv_action {true};
 };
 
 class Apply : public InvState

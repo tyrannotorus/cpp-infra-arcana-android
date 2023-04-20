@@ -27,68 +27,139 @@
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
-// GameOverSummary
+// Private
 // -----------------------------------------------------------------------------
-void GameOverSummary::setup(const game_summary_data::GameSummaryData& data)
-{
-        const Color& color_heading = colors::menu_highlight();
-        const Color& color_info = colors::white();
+static const Color& s_color_heading = colors::menu_highlight();
+static const Color& s_color_info = colors::text();
+static const std::string s_indent = "  ";
 
+static void add_player_summary_descr(
+        const game_summary_data::GameSummaryData& data,
+        std::vector<ColoredString>& lines)
+{
         const std::string name = data.highscore.name;
 
-        m_lines.emplace_back(name + " (" + data.background_title + ")", color_heading);
+        lines.emplace_back(name + " (" + data.background_title + ")", s_color_heading);
 
         if (data.dlvl == 0) {
-                m_lines.emplace_back(
-                        "Died before entering the dungeon",
-                        color_info);
+                lines.emplace_back(
+                        s_indent + "Died before entering the dungeon",
+                        s_color_info);
         }
         else {
-                m_lines.emplace_back(
-                        "Explored to dungeon level " + std::to_string(data.dlvl),
-                        color_info);
+                lines.emplace_back(
+                        s_indent + "Explored to dungeon level " + std::to_string(data.dlvl),
+                        s_color_info);
         }
 
-        m_lines.emplace_back(
-                "Spent " + std::to_string(data.turns) + " turns",
-                color_info);
+        lines.emplace_back(
+                s_indent + "Spent " + std::to_string(data.turns) + " turns",
+                s_color_info);
 
-        m_lines.emplace_back(
-                "Was " + std::to_string(data.insanity) + "% insane",
-                color_info);
+        lines.emplace_back(
+                s_indent + "Was " + std::to_string(data.insanity) + "% insane",
+                s_color_info);
 
-        m_lines.emplace_back(
-                "Killed " + std::to_string(data.nr_kills_tot) + " monsters",
-                color_info);
+        lines.emplace_back(
+                s_indent + "Killed " + std::to_string(data.nr_kills_tot) + " monsters",
+                s_color_info);
 
-        m_lines.emplace_back(
-                "Gained " + std::to_string(data.xp) + " experience points",
-                color_info);
+        lines.emplace_back(
+                s_indent + "Gained " + std::to_string(data.xp) + " experience points",
+                s_color_info);
 
         const int score = data.highscore.calculate_score();
 
-        m_lines.emplace_back(
-                "Gained a score of " + std::to_string(score),
-                color_info);
+        lines.emplace_back(
+                s_indent + "Gained a score of " + std::to_string(score),
+                s_color_info);
 
         if (!data.insanity_symptons.empty()) {
                 for (const InsSympt* const sympt : data.insanity_symptons) {
                         const std::string sympt_descr = sympt->game_over_summary_msg();
 
                         if (!sympt_descr.empty()) {
-                                m_lines.emplace_back(sympt_descr, color_info);
+                                lines.emplace_back(s_indent + sympt_descr, s_color_info);
                         }
                 }
         }
 
-        m_lines.emplace_back("", color_info);
+        lines.emplace_back("", s_color_info);
+}
 
-        m_lines.emplace_back(
+static int shock_from_src(
+        const game_summary_data::GameSummaryData& data,
+        const ShockSrc src)
+{
+        return data.total_shock_from_src[(size_t)src];
+}
+
+static std::string to_pct_str_padded(const int value, const int padding)
+{
+        return text_format::pad_after(std::to_string(value) + "%", padding);
+}
+
+static void add_total_shock_received_descr(
+        const game_summary_data::GameSummaryData& data,
+        std::vector<ColoredString>& lines)
+{
+        lines.emplace_back(
+                ("Total shock received is " +
+                 std::to_string(data.total_shock) +
+                 "%, derived from (rounded values):"),
+                s_color_heading);
+
+        const int padding = 10;
+
+        lines.emplace_back(
+                (s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::time), padding) +
+                 "from the passing of time"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::see_mon), padding) +
+                 "from observing creatures"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::take_damage), padding) +
+                 "from being harmed"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::use_strange_item), padding) +
+                 "from using items"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 to_pct_str_padded(data.total_shock_from_casting_spells, padding) +
+                 "from casting learned spells"),
+                colors::text());
+
+        lines.emplace_back(
+                (s_indent +
+                 to_pct_str_padded(shock_from_src(data, ShockSrc::misc), padding) +
+                 "from other sources"),
+                colors::text());
+
+        lines.emplace_back("", colors::text());
+}
+
+static void add_traits_descr(
+        const game_summary_data::GameSummaryData& data,
+        std::vector<ColoredString>& lines)
+{
+        lines.emplace_back(
                 "Traits gained (at character level)",
-                color_heading);
+                s_color_heading);
 
         if (data.trait_log.empty()) {
-                m_lines.emplace_back("None", color_info);
+                lines.emplace_back(s_indent + "None", s_color_info);
         }
         else {
                 bool has_double_digit =
@@ -110,26 +181,87 @@ void GameOverSummary::setup(const game_summary_data::GameSummaryData& data)
                         const std::string removed_str = e.is_removal ? " - REMOVED" : "";
                         const std::string str = clvl_str + " " + title + removed_str;
 
-                        m_lines.emplace_back(str, color_info);
+                        lines.emplace_back(s_indent + str, s_color_info);
                 }
         }
 
-        m_lines.emplace_back("", color_info);
+        lines.emplace_back("", s_color_info);
+}
 
-        m_lines.emplace_back("Unique monsters killed", color_heading);
+static void add_unique_monsters_killed_descr(
+        const game_summary_data::GameSummaryData& data,
+        std::vector<ColoredString>& lines)
+{
+        lines.emplace_back("Unique monsters killed", s_color_heading);
 
         if (data.unique_monsters_killed.empty()) {
-                m_lines.emplace_back("None", color_info);
+                lines.emplace_back(s_indent + "None", s_color_info);
         }
         else {
                 for (const std::string& monster_name : data.unique_monsters_killed) {
-                        m_lines.emplace_back(monster_name, color_info);
+                        lines.emplace_back(s_indent + monster_name, s_color_info);
                 }
         }
 
-        m_lines.emplace_back("", color_info);
+        lines.emplace_back("", s_color_info);
+}
 
-        m_lines.emplace_back("History of " + data.player_name, color_heading);
+static void add_inventory_descr(
+        const game_summary_data::GameSummaryData& data,
+        std::vector<ColoredString>& lines)
+{
+        lines.emplace_back("Inventory", s_color_heading);
+
+        if (data.inventory.empty()) {
+                lines.emplace_back(s_indent + "Empty", colors::text());
+        }
+        else {
+                for (const game_summary_data::InventoryItemData& item : data.inventory) {
+                        if (item.slot_name.empty()) {
+                                // Is "backpack" item.
+                                lines.emplace_back(s_indent + item.item_name, colors::text());
+                        }
+                        else {
+                                // Is slot item (wielded, armor etc),
+                                std::string str = item.slot_name;
+
+                                str = text_format::pad_after(str, 9, ' ');
+
+                                str += item.item_name.empty() ? "<empty>" : item.item_name;
+
+                                lines.emplace_back(s_indent + str, colors::text());
+                        }
+                }
+        }
+
+        lines.emplace_back("", colors::text());
+}
+
+static void add_item_knowledge_descr(
+        const game_summary_data::GameSummaryData& data,
+        std::vector<ColoredString>& lines)
+{
+        lines.emplace_back("Item knowledge", s_color_heading);
+
+        std::vector<ColoredString> item_knowledge = data.item_knowledge;
+
+        if (data.item_knowledge.empty()) {
+                lines.emplace_back(s_indent + "None", colors::text());
+        }
+        else {
+                for (const ColoredString& e : item_knowledge) {
+                        lines.emplace_back(s_indent + e.str, e.color);
+                }
+        }
+
+        lines.emplace_back("", colors::text());
+}
+
+static void add_player_history(
+        const game_summary_data::GameSummaryData& data,
+        std::vector<ColoredString>& lines)
+{
+        lines.emplace_back("History of " + data.player_name, s_color_heading);
 
         int longest_turn_w = 0;
 
@@ -148,27 +280,49 @@ void GameOverSummary::setup(const game_summary_data::GameSummaryData& data)
 
                 ev_str += " " + event.msg;
 
-                m_lines.emplace_back(ev_str, color_info);
+                lines.emplace_back(s_indent + ev_str, s_color_info);
         }
 
-        m_lines.emplace_back("", color_info);
+        lines.emplace_back("", s_color_info);
+}
 
-        m_lines.emplace_back("Last messages", color_heading);
+static void add_last_messages(
+        const game_summary_data::GameSummaryData& data,
+        std::vector<ColoredString>& lines)
+{
+        lines.emplace_back("Last messages", s_color_heading);
 
         const int max_nr_messages_to_show = 20;
 
         int history_start_idx =
-                std::max(0, (int)data.msg_history.size() - max_nr_messages_to_show);
+                std::max(
+                        0,
+                        (int)data.msg_history.size() - max_nr_messages_to_show);
 
         for (size_t history_idx = history_start_idx;
              history_idx < data.msg_history.size();
              ++history_idx) {
                 const Msg& msg = data.msg_history[history_idx];
 
-                m_lines.emplace_back(msg.text_with_repeats(), color_info);
+                lines.emplace_back(s_indent + msg.text_with_repeats(), s_color_info);
         }
 
-        m_lines.emplace_back("", color_info);
+        lines.emplace_back("", s_color_info);
+}
+
+// -----------------------------------------------------------------------------
+// GameOverSummary
+// -----------------------------------------------------------------------------
+void GameOverSummary::setup(const game_summary_data::GameSummaryData& data)
+{
+        add_player_summary_descr(data, m_lines);
+        add_total_shock_received_descr(data, m_lines);
+        add_unique_monsters_killed_descr(data, m_lines);
+        add_last_messages(data, m_lines);
+        add_inventory_descr(data, m_lines);
+        add_item_knowledge_descr(data, m_lines);
+        add_traits_descr(data, m_lines);
+        add_player_history(data, m_lines);
 }
 
 void GameOverSummary::setup(std::vector<ColoredString> lines)
@@ -187,14 +341,6 @@ void GameOverSummary::dump_to_file(const std::string& path) const
         }
 
         file.close();
-}
-
-void GameOverSummary::dump_to_clipboard() const
-{
-        // TODO: Implement.
-
-        // TODO: Perhaps this should only dump an abbreviated version of the
-        // lines (to fit in a Discord message (2000 character limit)).
 }
 
 StateId GameOverSummary::id() const

@@ -603,9 +603,15 @@ void BrowseSpell::draw()
         const int nr_spells = (int)s_learned_spells.size();
 
         io::draw_text_center(
-                " Use which power? ",
+                " Known spells ",
                 Panel::screen,
-                P(panels::center_x(Panel::screen), 0),
+                {panels::center_x(Panel::screen), 0},
+                colors::title());
+
+        io::draw_text_center(
+                " " + common_text::g_screen_exit_hint + " ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
                 colors::title());
 
         int y = 0;
@@ -638,13 +644,14 @@ void BrowseSpell::update()
 
         switch (action) {
         case MenuAction::selected: {
-                Spell* const spell = s_learned_spells[m_browser.y()];
+                if (m_allow_cast) {
+                        Spell* const spell = s_learned_spells[m_browser.y()];
 
-                // Exit screen
-                states::pop();
+                        // Exit screen
+                        states::pop();
 
-                try_cast(spell);
-
+                        try_cast(spell);
+                }
                 return;
         } break;
 

@@ -151,7 +151,7 @@ std::string pad_before(
         const size_t tot_w,
         const char c)
 {
-        auto result = str;
+        std::string result = str;
 
         if (tot_w > str.size()) {
                 result.insert(0, tot_w - str.size(), c);
@@ -165,7 +165,7 @@ std::string pad_after(
         const size_t tot_w,
         const char c)
 {
-        auto result = str;
+        std::string result = str;
 
         if (tot_w > str.size()) {
                 result.insert(result.size(), tot_w - str.size(), c);
@@ -176,7 +176,7 @@ std::string pad_after(
 
 std::string first_to_lower(const std::string& str)
 {
-        auto result = str;
+        std::string result = str;
 
         if (!result.empty()) {
                 result[0] = tolower(result[0]);
@@ -187,7 +187,7 @@ std::string first_to_lower(const std::string& str)
 
 std::string first_to_upper(const std::string& str)
 {
-        auto result = str;
+        std::string result = str;
 
         if (!result.empty()) {
                 result[0] = toupper(result[0]);
@@ -198,7 +198,7 @@ std::string first_to_upper(const std::string& str)
 
 std::string to_upper(const std::string& str)
 {
-        auto result = str;
+        std::string result = str;
 
         transform(
                 std::begin(result),

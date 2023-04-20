@@ -39,9 +39,9 @@ enum class SlotId
 
 struct InvSlot
 {
-        InvSlot(SlotId id_, std::string name_) :
-                id(id_),
-                name(std::move(name_)),
+        InvSlot(SlotId slot_id, std::string slot_name) :
+                id(slot_id),
+                name(std::move(slot_name)),
                 item(nullptr) {}
 
         InvSlot() = default;

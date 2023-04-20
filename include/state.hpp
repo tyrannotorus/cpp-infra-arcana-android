@@ -100,10 +100,26 @@ public:
                 m_has_started = true;
         }
 
+        bool is_drawing_disabled() const
+        {
+                return m_is_drawing_disabled;
+        }
+
+        void disable_drawing()
+        {
+                m_is_drawing_disabled = true;
+        }
+
+        void enable_drawing()
+        {
+                m_is_drawing_disabled = false;
+        }
+
         virtual StateId id() const = 0;
 
 private:
         bool m_has_started {false};
+        bool m_is_drawing_disabled {false};
 };
 
 namespace states

@@ -52,8 +52,15 @@ public:
 
         StateId id() const override;
 
+        void disable_allow_cast()
+        {
+                m_allow_cast = false;
+        }
+
 private:
         MenuBrowser m_browser {};
+
+        bool m_allow_cast {true};
 };
 
 #endif  // PLAYER_SPELLS_HPP

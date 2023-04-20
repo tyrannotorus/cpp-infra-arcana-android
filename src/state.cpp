@@ -101,9 +101,7 @@ void cycle_graphics(const io::GraphicsCycle cycle)
                 return;
         }
 
-        // TODO: Very copy/pasted from the "draw" function - refactor!
-
-        // Find the first state from the end which is NOT drawn overlayed.
+        // Find the first state to draw from.
         auto cycle_from = std::end(s_current_states);
 
         while (cycle_from != std::begin(s_current_states)) {
@@ -112,23 +110,26 @@ void cycle_graphics(const io::GraphicsCycle cycle)
                 const auto& state_ptr = *cycle_from;
 
                 // If not drawn overlayed, cycle graphics from this state as
-                // bottom layer (but only if the state has been started, see
-                // note below).
+                // bottom layer (but only if the state has been started and
+                // drawing is not paused for the state).
                 if (!state_ptr->draw_overlayed() &&
-                    state_ptr->has_started()) {
+                    state_ptr->has_started() &&
+                    !state_ptr->is_drawing_disabled()) {
                         break;
                 }
         }
 
-        // Cycle graphics in every state from this (non-overlayed) state onward.
+        // Cycle graphics in every state from this state onward.
         for (; cycle_from != std::end(s_current_states); ++cycle_from) {
                 const auto& state_ptr = *cycle_from;
 
                 // Do NOT cycle graphics in states which are not yet started
                 // (they may need to set up menus etc in their start function,
                 // and expect the chance to do so before cycling is called).
+                // Also do not cycle graphics if drawing is disabled.
 
-                if (state_ptr->has_started()) {
+                if (state_ptr->has_started() &&
+                    !state_ptr->is_drawing_disabled()) {
                         state_ptr->cycle_graphics(cycle);
                 }
         }
@@ -142,7 +143,7 @@ void draw()
 
         io::clear_screen();
 
-        // Find the first state from the end which is NOT drawn overlayed.
+        // Find the first state to draw from.
         auto draw_from = std::end(s_current_states);
 
         while (draw_from != std::begin(s_current_states)) {
@@ -150,23 +151,27 @@ void draw()
 
                 const auto& state_ptr = *draw_from;
 
-                // If not drawn overlayed, draw from this state as bottom layer
-                // (but only if the state has been started, see note below).
+                // If not drawn overlayed, cycle graphics from this state as
+                // bottom layer (but only if the state has been started and
+                // drawing is not paused for the state).
                 if (!state_ptr->draw_overlayed() &&
-                    state_ptr->has_started()) {
+                    state_ptr->has_started() &&
+                    !state_ptr->is_drawing_disabled()) {
                         break;
                 }
         }
 
-        // Draw every state from this (non-overlayed) state onward.
+        // Draw every state from this state onward.
         for (; draw_from != std::end(s_current_states); ++draw_from) {
                 const auto& state_ptr = *draw_from;
 
                 // Do NOT draw states which are not yet started (they may need
                 // to set up menus etc in their start function, and expect the
-                // chance to do so before drawing is called).
+                // chance to do so before drawing is called). Also do not draw
+                // if drawing is disabled.
 
-                if (state_ptr->has_started()) {
+                if (state_ptr->has_started() &&
+                    !state_ptr->is_drawing_disabled()) {
                         state_ptr->draw();
                 }
         }

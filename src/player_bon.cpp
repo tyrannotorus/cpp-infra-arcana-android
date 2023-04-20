@@ -1637,7 +1637,8 @@ void on_player_gained_lvl(const int new_lvl)
                 if (is_exorcist_extra_trait) {
                         states::push(
                                 std::make_unique<PickTraitState>(
-                                        "You gain an extra trait!"));
+                                        "You gain an extra trait!",
+                                        IsCharacterCreationTraitPick::no));
                 }
         } break;
 

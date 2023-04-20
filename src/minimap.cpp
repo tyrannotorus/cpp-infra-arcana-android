@@ -120,9 +120,15 @@ void ViewMinimap::draw()
         draw_box(panels::area(Panel::screen));
 
         io::draw_text_center(
-                " Viewing minimap " + common_text::g_minimap_exit_hint + " ",
+                " Viewing map ",
                 Panel::screen,
-                P(panels::center_x(Panel::screen), 0),
+                {panels::center_x(Panel::screen), 0},
+                colors::title());
+
+        io::draw_text_center(
+                " " + common_text::g_minimap_exit_hint + " ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
                 colors::title());
 
         const int px_w_per_cell = get_px_w_per_cell();

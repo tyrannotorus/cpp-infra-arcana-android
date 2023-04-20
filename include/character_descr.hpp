@@ -34,8 +34,6 @@ public:
         // NOTE: This must be called before the state runs.
         void setup(const game_summary_data::GameSummaryData& data);
 
-        void dump_to_clipboard() const;
-
         void draw() override;
 
         void update() override;

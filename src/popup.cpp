@@ -204,13 +204,28 @@ void PopupState::on_start()
                 }
 
                 if (!m_msg.empty()) {
-                        const auto msg_lines =
-                                text_format::split(
-                                        m_msg,
-                                        78);
+                        Text text(m_msg);
 
-                        for (const auto& line : msg_lines) {
-                                msg_log::add_line_to_history(line);
+                        text.set_w(max_msg_w());
+
+                        std::string str;
+
+                        for (const TextAction& action : text.actions()) {
+                                switch (action.id) {
+                                case TextActionId::write_str:
+                                        str += action.str;
+                                        break;
+
+                                case TextActionId::newline:
+                                case TextActionId::done:
+                                        msg_log::add_line_to_history(str);
+                                        str = "";
+                                        break;
+
+                                case TextActionId::change_color:
+                                        // str += action.str;
+                                        break;
+                                }
                         }
                 }
         }
@@ -250,8 +265,7 @@ void MsgPopupState::draw()
                         ? (int)msg_lines[0].size()
                         : text_max_w;
 
-                const auto confirm_line_w =
-                        (int)common_text::g_confirm_hint.size();
+                const auto confirm_line_w = (int)common_text::g_confirm_hint.size();
 
                 const int padding = 12;
 

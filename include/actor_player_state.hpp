@@ -11,6 +11,7 @@
 
 #include "colors.hpp"
 #include "direction.hpp"
+#include "global.hpp"
 
 namespace item
 {
@@ -51,6 +52,9 @@ extern int g_insanity;
 extern double g_shock;
 extern double g_shock_tmp;
 extern int g_nr_turns_until_insanity;
+
+extern double g_player_total_shock_taken;
+extern double g_player_total_shock_from_src[(size_t)ShockSrc::END];
 
 // Cooldowns to regain effects
 extern int g_nr_turns_until_r_spell;

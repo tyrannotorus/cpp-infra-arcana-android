@@ -169,21 +169,31 @@ MenuAction MenuBrowser::read(
 
                 set_y(global_idx);
 
-                if (m_play_selection_audio) {
-                        audio::play(audio::SfxId::menu_select);
-                }
+                // Allow selecting this menu item if:
+                //
+                // * A different position was selected with a letter key, or
+                // * Auto select is enabled, or
+                // * The browser is configured to auto select
+                //
+                // Otherwise only jump to this position.
+                //
+                const bool allow_select =
+                        !is_new_idx_selected ||
+                        config::is_auto_select_menu() ||
+                        (force_auto_select == ForceAutoSelect::yes);
 
-                if ((mode == MenuInputMode::scrolling_and_letters) &&
-                    is_new_idx_selected &&
-                    !config::is_auto_select_menu() &&
-                    (force_auto_select == ForceAutoSelect::no)) {
-                        // A different position than the current position was
-                        // selected with a letter key, and auto select is
-                        // disabled - only jump to this location.
+                if (allow_select) {
+                        if (m_play_selection_audio) {
+                                audio::play(audio::SfxId::menu_select);
+                        }
+
+                        return MenuAction::selected;
+                }
+                else {
+                        audio::play(audio::SfxId::menu_browse);
+
                         return MenuAction::none;
                 }
-
-                return MenuAction::selected;
         }
 
         return MenuAction::none;

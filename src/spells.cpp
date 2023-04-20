@@ -906,6 +906,11 @@ std::string skill_to_str(const SpellSkill skill)
         return "";
 }
 
+ShockSrc spell_domain_to_shock_type(const SpellDomain domain)
+{
+        return s_spell_domain_to_shock_type_map.at(domain);
+}
+
 terrain::DidOpen run_opening_spell_effect_at(
         const P& pos,
         const SpellSkill skill)

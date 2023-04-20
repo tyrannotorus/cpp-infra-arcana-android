@@ -104,7 +104,7 @@ static void randomize_medical_supplies(item::MedicalBag& medbag)
         medbag.randomize_nr_supplies();
 }
 
-static void randomize_lantern_duration(device::Lantern& lantern)
+static void randomize_lantern_duration(item::Lantern& lantern)
 {
         lantern.randomize_duration();
 }
@@ -395,7 +395,7 @@ Item* make(const Id item_id, const int nr_items)
                 break;
 
         case Id::lantern:
-                r = new device::Lantern(d);
+                r = new item::Lantern(d);
                 break;
 
         case Id::rod_curing:
@@ -524,7 +524,7 @@ void randomize_item_properties(Item& item)
         }
 
         if (d.id == Id::lantern) {
-                auto& lantern = static_cast<device::Lantern&>(item);
+                auto& lantern = static_cast<item::Lantern&>(item);
                 randomize_lantern_duration(lantern);
         }
 

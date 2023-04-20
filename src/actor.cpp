@@ -25,6 +25,7 @@
 #include "item_data.hpp"
 #include "item_device.hpp"
 #include "item_explosive.hpp"
+#include "item_misc.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
@@ -61,9 +62,7 @@ static Color color_player()
                 map::g_player->m_inv.item_in_backpack(item::Id::lantern);
 
         if (lantern_item) {
-                const auto* const lantern =
-                        static_cast<const device::Lantern*>(
-                                lantern_item);
+                const auto* const lantern = static_cast<const item::Lantern*>(lantern_item);
 
                 if (lantern->is_activated()) {
                         return actor::player_state::g_lantern_color;

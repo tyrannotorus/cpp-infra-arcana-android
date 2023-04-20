@@ -15,26 +15,94 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "browser.hpp"
+#include "character_descr.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "config.hpp"
 #include "debug.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
+#include "game_summary_data.hpp"
 #include "global.hpp"
 #include "init.hpp"
+#include "inventory_handling.hpp"
 #include "io.hpp"
 #include "map.hpp"
+#include "marker.hpp"
+#include "minimap.hpp"
 #include "panel.hpp"
+#include "player_spells.hpp"
 #include "popup.hpp"
+#include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "spells.hpp"
 #include "text.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static void handle_show_player_info_command()
+{
+        int choice = 0;
+
+        popup::Popup(popup::AddToMsgHistory::no)
+                .setup_menu_mode(
+                        {"(c) Character information",
+                         "(i) Inventory",
+                         "(x) Known spells",
+                         "(v) Look around",
+                         "(m) View map"},
+                        {'c',
+                         'i',
+                         'x',
+                         'v',
+                         'm'},
+                        &choice)
+                .run();
+
+        // NOTE: Any states created here shall run immediately until done, since
+        // drawing of the trait pick state is paused and resumed around the call
+        // to this function (so that for example the view marker state can be
+        // drawn on top of the game map).
+
+        switch (choice) {
+        case 0: {
+                game_summary_data::GameSummaryData game_data = game_summary_data::collect();
+
+                auto char_descr = std::make_unique<CharacterDescr>();
+
+                char_descr->setup(game_data);
+
+                states::run_until_state_done(std::move(char_descr));
+        } break;
+
+        case 1: {
+                auto browse_inv = std::make_unique<BrowseInv>();
+
+                browse_inv->disable_allow_inventory_actions();
+
+                states::run_until_state_done(std::move(browse_inv));
+        } break;
+
+        case 2: {
+                auto browse_spells = std::make_unique<BrowseSpell>();
+
+                browse_spells->disable_allow_cast();
+
+                states::run_until_state_done(std::move(browse_spells));
+        } break;
+
+        case 3: {
+                states::run_until_state_done(std::make_unique<Viewing>(map::g_player->m_pos));
+        } break;
+
+        case 4: {
+                states::run_until_state_done(std::make_unique<ViewMinimap>());
+        } break;
+        }
+}
 
 // -----------------------------------------------------------------------------
 // New game state
@@ -47,7 +115,8 @@ void NewGameState::on_pushed()
 
         states::push(
                 std::make_unique<PickTraitState>(
-                        "Which extra trait do you start with?"));
+                        "Which extra trait do you start with?",
+                        IsCharacterCreationTraitPick::yes));
 
         states::push(std::make_unique<PickBgState>());
 }
@@ -70,18 +139,15 @@ void PickBgState::on_start()
 
         // Set the marker on war veteran, to recommend it as a default choice
         // for new players.
-        const auto war_vet_pos =
-                std::find(std::begin(m_bgs), std::end(m_bgs), Bg::war_vet);
-
-        const auto idx =
-                (int)std::distance(std::begin(m_bgs), war_vet_pos);
+        const auto war_vet_pos = std::find(std::begin(m_bgs), std::end(m_bgs), Bg::war_vet);
+        const auto idx = (int)std::distance(std::begin(m_bgs), war_vet_pos);
 
         m_browser.set_y(idx);
 }
 
 void PickBgState::update()
 {
-        auto action = MenuAction::selected;
+        MenuAction action = MenuAction::selected;
 
         if (config::is_stress_test()) {
                 // Stress-test mode, we just want to run everything
@@ -91,10 +157,7 @@ void PickBgState::update()
         else {
                 const io::InputData input = io::read_input();
 
-                action =
-                        m_browser.read(
-                                input,
-                                MenuInputMode::scrolling_and_letters);
+                action = m_browser.read(input, MenuInputMode::scrolling_and_letters);
         }
 
         switch (action) {
@@ -334,7 +397,7 @@ void PickOccultistState::draw()
 // -----------------------------------------------------------------------------
 void PickTraitState::on_start()
 {
-        const auto unpicked_traits_data =
+        const player_bon::UnpickedTraitsData unpicked_traits_data =
                 player_bon::unpicked_traits(
                         player_bon::bg(),
                         player_bon::occultist_domain());
@@ -354,13 +417,17 @@ void PickTraitState::init_browsers()
 {
         const int choices_h = panels::h(Panel::create_char_menu);
 
-        m_browser_traits_avail.reset(
-                (int)m_traits_avail.size(),
-                choices_h);
+        m_browser_traits_avail.reset((int)m_traits_avail.size(), choices_h);
+        m_browser_traits_unavail.reset((int)m_traits_unavail.size(), choices_h);
 
-        m_browser_traits_unavail.reset(
-                (int)m_traits_unavail.size(),
-                choices_h);
+        // The "i" key is used for showing player information, do not use it as
+        // a menu key.
+        //
+        // NOTE: The "i" key is not available at character creation, but this
+        // menu key is removed in that case as well for consistency.
+        //
+        m_browser_traits_avail.remove_key('i');
+        m_browser_traits_unavail.remove_key('i');
 
         m_browser_traits_avail.set_y(0);
         m_browser_traits_unavail.set_y(0);
@@ -386,23 +453,29 @@ void PickTraitState::update()
                 return;
         }
 
+        if ((input.key == 'i') && (m_is_char_creation == IsCharacterCreationTraitPick::no)) {
+                disable_drawing();
+
+                handle_show_player_info_command();
+
+                enable_drawing();
+
+                return;
+        }
+
         MenuBrowser& browser =
                 (m_screen_mode == TraitScreenMode::pick_new)
                 ? m_browser_traits_avail
                 : m_browser_traits_unavail;
 
-        const auto action =
-                browser.read(
-                        input,
-                        MenuInputMode::scrolling_and_letters);
+        const MenuAction action = browser.read(input, MenuInputMode::scrolling_and_letters);
 
         switch (action) {
         case MenuAction::selected: {
                 if (m_screen_mode == TraitScreenMode::pick_new) {
                         const Trait trait = m_traits_avail[browser.y()];
 
-                        const std::string name =
-                                player_bon::trait_title(trait);
+                        const std::string name = player_bon::trait_title(trait);
 
                         bool should_pick_trait = true;
 
@@ -412,8 +485,7 @@ void PickTraitState::update()
                         if (!is_character_creation) {
                                 states::draw();
 
-                                const std::string title =
-                                        "Gain trait \"" + name + "\"?";
+                                const std::string title = "Gain trait \"" + name + "\"?";
 
                                 int choice = 0;
 
@@ -459,28 +531,38 @@ void PickTraitState::draw()
 {
         draw_box(panels::area(Panel::screen));
 
-        std::string full_title;
+        std::string title = m_title;
+        std::string cmd_info;
 
         if (m_screen_mode == TraitScreenMode::pick_new) {
-                full_title = m_title + " [TAB] to view unavailable traits";
+                cmd_info = "[TAB] to view unavailable traits";
         }
         else {
                 // Viewing unavailable traits
-                full_title =
-                        "Currently unavailable traits "
-                        "[TAB] to view available traits";
+                title = "Currently unavailable traits";
+                cmd_info = "[TAB] to view available traits";
+        }
+
+        if (m_is_char_creation == IsCharacterCreationTraitPick::no) {
+                cmd_info += " [i] to view game info";
         }
 
         const int screen_center_x = panels::center_x(Panel::screen);
 
         io::draw_text_center(
-                " " + full_title + " ",
+                " " + title + " ",
                 Panel::screen,
                 {screen_center_x, 0},
                 colors::title(),
                 io::DrawBg::yes,
                 colors::black(),
                 true);
+
+        io::draw_text_center(
+                " " + cmd_info + " ",
+                Panel::screen,
+                {screen_center_x, panels::y1(Panel::screen)},
+                colors::title());
 
         MenuBrowser* browser = nullptr;
 
@@ -496,17 +578,17 @@ void PickTraitState::draw()
                 traits = &m_traits_unavail;
         }
 
-        const auto browser_y = browser->y();
+        const int browser_y = browser->y();
 
-        const auto trait_marked = traits->at(browser_y);
+        const Trait trait_marked = traits->at(browser_y);
 
-        const auto idx_range_shown = browser->range_shown();
+        const Range idx_range_shown = browser->range_shown();
 
         int y = 0;
 
         // Traits
         for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
-                const auto trait = traits->at(i);
+                const Trait trait = traits->at(i);
 
                 const bool is_idx_marked = (browser_y == i);
 
@@ -537,7 +619,7 @@ void PickTraitState::draw()
 
         std::string descr = player_bon::trait_descr(trait_marked);
 
-        const auto formatted_descr =
+        const std::vector<std::string> formatted_descr =
                 text_format::split(
                         descr,
                         panels::w(Panel::create_char_descr));
@@ -552,7 +634,7 @@ void PickTraitState::draw()
         }
 
         // Prerequisites
-        const auto prereq_data =
+        const player_bon::TraitPrereqData prereq_data =
                 player_bon::trait_prereqs(
                         trait_marked,
                         player_bon::bg(),
@@ -721,6 +803,10 @@ void RemoveTraitState::init_browser()
                 (int)m_traits_can_be_removed.size(),
                 choices_h);
 
+        // The "i" key is used for showing player information, do not use it as
+        // a menu key.
+        m_browser.remove_key('i');
+
         m_browser.set_y(0);
 }
 
@@ -734,10 +820,13 @@ void RemoveTraitState::update()
 
         const io::InputData input = io::read_input();
 
-        const auto action =
-                m_browser.read(
-                        input,
-                        MenuInputMode::scrolling_and_letters);
+        if (input.key == 'i') {
+                handle_show_player_info_command();
+
+                return;
+        }
+
+        const MenuAction action = m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
         switch (action) {
         case MenuAction::selected: {
@@ -749,7 +838,7 @@ void RemoveTraitState::update()
 
                 states::draw();
 
-                const auto title = "Remove trait \"" + name + "\"?";
+                const std::string title = "Remove trait \"" + name + "\"?";
 
                 int choice = 0;
 
@@ -795,17 +884,23 @@ void RemoveTraitState::draw()
                 colors::black(),
                 true);
 
-        const auto browser_y = m_browser.y();
+        io::draw_text_center(
+                " [i] to view game info ",
+                Panel::screen,
+                {screen_center_x, panels::y1(Panel::screen)},
+                colors::title());
 
-        const auto trait_marked = m_traits_can_be_removed.at(browser_y);
+        const int browser_y = m_browser.y();
 
-        const auto idx_range_shown = m_browser.range_shown();
+        const Trait trait_marked = m_traits_can_be_removed.at(browser_y);
+
+        const Range idx_range_shown = m_browser.range_shown();
 
         int y = 0;
 
         // Traits
         for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
-                const auto trait = m_traits_can_be_removed[i];
+                const Trait trait = m_traits_can_be_removed[i];
 
                 const bool is_idx_marked = (browser_y == i);
 
@@ -836,7 +931,7 @@ void RemoveTraitState::draw()
 
         std::string descr = player_bon::trait_descr(trait_marked);
 
-        const auto formatted_descr =
+        const std::vector<std::string> formatted_descr =
                 text_format::split(
                         descr,
                         panels::w(Panel::create_char_descr));
