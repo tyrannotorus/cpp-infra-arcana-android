@@ -186,9 +186,7 @@ TEST_CASE("Invisible hostile monster attacking seen friendly monster")
         const auto& mon_hostile_player_aware_counter =
                 mon_hostile->m_mon_aware_state.player_aware_of_me_counter;
 
-        mon_hostile->m_properties.apply(
-                property_factory::make(
-                        PropId::invis));
+        mon_hostile->m_properties.apply(prop::make(prop::Id::invis));
 
         // Make the hostile monster aware so it doesn't become aware by
         // attacking (attacking bumps awareness) and runs its "aware phrase".
@@ -252,13 +250,8 @@ TEST_CASE("Invisible hostile monster attacking invisible friendly monster")
         auto& mon_hostile_player_aware_counter =
                 mon_hostile->m_mon_aware_state.player_aware_of_me_counter;
 
-        mon_allied->m_properties.apply(
-                property_factory::make(
-                        PropId::invis));
-
-        mon_hostile->m_properties.apply(
-                property_factory::make(
-                        PropId::invis));
+        mon_allied->m_properties.apply(prop::make(prop::Id::invis));
+        mon_hostile->m_properties.apply(prop::make(prop::Id::invis));
 
         mon_allied_player_aware_counter = 0;
         mon_hostile_player_aware_counter = 0;
@@ -321,9 +314,7 @@ TEST_CASE("Visible friendly monster attacking invisible hostile monster")
         auto& mon_hostile_player_aware_counter =
                 mon_hostile->m_mon_aware_state.player_aware_of_me_counter;
 
-        mon_hostile->m_properties.apply(
-                property_factory::make(
-                        PropId::invis));
+        mon_hostile->m_properties.apply(prop::make(prop::Id::invis));
 
         mon_allied_player_aware_counter = 0;
         mon_hostile_player_aware_counter = 0;
@@ -379,7 +370,7 @@ TEST_CASE("Player kicking invisible monster")
 
         auto* mon = actor::make("MON_ZOMBIE", {8, 5});
 
-        mon->m_properties.apply(property_factory::make(PropId::invis));
+        mon->m_properties.apply(prop::make(prop::Id::invis));
 
         // Make the hostile monster aware so it doesn't become aware and runs
         // its "aware phrase".
@@ -439,7 +430,7 @@ TEST_CASE("Test player killing invisible monster")
 
         auto* mon = actor::make("MON_ZOMBIE", {8, 5});
 
-        mon->m_properties.apply(property_factory::make(PropId::invis));
+        mon->m_properties.apply(prop::make(prop::Id::invis));
 
         // Make the hostile monster aware so it doesn't become aware and runs
         // its "aware phrase".

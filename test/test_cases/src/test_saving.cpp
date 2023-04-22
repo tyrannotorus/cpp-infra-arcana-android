@@ -24,6 +24,7 @@
 #include "item_data.hpp"
 #include "item_device.hpp"
 #include "item_factory.hpp"
+#include "item_misc.hpp"
 #include "item_weapon.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"
@@ -105,10 +106,7 @@ TEST_CASE("Saving and loading the game")
                 // Wear asbestos suit to test properties from wearing items
                 item = item::make(item::Id::armor_asb_suit);
 
-                inv.put_in_slot(
-                        SlotId::body,
-                        item,
-                        Verbose::yes);
+                inv.put_in_slot(SlotId::body, item, Verbose::yes);
 
                 item = item::make(item::Id::pistol_mag);
                 static_cast<item::AmmoMag*>(item)->m_ammo = 1;
@@ -127,15 +125,14 @@ TEST_CASE("Saving and loading the game")
                 inv.put_in_backpack(item);
 
                 item = item::make(item::Id::device_blaster);
-                static_cast<device::StrangeDevice*>(item)->condition =
-                        Condition::shoddy;
+                static_cast<device::Device*>(item)->m_condition = Condition::shoddy;
                 inv.put_in_backpack(item);
 
                 item = item::make(item::Id::lantern);
 
                 inv.put_in_backpack(item);
 
-                auto* lantern = static_cast<device::Lantern*>(item);
+                auto* lantern = static_cast<item::Lantern*>(item);
 
                 // NOTE: This will drain some turns from the lantern, and tick
                 // the game time.
@@ -200,28 +197,24 @@ TEST_CASE("Saving and loading the game")
                 auto& props = map::g_player->m_properties;
 
                 {
-                        auto* const prop =
-                                property_factory::make(
-                                        PropId::r_sleep);
+                        auto* const prop = prop::make(prop::Id::r_sleep);
 
                         prop->set_duration(3);
                         props.apply(prop);
                 }
 
                 {
-                        auto* const prop =
-                                property_factory::make(
-                                        PropId::diseased);
+                        auto* const prop = prop::make(prop::Id::diseased);
 
                         prop->set_indefinite();
                         props.apply(prop);
                 }
 
-                props.apply(property_factory::make(PropId::blessed));
+                props.apply(prop::make(prop::Id::blessed));
 
-                REQUIRE(props.has(PropId::diseased));
-                REQUIRE(props.has(PropId::blessed));
-                REQUIRE(!props.has(PropId::confused));
+                REQUIRE(props.has(prop::Id::diseased));
+                REQUIRE(props.has(prop::Id::blessed));
+                REQUIRE(!props.has(prop::Id::confused));
 
                 saving::save_game();
 
@@ -341,18 +334,15 @@ TEST_CASE("Saving and loading the game")
                         case item::Id::device_blaster: {
                                 is_sentry_device_found = true;
 
-                                const auto* const device =
-                                        static_cast<device::StrangeDevice*>(
-                                                item);
+                                const auto* const device = static_cast<device::Device*>(item);
 
-                                REQUIRE(device->condition == Condition::shoddy);
+                                REQUIRE(device->m_condition == Condition::shoddy);
                         } break;
 
                         case item::Id::lantern: {
                                 is_lantern_found = true;
 
-                                const auto* const lantern =
-                                        static_cast<device::Lantern*>(item);
+                                const auto* const lantern = static_cast<item::Lantern*>(item);
 
                                 REQUIRE(lantern->nr_turns_left() == 147);
                                 REQUIRE(lantern->is_activated());
@@ -424,7 +414,7 @@ TEST_CASE("Saving and loading the game")
                 const auto& props = map::g_player->m_properties;
 
                 {
-                        const auto* const prop = props.prop(PropId::diseased);
+                        const auto* const prop = props.prop(prop::Id::diseased);
 
                         REQUIRE(prop);
                         REQUIRE(prop->nr_turns_left() == -1);
@@ -434,14 +424,14 @@ TEST_CASE("Saving and loading the game")
                 REQUIRE(map::g_player->m_hp == map::g_player->m_data->hp);
 
                 {
-                        const auto* const prop = props.prop(PropId::r_sleep);
+                        const auto* const prop = props.prop(prop::Id::r_sleep);
 
                         REQUIRE(prop);
                         REQUIRE(prop->nr_turns_left() == 3);
                 }
 
                 {
-                        const auto* const prop = props.prop(PropId::blessed);
+                        const auto* const prop = props.prop(prop::Id::blessed);
 
                         REQUIRE(prop);
                         REQUIRE(prop->nr_turns_left() > 0);
@@ -449,14 +439,14 @@ TEST_CASE("Saving and loading the game")
 
                 // Properties from worn item
                 {
-                        const auto* const prop = props.prop(PropId::r_acid);
+                        const auto* const prop = props.prop(prop::Id::r_acid);
 
                         REQUIRE(prop);
                         REQUIRE(prop->nr_turns_left() == -1);
                 }
 
                 {
-                        const auto* const prop = props.prop(PropId::r_fire);
+                        const auto* const prop = props.prop(prop::Id::r_fire);
 
                         REQUIRE(prop);
                         REQUIRE(prop->nr_turns_left() == -1);
@@ -465,13 +455,13 @@ TEST_CASE("Saving and loading the game")
                 // Properties from item curse
                 {
                         const auto* const prop =
-                                props.prop(PropId::cannot_read_curse);
+                                props.prop(prop::Id::cannot_read_curse);
 
                         REQUIRE(prop);
                         REQUIRE(prop->nr_turns_left() == -1);
                 }
 
-                REQUIRE(!props.has(PropId::hit_chance_penalty_curse));
+                REQUIRE(!props.has(prop::Id::hit_chance_penalty_curse));
 
                 // Turn number (1 turn due to activating lantern).
                 REQUIRE(game_time::turn_nr() == 1);

@@ -35,8 +35,8 @@ TEST_CASE("Properties from item applied and removed for actor")
 
         auto& props = map::g_player->m_properties;
 
-        for (size_t i = 0; i < (size_t)PropId::END; ++i) {
-                REQUIRE(!props.has((PropId)i));
+        for (size_t i = 0; i < (size_t)prop::Id::END; ++i) {
+                REQUIRE(!props.has((prop::Id)i));
         }
 
         // Wear asbesthos suit
@@ -50,17 +50,17 @@ TEST_CASE("Properties from item applied and removed for actor")
         // Check that the expected properties are applied
         int nr_props = 0;
 
-        for (size_t i = 0u; i < (size_t)PropId::END; ++i) {
-                if (props.has((PropId)i)) {
+        for (size_t i = 0u; i < (size_t)prop::Id::END; ++i) {
+                if (props.has((prop::Id)i)) {
                         ++nr_props;
                 }
         }
 
         REQUIRE(nr_props == 3);
 
-        REQUIRE(props.has(PropId::r_fire));
-        REQUIRE(props.has(PropId::r_elec));
-        REQUIRE(props.has(PropId::r_acid));
+        REQUIRE(props.has(prop::Id::r_fire));
+        REQUIRE(props.has(prop::Id::r_elec));
+        REQUIRE(props.has(prop::Id::r_acid));
 
         // Take off asbeshos suit
         inv.unequip_slot(SlotId::body);
@@ -68,8 +68,8 @@ TEST_CASE("Properties from item applied and removed for actor")
         REQUIRE(inv.backpack_idx(item::Id::armor_asb_suit) != -1);
 
         // Check that the properties are cleared
-        for (int i = 0; i < (int)PropId::END; ++i) {
-                REQUIRE(!props.has((PropId)i));
+        for (int i = 0; i < (int)prop::Id::END; ++i) {
+                REQUIRE(!props.has((prop::Id)i));
         }
 
         // Wear the asbeshos suit again
@@ -80,17 +80,17 @@ TEST_CASE("Properties from item applied and removed for actor")
         // Check that the props are applied
         nr_props = 0;
 
-        for (int i = 0; i < (int)PropId::END; ++i) {
-                if (props.has((PropId)i)) {
+        for (int i = 0; i < (int)prop::Id::END; ++i) {
+                if (props.has((prop::Id)i)) {
                         ++nr_props;
                 }
         }
 
         REQUIRE(nr_props == 3);
 
-        REQUIRE(props.has(PropId::r_fire));
-        REQUIRE(props.has(PropId::r_elec));
-        REQUIRE(props.has(PropId::r_acid));
+        REQUIRE(props.has(prop::Id::r_fire));
+        REQUIRE(props.has(prop::Id::r_elec));
+        REQUIRE(props.has(prop::Id::r_acid));
 
         // Drop the asbeshos suit on the ground
         item_drop::drop_item_from_inv(
@@ -104,8 +104,8 @@ TEST_CASE("Properties from item applied and removed for actor")
         REQUIRE(map::g_items.at(map::g_player->m_pos));
 
         // Check that the properties are cleared
-        for (int i = 0; i < (int)PropId::END; ++i) {
-                REQUIRE(!props.has((PropId)i));
+        for (int i = 0; i < (int)prop::Id::END; ++i) {
+                REQUIRE(!props.has((prop::Id)i));
         }
 
         // Wear the same dropped asbesthos suit again
@@ -119,17 +119,17 @@ TEST_CASE("Properties from item applied and removed for actor")
         // Check that the properties are applied
         nr_props = 0;
 
-        for (int i = 0; i < (int)PropId::END; ++i) {
-                if (props.has((PropId)i)) {
+        for (int i = 0; i < (int)prop::Id::END; ++i) {
+                if (props.has((prop::Id)i)) {
                         ++nr_props;
                 }
         }
 
         REQUIRE(nr_props == 3);
 
-        REQUIRE(props.has(PropId::r_fire));
-        REQUIRE(props.has(PropId::r_elec));
-        REQUIRE(props.has(PropId::r_acid));
+        REQUIRE(props.has(prop::Id::r_fire));
+        REQUIRE(props.has(prop::Id::r_elec));
+        REQUIRE(props.has(prop::Id::r_acid));
 
         // Destroy the asbesthos suit by explosions
         for (int i = 0; i < 10; ++i) {
@@ -137,14 +137,14 @@ TEST_CASE("Properties from item applied and removed for actor")
 
                 explosion::run(map::g_player->m_pos, ExplType::expl);
 
-                props.end_prop(PropId::wound);
+                props.end_prop(prop::Id::wound);
         }
 
         REQUIRE(!body_slot.item);
 
         // Check that the properties are cleared
-        for (int i = 0; i < (int)PropId::END; ++i) {
-                REQUIRE(!props.has((PropId)i));
+        for (int i = 0; i < (int)prop::Id::END; ++i) {
+                REQUIRE(!props.has((prop::Id)i));
         }
 
         test_utils::cleanup_all();

@@ -48,13 +48,12 @@ public:
 
         void identify(Verbose verbose) final;
 
+        Condition m_condition;
+
 protected:
         virtual std::string descr_identified() const = 0;
 
         virtual ConsumeItem run_effect() = 0;
-
-private:
-        Condition m_condition;
 };
 
 class Blaster : public Device

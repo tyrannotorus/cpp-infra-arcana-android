@@ -67,7 +67,7 @@ TEST_CASE("Throw potion at monster")
 
         auto* const mon = actor::make("MON_ZOMBIE", {6, 7});
 
-        REQUIRE(!mon->m_properties.has(PropId::r_fire));
+        REQUIRE(!mon->m_properties.has(prop::Id::r_fire));
 
         bool did_test_r_fire = false;
 
@@ -81,7 +81,7 @@ TEST_CASE("Throw potion at monster")
 
                         // Clear fire resistance, throwing at the corpse should
                         // not re-apply it
-                        mon->m_properties.end_prop(PropId::r_fire);
+                        mon->m_properties.end_prop(prop::Id::r_fire);
                 }
 
                 game_time::g_allow_tick = true;
@@ -92,14 +92,14 @@ TEST_CASE("Throw potion at monster")
                         *item::make(item::Id::potion_r_fire));
 
                 if (is_dead) {
-                        REQUIRE(!mon->m_properties.has(PropId::r_fire));
+                        REQUIRE(!mon->m_properties.has(prop::Id::r_fire));
                 }
                 else {
                         // Not dead
                         if (mon->m_hp < actor::max_hp(*mon)) {
                                 did_test_r_fire = true;
 
-                                REQUIRE(mon->m_properties.has(PropId::r_fire));
+                                REQUIRE(mon->m_properties.has(prop::Id::r_fire));
                         }
                 }
 

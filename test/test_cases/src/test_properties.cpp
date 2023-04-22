@@ -40,10 +40,10 @@ TEST_CASE("Infection triggers disease")
 
         auto& properties = map::g_player->m_properties;
 
-        properties.apply(property_factory::make(PropId::infected));
+        properties.apply(prop::make(prop::Id::infected));
 
-        REQUIRE(properties.has(PropId::infected));
-        REQUIRE(!properties.has(PropId::diseased));
+        REQUIRE(properties.has(prop::Id::infected));
+        REQUIRE(!properties.has(prop::Id::diseased));
 
         // Tick the infected property enough to no longer exist (could use
         // while-true loop, but this could cause a failing test to get stuck)
@@ -51,8 +51,8 @@ TEST_CASE("Infection triggers disease")
                 properties.on_turn_begin();
         }
 
-        REQUIRE(!properties.has(PropId::infected));
-        REQUIRE(properties.has(PropId::diseased));
+        REQUIRE(!properties.has(prop::Id::infected));
+        REQUIRE(properties.has(prop::Id::diseased));
 
         test_utils::cleanup_all();
 }
@@ -63,18 +63,18 @@ TEST_CASE("Number turns active")
 
         auto& properties = map::g_player->m_properties;
 
-        auto* const blind = property_factory::make(PropId::blind);
+        auto* const blind = prop::make(prop::Id::blind);
         blind->set_duration(500);
 
         properties.apply(blind);
 
-        REQUIRE(properties.prop(PropId::blind)->nr_turns_active() == 0);
+        REQUIRE(properties.prop(prop::Id::blind)->nr_turns_active() == 0);
 
         properties.on_turn_begin();
         properties.on_turn_begin();
         properties.on_turn_begin();
 
-        REQUIRE(properties.prop(PropId::blind)->nr_turns_active() == 3);
+        REQUIRE(properties.prop(prop::Id::blind)->nr_turns_active() == 3);
 
         test_utils::cleanup_all();
 }
@@ -85,7 +85,7 @@ TEST_CASE("Frenzy allows moving away from monster if LOS blocked")
 
         auto& properties = map::g_player->m_properties;
 
-        properties.apply(property_factory::make(PropId::frenzied));
+        properties.apply(prop::make(prop::Id::frenzied));
 
         map::g_player->m_pos.set(10, 10);
 
@@ -119,7 +119,7 @@ TEST_CASE("Frenzy allows moving away from unseen known monster")
 
         auto& properties = map::g_player->m_properties;
 
-        properties.apply(property_factory::make(PropId::frenzied));
+        properties.apply(prop::make(prop::Id::frenzied));
 
         map::g_player->m_pos.set(10, 10);
 
@@ -132,7 +132,7 @@ TEST_CASE("Frenzy allows moving away from unseen known monster")
 
         REQUIRE(map::g_player->m_pos == P(10, 10));
 
-        mon->m_properties.apply(property_factory::make(PropId::invis));
+        mon->m_properties.apply(prop::make(prop::Id::invis));
 
         map::update_vision();
 
@@ -159,7 +159,7 @@ TEST_CASE("Frenzy allows attacking adjacent unseen known monster")
 
         auto& properties = map::g_player->m_properties;
 
-        properties.apply(property_factory::make(PropId::frenzied));
+        properties.apply(prop::make(prop::Id::frenzied));
 
         map::g_player->m_pos.set(10, 10);
 
@@ -174,7 +174,7 @@ TEST_CASE("Frenzy allows attacking adjacent unseen known monster")
 
         auto* const mon_2 = actor::make("MON_ZOMBIE", {10, 11});
 
-        mon_2->m_properties.apply(property_factory::make(PropId::invis));
+        mon_2->m_properties.apply(prop::make(prop::Id::invis));
 
         map::update_vision();
 

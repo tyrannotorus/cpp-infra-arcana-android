@@ -45,7 +45,7 @@ TEST_CASE("Creatures are not nailed to occupied terrain blocking los")
 
         // Target cell is occupied, nothing should happen
         REQUIRE(map::g_player->m_pos == pos_l);
-        REQUIRE(!map::g_player->m_properties.has(PropId::nailed));
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::nailed));
 
         // Kill the other actor, and knock the player again
         other_actor->m_state = ActorState::corpse;
@@ -57,7 +57,7 @@ TEST_CASE("Creatures are not nailed to occupied terrain blocking los")
 
         // Now the player should be knocked back, but not nailed
         REQUIRE(map::g_player->m_pos == pos_r);
-        REQUIRE(!map::g_player->m_properties.has(PropId::nailed));
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::nailed));
 
         // Knock the player into the wall
         knockback::run(
@@ -67,7 +67,7 @@ TEST_CASE("Creatures are not nailed to occupied terrain blocking los")
 
         // Now the player should not be knocked back, but be nailed
         REQUIRE(map::g_player->m_pos == pos_r);
-        REQUIRE(map::g_player->m_properties.has(PropId::nailed));
+        REQUIRE(map::g_player->m_properties.has(prop::Id::nailed));
 
         test_utils::cleanup_all();
 }

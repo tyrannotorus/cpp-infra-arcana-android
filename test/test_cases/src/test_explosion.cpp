@@ -246,14 +246,14 @@ TEST_CASE("Fire explosion applies burning to actors")
                 EmitExplSnd::no,
                 0,
                 ExplExclCenter::no,
-                {new PropBurning()});
+                {prop::make(prop::Id::burning)});
 
         for (int i = 0; i < nr_corpses; ++i) {
-                REQUIRE(corpses[i]->m_properties.has(PropId::burning));
+                REQUIRE(corpses[i]->m_properties.has(prop::Id::burning));
         }
 
-        REQUIRE(a1->m_properties.has(PropId::burning));
-        REQUIRE(a2->m_properties.has(PropId::burning));
+        REQUIRE(a1->m_properties.has(prop::Id::burning));
+        REQUIRE(a2->m_properties.has(prop::Id::burning));
 
         test_utils::cleanup_all();
 }
@@ -263,7 +263,7 @@ TEST_CASE("Gas explosions not affecting gas immune creatures")
         test_utils::init_all();
 
         auto run_explosion = [](const P& pos) {
-                auto* const prop = property_factory::make(PropId::confused);
+                auto* const prop = prop::make(prop::Id::confused);
 
                 explosion::run(
                         pos,
@@ -282,21 +282,21 @@ TEST_CASE("Gas explosions not affecting gas immune creatures")
 
         auto* const actor = actor::make("MON_ZOMBIE", origin);
 
-        REQUIRE(!actor->m_properties.has(PropId::confused));
+        REQUIRE(!actor->m_properties.has(prop::Id::confused));
 
         run_explosion(origin);
 
-        REQUIRE(actor->m_properties.has(PropId::confused));
+        REQUIRE(actor->m_properties.has(prop::Id::confused));
 
-        actor->m_properties.end_prop(PropId::confused);
+        actor->m_properties.end_prop(prop::Id::confused);
 
-        REQUIRE(!actor->m_properties.has(PropId::confused));
+        REQUIRE(!actor->m_properties.has(prop::Id::confused));
 
-        actor->m_properties.apply(property_factory::make(PropId::r_breath));
+        actor->m_properties.apply(prop::make(prop::Id::r_breath));
 
         run_explosion(origin);
 
-        REQUIRE(!actor->m_properties.has(PropId::confused));
+        REQUIRE(!actor->m_properties.has(prop::Id::confused));
 
         test_utils::cleanup_all();
 }
@@ -306,7 +306,7 @@ TEST_CASE("Gas mask protects against gas explosions")
         test_utils::init_all();
 
         auto run_explosion = [](const P& pos) {
-                auto* const prop = property_factory::make(PropId::confused);
+                auto* const prop = prop::make(prop::Id::confused);
 
                 explosion::run(
                         pos,
@@ -329,15 +329,15 @@ TEST_CASE("Gas mask protects against gas explosions")
 
         player.m_inv.drop_all_non_intrinsic(origin);
 
-        REQUIRE(!player.m_properties.has(PropId::confused));
+        REQUIRE(!player.m_properties.has(prop::Id::confused));
 
         run_explosion(origin);
 
-        REQUIRE(player.m_properties.has(PropId::confused));
+        REQUIRE(player.m_properties.has(prop::Id::confused));
 
-        player.m_properties.end_prop(PropId::confused);
+        player.m_properties.end_prop(prop::Id::confused);
 
-        REQUIRE(!player.m_properties.has(PropId::confused));
+        REQUIRE(!player.m_properties.has(prop::Id::confused));
 
         player.m_inv.put_in_slot(
                 SlotId::head,
@@ -346,7 +346,7 @@ TEST_CASE("Gas mask protects against gas explosions")
 
         run_explosion(origin);
 
-        REQUIRE(!player.m_properties.has(PropId::confused));
+        REQUIRE(!player.m_properties.has(prop::Id::confused));
 
         test_utils::cleanup_all();
 }
@@ -356,7 +356,7 @@ TEST_CASE("Asbestos suite protects against gas explosions")
         test_utils::init_all();
 
         auto run_explosion = [](const P& pos) {
-                auto* const prop = property_factory::make(PropId::confused);
+                auto* const prop = prop::make(prop::Id::confused);
 
                 explosion::run(
                         pos,
@@ -379,15 +379,15 @@ TEST_CASE("Asbestos suite protects against gas explosions")
 
         player.m_inv.drop_all_non_intrinsic(origin);
 
-        REQUIRE(!player.m_properties.has(PropId::confused));
+        REQUIRE(!player.m_properties.has(prop::Id::confused));
 
         run_explosion(origin);
 
-        REQUIRE(player.m_properties.has(PropId::confused));
+        REQUIRE(player.m_properties.has(prop::Id::confused));
 
-        player.m_properties.end_prop(PropId::confused);
+        player.m_properties.end_prop(prop::Id::confused);
 
-        REQUIRE(!player.m_properties.has(PropId::confused));
+        REQUIRE(!player.m_properties.has(prop::Id::confused));
 
         player.m_inv.put_in_slot(
                 SlotId::body,
@@ -396,7 +396,7 @@ TEST_CASE("Asbestos suite protects against gas explosions")
 
         run_explosion(origin);
 
-        REQUIRE(!player.m_properties.has(PropId::confused));
+        REQUIRE(!player.m_properties.has(prop::Id::confused));
 
         test_utils::cleanup_all();
 }

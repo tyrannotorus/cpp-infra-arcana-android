@@ -102,7 +102,7 @@ TEST_CASE("Spider web")
                 // It should never be possible to move on the first try
                 REQUIRE(actor->m_pos == pos_r);
 
-                REQUIRE(actor->m_properties.has(PropId::entangled));
+                REQUIRE(actor->m_properties.has(prop::Id::entangled));
 
                 // This may or may not unstuck the monster
                 game_time::g_allow_tick = true;
@@ -119,7 +119,7 @@ TEST_CASE("Spider web")
                 else if (actor->m_pos == pos_l) {
                         tested_unstuck = true;
 
-                        REQUIRE(!actor->m_properties.has(PropId::entangled));
+                        REQUIRE(!actor->m_properties.has(prop::Id::entangled));
                 }
 
                 test_utils::cleanup_all();

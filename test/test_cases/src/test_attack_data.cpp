@@ -49,7 +49,7 @@ TEST_CASE("Melee attack data")
         // Zombie with invisible property applied
         auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
-        mon_2.m_properties.apply(property_factory::make(PropId::invis));
+        mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
         map::g_player->update_fov();
 
@@ -124,8 +124,7 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
 
         map::g_player->m_pos = p1;
 
-        map::g_player->m_properties.apply(
-                property_factory::make(PropId::weakened));
+        map::g_player->m_properties.apply(prop::make(prop::Id::weakened));
 
         // Zombie
         auto& mon = *actor::make("MON_ZOMBIE", p2);
@@ -215,7 +214,7 @@ TEST_CASE("Ranged attack data")
         // Zombie with invisible property applied
         auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
-        mon_2.m_properties.apply(property_factory::make(PropId::invis));
+        mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
         map::g_player->update_fov();
 
@@ -316,7 +315,7 @@ TEST_CASE("Throwing attack data")
         // Zombie with invisible property applied
         auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
-        mon_2.m_properties.apply(property_factory::make(PropId::invis));
+        mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
         map::g_player->update_fov();
 

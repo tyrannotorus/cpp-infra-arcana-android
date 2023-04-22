@@ -29,7 +29,7 @@ TEST_CASE("Test opening spell effect")
         test_utils::init_all();
 
         const P wood_door_pos(3, 3);
-        const P metal_door_pos(10, 10);
+        const P warded_door_pos(10, 10);
         const P lever_1_pos(50, 50);
         const P lever_2_pos(75, 75);
 
@@ -41,38 +41,38 @@ TEST_CASE("Test opening spell effect")
                 terrain::DoorType::wood,
                 terrain::DoorSpawnState::closed);
 
-        auto* const metal_door =
+        auto* const warded_door =
                 static_cast<terrain::Door*>(
-                        terrain::make(terrain::Id::door, metal_door_pos));
+                        terrain::make(terrain::Id::door, warded_door_pos));
 
-        metal_door->init_type_and_state(
-                terrain::DoorType::metal,
-                terrain::DoorSpawnState::closed);
+        warded_door->init_type_and_state(
+                terrain::DoorType::wood,
+                terrain::DoorSpawnState::warded);
 
-        auto* const lever_1 =
-                static_cast<terrain::Lever*>(
-                        terrain::make(terrain::Id::lever, lever_1_pos));
+        auto* const crystal_1 =
+                static_cast<terrain::CrystalKey*>(
+                        terrain::make(terrain::Id::crystal_key, lever_1_pos));
 
-        auto* const lever_2 =
-                static_cast<terrain::Lever*>(
-                        terrain::make(terrain::Id::lever, lever_2_pos));
+        auto* const crystal_2 =
+                static_cast<terrain::CrystalKey*>(
+                        terrain::make(terrain::Id::crystal_key, lever_2_pos));
 
         map::update_terrain(wood_door);
-        map::update_terrain(metal_door);
-        map::update_terrain(lever_1);
-        map::update_terrain(lever_2);
+        map::update_terrain(warded_door);
+        map::update_terrain(crystal_1);
+        map::update_terrain(crystal_2);
 
-        lever_1->set_linked_terrain(*metal_door);
-        lever_2->set_linked_terrain(*metal_door);
-        lever_1->add_sibbling(lever_2);
-        lever_2->add_sibbling(lever_1);
+        crystal_1->set_linked_door(*warded_door);
+        crystal_2->set_linked_door(*warded_door);
+        crystal_1->add_sibbling(crystal_2);
+        crystal_2->add_sibbling(crystal_1);
 
         REQUIRE(!wood_door->is_open());
-        REQUIRE(!metal_door->is_open());
-        REQUIRE(lever_1->is_left_pos());
-        REQUIRE(lever_2->is_left_pos());
+        REQUIRE(!warded_door->is_open());
+        REQUIRE(crystal_1->is_active());
+        REQUIRE(crystal_2->is_active());
 
-        const auto did_open_wood_door =
+        const terrain::DidOpen did_open_wood_door =
                 spells::run_opening_spell_effect_at(
                         wood_door_pos,
                         SpellSkill::master);
@@ -80,21 +80,21 @@ TEST_CASE("Test opening spell effect")
         REQUIRE(did_open_wood_door == terrain::DidOpen::yes);
 
         REQUIRE(wood_door->is_open());
-        REQUIRE(!metal_door->is_open());
-        REQUIRE(lever_1->is_left_pos());
-        REQUIRE(lever_2->is_left_pos());
+        REQUIRE(!warded_door->is_open());
+        REQUIRE(crystal_1->is_active());
+        REQUIRE(crystal_2->is_active());
 
-        const auto did_open_metal_door =
+        const terrain::DidOpen did_open_warded_door =
                 spells::run_opening_spell_effect_at(
-                        metal_door_pos,
+                        warded_door_pos,
                         SpellSkill::master);
 
-        REQUIRE(did_open_metal_door == terrain::DidOpen::yes);
+        REQUIRE(did_open_warded_door == terrain::DidOpen::yes);
 
         REQUIRE(wood_door->is_open());
-        REQUIRE(metal_door->is_open());
-        REQUIRE(!lever_1->is_left_pos());
-        REQUIRE(!lever_2->is_left_pos());
+        REQUIRE(warded_door->is_open());
+        REQUIRE(!crystal_1->is_active());
+        REQUIRE(!crystal_2->is_active());
 }
 
 TEST_CASE("Test spell bonuses for learned spells")
@@ -124,7 +124,7 @@ TEST_CASE("Test spell bonuses for learned spells")
                 SpellSkill::expert);
 
         // With eruditon bonus
-        player.m_properties.apply(property_factory::make(PropId::erudition));
+        player.m_properties.apply(prop::make(prop::Id::erudition));
 
         REQUIRE(
                 player_spells::spell_skill(SpellId::heal) ==
@@ -195,16 +195,16 @@ TEST_CASE("Test spell bonuses for manuscripts")
 
         // Casting healing from manuscript (expert level) should clear disease,
         // but not deafness.
-        player.m_properties.apply(property_factory::make(PropId::diseased));
-        player.m_properties.apply(property_factory::make(PropId::deaf));
+        player.m_properties.apply(prop::make(prop::Id::diseased));
+        player.m_properties.apply(prop::make(prop::Id::deaf));
 
-        REQUIRE(player.m_properties.has(PropId::diseased));
-        REQUIRE(player.m_properties.has(PropId::deaf));
+        REQUIRE(player.m_properties.has(prop::Id::diseased));
+        REQUIRE(player.m_properties.has(prop::Id::deaf));
 
         scroll->activate(map::g_player);
 
-        REQUIRE(!player.m_properties.has(PropId::diseased));
-        REQUIRE(player.m_properties.has(PropId::deaf));
+        REQUIRE(!player.m_properties.has(prop::Id::diseased));
+        REQUIRE(player.m_properties.has(prop::Id::deaf));
 
         // Casting healing from manuscript at altar (master level) should clear
         // both disease and deafness.
@@ -213,15 +213,15 @@ TEST_CASE("Test spell bonuses for manuscripts")
                         terrain::Id::altar,
                         player.m_pos.with_x_offset(1)));
 
-        player.m_properties.apply(property_factory::make(PropId::diseased));
-        player.m_properties.apply(property_factory::make(PropId::deaf));
+        player.m_properties.apply(prop::make(prop::Id::diseased));
+        player.m_properties.apply(prop::make(prop::Id::deaf));
 
         game_time::g_allow_tick = true;
 
         scroll->activate(map::g_player);
 
-        REQUIRE(!player.m_properties.has(PropId::diseased));
-        REQUIRE(!player.m_properties.has(PropId::deaf));
+        REQUIRE(!player.m_properties.has(prop::Id::diseased));
+        REQUIRE(!player.m_properties.has(prop::Id::deaf));
 
         // Remove the altar
         map::update_terrain(
@@ -231,18 +231,17 @@ TEST_CASE("Test spell bonuses for manuscripts")
 
         // Casting healing from manuscript with erudition (master level) should
         // clear both disease and deafness.
-        player.m_properties.apply(
-                property_factory::make(PropId::erudition));
+        player.m_properties.apply(prop::make(prop::Id::erudition));
 
-        player.m_properties.apply(property_factory::make(PropId::diseased));
-        player.m_properties.apply(property_factory::make(PropId::deaf));
+        player.m_properties.apply(prop::make(prop::Id::diseased));
+        player.m_properties.apply(prop::make(prop::Id::deaf));
 
         game_time::g_allow_tick = true;
 
         scroll->activate(map::g_player);
 
-        REQUIRE(!player.m_properties.has(PropId::diseased));
-        REQUIRE(!player.m_properties.has(PropId::deaf));
+        REQUIRE(!player.m_properties.has(prop::Id::diseased));
+        REQUIRE(!player.m_properties.has(prop::Id::deaf));
 }
 
 TEST_CASE("Test spell shield")
@@ -260,23 +259,21 @@ TEST_CASE("Test spell shield")
 
                 map::update_vision();
 
-                mon->m_properties.apply(
-                        property_factory::make(
-                                PropId::r_spell));
+                mon->m_properties.apply(prop::make(prop::Id::r_spell));
 
                 const auto* const darkbolt = spells::make(SpellId::darkbolt);
 
-                REQUIRE(mon->m_properties.has(PropId::r_spell));
+                REQUIRE(mon->m_properties.has(prop::Id::r_spell));
 
                 darkbolt->run_effect(map::g_player, SpellSkill::basic, {mon});
 
                 REQUIRE(mon->m_hp == actor::max_hp(*mon));
-                REQUIRE(!mon->m_properties.has(PropId::r_spell));
+                REQUIRE(!mon->m_properties.has(prop::Id::r_spell));
 
                 darkbolt->run_effect(map::g_player, SpellSkill::basic, {mon});
 
                 REQUIRE(mon->m_hp < actor::max_hp(*mon));
-                REQUIRE(!mon->m_properties.has(PropId::r_spell));
+                REQUIRE(!mon->m_properties.has(prop::Id::r_spell));
         }
 
         SECTION("Natural spell shield")
@@ -287,17 +284,17 @@ TEST_CASE("Test spell shield")
 
                 const auto* const darkbolt = spells::make(SpellId::darkbolt);
 
-                REQUIRE(mon->m_properties.has(PropId::r_spell));
+                REQUIRE(mon->m_properties.has(prop::Id::r_spell));
 
                 darkbolt->run_effect(map::g_player, SpellSkill::basic, {mon});
 
                 REQUIRE(mon->m_hp == actor::max_hp(*mon));
-                REQUIRE(mon->m_properties.has(PropId::r_spell));
+                REQUIRE(mon->m_properties.has(prop::Id::r_spell));
 
                 darkbolt->run_effect(map::g_player, SpellSkill::basic, {mon});
 
                 REQUIRE(mon->m_hp == actor::max_hp(*mon));
-                REQUIRE(mon->m_properties.has(PropId::r_spell));
+                REQUIRE(mon->m_properties.has(prop::Id::r_spell));
         }
 }
 
@@ -319,13 +316,9 @@ TEST_CASE("Test spell reflection hits correct creature")
 
         map::update_vision();
 
-        map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::r_spell));
+        map::g_player->m_properties.apply(prop::make(prop::Id::r_spell));
 
-        map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::spell_reflect));
+        map::g_player->m_properties.apply(prop::make(prop::Id::spell_reflect));
 
         // Cast darkbolt from monster 2 on the player.
         const auto* const darkbolt = spells::make(SpellId::darkbolt);
@@ -365,17 +358,11 @@ TEST_CASE("Test reflected knockback spell blocked by caster spell shield")
 
         map::update_vision();
 
-        map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::r_spell));
+        map::g_player->m_properties.apply(prop::make(prop::Id::r_spell));
 
-        map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::spell_reflect));
+        map::g_player->m_properties.apply(prop::make(prop::Id::spell_reflect));
 
-        mon->m_properties.apply(
-                property_factory::make(
-                        PropId::r_spell));
+        mon->m_properties.apply(prop::make(prop::Id::r_spell));
 
         mon->m_ai_state.is_target_seen = true;
 
@@ -389,18 +376,16 @@ TEST_CASE("Test reflected knockback spell blocked by caster spell shield")
         REQUIRE(map::g_player->m_pos == P(10, 10));
         REQUIRE(mon->m_pos == P(11, 10));
 
-        REQUIRE(!map::g_player->m_properties.has(PropId::r_spell));
-        REQUIRE(!mon->m_properties.has(PropId::r_spell));
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::r_spell));
+        REQUIRE(!mon->m_properties.has(prop::Id::r_spell));
 
         // Re-apply spell shield on the player and cast the spell again.
-        map::g_player->m_properties.apply(
-                property_factory::make(
-                        PropId::r_spell));
+        map::g_player->m_properties.apply(prop::make(prop::Id::r_spell));
 
         knockback->run_effect(mon, SpellSkill::basic, {map::g_player});
 
         // Now the spell should have hit the monster.
         REQUIRE(mon->m_pos == P(12, 10));
 
-        REQUIRE(!mon->m_properties.has(PropId::r_spell));
+        REQUIRE(!mon->m_properties.has(prop::Id::r_spell));
 }

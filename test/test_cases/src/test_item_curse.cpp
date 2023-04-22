@@ -25,8 +25,8 @@ TEST_CASE("Activate curse")
 
         auto& props = map::g_player->m_properties;
 
-        for (size_t i = 0; i < (size_t)PropId::END; ++i) {
-                REQUIRE(!props.has((PropId)i));
+        for (size_t i = 0; i < (size_t)prop::Id::END; ++i) {
+                REQUIRE(!props.has((prop::Id)i));
         }
 
         auto* const item = item::make(item::Id::horn_of_malice);
@@ -39,7 +39,7 @@ TEST_CASE("Activate curse")
 
         REQUIRE(!item->current_curse().is_active());
 
-        REQUIRE(!map::g_player->m_properties.has(PropId::cannot_read_curse));
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::cannot_read_curse));
 
         for (int i = 0; i < 10; ++i) {
                 item->current_curse().on_player_reached_new_dlvl();
@@ -47,7 +47,7 @@ TEST_CASE("Activate curse")
 
         REQUIRE(!item->current_curse().is_active());
 
-        REQUIRE(!map::g_player->m_properties.has(PropId::cannot_read_curse));
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::cannot_read_curse));
 
         for (int i = 0; i < 5000; ++i) {
                 item->current_curse().on_new_turn(*item);
@@ -55,7 +55,7 @@ TEST_CASE("Activate curse")
 
         REQUIRE(item->current_curse().is_active());
 
-        REQUIRE(map::g_player->m_properties.has(PropId::cannot_read_curse));
+        REQUIRE(map::g_player->m_properties.has(prop::Id::cannot_read_curse));
 
         test_utils::cleanup_all();
 }
