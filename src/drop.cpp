@@ -220,7 +220,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
                                         map::g_items.at(stack_p) = &item;
 
                                         if (map::g_player->m_pos == stack_p) {
-                                                item.on_player_found();
+                                                item.discover();
                                         }
 
                                         TRACE_FUNC_END_VERBOSE;
@@ -238,7 +238,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
                         map::g_items.at(p) = &item;
 
                         if (map::g_player->m_pos == p) {
-                                item.on_player_found();
+                                item.discover();
                         }
 
                         return &item;

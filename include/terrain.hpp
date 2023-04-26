@@ -43,7 +43,7 @@ class Array2;
 enum class AllowAction;
 enum class Article;
 enum class DmgType;
-enum class Matl;
+enum class Material;
 enum class Verbose;
 
 namespace terrain
@@ -258,9 +258,9 @@ public:
                 return m_data->can_have_item;
         }
 
-        virtual Matl matl() const
+        virtual Material material() const
         {
-                return m_data->matl_type;
+                return m_data->material_type;
         }
 
         virtual void on_placed()
@@ -1040,7 +1040,7 @@ private:
         TombTrait m_trait;
 };
 
-enum class ChestMatl
+enum class ChestMaterial
 {
         wood,
         iron,
@@ -1086,7 +1086,7 @@ private:
         bool m_is_open;
         bool m_is_locked;
 
-        ChestMatl m_matl;
+        ChestMaterial m_material;
 };
 
 class Cabinet : public Terrain

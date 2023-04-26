@@ -130,7 +130,7 @@ public:
 
         void on_revealed_from_searching() override;
 
-        Matl matl() const override;
+        Material material() const override;
 
         TrapId type() const;
 

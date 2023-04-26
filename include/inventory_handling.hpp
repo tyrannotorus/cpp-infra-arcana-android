@@ -182,9 +182,7 @@ class SelectIdentify : public InvState
 {
 public:
         SelectIdentify(std::vector<ItemType> item_types_allowed = {}) :
-
-                m_item_types_allowed(std::move(item_types_allowed))
-        {}
+                m_item_types_allowed(std::move(item_types_allowed)) {}
 
         void on_start() override;
 

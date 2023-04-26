@@ -89,34 +89,34 @@ static void on_attack_performed(actor::Actor& actor)
 
 static bool is_noisy_terrain(const terrain::Terrain& terrain)
 {
-        const auto matl = terrain.matl();
+        const auto material = terrain.material();
 
-        switch (matl) {
-        case Matl::empty:
+        switch (material) {
+        case Material::empty:
                 return false;
                 break;
 
-        case Matl::stone:
+        case Material::stone:
                 return true;
                 break;
 
-        case Matl::metal:
+        case Material::metal:
                 return true;
                 break;
 
-        case Matl::plant:
+        case Material::plant:
                 return false;
                 break;
 
-        case Matl::wood:
+        case Material::wood:
                 return true;
                 break;
 
-        case Matl::cloth:
+        case Material::cloth:
                 return false;
                 break;
 
-        case Matl::fluid:
+        case Material::fluid:
                 return false;
                 break;
         }

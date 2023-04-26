@@ -85,6 +85,7 @@ enum class SfxId
         boss_voice2,
         chains,
         crystal_key_disable,
+        mirror_activate,
         statue_crash,
         lever_pull,
         monolith,

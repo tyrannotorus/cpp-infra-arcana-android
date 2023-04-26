@@ -11,6 +11,7 @@
 #include "terrain_door.hpp"
 #include "terrain_event.hpp"
 #include "terrain_gong.hpp"
+#include "terrain_mirror.hpp"
 #include "terrain_mob.hpp"
 #include "terrain_monolith.hpp"
 #include "terrain_pylon.hpp"
@@ -137,6 +138,10 @@ Terrain* make(const Id id, const P& pos)
 
         case Id::monolith:
                 return new Monolith(pos, d);
+                break;
+
+        case Id::mirror:
+                return new Mirror(pos, d);
                 break;
 
         case Id::pylon:

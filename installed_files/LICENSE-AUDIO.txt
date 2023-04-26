@@ -810,6 +810,13 @@ Original title:      Light wooshes
 License:             CC0 1.0 Universal (CC0 1.0)
 Changes made:        Cut most of the sound
 
+File:                sfx_mirror.ogg
+Source:              https://freesound.org/people/sweet_niche/sounds/548215/
+Author:              sweet_niche (username on freesound.org)
+Original title:      Processed Canned Air.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut most of the sound, changed tempo, added echo, etc
+
 File:                sfx_menu_browse.ogg
 Source:              https://www.freesound.org/people/sandyrb/sounds/84346
 Author:              sandyrb (username on freesound.org)

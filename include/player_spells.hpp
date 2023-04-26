@@ -28,8 +28,8 @@ void remove_learned_spell(SpellId id);
 
 bool is_spell_forgotten(SpellId id);
 void forget_spell(SpellId id);
-void recall_spell(SpellId id);
-void recall_all_spells();
+bool recall_spell(SpellId id);
+bool recall_all_spells();
 
 void incr_spell_skill(SpellId id, Verbose verbose);
 SpellSkill spell_skill(SpellId id);

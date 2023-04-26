@@ -127,7 +127,7 @@ static void player_walk_on_item(item::Item* const item)
                 msg_log::add(item_name + ".");
         }
 
-        item->on_player_found();
+        item->discover();
 }
 
 static void print_corpses_at_player_msgs()
@@ -252,7 +252,7 @@ static void bump_terrains(actor::Actor& actor, const P& target)
 
         if (!actor::is_player(&actor) &&
             !terrain->is_walkable() &&
-            (terrain->m_data->matl_type != Matl::fluid) &&
+            (terrain->m_data->material_type != Material::fluid) &&
             (terrain->id() != terrain::Id::chasm) &&
             can_player_see_actor(actor)) {
                 print_mon_enter_non_walkable_terrain_msg(actor, *terrain);

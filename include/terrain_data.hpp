@@ -57,6 +57,7 @@ enum class Id
         alchemist_bench,
         fountain,
         monolith,
+        mirror,
         pylon,
         stalagmite,
         chasm,
@@ -116,7 +117,7 @@ struct TerrainData
         bool can_have_corpse {true};
         bool can_have_trap {false};
         bool can_have_item {true};
-        Matl matl_type {Matl::stone};
+        Material material_type {Material::stone};
         std::string msg_on_player_blocked {"The way is blocked."};
         std::string msg_on_player_blocked_blind {"I bump into something."};
         int shock_when_adjacent {0};

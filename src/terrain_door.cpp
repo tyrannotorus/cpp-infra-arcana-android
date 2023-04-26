@@ -396,8 +396,12 @@ void Door::hit(
 
         switch (dmg_type) {
         case DmgType::pure: {
+                const P pos = m_pos;
+
+                // NOTE: This might destroy the door:
                 try_trigger_ward_trap();
-                map::update_terrain(make(Id::rubble_low, m_pos));
+
+                map::update_terrain(make(Id::rubble_low, pos));
                 map::update_vision();
 
                 return;
@@ -420,8 +424,12 @@ void Door::hit(
                                                 " is blown to pieces!");
                                 }
 
+                                const P pos = m_pos;
+
+                                // NOTE: This might destroy the door:
                                 try_trigger_ward_trap();
-                                map::update_terrain(make(Id::rubble_low, m_pos));
+
+                                map::update_terrain(make(Id::rubble_low, pos));
                                 map::update_vision();
 
                                 return;
@@ -434,9 +442,12 @@ void Door::hit(
         } break;
 
         case DmgType::explosion: {
+                const P pos = m_pos;
+
+                // NOTE: This might destroy the door:
                 try_trigger_ward_trap();
 
-                map::update_terrain(terrain::make(terrain::Id::rubble_low, m_pos));
+                map::update_terrain(terrain::make(terrain::Id::rubble_low, pos));
 
                 map::update_vision();
         } break;
@@ -459,7 +470,7 @@ void Door::hit(
         case DmgType::fire: {
                 // TODO: Warded doors do not burn, but consider printing some
                 // message about the door resisting fire.
-                if ((matl() == Matl::wood) && (m_ward_state != WardState::warded)) {
+                if ((material() == Material::wood) && (m_ward_state != WardState::warded)) {
                         reveal(PrintRevealMsg::if_seen);
 
                         try_start_burning(Verbose::yes);
@@ -526,11 +537,12 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
                         base_name_short(),
                         break_descr);
 
-                try_trigger_ward_trap();
-
                 const P pos = m_pos;
 
-                map::update_terrain(make(Id::rubble_low, m_pos));
+                // NOTE: This might destroy the door:
+                try_trigger_ward_trap();
+
+                map::update_terrain(make(Id::rubble_low, pos));
 
                 map::memorize_terrain_at(pos);
                 map::update_vision();
@@ -925,22 +937,22 @@ gfx::TileId Door::tile() const
         return gfx::TileId::door_closed;
 }
 
-Matl Door::matl() const
+Material Door::material() const
 {
         switch (m_type) {
         case DoorType::wood:
-                return Matl::wood;
+                return Material::wood;
                 break;
 
         case DoorType::metal:
         case DoorType::gate:
-                return Matl::metal;
+                return Material::metal;
                 break;
         }
 
         ASSERT(false);
 
-        return Matl::wood;
+        return Material::wood;
 }
 
 void Door::bump(actor::Actor& actor_bumping)
@@ -1065,9 +1077,12 @@ void Door::bump(actor::Actor& actor_bumping)
                         }
                 }
 
+                const P pos = m_pos;
+
+                // NOTE: This might destroy the door:
                 actor_try_open(actor_bumping);
 
-                map::memorize_terrain_at(m_pos);
+                map::memorize_terrain_at(pos);
                 map::update_vision();
         }
 }
@@ -1616,11 +1631,14 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                 actor_trying.m_opening_door_pos = m_pos;
 
+                const P pos = m_pos;
+
+                // NOTE: This might destroy the door:
                 try_trigger_ward_trap();
 
                 game_time::tick();
 
-                map::memorize_terrain_at(m_pos);
+                map::memorize_terrain_at(pos);
                 map::update_vision();
         }
 

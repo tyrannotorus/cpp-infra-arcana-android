@@ -173,7 +173,7 @@ enum class Article
         the
 };
 
-enum class Matl
+enum class Material
 {
         empty,
         stone,

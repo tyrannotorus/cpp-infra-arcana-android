@@ -1,4 +1,4 @@
-# ------------------------------------------------------------------------------
+ # ------------------------------------------------------------------------------
 # Project
 # ------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.0)
@@ -141,6 +141,7 @@ set(COMMON_SRC
         include/terrain_event.hpp
         include/terrain_factory.hpp
         include/terrain_gong.hpp
+        include/terrain_mirror.hpp
         include/terrain_mob.hpp
         include/terrain_monolith.hpp
         include/terrain_pylon.hpp
@@ -252,11 +253,12 @@ set(COMMON_SRC
         src/mapgen_doors.cpp
         src/mapgen_doors_and_keys.cpp
         src/mapgen_merge_regions.cpp
-        src/mapgen_monolith.cpp
+        src/mapgen_valuable_terrain.cpp
         src/mapgen_pylon.cpp
         src/mapgen_region.cpp
         src/mapgen_river.cpp
         src/mapgen_room.cpp
+        src/mapgen_stairs.cpp
         src/mapgen_sub_rooms.cpp
         src/mapgen_utils.cpp
         src/marker.cpp
@@ -296,6 +298,7 @@ set(COMMON_SRC
         src/terrain_event.cpp
         src/terrain_factory.cpp
         src/terrain_gong.cpp
+        src/terrain_mirror.cpp
         src/terrain_mob.cpp
         src/terrain_monolith.cpp
         src/terrain_pylon.cpp

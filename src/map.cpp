@@ -373,6 +373,9 @@ void memorize_terrain_at(const P& p)
         else if (id == terrain::Id::monolith) {
                 memory.appearance.minimap_color = terrain->color_default();
         }
+        else if (id == terrain::Id::mirror) {
+                memory.appearance.minimap_color = terrain->color_default();
+        }
         else if (id == terrain::Id::crystal_key) {
                 memory.appearance.minimap_color = terrain->color_default();
         }

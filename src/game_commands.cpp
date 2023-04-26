@@ -1107,10 +1107,25 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_shift_f4: {
-                map::update_terrain(
-                        terrain::make(
-                                terrain::Id::chest,
-                                map::g_player->m_pos.with_x_offset(1)));
+                // Spawn some of the lootable/usable terrain objects.
+
+                const std::vector<terrain::Id> terrain_ids = {
+                        terrain::Id::monolith,
+                        terrain::Id::mirror,
+                        terrain::Id::chest,
+                        terrain::Id::cocoon,
+                        terrain::Id::alchemist_bench,
+                        terrain::Id::cabinet,
+                };
+
+                int dx = 1;
+
+                for (const terrain::Id id : terrain_ids) {
+                        map::update_terrain(
+                                terrain::make(id, map::g_player->m_pos.with_x_offset(dx)));
+
+                        ++dx;
+                }
         } break;
 
         case GameCmd::debug_f5: {
@@ -1122,17 +1137,13 @@ void handle(const GameCmd cmd)
                         const item::ItemData& item_data = item::g_data[i];
 
                         if (!item_data.is_intr && (item_data.tile != gfx::TileId::END)) {
-                                item::make_item_on_floor(
-                                        (item::Id)i,
-                                        map::g_player->m_pos);
+                                item::make_item_on_floor((item::Id)i, map::g_player->m_pos);
                         }
                 }
         } break;
 
         case GameCmd::debug_f7: {
-                map::g_player->m_properties.apply(
-                        prop::make(
-                                prop::Id::r_conf));
+                map::g_player->m_properties.apply(prop::make(prop::Id::r_conf));
 
                 teleport(*map::g_player);
         } break;

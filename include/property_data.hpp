@@ -85,15 +85,15 @@ enum class Id
         corpse_rises,
         spawns_zombie_parts_on_destroyed,
         breeds,
-        vomits_ooze,  // Gla'Suu
-        confuses_adjacent,  // "Strange color" confusing player when seen
+        vomits_ooze,            // Gla'Suu
+        confuses_adjacent,      // "Strange color" confusing player when seen
         frenzy_player_on_seen,  // Ghastly Light
-        aura_of_decay,  // Damages adjacent hostile creatures
-        reduced_pierce_dmg,  // E.g. worm masses
+        aura_of_decay,          // Damages adjacent hostile creatures
+        reduced_pierce_dmg,     // E.g. worm masses
         short_hearing_range,
-        frenzies_self,  // E.g. Apes
+        frenzies_self,       // E.g. Apes
         frenzies_followers,  // E.g. Pickman
-        summons_locusts,  // Khephren ability
+        summons_locusts,     // Khephren ability
         // Monster with this property terrifies other monsters with this
         // property on death ("cowardly monsters", e.g. Troglodytes).
         others_terrified_on_death,
@@ -139,9 +139,9 @@ enum class Id
         sanctuary,
         astral_opium_addiction,
         meditative_focused,  // From Meditative trait
-        moribund,  // Flagellant low health bonuses
-        thorns,  // From the Thorns spell
-        crimson_passage,  // From the Crimson Passage spell
+        moribund,            // Flagellant low health bonuses
+        thorns,              // From the Thorns spell
+        crimson_passage,     // From the Crimson Passage spell
 
         END
 };

@@ -684,13 +684,13 @@ gfx::TileId Trap::tile() const
         }
 }
 
-Matl Trap::matl() const
+Material Trap::material() const
 {
         if (m_is_hidden) {
-                return m_mimic_terrain->matl();
+                return m_mimic_terrain->material();
         }
         else {
-                return m_data->matl_type;
+                return m_data->material_type;
         }
 }
 

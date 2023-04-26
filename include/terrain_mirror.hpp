@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#ifndef TERRAIN_MONOLITH_HPP
-#define TERRAIN_MONOLITH_HPP
+#ifndef TERRAIN_MIRROR_HPP
+#define TERRAIN_MIRROR_HPP
 
 #include <string>
 
@@ -22,12 +22,12 @@ struct P;
 
 namespace terrain
 {
-class Monolith : public Terrain
+class Mirror : public Terrain
 {
 public:
-        Monolith(const P& p, const TerrainData* data);
-        Monolith() = delete;
-        ~Monolith() = default;
+        Mirror(const P& p, const TerrainData* data);
+        Mirror() = delete;
+        ~Mirror() = default;
 
         std::string name(Article article) const override;
 
@@ -49,4 +49,4 @@ private:
 
 }  // namespace terrain
 
-#endif  // TERRAIN_MONOLITH_HPP
+#endif  // TERRAIN_MIRROR_HPP

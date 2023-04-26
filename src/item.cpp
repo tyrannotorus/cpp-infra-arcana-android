@@ -360,7 +360,7 @@ void Item::on_pickup(actor::Actor& actor)
         m_actor_carrying = &actor;
 
         if (actor::is_player(m_actor_carrying)) {
-                on_player_found();
+                discover();
         }
 
         m_curse.on_item_picked_up(*this);
@@ -391,7 +391,7 @@ void Item::on_removed_from_inv()
         m_actor_carrying = nullptr;
 }
 
-void Item::on_player_found()
+void Item::discover()
 {
         if ((m_data->xp_on_found > 0) && !m_data->is_found) {
                 const std::string item_name =

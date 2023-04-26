@@ -26,8 +26,7 @@ struct P;
 namespace terrain
 {
 Monolith::Monolith(const P& p, const TerrainData* const data) :
-        Terrain(p, data),
-        m_is_activated(false) {}
+        Terrain(p, data) {}
 
 void Monolith::hit(
         DmgType dmg_type,
@@ -50,16 +49,15 @@ void Monolith::hit(
                 map::update_vision();
 
                 if (player_bon::is_bg(Bg::exorcist)) {
-                        const auto msg =
-                                rnd::element(
-                                        common_text::g_exorcist_purge_phrases);
+                        const std::string msg =
+                                rnd::element(common_text::g_exorcist_purge_phrases);
 
                         msg_log::add(msg);
 
-                        game::incr_player_xp(8);
+                        game::incr_player_xp(15);
 
                         map::g_player->restore_sp(999, false, Verbose::no);
-                        map::g_player->restore_sp(5, true);
+                        map::g_player->restore_sp(10, true);
                 }
                 break;
 
@@ -70,9 +68,9 @@ void Monolith::hit(
 
 std::string Monolith::name(const Article article) const
 {
-        std::string ret = article == Article::a ? "a " : "the ";
+        std::string str = article == Article::a ? "a " : "the ";
 
-        return ret + "carved monolith";
+        return str + "carved monolith";
 }
 
 Color Monolith::color_default() const
@@ -90,7 +88,13 @@ void Monolith::bump(actor::Actor& actor_bumping)
         map::update_vision();
 
         if (!map::g_player->m_properties.allow_see()) {
-                msg_log::add("There is a carved rock here.");
+                if (player_bon::is_bg(Bg::exorcist)) {
+                        msg_log::add(
+                                "There is a carved rock defiled with blasphemous carvings here. "
+                                "It must be destroyed!");
+                } else {
+                        msg_log::add("There is a carved rock here.");
+                }
 
                 return;
         }
@@ -124,9 +128,7 @@ void Monolith::activate()
 
         audio::play(audio::SfxId::monolith);
 
-        game::incr_player_xp(10);
-
-        player_spells::recall_all_spells();
+        game::incr_player_xp(20);
 
         m_is_activated = true;
 

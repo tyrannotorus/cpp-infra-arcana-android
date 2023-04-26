@@ -131,6 +131,7 @@ enum class TileId
         mi_go,
         mi_go_armor,
         mi_go_gun,
+        mirror,
         molotov,
         monolith,
         mummy,

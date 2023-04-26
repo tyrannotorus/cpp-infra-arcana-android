@@ -486,6 +486,17 @@ bool MapBuilderStd::build_specific()
         }
 
         // ---------------------------------------------------------------------
+        // Place Mirrors
+        // ---------------------------------------------------------------------
+        // NOTE: This depends on choke point data having been gathered
+        // (including player side and stairs side)
+        mapgen::make_mirrors();
+
+        if (!mapgen::g_is_map_valid) {
+                return false;
+        }
+
+        // ---------------------------------------------------------------------
         // Place pylons
         // ---------------------------------------------------------------------
         mapgen::make_pylons();

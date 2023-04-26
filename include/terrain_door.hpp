@@ -136,7 +136,7 @@ public:
 
         void remove_ward();
 
-        Matl matl() const override;
+        Material material() const override;
 
         void reveal(PrintRevealMsg print_reveal_msg) override;
 

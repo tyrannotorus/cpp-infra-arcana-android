@@ -1230,9 +1230,9 @@ std::vector<std::string> Spell::descr(
 
         if (spell_src == SpellSrc::learned) {
                 const std::string forgotten_hint_str =
-                        "A forgotten spell is recalled again if "
-                        "a monolith is activated, "
-                        "or if the spell is cast from a manuscript.";
+                        "A forgotten spell can be recalled again by "
+                        "gazing into a magic mirror, "
+                        "or by casting the spell from a manuscript.";
 
                 if (player_spells::is_spell_forgotten(id())) {
                         lines.emplace_back(
@@ -2787,6 +2787,7 @@ void SpellPurge::run_effect(
                 switch (terrain->id()) {
                 case terrain::Id::altar:
                 case terrain::Id::monolith:
+                case terrain::Id::mirror:
                 case terrain::Id::gong: {
                         if (map::g_seen.at(p)) {
                                 draw_blast_at_cells({p}, colors::light_white());

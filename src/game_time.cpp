@@ -274,7 +274,7 @@ static void run_atomic_turn_events()
 
                 const auto* const terrain = map::g_terrain.at(p);
 
-                if (terrain->m_data->matl_type == Matl::fluid) {
+                if (terrain->m_data->material_type == Material::fluid) {
                         // TODO: Add a message here.
 
                         actor->m_properties.end_prop(prop::Id::burning);

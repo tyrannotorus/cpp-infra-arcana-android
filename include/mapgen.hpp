@@ -73,6 +73,8 @@ void make_warded_doors_and_keys();
 
 void make_monoliths();
 
+void make_mirrors();
+
 void make_pylons();
 
 //------------------------------------------------------------------------------
@@ -147,7 +149,8 @@ std::vector<P> pathfinder_walk(
         bool is_smooth);
 
 // Generates a map of spawn chance weights, with emphasis on hidden, optional,
-// or hard to reach areas - this can be used e.g. to place items or levers.
+// or hard to reach areas - this can be used for finding good places to put
+// valuable stuff (items or terrain objects).
 void make_explore_spawn_weights(
         const Array2<bool>& blocked,
         std::vector<P>& positions_out,

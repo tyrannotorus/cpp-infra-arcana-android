@@ -456,10 +456,10 @@ void forget_spell(const SpellId id)
         s_is_forgotten[(size_t)id] = true;
 }
 
-void recall_spell(const SpellId id)
+bool recall_spell(const SpellId id)
 {
         if (!is_spell_forgotten(id)) {
-                return;
+                return false;
         }
 
         std::unique_ptr<const Spell> spell(spells::make(id));
@@ -469,13 +469,21 @@ void recall_spell(const SpellId id)
         msg_log::add("I remember how to cast " + name + " again!");
 
         s_is_forgotten[(size_t)id] = false;
+
+        return true;
 }
 
-void recall_all_spells()
+bool recall_all_spells()
 {
+        bool is_any_recalled = false;
+
         for (size_t i = 0; i < (size_t)SpellId::END; ++i) {
-                recall_spell((SpellId)i);
+                const bool is_recalled = recall_spell((SpellId)i);
+
+                is_any_recalled = is_recalled || is_any_recalled;
         }
+
+        return is_any_recalled;
 }
 
 void incr_spell_skill(const SpellId id, const Verbose verbose)

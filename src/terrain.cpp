@@ -66,44 +66,44 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-struct MatlBurnData
+struct MaterialBurnData
 {
         int finish_burning_one_in_n {1};
         int hit_adjacent_one_in_n {1};
 };
 
-static MatlBurnData get_matl_burn_data(const Matl matl)
+static MaterialBurnData get_material_burn_data(const Material material)
 {
-        MatlBurnData d;
+        MaterialBurnData d;
 
-        switch (matl) {
-        case Matl::fluid:
-        case Matl::empty:
+        switch (material) {
+        case Material::fluid:
+        case Material::empty:
                 d.finish_burning_one_in_n = 1;
                 d.hit_adjacent_one_in_n = 1;
                 break;
 
-        case Matl::stone:
+        case Material::stone:
                 d.finish_burning_one_in_n = 14;
                 d.hit_adjacent_one_in_n = 10;
                 break;
 
-        case Matl::metal:
+        case Material::metal:
                 d.finish_burning_one_in_n = 14;
                 d.hit_adjacent_one_in_n = 10;
                 break;
 
-        case Matl::plant:
+        case Material::plant:
                 d.finish_burning_one_in_n = 25;
                 d.hit_adjacent_one_in_n = 9;
                 break;
 
-        case Matl::wood:
+        case Material::wood:
                 d.finish_burning_one_in_n = 25;
                 d.hit_adjacent_one_in_n = 2;
                 break;
 
-        case Matl::cloth:
+        case Material::cloth:
                 d.finish_burning_one_in_n = 20;
                 d.hit_adjacent_one_in_n = 8;
                 break;
@@ -179,9 +179,9 @@ static WasDestroyed on_new_turn_terrain_burning(terrain::Terrain& terrain)
                 }
         }
 
-        const auto matl_burn_data = get_matl_burn_data(terrain.matl());
+        const auto material_burn_data = get_material_burn_data(terrain.material());
 
-        if (rnd::one_in(matl_burn_data.finish_burning_one_in_n)) {
+        if (rnd::one_in(material_burn_data.finish_burning_one_in_n)) {
                 terrain.m_burn_state = terrain::BurnState::has_burned;
 
                 const auto was_destroyed = terrain.on_finished_burning();
@@ -191,7 +191,7 @@ static WasDestroyed on_new_turn_terrain_burning(terrain::Terrain& terrain)
                 }
         }
 
-        if (rnd::one_in(matl_burn_data.hit_adjacent_one_in_n)) {
+        if (rnd::one_in(material_burn_data.hit_adjacent_one_in_n)) {
                 spread_burning(terrain);
         }
 
@@ -2715,7 +2715,7 @@ void ItemContainer::on_item_found(
         else if (answer == BinaryAnswer::no) {
                 item_drop::drop_item_on_map(terrain_pos, *item);
 
-                item->on_player_found();
+                item->discover();
         }
         else {
                 // Special key (unload in this case)
@@ -3264,10 +3264,10 @@ Chest::Chest(const P& p, const TerrainData* const data) :
         Terrain(p, data),
         m_is_open(false),
         m_is_locked(false),
-        m_matl(ChestMatl::wood)
+        m_material(ChestMaterial::wood)
 {
         if ((map::g_dlvl >= 3) && rnd::fraction(2, 3)) {
-                m_matl = ChestMatl::iron;
+                m_material = ChestMaterial::iron;
         }
 
         // Contained items
@@ -3451,7 +3451,7 @@ void Chest::on_player_kick()
         // Is locked
 
         if (map::g_player->m_properties.has(prop::Id::weakened) ||
-            (m_matl == ChestMatl::iron)) {
+            (m_material == ChestMaterial::iron)) {
                 msg_log::add("It seems futile.");
 
                 snd.run();
@@ -3495,18 +3495,18 @@ void Chest::on_player_kick()
 
 std::string Chest::name(const Article article) const
 {
-        std::string matl_str;
+        std::string material_str;
         std::string locked_str;
         std::string empty_str;
         std::string open_str;
         std::string a;
 
-        if (m_matl == ChestMatl::wood) {
-                matl_str = "wooden ";
+        if (m_material == ChestMaterial::wood) {
+                material_str = "wooden ";
                 a = "a ";
         }
         else {
-                matl_str = "iron ";
+                material_str = "iron ";
                 a = "an ";
         }
 
@@ -3530,22 +3530,17 @@ std::string Chest::name(const Article article) const
                 a = "the ";
         }
 
-        return a + locked_str + empty_str + open_str + matl_str + "chest";
+        return a + locked_str + empty_str + open_str + material_str + "chest";
 }
 
 gfx::TileId Chest::tile() const
 {
-        return (m_is_open
-                        ? gfx::TileId::chest_open
-                        : gfx::TileId::chest_closed);
+        return m_is_open ? gfx::TileId::chest_open : gfx::TileId::chest_closed;
 }
 
 Color Chest::color_default() const
 {
-        return (
-                (m_matl == ChestMatl::wood)
-                        ? colors::dark_brown()
-                        : colors::gray());
+        return (m_material == ChestMaterial::wood) ? colors::dark_brown() : colors::gray();
 }
 
 // -----------------------------------------------------------------------------

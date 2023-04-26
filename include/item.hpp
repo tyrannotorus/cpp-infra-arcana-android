@@ -131,12 +131,12 @@ public:
         // "on_unequip()" should be called first.
         void on_removed_from_inv();
 
-        // Called when:
-        // * Player walks into the same cell as the item,
-        // * The item is dropped into the same cell as the player,
+        // This is called for example when:
+        // * Player walks into the same position as the item,
+        // * The item is dropped into the same position as the player,
         // * The item is picked up,
-        // * The item is found in an item container, but not picked up
-        void on_player_found();
+        // * The item is found in an item container, but NOT picked up
+        void discover();
 
         void on_player_reached_new_dlvl();
 
