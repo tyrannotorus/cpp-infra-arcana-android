@@ -1112,7 +1112,9 @@ void handle(const GameCmd cmd)
                 const std::vector<terrain::Id> terrain_ids = {
                         terrain::Id::monolith,
                         terrain::Id::mirror,
+                        terrain::Id::gong,
                         terrain::Id::chest,
+                        terrain::Id::tomb,
                         terrain::Id::cocoon,
                         terrain::Id::alchemist_bench,
                         terrain::Id::cabinet,

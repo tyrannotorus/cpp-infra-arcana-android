@@ -89,6 +89,7 @@ Checks: >
     -readability-magic-numbers,
     -readability-simplify-boolean-expr,
     -readability-suspicious-call-argument,
+    -readability-identifier-length,
 
 
 CheckOptions:

@@ -3072,6 +3072,10 @@ DidOpen Tomb::open(actor::Actor* const actor_opening)
 
                 if (map::g_seen.at(m_pos)) {
                         msg_log::add("The lid comes off.");
+
+                        if (!m_item_container.is_empty()) {
+                                msg_log::add("There is something inside.");
+                        }
                 }
 
                 trigger_trap(actor_opening);
