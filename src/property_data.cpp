@@ -99,7 +99,9 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_WEAKENED", prop::Id::weakened},
         {"PROP_ZUUL_POSSESS_PRIEST", prop::Id::zuul_possess_priest},
         {"PROP_SHAPESHIFTS", prop::Id::shapeshifts},
-        {"PROP_ZEALOT_STOP", prop::Id::zealot_stop}};
+        {"PROP_ZEALOT_STOP", prop::Id::zealot_stop},
+        {"PROP_MELEE_COOLDOWN", prop::Id::melee_cooldown},
+};
 
 static void add(prop::PropData& d)
 {
@@ -1177,6 +1179,12 @@ static void init_data_list()
         add(d);
 
         d.id = prop::Id::disabled_ranged;
+        d.std_rnd_turns = Range(1, 1);
+        d.allow_display_turns = false;
+        d.alignment = prop::PropAlignment::neutral;
+        add(d);
+
+        d.id = prop::Id::melee_cooldown;
         d.std_rnd_turns = Range(1, 1);
         d.allow_display_turns = false;
         d.alignment = prop::PropAlignment::neutral;

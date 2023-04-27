@@ -162,7 +162,7 @@ public:
         bool allow_move() const;
         bool allow_act() const;
         bool allow_speak(Verbose verbose) const;
-        bool allow_eat(Verbose verbose) const;  // Also for drinking
+        bool allow_eat(Verbose verbose) const;   // Also for drinking
         bool allow_pray(Verbose verbose) const;  // Pray over the Holy Symbol
 
         // NOTE: The allow_*_absolute methods below answer if some action could
@@ -212,11 +212,11 @@ public:
         // make sure to do this).
         DidAction on_act();
 
+        void on_melee_attack();
+
         void on_player_see();
 
-        bool is_resisting_dmg(
-                DmgType dmg_type,
-                Verbose verbose) const;
+        bool is_resisting_dmg(DmgType dmg_type, Verbose verbose) const;
 
 private:
         void print_resist_msg(const Prop& prop);

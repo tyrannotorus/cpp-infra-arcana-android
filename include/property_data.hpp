@@ -113,6 +113,7 @@ enum class Id
         disabled_attack,
         disabled_melee,
         disabled_ranged,
+        melee_cooldown,  // After a melee attack, cannot attack again for a while.
 
         // Properties for supporting specific game mechanics (NOT intended to be
         // used in a general way).

@@ -49,6 +49,7 @@ by bumping them).
 
 # Monsters
 - Added more monsters
+- Ravens have a melee attack cooldown time to make them less deadly
 
 # Other
 - Added a command in the trait selection menu to show information about the current game, such as character information or inventory (intended to help in choosing trait to pick).

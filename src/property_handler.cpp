@@ -714,6 +714,13 @@ DidAction PropHandler::on_act()
         return DidAction::no;
 }
 
+void PropHandler::on_melee_attack()
+{
+        for (auto& prop : m_props) {
+                prop->on_melee_attack();
+        }
+}
+
 void PropHandler::on_player_see()
 {
         for (auto& prop : m_props) {

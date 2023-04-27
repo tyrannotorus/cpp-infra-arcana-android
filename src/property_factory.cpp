@@ -103,6 +103,9 @@ Prop* make(const prop::Id id)
         case prop::Id::disabled_ranged:
                 return new DisabledRanged();
 
+        case prop::Id::melee_cooldown:
+                return new MeleeCooldown();
+
         case prop::Id::blessed:
                 return new Blessed();
 

@@ -286,6 +286,8 @@ public:
                 return {};
         }
 
+        virtual void on_melee_attack() {}
+
         virtual bool allow_attack_melee(const Verbose verbose) const
         {
                 (void)verbose;
@@ -1079,6 +1081,15 @@ public:
                 (void)verbose;
                 return false;
         }
+};
+
+class MeleeCooldown : public Prop
+{
+public:
+        MeleeCooldown() :
+                Prop(Id::melee_cooldown) {}
+
+        void on_melee_attack() override;
 };
 
 class Paralyzed : public Prop

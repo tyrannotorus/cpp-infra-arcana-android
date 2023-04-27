@@ -4586,7 +4586,7 @@
             <spirit>6</spirit>
             <speed>MONSPEED_VERY_FAST</speed>
             <shock_level>MONSHOCK_NONE</shock_level>
-            <melee>25</melee>
+            <melee>30</melee>
             <ranged>0</ranged>
             <dodging>50</dodging>
             <stealth>0</stealth>
@@ -4608,17 +4608,18 @@
 
         <properties>
             <property>PROP_FLYING</property>
+            <property>PROP_MELEE_COOLDOWN</property>
         </properties>
 
         <ai>
-            <erratic_move_percent>35</erratic_move_percent>
+            <erratic_move_percent>45</erratic_move_percent>
             <turns_aware>7</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <looks>true</looks>
             <avoids_blocking_friend>true</avoids_blocking_friend>
             <attacks>true</attacks>
             <paths_to_target_when_aware>false</paths_to_target_when_aware>
-            <moves_to_target_when_los>false</moves_to_target_when_los>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
             <moves_to_lair>false</moves_to_lair>
             <moves_to_leader>true</moves_to_leader>
             <moves_randomly_when_unaware>true</moves_randomly_when_unaware>

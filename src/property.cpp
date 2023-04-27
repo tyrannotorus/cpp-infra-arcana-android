@@ -1893,6 +1893,15 @@ bool Blind::should_update_vision_on_toggled() const
         return actor::is_player(m_owner);
 }
 
+void MeleeCooldown::on_melee_attack()
+{
+        Prop* const disabled_melee = make(Id::disabled_melee);
+
+        disabled_melee->set_duration(rnd::range(3, 4));
+
+        m_owner->m_properties.apply(disabled_melee);
+}
+
 void Paralyzed::on_applied()
 {
         if (actor::is_player(m_owner)) {
@@ -2619,7 +2628,7 @@ void SpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
         const std::vector<int> weights = {
                 25,  // Hand
                 25,  // Intestines
-                1  // Floating skull
+                1    // Floating skull
         };
 
         const int mon_choice = rnd::weighted_choice(weights);

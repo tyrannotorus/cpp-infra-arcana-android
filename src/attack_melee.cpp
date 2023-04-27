@@ -799,6 +799,8 @@ static void attack_actor(
                 attacker->m_properties.end_prop(prop::Id::cloaked);
                 attacker->m_properties.end_prop(prop::Id::sanctuary);
 
+                attacker->m_properties.on_melee_attack();
+
                 game_time::tick();
         }
 }
