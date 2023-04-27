@@ -181,7 +181,7 @@ static void init_data_list()
         d.can_have_gore = false;
         d.can_have_corpse = false;
         d.can_have_item = false;
-        d.shock_when_adjacent = 10;
+        d.shock_when_adjacent = 5;
         d.material_type = Material::metal;  // Close enough.
         add_to_list_and_reset(d);
 

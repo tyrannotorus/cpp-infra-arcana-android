@@ -496,7 +496,7 @@ void Healed::run_effect()
         }
 
         map::g_player->restore_hp(
-                999,  // HP restored
+                999,     // HP restored
                 false);  // Not allowed above max
 }
 
@@ -835,6 +835,8 @@ void Gong::bump(actor::Actor& actor_bumping)
                 m_is_used = true;
         }
 
+        map::g_player->incr_shock(8.0, ShockSrc::misc);
+
         map::memorize_terrain_at(m_pos);
         map::update_vision();
 
@@ -890,9 +892,7 @@ std::string Gong::name(const Article article) const
 
 Color Gong::color_default() const
 {
-        return m_is_used
-                ? colors::gray()
-                : colors::brown();
+        return m_is_used ? colors::gray() : colors::brown();
 }
 
 }  // namespace terrain

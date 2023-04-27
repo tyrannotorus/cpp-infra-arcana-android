@@ -6,7 +6,6 @@
 
 #include "terrain_mirror.hpp"
 
-#include "text_format.hpp"
 #include "actor.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
@@ -24,6 +23,7 @@
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "terrain_factory.hpp"
+#include "text_format.hpp"
 
 struct P;
 
@@ -203,7 +203,7 @@ void Mirror::activate()
 
         m_is_activated = true;
 
-        map::g_player->incr_shock(12.0, ShockSrc::misc);
+        map::g_player->incr_shock(8.0, ShockSrc::misc);
 }
 
 }  // namespace terrain
