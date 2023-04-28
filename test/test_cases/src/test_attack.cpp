@@ -7,6 +7,7 @@
 #include <cstddef>
 
 #include "actor.hpp"
+#include "actor_death.hpp"
 #include "actor_factory.hpp"
 #include "attack.hpp"
 #include "catch.hpp"
@@ -76,8 +77,8 @@ TEST_CASE("Seen hostile monster attacking seen friendly monster")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make("MON_GHOUL", {7, 6});
-        auto* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
+        actor::Actor* mon_allied = actor::make("MON_GHOUL", {7, 6});
+        actor::Actor* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
 
         // Make the hostile monster aware so it doesn't become aware by
         // attacking (attacking bumps awareness) and runs its "aware phrase".
@@ -122,17 +123,17 @@ TEST_CASE("Hostile monster outside FOV attacking friendly monster outside FOV")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make("MON_GHOUL", {9, 6});
-        auto* mon_hostile = actor::make("MON_ZOMBIE", {9, 7});
+        actor::Actor* mon_allied = actor::make("MON_GHOUL", {9, 6});
+        actor::Actor* mon_hostile = actor::make("MON_ZOMBIE", {9, 7});
 
         // Make the hostile monster aware so it doesn't become aware by
         // attacking (attacking bumps awareness) and runs its "aware phrase".
         mon_hostile->m_mon_aware_state.aware_counter = 100;
 
-        const auto& mon_allied_player_aware_counter =
+        const int& mon_allied_player_aware_counter =
                 mon_allied->m_mon_aware_state.player_aware_of_me_counter;
 
-        const auto& mon_hostile_player_aware_counter =
+        const int& mon_hostile_player_aware_counter =
                 mon_hostile->m_mon_aware_state.player_aware_of_me_counter;
 
         mon_allied->m_leader = map::g_player;
@@ -177,13 +178,13 @@ TEST_CASE("Invisible hostile monster attacking seen friendly monster")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make("MON_GHOUL", {7, 6});
-        auto* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
+        actor::Actor* mon_allied = actor::make("MON_GHOUL", {7, 6});
+        actor::Actor* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
 
-        const auto& mon_allied_player_aware_counter =
+        const int& mon_allied_player_aware_counter =
                 mon_allied->m_mon_aware_state.player_aware_of_me_counter;
 
-        const auto& mon_hostile_player_aware_counter =
+        const int& mon_hostile_player_aware_counter =
                 mon_hostile->m_mon_aware_state.player_aware_of_me_counter;
 
         mon_hostile->m_properties.apply(prop::make(prop::Id::invis));
@@ -241,13 +242,13 @@ TEST_CASE("Invisible hostile monster attacking invisible friendly monster")
 
         // First place the monsters outside FOV to not trigger player awareness
         // when vision is updated when invisibility is applied.
-        auto* mon_allied = actor::make("MON_GHOUL", {27, 6});
-        auto* mon_hostile = actor::make("MON_ZOMBIE", {27, 7});
+        actor::Actor* mon_allied = actor::make("MON_GHOUL", {27, 6});
+        actor::Actor* mon_hostile = actor::make("MON_ZOMBIE", {27, 7});
 
-        auto& mon_allied_player_aware_counter =
+        int& mon_allied_player_aware_counter =
                 mon_allied->m_mon_aware_state.player_aware_of_me_counter;
 
-        auto& mon_hostile_player_aware_counter =
+        int& mon_hostile_player_aware_counter =
                 mon_hostile->m_mon_aware_state.player_aware_of_me_counter;
 
         mon_allied->m_properties.apply(prop::make(prop::Id::invis));
@@ -305,13 +306,13 @@ TEST_CASE("Visible friendly monster attacking invisible hostile monster")
 
         map::g_player->m_pos.set(7, 5);
 
-        auto* mon_allied = actor::make("MON_GHOUL", {7, 6});
-        auto* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
+        actor::Actor* mon_allied = actor::make("MON_GHOUL", {7, 6});
+        actor::Actor* mon_hostile = actor::make("MON_ZOMBIE", {7, 7});
 
-        auto& mon_allied_player_aware_counter =
+        int& mon_allied_player_aware_counter =
                 mon_allied->m_mon_aware_state.player_aware_of_me_counter;
 
-        auto& mon_hostile_player_aware_counter =
+        int& mon_hostile_player_aware_counter =
                 mon_hostile->m_mon_aware_state.player_aware_of_me_counter;
 
         mon_hostile->m_properties.apply(prop::make(prop::Id::invis));
@@ -368,7 +369,7 @@ TEST_CASE("Player kicking invisible monster")
 
         map::update_terrain(terrain::make(terrain::Id::floor, {8, 5}));
 
-        auto* mon = actor::make("MON_ZOMBIE", {8, 5});
+        actor::Actor* mon = actor::make("MON_ZOMBIE", {8, 5});
 
         mon->m_properties.apply(prop::make(prop::Id::invis));
 
@@ -406,7 +407,7 @@ TEST_CASE("Player kicking invisible monster")
         test_utils::cleanup_all();
 }
 
-TEST_CASE("Test player killing invisible monster")
+TEST_CASE("Player killing invisible monster")
 {
         test_utils::init_all();
 
@@ -428,7 +429,7 @@ TEST_CASE("Test player killing invisible monster")
 
         map::update_terrain(terrain::make(terrain::Id::floor, {8, 5}));
 
-        auto* mon = actor::make("MON_ZOMBIE", {8, 5});
+        actor::Actor* mon = actor::make("MON_ZOMBIE", {8, 5});
 
         mon->m_properties.apply(prop::make(prop::Id::invis));
 
@@ -464,4 +465,73 @@ TEST_CASE("Test player killing invisible monster")
         REQUIRE(!mon->m_data->has_player_seen);
 
         test_utils::cleanup_all();
+}
+
+TEST_CASE("Zero damage attacks do not cause damage")
+{
+        test_utils::init_all();
+
+        player_bon::pick_bg(Bg::war_vet);
+
+        init_terrain();
+
+        for (int x = 7; x <= 9; ++x) {
+                map::update_terrain(terrain::make(terrain::Id::floor, {x, 5}));
+        }
+
+        map::g_player->m_pos.set(7, 5);
+
+        // Test with a spitting cobra spit.
+
+        actor::Actor* mon = actor::make("MON_SPITTING_COBRA", {9, 5});
+
+        // NOTE: Assuming that spitting is the second intrinsic attack of
+        // spitting cobras (first one is biting).
+        auto* wpn = static_cast<item::Wpn*>(mon->m_inv.m_intrinsics[1]);
+
+        REQUIRE(wpn->id() == item::Id::intr_snake_venom_spit);
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::blind));
+        REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
+
+        while (true) {
+                game_time::g_allow_tick = true;
+
+                attack::ranged(mon, mon->m_pos, map::g_player->m_pos, *wpn);
+
+                if (map::g_player->m_properties.has(prop::Id::blind)) {
+                        // OK, the cobra did spit on the player now.
+                        break;
+                }
+        }
+
+        // The player shall not have lost any hit points.
+        REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
+
+        actor::kill(*mon, IsDestroyed::yes, AllowGore::no, AllowDropItems::no);
+
+        // Test with a deep one net.
+
+        mon = actor::make("MON_DEEP_ONE", {9, 5});
+
+        // NOTE: Assuming that net throwing is the second intrinsic attack of
+        // deep ones cobras (first one is spear attack).
+        wpn = static_cast<item::Wpn*>(mon->m_inv.m_intrinsics[1]);
+
+        REQUIRE(wpn->id() == item::Id::intr_net_throw);
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::entangled));
+        REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
+
+        while (true) {
+                game_time::g_allow_tick = true;
+
+                attack::ranged(mon, mon->m_pos, map::g_player->m_pos, *wpn);
+
+                if (map::g_player->m_properties.has(prop::Id::entangled)) {
+                        // OK, the deep one threw a net on the player now.
+                        break;
+                }
+        }
+
+        // The player shall not have lost any hit points.
+        REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
 }

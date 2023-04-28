@@ -26,7 +26,11 @@
 //------------------------------------------------------------------------------
 // Custom trace output and assert functionality
 //------------------------------------------------------------------------------
-#ifdef NDEBUG  // Release mode
+
+//------------------------------------------------------------------------------
+// Relase mode
+//------------------------------------------------------------------------------
+#ifdef NDEBUG
 
 #define ASSERT(check)
 
@@ -44,26 +48,31 @@
                 ; \
         else \
                 std::cerr
+
 #define TRACE_FUNC_BEGIN \
         if (1) \
                 ; \
         else \
                 std::cerr
+
 #define TRACE_FUNC_END \
         if (1) \
                 ; \
         else \
                 std::cerr
+
 #define TRACE_VERBOSE \
         if (1) \
                 ; \
         else \
                 std::cerr
+
 #define TRACE_FUNC_BEGIN_VERBOSE \
         if (1) \
                 ; \
         else \
                 std::cerr
+
 #define TRACE_FUNC_END_VERBOSE \
         if (1) \
                 ; \
@@ -72,7 +81,10 @@
 
 #define PANIC exit(EXIT_FAILURE)
 
-#else  // Debug mode
+//------------------------------------------------------------------------------
+// Debug mode
+//------------------------------------------------------------------------------
+#else  // NDEBUG
 
 #define ASSERT(check) assert_impl(check, #check, __FILE__, __LINE__, __func__)
 

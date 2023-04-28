@@ -431,9 +431,7 @@ static void apply_ranged_attack_props(
         const Projectile& projectile,
         item::Wpn& wpn)
 {
-        ItemAttackProp att_prop =
-                wpn.prop_applied_on_ranged(
-                        projectile.att_data->attacker);
+        ItemAttackProp att_prop = wpn.prop_applied_on_ranged(projectile.att_data->attacker);
 
         if (att_prop.prop) {
                 attack::try_apply_attack_property_on_actor(
@@ -779,11 +777,9 @@ static void update_projectile_states(ProjectileFireData& fire_data)
                 }
 
                 const ActionResult att_result =
-                        ability_roll::roll(
-                                projectile.att_data->hit_chance_tot);
+                        ability_roll::roll(projectile.att_data->hit_chance_tot);
 
-                projectile.dmg =
-                        projectile.att_data->dmg_range.total_range().roll();
+                projectile.dmg = projectile.att_data->dmg_range.total_range().roll();
 
                 projectile.is_seen_by_player = map::g_seen.at(projectile_pos);
 

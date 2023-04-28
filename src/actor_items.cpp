@@ -732,14 +732,21 @@ static void make_monster_item_sets(actor::Actor& actor)
 
 static void make_monster_intr_attacks(actor::Actor& actor)
 {
-        for (auto& intr_attack : actor.m_data->intr_attacks) {
+        for (std::shared_ptr<actor::IntrAttData>& intr_attack : actor.m_data->intr_attacks) {
                 item::Item* item = item::make(intr_attack->item_id);
 
                 // Override damage with the damage in the intrinsic attack data
                 // (we always override both melee and ranged damage - this
                 // doesn't matter, since only one damage type will be used and
                 // the other will have no effect).
-                const WpnDmg range(1, intr_attack->dmg);
+                WpnDmg range;
+
+                if (intr_attack->dmg == 0) {
+                        range = WpnDmg(0, 0);
+                }
+                else {
+                        range = WpnDmg(1, intr_attack->dmg);
+                }
 
                 item->set_base_melee_dmg(range);
                 item->set_base_ranged_dmg(range);

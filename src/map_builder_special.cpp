@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -11,7 +12,6 @@
 #include <vector>
 
 #include "actor.hpp"
-#include "actor_data.hpp"
 #include "actor_factory.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
@@ -31,16 +31,15 @@
 #include "populate_monsters.hpp"
 #include "pos.hpp"
 #include "property.hpp"
+#include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "room.hpp"
 #include "terrain.hpp"
+#include "terrain_data.hpp"
 #include "terrain_door.hpp"
-#include "terrain_event.hpp"
 #include "terrain_factory.hpp"
-#include "terrain_gong.hpp"
-#include "terrain_monolith.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

@@ -95,7 +95,7 @@ int range_binom(const int v1, const int v2, const double p)
         std::binomial_distribution<std::mt19937::result_type>
                 dist(upper_random_value, p);
 
-        const int random_value = dist(g_rng);
+        const int random_value = (int)dist(g_rng);
 
         return min + random_value;
 }

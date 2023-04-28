@@ -402,8 +402,7 @@ static void dump_intr_attacks(xml::Element* attacks_e, actor::ActorData& data)
              attack_e = xml::next_sibling(attack_e)) {
                 auto attack_data = std::make_unique<actor::IntrAttData>();
 
-                const std::string id_str =
-                        xml::get_attribute_str(attack_e, "id");
+                const std::string id_str = xml::get_attribute_str(attack_e, "id");
 
                 attack_data->item_id = item::str_to_intr_item_id(id_str);
 
@@ -411,7 +410,7 @@ static void dump_intr_attacks(xml::Element* attacks_e, actor::ActorData& data)
 
                 attack_data->dmg = xml::get_text_int(e);
 
-                // Propertyies applied
+                // Properties applied
                 for (e = xml::next_sibling(e);
                      e;
                      e = xml::next_sibling(e)) {

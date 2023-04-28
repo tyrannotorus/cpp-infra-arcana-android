@@ -415,10 +415,7 @@ void hit(
         // Property resists damage?
         const auto verbose = actor.is_alive() ? Verbose::yes : Verbose::no;
 
-        const bool is_dmg_resisted =
-                actor.m_properties.is_resisting_dmg(
-                        dmg_type,
-                        verbose);
+        const bool is_dmg_resisted = actor.m_properties.is_resisting_dmg(dmg_type, verbose);
 
         if (is_dmg_resisted) {
                 return;
@@ -431,13 +428,11 @@ void hit(
                 }
 
                 // Soaking up damage with SP instead due to Prolonged Life?
-                if (actor::is_player(&actor) &&
-                    player_bon::has_trait(Trait::prolonged_life)) {
+                if (actor::is_player(&actor) && player_bon::has_trait(Trait::prolonged_life)) {
                         dmg = absorb_dmg_for_prolonged_life_player(dmg);
 
                         if (dmg <= 0) {
-                                map::g_player->interrupt_actions(
-                                        ForceInterruptActions::no);
+                                map::g_player->interrupt_actions(ForceInterruptActions::no);
 
                                 return;
                         }
