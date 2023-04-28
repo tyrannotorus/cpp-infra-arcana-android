@@ -1151,16 +1151,26 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f8: {
-                const P p = map::g_player->m_pos.with_x_offset(2);
+                P p = map::g_player->m_pos;
 
-                if (map::g_terrain.at(p)->can_have_trap()) {
+                for (int id_idx = 0; id_idx < (int)terrain::TrapId::END; ++id_idx) {
+                        if ((terrain::TrapId)id_idx == terrain::TrapId::END_MECHANICAL) {
+                                continue;
+                        }
+
+                        ++p.x;
+
+                        if (!map::g_terrain.at(p)->can_have_trap()) {
+                                continue;
+                        }
+
                         auto* const trap =
                                 static_cast<terrain::Trap*>(
                                         terrain::make(terrain::Id::trap, p));
 
                         trap->set_mimic_terrain(terrain::make(terrain::Id::floor, p));
 
-                        if (trap->try_init_type(terrain::TrapId::any)) {
+                        if (trap->try_init_type((terrain::TrapId)id_idx)) {
                                 map::update_terrain(trap);
                         }
                         else {

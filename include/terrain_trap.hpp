@@ -244,8 +244,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a) ? "a" : "the";
+                std::string name = (article == Article::a) ? "a" : "the";
 
                 name += " dart trap";
 
@@ -281,8 +280,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a) ? "a" : "the";
+                std::string name = (article == Article::a) ? "a" : "the";
 
                 name += " spear trap";
 
@@ -319,8 +317,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a) ? "a" : "the";
+                std::string name = (article == Article::a) ? "a" : "the";
 
                 name += " blinding trap";
 
@@ -348,8 +345,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a) ? "a" : "the";
+                std::string name = (article == Article::a) ? "a" : "the";
 
                 name += " deafening trap";
 
@@ -377,8 +373,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a) ? "a" : "the";
+                std::string name = (article == Article::a) ? "a" : "the";
 
                 name += " smoke trap";
 
@@ -406,8 +401,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a) ? "a" : "the";
+                std::string name = (article == Article::a) ? "a" : "the";
 
                 name += " fire trap";
 
@@ -423,7 +417,7 @@ public:
 
         Range nr_turns_range_to_trigger() const override
         {
-                return {3, 4};
+                return {5, 6};
         }
 };
 
@@ -435,8 +429,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a) ? "an" : "the";
+                std::string name = (article == Article::a) ? "an" : "the";
 
                 name += " alarm trap";
 
@@ -471,10 +464,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a)
-                        ? "a"
-                        : "the";
+                std::string name = (article == Article::a) ? "a" : "the";
 
                 name += " spider web";
 
@@ -517,10 +507,7 @@ public:
 
         std::string name(const Article article) const override
         {
-                std::string name =
-                        (article == Article::a)
-                        ? "a"
-                        : "the";
+                std::string name = (article == Article::a) ? "a" : "the";
 
                 name += " strange shape on the floor";
 
