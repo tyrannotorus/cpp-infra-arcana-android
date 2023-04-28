@@ -24,6 +24,8 @@
 #include "map.hpp"
 #include "map_builder.hpp"
 #include "map_controller.hpp"
+#include "map_parsing.hpp"
+#include "misc.hpp"
 #include "player_bon.hpp"
 #include "populate_items.hpp"
 #include "populate_monsters.hpp"
@@ -571,7 +573,7 @@ void MapBuilderEgypt::handle_template_pos(const P& p, const char c)
                 }
 
                 if (!actor_id.empty()) {
-                        auto* const actor = actor::make(actor_id, p);
+                        actor::Actor* const actor = actor::make(actor_id, p);
 
                         actor->m_ai_state.is_roaming_allowed =
                                 MonRoamingAllowed::no;
@@ -736,7 +738,7 @@ void MapBuilderRatCave::handle_template_pos(const P& p, const char c)
 void MapBuilderRatCave::on_template_built()
 {
         // Set all actors to non-roaming (they will be set to roaming later)
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if (actor::is_player(actor)) {
                         continue;
                 }
@@ -767,15 +769,6 @@ void MapBuilderBoss::handle_template_pos(const P& p, const char c)
                 else if (c == 'P') {
                         actor::make("MON_THE_HIGH_PRIEST", p);
                 }
-                else if (c == 'W') {
-                        actor::make("MON_HIGH_PRIEST_GUARD_WAR_VET", p);
-                }
-                else if (c == 'R') {
-                        actor::make("MON_HIGH_PRIEST_GUARD_ROGUE", p);
-                }
-                else if (c == 'G') {
-                        actor::make("MON_HIGH_PRIEST_GUARD_GHOUL", p);
-                }
         } break;
 
         case '#': {
@@ -805,10 +798,49 @@ void MapBuilderBoss::handle_template_pos(const P& p, const char c)
 
 void MapBuilderBoss::on_template_built()
 {
-        // Make the High Priest leader of all other monsters
+        // Spawn guardians.
+
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksWalking(ParseActors::yes).run(blocked, blocked.rect());
+
+        std::vector<P> free_positions = to_vec(blocked, false, blocked.rect());
+
+        // Remove any positions to the left of the middle of the map.
+        free_positions.erase(
+                std::remove_if(
+                        std::begin(free_positions),
+                        std::end(free_positions),
+                        [](const P& pos) {
+                                return pos.x < (map::w() / 2);
+                        }),
+                std::end(free_positions));
+
+        rnd::shuffle(free_positions);
+
+        const std::vector<std::string> guardian_ids = {
+                "MON_HIGH_PRIEST_GUARD_WAR_VET",
+                "MON_HIGH_PRIEST_GUARD_ROGUE",
+                "MON_HIGH_PRIEST_GUARD_GHOUL",
+        };
+
+        for (size_t i = 0; i < guardian_ids.size(); ++i) {
+                if (i == free_positions.size()) {
+                        ASSERT(false);
+
+                        break;
+                }
+
+                const std::string& id = guardian_ids[i];
+                const P pos = free_positions[i];
+
+                actor::make(id, pos);
+        }
+
+        // Make the High Priest leader of all other monsters.
         actor::Actor* high_priest = nullptr;
 
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if (actor->id() == "MON_THE_HIGH_PRIEST") {
                         high_priest = actor;
 
@@ -816,7 +848,7 @@ void MapBuilderBoss::on_template_built()
                 }
         }
 
-        for (auto* const actor : game_time::g_actors) {
+        for (actor::Actor* const actor : game_time::g_actors) {
                 if (!actor::is_player(actor) && (actor != high_priest)) {
                         actor->m_leader = high_priest;
                 }
