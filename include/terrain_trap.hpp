@@ -57,6 +57,7 @@ enum class TrapId
         unlearn_spell,
 
         // Positive
+        bless,
         haste,
 
         // Neutral
@@ -613,6 +614,15 @@ class TrapCurse : public MagicTrapImpl
 public:
         TrapCurse(P pos, Trap* const base_trap) :
                 MagicTrapImpl(pos, TrapId::curse, base_trap) {}
+
+        void trigger() override;
+};
+
+class TrapBless : public MagicTrapImpl
+{
+public:
+        TrapBless(P pos, Trap* const base_trap) :
+                MagicTrapImpl(pos, TrapId::bless, base_trap) {}
 
         void trigger() override;
 };

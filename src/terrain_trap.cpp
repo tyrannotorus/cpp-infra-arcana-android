@@ -233,6 +233,10 @@ static terrain::TrapImpl* make_trap_impl_from_id(
                 return new terrain::TrapCurse(pos, parent_trap);
                 break;
 
+        case terrain::TrapId::bless:
+                return new terrain::TrapBless(pos, parent_trap);
+                break;
+
         case terrain::TrapId::unlearn_spell:
                 return new terrain::TrapUnlearnSpell(pos, parent_trap);
                 break;
@@ -1317,6 +1321,25 @@ void TrapCurse::trigger()
         }
 
         actor_here->m_properties.apply(prop::make(prop::Id::cursed));
+
+        TRACE_FUNC_END;
+}
+
+void TrapBless::trigger()
+{
+        TRACE_FUNC_BEGIN;
+
+        actor::Actor* const actor_here = map::living_actor_at(m_pos);
+
+        ASSERT(actor_here);
+
+        if (!actor_here) {
+                // Should never happen.
+                ASSERT(false);
+                return;
+        }
+
+        actor_here->m_properties.apply(prop::make(prop::Id::blessed));
 
         TRACE_FUNC_END;
 }
