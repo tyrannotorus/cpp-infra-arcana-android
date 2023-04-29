@@ -26,6 +26,7 @@
 - It is now possible to aim melee weapons with the "f" key to choose a position to attack.
 - Some weapons have "long reach" (has a range of 2 instead of 1), attacking positions further away can be done by pressing "f".
 - Pitchforks and the Staff of the Pharaohs now have long reach (pitchforks no longer give a bonus to evasion). A new unique weapon for the Flagellant also has long reach.
+- Weapons no longer have a chance to break when the player does a melee attack while cursed.
 
 # Traps
 - Traps are always destroyed after they are triggered (i.e. they can only ever be triggered once).

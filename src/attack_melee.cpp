@@ -653,38 +653,6 @@ static void bump_awareness_after_melee_attack(
         }
 }
 
-static bool melee_should_break_wpn(
-        const ActionResult att_result,
-        const actor::Actor* attacker,
-        const item::Item& wpn)
-{
-        if (!actor::is_player(attacker)) {
-                return false;
-        }
-
-        if (att_result != ActionResult::fail_critical) {
-                return false;
-        }
-
-        const bool is_player_cursed =
-                (map::g_player->m_properties.has(prop::Id::cursed) ||
-                 map::g_player->m_properties.has(prop::Id::doomed));
-
-        if (!is_player_cursed) {
-                return false;
-        }
-
-        if (map::g_player->m_inv.item_in_slot(SlotId::wpn) != &wpn) {
-                return false;
-        }
-
-        if (!rnd::one_in(32)) {
-                return false;
-        }
-
-        return true;
-}
-
 static terrain::Terrain* get_blocking_terrain_on_path_to_target(const P& origin, const P& target)
 {
         // Terrain on the path to the target is considered blocking if it blocks
@@ -767,29 +735,6 @@ static void attack_actor(
                 }
 
                 melee_hit_actor(dmg, defender, attacker, origin, wpn);
-        }
-
-        // If player is cursed and the attack critically fails, occasionally
-        // break the weapon.
-        if (melee_should_break_wpn(att_result, attacker, wpn)) {
-                item::Item* const item =
-                        map::g_player->m_inv
-                                .remove_item_in_slot(SlotId::wpn, false);
-
-                ASSERT(item);
-
-                if (item) {
-                        const std::string item_name =
-                                item->name(ItemNameType::plain, ItemNameInfo::none);
-
-                        msg_log::add(
-                                "My " + item_name + " breaks!",
-                                colors::msg_note(),
-                                MsgInterruptPlayer::yes,
-                                MorePromptOnMsg::yes);
-
-                        delete item;
-                }
         }
 
         if (attacker) {
