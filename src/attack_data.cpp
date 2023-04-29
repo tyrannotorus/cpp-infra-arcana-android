@@ -481,7 +481,7 @@ RangedAttData::RangedAttData(
                 dmg_range.set_base_min(dmg_range.base_max());
         }
 
-        if (dist > effective_range.max) {
+        if (!effective_range.is_in_range(dist)) {
                 dmg_range = dmg_range.scaled_pct(50);
         }
 
@@ -605,7 +605,7 @@ ThrowAttData::ThrowAttData(
                 dmg_range.set_base_min(dmg_range.base_max());
         }
 
-        if (dist > effective_range.max) {
+        if (!effective_range.is_in_range(dist)) {
                 dmg_range = dmg_range.scaled_pct(50);
         }
 
