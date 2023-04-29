@@ -3530,16 +3530,14 @@ void SpellIdentify::run_effect(
         }
 
         if (skill == SpellSkill::transcendent) {
-                // Immediately identify all items
-                for (auto* const item : caster->m_inv.all_items()) {
+                // Immediately identify all items.
+                for (item::Item* const item : caster->m_inv.all_items()) {
                         item->identify(Verbose::yes);
                 }
         }
         else {
-                // Run identify selection menu
-                auto state =
-                        std::make_unique<SelectIdentify>(
-                                item_types_allowed);
+                // Run identify selection menu to select one item.
+                auto state = std::make_unique<SelectIdentify>(item_types_allowed);
 
                 states::push(std::move(state));
         }

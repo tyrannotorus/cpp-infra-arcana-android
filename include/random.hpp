@@ -60,8 +60,7 @@ struct Range
 
         bool is_in_range(const int v) const
         {
-                return (v >= min) &&
-                        (v <= max);
+                return (v >= min) && (v <= max);
         }
 
         std::string str() const;
