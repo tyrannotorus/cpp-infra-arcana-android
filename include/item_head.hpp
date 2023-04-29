@@ -42,6 +42,10 @@ public:
         void decr_turns_left(Inventory& carrier_inv);
 
 protected:
+        void save_hook() const override;
+
+        void load_hook() override;
+
         int m_nr_turns_left;
 };
 

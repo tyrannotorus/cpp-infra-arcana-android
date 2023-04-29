@@ -9,6 +9,7 @@
 #include "global.hpp"
 #include "inventory.hpp"
 #include "msg_log.hpp"
+#include "saving.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -40,6 +41,16 @@ void GasMask::decr_turns_left(Inventory& carrier_inv)
 std::string GasMask::name_info_str() const
 {
         return "(" + std::to_string(m_nr_turns_left) + " turns)";
+}
+
+void GasMask::save_hook() const
+{
+        saving::put_int(m_nr_turns_left);
+}
+
+void GasMask::load_hook()
+{
+        m_nr_turns_left = saving::get_int();
 }
 
 }  // namespace item

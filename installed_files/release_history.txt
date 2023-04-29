@@ -107,6 +107,7 @@ by bumping them).
 - Kicking locked wooden chests would print the message "I kick the locked wooden chest! I kick the lid. The lock resists." - removed the redundant part "I kick the lid".
 - Kicking chests caused extra rolls for sprains in some cases (so the risk of a sprain was doubled, and player could get double sprains).
 - Fixed a bug where the player killing themselves with an Incinerator would freeze the game.
+- The gas mask duration was not stored when saving the game (it was reset to the default length when loading a save file).
 - And many more minor bug fixes...
 
 ============================================================
