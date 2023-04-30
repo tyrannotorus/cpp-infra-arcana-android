@@ -544,17 +544,19 @@ void Trap::bump(actor::Actor& actor_bumping)
         TRACE_FUNC_END_VERBOSE;
 }
 
-void Trap::disarm()
+bool Trap::disarm()
 {
         if (m_nr_turns_until_trigger != -1) {
                 msg_log::add("It cannot be disarmed now!");
 
-                return;
+                return false;
         }
 
         msg_log::add(m_trap_impl->disarm_msg());
 
         destroy();
+
+        return true;
 }
 
 void Trap::destroy()

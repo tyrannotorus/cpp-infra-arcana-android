@@ -107,7 +107,7 @@ public:
                 const P& from_pos,
                 int dmg) override;
 
-        void disarm();
+        bool disarm();
 
         // Quietly destroys the trap, and either places rubble, or replaces it
         // with the mimic terrain (depending on trap type)

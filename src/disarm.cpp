@@ -99,7 +99,7 @@ void player_disarm()
                 return;
         }
 
-        const auto* const actor_on_trap = map::living_actor_at(pos);
+        const actor::Actor* const actor_on_trap = map::living_actor_at(pos);
 
         if (actor_on_trap && !actor::is_player(actor_on_trap)) {
                 if (can_player_see_actor(*actor_on_trap)) {
@@ -112,9 +112,11 @@ void player_disarm()
                 return;
         }
 
-        trap->disarm();
+        const bool did_disarm = trap->disarm();
 
-        game_time::tick();
+        if (did_disarm) {
+                game_time::tick();
+        }
 
 }  // player_disarm
 
