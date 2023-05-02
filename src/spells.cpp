@@ -3913,16 +3913,16 @@ Range SpellEnfeeble::duration_range(const SpellSkill skill) const
 {
         switch (skill) {
         case SpellSkill::basic:
-                return {15, 30};
+                return {8, 12};
 
         case SpellSkill::expert:
-                return {30, 60};
+                return {10, 16};
 
         case SpellSkill::master:
-                return {45, 90};
+                return {12, 20};
 
         case SpellSkill::transcendent:
-                return {60, 120};
+                return {30, 50};
         }
 
         ASSERT(false);
@@ -3934,7 +3934,7 @@ int SpellEnfeeble::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
-        return 3;
+        return 5;
 }
 
 int SpellEnfeeble::mon_cooldown() const
@@ -3950,8 +3950,7 @@ void SpellEnfeeble::run_effect(
         const int duration = duration_range(skill).roll();
 
         if (seen_targets.empty()) {
-                msg_log::add(
-                        "The bugs on the ground suddenly move very feebly.");
+                msg_log::add("The bugs on the ground suddenly move very feebly.");
 
                 return;
         }
@@ -3992,15 +3991,14 @@ void SpellEnfeeble::run_effect(
                         continue;
                 }
 
-                auto* const prop = prop::make(prop::Id::weakened);
+                prop::Prop* const prop = prop::make(prop::Id::weakened);
 
                 prop->set_duration(duration);
 
                 target->m_properties.apply(prop);
 
                 if (!actor::is_player(target)) {
-                        target->become_aware_player(
-                                actor::AwareSource::spell_victim);
+                        target->become_aware_player(actor::AwareSource::spell_victim);
                 }
         }
 }
@@ -4049,16 +4047,16 @@ Range SpellSlow::duration_range(const SpellSkill skill) const
 {
         switch (skill) {
         case SpellSkill::basic:
-                return {10, 20};
+                return {8, 12};
 
         case SpellSkill::expert:
-                return {20, 40};
+                return {10, 16};
 
         case SpellSkill::master:
-                return {30, 60};
+                return {12, 20};
 
         case SpellSkill::transcendent:
-                return {40, 80};
+                return {30, 50};
         }
 
         ASSERT(false);
@@ -4070,7 +4068,7 @@ int SpellSlow::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
-        return 4;
+        return 5;
 }
 
 void SpellSlow::run_effect(
@@ -4081,8 +4079,7 @@ void SpellSlow::run_effect(
         const int duration = duration_range(skill).roll();
 
         if (seen_targets.empty()) {
-                msg_log::add(
-                        "The bugs on the ground suddenly move very slowly.");
+                msg_log::add("The bugs on the ground suddenly move very slowly.");
 
                 return;
         }
@@ -4626,12 +4623,19 @@ bool SpellSummonTentacles::allow_mon_cast_now(
 // -----------------------------------------------------------------------------
 int SpellHeal::nr_hp_restored(SpellSkill skill) const
 {
-        return 8 + (int)skill * 8;
+        return 7 + (int)skill * 4;
 }
 
 Range SpellHeal::regen_duration() const
 {
         return {50, 100};
+}
+
+int SpellHeal::base_max_cost(const SpellSkill skill) const
+{
+        (void)skill;
+
+        return 7;
 }
 
 void SpellHeal::run_effect(
@@ -4642,33 +4646,29 @@ void SpellHeal::run_effect(
         (void)seen_targets;
 
         if ((int)skill >= (int)SpellSkill::expert) {
-                caster->m_properties.end_prop(prop::Id::infected);
-                caster->m_properties.end_prop(prop::Id::diseased);
                 caster->m_properties.end_prop(prop::Id::weakened);
                 caster->m_properties.end_prop(prop::Id::hp_sap);
                 caster->m_properties.end_prop(prop::Id::poisoned);
         }
 
         if (skill >= SpellSkill::master) {
+                caster->m_properties.end_prop(prop::Id::infected);
+                caster->m_properties.end_prop(prop::Id::diseased);
                 caster->m_properties.end_prop(prop::Id::blind);
                 caster->m_properties.end_prop(prop::Id::deaf);
-
-                if (actor::is_player(caster)) {
-                        auto* const wound_prop =
-                                map::g_player->m_properties.prop(prop::Id::wound);
-
-                        if (wound_prop) {
-                                auto* const wound = static_cast<prop::Wound*>(wound_prop);
-
-                                wound->heal_one_wound();
-                        }
-                }
         }
 
         if (skill == SpellSkill::transcendent) {
-                auto* const prop =
-                        prop::make(
-                                prop::Id::regenerating);
+                if (actor::is_player(caster)) {
+                        prop::Prop* const wound_prop =
+                                map::g_player->m_properties.prop(prop::Id::wound);
+
+                        if (wound_prop) {
+                                static_cast<prop::Wound*>(wound_prop)->heal_one_wound();
+                        }
+                }
+
+                auto* const prop = prop::make(prop::Id::regenerating);
 
                 prop->set_duration(regen_duration().roll());
 
@@ -4699,18 +4699,17 @@ std::vector<std::string> SpellHeal::descr_specific(
 
         if (skill == SpellSkill::expert) {
                 descr.emplace_back(
-                        "Cures infections, disease, weakening, life sapping, "
-                        "and poisoning.");
+                        "Cures weakening, life sapping, and poisoning.");
         }
         else if (skill >= SpellSkill::master) {
                 descr.emplace_back(
-                        "Cures infections, disease, weakening, life sapping, "
-                        "poisoning, blindness, and deafness.");
-
-                descr.emplace_back("Heals one wound.");
+                        "Cures weakening, life sapping, poisoning, "
+                        "infections, disease, blindness, and deafness.");
         }
 
         if (skill == SpellSkill::transcendent) {
+                descr.emplace_back("Heals one wound.");
+
                 descr.emplace_back(
                         "+1 hit point regenerated per turn, for " +
                         regen_duration().str() +
