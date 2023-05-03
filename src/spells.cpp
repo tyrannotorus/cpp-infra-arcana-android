@@ -3509,7 +3509,9 @@ std::vector<std::string> SpellErudition::descr_specific(
 // -----------------------------------------------------------------------------
 int SpellIdentify::base_max_cost(const SpellSkill skill) const
 {
-        return ((skill == SpellSkill::transcendent) ? 4 : 8);
+        (void)skill;
+
+        return 7;
 }
 
 void SpellIdentify::run_effect(
