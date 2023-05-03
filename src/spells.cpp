@@ -4625,7 +4625,7 @@ bool SpellSummonTentacles::allow_mon_cast_now(
 // -----------------------------------------------------------------------------
 int SpellHeal::nr_hp_restored(SpellSkill skill) const
 {
-        return 7 + (int)skill * 4;
+        return 8 + (int)skill * 4;
 }
 
 Range SpellHeal::regen_duration() const
@@ -4637,7 +4637,7 @@ int SpellHeal::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
-        return 7;
+        return 6;
 }
 
 void SpellHeal::run_effect(
