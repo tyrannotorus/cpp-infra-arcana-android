@@ -113,9 +113,6 @@
         </attributes>
 
         <attacks>
-            <!--
-                TODO: Zombies should also have something like grip/strangle.
-            -->
             <attack id="ITEMINTR_CLAW">
                 <damage>6</damage>
                 <property_applied percent_chance="25">PROP_INFECTED</property_applied>
@@ -211,9 +208,6 @@
         </attributes>
 
         <attacks>
-            <!--
-                TODO: Zombies should also have something like grip/strangle.
-            -->
             <attack id="ITEMINTR_CLAW">
                 <damage>6</damage>
                 <property_applied percent_chance="25">PROP_INFECTED</property_applied>
@@ -311,11 +305,8 @@
         </attributes>
 
         <attacks>
-            <!--
-                TODO: Zombies should also have something like grip/strangle
-            -->
-            <attack id="ITEMINTR_PUNCH">
-                <damage>8</damage>
+            <attack id="ITEMINTR_PUNCH_KNOCKBACK">
+                <damage>9</damage>
             </attack>
             <attack id="ITEMINTR_ACID_SPIT">
                 <damage>3</damage>

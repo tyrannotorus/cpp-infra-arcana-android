@@ -29,6 +29,7 @@ static const StrToIdMap s_str_to_intr_item_id_map = {
         {"ITEMINTR_CLAW", item::Id::intr_claw},
         {"ITEMINTR_STRIKE", item::Id::intr_strike},
         {"ITEMINTR_PUNCH", item::Id::intr_punch},
+        {"ITEMINTR_PUNCH_KNOCKBACK", item::Id::intr_punch_knockback},
         {"ITEMINTR_ACID_SPIT", item::Id::intr_acid_spit},
         {"ITEMINTR_SNAKE_VENOM_SPIT", item::Id::intr_snake_venom_spit},
         {"ITEMINTR_FIRE_BREATH", item::Id::intr_fire_breath},
@@ -1221,6 +1222,13 @@ void init()
         d.id = Id::intr_punch;
         d.melee.attack_msgs = {"", "punches"};
         d.melee.dmg_type = DmgType::blunt;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::melee_wpn_intr);
+        d.id = Id::intr_punch_knockback;
+        d.melee.attack_msgs = {"", "punches"};
+        d.melee.dmg_type = DmgType::blunt;
+        d.melee.knocks_back = true;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::ranged_wpn_intr);

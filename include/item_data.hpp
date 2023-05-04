@@ -95,6 +95,7 @@ enum class Id
         intr_claw,
         intr_strike,
         intr_punch,
+        intr_punch_knockback,
         intr_acid_spit,
         intr_snake_venom_spit,
         intr_fire_breath,
@@ -244,9 +245,9 @@ enum Weight
 {
         none = 0,
         extra_light = 1,  // E.g. ammo
-        light = 10,  // E.g. dynamite, daggers
-        medium = 50,  // E.g. most firearms
-        heavy = 100,  // E.g. heavy armor, heavy weapons
+        light = 10,       // E.g. dynamite, daggers
+        medium = 50,      // E.g. most firearms
+        heavy = 100,      // E.g. heavy armor, heavy weapons
 };
 
 struct ItemName
@@ -368,7 +369,7 @@ public:
         Id id;
         ItemType type;
         bool is_intr;
-        bool has_std_activate;  // E.g. potions and scrolls
+        bool has_std_activate;          // E.g. potions and scrolls
         bool is_prio_in_backpack_list;  // E.g. Medical Bag
         Value value;
         bool allow_cursed;
@@ -380,7 +381,7 @@ public:
         int chance_to_incl_in_spawn_list;
         bool is_stackable;
         bool is_identified;
-        bool is_alignment_known;  // Used for Potions
+        bool is_alignment_known;     // Used for Potions
         bool is_spell_domain_known;  // Used for Scrolls
         bool is_tried;
         bool is_found;  // Was seen on map or in inventory
