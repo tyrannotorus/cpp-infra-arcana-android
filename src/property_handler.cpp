@@ -867,8 +867,7 @@ bool PropHandler::is_resisting_dmg(
                 }
         }
 
-        if (res_data.is_resisted &&
-            (verbose == Verbose::yes)) {
+        if (res_data.is_resisted && (verbose == Verbose::yes)) {
                 if (actor::is_player(m_owner)) {
                         msg_log::add(res_data.msg_resist_player);
                 }

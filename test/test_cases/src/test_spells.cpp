@@ -193,34 +193,34 @@ TEST_CASE("Test spell bonuses for manuscripts")
         auto* const item = item::make(item::Id::scroll_heal);
         auto* const scroll = static_cast<scroll::Scroll*>(item);
 
-        // Casting healing from manuscript (expert level) should clear disease,
-        // but not deafness.
-        player.m_properties.apply(prop::make(prop::Id::diseased));
+        // Casting healing from manuscript (expert level) should clear
+        // poisoning, but not deafness.
+        player.m_properties.apply(prop::make(prop::Id::poisoned));
         player.m_properties.apply(prop::make(prop::Id::deaf));
 
-        REQUIRE(player.m_properties.has(prop::Id::diseased));
+        REQUIRE(player.m_properties.has(prop::Id::poisoned));
         REQUIRE(player.m_properties.has(prop::Id::deaf));
 
         scroll->activate(map::g_player);
 
-        REQUIRE(!player.m_properties.has(prop::Id::diseased));
+        REQUIRE(!player.m_properties.has(prop::Id::poisoned));
         REQUIRE(player.m_properties.has(prop::Id::deaf));
 
         // Casting healing from manuscript at altar (master level) should clear
-        // both disease and deafness.
+        // both poisoning and deafness.
         map::update_terrain(
                 terrain::make(
                         terrain::Id::altar,
                         player.m_pos.with_x_offset(1)));
 
-        player.m_properties.apply(prop::make(prop::Id::diseased));
+        player.m_properties.apply(prop::make(prop::Id::poisoned));
         player.m_properties.apply(prop::make(prop::Id::deaf));
 
         game_time::g_allow_tick = true;
 
         scroll->activate(map::g_player);
 
-        REQUIRE(!player.m_properties.has(prop::Id::diseased));
+        REQUIRE(!player.m_properties.has(prop::Id::poisoned));
         REQUIRE(!player.m_properties.has(prop::Id::deaf));
 
         // Remove the altar
@@ -230,17 +230,17 @@ TEST_CASE("Test spell bonuses for manuscripts")
                         player.m_pos.with_x_offset(1)));
 
         // Casting healing from manuscript with erudition (master level) should
-        // clear both disease and deafness.
+        // clear both poisoning and deafness.
         player.m_properties.apply(prop::make(prop::Id::erudition));
 
-        player.m_properties.apply(prop::make(prop::Id::diseased));
+        player.m_properties.apply(prop::make(prop::Id::poisoned));
         player.m_properties.apply(prop::make(prop::Id::deaf));
 
         game_time::g_allow_tick = true;
 
         scroll->activate(map::g_player);
 
-        REQUIRE(!player.m_properties.has(prop::Id::diseased));
+        REQUIRE(!player.m_properties.has(prop::Id::poisoned));
         REQUIRE(!player.m_properties.has(prop::Id::deaf));
 }
 

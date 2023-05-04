@@ -149,15 +149,13 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 // Poison victim from Ghoul Toxic trait?
                 if (player_bon::has_trait(Trait::toxic) &&
                     rnd::fraction(3, 4)) {
-                        actor_hit.m_properties.apply(
-                                prop::make(prop::Id::poisoned));
+                        actor_hit.m_properties.apply(prop::make(prop::Id::poisoned));
                 }
 
                 // Terrify victim from Ghoul Indomitable Fury trait?
                 if (player_bon::has_trait(Trait::indomitable_fury) &&
                     map::g_player->m_properties.has(prop::Id::frenzied)) {
-                        actor_hit.m_properties.apply(
-                                prop::make(prop::Id::terrified));
+                        actor_hit.m_properties.apply(prop::make(prop::Id::terrified));
                 }
         }
 }
@@ -247,6 +245,10 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
+        if (actor_hit.m_properties.has(prop::Id::r_phys)) {
+                return;
+        }
+
         // Gas mask and Asbestos suit protects against blindness.
         Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
@@ -300,18 +302,11 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                         msg_log::add(mon_name_the + " looks shocked!");
                 }
 
-                actor::hit(
-                        *mon,
-                        rnd::range(3, 15),
-                        DmgType::pure,
-                        &actor_hit);
+                actor::hit(*mon, rnd::range(3, 15), DmgType::pure, &actor_hit);
 
                 if (mon->is_alive()) {
-                        mon->m_properties.apply(
-                                prop::make(prop::Id::confused));
-
-                        mon->m_properties.apply(
-                                prop::make(prop::Id::terrified));
+                        mon->m_properties.apply(prop::make(prop::Id::confused));
+                        mon->m_properties.apply(prop::make(prop::Id::terrified));
                 }
         }
         else {
@@ -339,6 +334,10 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
+        if (actor_hit.m_properties.has(prop::Id::r_phys)) {
+                return;
+        }
+
         // Gas mask and Asbestos suit protects against blindness.
         Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
@@ -356,6 +355,10 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
 {
         if (!actor_hit.is_alive()) {
+                return;
+        }
+
+        if (actor_hit.m_properties.has(prop::Id::r_phys)) {
                 return;
         }
 
@@ -563,10 +566,15 @@ void ShadowDagger::hit_radiant_creature(actor::Actor& actor) const
 
 void ZombieDust::on_ranged_hit(actor::Actor& actor_hit)
 {
-        if (actor_hit.is_alive() && !actor_hit.m_data->is_undead) {
-                actor_hit.m_properties.apply(
-                        prop::make(prop::Id::paralyzed));
+        if (!actor_hit.is_alive()) {
+                return;
         }
+
+        if (actor_hit.m_data->is_undead) {
+                return;
+        }
+
+        actor_hit.m_properties.apply(prop::make(prop::Id::paralyzed));
 }
 
 }  // namespace item

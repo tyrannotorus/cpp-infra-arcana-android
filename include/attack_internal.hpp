@@ -39,7 +39,7 @@ std::string hit_size_punctuation_str(HitSize hit_size);
 void try_apply_attack_property_on_actor(
         const ItemAttackProp& att_prop,
         actor::Actor& actor,
-        const DmgType& dmg_type);
+        DmgType dmg_type);
 
 }  // namespace attack
 

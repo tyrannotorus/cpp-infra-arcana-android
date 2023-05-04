@@ -74,28 +74,21 @@ std::string hit_size_punctuation_str(const HitSize hit_size)
 void try_apply_attack_property_on_actor(
         const ItemAttackProp& att_prop,
         actor::Actor& actor,
-        const DmgType& dmg_type)
+        const DmgType dmg_type)
 {
         if (!rnd::percent(att_prop.pct_chance_to_apply)) {
                 return;
         }
 
-        const bool is_resisting_dmg =
-                actor.m_properties.is_resisting_dmg(
-                        dmg_type,
-                        Verbose::no);
+        const bool is_resisting_dmg = actor.m_properties.is_resisting_dmg(dmg_type, Verbose::no);
 
         if (!is_resisting_dmg) {
-                auto* const prop_cpy =
-                        prop::make(
-                                att_prop.prop->id());
+                prop::Prop* const prop_cpy = prop::make(att_prop.prop->id());
 
-                const auto duration_mode =
-                        att_prop.prop->duration_mode();
+                const prop::PropDurationMode duration_mode = att_prop.prop->duration_mode();
 
                 if (duration_mode == prop::PropDurationMode::specific) {
-                        prop_cpy->set_duration(
-                                att_prop.prop->nr_turns_left());
+                        prop_cpy->set_duration(att_prop.prop->nr_turns_left());
                 }
                 else if (duration_mode == prop::PropDurationMode::indefinite) {
                         prop_cpy->set_indefinite();

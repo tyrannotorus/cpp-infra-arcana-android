@@ -504,7 +504,7 @@ TEST_CASE("Zero damage attacks do not cause damage")
                 }
         }
 
-        // The player shall not have lost any hit points.
+        // The player should not have lost any hit points.
         REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
 
         actor::kill(*mon, IsDestroyed::yes, AllowGore::no, AllowDropItems::no);
@@ -514,7 +514,7 @@ TEST_CASE("Zero damage attacks do not cause damage")
         mon = actor::make("MON_DEEP_ONE", {9, 5});
 
         // NOTE: Assuming that net throwing is the second intrinsic attack of
-        // deep ones cobras (first one is spear attack).
+        // deep ones (first one is spear attack).
         wpn = static_cast<item::Wpn*>(mon->m_inv.m_intrinsics[1]);
 
         REQUIRE(wpn->id() == item::Id::intr_net_throw);
@@ -532,6 +532,87 @@ TEST_CASE("Zero damage attacks do not cause damage")
                 }
         }
 
-        // The player shall not have lost any hit points.
+        // The player should not have lost any hit points.
+        REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
+}
+
+TEST_CASE("Resisting attack damage type also resists paralysis")
+{
+        test_utils::init_all();
+
+        player_bon::pick_bg(Bg::war_vet);
+
+        init_terrain();
+
+        map::g_player->m_pos.set(7, 5);
+
+        map::g_player->change_max_hp(100000);
+        map::g_player->restore_hp(100000, false);
+
+        // Ensure that the spiked mace paralysis always activates.
+        item::g_data[(size_t)item::Id::spiked_mace].melee.prop_applied.pct_chance_to_apply = 100;
+
+        actor::Actor* mon = actor::make("MON_ZEALOT", {8, 5});
+
+        // Assuming that Zealots wield a spiked mace.
+        auto* const wpn =
+                static_cast<item::Wpn*>(
+                        mon->m_inv.item_in_slot(SlotId::wpn));
+
+        REQUIRE(wpn->id() == item::Id::spiked_mace);
+
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::paralyzed));
+        REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
+
+        while (true) {
+                game_time::g_allow_tick = true;
+
+                REQUIRE(map::g_player->is_alive());
+
+                REQUIRE(map::g_player->is_alive());
+
+                map::g_player->restore_hp(100000, false);
+                map::g_player->m_properties.end_prop(prop::Id::wound);
+                map::g_player->restore_shock(100, true);
+
+                attack::melee(mon, mon->m_pos, map::g_player->m_pos, *wpn);
+
+                if (map::g_player->m_hp < actor::max_hp(*map::g_player)) {
+                        // OK, the player has been hit.
+                        break;
+                }
+        }
+
+        // The player should now be paralyzed.
+        REQUIRE(map::g_player->m_properties.has(prop::Id::paralyzed));
+
+        map::g_player->m_properties.end_prop(prop::Id::paralyzed);
+
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::paralyzed));
+
+        // NOTE: Since the player should neither take damage nor get paralyzed
+        // now, there is nothing we can check here to know that the player
+        // actually got hit (except maybe the message log), therefore just run a
+        // huge number of attacks so that it's practically impossible that the
+        // player avoided all of them.
+        for (int i = 0; i < 10000; ++i) {
+                game_time::g_allow_tick = true;
+
+                REQUIRE(map::g_player->is_alive());
+
+                map::g_player->restore_shock(100, true);
+
+                // Make the player resistant to physical damage.
+                map::g_player->m_properties.apply(prop::make(prop::Id::r_phys));
+
+                REQUIRE(map::g_player->m_properties.has(prop::Id::r_phys));
+
+                attack::melee(mon, mon->m_pos, map::g_player->m_pos, *wpn);
+        }
+
+        // The player should not be paralyzed now.
+        REQUIRE(!map::g_player->m_properties.has(prop::Id::paralyzed));
+
+        // The player should not have lost any hit points.
         REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
 }

@@ -372,6 +372,7 @@ public:
         virtual bool is_resisting_other_prop(const Id prop_id) const
         {
                 (void)prop_id;
+
                 return false;
         }
 
