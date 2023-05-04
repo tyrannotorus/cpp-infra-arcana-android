@@ -75,9 +75,9 @@ static bool recall_all_spells()
 
 static void incr_xp()
 {
-        msg_log::add("I feel like I have learned something.");
+        msg_log::add("I feel like I have gleaned a small bit of knowledge.");
 
-        game::incr_player_xp(5);
+        game::incr_player_xp(2);
 }
 
 // -----------------------------------------------------------------------------
@@ -116,10 +116,10 @@ void Mirror::hit(
 
                         msg_log::add(msg);
 
-                        game::incr_player_xp(5);
+                        game::incr_player_xp(2);
 
                         map::g_player->restore_sp(999, false, Verbose::no);
-                        map::g_player->restore_sp(5, true);
+                        map::g_player->restore_sp(3, true);
                 }
                 break;
 
