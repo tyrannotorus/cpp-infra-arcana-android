@@ -8556,6 +8556,10 @@
             <nr_allowed_to_spawn>0</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
         </spawning>
+
+        <starting_allies>
+            <monster id="MON_SENTRY_DRONE" min="2" max="2"/>
+        </starting_allies>
     </monster>
 
     <!--************************************************************-->
