@@ -833,18 +833,8 @@ void Actor::kick_mon(Actor& defender)
 
         const ActorData& d = *defender.m_data;
 
-        // TODO: This is REALLY hacky, it should be done another way. Perhaps
-        // for a slightly better way, check for the "small crawling" property
-        // instead?
         if ((d.actor_size == Size::floor) &&
-            (d.is_spider ||
-             d.is_rat ||
-             d.is_snake ||
-             (d.id == "MON_WORM_MASS") ||
-             (d.id == "MON_MIND_WORM") ||
-             (d.id == "MON_CRAWLING_INTESTINES") ||
-             (d.id == "MON_CRAWLING_HAND") ||
-             (d.id == "MON_THING"))) {
+            defender.m_properties.has(prop::Id::small_crawling)) {
                 kick_wpn = static_cast<item::Wpn*>(item::make(item::Id::player_stomp));
         }
         else {
