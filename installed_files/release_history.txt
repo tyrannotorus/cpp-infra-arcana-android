@@ -47,6 +47,7 @@
 - Metal doors can now be opened and closed regularly (there are no levers). This is an advantage for the player, as metal doors can never be bashed open.
 - Reverted Pylons to make them always active again (they start permanently activated, instead of being activated
 by bumping them).
+- There is now a chance to get stuck in mud (to differentiate it more from water).
 
 # Monsters
 - Added more monsters

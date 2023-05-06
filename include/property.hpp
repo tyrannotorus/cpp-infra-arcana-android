@@ -726,6 +726,15 @@ private:
         bool try_player_end_with_machete();
 };
 
+class Stuck : public Prop
+{
+public:
+        Stuck() :
+                Prop(Id::stuck) {}
+
+        PropEnded affect_move_dir(Dir& dir) override;
+};
+
 class Burning : public Prop
 {
 public:

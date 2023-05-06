@@ -482,6 +482,39 @@ bool Entangled::try_player_end_with_machete()
         return false;
 }
 
+PropEnded Stuck::affect_move_dir(Dir& dir)
+{
+        if (dir == Dir::center) {
+                return PropEnded::no;
+        }
+
+        dir = Dir::center;
+
+        if (actor::is_player(m_owner)) {
+                msg_log::add("I struggle to pull free!", colors::msg_bad());
+        }
+        else {
+                // Is monster
+                if (actor::can_player_see_actor(*m_owner)) {
+                        const std::string actor_name_the =
+                                text_format::first_to_upper(
+                                        m_owner->name_the());
+
+                        msg_log::add(
+                                actor_name_the + " struggles to pull free.",
+                                colors::msg_good());
+                }
+        }
+
+        if (rnd::one_in(6)) {
+                m_owner->m_properties.end_prop(id());
+
+                return PropEnded::yes;
+        }
+
+        return PropEnded::no;
+}
+
 void Slowed::on_applied()
 {
         m_owner->m_properties.end_prop(
@@ -856,6 +889,7 @@ PropEnded ZealotStop::affect_move_dir(Dir& dir)
             (dir == Dir::center) ||
             m_owner->m_properties.has(prop::Id::burning) ||
             m_owner->m_properties.has(prop::Id::entangled) ||
+            m_owner->m_properties.has(prop::Id::stuck) ||
             m_owner->m_properties.has(prop::Id::terrified) ||
             m_owner->m_properties.has(prop::Id::frenzied) ||
             !rnd::percent(stop_pct_chance)) {
@@ -863,9 +897,7 @@ PropEnded ZealotStop::affect_move_dir(Dir& dir)
         }
 
         if (actor::can_player_see_actor(*m_owner)) {
-                const auto name =
-                        text_format::first_to_upper(
-                                m_owner->name_the());
+                const auto name = text_format::first_to_upper(m_owner->name_the());
 
                 msg_log::add(name + " stops and gropes about.");
         }

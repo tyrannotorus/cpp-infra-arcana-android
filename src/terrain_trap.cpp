@@ -1198,13 +1198,11 @@ void TrapWeb::trigger()
 
         if (actor::is_player(actor_here)) {
                 if (actor_here->m_properties.allow_see()) {
-                        msg_log::add(
-                                "I am entangled in a spider web!");
+                        msg_log::add("I am entangled in a spider web!");
                 }
                 else {
                         // Cannot see
-                        msg_log::add(
-                                "I am entangled in a sticky mass of threads!");
+                        msg_log::add("I am entangled in a sticky mass of threads!");
                 }
         }
         else {
@@ -1214,9 +1212,7 @@ void TrapWeb::trigger()
                                 text_format::first_to_upper(
                                         actor_here->name_the());
 
-                        msg_log::add(
-                                actor_name +
-                                " is entangled in a huge spider web!");
+                        msg_log::add(actor_name + " is entangled in a huge spider web!");
                 }
         }
 

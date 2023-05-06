@@ -158,13 +158,9 @@ static void run_std_turn_events()
                         prop::PropEndAllowMsg::no,
                         prop::PropEndAllowHistoricMsg::no);
 
-                map::g_player->m_properties.end_prop(
-                        prop::Id::nailed,
-                        prop_end_config);
-
-                map::g_player->m_properties.end_prop(
-                        prop::Id::entangled,
-                        prop_end_config);
+                map::g_player->m_properties.end_prop(prop::Id::nailed, prop_end_config);
+                map::g_player->m_properties.end_prop(prop::Id::entangled, prop_end_config);
+                map::g_player->m_properties.end_prop(prop::Id::stuck, prop_end_config);
 
                 msg_log::add(
                         "I sink downwards!",

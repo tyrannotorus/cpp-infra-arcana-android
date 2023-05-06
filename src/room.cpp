@@ -132,8 +132,7 @@ static int walk_blockers_in_dir(const Dir dir, const P& pos)
         switch (dir) {
         case Dir::right:
                 for (int dy = -1; dy <= 1; ++dy) {
-                        const auto* const t =
-                                map::g_terrain.at(pos.x + 1, pos.y + dy);
+                        const auto* const t = map::g_terrain.at(pos.x + 1, pos.y + dy);
 
                         if (!t->is_walkable()) {
                                 nr_blockers += 1;
@@ -143,8 +142,7 @@ static int walk_blockers_in_dir(const Dir dir, const P& pos)
 
         case Dir::down:
                 for (int dx = -1; dx <= 1; ++dx) {
-                        const auto* const t =
-                                map::g_terrain.at(pos.x + dx, pos.y + 1);
+                        const auto* const t = map::g_terrain.at(pos.x + dx, pos.y + 1);
 
                         if (!t->is_walkable()) {
                                 nr_blockers += 1;
@@ -154,8 +152,7 @@ static int walk_blockers_in_dir(const Dir dir, const P& pos)
 
         case Dir::left:
                 for (int dy = -1; dy <= 1; ++dy) {
-                        const auto* const t =
-                                map::g_terrain.at(pos.x - 1, pos.y + dy);
+                        const auto* const t = map::g_terrain.at(pos.x - 1, pos.y + dy);
 
                         if (!t->is_walkable()) {
                                 nr_blockers += 1;
@@ -165,8 +162,7 @@ static int walk_blockers_in_dir(const Dir dir, const P& pos)
 
         case Dir::up:
                 for (int dx = -1; dx <= 1; ++dx) {
-                        const auto* const t =
-                                map::g_terrain.at(pos.x + dx, pos.y - 1);
+                        const auto* const t = map::g_terrain.at(pos.x + dx, pos.y - 1);
 
                         if (!t->is_walkable()) {
                                 nr_blockers += 1;
@@ -263,7 +259,7 @@ static void get_positions_in_room_relative_to_walls(
         }
 
         TRACE_FUNC_END_VERBOSE;
-}  // cells_in_room
+}
 
 // -----------------------------------------------------------------------------
 // Room factory
@@ -554,8 +550,7 @@ P StdRoom::find_auto_terrain_placement(
 
         if (!is_adj_to_walls_avail &&
             !is_away_from_walls_avail) {
-                TRACE_FUNC_END_VERBOSE << "No eligible cells found"
-                                       << std::endl;
+                TRACE_FUNC_END_VERBOSE << "No eligible positions found" << std::endl;
 
                 return {-1, -1};
         }
@@ -747,8 +742,7 @@ std::vector<RoomAutoTerrainRule> HumanRoom::auto_terrains_allowed() const
 
 bool HumanRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 3 &&
-                m_r.max_dim() <= 8;
+        return m_r.min_dim() >= 3 && m_r.max_dim() <= 8;
 }
 
 void HumanRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -834,8 +828,7 @@ std::vector<RoomAutoTerrainRule> RitualRoom::auto_terrains_allowed() const
 
 bool RitualRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 4 &&
-                m_r.max_dim() <= 9;
+        return m_r.min_dim() >= 4 && m_r.max_dim() <= 9;
 }
 
 void RitualRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -868,8 +861,7 @@ void RitualRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
                 for (int y = m_r.p0.y; y <= m_r.p1.y; ++y) {
                         for (int x = m_r.p0.x; x <= m_r.p1.x; ++x) {
-                                if (map::g_terrain.at(x, y)->id() ==
-                                    terrain::Id::altar) {
+                                if (map::g_terrain.at(x, y)->id() == terrain::Id::altar) {
                                         origin = P(x, y);
                                         y = 999;
                                         x = 999;
@@ -912,8 +904,7 @@ std::vector<RoomAutoTerrainRule> SpiderRoom::auto_terrains_allowed() const
 
 bool SpiderRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 3 &&
-                m_r.max_dim() <= 8;
+        return m_r.min_dim() >= 3 && m_r.max_dim() <= 8;
 }
 
 void SpiderRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -953,8 +944,7 @@ std::vector<RoomAutoTerrainRule> CrawlingPitRoom::auto_terrains_allowed() const
 
 bool CrawlingPitRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 2 &&
-                m_r.max_dim() <= 6;
+        return m_r.min_dim() >= 2 && m_r.max_dim() <= 6;
 }
 
 void CrawlingPitRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -1057,17 +1047,17 @@ void CrawlingPitRoom::populate_monsters() const
 
                 const auto origin = rnd::element(origin_bucket);
 
-                const auto sorted_free_cells =
+                const auto sorted_free_positions =
                         populate_mon::make_sorted_free_cells(origin, blocked);
 
-                if (sorted_free_cells.empty()) {
+                if (sorted_free_positions.empty()) {
                         return;
                 }
 
                 populate_mon::make_group_at(
                         actor_id,
-                        sorted_free_cells,
-                        &blocked,  // New blocked cells (output)
+                        sorted_free_positions,
+                        &blocked,  // New blocked positions (output)
                         MonRoamingAllowed::yes);
         }
 }
@@ -1084,8 +1074,7 @@ std::vector<RoomAutoTerrainRule> CryptRoom::auto_terrains_allowed() const
 
 bool CryptRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 2 &&
-                m_r.max_dim() <= 12;
+        return m_r.min_dim() >= 2 && m_r.max_dim() <= 12;
 }
 
 void CryptRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -1117,8 +1106,7 @@ std::vector<RoomAutoTerrainRule> MonsterRoom::auto_terrains_allowed() const
 
 bool MonsterRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 4 &&
-                m_r.max_dim() <= 8;
+        return m_r.min_dim() >= 4 && m_r.max_dim() <= 8;
 }
 
 void MonsterRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -1167,8 +1155,8 @@ void MonsterRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                                 if (!blocked.at(x, y) &&
                                     map::g_room_map.at(x, y) == this &&
                                     rnd::fraction(2, 5)) {
-                                        terrain::make_gore(P(x, y));
-                                        terrain::make_blood(P(x, y));
+                                        terrain::make_gore({x, y});
+                                        terrain::make_blood({x, y});
                                         nr_blood_put++;
                                 }
                         }
@@ -1227,10 +1215,7 @@ void DampRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
         const int liquid_one_in_n = rnd::range(2, 5);
 
-        const auto liquid_type =
-                rnd::fraction(3, 4)
-                ? LiquidType::water
-                : LiquidType::mud;
+        const LiquidType liquid_type = rnd::coin_toss() ? LiquidType::water : LiquidType::mud;
 
         for (int x = m_r.p0.x; x <= m_r.p1.x; ++x) {
                 for (int y = m_r.p0.y; y <= m_r.p1.y; ++y) {
@@ -1271,13 +1256,10 @@ void PoolRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
 {
         (void)door_proposals;
 
-        const bool is_early = map::g_dlvl <= g_dlvl_last_early_game;
+        const bool is_early = (map::g_dlvl <= g_dlvl_last_early_game);
+        const bool is_mid = (!is_early && (map::g_dlvl <= g_dlvl_last_mid_game));
 
-        const bool is_mid = !is_early && (map::g_dlvl <= g_dlvl_last_mid_game);
-
-        if (is_early ||
-            (is_mid && rnd::coin_toss()) ||
-            m_is_sub_room) {
+        if (is_early || (is_mid && rnd::coin_toss()) || m_is_sub_room) {
                 if (rnd::coin_toss()) {
                         mapgen::cut_room_corners(*this);
                 }
@@ -1328,7 +1310,7 @@ void PoolRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
         const P origin = rnd::element(origin_bucket);
 
-        const int flood_travel_limit = 12;
+        const int flood_travel_limit = rnd::range(3, 12);
 
         const bool allow_diagonal_flood = true;
 
@@ -1337,69 +1319,79 @@ void PoolRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                         origin,
                         blocked,
                         flood_travel_limit,
-                        P(-1, -1),  // Target cell
+                        {-1, -1},  // Target position
                         allow_diagonal_flood);
 
-        // Do not place any liquid if we cannot place at least a certain amount
+        // Do not place any liquid if we cannot place at least a certain amount.
         {
-                const int min_nr_liquid_cells = 9;
+                const int min_nr_liquid_positions = 4;
 
-                int nr_liquid_cells = 0;
+                int nr_liquid_positions = 0;
 
                 for (int x = 0; x < flood.w(); ++x) {
                         for (int y = 0; y < flood.w(); ++y) {
                                 const P p(x, y);
 
-                                const bool should_put_liquid =
-                                        (flood.at(p) > 0) || (p == origin);
+                                const bool should_put_liquid = (flood.at(p) > 0) || (p == origin);
 
                                 if (should_put_liquid) {
-                                        ++nr_liquid_cells;
+                                        ++nr_liquid_positions;
                                 }
                         }
                 }
 
-                if (nr_liquid_cells < min_nr_liquid_cells) {
+                if (nr_liquid_positions < min_nr_liquid_positions) {
                         return;
                 }
         }
 
         // OK, we can place liquid
 
-        bool is_natural_pool = false;
+        // Decide if this is a "natural" pool or an "artificial" pool.
+        bool is_artificial_pool = true;
 
         if (map::g_dlvl >= g_dlvl_first_late_game) {
-                is_natural_pool = true;
+                // Late game, only make natural pools.
+                is_artificial_pool = false;
         }
         else if (map::g_dlvl >= g_dlvl_first_mid_game) {
-                is_natural_pool = rnd::coin_toss();
+                // Mid game, same chance of natural or artificial.
+                is_artificial_pool = rnd::coin_toss();
         }
         else {
-                is_natural_pool = rnd::fraction(1, 4);
+                // Early game, make mostly artificial pools.
+                is_artificial_pool = rnd::fraction(3, 4);
+        }
+
+        // Decide liquid type. If artificial pool, only make water (there
+        // should not be mud baths in the dungeon...).
+        auto liquid_type = LiquidType::water;
+
+        if (!is_artificial_pool) {
+                liquid_type = rnd::coin_toss() ? LiquidType::water : LiquidType::mud;
         }
 
         for (int x = 0; x < flood.w(); ++x) {
                 for (int y = 0; y < flood.w(); ++y) {
                         const P p(x, y);
 
-                        const bool should_put_liquid =
-                                (flood.at(p) > 0) || (p == origin);
+                        const bool should_put_liquid = (flood.at(p) > 0) || (p == origin);
 
                         if (!should_put_liquid) {
                                 continue;
                         }
 
-                        // TODO: Should this really be "NOT is_natural_pool"?
-                        if (!is_natural_pool ||
+                        // If artificial pool, just fill as far as possible
+                        // within the floodfill, for a more rectangular
+                        // "constructed" look, otherwise put liquid randomly.
+                        if (is_artificial_pool ||
                             (flood.at(p) < (flood_travel_limit / 2)) ||
                             rnd::fraction(2, 3)) {
                                 auto* const liquid =
                                         static_cast<terrain::Liquid*>(
-                                                terrain::make(
-                                                        terrain::Id::liquid,
-                                                        p));
+                                                terrain::make(terrain::Id::liquid, p));
 
-                                liquid->m_type = LiquidType::water;
+                                liquid->m_type = liquid_type;
 
                                 map::set_terrain(liquid);
                         }
@@ -1538,10 +1530,7 @@ std::vector<RoomAutoTerrainRule> ChasmRoom::auto_terrains_allowed() const
 
 bool ChasmRoom::is_allowed() const
 {
-        return (
-                (m_r.min_dim() >= 5) &&
-                (m_r.max_dim() <= 9) &&
-                !m_is_sub_room);
+        return ((m_r.min_dim() >= 5) && (m_r.max_dim() <= 9) && !m_is_sub_room);
 }
 
 void ChasmRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -1583,7 +1572,7 @@ void ChasmRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                 origin,
                 blocked,
                 10000,
-                P(-1, -1),
+                {-1, -1},
                 false);
 
         for (int x = m_r.p0.x; x <= m_r.p1.x; ++x) {
@@ -1606,7 +1595,7 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
         TRACE_FUNC_BEGIN;
 
         // Strategy: Expand the the river on both sides until parallel to the
-        // closest center cell of another room
+        // closest center position of another room
 
         const bool is_hor = m_axis == Axis::hor;
 
@@ -1719,8 +1708,8 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
 
         Array2<bool> blocked(map::dims());
 
-        // Within the expansion limits, mark all cells not belonging to another
-        // room as free. All other cells are considered as blocking.
+        // Within the expansion limits, mark all positions not belonging to
+        // another room as free. All other positions are considered as blocking.
         for (int x = 0; x < map::w(); ++x) {
                 for (int y = 0; y < map::h(); ++y) {
                         blocked.at(x, y) = true;
@@ -1744,7 +1733,7 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                 origin,
                 blocked,
                 INT_MAX,
-                P(-1, -1),
+                {-1, -1},
                 true);
 
         for (int x = 0; x < map::w(); ++x) {
@@ -1767,7 +1756,7 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
 
         TRACE << "Making bridge(s)" << std::endl;
 
-        // Mark which side each cell belongs to
+        // Mark which side each position belongs to
         enum Side
         {
                 in_river,
@@ -1938,8 +1927,7 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                                 break;
                         }
 
-                        const P p_nxt =
-                                is_hor ? P(bridge_n, c - 1) : P(c - 1, bridge_n);
+                        const P p_nxt = is_hor ? P(bridge_n, c - 1) : P(c - 1, bridge_n);
 
                         if (valid_room_entries0.at(p_nxt)) {
                                 room_con0 = p_nxt;
@@ -1956,8 +1944,7 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                                 break;
                         }
 
-                        const P p_nxt =
-                                is_hor ? P(bridge_n, c + 1) : P(c + 1, bridge_n);
+                        const P p_nxt = is_hor ? P(bridge_n, c + 1) : P(c + 1, bridge_n);
 
                         if (valid_room_entries1.at(p_nxt)) {
                                 room_con1 = p_nxt;
@@ -2064,7 +2051,7 @@ void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
                         }
                 }
 
-                // Convert wall cells adjacent to river cells to river
+                // Convert wall positions adjacent to river positions to river
                 valid_room_entries = map_parsers::expand(valid_room_entries, 2);
 
                 for (int x = 2; x < map::w() - 2; ++x) {

@@ -23,7 +23,10 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static void put_templ_symbol_at(const P& p, const char c)
+static void put_templ_symbol_at(
+        const P& p,
+        const char c,
+        const LiquidType liquid_type)
 {
         switch (c) {
         case '.': {
@@ -39,9 +42,9 @@ static void put_templ_symbol_at(const P& p, const char c)
         } break;
 
         case '~': {
-                auto* const t = terrain::make(terrain::Id::liquid, p);
+                terrain::Terrain* const t = terrain::make(terrain::Id::liquid, p);
 
-                static_cast<terrain::Liquid*>(t)->m_type = LiquidType::water;
+                static_cast<terrain::Liquid*>(t)->m_type = liquid_type;
 
                 map::set_terrain(t);
         } break;
@@ -125,13 +128,17 @@ static bool is_symbol_room_cell(const char c)
         }
 }
 
-static void put_templ_terrains(
-        const Array2<char>& templ,
-        const P& p0)
+static void put_templ_terrains(const RoomTempl& templ, const P& p0)
 {
         const bool generate_optional_walls = rnd::coin_toss();
 
-        const P dims(templ.dims());
+        const P dims(templ.symbols.dims());
+
+        auto liquid_type = LiquidType::water;
+
+        if (templ.type == RoomType::damp) {
+                liquid_type = rnd::coin_toss() ? LiquidType::water : LiquidType::mud;
+        }
 
         for (int templ_x = 0; templ_x < dims.x; ++templ_x) {
                 for (int templ_y = 0; templ_y < dims.y; ++templ_y) {
@@ -139,13 +146,13 @@ static void put_templ_terrains(
 
                         const auto p = p0 + templ_p;
 
-                        char c = templ.at(templ_p);
+                        char c = templ.symbols.at(templ_p);
 
                         if (c == '?') {
                                 c = generate_optional_walls ? '#' : '.';
                         }
 
-                        put_templ_symbol_at(p, c);
+                        put_templ_symbol_at(p, c, liquid_type);
 
                         if (!is_symbol_room_cell(c)) {
                                 map::g_room_map.at(p) = nullptr;
@@ -175,7 +182,7 @@ static Room* make_template_room(const RoomTempl& templ, Region& region)
 
         // NOTE: This must be done AFTER "register_room", since it may remove
         // some of its cells from the global room map (e.g. untouched cells)
-        put_templ_terrains(templ.symbols, p0);
+        put_templ_terrains(templ, p0);
 
         region.main_room = room;
         region.is_free = false;

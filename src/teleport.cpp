@@ -285,7 +285,9 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         const std::vector<prop::Id> props_ended = {
                 prop::Id::entangled,
-                prop::Id::nailed};
+                prop::Id::stuck,
+                prop::Id::nailed
+        };
 
         for (const auto id : props_ended) {
                 const prop::PropEndConfig cfg(

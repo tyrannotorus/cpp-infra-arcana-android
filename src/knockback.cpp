@@ -37,6 +37,7 @@
 // -----------------------------------------------------------------------------
 static const std::vector<prop::Id> s_props_cannot_knock_back = {
         prop::Id::entangled,
+        prop::Id::stuck,
         prop::Id::ethereal,
         prop::Id::ooze,
 };

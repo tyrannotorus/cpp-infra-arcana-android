@@ -1494,8 +1494,7 @@ void Liquid::bump(actor::Actor& actor_bumping)
         }
 
         if (!props.has(prop::Id::crimson_passage)) {
-                actor_bumping.m_properties.apply(
-                        prop::make(prop::Id::delayed_by_liquid));
+                actor_bumping.m_properties.apply(prop::make(prop::Id::delayed_by_liquid));
 
                 // Print message if player, unless player is wearing torture
                 // collar (in that case the message is redundant since the
@@ -1505,22 +1504,32 @@ void Liquid::bump(actor::Actor& actor_bumping)
                             SlotId::head,
                             item::Id::torture_collar)) {
                         std::string type_str;
+                        std::string verb_str;
 
                         switch (m_type) {
                         case LiquidType::water:
                         case LiquidType::magic_water:
                                 type_str = "water";
+                                verb_str = "wade";
                                 break;
 
                         case LiquidType::mud:
                                 type_str = "mud";
+                                verb_str = "trudge";
                                 break;
                         }
 
                         msg_log::add(
-                                "I wade slowly through the knee high " +
+                                "I " +
+                                verb_str +
+                                " slowly through the knee high " +
                                 type_str +
                                 ".");
+                }
+
+                // The creature might also get stuck.
+                if ((m_type == LiquidType::mud) && rnd::one_in(5)) {
+                        actor_bumping.m_properties.apply(prop::make(prop::Id::stuck));
                 }
         }
 
@@ -1550,8 +1559,7 @@ void Liquid::bump(actor::Actor& actor_bumping)
         }
 
         // "Magic pool" effects.
-        if (actor::is_player(&actor_bumping) &&
-            (m_type == LiquidType::magic_water)) {
+        if (actor::is_player(&actor_bumping) && (m_type == LiquidType::magic_water)) {
                 run_magic_pool_effects_on_player();
         }
 }

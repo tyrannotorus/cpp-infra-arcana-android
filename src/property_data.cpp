@@ -37,6 +37,7 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_DEAF", prop::Id::deaf},
         {"PROP_DISEASED", prop::Id::diseased},
         {"PROP_ENTANGLED", prop::Id::entangled},
+        {"PROP_STUCK", prop::Id::stuck},
         {"PROP_ETHEREAL", prop::Id::ethereal},
         {"PROP_EXPLODES_ON_DEATH", prop::Id::explodes_on_death},
         {"PROP_FAINTED", prop::Id::fainted},
@@ -881,6 +882,19 @@ static void init_data_list()
         d.msg_start_mon = "is entangled.";
         d.msg_end_player = "I tear free!";
         d.msg_end_mon = "tears free!";
+        d.allow_display_turns = false;
+        d.force_interrupt_player_on_start = true;
+        d.alignment = prop::PropAlignment::bad;
+        add(d);
+
+        d.id = prop::Id::stuck;
+        d.name = "Stuck";
+        d.name_short = "Stuck";
+        d.descr = "Stuck in something.";
+        d.msg_start_player = "I am stuck!";
+        d.msg_start_mon = "is stuck.";
+        d.msg_end_player = "I pull myself free!";
+        d.msg_end_mon = "pulls free!";
         d.allow_display_turns = false;
         d.force_interrupt_player_on_start = true;
         d.alignment = prop::PropAlignment::bad;

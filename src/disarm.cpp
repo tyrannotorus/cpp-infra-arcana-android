@@ -42,6 +42,12 @@ void player_disarm()
                 return;
         }
 
+        if (map::g_player->m_properties.has(prop::Id::stuck)) {
+                msg_log::add("Not while stuck.");
+
+                return;
+        }
+
         const std::string hint =
                 common_text::g_direction_query +
                 " " +

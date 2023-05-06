@@ -69,6 +69,7 @@ enum class Id
         erudition,
         magic_searching,
         entangled,
+        stuck,
         tele_ctrl,
         spell_reflect,
         conflict,

@@ -230,7 +230,8 @@ MeleeAttData::MeleeAttData(
                         defender->m_properties.has(prop::Id::paralyzed) ||
                         defender->m_properties.has(prop::Id::nailed) ||
                         defender->m_properties.has(prop::Id::fainted) ||
-                        defender->m_properties.has(prop::Id::entangled);
+                        defender->m_properties.has(prop::Id::entangled) ||
+                        defender->m_properties.has(prop::Id::stuck);
 
                 const bool has_small_bon_prop =
                         defender->m_properties.has(prop::Id::confused) ||
