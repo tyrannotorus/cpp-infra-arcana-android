@@ -133,8 +133,8 @@ void make_monoliths()
 void make_mirrors()
 {
         std::vector<int> nr_weights = {
-                4,   // 0 mirrors(s)
-                8,  // 1 -
+                2,   // 0 mirrors(s)
+                16,  // 1 -
                 2,   // 2 -
                 1,   // 3 -
         };
