@@ -96,9 +96,10 @@ static actor::Speed decr_speed_category(actor::Speed speed)
 
 static actor::Speed current_actor_speed(const actor::Actor& actor)
 {
-        // Paralyzed actors always act at normal speed (otherwise paralysis will
-        // barely affect super fast monsters at all).
-        if (actor.m_properties.has(prop::Id::paralyzed)) {
+        // Paralyzed or fainted actors always act at normal speed (the duration
+        // of these effects should not depend on the speed of the actor).
+        if (actor.m_properties.has(prop::Id::paralyzed) ||
+            actor.m_properties.has(prop::Id::fainted)) {
                 return actor::Speed::normal;
         }
 
