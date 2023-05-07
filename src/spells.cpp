@@ -4049,13 +4049,13 @@ Range SpellSlow::duration_range(const SpellSkill skill) const
 {
         switch (skill) {
         case SpellSkill::basic:
-                return {8, 12};
+                return {5, 10};
 
         case SpellSkill::expert:
-                return {10, 16};
+                return {7, 12};
 
         case SpellSkill::master:
-                return {12, 20};
+                return {9, 14};
 
         case SpellSkill::transcendent:
                 return {30, 50};
@@ -4070,7 +4070,7 @@ int SpellSlow::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
-        return 5;
+        return 7;
 }
 
 void SpellSlow::run_effect(
