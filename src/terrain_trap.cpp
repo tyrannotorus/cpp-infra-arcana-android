@@ -515,7 +515,7 @@ void Trap::bump(actor::Actor& actor_bumping)
         if (props.has(prop::Id::ethereal) ||
             props.has(prop::Id::flying) ||
             props.has(prop::Id::tiny_flying) ||
-            (d.actor_size < actor::Size::humanoid) ||
+            props.has(prop::Id::small_crawling) ||
             d.is_spider) {
                 TRACE_FUNC_END_VERBOSE;
 
