@@ -115,9 +115,9 @@ void MarkerState::draw()
                 line_calc::calc_new_line(
                         m_origin,
                         m_pos,
-                        true,  // Stop at target
+                        true,     // Stop at target
                         INT_MAX,  // Travel limit
-                        true);  // Allow outside map
+                        true);    // Allow outside map
 
         // Remove origin position
         if (!line.empty()) {
@@ -1063,16 +1063,18 @@ void CtrlTele::handle_input(const io::InputData& input)
                 m_blocked.rect().is_pos_inside(m_pos) &&
                 !m_blocked.at(m_pos);
 
-        // Copy position before object is deleted
+        // Copy data before object is deleted.
+        const int max_dist = m_max_dist;
         const P tgt_p = m_pos;
+        const Array2<bool> blocked = m_blocked;
 
         states::pop();
 
         // NOTE: This object is now destroyed
 
         if (is_success) {
-                // Teleport to this exact destination
-                teleport(*map::g_player, tgt_p, m_blocked);
+                // Teleport to this exact destination.
+                teleport(*map::g_player, tgt_p, blocked);
         }
         else {
                 // Failed to teleport (blocked or roll failed)
@@ -1083,8 +1085,8 @@ void CtrlTele::handle_input(const io::InputData& input)
                         MorePromptOnMsg::yes,
                         CopyToMsgHistory::yes);
 
-                // Run a randomized teleport with no teleport control
-                teleport(*map::g_player, ShouldCtrlTele::never);
+                // Run a randomized teleport with no teleport control.
+                teleport(*map::g_player, ShouldCtrlTele::never, max_dist);
         }
 }
 

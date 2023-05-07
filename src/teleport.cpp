@@ -205,7 +205,7 @@ void teleport(
                 }
         }
 
-        // Allow teleporting past Force Fields, since they are temporary
+        // Allow teleporting past Force Fields, since they are temporary.
         for (const auto* const mob : game_time::g_mobs) {
                 if (mob->id() == terrain::Id::force_field) {
                         blocked.at(mob->pos()) = false;
@@ -245,11 +245,7 @@ void teleport(
 
         // Teleport control?
         if (actor::is_player(&actor) && should_player_ctrl_tele(ctrl_tele)) {
-                auto tele_ctrl_state =
-                        std::make_unique<CtrlTele>(
-                                actor.m_pos,
-                                blocked,
-                                max_dist);
+                auto tele_ctrl_state = std::make_unique<CtrlTele>(actor.m_pos, blocked, max_dist);
 
                 states::push(std::move(tele_ctrl_state));
 
@@ -286,8 +282,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         const std::vector<prop::Id> props_ended = {
                 prop::Id::entangled,
                 prop::Id::stuck,
-                prop::Id::nailed
-        };
+                prop::Id::nailed};
 
         for (const auto id : props_ended) {
                 const prop::PropEndConfig cfg(
