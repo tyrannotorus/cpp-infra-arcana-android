@@ -403,8 +403,9 @@ static void bot_act()
                 for (size_t i = 0; i < (size_t)item::Id::END; ++i) {
                         item::ItemData& d = item::g_data[i];
 
+                        // TODO: Handle force field as well.
                         if ((d.type == ItemType::device) &&
-                            (d.id != item::Id::lantern)) {
+                            (d.id != item::Id::device_force_field)) {
                                 d.is_identified = true;
                                 id_bucket.push_back((item::Id)i);
                         }

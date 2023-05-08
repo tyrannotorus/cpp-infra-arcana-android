@@ -1927,27 +1927,24 @@ void SelectIdentify::update()
         const io::InputData input = io::read_input();
 
         const MenuAction action =
-                m_browser.read(
-                        input,
-                        MenuInputMode::scrolling_and_letters);
+                config::is_bot_playing()
+                ? MenuAction::selected
+                : m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
         const Inventory& inv = map::g_player->m_inv;
 
         switch (action) {
         case MenuAction::selected: {
-                const FilteredInvEntry& inv_entry_marked =
-                        m_filtered_inv[m_browser.y()];
+                const FilteredInvEntry& inv_entry_marked = m_filtered_inv[m_browser.y()];
 
                 item::Item* item_to_identify = nullptr;
 
                 if (inv_entry_marked.is_slot) {
-                        item_to_identify =
-                                inv.m_slots[inv_entry_marked.relative_idx].item;
+                        item_to_identify = inv.m_slots[inv_entry_marked.relative_idx].item;
                 }
                 else {
                         // Backpack item selected
-                        item_to_identify =
-                                inv.m_backpack[inv_entry_marked.relative_idx];
+                        item_to_identify = inv.m_backpack[inv_entry_marked.relative_idx];
                 }
 
                 // Exit screen
