@@ -1,17 +1,11 @@
-1. Set version string in src/version.cpp (see comment)
+1. Set version string in src/version.cpp
 
 2. Set release date in installed_files/release_history.txt
 
-3. Make a git commit (e.g. "Set version to 20.0")
+3. Make a git commit (e.g. "Update version to 22.0.0")
 
 4. Set version git tag
 
 5. Push to the develop and master branches
 
 6. Wait for jobs to finish OK
-
-7. Unset version string in src/version.cpp
-
-8. Make a git commit (e.g. "Remove version string")
-
-9. Push to the develop and master branches
