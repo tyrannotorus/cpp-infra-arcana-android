@@ -4160,6 +4160,94 @@
     </monster>
 
     <!--************************************************************-->
+    <!-- MON_BLACK_PHILLIP -->
+    <!--************************************************************-->
+    <monster id="MON_BLACK_PHILLIP">
+        <text>
+            <name_a>Black Phillip</name_a>
+            <name_the>Black Phillip</name_the>
+            <corpse_name_a>the carcass of Black Phillip</corpse_name_a>
+            <corpse_name_the>the carcass of Black Phillip</corpse_name_the>
+            <description>Black Phillip is a malevolent goat of immense size, exuding a sinister aura. Its fur is as dark as coal, and its eyes shimmer with an eerie, otherworldly light. Despite its large size, Black Phillip's movements are quick and fluid, enabling it to lunge at its prey with deadly accuracy. The creature seems to take pleasure in using its formidable horns to bludgeon unsuspecting victims. Black Phillip is believed to be a manifestation of the devil himself.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>looks wary.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_GOAT</tile>
+            <character>d</character>
+            <color>COLOR_GRAY</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>16</hit_points>
+            <spirit>2</spirit>
+            <speed>MONSPEED_FAST</speed>
+            <shock_level>MONSHOCK_UNSETTLING</shock_level>
+            <melee>65</melee>
+            <ranged>0</ranged>
+            <dodging>20</dodging>
+            <stealth>70</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>false</can_bash_doors>
+            <size>MONSIZE_FLOOR</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="ITEMINTR_HEADBUTT">
+                <damage>4</damage>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>PROP_DARKVISION</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>25</erratic_move_percent>
+            <turns_aware>10</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>0</min_dungeon_level>
+            <max_dungeon_level>6</max_dungeon_level>
+            <spawn_weight>50</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <unique/>
+            <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_FOREST</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
     <!-- MON_GHOST -->
     <!--************************************************************-->
     <monster id="MON_GHOST">

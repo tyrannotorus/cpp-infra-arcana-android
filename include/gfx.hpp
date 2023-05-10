@@ -96,6 +96,7 @@ enum class TileId
         ghoul,
         giant_spider,
         glasuu,
+        goat,
         gong,
         gore1,
         gore2,

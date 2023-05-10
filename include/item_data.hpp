@@ -96,6 +96,7 @@ enum class Id
         intr_strike,
         intr_punch,
         intr_punch_knockback,
+        intr_headbutt,
         intr_acid_spit,
         intr_snake_venom_spit,
         intr_fire_breath,

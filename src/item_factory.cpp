@@ -162,6 +162,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::intr_strike:
         case Id::intr_punch:
         case Id::intr_punch_knockback:
+        case Id::intr_headbutt:
         case Id::intr_acid_spit:
         case Id::intr_fire_breath:
         case Id::intr_energy_breath:
