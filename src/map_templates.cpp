@@ -39,6 +39,7 @@ const std::unordered_map<LevelTemplId, std::string> level_id_to_filename = {
         {LevelTemplId::egypt, "egypt.txt"},
         {LevelTemplId::high_priest, "high_priest.txt"},
         {LevelTemplId::intro_forest, "intro_forest.txt"},
+        {LevelTemplId::mi_go_outpost, "mi_go_outpost.txt"},
         {LevelTemplId::rat_cave, "rat_cave.txt"},
         {LevelTemplId::trapez, "trapez.txt"}};
 

@@ -663,10 +663,16 @@ Author:              Project_Trident (username on freesound.org)
 Original title:      Large knife drop
 License:             Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)
 
-File:                sfx_migo_gun.ogg
+File:                sfx_electric_gun.ogg
 Source:              https://www.freesound.org/people/TheHadnot/sounds/160880
 Author:              TheHadnot (username on freesound.org)
 Original title:      BFG Laser
+License:             CC0 1.0 Universal (CC0 1.0)
+
+File:                sfx_morphic_blaster.ogg
+Source:              https://freesound.org/people/EcoDTR/sounds/36847/
+Author:              EcoDTR (username on freesound.org)
+Original title:      LaserRocket2.wav
 License:             CC0 1.0 Universal (CC0 1.0)
 
 File:                sfx_miss_heavy.ogg

@@ -91,6 +91,10 @@ static const std::pair<prop::Id, std::string> s_custom_props[] = {
          "They emit light and can be seen in darkness"},
         {prop::Id::radiant_fov,
          "They emit light and can be seen in darkness"},
+        {prop::Id::regenerating,
+         "They regenerate health over time"},
+        {prop::Id::explodes_on_death,
+         "They explode on death"},
 };
 
 struct MonShockStrings

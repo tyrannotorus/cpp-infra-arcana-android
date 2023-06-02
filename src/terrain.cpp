@@ -579,36 +579,36 @@ gfx::TileId Floor::tile() const
 
 std::string Floor::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "" : "the ";
+        std::string str = (article == Article::a) ? "" : "the ";
 
         if (m_burn_state == BurnState::burning) {
-                ret += "flames";
+                str += "flames";
         }
         else {
                 if (m_burn_state == BurnState::has_burned) {
-                        ret += "scorched ";
+                        str += "scorched ";
                 }
 
                 switch (m_type) {
                 case FloorType::common:
-                        ret += "stone floor";
+                        str += "stone floor";
                         break;
 
                 case FloorType::cave:
-                        ret += "cavern floor";
+                        str += "cavern floor";
                         break;
 
                 case FloorType::stone_path:
                         if (article == Article::a) {
-                                ret.insert(0, "a ");
+                                str.insert(0, "a ");
                         }
 
-                        ret += "stone path";
+                        str += "stone path";
                         break;
                 }
         }
 
-        return ret;
+        return str;
 }
 
 Color Floor::color_default() const
@@ -657,20 +657,19 @@ void Wall::hit(
 
 gfx::TileId Wall::tile() const
 {
-        const auto p_below = m_pos.with_y_offset(1);
+        const P p_below = m_pos.with_y_offset(1);
 
-        auto id_below = terrain::Id::END;
+        Id id_below = Id::END;
 
         if (p_below.y < map::h()) {
-                const auto* const terrain_below = map::g_terrain.at(p_below);
+                const Terrain* const terrain_below = map::g_terrain.at(p_below);
 
                 if (map::g_seen.at(p_below)) {
                         id_below = terrain_below->id();
                 }
                 else {
-                        const auto& memory_below =
-                                map::g_terrain_memory.at(
-                                        p_below);
+                        const map::PlayerMemoryTerrain& memory_below =
+                                map::g_terrain_memory.at(p_below);
 
                         id_below = memory_below.id;
                 }
@@ -689,38 +688,54 @@ gfx::TileId Wall::tile() const
 
 std::string Wall::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "a " : "the ";
-
-        if (m_is_mossy) {
-                ret += "moss-grown ";
-        }
+        std::string article_str;
+        std::string name_str;
 
         switch (m_type) {
         case WallType::common:
         case WallType::common_alt:
         case WallType::leng_monestary:
         case WallType::egypt:
-                ret += "stone wall";
+                article_str = "a";
+                name_str = "stone wall";
+                break;
+
+        case WallType::mi_go:
+                article_str = "an";
+                name_str = "alien wall";
                 break;
 
         case WallType::pillar:
-                ret += "pillar";
+                article_str = "a";
+                name_str = "pillar";
                 break;
 
         case WallType::pillar_broken:
-                ret += "broken pillar";
+                article_str = "a";
+                name_str = "broken pillar";
                 break;
 
         case WallType::cave:
-                ret += "cavern wall";
+                article_str = "a";
+                name_str = "cavern wall";
                 break;
 
         case WallType::cliff:
-                ret += "cliff";
+                article_str = "a";
+                name_str = "cliff";
                 break;
         }
 
-        return ret;
+        if (m_is_mossy) {
+                article_str = "a";
+                name_str = "moss-grown " + name_str;
+        }
+
+        if (article == Article::the) {
+                article_str = "the";
+        }
+
+        return article_str + " " + name_str;
 }
 
 Color Wall::color_default() const
@@ -736,6 +751,9 @@ Color Wall::color_default() const
         case WallType::egypt:
         case WallType::cave:
                 return colors::gray_brown();
+
+        case WallType::mi_go:
+                return colors::orange();
 
         case WallType::pillar:
         case WallType::pillar_broken:
@@ -776,6 +794,9 @@ gfx::TileId Wall::front_wall_tile() const
         case WallType::leng_monestary:
         case WallType::egypt:
                 return gfx::TileId::wall_egypt_front;
+
+        case WallType::mi_go:
+                return gfx::TileId::wall_mi_go_front;
         }
 
         ASSERT(false && "Failed to set front wall tile");
@@ -802,6 +823,9 @@ gfx::TileId Wall::top_wall_tile() const
         case WallType::leng_monestary:
         case WallType::egypt:
                 return gfx::TileId::wall_egypt_top;
+
+        case WallType::mi_go:
+                return gfx::TileId::wall_mi_go_top;
         }
 
         ASSERT(false && "Failed to set top wall tile");
@@ -810,10 +834,7 @@ gfx::TileId Wall::top_wall_tile() const
 
 void Wall::set_rnd_common_wall()
 {
-        m_type =
-                (rnd::one_in(6))
-                ? WallType::common_alt
-                : WallType::common;
+        m_type = (rnd::one_in(6)) ? WallType::common_alt : WallType::common;
 }
 
 void Wall::set_moss_grown()
@@ -890,17 +911,17 @@ void RubbleLow::hit(
 
 std::string RubbleLow::name(const Article article) const
 {
-        std::string ret;
+        std::string str;
 
         if (article == Article::the) {
-                ret += "the ";
+                str += "the ";
         }
 
         if (m_burn_state == BurnState::burning) {
-                ret += "burning ";
+                str += "burning ";
         }
 
-        return ret + "rubble";
+        return str + "rubble";
 }
 
 Color RubbleLow::color_default() const
@@ -929,13 +950,13 @@ void Bones::hit(
 
 std::string Bones::name(const Article article) const
 {
-        std::string ret;
+        std::string str;
 
         if (article == Article::the) {
-                ret += "the ";
+                str += "the ";
         }
 
-        return ret + "bones";
+        return str + "bones";
 }
 
 Color Bones::color_default() const
@@ -1201,23 +1222,23 @@ void Statue::bump(actor::Actor& actor_bumping)
 
 std::string Statue::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "a " : "the ";
+        std::string str = (article == Article::a) ? "a " : "the ";
 
         switch (m_type) {
         case StatueType::common:
-                ret += "statue";
+                str += "statue";
                 break;
 
         case StatueType::ghoul:
-                ret += "statue of a ghoulish creature";
+                str += "statue of a ghoulish creature";
                 break;
         }
 
         if (!m_inscr.empty()) {
-                ret += " (\"" + m_inscr + "\")";
+                str += " (\"" + m_inscr + "\")";
         }
 
-        return ret;
+        return str;
 }
 
 gfx::TileId Statue::tile() const
@@ -1601,27 +1622,27 @@ void Liquid::run_magic_pool_effects_on_player()
 
 std::string Liquid::name(const Article article) const
 {
-        std::string ret;
+        std::string str;
 
         if (article == Article::the) {
-                ret += "the ";
+                str += "the ";
         }
 
         switch (m_type) {
         case LiquidType::water:
-                ret += "water";
+                str += "water";
                 break;
 
         case LiquidType::mud:
-                ret += "shallow mud";
+                str += "shallow mud";
                 break;
 
         case LiquidType::magic_water:
-                ret += "gleaming pool";
+                str += "gleaming pool";
                 break;
         }
 
-        return ret;
+        return str;
 }
 
 Color Liquid::color_default() const
@@ -1694,15 +1715,15 @@ void CrystalKey::hit(
 
 std::string CrystalKey::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "a" : "the";
+        std::string str = (article == Article::a) ? "a" : "the";
 
-        ret += " ";
+        str += " ";
 
-        ret += m_is_active ? "gleaming" : "dead";
+        str += m_is_active ? "gleaming" : "dead";
 
-        ret += " crystal";
+        str += " crystal";
 
-        return ret;
+        return str;
 }
 
 Color CrystalKey::color_default() const
@@ -1873,9 +1894,9 @@ void Altar::bump(actor::Actor& actor_bumping)
 
 std::string Altar::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "an " : "the ";
+        std::string str = (article == Article::a) ? "an " : "the ";
 
-        return ret + "altar";
+        return str + "altar";
 }
 
 Color Altar::color_default() const
@@ -1923,11 +1944,9 @@ WasDestroyed Carpet::on_finished_burning()
 
 std::string Carpet::name(const Article article) const
 {
-        std::string ret = (article == Article::a)
-                ? ""
-                : "the ";
+        std::string str = (article == Article::a) ? "" : "the ";
 
-        return ret + "carpet";
+        return str + "carpet";
 }
 
 Color Carpet::color_default() const
@@ -1979,28 +1998,28 @@ gfx::TileId Grass::tile() const
 
 std::string Grass::name(const Article article) const
 {
-        std::string ret;
+        std::string str;
 
         if (article == Article::the) {
-                ret += "the ";
+                str += "the ";
         }
 
         switch (m_burn_state) {
         case BurnState::not_burned:
                 switch (m_type) {
                 case GrassType::common:
-                        return ret + "grass";
+                        return str + "grass";
 
                 case GrassType::withered:
-                        return ret + "withered grass";
+                        return str + "withered grass";
                 }
                 break;
 
         case BurnState::burning:
-                return ret + "burning grass";
+                return str + "burning grass";
 
         case BurnState::has_burned:
-                return ret + "scorched ground";
+                return str + "scorched ground";
         }
 
         ASSERT("Failed to set name" && false);
@@ -2069,21 +2088,21 @@ WasDestroyed Bush::on_finished_burning()
 
 std::string Bush::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "a " : "the ";
+        std::string str = (article == Article::a) ? "a " : "the ";
 
         switch (m_burn_state) {
         case BurnState::not_burned:
                 switch (m_type) {
                 case GrassType::common:
-                        return ret + "shrub";
+                        return str + "shrub";
 
                 case GrassType::withered:
-                        return ret + "withered shrub";
+                        return str + "withered shrub";
                 }
                 break;
 
         case BurnState::burning:
-                return ret + "burning shrub";
+                return str + "burning shrub";
 
         case BurnState::has_burned:
                 // Should not happen
@@ -2156,14 +2175,14 @@ WasDestroyed Vines::on_finished_burning()
 
 std::string Vines::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "" : "the ";
+        std::string str = (article == Article::a) ? "" : "the ";
 
         switch (m_burn_state) {
         case BurnState::not_burned:
-                return ret + "hanging vines";
+                return str + "hanging vines";
 
         case BurnState::burning:
-                return ret + "burning vines";
+                return str + "burning vines";
 
         case BurnState::has_burned:
                 // Should not happen
@@ -4150,13 +4169,13 @@ DidOpen Cabinet::open(actor::Actor* const actor_opening)
 
 std::string Cabinet::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "a " : "the ";
+        std::string str = (article == Article::a) ? "a " : "the ";
 
         if (m_burn_state == BurnState::burning) {
-                ret += "burning ";
+                str += "burning ";
         }
 
-        return ret + "cabinet";
+        return str + "cabinet";
 }
 
 gfx::TileId Cabinet::tile() const
@@ -4320,13 +4339,13 @@ void Bookshelf::player_loot()
 
 std::string Bookshelf::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "a " : "the ";
+        std::string str = (article == Article::a) ? "a " : "the ";
 
         if (m_burn_state == BurnState::burning) {
-                ret += "burning ";
+                str += "burning ";
         }
 
-        return ret + "bookshelf";
+        return str + "bookshelf";
 }
 
 gfx::TileId Bookshelf::tile() const
@@ -4750,13 +4769,13 @@ DidOpen Cocoon::open(actor::Actor* const actor_opening)
 
 std::string Cocoon::name(const Article article) const
 {
-        std::string ret = (article == Article::a) ? "a " : "the ";
+        std::string str = (article == Article::a) ? "a " : "the ";
 
         if (m_burn_state == BurnState::burning) {
-                ret += "burning ";
+                str += "burning ";
         }
 
-        return ret + "cocoon";
+        return str + "cocoon";
 }
 
 gfx::TileId Cocoon::tile() const

@@ -43,9 +43,13 @@ inline constexpr int g_weakened_carry_weight_penalty = 15;
 
 inline constexpr int g_nr_mg_projectiles = 5;
 
-inline constexpr int g_mi_go_gun_hp_drained = 3;
-inline constexpr int g_mi_go_gun_regen_disabled_min_turns = 7;
-inline constexpr int g_mi_go_gun_regen_disabled_max_turns = 12;
+inline constexpr int g_electric_gun_hp_drained = 3;
+inline constexpr int g_electric_gun_regen_disabled_min_turns = 7;
+inline constexpr int g_electric_gun_regen_disabled_max_turns = 12;
+
+inline constexpr int g_morphic_blaster_hp_drained = 9;
+inline constexpr int g_morphic_blaster_regen_disabled_min_turns = 10;
+inline constexpr int g_morphic_blaster_regen_disabled_max_turns = 20;
 
 inline constexpr int g_min_dmg_to_wound = 5;
 
@@ -179,7 +183,7 @@ enum class Material
         stone,
         metal,
         plant,  // Grass, bushes, reeds, vines, fungi...
-        wood,  // Trees, doors, benches...
+        wood,   // Trees, doors, benches...
         cloth,  // Carpet, silk (cocoons)...
         fluid
 };
@@ -383,7 +387,7 @@ enum class LightSize
 {
         none,
         single,  // Single position
-        small,  // Including adjacent positions, i.e. 3x3
+        small,   // Including adjacent positions, i.e. 3x3
         fov
 };
 

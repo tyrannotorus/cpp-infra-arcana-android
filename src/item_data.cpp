@@ -6,13 +6,14 @@
 
 #include "item_data.hpp"
 
+#include <memory>
 #include <unordered_map>
 
 #include "colors.hpp"
-#include "common_text.hpp"
 #include "debug.hpp"
 #include "item_att_property.hpp"
 #include "property.hpp"
+#include "property_data.hpp"
 #include "property_factory.hpp"
 #include "random.hpp"
 #include "saving.hpp"
@@ -65,10 +66,29 @@ static const StrToItemSetIdMap s_str_to_item_set_id_map = {
         {"ITEMSET_FLUCTUATING_MATERIAL", item::ItemSetId::fluctuating_material},
         {"ITEMSET_ZEALOT_SPIKED_MACE", item::ItemSetId::zealot_spiked_mace},
         {"ITEMSET_PRIEST_DAGGER", item::ItemSetId::priest_dagger},
-        {"ITEMSET_MI_GO_GUN", item::ItemSetId::mi_go_gun},
+        {"ITEMSET_ELECTRIC_GUN", item::ItemSetId::electric_gun},
+        {"ITEMSET_MORPHIC_BLASTER", item::ItemSetId::morphic_blaster},
         {"ITEMSET_MI_GO_ARMOR", item::ItemSetId::mi_go_armor},
         {"ITEMSET_HIGH_PRIEST_GUARD_WAR_VET", item::ItemSetId::high_priest_guard_war_vet},
         {"ITEMSET_HIGH_PRIEST_GUARD_ROGUE", item::ItemSetId::high_priest_guard_rogue}};
+
+static const std::string s_electric_gun_hp_drained_str =
+        std::to_string(g_electric_gun_hp_drained);
+
+static const std::string s_electric_gun_hp_disable_range_str =
+        Range(
+                g_electric_gun_regen_disabled_min_turns,
+                g_electric_gun_regen_disabled_max_turns)
+                .str();
+
+static const std::string s_morphic_blaster_hp_drained_str =
+        std::to_string(g_morphic_blaster_hp_drained);
+
+static const std::string s_morphic_blaster_hp_disable_range_str =
+        Range(
+                g_morphic_blaster_regen_disabled_min_turns,
+                g_morphic_blaster_regen_disabled_max_turns)
+                .str();
 
 static void mod_spawn_chance(item::ItemData& data, const double factor)
 {
@@ -419,44 +439,44 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::ranged_wpn);
-        d.id = Id::incinerator;
-        d.base_name = {"Incinerator", "Incinerators", "an Incinerator"};
+        d.id = Id::morphic_blaster;
+        d.base_name = {"Morphic Blaster", "Morphic Blasters", "a Morphic Blaster"};
         d.base_descr = {
-                "This hellish, experimental weapon launches an explosive "
-                "fireball. Best used with extreme caution."};
+                "A weapon created by the Mi-Go. "
+                "It launches projectiles that unleash explosive energy upon impact. "
+                "The weapon adapts itself to merge with the biology of its wielder. "
+                "A guidance system integrates with the brain to "
+                "ensure that the projectile hits its intended mark independent of aiming skill "
+                "(although there is a small chance that it collides with unintended "
+                "targets along the path).",
+
+                "When wielded by creatures lacking the peculiar power sources "
+                "employed by the Mi-Go, "
+                "this weapon instead draws power from the life force of the wielder (" +
+                        s_morphic_blaster_hp_drained_str +
+                        " hit points drained per attack, "
+                        "passive hit point regeneration is disabled for " +
+                        s_morphic_blaster_hp_disable_range_str +
+                        " turns, unable to act for the next turn)."};
         d.weight = (Weight::medium + Weight::heavy) / 2;
-        d.tile = gfx::TileId::incinerator;
+        d.tile = gfx::TileId::morphic_blaster;
+        d.is_unique = true;
+        d.allow_spawn = false;
         d.melee.attack_msgs = {"strike", "strikes"};
         d.ranged.max_ammo = 5;
         d.ranged.dmg = WpnDmg(1, 3);
-        d.ranged.effective_range = {0, 8};
+        d.ranged.effective_range = {0, 999};
         d.allow_display_dmg = false;
-        d.ranged.ammo_item_id = Id::incinerator_ammo;
+        d.ranged.has_infinite_ammo = true;
         d.ranged.attack_msgs = {"fire", "fires"};
-        d.ranged.snd_msg = "I hear the blast of a launched missile.";
+        d.ranged.snd_msg = "I hear the blast of a launched projectile.";
+        d.ranged.attack_sfx = audio::SfxId::morphic_blaster;
         d.ranged.projectile_character = '*';
-        d.ranged.projectile_color = colors::light_red();
+        d.ranged.projectile_color = colors::light_blue();
+        d.ranged.projectile_tile = gfx::TileId::blast1;
         d.ranged.reload_sfx = audio::SfxId::machine_gun_reload;
         d.spawn_std_range.min = g_dlvl_first_mid_game;
         d.chance_to_incl_in_spawn_list = 35;
-        d.native_containers.push_back(terrain::Id::chest);
-        d.native_containers.push_back(terrain::Id::cabinet);
-        d.native_containers.push_back(terrain::Id::cocoon);
-        g_data[(size_t)d.id] = d;
-
-        reset_data(d, ItemType::ammo_mag);
-        d.id = Id::incinerator_ammo;
-        d.base_name = {
-                "Incinerator Cartridge",
-                "Incinerator Cartridges",
-                "an Incinerator Cartridge"};
-        d.base_descr = {
-                "Ammunition designed for Incinerators."};
-        d.weight = Weight::light;
-        d.spawn_std_range.min = 5;
-        d.max_stack_at_spawn = 1;
-        d.ranged.max_ammo = g_data[(size_t)Id::incinerator].ranged.max_ammo;
-        d.chance_to_incl_in_spawn_list = 15;
         d.native_containers.push_back(terrain::Id::chest);
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::cocoon);
@@ -660,24 +680,24 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::ranged_wpn);
-        d.id = Id::mi_go_gun;
+        d.id = Id::electric_gun;
         d.base_name = {
                 "Electric Gun", "Electric Gun", "an Electric Gun"};
         d.base_descr = {
-                "A weapon created by the Mi-go. It fires devastating bolts of "
-                "electricity.",
+                "A weapon created by the Mi-Go. "
+                "It fires devastating bolts of electricity.",
 
-                ("The weapon does not use ammunition, instead it draws "
-                 "power from the life force of the wielder "
-                 "(3 hit points drained per attack, passive hit point "
-                 "regeneration is disabled for ") +
-                        Range(g_mi_go_gun_regen_disabled_min_turns,
-                              g_mi_go_gun_regen_disabled_max_turns)
-                                .str() +
+                "When wielded by creatures lacking the peculiar power sources "
+                "employed by the Mi-Go, "
+                "this weapon instead draws power from the life force of the wielder (" +
+                        s_electric_gun_hp_drained_str +
+                        " hit points drained per attack, "
+                        "passive hit point regeneration is disabled for " +
+                        s_electric_gun_hp_disable_range_str +
                         " turns)."};
         d.spawn_std_range = Range(-1, -1);
         d.weight = Weight::medium;
-        d.tile = gfx::TileId::mi_go_gun;
+        d.tile = gfx::TileId::electric_gun;
         d.color = colors::yellow();
         d.ranged.dmg = WpnDmg(8, 12);
         d.ranged.hit_chance_mod = 5;
@@ -696,7 +716,7 @@ void init()
         d.melee.attack_msgs = {"strike", "strikes"};
         d.ranged.attack_msgs = {"fire", "fires"};
         d.ranged.snd_msg = "I hear a bolt of electricity.";
-        d.ranged.attack_sfx = audio::SfxId::migo_gun;
+        d.ranged.attack_sfx = audio::SfxId::electric_gun;
         d.ranged.makes_ricochet_snd = false;
         g_data[(size_t)d.id] = d;
 
@@ -1463,9 +1483,9 @@ void init()
 
         reset_data(d, ItemType::armor);
         d.id = Id::armor_mi_go;
-        d.base_name = {"Mi-go Bio-armor", "", "a Mi-go Bio-armor"};
+        d.base_name = {"Mi-Go Bio-armor", "", "a Mi-Go Bio-armor"};
         d.base_descr = {
-                "An extremely durable biological armor created by the Mi-go."};
+                "An extremely durable biological armor created by the Mi-Go."};
         d.spawn_std_range = Range(-1, -1);
         d.weight = Weight::medium;
         d.color = colors::magenta();

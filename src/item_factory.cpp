@@ -181,12 +181,12 @@ Item* make(const Id item_id, const int nr_items)
                 r = new Wpn(d);
                 break;
 
-        case Id::incinerator:
-                r = new Incinerator(d);
+        case Id::morphic_blaster:
+                r = new MorphicBlaster(d);
                 break;
 
-        case Id::mi_go_gun:
-                r = new MiGoGun(d);
+        case Id::electric_gun:
+                r = new ElectricGun(d);
                 break;
 
         case Id::revolver_bullet:
@@ -197,7 +197,6 @@ Item* make(const Id item_id, const int nr_items)
 
         case Id::drum_of_bullets:
         case Id::pistol_mag:
-        case Id::incinerator_ammo:
                 r = new AmmoMag(d);
                 break;
 

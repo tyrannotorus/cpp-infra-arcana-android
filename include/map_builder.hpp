@@ -25,6 +25,7 @@ enum class MapType
         high_priest,
         intro_forest,
         rat_cave,
+        mi_go_outpost,
         std,
         trapez
 };
@@ -170,6 +171,29 @@ private:
 
         std::vector<P> m_possible_grave_positions {};
         std::vector<P> m_possible_statue_positions {};
+};
+
+// -----------------------------------------------------------------------------
+// MapBuilderMiGoOutpost
+// -----------------------------------------------------------------------------
+class MapBuilderMiGoOutpost : public MapBuilderTemplateLevel
+{
+public:
+        MapBuilderMiGoOutpost() = default;
+
+        ~MapBuilderMiGoOutpost() = default;
+
+private:
+        LevelTemplId template_id() const override
+        {
+                return LevelTemplId::mi_go_outpost;
+        }
+
+        void handle_template_pos(const P& p, char c) override;
+
+        void on_template_built() override;
+
+        std::vector<P> m_possible_mon_positions {};
 };
 
 // -----------------------------------------------------------------------------

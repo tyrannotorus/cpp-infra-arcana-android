@@ -50,7 +50,8 @@ enum class SfxId
         shotgun_reload,
         machine_gun_fire,
         machine_gun_reload,
-        migo_gun,
+        electric_gun,
+        morphic_blaster,
         spike_gun,
         bite,
 

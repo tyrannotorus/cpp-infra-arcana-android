@@ -267,7 +267,7 @@ static void bot_act()
                         Verbose::no);
         }
 
-        // Keep an allied Mi-go around (to help getting out of sticky
+        // Keep an allied Mi-Go around (to help getting out of sticky
         // situations, and for some allied monster code exercise).
         bool has_allied_mon = false;
 

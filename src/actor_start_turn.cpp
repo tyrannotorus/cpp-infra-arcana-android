@@ -333,10 +333,6 @@ static void update_player_monster_detection()
                 else {
                         update_player_unseen_monster(*actor, vigilant_flood);
                 }
-
-                if (actor->is_player_aware_of_me()) {
-                        actor->m_give_hit_chance_penalty_vs_player = false;
-                }
         }
 
         if (actor::player_state::g_seen_mon_to_warn_about) {

@@ -102,23 +102,22 @@ static void query_quit()
         }
 }
 
-static bool allow_player_fire_mi_go_gun()
+static bool allow_player_fire_mi_go_weapon(const int hp_drained)
 {
-        const bool has_enough_hp =
-                (map::g_player->m_hp > g_mi_go_gun_hp_drained);
+        const bool has_enough_hp = (map::g_player->m_hp > hp_drained);
 
         if (has_enough_hp) {
                 return true;
         }
         else {
                 // Not enough HP - allow firing the gun if player has the
-                // Prolonged Life trait and enough SP instead
+                // Prolonged Life trait and enough SP instead.
                 const bool has_prolonged_life = player_bon::has_trait(Trait::prolonged_life);
 
                 const int hp = map::g_player->m_hp;
                 const int sp = map::g_player->m_sp;
 
-                const bool has_enough_hp_and_sp = ((hp + sp - 1) > g_mi_go_gun_hp_drained);
+                const bool has_enough_hp_and_sp = ((hp + sp - 1) > hp_drained);
 
                 return (has_prolonged_life && has_enough_hp_and_sp);
         }
@@ -150,18 +149,32 @@ static void handle_fire_command_firearm(item::Wpn& wpn)
                 return;
         }
 
-        if ((item_data.id == item::Id::mi_go_gun) &&
-            !allow_player_fire_mi_go_gun()) {
+        bool is_mi_go_wpn = false;
+        int mi_go_wpn_hp_drain = 0;
+
+        switch (item_data.id) {
+        case item::Id::electric_gun:
+                is_mi_go_wpn = true;
+                mi_go_wpn_hp_drain = g_electric_gun_hp_drained;
+                break;
+
+        case item::Id::morphic_blaster:
+                is_mi_go_wpn = true;
+                mi_go_wpn_hp_drain = g_morphic_blaster_hp_drained;
+                break;
+
+        default:
+                break;
+        }
+
+        if (is_mi_go_wpn && !allow_player_fire_mi_go_weapon(mi_go_wpn_hp_drain)) {
                 msg_log::add("Firing the gun now would destroy me.");
 
                 return;
         }
 
         // OK - we can fire the gun.
-        states::push(
-                std::make_unique<Aiming>(
-                        map::g_player->m_pos,
-                        wpn));
+        states::push(std::make_unique<Aiming>(map::g_player->m_pos, wpn));
 }
 
 static void handle_fire_command()

@@ -629,11 +629,19 @@ static void make_item_set_priest_dagger(actor::Actor& actor)
         actor.m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 }
 
-static void make_item_set_mi_go_gun(actor::Actor& actor)
+static void make_item_set_electric_gun(actor::Actor& actor)
 {
         actor.m_inv.put_in_slot(
                 SlotId::wpn,
-                item::make(item::Id::mi_go_gun),
+                item::make(item::Id::electric_gun),
+                Verbose::no);
+}
+
+static void make_item_set_morphic_blaster(actor::Actor& actor)
+{
+        actor.m_inv.put_in_slot(
+                SlotId::wpn,
+                item::make(item::Id::morphic_blaster),
                 Verbose::no);
 }
 
@@ -710,8 +718,12 @@ static void make_monster_item_sets(actor::Actor& actor)
                                 make_item_set_priest_dagger(actor);
                                 break;
 
-                        case item::ItemSetId::mi_go_gun:
-                                make_item_set_mi_go_gun(actor);
+                        case item::ItemSetId::electric_gun:
+                                make_item_set_electric_gun(actor);
+                                break;
+
+                        case item::ItemSetId::morphic_blaster:
+                                make_item_set_morphic_blaster(actor);
                                 break;
 
                         case item::ItemSetId::mi_go_armor:

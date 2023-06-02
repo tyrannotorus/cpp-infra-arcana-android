@@ -556,6 +556,7 @@ enum class WallType
         pillar_broken,
         cave,
         egypt,
+        mi_go,
         cliff,
         leng_monestary
 };
@@ -987,15 +988,15 @@ enum class TombTrait
 {
         ghost,
         other_undead,  // Zombies, Mummies, ...
-        stench,  // Fumes, Ooze-type monster
+        stench,        // Fumes, Ooze-type monster
         cursed,
         END
 };
 
 enum class TombAppearance
 {
-        common,  // Common items
-        ornate,  // Minor treasure
+        common,     // Common items
+        ornate,     // Minor treasure
         marvelous,  // Major treasure
         END
 };

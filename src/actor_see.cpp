@@ -134,9 +134,7 @@ static std::vector<actor::Actor*> seen_actors_mon(const actor::Actor& mon)
                 std::min(map::h() - 1, mon.m_pos.y + g_fov_radi_int));
 
         map_parsers::BlocksLos()
-                .run(blocked_los,
-                     los_rect,
-                     MapParseMode::overwrite);
+                .run(blocked_los, los_rect, MapParseMode::overwrite);
 
         for (auto* const other_actor : game_time::g_actors) {
                 if (other_actor == &mon) {
@@ -148,10 +146,7 @@ static std::vector<actor::Actor*> seen_actors_mon(const actor::Actor& mon)
                 }
 
                 const bool can_see_actor =
-                        actor::can_mon_see_actor(
-                                mon,
-                                *other_actor,
-                                blocked_los);
+                        actor::can_mon_see_actor(mon, *other_actor, blocked_los);
 
                 if (!can_see_actor) {
                         continue;
@@ -266,22 +261,42 @@ bool can_mon_see_actor(
                 return false;
         }
 
-        if (mon.is_actor_my_leader(map::g_player)) {
-                // Monster is allied to player
+        // The monster can potentially see the other actor (LOS not obstructed,
+        // not hidden by an invisibility property etc) - the monster can see the
+        // actor if they are aware of it.
 
-                if (is_player(&other)) {
-                        // Player-allied monster looking at the player
+        if (mon.is_actor_my_leader(map::g_player)) {
+                // The looking monster is allied to the player.
+
+                if (is_player(&other) || other.is_actor_my_leader(map::g_player)) {
+                        // Player-allied monster looking at the player or at
+                        // another player-allied monster - they are always aware
+                        // of the player or other player-allied monsters.
                         return true;
                 }
-
-                // Player-allied monster looking at other monster
-
-                return other.is_player_aware_of_me();
+                else {
+                        // Player-allied monster looking at a hostile monster -
+                        // they are considered aware of monsters that the player
+                        // is aware of.
+                        return other.is_player_aware_of_me();
+                }
         }
+        else {
+                // The looking monster is hostile to the player.
 
-        // Monster is hostile to player
-
-        return mon.is_aware_of_player();
+                if (is_player(&other) || other.is_actor_my_leader(map::g_player)) {
+                        // Hostile monster looking at the player or at a
+                        // player-allied monster - they are considered aware of
+                        // the player or player-allied monster if they are aware
+                        // of the player.
+                        return mon.is_aware_of_player();
+                }
+                else {
+                        // Hostile monster looking at a hostile monster - they
+                        // are always aware of each other.
+                        return true;
+                }
+        }
 }
 
 std::vector<Actor*> seen_actors(const Actor& actor)

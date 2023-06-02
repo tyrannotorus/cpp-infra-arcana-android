@@ -30,7 +30,7 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<std::string> actor_ids_for_starting_allies(
+static std::vector<std::string> ids_for_starting_allies(
         const actor::StartingAllyEntry& allies_entry)
 {
         return {(size_t)allies_entry.nr.roll(), allies_entry.id};
@@ -48,22 +48,33 @@ static void disable_player_feeling_msg(
                 });
 }
 
+static actor::Actor* find_top_leader(actor::Actor& actor)
+{
+        if (actor.m_leader) {
+                return find_top_leader(*actor.m_leader);
+        }
+        else {
+                return &actor;
+        }
+}
+
 static void spawn_starting_allies()
 {
         for (size_t i = 0; i < game_time::g_actors.size(); ++i) {
                 actor::Actor* const actor = game_time::g_actors[i];
 
-                for (const actor::StartingAllyEntry& allies_entry :
-                     actor->m_data->starting_allies) {
-                        const std::vector<std::string> ids =
-                                actor_ids_for_starting_allies(allies_entry);
+                const std::vector<actor::StartingAllyEntry>& allies =
+                        actor->m_data->starting_allies;
+
+                for (const actor::StartingAllyEntry& entry : allies) {
+                        const std::vector<std::string> ids = ids_for_starting_allies(entry);
 
                         const actor::MonSpawnResult summoned =
                                 actor::spawn(
                                         actor->m_pos,
                                         ids,
                                         map::rect())
-                                        .set_leader(actor);
+                                        .set_leader(find_top_leader(*actor));
 
                         disable_player_feeling_msg(summoned.monsters);
                 }
@@ -91,6 +102,9 @@ std::unique_ptr<MapBuilder> make(const MapType map_type)
 
         case MapType::std:
                 return std::make_unique<MapBuilderStd>();
+
+        case MapType::mi_go_outpost:
+                return std::make_unique<MapBuilderMiGoOutpost>();
 
         case MapType::egypt:
                 return std::make_unique<MapBuilderEgypt>();

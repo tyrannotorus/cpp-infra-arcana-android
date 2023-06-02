@@ -358,18 +358,15 @@ void MapBuilderIntroForest::handle_template_pos(const P& p, const char c)
         case '.': {
                 if (rnd::one_in(6)) {
                         if (rnd::one_in(6)) {
-                                map::set_terrain(
-                                        terrain::make(terrain::Id::bush, p));
+                                map::set_terrain(terrain::make(terrain::Id::bush, p));
                         }
                         else {
-                                map::set_terrain(
-                                        terrain::make(terrain::Id::grass, p));
+                                map::set_terrain(terrain::make(terrain::Id::grass, p));
                         }
                 }
                 else {
                         // Normal stone floor
-                        map::set_terrain(
-                                terrain::make(terrain::Id::floor, p));
+                        map::set_terrain(terrain::make(terrain::Id::floor, p));
                 }
         } break;
 
@@ -521,6 +518,105 @@ void MapBuilderIntroForest::on_template_built()
 }
 
 // -----------------------------------------------------------------------------
+// MapBuilderMiGoOutpost
+// -----------------------------------------------------------------------------
+void MapBuilderMiGoOutpost::handle_template_pos(const P& p, const char c)
+{
+        switch (c) {
+        case '@':
+        case ',': {
+                auto* const floor =
+                        static_cast<terrain::Floor*>(
+                                terrain::make(terrain::Id::floor, p));
+
+                floor->m_type = terrain::FloorType::cave;
+
+                map::set_terrain(floor);
+
+                if (c == '@') {
+                        map::g_player->m_pos = p;
+                }
+        } break;
+
+        case '.':
+        case '1': {
+                auto* const floor =
+                        static_cast<terrain::Floor*>(
+                                terrain::make(terrain::Id::floor, p));
+
+                floor->m_type = terrain::FloorType::common;
+
+                map::set_terrain(floor);
+
+                if (c == '1') {
+                        actor::make("MON_MI_GO_OMEGA_SENTINEL", p);
+                }
+                else {
+                        m_possible_mon_positions.push_back(p);
+                }
+
+        } break;
+
+        case '#': {
+                auto* const wall =
+                        static_cast<terrain::Wall*>(
+                                terrain::make(terrain::Id::wall, p));
+
+                wall->m_type = terrain::WallType::cave;
+
+                map::set_terrain(wall);
+        } break;
+
+        case 'x': {
+                auto* const wall =
+                        static_cast<terrain::Wall*>(
+                                terrain::make(terrain::Id::wall, p));
+
+                wall->m_type = terrain::WallType::mi_go;
+
+                map::set_terrain(wall);
+        } break;
+
+        case '>': {
+                map::set_terrain(terrain::make(terrain::Id::stairs, p));
+        } break;
+
+        case ':': {
+                map::set_terrain(terrain::make(terrain::Id::stalagmite, p));
+        } break;
+
+        default:
+        {
+                ASSERT(false);
+        } break;
+        }
+}
+
+void MapBuilderMiGoOutpost::on_template_built()
+{
+        rnd::shuffle(m_possible_mon_positions);
+
+        size_t pos_idx = 0U;
+
+        const size_t nr_bio_engineer = 2U;
+        const size_t nr_commander = 2U;
+
+        for (size_t i = 0; i < nr_bio_engineer; ++i) {
+                actor::make("MON_MI_GO_BIO_ENGINEER", m_possible_mon_positions[pos_idx]);
+
+                ++pos_idx;
+        }
+
+        for (size_t i = 0; i < nr_commander; ++i) {
+                actor::make("MON_MI_GO_COMMANDER", m_possible_mon_positions[pos_idx]);
+
+                ++pos_idx;
+        }
+
+        populate_items::make_items_on_floor();
+}
+
+// -----------------------------------------------------------------------------
 // MapBuilderEgypt
 // -----------------------------------------------------------------------------
 MapBuilderEgypt::MapBuilderEgypt() :
@@ -650,7 +746,13 @@ void MapBuilderRatCave::handle_template_pos(const P& p, const char c)
                         map::set_terrain(terrain::make(terrain::Id::bones, p));
                 }
                 else {
-                        map::set_terrain(terrain::make(terrain::Id::floor, p));
+                        auto* const floor =
+                                static_cast<terrain::Floor*>(
+                                        terrain::make(terrain::Id::floor, p));
+
+                        floor->m_type = terrain::FloorType::cave;
+
+                        map::set_terrain(floor);
                 }
 
                 if (c == '@') {

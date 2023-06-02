@@ -126,6 +126,7 @@ public:
         bool is_leader_of(const Actor* actor) const;
         bool is_actor_my_leader(const Actor* actor) const;
         bool is_in_same_group_as(const Actor* actor) const;
+        std::vector<Actor*> actors_in_same_group() const;
 
         int ability(AbilityId id, bool is_affected_by_props) const;
 
@@ -253,7 +254,6 @@ public:
         //
         AiState m_ai_state {};
         AwareState m_mon_aware_state {};
-        bool m_give_hit_chance_penalty_vs_player {true};
         Actor* m_leader {nullptr};
         std::vector<MonSpell> m_mon_spells {};
         const ActorData* m_mimic_data {nullptr};  // Hallucination

@@ -33,6 +33,7 @@
 #include "drop.hpp"
 #include "explosion.hpp"
 #include "flood.hpp"
+#include "fov.hpp"
 #include "game_time.hpp"
 #include "gfx.hpp"
 #include "global.hpp"
@@ -73,34 +74,35 @@
 // -----------------------------------------------------------------------------
 static const std::unordered_map<std::string, SpellId> s_str_to_spell_id_map = {
         {"SPELL_AURA_OF_DECAY", SpellId::aura_of_decay},
-        {"SPELL_SPECTRAL_WEAPONS", SpellId::spectral_weapons},
         {"SPELL_AZA_GAZE", SpellId::aza_gaze},
         {"SPELL_BLESS", SpellId::bless},
         {"SPELL_BURN", SpellId::burn},
-        {"SPELL_FORCE_BOLT", SpellId::force_bolt},
+        {"SPELL_CATACLYSM", SpellId::cataclysm},
+        {"SPELL_CLEANSING_FIRE", SpellId::cleansing_fire},
+        {"SPELL_CONTROL_OBJECT", SpellId::control_object},
+        {"SPELL_CURSE", SpellId::curse},
         {"SPELL_DARKBOLT", SpellId::darkbolt},
         {"SPELL_DEAFEN", SpellId::deafen},
         {"SPELL_DISEASE", SpellId::disease},
-        {"SPELL_PREMONITION", SpellId::premonition},
-        {"SPELL_ERUDITION", SpellId::erudition},
         {"SPELL_ENFEEBLE", SpellId::enfeeble},
-        {"SPELL_CURSE", SpellId::curse},
-        {"SPELL_CLEANSING_FIRE", SpellId::cleansing_fire},
-        {"SPELL_SANCTUARY", SpellId::sanctuary},
-        {"SPELL_PURGE", SpellId::purge},
+        {"SPELL_ERUDITION", SpellId::erudition},
+        {"SPELL_FORCE_BOLT", SpellId::force_bolt},
         {"SPELL_FRENZY", SpellId::frenzy},
+        {"SPELL_HASTE", SpellId::haste},
         {"SPELL_HEAL", SpellId::heal},
+        {"SPELL_HEAL_OTHERS", SpellId::heal_others},
         {"SPELL_IDENTIFY", SpellId::identify},
         {"SPELL_KNOCKBACK", SpellId::knockback},
         {"SPELL_LIGHT", SpellId::light},
-        {"SPELL_CATACLYSM", SpellId::cataclysm},
         {"SPELL_MI_GO_HYPNO", SpellId::mi_go_hypno},
-        {"SPELL_CONTROL_OBJECT", SpellId::control_object},
         {"SPELL_PESTILENCE", SpellId::pestilence},
+        {"SPELL_PREMONITION", SpellId::premonition},
+        {"SPELL_PURGE", SpellId::purge},
         {"SPELL_RES", SpellId::resistance},
+        {"SPELL_SANCTUARY", SpellId::sanctuary},
         {"SPELL_SEE_INVIS", SpellId::see_invis},
         {"SPELL_SLOW", SpellId::slow},
-        {"SPELL_HASTE", SpellId::haste},
+        {"SPELL_SPECTRAL_WEAPONS", SpellId::spectral_weapons},
         {"SPELL_SPELL_SHIELD", SpellId::spell_shield},
         {"SPELL_SUMMON", SpellId::summon},
         {"SPELL_SUMMON_TENTACLES", SpellId::summon_tentacles},
@@ -838,6 +840,9 @@ Spell* make(const SpellId spell_id)
 
         case SpellId::crimson_passage:
                 return new SpellCrimsonPassage();
+
+        case SpellId::heal_others:
+                return new SpellHealOthers();
 
         case SpellId::END:
                 break;
@@ -3909,6 +3914,98 @@ bool SpellCurse::allow_mon_cast_now(
 }
 
 // -----------------------------------------------------------------------------
+// Heal Others
+// -----------------------------------------------------------------------------
+int SpellHealOthers::base_max_cost(const SpellSkill skill) const
+{
+        (void)skill;
+
+        return 6;
+}
+
+int SpellHealOthers::mon_cooldown() const
+{
+        return 10;
+}
+
+std::vector<actor::Actor*> SpellHealOthers::find_possible_actors_to_heal(
+        const actor::Actor* const caster) const
+{
+        const std::vector<actor::Actor*> actors_in_group = caster->actors_in_same_group();
+
+        Array2<bool> blocks_los(map::dims());
+
+        const auto r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
+
+        map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
+
+        std::vector<actor::Actor*> actors_to_heal;
+
+        std::copy_if(
+                std::begin(actors_in_group),
+                std::end(actors_in_group),
+                std::back_inserter(actors_to_heal),
+                [caster, blocks_los](const actor::Actor* const actor) {
+                        const bool can_see = can_mon_see_actor(*caster, *actor, blocks_los);
+
+                        const int hp = actor->m_hp;
+                        const int max_hp = actor::max_hp(*actor);
+
+                        const bool is_healing_needed = (hp < ((max_hp * 3) / 4));
+
+                        return can_see && is_healing_needed;
+                });
+
+        return actors_to_heal;
+}
+
+actor::Actor* SpellHealOthers::find_random_actor_to_heal(
+        const actor::Actor* caster) const
+{
+        const std::vector<actor::Actor*> actors = find_possible_actors_to_heal(caster);
+
+        if (actors.empty()) {
+                ASSERT(false);
+
+                return nullptr;
+        }
+        else {
+                return rnd::element(actors);
+        }
+}
+
+void SpellHealOthers::run_effect(
+        actor::Actor* const caster,
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)seen_targets;
+
+        const int hp_healed = 8 + (int)skill * 4;
+
+        actor::Actor* const actor_to_heal = find_random_actor_to_heal(caster);
+
+        if (!actor_to_heal) {
+                ASSERT(false);
+
+                return;
+        }
+
+        draw_blast_at_seen_actors({actor_to_heal}, colors::light_green());
+
+        actor_to_heal->restore_hp(hp_healed);
+}
+
+bool SpellHealOthers::allow_mon_cast_now(
+        const actor::Actor& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)seen_targets;
+
+        return !find_possible_actors_to_heal(&mon).empty();
+}
+
+// -----------------------------------------------------------------------------
 // Enfeeble
 // -----------------------------------------------------------------------------
 Range SpellEnfeeble::duration_range(const SpellSkill skill) const
@@ -4621,7 +4718,7 @@ bool SpellSummonTentacles::allow_mon_cast_now(
 }
 
 // -----------------------------------------------------------------------------
-// Healing
+// Heal
 // -----------------------------------------------------------------------------
 int SpellHeal::nr_hp_restored(SpellSkill skill) const
 {
@@ -4722,7 +4819,7 @@ std::vector<std::string> SpellHeal::descr_specific(
 }
 
 // -----------------------------------------------------------------------------
-// Mi-go hypnosis
+// Mi-Go hypnosis
 // -----------------------------------------------------------------------------
 void SpellMiGoHypno::run_effect(
         actor::Actor* const caster,

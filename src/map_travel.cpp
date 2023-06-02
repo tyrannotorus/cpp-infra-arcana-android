@@ -71,17 +71,20 @@ void init()
         if (rnd::one_in(3)) {
                 const int deep_one_lvl_nr =
                         rnd::range(
-                                g_dlvl_first_mid_game,
-                                g_dlvl_last_mid_game - 1);
+                                g_dlvl_first_mid_game + 4,
+                                g_dlvl_last_mid_game - 2);
 
                 s_map_list[deep_one_lvl_nr] = MapType::deep_one_lair;
         }
 
         if (rnd::one_in(8)) {
-                s_map_list[g_dlvl_first_late_game - 1] = MapType::rat_cave;
+                s_map_list[g_dlvl_last_mid_game - 1] = MapType::rat_cave;
         }
 
-        // "Pharaoh chamber" is the first late game level
+        // Mi-Go outpost
+        s_map_list[g_dlvl_last_mid_game] = MapType::mi_go_outpost;
+
+        // Pharaoh chamber
         s_map_list[g_dlvl_first_late_game] = MapType::egypt;
 
         s_map_list[g_dlvl_first_late_game + 1] = MapType::magic_pool;

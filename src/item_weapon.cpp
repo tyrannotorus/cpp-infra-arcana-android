@@ -183,10 +183,10 @@ void PlayerGhoulClaw::on_melee_kill(actor::Actor& actor_killed)
         }
 }
 
-MiGoGun::MiGoGun(ItemData* const item_data) :
+ElectricGun::ElectricGun(ItemData* const item_data) :
         Wpn(item_data) {}
 
-void MiGoGun::specific_dmg_mod(
+void ElectricGun::specific_dmg_mod(
         WpnDmg& range,
         const actor::Actor* const actor) const
 {
@@ -196,7 +196,7 @@ void MiGoGun::specific_dmg_mod(
         }
 }
 
-void MiGoGun::pre_ranged_attack()
+void ElectricGun::pre_ranged_attack()
 {
         if (!actor::is_player(m_actor_carrying)) {
                 return;
@@ -204,37 +204,71 @@ void MiGoGun::pre_ranged_attack()
 
         const auto wpn_name = name(ItemNameType::plain, ItemNameInfo::none);
 
-        const auto msg =
-                "The " +
-                wpn_name +
-                " feeds on my energy!";
+        const auto msg = "The " + wpn_name + " feeds on my energy!";
 
         msg_log::add(msg, colors::msg_bad());
 
         actor::hit(
                 *m_actor_carrying,
-                g_mi_go_gun_hp_drained,
+                g_electric_gun_hp_drained,
                 DmgType::pure,
                 nullptr,
                 AllowWound::no);
 
-        auto* disabled_regen =
-                prop::make(prop::Id::disabled_hp_regen);
+        auto* disabled_regen = prop::make(prop::Id::disabled_hp_regen);
 
         disabled_regen->set_duration(
                 rnd::range(
-                        g_mi_go_gun_regen_disabled_min_turns,
-                        g_mi_go_gun_regen_disabled_max_turns));
+                        g_electric_gun_regen_disabled_min_turns,
+                        g_electric_gun_regen_disabled_max_turns));
 
         m_actor_carrying->m_properties.apply(disabled_regen);
 }
 
-Incinerator::Incinerator(ItemData* const item_data) :
+void MorphicBlaster::pre_ranged_attack()
+{
+        if (!actor::is_player(m_actor_carrying)) {
+                return;
+        }
+
+        const auto wpn_name = name(ItemNameType::plain, ItemNameInfo::none);
+
+        const auto msg = "The " + wpn_name + " feeds on my energy!";
+
+        msg_log::add(msg, colors::msg_bad());
+
+        actor::hit(
+                *m_actor_carrying,
+                g_morphic_blaster_hp_drained,
+                DmgType::pure,
+                nullptr,
+                AllowWound::no);
+
+        auto* disabled_regen = prop::make(prop::Id::disabled_hp_regen);
+
+        disabled_regen->set_duration(
+                rnd::range(
+                        g_morphic_blaster_regen_disabled_min_turns,
+                        g_morphic_blaster_regen_disabled_max_turns));
+
+        m_actor_carrying->m_properties.apply(disabled_regen);
+
+        map::g_player->m_properties.apply(prop::make(prop::Id::waiting));
+}
+
+MorphicBlaster::MorphicBlaster(ItemData* const item_data) :
         Wpn(item_data) {}
 
-void Incinerator::on_projectile_blocked(const P& pos)
+void MorphicBlaster::on_projectile_blocked(const P& pos)
 {
-        explosion::run(pos, ExplType::expl);
+        explosion::run(
+                pos,
+                ExplType::expl,
+                EmitExplSnd::yes,
+                -1,  // Smaller radius (mostly so monsters don't hit themselves).
+                ExplExclCenter::no,
+                {},
+                colors::light_blue());
 }
 
 void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)

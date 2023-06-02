@@ -92,7 +92,7 @@ TEST_CASE("Saving and loading the game")
                 // Put new items
                 item::Item* item = nullptr;
 
-                item = item::make(item::Id::mi_go_gun);
+                item = item::make(item::Id::electric_gun);
 
                 inv.put_in_slot(
                         SlotId::wpn,
@@ -292,7 +292,7 @@ TEST_CASE("Saving and loading the game")
                 REQUIRE(inv.m_backpack.size() == 9);
 
                 REQUIRE(inv.item_in_slot(SlotId::wpn)->data().id ==
-                        item::Id::mi_go_gun);
+                        item::Id::electric_gun);
 
                 REQUIRE(map::g_player->unarmed_wpn().id() ==
                         item::Id::player_punch);

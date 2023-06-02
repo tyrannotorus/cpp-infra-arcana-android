@@ -13,6 +13,7 @@
 #include "pos.hpp"
 #include "room.hpp"
 
+// NOTE: When updating this, also update the translation table in the cpp file.
 enum class LevelTemplId
 {
         deep_one_lair,
@@ -21,6 +22,7 @@ enum class LevelTemplId
         high_priest,
         intro_forest,
         rat_cave,
+        mi_go_outpost,
         trapez,
         END
 };
@@ -46,7 +48,7 @@ enum class RoomTemplStatus
 {
         unused,
         placed,  // Plcaed on the map
-        used  // Included in a map which was not discarded
+        used     // Included in a map which was not discarded
 };
 
 namespace map_templates

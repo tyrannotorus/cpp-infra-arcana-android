@@ -208,11 +208,7 @@ DidAction try_cast_random_spell(actor::Actor& mon)
         remove_player_with_sanctuary(seen_targets);
 
         for (auto& spell : mon.m_mon_spells) {
-                const auto did_cast =
-                        try_cast_spell(
-                                mon,
-                                spell,
-                                seen_targets);
+                const DidAction did_cast = try_cast_spell(mon, spell, seen_targets);
 
                 if (did_cast == DidAction::yes) {
                         return did_cast;

@@ -1251,6 +1251,7 @@
         <spells>
             <spell skill="SPELLSKILL_EXPERT">SPELL_TELEPORT</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL</spell>
+            <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL_OTHERS</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SUMMON</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_DARKBOLT</spell>
@@ -3201,10 +3202,10 @@
     <!--************************************************************-->
     <monster id="MON_MI_GO">
         <text>
-            <name_a>a Mi-go</name_a>
-            <name_the>the Mi-go</name_the>
-            <corpse_name_a>a Mi-go corpse</corpse_name_a>
-            <corpse_name_the>the Mi-go corpse</corpse_name_the>
+            <name_a>a Mi-Go</name_a>
+            <name_the>the Mi-Go</name_the>
+            <corpse_name_a>a Mi-Go corpse</corpse_name_a>
+            <corpse_name_the>the Mi-Go corpse</corpse_name_the>
             <description>An amalgam of crustacean, insect and fungi whose droning voice resembles a swarm of maddened hornets. It employs an irregular set of appendages as limbs and is capable of making use of advanced technology.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
@@ -3246,7 +3247,7 @@
         </attributes>
 
         <items>
-            <item_set>ITEMSET_MI_GO_GUN</item_set>
+            <item_set>ITEMSET_ELECTRIC_GUN</item_set>
             <item_set percent_chance="5">ITEMSET_RARE_TREASURE</item_set>
         </items>
 
@@ -3301,10 +3302,10 @@
     <!--************************************************************-->
     <monster id="MON_MI_GO_COMMANDER">
         <text>
-            <name_a>a Mi-go Commander</name_a>
-            <name_the>the Mi-go Commander</name_the>
-            <corpse_name_a>a Mi-go corpse</corpse_name_a>
-            <corpse_name_the>the Mi-go corpse</corpse_name_the>
+            <name_a>a Mi-Go Commander</name_a>
+            <name_the>the Mi-Go Commander</name_the>
+            <corpse_name_a>a Mi-Go corpse</corpse_name_a>
+            <corpse_name_the>the Mi-Go corpse</corpse_name_the>
             <description>Part of a higher echelon of the Mi-Go, the buzz of this creature's commanding tone dims that of its insectoid wings. A protective bio-mechanical suit is fused to its carapace.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
@@ -3327,7 +3328,7 @@
         </audio>
 
         <attributes>
-            <hit_points>18</hit_points>
+            <hit_points>14</hit_points>
             <spirit>20</spirit>
             <speed>MONSPEED_NORMAL</speed>
             <shock_level>MONSHOCK_FRIGHTENING</shock_level>
@@ -3346,7 +3347,11 @@
         </attributes>
 
         <items>
-            <item_set>ITEMSET_MI_GO_GUN</item_set>
+            <item_set>ITEMSET_ELECTRIC_GUN</item_set>
+            <!--
+                NOTE: The description says that they wear a bio-mechanical suit, but there is not
+                a 100% chance that they actually drop one (it could be destroyed when they die).
+            -->
             <item_set percent_chance="25">ITEMSET_MI_GO_ARMOR</item_set>
             <item_set percent_chance="5">ITEMSET_RARE_TREASURE</item_set>
         </items>
@@ -3394,6 +3399,218 @@
             <native_room>ROOM_CAVE</native_room>
             <native_room>ROOM_CHASM</native_room>
         </spawning>
+
+        <starting_allies>
+            <monster id="MON_MI_GO_BIO_ENGINEER"/>
+        </starting_allies>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- MON_MI_GO_BIO_ENGINEER -->
+    <!--************************************************************-->
+    <monster id="MON_MI_GO_BIO_ENGINEER">
+        <text>
+            <name_a>a Mi-Go Bio Engineer</name_a>
+            <name_the>the Mi-Go Bio Engineer</name_the>
+            <corpse_name_a>a Mi-Go corpse</corpse_name_a>
+            <corpse_name_the>the Mi-Go corpse</corpse_name_the>
+            <description>A marvel of biological and technological symbiosis. The Mi-Go Bio Engineer harnesses intricate anatomical knowledge to remotely mend the wounds of its kin - through an intricate network of unseen tendrils, it channels healing energies, fostering rejuvenation from a distance. Cloaked in ethereal veils, it maneuvers undetected, an invaluable asset to the covert operations of the enigmatic Mi-Go.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>looks wary.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen>speaks in a droning voice.</aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message>speaks incantations in a droning voice.</spell_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_MI_GO</tile>
+            <character>E</character>
+            <color>COLOR_ORANGE</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>18</hit_points>
+            <spirit>20</spirit>
+            <speed>MONSPEED_NORMAL</speed>
+            <shock_level>MONSHOCK_FRIGHTENING</shock_level>
+            <melee>80</melee>
+            <ranged>80</ranged>
+            <dodging>0</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>true</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <size>MONSIZE_HUMANOID</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <items>
+            <!-- <item_set>ITEMSET_ELECTRIC_GUN</item_set> -->
+            <!--
+                NOTE: The description says that they wear a bio-mechanical suit, but there is not
+                a 100% chance that they actually drop one (it could be destroyed when they die).
+            -->
+            <item_set percent_chance="25">ITEMSET_MI_GO_ARMOR</item_set>
+            <item_set percent_chance="5">ITEMSET_RARE_TREASURE</item_set>
+        </items>
+
+        <spells>
+            <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL</spell>
+            <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL_OTHERS</spell>
+        </spells>
+
+        <properties>
+            <property>PROP_FLYING</property>
+            <property>PROP_RECLOAKS</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>5</erratic_move_percent>
+            <turns_aware>16</turns_aware>
+            <ranged_cooldown_turns>3</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>false</paths_to_target_when_aware>
+            <moves_to_target_when_los>false</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>12</min_dungeon_level>
+            <max_dungeon_level>28</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_FOREST</native_room>
+            <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CHASM</native_room>
+        </spawning>
+
+        <starting_allies>
+            <monster id="MON_MI_GO" min="1" max="3"/>
+        </starting_allies>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- MON_MI_GO_OMEGA_SENTINEL -->
+    <!--************************************************************-->
+    <monster id="MON_MI_GO_OMEGA_SENTINEL">
+        <text>
+            <name_a>The Omega Sentinel</name_a>
+            <name_the>The Omega Sentinel</name_the>
+            <corpse_name_a>a Mi-Go corpse</corpse_name_a>
+            <corpse_name_the>the Mi-Go corpse</corpse_name_the>
+            <description>The Omega Sentinel, a dreadful creation of the Mi-Go, stands as a testament to their technological mastery. Its chitinous form melds organic and mechanical elements seamlessly, emanating an aura of awe-inspiring terror. Armed with a devastating weapon, it guards the hidden operations of the Mi-Go with unwavering resolve.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>looks wary.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen>speaks in a droning voice.</aware_message_seen>
+            <aware_message_hidden>I hear a droning voice.</aware_message_hidden>
+            <spell_message>speaks incantations in a droning voice.</spell_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_MI_GO</tile>
+            <character>E</character>
+            <color>COLOR_GRAY</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>70</hit_points>
+            <spirit>20</spirit>
+            <speed>MONSPEED_NORMAL</speed>
+            <shock_level>MONSHOCK_TERRIFYING</shock_level>
+            <melee>80</melee>
+            <ranged>80</ranged>
+            <dodging>0</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>true</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <size>MONSIZE_HUMANOID</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <items>
+            <item_set>ITEMSET_MORPHIC_BLASTER</item_set>
+            <item_set percent_chance="5">ITEMSET_RARE_TREASURE</item_set>
+        </items>
+
+        <attacks>
+            <attack id="ITEMINTR_STING">
+                <damage>12</damage>
+                <property_applied duration="8">PROP_POISONED</property_applied>
+            </attack>
+        </attacks>
+
+        <spells>
+            <spell skill="SPELLSKILL_BASIC">SPELL_SPELL_SHIELD</spell>
+        </spells>
+
+        <properties>
+            <property>PROP_FLYING</property>
+            <property>PROP_REGENERATING</property>
+            <property>PROP_EXPLODES_ON_DEATH</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>5</erratic_move_percent>
+            <turns_aware>16</turns_aware>
+            <ranged_cooldown_turns>2</ranged_cooldown_turns>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>false</moves_to_target_when_los>
+            <moves_to_lair>true</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>12</min_dungeon_level>
+            <max_dungeon_level>28</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>false</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_FOREST</native_room>
+            <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CHASM</native_room>
+        </spawning>
+
+        <starting_allies>
+            <monster id="MON_MI_GO_BIO_ENGINEER"/>
+        </starting_allies>
     </monster>
 
     <!--************************************************************-->
@@ -5898,6 +6115,7 @@
             <spell skill="SPELLSKILL_BASIC">SPELL_CURSE</spell>
             <spell skill="SPELLSKILL_BASIC">SPELL_ENFEEBLE</spell>
             <spell skill="SPELLSKILL_BASIC">SPELL_HEAL</spell>
+            <spell skill="SPELLSKILL_BASIC">SPELL_HEAL_OTHERS</spell>
         </spells>
 
         <attacks>
@@ -7828,6 +8046,7 @@
             <spell skill="SPELLSKILL_EXPERT">SPELL_DARKBOLT</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_BURN</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL</spell>
+            <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL_OTHERS</spell>
         </spells>
 
         <properties>

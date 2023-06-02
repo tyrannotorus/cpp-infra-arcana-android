@@ -96,10 +96,7 @@ static void make_all_mon_not_seeing_player_unaware()
                 }
 
                 const bool can_mon_see_player =
-                        can_mon_see_actor(
-                                *mon,
-                                *map::g_player,
-                                blocks_los);
+                        can_mon_see_actor(*mon, *map::g_player, blocks_los);
 
                 if (!can_mon_see_player) {
                         mon->m_mon_aware_state.aware_counter = 0;

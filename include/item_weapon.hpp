@@ -69,20 +69,22 @@ private:
         void on_melee_kill(actor::Actor& actor_killed) override;
 };
 
-class Incinerator : public Wpn
+class MorphicBlaster : public Wpn
 {
 public:
-        Incinerator(ItemData* item_data);
-        ~Incinerator() = default;
+        MorphicBlaster(ItemData* item_data);
+        ~MorphicBlaster() = default;
+
+        void pre_ranged_attack() override;
 
         void on_projectile_blocked(const P& pos) override;
 };
 
-class MiGoGun : public Wpn
+class ElectricGun : public Wpn
 {
 public:
-        MiGoGun(ItemData* item_data);
-        ~MiGoGun() = default;
+        ElectricGun(ItemData* item_data);
+        ~ElectricGun() = default;
 
         void pre_ranged_attack() override;
 

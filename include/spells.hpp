@@ -85,6 +85,7 @@ enum class SpellId
         mi_go_hypno,
         summon,
         summon_tentacles,
+        heal_others,
 
         END
 };
@@ -2760,6 +2761,70 @@ private:
 
                 return 4;
         }
+
+        bool is_noisy(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return true;
+        }
+};
+
+class SpellHealOthers : public Spell
+{
+public:
+        SpellHealOthers() = default;
+
+        bool allow_mon_cast_now(
+                const actor::Actor& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+        int mon_cooldown() const override;
+
+        std::string name() const override
+        {
+                return "Heal Others";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::heal_others;
+        }
+
+        SpellDomain domain() const override
+        {
+                return SpellDomain::enchantment;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::mild;
+        }
+
+        bool player_can_learn() const override
+        {
+                return false;
+        }
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override
+        {
+                (void)skill;
+                return {};
+        }
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+protected:
+        std::vector<actor::Actor*> find_possible_actors_to_heal(
+                const actor::Actor* caster) const;
+
+        actor::Actor* find_random_actor_to_heal(const actor::Actor* caster) const;
+
+        int base_max_cost(SpellSkill skill) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {

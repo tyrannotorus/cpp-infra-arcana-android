@@ -67,17 +67,6 @@ static bool is_defender_aware_of_attack(
         }
 }
 
-static bool is_mon_hit_chance_penalty(
-        const actor::Actor* const attacker,
-        const actor::Actor* const defender)
-{
-        return (
-                attacker &&
-                !actor::is_player(attacker) &&
-                actor::is_player(defender) &&
-                attacker->m_give_hit_chance_penalty_vs_player);
-}
-
 static int get_attacker_melee_skill(const actor::Actor* const attacker)
 {
         if (attacker) {
@@ -273,15 +262,7 @@ MeleeAttData::MeleeAttData(
                 state_mod -= 50;
         }
 
-        hit_chance_tot =
-                skill_mod +
-                wpn_mod +
-                dodging_mod +
-                state_mod;
-
-        if (is_mon_hit_chance_penalty(attacker, defender)) {
-                hit_chance_tot = 0;
-        }
+        hit_chance_tot = skill_mod + wpn_mod + dodging_mod + state_mod;
 
         hit_chance_tot = std::clamp(hit_chance_tot, 5, 99);
 
@@ -353,7 +334,7 @@ RangedAttData::RangedAttData(
                 // Aim level not overriden by caller
 
                 // This weapon always aim at the floor
-                if (wpn.id() == item::Id::incinerator) {
+                if (wpn.id() == item::Id::morphic_blaster) {
                         aim_lvl = actor::Size::floor;
                 }
                 else {
@@ -455,14 +436,17 @@ RangedAttData::RangedAttData(
                 state_mod -= 50;
         }
 
-        hit_chance_tot =
-                skill_mod +
-                wpn_mod +
-                dodging_mod +
-                dist_mod +
-                state_mod;
+        hit_chance_tot = skill_mod + wpn_mod + dodging_mod + dist_mod + state_mod;
 
-        if (is_mon_hit_chance_penalty(attacker, defender)) {
+        // The Morphic Blaster should have a minimum chance to hit unintended
+        // targets (otherwise it would be annoying that higher ranged skill
+        // level *increases* the chance to accidentally hit something).
+        if ((wpn.id() == item::Id::morphic_blaster) && (current_pos != aim_pos)) {
+                TRACE
+                        << wpn.name(ItemNameType::plain, ItemNameInfo::none)
+                        << " projectile not at aim position, setting minimum hit chance"
+                        << std::endl;
+
                 hit_chance_tot = 0;
         }
 
@@ -579,16 +563,7 @@ ThrowAttData::ThrowAttData(
                 state_mod -= 50;
         }
 
-        hit_chance_tot =
-                skill_mod +
-                wpn_mod +
-                dodging_mod +
-                dist_mod +
-                state_mod;
-
-        if (is_mon_hit_chance_penalty(attacker, defender)) {
-                hit_chance_tot = 0;
-        }
+        hit_chance_tot = skill_mod + wpn_mod + dodging_mod + dist_mod + state_mod;
 
         hit_chance_tot = std::clamp(hit_chance_tot, 5, 99);
 

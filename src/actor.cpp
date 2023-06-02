@@ -19,6 +19,7 @@
 #include "array2.hpp"
 #include "debug.hpp"
 #include "fov.hpp"
+#include "game_time.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
@@ -532,6 +533,19 @@ bool Actor::is_in_same_group_as(const Actor* actor) const
                 is_leader_of(actor) ||
                 is_actor_my_leader(actor) ||
                 actor->is_actor_my_leader(m_leader));
+}
+
+std::vector<Actor*> Actor::actors_in_same_group() const
+{
+        std::vector<Actor*> result;
+
+        std::copy_if(
+                std::begin(game_time::g_actors),
+                std::end(game_time::g_actors),
+                std::back_inserter(result),
+                [this](const actor::Actor* const actor) { return is_in_same_group_as(actor); });
+
+        return result;
 }
 
 bool Actor::restore_hp(
