@@ -14,6 +14,7 @@
 * Reworked the Incinerator - it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.
 
 # Monsters
+* A few monsters wait for a turn when they see the player and are aware of the player. This only happens once, until the monster loses awareness again. It is intended to avoid some unfair instant deaths by allowing the player a chance to act first (for example Cultists and White Spiders have this behavior).
 * Added more monsters
 
 
@@ -130,6 +131,7 @@ by bumping them).
 - Fixed a bug where the player killing themselves with an Incinerator would freeze the game.
 - The gas mask duration was not stored when saving the game (it was reset to the default length when loading a save file).
 - And many more minor bug fixes...
+
 
 ============================================================
 = v21.0.1 (April 7, 2022)

@@ -478,6 +478,11 @@ static void dump_ai(xml::Element* ai_e, actor::ActorData& data)
                         xml::first_child(
                                 ai_e, "ranged_cooldown_turns"));
 
+        data.is_pausing_on_player_seen =
+                xml::get_text_bool(
+                        xml::first_child(
+                                ai_e, "is_pausing_on_player_seen"));
+
         for (size_t i = 0; i < (size_t)actor::AiId::END; ++i) {
                 const std::string ai_id_str =
                         s_ai_id_to_tag_name_map.at((actor::AiId)i);

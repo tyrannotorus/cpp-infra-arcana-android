@@ -134,6 +134,7 @@ struct ActorData
         bool ai[(size_t)AiId::END];
         int nr_turns_aware;
         int ranged_cooldown_turns;
+        bool is_pausing_on_player_seen;
         int spawn_min_dlvl, spawn_max_dlvl;
         int spawn_weight;
         Size actor_size;

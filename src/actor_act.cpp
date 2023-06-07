@@ -330,7 +330,7 @@ static void mon_act(actor::Actor& mon)
         }
 
         // Sanity check - verify that monster's leader does not have a leader
-        // (never allowed)
+        // (never allowed).
         if (mon.m_leader && !is_player_leader) {
                 const auto* const leader_leader = mon.m_leader->m_leader;
 
@@ -361,12 +361,15 @@ static void mon_act(actor::Actor& mon)
         }
 #endif  // NDEBUG
 
+        // ---------------------------------------------------------------------
+        // Skip every second action while unaware
+        // ---------------------------------------------------------------------
         if (!mon.is_aware_of_player() &&
             !mon.is_wary_of_player() &&
             !is_player_leader) {
-                mon.m_ai_state.is_waiting = !mon.m_ai_state.is_waiting;
+                mon.m_ai_state.is_waiting_unaware = !mon.m_ai_state.is_waiting_unaware;
 
-                if (mon.m_ai_state.is_waiting) {
+                if (mon.m_ai_state.is_waiting_unaware) {
                         game_time::tick();
 
                         return;
@@ -374,7 +377,7 @@ static void mon_act(actor::Actor& mon)
         }
         else {
                 // Is wary/aware, or player is leader
-                mon.m_ai_state.is_waiting = false;
+                mon.m_ai_state.is_waiting_unaware = false;
         }
 
         // Pick a target
@@ -419,7 +422,7 @@ static void mon_act(actor::Actor& mon)
                 mon.m_ai_state.is_roaming_allowed = MonRoamingAllowed::yes;
 
                 // Occasionally make a sound - but only if the monster does not
-                // have a leader - otherwise it gets very spammy
+                // have a leader - otherwise it gets very spammy.
                 const bool has_living_leader =
                         mon.m_leader && mon.m_leader->is_alive();
 
@@ -431,10 +434,41 @@ static void mon_act(actor::Actor& mon)
         }
 
         // ---------------------------------------------------------------------
-        // Property actions (e.g. Zombie rising, Vortex pulling, ...)
+        // Properties that performs an action (e.g. Vortex pulling)
         // ---------------------------------------------------------------------
         if (mon.m_properties.on_act() == DidAction::yes) {
                 return;
+        }
+
+        // ---------------------------------------------------------------------
+        // Wait a turn when seeing the player (to avoid unfair deaths)
+        // ---------------------------------------------------------------------
+        if (mon.m_data->is_pausing_on_player_seen) {
+                if (mon.is_aware_of_player()) {
+                        if (actor::is_player(mon.m_ai_state.target) &&
+                            mon.m_ai_state.is_target_seen &&
+                            mon.m_ai_state.do_wait_on_player_seen_aware) {
+                                // Never wait again, until losing awareness.
+                                mon.m_ai_state.do_wait_on_player_seen_aware = false;
+
+                                // Mark the actor as currently waiting due to
+                                // seeing the player, to make it act at normal
+                                // speed for this turn (the player should
+                                // normally get a chance to act first).
+                                mon.m_ai_state.is_waiting_on_player_seen_aware = true;
+
+                                game_time::tick();
+
+                                mon.m_ai_state.is_waiting_on_player_seen_aware = false;
+
+                                return;
+                        }
+                }
+                else {
+                        // Monster is unaware - do wait the next time that the
+                        // player is seen.
+                        mon.m_ai_state.do_wait_on_player_seen_aware = true;
+                }
         }
 
         // ---------------------------------------------------------------------

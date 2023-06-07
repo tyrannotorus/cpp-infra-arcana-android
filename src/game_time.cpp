@@ -99,7 +99,8 @@ static actor::Speed current_actor_speed(const actor::Actor& actor)
         // Paralyzed or fainted actors always act at normal speed (the duration
         // of these effects should not depend on the speed of the actor).
         if (actor.m_properties.has(prop::Id::paralyzed) ||
-            actor.m_properties.has(prop::Id::fainted)) {
+            actor.m_properties.has(prop::Id::fainted) ||
+            actor.m_ai_state.is_waiting_on_player_seen_aware) {
                 return actor::Speed::normal;
         }
 

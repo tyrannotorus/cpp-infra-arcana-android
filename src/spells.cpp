@@ -3935,7 +3935,7 @@ std::vector<actor::Actor*> SpellHealOthers::find_possible_actors_to_heal(
 
         Array2<bool> blocks_los(map::dims());
 
-        const auto r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
+        const R r = fov::fov_rect(caster->m_pos, blocks_los.dims());
 
         map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
 

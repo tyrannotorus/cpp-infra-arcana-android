@@ -43,8 +43,22 @@ struct AiState
         Dir last_dir_moved {Dir::center};
 
         // AI creatures pauses every second step while not aware or wary, this
-        // tracks the state of the pausing
-        bool is_waiting {false};
+        // tracks the state of the pausing.
+        bool is_waiting_unaware {false};
+
+        // Some monster types will skip a turn upon seeing the player (to avoid
+        // unfair instant deaths by allowing the player to "shoot first").
+        //
+        // NOTE: This is different from monsters pausing when DETECTING the
+        // player by looking (and BECOMING aware), which can also cause them to
+        // skip a turn. The waiting handled here is supposed to make the monster
+        // wait when seeing the player, while they are ALREADY aware.
+        //
+        bool do_wait_on_player_seen_aware {false};
+
+        // This is used for controlling actor speed - the monster should have
+        // normal speed while waiting.
+        bool is_waiting_on_player_seen_aware {false};
 };
 
 struct AwareState

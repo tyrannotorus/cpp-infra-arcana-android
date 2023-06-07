@@ -16,6 +16,7 @@
 #include "actor_see.hpp"
 #include "attack.hpp"
 #include "direction.hpp"
+#include "fov.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
@@ -26,6 +27,7 @@
 #include "item_weapon.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
@@ -45,6 +47,89 @@ struct P;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static bool should_do_reaction_time_for_aware_source(
+        const actor::AwareSource source)
+{
+        switch (source) {
+        case actor::AwareSource::attacked:
+                return false;
+                break;
+
+        case actor::AwareSource::spell_victim:
+                return false;
+                break;
+
+        case actor::AwareSource::seeing:
+                return true;
+                break;
+
+        case actor::AwareSource::heard_sound:
+                return true;
+                break;
+
+        case actor::AwareSource::other:
+                return true;
+                break;
+        }
+
+        ASSERT(false);
+
+        return false;
+}
+
+static bool allow_speak_phrase_for_aware_source(const actor::AwareSource source)
+{
+        switch (source) {
+        case actor::AwareSource::attacked:
+                return true;
+                break;
+
+        case actor::AwareSource::spell_victim:
+                return true;
+                break;
+
+        case actor::AwareSource::seeing:
+                return true;
+                break;
+
+        case actor::AwareSource::heard_sound:
+                return false;
+                break;
+
+        case actor::AwareSource::other:
+                return true;
+                break;
+        }
+
+        ASSERT(false);
+
+        return false;
+}
+
+static void apply_mon_reaction_time_on_aware(actor::Actor& actor)
+{
+        prop::Prop* const prop = prop::make(prop::Id::waiting);
+
+        prop->set_duration(1);
+
+        actor.m_properties.apply(prop);
+
+        // If this is a monster that is pausing when seeing the player (to avoid
+        // unfair instant deaths), disable this pausing now to avoid double
+        // waiting (the monster is already waiting due to the reaction time on
+        // becoming aware, applied above).
+        if (actor.m_data->is_pausing_on_player_seen) {
+                Array2<bool> blocks_los(map::dims());
+
+                const R r = fov::fov_rect(actor.m_pos, blocks_los.dims());
+
+                map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
+
+                if (can_mon_see_actor(actor, *map::g_player, blocks_los)) {
+                        actor.m_ai_state.do_wait_on_player_seen_aware = false;
+                }
+        }
+}
 
 // -----------------------------------------------------------------------------
 // actor
@@ -245,41 +330,12 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
         const int aware_counter_before = m_mon_aware_state.aware_counter;
         const bool was_aware_before = is_aware_of_player();
 
-        m_mon_aware_state.aware_counter =
-                std::max(nr_turns, aware_counter_before);
+        m_mon_aware_state.aware_counter = std::max(nr_turns, aware_counter_before);
 
-        m_mon_aware_state.wary_counter =
-                m_mon_aware_state.aware_counter;
+        m_mon_aware_state.wary_counter = m_mon_aware_state.aware_counter;
 
-        bool do_reaction_time = false;
-        bool allow_speak_phrase = false;
-
-        switch (source) {
-        case AwareSource::attacked:
-                do_reaction_time = false;
-                allow_speak_phrase = true;
-                break;
-
-        case AwareSource::spell_victim:
-                do_reaction_time = false;
-                allow_speak_phrase = true;
-                break;
-
-        case AwareSource::seeing:
-                do_reaction_time = true;
-                allow_speak_phrase = true;
-                break;
-
-        case AwareSource::heard_sound:
-                do_reaction_time = true;
-                allow_speak_phrase = false;
-                break;
-
-        case AwareSource::other:
-                do_reaction_time = true;
-                allow_speak_phrase = true;
-                break;
-        }
+        const bool do_reaction_time = should_do_reaction_time_for_aware_source(source);
+        const bool allow_speak_phrase = allow_speak_phrase_for_aware_source(source);
 
         if (!do_reaction_time) {
                 // No reaction time - clear any waiting status. The monster may
@@ -288,13 +344,18 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
                 // status (as becoming aware by hearing sounds do), but if the
                 // monster is attacked we want it to act immediately.
                 m_properties.end_prop(prop::Id::waiting);
+
+                // Also for sources of awareness that instantly alerts the
+                // monster (e.g. getting attacked), never wait due to seeing the
+                // player (some monster types skip a turn when coming into sight
+                // of the player, to avoid unfair deahts).
+                m_ai_state.do_wait_on_player_seen_aware = false;
         }
 
         if (!was_aware_before) {
-                // Monster became aware now
+                // Monster became aware now.
 
-                if ((source == AwareSource::seeing) &&
-                    can_player_see_actor(*this)) {
+                if ((source == AwareSource::seeing) && can_player_see_actor(*this)) {
                         print_player_see_mon_become_aware_msg();
                 }
 
@@ -302,15 +363,8 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
                         speak_phrase(AlertsMon::yes);
                 }
 
-                if (do_reaction_time) {
-                        // Give the monster some reaction time
-                        if (!is_actor_my_leader(map::g_player)) {
-                                auto* const prop = prop::make(prop::Id::waiting);
-
-                                prop->set_duration(1);
-
-                                m_properties.apply(prop);
-                        }
+                if (do_reaction_time && !is_actor_my_leader(map::g_player)) {
+                        apply_mon_reaction_time_on_aware(*this);
                 }
         }
 }
