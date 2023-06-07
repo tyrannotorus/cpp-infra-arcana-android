@@ -4124,9 +4124,9 @@
         </ai>
 
         <spawning>
-            <min_dungeon_level>6</min_dungeon_level>
+            <min_dungeon_level>10</min_dungeon_level>
             <max_dungeon_level>-1</max_dungeon_level>
-            <spawn_weight>100</spawn_weight>
+            <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
@@ -5340,7 +5340,7 @@
         </ai>
 
         <spawning>
-            <min_dungeon_level>6</min_dungeon_level>
+            <min_dungeon_level>8</min_dungeon_level>
             <max_dungeon_level>27</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
@@ -5348,7 +5348,7 @@
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="4">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="1">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="1" required_dungeon_level="10">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_CAVE</native_room>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_FOREST</native_room>
