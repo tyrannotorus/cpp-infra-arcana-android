@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+set -xue
+
+root_dir=${PWD}
+
+./build-sanitize.sh
+
+cd build
+
+./ia-debug $*
+
+cd ${root_dir}
