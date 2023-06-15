@@ -648,30 +648,25 @@ void MapBuilderEgypt::handle_template_pos(const P& p, const char c)
                         map::set_terrain(terrain::make(terrain::Id::floor, p));
                 }
 
-                std::string actor_id;
-
                 switch (c) {
-                case 'P':
-                        actor_id = "MON_KHEPHREN";
-                        break;
+                case 'P': {
+                        actor::Actor* const actor = actor::make("MON_KHEPHREN", p);
+                        m_kephren = actor;
+                } break;
 
-                case 'M':
-                        actor_id = "MON_MUMMY";
-                        break;
+                case 'M': {
+                        actor::Actor* const actor = actor::make("MON_MUMMY", p);
+                        m_other_mummies.push_back(actor);
+                } break;
 
-                case 'C':
-                        actor_id = "MON_CROC_HEAD_MUMMY";
-                        break;
+                case 'C': {
+                        actor::Actor* const actor = actor::make("MON_CROC_HEAD_MUMMY", p);
+                        m_other_mummies.push_back(actor);
+
+                } break;
 
                 default:
                         break;
-                }
-
-                if (!actor_id.empty()) {
-                        actor::Actor* const actor = actor::make(actor_id, p);
-
-                        actor->m_ai_state.is_roaming_allowed =
-                                MonRoamingAllowed::no;
                 }
         } break;
 
@@ -726,6 +721,10 @@ void MapBuilderEgypt::handle_template_pos(const P& p, const char c)
 
 void MapBuilderEgypt::on_template_built()
 {
+        for (actor::Actor* const actor : m_other_mummies) {
+                actor->m_leader = m_kephren;
+        }
+
         populate_items::make_items_on_floor();
 }
 

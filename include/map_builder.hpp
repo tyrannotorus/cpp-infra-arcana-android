@@ -217,6 +217,9 @@ private:
         void on_template_built() override;
 
         const char m_stair_symbol;
+
+        actor::Actor* m_kephren {nullptr};
+        std::vector<actor::Actor*> m_other_mummies {};
 };
 
 // -----------------------------------------------------------------------------

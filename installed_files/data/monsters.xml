@@ -5644,9 +5644,9 @@
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
-            <aware_message_seen></aware_message_seen>
-            <aware_message_hidden></aware_message_hidden>
-            <spell_message>speaks incantations in a deep hollow voice.</spell_message>
+            <aware_message_seen>speaks in a hollow voice.</aware_message_seen>
+            <aware_message_hidden>I hear a hollow voice.</aware_message_hidden>
+            <spell_message>speaks incantations in a hollow voice.</spell_message>
         </text>
 
         <graphics>
@@ -5742,9 +5742,9 @@
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
-            <aware_message_seen></aware_message_seen>
-            <aware_message_hidden></aware_message_hidden>
-            <spell_message>casts a spell.</spell_message>
+            <aware_message_seen>speaks in a hollow voice.</aware_message_seen>
+            <aware_message_hidden>I hear a hollow voice.</aware_message_hidden>
+            <spell_message>speaks incantations in a hollow voice.</spell_message>
         </text>
 
         <graphics>
@@ -5831,9 +5831,9 @@
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
-            <aware_message_seen></aware_message_seen>
-            <aware_message_hidden></aware_message_hidden>
-            <spell_message>speaks incantations in a deep hollow voice.</spell_message>
+            <aware_message_seen>speaks in a hollow voice.</aware_message_seen>
+            <aware_message_hidden>I hear a hollow voice.</aware_message_hidden>
+            <spell_message>speaks incantations in a hollow voice.</spell_message>
         </text>
 
         <graphics>
@@ -5906,7 +5906,7 @@
             <attacks>true</attacks>
             <paths_to_target_when_aware>true</paths_to_target_when_aware>
             <moves_to_target_when_los>true</moves_to_target_when_los>
-            <moves_to_lair>false</moves_to_lair>
+            <moves_to_lair>true</moves_to_lair>
             <moves_to_leader>true</moves_to_leader>
             <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
         </ai>
@@ -5939,9 +5939,9 @@
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
             <smell_message>There is a stench of decayed flesh here.</smell_message>
-            <aware_message_seen></aware_message_seen>
-            <aware_message_hidden></aware_message_hidden>
-            <spell_message>speaks incantations in a deep hollow voice.</spell_message>
+            <aware_message_seen>speaks in a hollow voice.</aware_message_seen>
+            <aware_message_hidden>I hear a hollow voice.</aware_message_hidden>
+            <spell_message>speaks incantations in a hollow voice.</spell_message>
         </text>
 
         <graphics>
