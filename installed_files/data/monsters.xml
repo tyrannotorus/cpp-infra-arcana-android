@@ -3625,7 +3625,7 @@
             <attacks>true</attacks>
             <paths_to_target_when_aware>true</paths_to_target_when_aware>
             <moves_to_target_when_los>false</moves_to_target_when_los>
-            <moves_to_lair>true</moves_to_lair>
+            <moves_to_lair>false</moves_to_lair>
             <moves_to_leader>true</moves_to_leader>
             <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
         </ai>
@@ -3645,10 +3645,6 @@
             <native_room>ROOM_CAVE</native_room>
             <native_room>ROOM_CHASM</native_room>
         </spawning>
-
-        <starting_allies>
-            <monster id="MON_MI_GO_BIO_ENGINEER"/>
-        </starting_allies>
     </monster>
 
     <!--************************************************************-->

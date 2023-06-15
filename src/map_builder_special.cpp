@@ -598,7 +598,7 @@ void MapBuilderMiGoOutpost::on_template_built()
 
         size_t pos_idx = 0U;
 
-        const size_t nr_bio_engineer = 2U;
+        const size_t nr_bio_engineer = 3U;
         const size_t nr_commander = 2U;
 
         for (size_t i = 0; i < nr_bio_engineer; ++i) {
