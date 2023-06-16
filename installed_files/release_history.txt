@@ -15,6 +15,7 @@
 
 # Monsters
 * Added more monsters
+* Tentacle Clusters can spawn randomly on the map (not just from spell side effects etc), although somewhat rarely
 * A few monsters wait for a turn when they see the player and are aware of the player. This only happens once, until the monster loses awareness again. It is intended to avoid some unfair instant deaths by allowing the player a chance to act first (for example Cultists and White Spiders have this behavior).
 * Pickman spawn from level 10 instead of 6, and is somewhat rarer.
 * Byakhee spawn from level 8 instead of 6, and can only spawn in groups from level 10.
