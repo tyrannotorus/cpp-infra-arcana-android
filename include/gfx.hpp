@@ -222,6 +222,7 @@ enum class TileId
         zombie_bloated,
         zombie_dust,
         zombie_unarmed,
+        zombie_winged,
 
         END
 };

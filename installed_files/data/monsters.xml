@@ -256,6 +256,103 @@
     </monster>
 
     <!--************************************************************-->
+    <!-- MON_WINGED_ZOMBIE -->
+    <!--************************************************************-->
+    <monster id="MON_WINGED_ZOMBIE">
+        <text>
+            <name_a>a Winged Corpse</name_a>
+            <name_the>the Winged Corpse</name_the>
+            <corpse_name_a>a lifeless gruesome corpse</corpse_name_a>
+            <corpse_name_the>the lifeless gruesome corpse</corpse_name_the>
+            <description>This former corpse has been granted a twisted gift of wings, resembling those of a monstrous bat. Awkward and ungainly in its newfound aerial ability, it navigates the air with unsteady movements. Despite its diminished agility and imprecise strikes, this abomination remains a formidable threat, driven by an insatiable hunger for the living.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>looks wary.</wary_message>
+            <smell_message>There is a stench of decayed flesh here.</smell_message>
+            <aware_message_seen>growls.</aware_message_seen>
+            <aware_message_hidden>I hear the flapping of great wings.</aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_ZOMBIE_WINGED</tile>
+            <character>Z</character>
+            <color>COLOR_SEPIA</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen>SFX_ZOMBIE_GROWL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_FLAPPING_WINGS</aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>12</hit_points>
+            <spirit>14</spirit>
+            <speed>MONSPEED_VERY_FAST</speed>
+            <shock_level>MONSHOCK_FRIGHTENING</shock_level>
+            <melee>50</melee>
+            <ranged>0</ranged>
+            <dodging>10</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <size>MONSIZE_HUMANOID</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <humanoid/>
+            <undead/>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>true</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="ITEMINTR_CLAW">
+                <damage>5</damage>
+                <property_applied percent_chance="25">PROP_INFECTED</property_applied>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>PROP_CORPSE_RISES</property>
+            <property>PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED</property>
+            <property>PROP_DARKVISION</property>
+            <property>PROP_FLYING</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>20</erratic_move_percent>
+            <turns_aware>8</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>1</min_dungeon_level>
+            <max_dungeon_level>19</max_dungeon_level>
+            <spawn_weight>10</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size weight="20">MONGROUPSIZE_ALONE</group_size>
+            <group_size weight="60" required_dungeon_level="2">MONGROUPSIZE_FEW</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_MONSTER</native_room>
+            <native_room>ROOM_CRYPT</native_room>
+            <native_room>ROOM_JAIL</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
     <!-- MON_BLOATED_ZOMBIE -->
     <!--************************************************************-->
     <monster id="MON_BLOATED_ZOMBIE">

@@ -220,6 +220,7 @@ static const std::unordered_map<std::string, gfx::TileId> s_str_to_tile_id_map =
         {"TILE_ZOMBIE_BLOATED", gfx::TileId::zombie_bloated},
         {"TILE_ZOMBIE_DUST", gfx::TileId::zombie_dust},
         {"TILE_ZOMBIE_UNARMED", gfx::TileId::zombie_unarmed},
+        {"TILE_ZOMBIE_WINGED", gfx::TileId::zombie_winged},
         {"", gfx::TileId::END}};
 
 static const std::unordered_map<gfx::TileId, std::string> s_tile_id_to_filename_map = {
@@ -429,6 +430,7 @@ static const std::unordered_map<gfx::TileId, std::string> s_tile_id_to_filename_
         {gfx::TileId::zombie_bloated, "zombie_bloated.png"},
         {gfx::TileId::zombie_dust, "zombie_dust.png"},
         {gfx::TileId::zombie_unarmed, "zombie_unarmed.png"},
+        {gfx::TileId::zombie_winged, "zombie_winged.png"},
         {gfx::TileId::END, ""}};
 
 // -----------------------------------------------------------------------------
