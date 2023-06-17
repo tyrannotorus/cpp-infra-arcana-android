@@ -52,6 +52,7 @@ enum class TileId
         cocoon_open,
         corpse,
         corpse2,
+        corpse_mound,
         crawling_hand,
         crawling_intestines,
         croc_head_mummy,

@@ -422,7 +422,7 @@
         <ai>
             <erratic_move_percent>5</erratic_move_percent>
             <turns_aware>16</turns_aware>
-            <ranged_cooldown_turns>20</ranged_cooldown_turns>
+            <ranged_cooldown_turns>10</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
             <looks>true</looks>
             <avoids_blocking_friend>true</avoids_blocking_friend>
@@ -444,6 +444,102 @@
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="3">MONGROUPSIZE_ALONE</group_size>
             <group_size weight="1" required_dungeon_level="2">MONGROUPSIZE_FEW</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_MONSTER</native_room>
+            <native_room>ROOM_CRYPT</native_room>
+            <native_room>ROOM_JAIL</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- MON_CORPSE_MOUND -->
+    <!--************************************************************-->
+    <monster id="MON_CORPSE_MOUND">
+        <text>
+            <name_a>a Corpse Mound</name_a>
+            <name_the>the Corpse Mound</name_the>
+            <corpse_name_a></corpse_name_a>
+            <corpse_name_the></corpse_name_the>
+            <description>Stitched together from a grotesque patchwork of decaying flesh, this enormous form looms like a nightmarish sentinel. Immobilized by its own unfathomable bulk, it lies dormant, a testament to the macabre experiments that birthed it. Putrid fluids seep from its bloated mass, forming stagnant pools that emit a sickening stench of decay.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>false</allow_speed_description>
+            <wary_message>looks wary.</wary_message>
+            <smell_message>There is a stench of decayed flesh here.</smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_CORPSE_MOUND</tile>
+            <character>Z</character>
+            <color>COLOR_GRAY_BROWN</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>60</hit_points>
+            <spirit>30</spirit>
+            <speed>MONSPEED_SLOW</speed>
+            <shock_level>MONSHOCK_FRIGHTENING</shock_level>
+            <melee>60</melee>
+            <ranged>50</ranged>
+            <dodging>-50</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <size>MONSIZE_GIANT</size>
+            <always_prevent_knockback>true</always_prevent_knockback>
+            <humanoid/>
+            <undead/>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>false</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="ITEMINTR_PUNCH_KNOCKBACK">
+                <damage>11</damage>
+            </attack>
+            <attack id="ITEMINTR_ACID_SPIT">
+                <damage>5</damage>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>PROP_DARKVISION</property>
+            <property>PROP_R_ACID</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>0</erratic_move_percent>
+            <turns_aware>16</turns_aware>
+            <ranged_cooldown_turns>5</ranged_cooldown_turns>
+            <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
+            <looks>true</looks>
+            <avoids_blocking_friend>false</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>false</paths_to_target_when_aware>
+            <moves_to_target_when_los>false</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>false</moves_to_leader>
+            <moves_randomly_when_unaware>false</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>2</min_dungeon_level>
+            <max_dungeon_level>7</max_dungeon_level>
+            <spawn_weight>20</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_CRYPT</native_room>
