@@ -1817,6 +1817,8 @@ public:
         void save() const override;
         void load() override;
 
+        std::string name_short() const override;
+
         PropEnded on_moved_non_center_dir() override;
 
         void set_nr_steps_allowed(const int nr_steps)

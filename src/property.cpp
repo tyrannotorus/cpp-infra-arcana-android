@@ -3719,6 +3719,16 @@ void CrimsonPassage::load()
         m_nr_steps_taken = saving::get_int();
 }
 
+std::string CrimsonPassage::name_short() const
+{
+        std::string nr_str =
+                (m_nr_steps_allowed >= 0)
+                ? std::to_string(m_nr_steps_allowed - m_nr_steps_taken)
+                : "INF";
+
+        return "Crims Psg(" + nr_str + ")";
+}
+
 PropEnded CrimsonPassage::on_moved_non_center_dir()
 {
         const int dmg = 2;
