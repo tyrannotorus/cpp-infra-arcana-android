@@ -336,7 +336,7 @@
         </ai>
 
         <spawning>
-            <min_dungeon_level>1</min_dungeon_level>
+            <min_dungeon_level>3</min_dungeon_level>
             <max_dungeon_level>19</max_dungeon_level>
             <spawn_weight>10</spawn_weight>
             <auto_spawn>true</auto_spawn>
