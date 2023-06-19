@@ -74,6 +74,7 @@ enum class TileId
         door_open,
         door_stuck,
         door_warded,
+        drop,
         dynamite,
         dynamite_lit,
         elder_sign,

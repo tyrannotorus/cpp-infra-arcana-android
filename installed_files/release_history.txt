@@ -12,6 +12,7 @@
 
 # Items
 * Reworked the Incinerator - it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.
+* Added more artifacts.
 
 # Monsters
 * Added more monsters

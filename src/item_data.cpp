@@ -1931,6 +1931,27 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::general);
+        d.id = Id::onyx_drop;
+        d.base_name = {
+                "Onyx Drop",
+                "",
+                "the Onyx Drop"};
+        d.base_descr = {
+                "Drinking a malicious potion also applies its effect "
+                "to all nearby creatures (maximum distance is 6)."};
+        d.color = colors::violet();
+        d.weight = Weight::extra_light;
+        d.tile = gfx::TileId::drop;
+        d.character = '*';
+        d.is_unique = true;
+        d.xp_on_found = 20;
+        d.value = Value::supreme_treasure;
+        d.allow_cursed = true;
+        d.chance_to_incl_in_spawn_list = 1;
+        d.native_containers.push_back(terrain::Id::tomb);
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::general);
         d.id = Id::refl_talisman;
         d.base_name = {
                 "Talisman of Reflection",
@@ -2266,49 +2287,6 @@ void init()
         d.native_containers.push_back(terrain::Id::tomb);
         g_data[(size_t)d.id] = d;
 
-        // reset_data(d, ItemType::general);
-        // d.id = Id::flask_of_damning;
-        // d.base_name = {
-        //         "Flask of Damning",
-        //         "Flasks of Damning",
-        //         "a Flask of Damning"};
-        // d.base_descr = {
-        //         "TBD"};
-        // d.type = ItemType::general;
-        // d.value = item::Value::minor_treasure;
-        // d.weight = Weight::light;
-        // d.has_std_activate = true;
-        // d.color = colors::gray();
-        // // d.tile = TBD
-        // // d.character = TBD
-        // d.chance_to_incl_in_spawn_list = 60;
-        // d.allow_spawn = true;
-        // d.is_stackable = true;
-        // d.land_on_hard_snd_msg = "I hear a clanking sound.";
-        // g_data[(size_t)d.id] = d;
-
-        // reset_data(d, ItemType::general);
-        // d.id = Id::obsidian_charm;
-        // d.base_name = {
-        //         "Obsidian Charm",
-        //         "Obsidian Charms",
-        //         "an Obsidian Charm"};
-        // d.base_descr = {
-        //         "TBD"};
-        // d.type = ItemType::general;
-        // d.value = item::Value::minor_treasure;
-        // d.weight = Weight::extra_light;
-        // d.has_std_activate = true;
-        // d.color = colors::dark_gray();
-        // d.tile = gfx::TileId::obsidian_charm;
-        // d.character = '%';
-        // d.max_stack_at_spawn = 3;
-        // d.chance_to_incl_in_spawn_list = 60;
-        // d.allow_spawn = true;
-        // d.is_stackable = true;
-        // d.land_on_hard_snd_msg = "I hear a thud.";
-        // g_data[(size_t)d.id] = d;
-
         reset_data(d, ItemType::general);
         d.id = Id::fluctuating_material;
         d.base_name = {
@@ -2338,28 +2316,6 @@ void init()
         d.is_stackable = true;
         d.land_on_hard_snd_msg = "I hear a thud.";
         g_data[(size_t)d.id] = d;
-
-        // reset_data(d, ItemType::general);
-        // d.id = Id::bat_wing_salve;
-        // d.base_name = {
-        //         "Bat Wing Salve",
-        //         "Bat Wing Salves",
-        //         "a Bat Wing Salve"};
-        // d.base_descr = {
-        //         "TBD"};
-        // d.type = ItemType::general;
-        // d.value = item::Value::minor_treasure;
-        // d.weight = Weight::extra_light;
-        // d.has_std_activate = true;
-        // d.color = colors::gray();
-        // d.tile = gfx::TileId::bat_wing_salve;
-        // d.character = '%';
-        // d.max_stack_at_spawn = 1;
-        // d.chance_to_incl_in_spawn_list = 60;
-        // d.allow_spawn = true;
-        // d.is_stackable = true;
-        // d.land_on_hard_snd_msg = "I hear a thud.";
-        // g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::general);
         d.id = Id::astral_opium;

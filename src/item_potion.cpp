@@ -29,6 +29,7 @@
 #include "item_factory.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
+#include "misc.hpp"
 #include "msg_log.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
@@ -55,6 +56,27 @@ struct PotionAppearance
 };
 
 static std::vector<PotionAppearance> s_potion_appearances;
+
+static std::vector<actor::Actor*> actors_reached_by_onyx_drop()
+{
+        const int max_dist = 6;
+
+        std::vector<actor::Actor*> actors;
+
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if (actor::is_player(actor)) {
+                        continue;
+                }
+
+                if (king_dist(map::g_player->m_pos, actor->m_pos) > max_dist) {
+                        continue;
+                }
+
+                actors.push_back(actor);
+        }
+
+        return actors;
+}
 
 // -----------------------------------------------------------------------------
 // potion
@@ -259,6 +281,16 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
         }
 
         quaff_impl(*actor);
+
+        // Also apply effect to nearby creatures if this is a malign potion and
+        // the player has the Onyx Drop artifact.
+        if ((alignment() == PotionAlignment::bad) &&
+            actor::is_player(actor) &&
+            actor->m_inv.has_item_in_backpack(item::Id::onyx_drop)) {
+                for (actor::Actor* const other_actor : actors_reached_by_onyx_drop()) {
+                        quaff_impl(*other_actor);
+                }
+        }
 
         if (map::g_player->is_alive()) {
                 game_time::tick();
@@ -486,8 +518,7 @@ void Spirit::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Blindness::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(
-                prop::make(prop::Id::blind));
+        actor.m_properties.apply(prop::make(prop::Id::blind));
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);

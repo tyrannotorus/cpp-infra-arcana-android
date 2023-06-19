@@ -427,6 +427,10 @@ Item* make(const Id item_id, const int nr_items)
                 r = new PharaohStaff(d);
                 break;
 
+        case Id::onyx_drop:
+                r = new Item(d);
+                break;
+
         case Id::refl_talisman:
                 r = new ReflTalisman(d);
                 break;
