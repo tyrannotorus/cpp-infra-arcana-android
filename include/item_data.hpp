@@ -219,7 +219,7 @@ enum class Id
 enum class ItemSetId
 {
         minor_treasure,
-        rare_treasure,
+        major_treasure,
         supreme_treasure,
         firearm,
         spike_gun,
@@ -238,7 +238,7 @@ enum class Value
 {
         normal,
         minor_treasure,
-        rare_treasure,
+        major_treasure,
         supreme_treasure
 };
 

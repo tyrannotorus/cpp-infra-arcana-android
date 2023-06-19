@@ -58,7 +58,7 @@ using StrToItemSetIdMap = std::unordered_map<std::string, item::ItemSetId>;
 
 static const StrToItemSetIdMap s_str_to_item_set_id_map = {
         {"ITEMSET_MINOR_TREASURE", item::ItemSetId::minor_treasure},
-        {"ITEMSET_RARE_TREASURE", item::ItemSetId::rare_treasure},
+        {"ITEMSET_MAJOR_TREASURE", item::ItemSetId::major_treasure},
         {"ITEMSET_SUPREME_TREASURE", item::ItemSetId::supreme_treasure},
         {"ITEMSET_FIREARM", item::ItemSetId::firearm},
         {"ITEMSET_SPIKE_GUN", item::ItemSetId::spike_gun},
@@ -259,7 +259,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
         case ItemType::device:
                 reset_data(d, ItemType::general);
                 d.type = ItemType::device;
-                d.value = item::Value::rare_treasure;
+                d.value = item::Value::major_treasure;
                 d.has_std_activate = true;
                 d.base_name_un_id = {
                         "Strange Device",
@@ -286,7 +286,7 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
         case ItemType::rod:
                 reset_data(d, ItemType::general);
                 d.type = ItemType::rod;
-                d.value = item::Value::rare_treasure;
+                d.value = item::Value::major_treasure;
                 d.has_std_activate = true;
                 d.base_descr = {
                         "A peculiar metallic device of cylindrical shape. The "
@@ -2221,7 +2221,7 @@ void init()
                 "surrounding area, and the presence of all items and creatures "
                 "is revealed."};
         d.type = ItemType::general;
-        d.value = item::Value::rare_treasure;
+        d.value = item::Value::major_treasure;
         d.weight = Weight::extra_light;
         d.has_std_activate = true;
         d.color = colors::light_green();

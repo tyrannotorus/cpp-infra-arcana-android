@@ -1363,7 +1363,7 @@
 
         <items>
             <item_set>ITEMSET_SPIKE_GUN</item_set>
-            <item_set percent_chance="1">ITEMSET_RARE_TREASURE</item_set>
+            <item_set percent_chance="1">ITEMSET_MAJOR_TREASURE</item_set>
         </items>
 
         <ai>
@@ -3474,7 +3474,7 @@
 
         <items>
             <item_set>ITEMSET_ELECTRIC_GUN</item_set>
-            <item_set percent_chance="5">ITEMSET_RARE_TREASURE</item_set>
+            <item_set percent_chance="5">ITEMSET_MAJOR_TREASURE</item_set>
         </items>
 
         <attacks>
@@ -3580,7 +3580,7 @@
                 a 100% chance that they actually drop one (it could be destroyed when they die).
             -->
             <item_set percent_chance="25">ITEMSET_MI_GO_ARMOR</item_set>
-            <item_set percent_chance="5">ITEMSET_RARE_TREASURE</item_set>
+            <item_set percent_chance="5">ITEMSET_MAJOR_TREASURE</item_set>
         </items>
 
         <attacks>
@@ -3689,7 +3689,7 @@
                 a 100% chance that they actually drop one (it could be destroyed when they die).
             -->
             <item_set percent_chance="25">ITEMSET_MI_GO_ARMOR</item_set>
-            <item_set percent_chance="5">ITEMSET_RARE_TREASURE</item_set>
+            <item_set percent_chance="5">ITEMSET_MAJOR_TREASURE</item_set>
         </items>
 
         <spells>
@@ -3788,7 +3788,7 @@
 
         <items>
             <item_set>ITEMSET_MORPHIC_BLASTER</item_set>
-            <item_set percent_chance="5">ITEMSET_RARE_TREASURE</item_set>
+            <item_set percent_chance="5">ITEMSET_MAJOR_TREASURE</item_set>
         </items>
 
         <attacks>

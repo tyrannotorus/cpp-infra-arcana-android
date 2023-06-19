@@ -413,9 +413,9 @@ static void make_item_set_minor_treasure(actor::Actor& actor)
         make_item_set_treasure(item::Value::minor_treasure, actor);
 }
 
-static void make_item_set_rare_treasure(actor::Actor& actor)
+static void make_item_set_major_treasure(actor::Actor& actor)
 {
-        make_item_set_treasure(item::Value::rare_treasure, actor);
+        make_item_set_treasure(item::Value::major_treasure, actor);
 }
 
 static void make_item_set_supreme_treasure(actor::Actor& actor)
@@ -686,8 +686,8 @@ static void make_monster_item_sets(actor::Actor& actor)
                                 make_item_set_minor_treasure(actor);
                                 break;
 
-                        case item::ItemSetId::rare_treasure:
-                                make_item_set_rare_treasure(actor);
+                        case item::ItemSetId::major_treasure:
+                                make_item_set_major_treasure(actor);
                                 break;
 
                         case item::ItemSetId::supreme_treasure:
