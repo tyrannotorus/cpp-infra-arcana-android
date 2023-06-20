@@ -107,20 +107,20 @@ static bool try_make_aux_room(
                 }
 
                 // Make a "crumble room"?
-                if (rnd::one_in(30)) {
-                        Room* const room =
-                                room_factory::make(
-                                        RoomType::crumble_room,
-                                        aux_rect);
+                // if (rnd::one_in(30)) {
+                Room* const room =
+                        room_factory::make(
+                                RoomType::crumble_room,
+                                aux_rect);
 
-                        mapgen::register_room(*room);
+                mapgen::register_room(*room);
 
-                        make_crumble_room(aux_rect_with_border, door_p);
-                }
-                else {
-                        // Not "crumble room"
-                        mapgen::make_room(aux_rect, IsSubRoom::no);
-                }
+                make_crumble_room(aux_rect_with_border, door_p);
+                // }
+                // else {
+                //         // Not "crumble room"
+                //         mapgen::make_room(aux_rect, IsSubRoom::no);
+                // }
 
                 return true;
         }
@@ -277,7 +277,7 @@ void make_aux_rooms(Array2<Region>& regions)
                                 }
                         }
                 }  // Region y loop
-        }  // Region x loop
+        }          // Region x loop
 
         TRACE_FUNC_END;
 

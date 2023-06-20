@@ -902,6 +902,12 @@ License:             Attribution 3.0 Unported (CC BY 3.0)
 Original title:      Splash, Jumping, C.wav
 Changes made:        Cut most of the sound, reduced the speed
 
+File:                sfx_wall_collapse.ogg
+Source:              https://freesound.org/people/iwanPlays/sounds/567249/
+Author:              iwanPlays (username on freesound.org)
+License:             CC0 1.0 Universal (CC0 1.0)
+Original title:      Bricks/Stones/Rocks/Gravel Falling
+
 File:                musica_cthulhiana_fragment_madness.ogg
 Source:              Track "Madness" from music album "Fragment" (2010, Prowler/Ghost Records)
 Author:              Musica Cthulhiana

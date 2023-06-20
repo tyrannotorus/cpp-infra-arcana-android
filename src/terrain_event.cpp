@@ -14,6 +14,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
+#include "audio_data.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
 #include "draw_blast.hpp"
@@ -106,6 +107,8 @@ void EventWallCrumble::on_new_turn()
 
         // OK, everything seems to be in a good state, go!
 
+        std::string sound_message;
+
         if (map::g_player->m_properties.allow_see()) {
                 msg_log::add(
                         "Suddenly, the walls collapse!",
@@ -113,6 +116,20 @@ void EventWallCrumble::on_new_turn()
                         MsgInterruptPlayer::no,
                         MorePromptOnMsg::yes);
         }
+        else {
+                sound_message = "I hear walls collapsing!";
+        }
+
+        Snd snd(
+                sound_message,
+                audio::SfxId::wall_collapse,
+                IgnoreMsgIfOriginSeen::no,
+                m_pos,
+                nullptr,
+                SndVol::high,
+                AlertsMon::no);
+
+        snd.run();
 
         bool should_make_dark = false;
 

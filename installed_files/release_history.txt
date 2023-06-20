@@ -26,6 +26,11 @@
 * Changed Kephren AI so that he stays in his "lair". All other mummies in the Egypt level follows Kephren, and the mummies are no longer stationary before they become aware (making the level less predictable).
 * Mummies can now speak a phrase when they become aware, to alert other monsters.
 
+##############################
+# User interface
+##############################
+# Sound
+- Added a sound effect for walls collapsing ("Suddenly, the walls collapse!").
 
 ============================================================
 = v22.0.0 (May 8, 2023)
