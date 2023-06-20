@@ -4,6 +4,9 @@
 ##############################
 # Gameplay
 ##############################
+# Backgrounds and traits
+- Flaggelants also start with two potions of vitality.
+
 # Map generation
 * Added a new special level
 

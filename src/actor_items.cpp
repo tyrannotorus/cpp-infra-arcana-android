@@ -46,9 +46,7 @@ static void learn_spell_player(const SpellId spell)
 
                 temp_scroll->identify(Verbose::no);
 
-                game::incr_player_xp(
-                        temp_scroll->data().xp_on_found,
-                        Verbose::no);
+                game::incr_player_xp(temp_scroll->data().xp_on_found, Verbose::no);
 
                 temp_scroll->data().is_found = true;
 
@@ -109,6 +107,18 @@ static void make_for_player_flagellant()
                 static_cast<item::Wpn*>(
                         item::make(item::Id::player_punch)));
 
+        item::Item* vitality_pot = item::make(item::Id::potion_vitality);
+
+        vitality_pot->m_nr_items = 2;
+
+        vitality_pot->identify(Verbose::no);
+
+        game::incr_player_xp(vitality_pot->data().xp_on_found, Verbose::no);
+
+        vitality_pot->data().is_found = true;
+
+        inv.put_in_backpack(vitality_pot);
+
         inv.put_in_backpack(item::make(item::Id::dynamite, 1));
         inv.put_in_backpack(item::make(item::Id::molotov, 1));
         inv.put_in_backpack(item::make(item::Id::medical_bag));
@@ -147,9 +157,7 @@ static void make_for_player_occultist_common()
 
         spirit_pot->identify(Verbose::no);
 
-        game::incr_player_xp(
-                spirit_pot->data().xp_on_found,
-                Verbose::no);
+        game::incr_player_xp(spirit_pot->data().xp_on_found, Verbose::no);
 
         spirit_pot->data().is_found = true;
 
@@ -225,9 +233,7 @@ static void make_for_player_rogue()
 
         rod_cloud_minds->identify(Verbose::no);
 
-        game::incr_player_xp(
-                rod_cloud_minds->data().xp_on_found,
-                Verbose::no);
+        game::incr_player_xp(rod_cloud_minds->data().xp_on_found, Verbose::no);
 
         rod_cloud_minds->data().is_found = true;
 
