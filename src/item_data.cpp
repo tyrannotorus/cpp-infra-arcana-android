@@ -1937,7 +1937,7 @@ void init()
                 "",
                 "the Onyx Drop"};
         d.base_descr = {
-                "Drinking a malicious potion also applies its effect "
+                "Drinking a malign potion also applies its effect "
                 "to all nearby creatures (maximum distance is 6)."};
         d.color = colors::violet();
         d.weight = Weight::extra_light;
