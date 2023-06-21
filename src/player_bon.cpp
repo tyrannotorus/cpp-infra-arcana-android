@@ -485,9 +485,9 @@ static void update_trait_data()
         set_trait_data(d);
 
         // --- Callous ---
-        d = trait_data(Trait::thick_skinned);
         d.id = Trait::callous;
         d.title = "Callous";
+        d.descr = "+2 armor points (physical damage reduced by 2 points)";
         d.bg_prereq = Bg::flagellant;
         d.trait_prereqs = {Trait::thick_skinned};
         set_trait_data(d);

@@ -6,6 +6,7 @@
 ##############################
 # Backgrounds and traits
 - Flaggelants also start with two potions of vitality.
+- The Callous trait (unique for Flagellants) gives +2 armor instead of +1.
 
 # Map generation
 * Added a new special level
