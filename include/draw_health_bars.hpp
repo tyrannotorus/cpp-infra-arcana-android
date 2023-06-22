@@ -9,4 +9,4 @@
 
 void draw_health_bars();
 
-#endif  // DRAW_HEALTH_BARS
+#endif  // DRAW_HEALTH_BARS_HPP
