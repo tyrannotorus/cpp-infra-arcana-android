@@ -4167,7 +4167,7 @@ int SpellSlow::base_max_cost(const SpellSkill skill) const
 {
         (void)skill;
 
-        return 7;
+        return 5;
 }
 
 void SpellSlow::run_effect(
