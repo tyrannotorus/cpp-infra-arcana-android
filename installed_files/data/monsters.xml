@@ -4732,7 +4732,7 @@
         </audio>
 
         <attributes>
-            <hit_points>4</hit_points>
+            <hit_points>3</hit_points>
             <spirit>12</spirit>
             <speed>MONSPEED_NORMAL</speed>
             <shock_level>MONSHOCK_FRIGHTENING</shock_level>
