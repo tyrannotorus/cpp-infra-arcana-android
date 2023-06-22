@@ -2338,7 +2338,7 @@
         <attacks>
             <attack id="ITEMINTR_BITE">
                 <damage>5</damage>
-                <property_applied duration="2" percent_chance="50">PROP_PARALYZED</property_applied>
+                <property_applied duration="2" percent_chance="20">PROP_PARALYZED</property_applied>
             </attack>
         </attacks>
 
