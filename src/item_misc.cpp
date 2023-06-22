@@ -137,7 +137,7 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
         if (m_current_action == MedBagAction::END) {
                 msg_log::clear();
 
-                msg_log::add("I have no wounds to treat.");
+                msg_log::add("There is nothing to treat.");
 
                 return ConsumeItem::no;
         }
