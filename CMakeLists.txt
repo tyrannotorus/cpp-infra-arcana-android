@@ -412,7 +412,18 @@ if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX
         if(DEBUG_SANITIZE)
                 list(APPEND DEBUG_COMPILE_FLAGS
                         -fsanitize=address
+                        -fsanitize-address-use-after-scope
+                        -fsanitize=alignment
+                        -fsanitize=bool
+                        -fsanitize=bounds
+                        -fsanitize=enum
+                        -fsanitize=integer-divide-by-zero
+                        -fsanitize=null
+                        -fsanitize=return
+                        -fsanitize=signed-integer-overflow
                         -fsanitize=undefined
+                        -fsanitize=unreachable
+                        -fsanitize=vptr
                         -fno-sanitize-recover
                         # Needed for full stack trace when running gcc sanitizers
                         -fno-omit-frame-pointer
