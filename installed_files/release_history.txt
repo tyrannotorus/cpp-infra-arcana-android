@@ -34,6 +34,7 @@
 ##############################
 # Sound
 - Added a sound effect for walls collapsing ("Suddenly, the walls collapse!").
+- Hazy Mirrors are now colored gray on the minimap when they have been activated.
 
 ============================================================
 = v22.0.0 (May 8, 2023)

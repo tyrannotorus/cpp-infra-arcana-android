@@ -37,6 +37,7 @@
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
 #include "terrain_factory.hpp"
+#include "terrain_mirror.hpp"
 #include "text_format.hpp"
 
 #ifndef NDEBUG
@@ -374,7 +375,12 @@ void memorize_terrain_at(const P& p)
                 memory.appearance.minimap_color = terrain->color_default();
         }
         else if (id == terrain::Id::mirror) {
-                memory.appearance.minimap_color = colors::orange();
+                const auto* const mirror = static_cast<const terrain::Mirror*>(terrain);
+
+                memory.appearance.minimap_color =
+                        mirror->is_activated()
+                        ? terrain->color_default()
+                        : colors::orange();
         }
         else if (id == terrain::Id::crystal_key) {
                 memory.appearance.minimap_color = terrain->color_default();
