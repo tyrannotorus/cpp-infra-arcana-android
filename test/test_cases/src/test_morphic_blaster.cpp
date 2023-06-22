@@ -19,7 +19,7 @@
 #include "terrain_factory.hpp"
 #include "test_utils.hpp"
 
-TEST_CASE("Incinerator projectile explodes on hitting creature")
+TEST_CASE("Morphic Blaster projectile explodes on hitting creature")
 {
         test_utils::init_all();
 
@@ -41,9 +41,7 @@ TEST_CASE("Incinerator projectile explodes on hitting creature")
 
         auto* const wpn =
                 static_cast<item::Wpn*>(
-                        item::make(item::Id::incinerator));
-
-        wpn->m_ammo_loaded = 1;
+                        item::make(item::Id::morphic_blaster));
 
         REQUIRE(rat_1->is_alive());
         REQUIRE(rat_2->is_alive());
@@ -60,7 +58,7 @@ TEST_CASE("Incinerator projectile explodes on hitting creature")
         test_utils::cleanup_all();
 }
 
-TEST_CASE("Incinerator projectile explodes on hitting floor")
+TEST_CASE("Morphic Blaster projectile explodes on hitting floor")
 {
         test_utils::init_all();
 
@@ -87,9 +85,7 @@ TEST_CASE("Incinerator projectile explodes on hitting floor")
 
         auto* const wpn =
                 static_cast<item::Wpn*>(
-                        item::make(item::Id::incinerator));
-
-        wpn->m_ammo_loaded = 1;
+                        item::make(item::Id::morphic_blaster));
 
         REQUIRE(rat_1->is_alive());
         REQUIRE(rat_2->is_alive());
