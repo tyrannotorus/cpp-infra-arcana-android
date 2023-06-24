@@ -226,8 +226,7 @@ void PropHandler::apply(
                 if (!is_resisting &&
                     actor::is_player(m_owner) &&
                     prop->m_data.is_preventable_by_player_trait) {
-                        const int resist_chance =
-                                calc_resist_chance_from_player_traits();
+                        const int resist_chance = calc_resist_chance_from_player_traits();
 
                         is_resisting = rnd::percent(resist_chance);
                 }
@@ -245,15 +244,11 @@ void PropHandler::apply(
         // The property can be applied
 
         if (prop->m_src == PropSrc::intr) {
-                const bool did_apply_more =
-                        try_apply_more_on_existing_intr_prop(
-                                *prop,
-                                verbose);
+                const bool did_apply_more = try_apply_more_on_existing_intr_prop(*prop, verbose);
 
                 if (did_apply_more) {
                         if (prop->m_data.force_interrupt_player_on_start) {
-                                map::g_player->interrupt_actions(
-                                        ForceInterruptActions::yes);
+                                map::g_player->interrupt_actions(ForceInterruptActions::yes);
                         }
 
                         return;
@@ -716,8 +711,8 @@ DidAction PropHandler::on_act()
 
 void PropHandler::on_melee_attack()
 {
-        for (auto& prop : m_props) {
-                prop->on_melee_attack();
+        for (size_t i = 0; i < m_props.size(); ++i) {
+                m_props[i]->on_melee_attack();
         }
 }
 
