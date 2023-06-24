@@ -1924,12 +1924,16 @@ void SelectIdentify::draw()
 
 void SelectIdentify::update()
 {
-        const io::InputData input = io::read_input();
+        MenuAction action = MenuAction::none;
 
-        const MenuAction action =
-                config::is_bot_playing()
-                ? MenuAction::selected
-                : m_browser.read(input, MenuInputMode::scrolling_and_letters);
+        if (config::is_bot_playing()) {
+                action = MenuAction::selected;
+        }
+        else {
+                const io::InputData input = io::read_input();
+
+                action = m_browser.read(input, MenuInputMode::scrolling_and_letters);
+        }
 
         const Inventory& inv = map::g_player->m_inv;
 
