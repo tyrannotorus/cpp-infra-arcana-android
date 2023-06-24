@@ -39,6 +39,11 @@ public:
                 const P& from_pos,
                 int dmg) override;
 
+        bool is_activated() const
+        {
+                return m_is_activated;
+        }
+
 private:
         Color color_default() const override;
 
