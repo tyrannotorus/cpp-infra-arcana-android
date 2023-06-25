@@ -685,8 +685,8 @@ void PropHandler::on_turn_end()
 
 void PropHandler::on_std_turn()
 {
-        for (auto& prop : m_props) {
-                prop->on_std_turn();
+        for (size_t i = 0; i < m_props.size(); ++i) {
+                m_props[i]->on_std_turn();
         }
 }
 
