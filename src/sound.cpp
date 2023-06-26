@@ -27,8 +27,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static int s_nr_snd_msg_printed_current_turn;
-
 static int get_max_dist(const Snd& snd)
 {
         switch (snd.volume()) {
@@ -191,11 +189,6 @@ void Snd::on_heard(actor::Actor& actor) const
 // -----------------------------------------------------------------------------
 namespace snd_emit
 {
-void reset_nr_snd_msg_printed_current_turn()
-{
-        s_nr_snd_msg_printed_current_turn = 0;
-}
-
 void run(Snd snd)
 {
         ASSERT(snd.msg() != " ");

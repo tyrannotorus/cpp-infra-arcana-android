@@ -555,7 +555,7 @@ void add(
 
 void more_prompt()
 {
-        // If the current log is empty, do nothing
+        // If the current log is empty, do nothing.
         if (s_lines[0].messages.empty()) {
                 return;
         }

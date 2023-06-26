@@ -278,12 +278,9 @@ static int calc_new_dmg_for_light_sensitive(
 
 static void on_light_sensitive_player_hit_by_light()
 {
-        map::g_player->interrupt_actions(
-                ForceInterruptActions::no);
+        map::g_player->interrupt_actions(ForceInterruptActions::no);
 
-        msg_log::add(
-                "I am wracked by light!",
-                colors::msg_bad());
+        msg_log::add("I am wracked by light!", colors::msg_bad());
 }
 
 static int absorb_dmg_for_prolonged_life_player(int dmg)
@@ -328,8 +325,7 @@ static void on_player_hit(
         // realistically stop you from treating wounds or handling equipment
         // etc, while taking a minor hit by something like poison ticking would
         // not necessarily stop you.
-        const bool is_small_pure_damage =
-                ((dmg_type == DmgType::pure) && (dmg <= 1));
+        const bool is_small_pure_damage = ((dmg_type == DmgType::pure) && (dmg <= 1));
 
         if (!is_small_pure_damage) {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);

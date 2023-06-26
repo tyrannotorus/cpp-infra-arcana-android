@@ -32,7 +32,7 @@ void hear_sound_player(
 
         const auto sfx = snd.sfx();
         const std::string& msg = snd.msg();
-        const bool has_snd_msg = !msg.empty() && msg != " ";
+        const bool has_snd_msg = (!msg.empty() && msg != " ");
 
         if (has_snd_msg) {
                 const auto should_interrupt =
@@ -44,13 +44,10 @@ void hear_sound_player(
         }
 
         // Play audio after message to ensure sync between audio and animation.
-        audio::play_from_direction(
-                sfx,
-                dir_to_origin,
-                percent_audible_distance);
+        audio::play_from_direction(sfx, dir_to_origin, percent_audible_distance);
 
         if (has_snd_msg) {
-                auto* const actor_who_made_snd = snd.actor_who_made_sound();
+                actor::Actor* const actor_who_made_snd = snd.actor_who_made_sound();
 
                 if (actor_who_made_snd && !is_player(actor_who_made_snd)) {
                         actor_who_made_snd->make_player_aware_of_me();

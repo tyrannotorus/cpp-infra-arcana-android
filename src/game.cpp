@@ -286,7 +286,7 @@ void player_discover_monster(actor::Actor& actor)
                 return;
         }
 
-        auto& d = *actor.m_data;
+        actor::ActorData& d = *actor.m_data;
 
         if (d.has_player_seen) {
                 return;

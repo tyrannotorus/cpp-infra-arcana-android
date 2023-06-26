@@ -93,8 +93,7 @@ public:
 
         bool is_msg_ignored_if_origin_seen() const
         {
-                return m_is_msg_ignored_if_origin_seen ==
-                        IgnoreMsgIfOriginSeen::yes;
+                return m_is_msg_ignored_if_origin_seen == IgnoreMsgIfOriginSeen::yes;
         }
 
         bool is_alerting_mon() const
@@ -146,8 +145,6 @@ private:
 namespace snd_emit
 {
 void run(Snd snd);
-
-void reset_nr_snd_msg_printed_current_turn();
 
 }  // namespace snd_emit
 

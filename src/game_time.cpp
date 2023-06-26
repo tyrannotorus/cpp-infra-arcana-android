@@ -246,8 +246,6 @@ static void run_std_turn_events()
 
         smell::on_std_turn();
 
-        snd_emit::reset_nr_snd_msg_printed_current_turn();
-
         if ((map::g_dlvl > 0) &&
             !map::g_player->m_properties.has(prop::Id::deaf)) {
                 const int play_one_in_n = 200;
