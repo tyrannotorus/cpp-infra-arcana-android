@@ -47,17 +47,23 @@ static int nr_items()
                 range.set(4, 5);
         }
 
-        if (player_bon::has_trait(Trait::treasure_hunter)) {
-                range.min += 1;
-                range.max += 2;
-        }
-
         TRACE
-                << "Placing random number of items in range: "
+                << "Base random range of number of items to spawn on floor: "
                 << range.min << "-" << range.max
                 << std::endl;
 
-        const int nr = range.roll();
+        int nr = range.roll();
+
+        TRACE << "Rolled '" << nr << "' number of items" << std::endl;
+
+        if (player_bon::has_trait(Trait::treasure_hunter)) {
+                ++nr;
+
+                TRACE
+                        << "Treasure Hunter increased number of items to "
+                        << "'" << nr << "'."
+                        << std::endl;
+        }
 
         return nr;
 }
