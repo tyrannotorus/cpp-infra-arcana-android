@@ -29,6 +29,9 @@
 * Changed Kephren AI so that he stays in his "lair". All other mummies in the Egypt level follows Kephren, and the mummies are no longer stationary before they become aware (making the level less predictable).
 * Mummies can now speak a phrase when they become aware, to alert other monsters.
 
+# Other
+* Reduced XP gained from seeing "terrifying" monsters from 10 to 8, and reduced XP for "mind shattering" monsters from 20 to 15 (rationale: there are more monsters now).
+
 ##############################
 # User interface
 ##############################

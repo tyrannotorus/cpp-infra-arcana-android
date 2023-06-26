@@ -309,12 +309,12 @@ void player_discover_monster(actor::Actor& actor)
                 break;
 
         case MonShockLvl::terrifying:
-                xp_gained = 10;
+                xp_gained = 8;
                 shock_value = 10.0;
                 break;
 
         case MonShockLvl::mind_shattering:
-                xp_gained = 20;
+                xp_gained = 15;
                 shock_value = 33.0;
                 break;
 
