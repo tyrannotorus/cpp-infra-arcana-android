@@ -29,8 +29,10 @@
 * Changed Kephren AI so that he stays in his "lair". All other mummies in the Egypt level follows Kephren, and the mummies are no longer stationary before they become aware (making the level less predictable).
 * Mummies can now speak a phrase when they become aware, to alert other monsters.
 
-# Other
+# Misc balancing
 * Reduced XP gained from seeing "terrifying" monsters from 10 to 8, and reduced XP for "mind shattering" monsters from 20 to 15 (rationale: there are more monsters now).
+* On average, one less item is spawned on each floor in the mid game (10-19), this is intended to avoid players winning with a huge amount of items in the inventory, without making the early game harder or making exploration less rewarding in the late game.
+
 
 ##############################
 # User interface
@@ -38,6 +40,7 @@
 # Sound
 - Added a sound effect for walls collapsing ("Suddenly, the walls collapse!").
 - Hazy Mirrors are now colored gray on the minimap when they have been activated.
+
 
 ============================================================
 = v22.0.0 (May 8, 2023)
