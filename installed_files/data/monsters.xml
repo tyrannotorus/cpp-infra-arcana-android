@@ -4330,7 +4330,7 @@
         </spawning>
 
         <starting_allies>
-            <monster id="MON_GHOUL" min="4" max="5"/>
+            <monster id="MON_GHOUL" min="2" max="3"/>
         </starting_allies>
     </monster>
 
