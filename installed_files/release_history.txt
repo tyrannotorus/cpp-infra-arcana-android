@@ -7,6 +7,7 @@
 # Backgrounds and traits
 - Flaggelants also start with a potion of vitality.
 - The Callous trait (unique for Flagellants) gives +2 armor instead of +1.
+- For Flagellant characters, the number of turns spent is halved when calculating score (Flagellants tend to spend a lot more turns, especially since they must wait every time they walk, so this is a compensation for a more comparable score).
 - Treasure Hunter increases items spawned on each floor by 1, instead of 1-2. See also general change to number of items spawned below.
 
 # Map generation

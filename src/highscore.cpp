@@ -150,7 +150,17 @@ int HighscoreEntry::calculate_score() const
         const auto xp_db = (double)xp;
         const auto dlvl_db = (double)dlvl;
         const auto dlvl_last_db = (double)g_dlvl_last;
-        const auto turns_db = (double)turn_count;
+
+        // HACK: Flagellants tend to spend a lot more turns (especially since
+        // they are forced to wait for a turn every time they walk). Here this
+        // is compensated by halving the turn count when calculating
+        // score. Preferably the score model should be changed instead to
+        // something like counting how many actions the player performs (then no
+        // special case is needed for Flagellants).
+        const int turns_adjusted = (bg == Bg::flagellant) ? (turn_count / 2) : turn_count;
+
+        const auto turns_db = (double)turns_adjusted;
+
         const auto ins_db = (double)ins;
         const bool win = (is_win == IsWin::yes);
 
