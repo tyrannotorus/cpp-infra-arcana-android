@@ -110,8 +110,6 @@ static void make_for_player_flagellant()
 
         item::Item* vitality_pot = item::make(item::Id::potion_vitality);
 
-        vitality_pot->m_nr_items = 2;
-
         vitality_pot->identify(Verbose::no);
 
         game::incr_player_xp(vitality_pot->data().xp_on_found, Verbose::no);

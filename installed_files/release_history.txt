@@ -5,7 +5,7 @@
 # Gameplay
 ##############################
 # Backgrounds and traits
-- Flaggelants also start with two potions of vitality.
+- Flaggelants also start with a potion of vitality.
 - The Callous trait (unique for Flagellants) gives +2 armor instead of +1.
 - Treasure Hunter increases items spawned on each floor by 1, instead of 1-2. See also general change to number of items spawned below.
 
