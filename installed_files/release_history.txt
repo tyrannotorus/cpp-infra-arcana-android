@@ -12,6 +12,8 @@
 
 # Map generation
 * Added a new special level
+* When the monsters on the high priest level becomes aware of the player, a message is printed (to reduce the need for meta knowledge).
+* On the Egypt level, when the player is within a certain distance of Khephren, all monsters on the map become aware of the player. A message is printed when this happens.
 
 # Spells
 * Added a new spell that heals other creatures, available only to monsters.
@@ -29,7 +31,6 @@
 * Pickman spawn from level 10 instead of 6, and is somewhat rarer.
 * Pickman starts with 2-3 Ghouls instead of 4-5.
 * Byakhee spawn from level 8 instead of 6, and can only spawn in groups from level 10.
-* Changed Kephren AI so that he stays in his "lair". All other mummies in the Egypt level follows Kephren, and the mummies are no longer stationary before they become aware (making the level less predictable).
 * Mummies can now speak a phrase when they become aware, to alert other monsters.
 
 # Misc balancing

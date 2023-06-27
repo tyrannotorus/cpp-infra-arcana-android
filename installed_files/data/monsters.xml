@@ -6096,7 +6096,7 @@
             <attacks>true</attacks>
             <paths_to_target_when_aware>true</paths_to_target_when_aware>
             <moves_to_target_when_los>true</moves_to_target_when_los>
-            <moves_to_lair>true</moves_to_lair>
+            <moves_to_lair>false</moves_to_lair>
             <moves_to_leader>true</moves_to_leader>
             <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
         </ai>

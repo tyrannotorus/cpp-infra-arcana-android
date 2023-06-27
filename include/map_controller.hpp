@@ -34,6 +34,17 @@ public:
         void on_std_turn() override;
 };
 
+class MapControllerEgypt : public MapController
+{
+public:
+        MapControllerEgypt() = default;
+
+        void on_std_turn() override;
+
+private:
+        bool m_has_triggered_awareness {false};
+};
+
 class MapControllerBoss : public MapController
 {
 public:

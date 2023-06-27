@@ -16,6 +16,7 @@
 #include "colors.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
+#include "misc.hpp"
 #include "msg_log.hpp"
 #include "populate_monsters.hpp"
 #include "pos.hpp"
@@ -26,7 +27,7 @@
 #include "terrain_factory.hpp"
 
 // -----------------------------------------------------------------------------
-// MapController
+// Map controllers
 // -----------------------------------------------------------------------------
 void MapControllerStd::on_start()
 {
@@ -54,6 +55,14 @@ void MapControllerStd::on_std_turn()
 void MapControllerBoss::on_start()
 {
         audio::play(audio::SfxId::boss_voice1);
+
+        msg_log::more_prompt();
+
+        msg_log::add(
+                "I feel like my presence here is known!",
+                colors::msg_note(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::yes);
 
         for (auto* const actor : game_time::g_actors) {
                 if (actor::is_player(actor)) {
@@ -109,6 +118,45 @@ void MapControllerBoss::on_std_turn()
         // actor_factory::spawn(
         //         pos,
         //         {nr_snakes, "MON_PIT_VIPER"});
+}
+
+void MapControllerEgypt::on_std_turn()
+{
+        const int aware_dist = 9;
+
+        if (!m_has_triggered_awareness) {
+                bool is_in_aware_dist = false;
+
+                for (actor::Actor* const actor : game_time::g_actors) {
+                        if ((actor->id() == "MON_KHEPHREN") &&
+                            (king_dist(map::g_player->m_pos, actor->m_pos) <= aware_dist)) {
+                                is_in_aware_dist = true;
+                                break;
+                        }
+                }
+
+                if (is_in_aware_dist) {
+                        msg_log::more_prompt();
+
+                        msg_log::add(
+                                "I feel like my presence here is known!",
+                                colors::msg_note(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::yes);
+
+                        for (auto* const actor : game_time::g_actors) {
+                                if (actor::is_player(actor)) {
+                                        continue;
+                                }
+
+                                actor->become_aware_player(actor::AwareSource::other);
+
+                                actor->m_ai_state.is_roaming_allowed = MonRoamingAllowed::yes;
+                        }
+
+                        m_has_triggered_awareness = true;
+                }
+        }
 }
 
 // -----------------------------------------------------------------------------

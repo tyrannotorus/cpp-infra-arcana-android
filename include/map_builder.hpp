@@ -216,10 +216,9 @@ private:
 
         void on_template_built() override;
 
-        const char m_stair_symbol;
+        std::unique_ptr<MapController> map_controller() const override;
 
-        actor::Actor* m_kephren {nullptr};
-        std::vector<actor::Actor*> m_other_mummies {};
+        const char m_stair_symbol;
 };
 
 // -----------------------------------------------------------------------------
