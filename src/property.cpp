@@ -3113,6 +3113,12 @@ PropActResult MajorClaphamSummon::on_act()
 
                         spawned_mon->m_properties.apply(prop_summoned);
 
+                        Prop* waiting = prop::make(prop::Id::waiting);
+
+                        waiting->set_duration(1);
+
+                        spawned_mon->m_properties.apply(waiting);
+
                         spawned_mon->m_mon_aware_state.is_player_feeling_msg_allowed = false;
                 });
 

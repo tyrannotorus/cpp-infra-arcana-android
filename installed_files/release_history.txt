@@ -32,6 +32,7 @@
 * Pickman starts with 2-3 Ghouls instead of 4-5.
 * Byakhee spawn from level 8 instead of 6, and can only spawn in groups from level 10.
 * Mummies can now speak a phrase when they become aware, to alert other monsters.
+* When Major Clapham-Lee "calls forth his Tomb-Legions", the summoned monsters now wait a turn instead of acting immediately.
 
 # Misc balancing
 * Reduced XP gained from seeing "terrifying" monsters from 10 to 8, and reduced XP for "mind shattering" monsters from 20 to 15 (rationale: there are more monsters now).
