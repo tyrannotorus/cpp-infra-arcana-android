@@ -11,33 +11,33 @@
 - Treasure Hunter increases items spawned on each floor by 1, instead of 1-2. See also general change to number of items spawned below.
 
 # Map generation
-* Added a new special level
-* When the monsters on the high priest level becomes aware of the player, a message is printed (to reduce the need for meta knowledge).
-* On the Egypt level, when the player is within a certain distance of Khephren, all monsters on the map become aware of the player. A message is printed when this happens.
+- Added a new special level
+- When the monsters on the high priest level becomes aware of the player, a message is printed (to reduce the need for meta knowledge).
+- On the Egypt level, when the player is within a certain distance of Khephren, all monsters on the map become aware of the player. A message is printed when this happens.
 
 # Spells
-* Added spell "Shed Impurity" - a unique spell for the Flagellant background, that they start with. The spell lowers hit points to the limit where the Flagellant receives bonuses for having low hit points, and if enough hit points are lost, then some status effects such as poisoning are cured.
-* Added a new spell that heals other creatures, available only to monsters.
+- Added spell "Shed Impurity" - a unique spell for the Flagellant background, that they start with. The spell lowers hit points to the limit where the Flagellant receives bonuses for having low hit points, and if enough hit points are lost, then some status effects such as poisoning are cured.
+- Added a new spell that heals other creatures, available only to monsters.
 
 # Items
-* Reworked the Incinerator - it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.
-* Added more artifacts.
+- Reworked the Incinerator - it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.
+- Added more artifacts.
 
 # Monsters
-* Added more monsters
-* Tentacle Clusters can spawn randomly on the map (not just from spell side effects etc), although somewhat rarely
-* A few monsters wait for a turn when they see the player and are aware of the player. This only happens once, until the monster loses awareness again. It is intended to avoid some unfair instant deaths by allowing the player a chance to act first (for example Cultists and White Spiders have this behavior).
-* White Spider attacks have 20% chance to paralyze instead of 50%.
-* Reduced hit points of Ghosts (mainly to allow Flagellant players a better chance to counter them with the Thorns spell)
-* Pickman spawn from level 10 instead of 6, and is somewhat rarer.
-* Pickman starts with 2-3 Ghouls instead of 4-5.
-* Byakhee spawn from level 8 instead of 6, and can only spawn in groups from level 10.
-* Mummies can now speak a phrase when they become aware, to alert other monsters.
-* When Major Clapham-Lee "calls forth his Tomb-Legions", the summoned monsters now wait a turn instead of acting immediately.
+- Added more monsters
+- Tentacle Clusters can spawn randomly on the map (not just from spell side effects etc), although somewhat rarely
+- A few monsters wait for a turn when they see the player and are aware of the player. This only happens once, until the monster loses awareness again. It is intended to avoid some unfair instant deaths by allowing the player a chance to act first (for example Cultists and White Spiders have this behavior).
+- White Spider attacks have 20% chance to paralyze instead of 50%.
+- Reduced hit points of Ghosts (mainly to allow Flagellant players a better chance to counter them with the Thorns spell)
+- Pickman spawn from level 10 instead of 6, and is somewhat rarer.
+- Pickman starts with 2-3 Ghouls instead of 4-5.
+- Byakhee spawn from level 8 instead of 6, and can only spawn in groups from level 10.
+- Mummies can now speak a phrase when they become aware, to alert other monsters.
+- When Major Clapham-Lee "calls forth his Tomb-Legions", the summoned monsters now wait a turn instead of acting immediately.
 
 # Misc balancing
-* Reduced XP gained from seeing "terrifying" monsters from 10 to 8, and reduced XP for "mind shattering" monsters from 20 to 15 (rationale: there are more monsters now).
-* On average, one less item is spawned on each floor in the mid game (10-19), this is intended to avoid players winning with a huge amount of items in the inventory, without making the early game harder or making exploration less rewarding in the late game. See also Treasure Hunter change above.
+- Reduced XP gained from seeing "terrifying" monsters from 10 to 8, and reduced XP for "mind shattering" monsters from 20 to 15 (rationale: there are more monsters now).
+- On average, one less item is spawned on each floor in the mid game (10-19), this is intended to avoid players winning with a huge amount of items in the inventory, without making the early game harder or making exploration less rewarding in the late game. See also Treasure Hunter change above.
 
 
 ##############################
@@ -47,6 +47,10 @@
 - Added a sound effect for walls collapsing ("Suddenly, the walls collapse!").
 - Hazy Mirrors are now colored gray on the minimap when they have been activated.
 
+##############################
+# Fixes
+##############################
+- Fixed a bug where creatures (e.g. the player) could get knocked into impassable terrain (such as walls), if they had physical damage resistance.
 
 ============================================================
 = v22.0.0 (May 8, 2023)

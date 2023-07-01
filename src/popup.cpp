@@ -617,7 +617,7 @@ void NumberQueryPopupState::on_start_specific()
 void NumberQueryPopupState::update_input_str()
 {
         m_input_str =
-                (*m_number_result > 0)
+                (*m_number_result >= 0)
                 ? std::to_string(*m_number_result)
                 : "";
 

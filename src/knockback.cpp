@@ -98,29 +98,22 @@ void run(
                 !map_parsers::BlocksActor(actor, ParseActors::no)
                          .run(new_pos);
 
-        const std::vector<terrain::Id> deep_terrains = {
-                terrain::Id::chasm};
+        const std::vector<terrain::Id> deep_terrains = {terrain::Id::chasm};
 
-        const bool is_tgt_pos_deep =
-                map_parsers::IsAnyOfTerrains(deep_terrains)
-                        .run(new_pos);
+        const bool is_tgt_pos_deep = map_parsers::IsAnyOfTerrains(deep_terrains).run(new_pos);
 
         const terrain::Terrain* const tgt_terrain = map::g_terrain.at(new_pos);
 
-        if (!actor_can_move_into_tgt_pos &&
-            !is_tgt_pos_deep &&
-            !actor.m_properties.has(prop::Id::r_phys)) {
+        if (!actor_can_move_into_tgt_pos && !is_tgt_pos_deep) {
                 // Actor nailed to a wall from a spike gun?
-                if (source == KnockbackSource::spike_gun) {
-                        if (!tgt_terrain->is_projectile_passable()) {
-                                auto* prop =
-                                        prop::make(
-                                                prop::Id::nailed);
+                if ((source == KnockbackSource::spike_gun) &&
+                    !tgt_terrain->is_projectile_passable() &&
+                    !actor.m_properties.has(prop::Id::r_phys)) {
+                        prop::Prop* prop = prop::make(prop::Id::nailed);
 
-                                prop->set_indefinite();
+                        prop->set_indefinite();
 
-                                actor.m_properties.apply(prop);
-                        }
+                        actor.m_properties.apply(prop);
                 }
 
                 TRACE_FUNC_END;

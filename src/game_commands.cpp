@@ -49,6 +49,7 @@
 #include "item_explosive.hpp"
 #include "item_factory.hpp"
 #include "item_weapon.hpp"
+#include "knockback.hpp"
 #include "manual.hpp"
 #include "map.hpp"
 #include "map_travel.hpp"
@@ -594,7 +595,12 @@ static GameCmd to_cmd_default(const io::InputData& input)
                 }
 
         case SDLK_F5:
-                return GameCmd::debug_f5;
+                if (input.is_shift_held) {
+                        return GameCmd::debug_shift_f5;
+                }
+                else {
+                        return GameCmd::debug_f5;
+                }
 
         case SDLK_F6:
                 return GameCmd::debug_f6;
@@ -1016,7 +1022,7 @@ void handle(const GameCmd cmd)
 
                 query::QueryNumberConfig query_config;
 
-                query_config.allowed_range = {1, (int)actor::g_data.size() - 1};
+                query_config.allowed_range = {0, (int)prop::Id::END};
                 query_config.cancel_returns_default = false;
 
                 const int id_to_apply = query::number(query_config, query_str);
@@ -1145,6 +1151,14 @@ void handle(const GameCmd cmd)
 
         case GameCmd::debug_f5: {
                 map::g_player->incr_shock(50.0, ShockSrc::misc);
+        } break;
+
+        case GameCmd::debug_shift_f5: {
+                knockback::run(
+                        *map::g_player,
+                        map::g_player->m_pos.with_y_offset(1),
+                        knockback::KnockbackSource::other,
+                        Verbose::no);
         } break;
 
         case GameCmd::debug_f6: {
