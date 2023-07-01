@@ -1145,8 +1145,7 @@ void Spell::cast(
                 // Grant regeneration from Flagellant galvanization trait?
                 if (actor::is_player(caster) &&
                     player_bon::has_trait(Trait::galvanization) &&
-                    (domain() == SpellDomain::blood) &&
-                    (id() != SpellId::shed_impurity)) {
+                    (domain() == SpellDomain::blood)) {
                         prop::Prop* const regen = prop::make(prop::Id::regenerating);
 
                         regen->set_duration(rnd::range(4, 6));
@@ -5535,7 +5534,7 @@ std::vector<std::string> SpellSacrificeLife::descr_specific(
 // -----------------------------------------------------------------------------
 int SpellShedImpurity::get_nr_turns_disabled_hp_regen() const
 {
-        return 4;
+        return 2;
 }
 
 int SpellShedImpurity::get_min_hp_removed_for_bonus_effects() const
@@ -5654,11 +5653,19 @@ std::vector<std::string> SpellShedImpurity::descr_specific(
 
         descr.push_back(bonus_effect_descr);
 
+        const int nr_turns_disabled_hp_regen = get_nr_turns_disabled_hp_regen();
+
+        const std::string turns_str =
+                (nr_turns_disabled_hp_regen == 1)
+                ? "turn"
+                : "turns";
+
         descr.emplace_back(
                 "Hit point regeneration is disabled for " +
                 std::to_string(get_nr_turns_disabled_hp_regen()) +
-                " turns. "
-                "This spell does not trigger regeneration from the Galvanization trait.");
+                " " +
+                turns_str +
+                ".");
 
         return descr;
 }
