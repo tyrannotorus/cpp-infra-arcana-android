@@ -117,6 +117,8 @@ enum class OccultistDomain
 
 namespace player_bon
 {
+inline constexpr int g_flagellant_moribund_limit = 6;
+
 struct TraitLogEntry
 {
         Trait trait_id {Trait::END};

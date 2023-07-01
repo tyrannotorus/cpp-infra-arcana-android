@@ -75,6 +75,9 @@ enum class SpellId
         // Ghoul background
         frenzy,
 
+        // Flagellant background
+        shed_impurity,
+
         // Monsters only
         curse,
         force_bolt,
@@ -1340,9 +1343,9 @@ public:
                 SpellSkill skill,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
-private:
         Range duration_range(SpellSkill skill) const;
 
+private:
         int base_max_cost(const SpellSkill skill) const override
         {
                 (void)skill;
@@ -2290,6 +2293,68 @@ private:
                 (void)skill;
 
                 return true;
+        }
+};
+
+class SpellShedImpurity : public Spell
+{
+public:
+        SpellShedImpurity() = default;
+
+        bool player_can_learn() const override
+        {
+                return true;
+        }
+
+        std::string name() const override
+        {
+                return "Shed Impurity";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::shed_impurity;
+        }
+
+        SpellDomain domain() const override
+        {
+                return SpellDomain::blood;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::mild;
+        }
+
+        std::vector<std::string> descr_specific(
+                SpellSkill skill) const override;
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+private:
+        int get_nr_turns_disabled_hp_regen() const;
+
+        int get_min_hp_removed_for_bonus_effects() const;
+
+        int get_moribund_hp_limit() const;
+
+        int calc_nr_hp_removed(const actor::Actor* caster) const;
+
+        int base_max_cost(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return 0;
+        }
+
+        bool is_noisy(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return false;
         }
 };
 

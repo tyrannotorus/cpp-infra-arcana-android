@@ -835,6 +835,9 @@ Spell* make(const SpellId spell_id)
         case SpellId::sacrifice_life:
                 return new SpellSacrificeLife();
 
+        case SpellId::shed_impurity:
+                return new SpellShedImpurity();
+
         case SpellId::thorns:
                 return new SpellThorns();
 
@@ -1142,7 +1145,8 @@ void Spell::cast(
                 // Grant regeneration from Flagellant galvanization trait?
                 if (actor::is_player(caster) &&
                     player_bon::has_trait(Trait::galvanization) &&
-                    (domain() == SpellDomain::blood)) {
+                    (domain() == SpellDomain::blood) &&
+                    (id() != SpellId::shed_impurity)) {
                         prop::Prop* const regen = prop::make(prop::Id::regenerating);
 
                         regen->set_duration(rnd::range(4, 6));
@@ -5366,7 +5370,7 @@ std::vector<std::string> SpellThorns::descr_specific(
         descr.emplace_back(
                 "The spell lasts for " +
                 duration_range(skill).str() +
-                " turns before it is wasted.");
+                " turns.");
 
         return descr;
 }
@@ -5476,7 +5480,6 @@ void SpellSacrificeLife::run_effect(
         SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
 {
-        (void)skill;
         (void)seen_targets;
 
         const int hp = caster->m_hp;
@@ -5492,12 +5495,7 @@ void SpellSacrificeLife::run_effect(
 
         hp_drained = std::min(8, hp_drained);
 
-        actor::hit(
-                *caster,
-                hp_drained,
-                DmgType::pure,
-                nullptr,
-                AllowWound::no);
+        actor::hit(*caster, hp_drained, DmgType::pure, nullptr, AllowWound::no);
 
         const int sp_gained = hp_drained * nr_sp_per_hp(skill);
 
@@ -5528,6 +5526,139 @@ std::vector<std::string> SpellSacrificeLife::descr_specific(
                         std::to_string(k) +
                         " spirit points are gained.");
         }
+
+        return descr;
+}
+
+// -----------------------------------------------------------------------------
+// Shed Impurity
+// -----------------------------------------------------------------------------
+int SpellShedImpurity::get_nr_turns_disabled_hp_regen() const
+{
+        return 4;
+}
+
+int SpellShedImpurity::get_min_hp_removed_for_bonus_effects() const
+{
+        return 9;
+}
+
+int SpellShedImpurity::get_moribund_hp_limit() const
+{
+        return player_bon::g_flagellant_moribund_limit;
+}
+
+int SpellShedImpurity::calc_nr_hp_removed(const actor::Actor* const caster) const
+{
+        return caster->m_hp - get_moribund_hp_limit();
+}
+
+void SpellShedImpurity::run_effect(
+        actor::Actor* caster,
+        SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)seen_targets;
+
+        const int hp_removed = calc_nr_hp_removed(caster);
+
+        if (hp_removed <= 0) {
+                // Not enough HP.
+                msg_log::add("There is nothing more to shed.");
+
+                return;
+        }
+
+        actor::hit(*caster, hp_removed, DmgType::pure, nullptr, AllowWound::no);
+
+        prop::Prop* const disabled_regen = prop::make(prop::Id::disabled_hp_regen);
+
+        disabled_regen->set_duration(get_nr_turns_disabled_hp_regen());
+
+        caster->m_properties.apply(disabled_regen);
+
+        if (hp_removed >= get_min_hp_removed_for_bonus_effects()) {
+                caster->m_properties.end_prop(prop::Id::weakened);
+                caster->m_properties.end_prop(prop::Id::poisoned);
+
+                if ((int)skill >= (int)SpellSkill::expert) {
+                        caster->m_properties.end_prop(prop::Id::infected);
+                        caster->m_properties.end_prop(prop::Id::diseased);
+                }
+
+                if (skill >= SpellSkill::master) {
+                        caster->m_properties.end_prop(prop::Id::slowed);
+                }
+
+                if (skill == SpellSkill::transcendent) {
+                        std::unique_ptr<Spell> bless_spell(spells::make(SpellId::bless));
+
+                        bless_spell->run_effect(caster, SpellSkill::basic, {});
+                }
+        }
+}
+
+std::vector<std::string> SpellShedImpurity::descr_specific(
+        SpellSkill skill) const
+{
+        std::vector<std::string> descr;
+
+        descr.emplace_back(
+                "Purifies the caster by carving away all that is extraneous, "
+                "revealing the essential core of their being.");
+
+        descr.emplace_back(
+                "Hit points are lowered to the limit where the Moribund effect is activated "
+                "(bonuses for having low hit points). "
+                "This limit is at " +
+                std::to_string(get_moribund_hp_limit()) +
+                " hit points.");
+
+        std::string bonus_effect_descr =
+                "If at least " +
+                std::to_string(get_min_hp_removed_for_bonus_effects()) +
+                " hit points are lost, then ";
+
+        switch (skill) {
+        case SpellSkill::basic: {
+                bonus_effect_descr +=
+                        "weakening and poisoning are cured.";
+        } break;
+
+        case SpellSkill::expert: {
+                bonus_effect_descr +=
+                        "weakening, poisoning, infection and disease are cured.";
+        } break;
+
+        case SpellSkill::master: {
+                bonus_effect_descr +=
+                        "weakening, poisoning, infection, disease and slowing are cured.";
+        } break;
+
+        case SpellSkill::transcendent: {
+                std::unique_ptr<SpellBless> bless_spell(
+                        static_cast<SpellBless*>(spells::make(SpellId::bless)));
+
+                bonus_effect_descr +=
+                        "weakening, poisoning, infection, disease and slowing are cured. "
+                        "The caster is also blessed for " +
+                        bless_spell->duration_range(SpellSkill::basic).str() +
+                        " turns.";
+        } break;
+        }
+
+        bonus_effect_descr +=
+                " Currently " +
+                std::to_string(calc_nr_hp_removed(map::g_player)) +
+                " hit points would be removed.";
+
+        descr.push_back(bonus_effect_descr);
+
+        descr.emplace_back(
+                "Hit point regeneration is disabled for " +
+                std::to_string(get_nr_turns_disabled_hp_regen()) +
+                " turns. "
+                "This spell does not trigger regeneration from the Galvanization trait.");
 
         return descr;
 }

@@ -16,6 +16,7 @@
 * On the Egypt level, when the player is within a certain distance of Khephren, all monsters on the map become aware of the player. A message is printed when this happens.
 
 # Spells
+* Added spell "Shed Impurity" - a unique spell for the Flagellant background, that they start with. The spell lowers hit points to the limit where the Flagellant receives bonuses for having low hit points, and if enough hit points are lost, then some status effects such as poisoning are cured.
 * Added a new spell that heals other creatures, available only to monsters.
 
 # Items

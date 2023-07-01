@@ -2541,7 +2541,8 @@ void AltersEnv::on_std_turn()
 void Regenerating::on_std_turn()
 {
         if (!m_owner->is_alive() ||
-            m_owner->m_properties.has(prop::Id::burning)) {
+            m_owner->m_properties.has(prop::Id::burning) ||
+            m_owner->m_properties.has(prop::Id::disabled_hp_regen)) {
                 return;
         }
 

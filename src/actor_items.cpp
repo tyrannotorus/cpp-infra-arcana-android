@@ -125,6 +125,7 @@ static void make_for_player_flagellant()
 
         learn_spell_player(SpellId::thorns);
         learn_spell_player(SpellId::crimson_passage);
+        learn_spell_player(SpellId::shed_impurity);
 }
 
 static void make_for_player_occultist_common()
