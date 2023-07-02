@@ -247,7 +247,8 @@ void PropHandler::apply(
                 const bool did_apply_more = try_apply_more_on_existing_intr_prop(*prop, verbose);
 
                 if (did_apply_more) {
-                        if (prop->m_data.force_interrupt_player_on_start) {
+                        if (actor::is_player(m_owner) &&
+                            prop->m_data.force_interrupt_player_on_start) {
                                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
                         }
 
@@ -289,7 +290,8 @@ void PropHandler::apply(
                 return;
         }
 
-        if (prop->m_data.force_interrupt_player_on_start) {
+        if (actor::is_player(m_owner) &&
+            prop->m_data.force_interrupt_player_on_start) {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
         }
 }
