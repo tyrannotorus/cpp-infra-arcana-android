@@ -130,7 +130,7 @@ Item* make(const Id item_id, const int nr_items)
 
         case Id::sawed_off:
         case Id::pump_shotgun:
-        case Id::machine_gun:
+        case Id::tommy_gun:
         case Id::pistol:
         case Id::revolver:
         case Id::rifle:
@@ -144,9 +144,9 @@ Item* make(const Id item_id, const int nr_items)
         case Id::hammer:
         case Id::machete:
         case Id::axe:
-        case Id::pitch_fork:
+        case Id::pitchfork:
         case Id::spear:
-        case Id::sledge_hammer:
+        case Id::sledgehammer:
         case Id::flagellant_whip:
         case Id::spiked_mace:
         case Id::trap_dart:

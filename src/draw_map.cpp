@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <unordered_map>
 #include <vector>
 
 #include "actor.hpp"
@@ -34,6 +35,53 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+const std::unordered_map<item::Id, gfx::TileId> s_wpn_id_to_player_tile {
+        {item::Id::axe, gfx::TileId::player_axe},
+        {item::Id::club, gfx::TileId::player_club},
+        {item::Id::dagger, gfx::TileId::player_dagger},
+        {item::Id::electric_gun, gfx::TileId::player_electric_gun},
+        {item::Id::flagellant_whip, gfx::TileId::player_flagellant_whip},
+        {item::Id::hammer, gfx::TileId::player_hammer},
+        {item::Id::hatchet, gfx::TileId::player_hatchet},
+        {item::Id::machete, gfx::TileId::player_machete},
+        {item::Id::tommy_gun, gfx::TileId::player_tommy_gun},
+        {item::Id::morphic_blaster, gfx::TileId::player_morphic_blaster},
+        {item::Id::pharaoh_staff, gfx::TileId::player_pharaoh_staff},
+        {item::Id::pistol, gfx::TileId::player_pistol},
+        {item::Id::revolver, gfx::TileId::player_pistol},
+        {item::Id::pitchfork, gfx::TileId::player_pitchfork},
+        {item::Id::pump_shotgun, gfx::TileId::player_pump_shotgun},
+        {item::Id::rifle, gfx::TileId::player_rifle},
+        {item::Id::sawed_off, gfx::TileId::player_sawed_off},
+        {item::Id::sledgehammer, gfx::TileId::player_sledgehammer},
+        {item::Id::spear, gfx::TileId::player_spear},
+        {item::Id::spike_gun, gfx::TileId::player_spike_gun},
+        {item::Id::spiked_mace, gfx::TileId::player_spiked_mace},
+};
+
+const std::unordered_map<item::Id, gfx::TileId> s_wpn_id_to_player_tile_ghoul {
+        {item::Id::axe, gfx::TileId::player_ghoul_axe},
+        {item::Id::club, gfx::TileId::player_ghoul_club},
+        {item::Id::dagger, gfx::TileId::player_ghoul_dagger},
+        {item::Id::electric_gun, gfx::TileId::player_ghoul_electric_gun},
+        {item::Id::hammer, gfx::TileId::player_ghoul_hammer},
+        {item::Id::hatchet, gfx::TileId::player_ghoul_hatchet},
+        {item::Id::machete, gfx::TileId::player_ghoul_machete},
+        {item::Id::tommy_gun, gfx::TileId::player_ghoul_tommy_gun},
+        {item::Id::morphic_blaster, gfx::TileId::player_ghoul_morphic_blaster},
+        {item::Id::pharaoh_staff, gfx::TileId::player_ghoul_pharaoh_staff},
+        {item::Id::pistol, gfx::TileId::player_ghoul_pistol},
+        {item::Id::revolver, gfx::TileId::player_ghoul_pistol},
+        {item::Id::pitchfork, gfx::TileId::player_ghoul_pitchfork},
+        {item::Id::pump_shotgun, gfx::TileId::player_ghoul_pump_shotgun},
+        {item::Id::rifle, gfx::TileId::player_ghoul_rifle},
+        {item::Id::sawed_off, gfx::TileId::player_ghoul_sawed_off},
+        {item::Id::sledgehammer, gfx::TileId::player_ghoul_sledgehammer},
+        {item::Id::spear, gfx::TileId::player_ghoul_spear},
+        {item::Id::spike_gun, gfx::TileId::player_ghoul_spike_gun},
+        {item::Id::spiked_mace, gfx::TileId::player_ghoul_spiked_mace},
+};
+
 // Background color to draw in cases where one "object" is obscuring another,
 // such as when an item is on top of a trap.
 static Array2<std::optional<Color>> s_bg_color_obscured(0, 0);
@@ -466,6 +514,28 @@ static void draw_unseen_cells_from_player_memory()
         }
 }
 
+static gfx::TileId get_player_tile()
+{
+        const item::Item* const wpn = map::g_player->m_inv.item_in_slot(SlotId::wpn);
+
+        if (player_bon::is_bg(Bg::ghoul)) {
+                if (wpn) {
+                        return s_wpn_id_to_player_tile_ghoul.at(wpn->id());
+                }
+                else {
+                        return gfx::TileId::ghoul;
+                }
+        }
+        else {
+                if (wpn) {
+                        return s_wpn_id_to_player_tile.at(wpn->id());
+                }
+                else {
+                        return gfx::TileId::player_unarmed;
+                }
+        }
+}
+
 static void draw_player_character()
 {
         const actor::Actor& player = *map::g_player;
@@ -477,24 +547,7 @@ static void draw_player_character()
         const Color color = player.color();
         const Color color_bg = colors::black();
 
-        gfx::TileId tile = gfx::TileId::END;
-
-        if (player_bon::is_bg(Bg::ghoul)) {
-                tile = gfx::TileId::ghoul;
-        }
-        else {
-                item::Item* item = player.m_inv.item_in_slot(SlotId::wpn);
-
-                if (item && item->data().ranged.is_ranged_wpn) {
-                        tile = gfx::TileId::player_firearm;
-                }
-                else if (item) {
-                        tile = gfx::TileId::player_melee;
-                }
-                else {
-                        tile = gfx::TileId::player_unarmed;
-                }
-        }
+        gfx::TileId tile = get_player_tile();
 
         io::MapDrawObj draw_obj;
 

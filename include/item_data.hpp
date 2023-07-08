@@ -40,8 +40,8 @@ enum class Id
         hammer,
         hatchet,
         machete,
-        pitch_fork,
-        sledge_hammer,
+        pitchfork,
+        sledgehammer,
         spear,
         spiked_mace,
 
@@ -53,7 +53,7 @@ enum class Id
         // Ranged weapons, ammo
         drum_of_bullets,
         electric_gun,
-        machine_gun,
+        tommy_gun,
         morphic_blaster,
         pistol,
         pistol_mag,

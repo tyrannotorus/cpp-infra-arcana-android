@@ -19,7 +19,7 @@
         </text>
 
         <graphics>
-            <tile>TILE_PLAYER_FIREARM</tile>
+            <tile>TILE_PLAYER_UNARMED</tile>
             <character>@</character>
             <color>COLOR_LIGHT_WHITE</color>
         </graphics>
@@ -9173,7 +9173,7 @@
         </text>
 
         <graphics>
-            <tile>TILE_PLAYER_FIREARM</tile>
+            <tile>TILE_PLAYER_TOMMY_GUN</tile>
             <character>P</character>
             <color>COLOR_GREEN</color>
         </graphics>
@@ -9261,7 +9261,7 @@
         </text>
 
         <graphics>
-            <tile>TILE_PLAYER_MELEE</tile>
+            <tile>TILE_PLAYER_MACHETE</tile>
             <character>P</character>
             <color>COLOR_CYAN</color>
         </graphics>

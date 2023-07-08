@@ -417,7 +417,7 @@ gfx::TileId Actor::tile() const
                 case item::Id::sawed_off:
                         return gfx::TileId::cultist_sawed_off_shotgun;
 
-                case item::Id::machine_gun:
+                case item::Id::tommy_gun:
                         return gfx::TileId::cultist_tommygun;
 
                 case item::Id::rifle:

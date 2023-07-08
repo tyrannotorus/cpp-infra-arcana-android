@@ -483,7 +483,7 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::ranged_wpn);
-        d.id = Id::machine_gun;
+        d.id = Id::tommy_gun;
         d.base_name = {"Tommy Gun", "Tommy Guns", "a Tommy Gun"};
         d.base_descr = {
                 "\"Tommy Gun\" is a nickname for the Thompson submachine gun - "
@@ -519,7 +519,7 @@ void init()
                 "a Drum of .45 ACP"};
         d.base_descr = {
                 "Ammunition used by Tommy Guns."};
-        d.ranged.max_ammo = g_data[(size_t)Id::machine_gun].ranged.max_ammo;
+        d.ranged.max_ammo = g_data[(size_t)Id::tommy_gun].ranged.max_ammo;
         d.chance_to_incl_in_spawn_list = 50;
         d.native_containers.push_back(terrain::Id::chest);
         d.native_containers.push_back(terrain::Id::cabinet);
@@ -1066,7 +1066,7 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn);
-        d.id = Id::pitch_fork;
+        d.id = Id::pitchfork;
         d.base_name = {"Pitchfork", "Pitchforks", "a Pitchfork"};
         d.base_descr = {
                 "A long staff with a forked, four-pronged end.",
@@ -1121,13 +1121,13 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn);
-        d.id = Id::sledge_hammer;
+        d.id = Id::sledgehammer;
         d.base_name = {"Sledgehammer", "Sledgehammers", "a Sledgehammer"};
         d.base_descr = {
                 "It can deal devastating damage, although it is cumbersome "
                 "to carry, and it requires some skill to use effectively."};
         d.weight = Weight::heavy;
-        d.tile = gfx::TileId::sledge_hammer;
+        d.tile = gfx::TileId::sledgehammer;
         d.melee.attack_msgs = {"smash", "smashes"};
         d.melee.dmg = WpnDmg(4, 15);
         d.melee.hit_chance_mod = -15;

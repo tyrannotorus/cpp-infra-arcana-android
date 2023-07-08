@@ -1247,7 +1247,7 @@ gfx::TileId Statue::tile() const
                 return gfx::TileId::ghoul;
         }
         else if (m_player_bg != Bg::END) {
-                return gfx::TileId::player_melee;
+                return gfx::TileId::player_unarmed;
         }
         else if (m_type == StatueType::ghoul) {
                 return gfx::TileId::ghoul;

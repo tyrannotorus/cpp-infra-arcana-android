@@ -545,7 +545,7 @@ static void make_item_set_firearm(actor::Actor& actor)
 
                 // Number of bullets loaded needs to be a multiple of the number
                 // of projectiles fired in each burst
-                item::Item* item = item::make(item::Id::machine_gun);
+                item::Item* item = item::make(item::Id::tommy_gun);
                 auto* const wpn = static_cast<item::Wpn*>(item);
 
                 const int cap_scaled =
@@ -663,7 +663,7 @@ static void make_item_set_high_priest_guard_war_vet(actor::Actor& actor)
 {
         actor.m_inv.put_in_slot(
                 SlotId::wpn,
-                item::make(item::Id::machine_gun),
+                item::make(item::Id::tommy_gun),
                 Verbose::no);
 }
 

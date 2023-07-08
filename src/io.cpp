@@ -168,6 +168,42 @@ static void draw_black_contour_for_surface(
         }
 }
 
+static void verify_tile_colors(
+        const SDL_Surface& surface,
+        const std::string& img_path)
+{
+#ifndef NDEBUG
+        const Color full_black(0, 0, 0);
+        const Color full_white(255, 255, 255);
+
+        for (int x = 0; x < surface.w; ++x) {
+                for (int y = 0; y < surface.h; ++y) {
+                        const Color color = io::read_px_on_surface(surface, {x, y});
+
+                        if ((color == full_black) || (color == full_white)) {
+                                continue;
+                        }
+
+                        TRACE
+                                << "Found illegal tile color in image '"
+                                << img_path
+                                << "': "
+                                << (int)color.r()
+                                << ","
+                                << (int)color.g()
+                                << ","
+                                << (int)color.b()
+                                << " - at position: "
+                                << x
+                                << "x"
+                                << y
+                                << std::endl;
+                        PANIC;
+                }
+        }
+#endif  // NDEBUG
+}
+
 static void verify_texture_size(
         SDL_Texture* texture,
         const P& expected_size,
@@ -350,18 +386,18 @@ static void load_font()
 {
         TRACE_FUNC_BEGIN;
 
-        const auto img_path = paths::fonts_dir() + config::font_name();
+        const std::string img_path = paths::fonts_dir() + config::font_name();
 
         TRACE << "Loading font image: " << img_path << std::endl;
 
-        auto* const surface = load_surface(img_path);
+        SDL_Surface* const surface = load_surface(img_path);
 
         swap_surface_color(*surface, colors::black(), colors::magenta());
 
         set_surface_color_key(*surface, colors::magenta());
 
         // Create the non-contour version
-        auto* texture = create_texture_from_surface(*surface);
+        SDL_Texture* texture = create_texture_from_surface(*surface);
 
         io::g_font_texture = texture;
 
@@ -383,14 +419,16 @@ static void load_tile(const gfx::TileId id, const P& cell_px_dims)
 
         TRACE << "Loading tile image: " << img_path << std::endl;
 
-        auto* const surface = load_surface(img_path);
+        SDL_Surface* const surface = load_surface(img_path);
+
+        verify_tile_colors(*surface, img_path);
 
         swap_surface_color(*surface, colors::black(), colors::magenta());
 
         set_surface_color_key(*surface, colors::magenta());
 
         // Create the non-contour version
-        auto* texture = create_texture_from_surface(*surface);
+        SDL_Texture* texture = create_texture_from_surface(*surface);
 
         io::g_tile_textures[(size_t)id] = texture;
 
@@ -843,7 +881,7 @@ std::string sdl_pref_dir()
         char* const path_ptr =
                 // NOTE: This is somewhat of a hack, see the function arguments
                 SDL_GetPrefPath(
-                        "infra_arcana",  // "Organization"
+                        "infra_arcana",       // "Organization"
                         subdir_str.c_str());  // "Application"
 
         std::string path_str = path_ptr;

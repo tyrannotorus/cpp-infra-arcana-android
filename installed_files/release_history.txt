@@ -39,10 +39,12 @@
 - Reduced XP gained from seeing "terrifying" monsters from 10 to 8, and reduced XP for "mind shattering" monsters from 20 to 15 (rationale: there are more monsters now).
 - On average, one less item is spawned on each floor in the mid game (10-19), this is intended to avoid players winning with a huge amount of items in the inventory, without making the early game harder or making exploration less rewarding in the late game. See also Treasure Hunter change above.
 
-
 ##############################
 # User interface
 ##############################
+# Graphics
+- Added unique player tiles for each weapon that the player can wield (39 new tiles in total), thanks YARD and Hal from the IA Discord channel!
+
 # Sound
 - Added a sound effect for walls collapsing ("Suddenly, the walls collapse!").
 - Hazy Mirrors are now colored gray on the minimap when they have been activated.
