@@ -441,7 +441,11 @@ void Shockwave::run_effect()
         const P& player_pos = map::g_player->m_pos;
 
         for (const P& d : dir_utils::g_dir_list) {
-                const P p(player_pos + d);
+                const P p = player_pos + d;
+
+                if (!map::is_pos_inside_outer_walls(p)) {
+                        continue;
+                }
 
                 auto* const terrain = map::g_terrain.at(p);
 
