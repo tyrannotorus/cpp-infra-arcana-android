@@ -8,7 +8,7 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <unordered_map>
+#include <optional>
 #include <vector>
 
 #include "actor.hpp"
@@ -16,6 +16,7 @@
 #include "array2.hpp"
 #include "colors.hpp"
 #include "config.hpp"
+#include "debug.hpp"
 #include "game_time.hpp"
 #include "gfx.hpp"
 #include "inventory.hpp"
@@ -26,6 +27,7 @@
 #include "misc.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
+#include "property_data.hpp"
 #include "property_handler.hpp"
 #include "rect.hpp"
 #include "terrain.hpp"
@@ -35,56 +37,419 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-const std::unordered_map<item::Id, gfx::TileId> s_wpn_id_to_player_tile {
-        {item::Id::axe, gfx::TileId::player_axe},
-        {item::Id::club, gfx::TileId::player_club},
-        {item::Id::dagger, gfx::TileId::player_dagger},
-        {item::Id::electric_gun, gfx::TileId::player_electric_gun},
-        {item::Id::flagellant_whip, gfx::TileId::player_flagellant_whip},
-        {item::Id::hammer, gfx::TileId::player_hammer},
-        {item::Id::hatchet, gfx::TileId::player_hatchet},
-        {item::Id::machete, gfx::TileId::player_machete},
-        {item::Id::tommy_gun, gfx::TileId::player_tommy_gun},
-        {item::Id::morphic_blaster, gfx::TileId::player_morphic_blaster},
-        {item::Id::pharaoh_staff, gfx::TileId::player_pharaoh_staff},
-        {item::Id::pistol, gfx::TileId::player_pistol},
-        {item::Id::revolver, gfx::TileId::player_pistol},
-        {item::Id::pitchfork, gfx::TileId::player_pitchfork},
-        {item::Id::pump_shotgun, gfx::TileId::player_pump_shotgun},
-        {item::Id::rifle, gfx::TileId::player_rifle},
-        {item::Id::sawed_off, gfx::TileId::player_sawed_off},
-        {item::Id::sledgehammer, gfx::TileId::player_sledgehammer},
-        {item::Id::spear, gfx::TileId::player_spear},
-        {item::Id::spike_gun, gfx::TileId::player_spike_gun},
-        {item::Id::spiked_mace, gfx::TileId::player_spiked_mace},
-};
-
-const std::unordered_map<item::Id, gfx::TileId> s_wpn_id_to_player_tile_ghoul {
-        {item::Id::axe, gfx::TileId::player_ghoul_axe},
-        {item::Id::club, gfx::TileId::player_ghoul_club},
-        {item::Id::dagger, gfx::TileId::player_ghoul_dagger},
-        {item::Id::electric_gun, gfx::TileId::player_ghoul_electric_gun},
-        {item::Id::hammer, gfx::TileId::player_ghoul_hammer},
-        {item::Id::hatchet, gfx::TileId::player_ghoul_hatchet},
-        {item::Id::machete, gfx::TileId::player_ghoul_machete},
-        {item::Id::tommy_gun, gfx::TileId::player_ghoul_tommy_gun},
-        {item::Id::morphic_blaster, gfx::TileId::player_ghoul_morphic_blaster},
-        {item::Id::pharaoh_staff, gfx::TileId::player_ghoul_pharaoh_staff},
-        {item::Id::pistol, gfx::TileId::player_ghoul_pistol},
-        {item::Id::revolver, gfx::TileId::player_ghoul_pistol},
-        {item::Id::pitchfork, gfx::TileId::player_ghoul_pitchfork},
-        {item::Id::pump_shotgun, gfx::TileId::player_ghoul_pump_shotgun},
-        {item::Id::rifle, gfx::TileId::player_ghoul_rifle},
-        {item::Id::sawed_off, gfx::TileId::player_ghoul_sawed_off},
-        {item::Id::sledgehammer, gfx::TileId::player_ghoul_sledgehammer},
-        {item::Id::spear, gfx::TileId::player_ghoul_spear},
-        {item::Id::spike_gun, gfx::TileId::player_ghoul_spike_gun},
-        {item::Id::spiked_mace, gfx::TileId::player_ghoul_spiked_mace},
-};
-
 // Background color to draw in cases where one "object" is obscuring another,
 // such as when an item is on top of a trap.
 static Array2<std::optional<Color>> s_bg_color_obscured(0, 0);
+
+static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
+{
+        switch (item_id) {
+        case item::Id::axe:
+                return gfx::TileId::player_axe;
+
+        case item::Id::club:
+                return gfx::TileId::player_club;
+
+        case item::Id::dagger:
+        case item::Id::shadow_dagger:
+                return gfx::TileId::player_dagger;
+
+        case item::Id::electric_gun:
+                return gfx::TileId::player_electric_gun;
+
+        case item::Id::flagellant_whip:
+                return gfx::TileId::player_flagellant_whip;
+
+        case item::Id::hammer:
+                return gfx::TileId::player_hammer;
+
+        case item::Id::hatchet:
+                return gfx::TileId::player_hatchet;
+
+        case item::Id::machete:
+                return gfx::TileId::player_machete;
+
+        case item::Id::tommy_gun:
+                return gfx::TileId::player_tommy_gun;
+
+        case item::Id::morphic_blaster:
+                return gfx::TileId::player_morphic_blaster;
+
+        case item::Id::pharaoh_staff:
+                return gfx::TileId::player_pharaoh_staff;
+
+        case item::Id::pistol:
+        case item::Id::revolver:
+                return gfx::TileId::player_pistol;
+
+        case item::Id::pitchfork:
+                return gfx::TileId::player_pitchfork;
+
+        case item::Id::pump_shotgun:
+                return gfx::TileId::player_pump_shotgun;
+
+        case item::Id::rifle:
+                return gfx::TileId::player_rifle;
+
+        case item::Id::sawed_off:
+                return gfx::TileId::player_sawed_off;
+
+        case item::Id::sledgehammer:
+                return gfx::TileId::player_sledgehammer;
+
+        case item::Id::spear:
+                return gfx::TileId::player_spear;
+
+        case item::Id::spike_gun:
+                return gfx::TileId::player_spike_gun;
+
+        case item::Id::spiked_mace:
+                return gfx::TileId::player_spiked_mace;
+
+        case item::Id::armor_asb_suit:
+        case item::Id::armor_flak_jacket:
+        case item::Id::armor_iron_suit:
+        case item::Id::armor_leather_jacket:
+        case item::Id::armor_mi_go:
+        case item::Id::astral_opium:
+        case item::Id::bone_charm:
+        case item::Id::clockwork:
+        case item::Id::device_blaster:
+        case item::Id::device_deafening:
+        case item::Id::device_force_field:
+        case item::Id::device_rejuvenator:
+        case item::Id::device_sentry_drone:
+        case item::Id::device_translocator:
+        case item::Id::drum_of_bullets:
+        case item::Id::dynamite:
+        case item::Id::flare:
+        case item::Id::fluctuating_material:
+        case item::Id::gas_mask:
+        case item::Id::holy_symbol:
+        case item::Id::horn_of_banishment:
+        case item::Id::horn_of_malice:
+        case item::Id::intr_acid_spit:
+        case item::Id::intr_acid_touch:
+        case item::Id::intr_bite:
+        case item::Id::intr_claw:
+        case item::Id::intr_dust_engulf:
+        case item::Id::intr_energy_breath:
+        case item::Id::intr_energy_engulf:
+        case item::Id::intr_fire_breath:
+        case item::Id::intr_fire_engulf:
+        case item::Id::intr_ghost_touch:
+        case item::Id::intr_headbutt:
+        case item::Id::intr_kick:
+        case item::Id::intr_maul:
+        case item::Id::intr_mind_leech_sting:
+        case item::Id::intr_net_throw:
+        case item::Id::intr_punch:
+        case item::Id::intr_punch_knockback:
+        case item::Id::intr_pus_spew:
+        case item::Id::intr_raven_peck:
+        case item::Id::intr_snake_venom_spit:
+        case item::Id::intr_spear_thrust:
+        case item::Id::intr_spores:
+        case item::Id::intr_sting:
+        case item::Id::intr_strangle:
+        case item::Id::intr_strike:
+        case item::Id::intr_vampiric_bite:
+        case item::Id::intr_web_bola:
+        case item::Id::iron_spike:
+        case item::Id::lantern:
+        case item::Id::medical_bag:
+        case item::Id::molotov:
+        case item::Id::necronomicon:
+        case item::Id::onyx_drop:
+        case item::Id::orb_of_life:
+        case item::Id::pistol_mag:
+        case item::Id::player_ghoul_claw:
+        case item::Id::player_kick:
+        case item::Id::player_punch:
+        case item::Id::player_stomp:
+        case item::Id::potion_blindness:
+        case item::Id::potion_conf:
+        case item::Id::potion_curing:
+        case item::Id::potion_descent:
+        case item::Id::potion_fortitude:
+        case item::Id::potion_insight:
+        case item::Id::potion_paralyze:
+        case item::Id::potion_poison:
+        case item::Id::potion_r_elec:
+        case item::Id::potion_r_fire:
+        case item::Id::potion_spirit:
+        case item::Id::potion_vitality:
+        case item::Id::refl_talisman:
+        case item::Id::resurrect_talisman:
+        case item::Id::revolver_bullet:
+        case item::Id::rifle_bullet:
+        case item::Id::rock:
+        case item::Id::rod_bless:
+        case item::Id::rod_cloud_minds:
+        case item::Id::rod_curing:
+        case item::Id::rod_opening:
+        case item::Id::rod_shockwave:
+        case item::Id::scroll_aura_of_decay:
+        case item::Id::scroll_aza_gaze:
+        case item::Id::scroll_bless:
+        case item::Id::scroll_blood_temper:
+        case item::Id::scroll_cataclysm:
+        case item::Id::scroll_control_object:
+        case item::Id::scroll_crimson_passage:
+        case item::Id::scroll_darkbolt:
+        case item::Id::scroll_enfeeble:
+        case item::Id::scroll_erudition:
+        case item::Id::scroll_haste:
+        case item::Id::scroll_heal:
+        case item::Id::scroll_invis:
+        case item::Id::scroll_light:
+        case item::Id::scroll_pestilence:
+        case item::Id::scroll_premonition:
+        case item::Id::scroll_resistance:
+        case item::Id::scroll_sacrifice_life:
+        case item::Id::scroll_see_invis:
+        case item::Id::scroll_slow:
+        case item::Id::scroll_spectral_wpns:
+        case item::Id::scroll_spell_shield:
+        case item::Id::scroll_telep:
+        case item::Id::scroll_terrify:
+        case item::Id::scroll_thorns:
+        case item::Id::scroll_transmut:
+        case item::Id::shotgun_shell:
+        case item::Id::smoke_grenade:
+        case item::Id::tele_ctrl_talisman:
+        case item::Id::thr_knife:
+        case item::Id::torture_collar:
+        case item::Id::trap_dart:
+        case item::Id::trap_dart_poison:
+        case item::Id::trap_spear:
+        case item::Id::trap_spear_poison:
+        case item::Id::trapezohedron:
+        case item::Id::witch_eye:
+        case item::Id::zombie_dust:
+        case item::Id::END:
+                break;
+        }
+
+        ASSERT(false);
+
+        return gfx::TileId::player_unarmed;
+}
+
+static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
+{
+        switch (item_id) {
+        case item::Id::axe:
+                return gfx::TileId::player_ghoul_axe;
+
+        case item::Id::club:
+                return gfx::TileId::player_ghoul_club;
+
+        case item::Id::dagger:
+        case item::Id::shadow_dagger:
+                return gfx::TileId::player_ghoul_dagger;
+
+        case item::Id::electric_gun:
+                return gfx::TileId::player_ghoul_electric_gun;
+
+        case item::Id::hammer:
+                return gfx::TileId::player_ghoul_hammer;
+
+        case item::Id::hatchet:
+                return gfx::TileId::player_ghoul_hatchet;
+
+        case item::Id::machete:
+                return gfx::TileId::player_ghoul_machete;
+
+        case item::Id::tommy_gun:
+                return gfx::TileId::player_ghoul_tommy_gun;
+
+        case item::Id::morphic_blaster:
+                return gfx::TileId::player_ghoul_morphic_blaster;
+
+        case item::Id::pharaoh_staff:
+                return gfx::TileId::player_ghoul_pharaoh_staff;
+
+        case item::Id::pistol:
+        case item::Id::revolver:
+                return gfx::TileId::player_ghoul_pistol;
+
+        case item::Id::pitchfork:
+                return gfx::TileId::player_ghoul_pitchfork;
+
+        case item::Id::pump_shotgun:
+                return gfx::TileId::player_ghoul_pump_shotgun;
+
+        case item::Id::rifle:
+                return gfx::TileId::player_ghoul_rifle;
+
+        case item::Id::sawed_off:
+                return gfx::TileId::player_ghoul_sawed_off;
+
+        case item::Id::sledgehammer:
+                return gfx::TileId::player_ghoul_sledgehammer;
+
+        case item::Id::spear:
+                return gfx::TileId::player_ghoul_spear;
+
+        case item::Id::spike_gun:
+                return gfx::TileId::player_ghoul_spike_gun;
+
+        case item::Id::spiked_mace:
+                return gfx::TileId::player_ghoul_spiked_mace;
+
+        case item::Id::armor_asb_suit:
+        case item::Id::armor_flak_jacket:
+        case item::Id::armor_iron_suit:
+        case item::Id::armor_leather_jacket:
+        case item::Id::armor_mi_go:
+        case item::Id::astral_opium:
+        case item::Id::bone_charm:
+        case item::Id::clockwork:
+        case item::Id::device_blaster:
+        case item::Id::device_deafening:
+        case item::Id::device_force_field:
+        case item::Id::device_rejuvenator:
+        case item::Id::device_sentry_drone:
+        case item::Id::device_translocator:
+        case item::Id::drum_of_bullets:
+        case item::Id::dynamite:
+        case item::Id::flagellant_whip:
+        case item::Id::flare:
+        case item::Id::fluctuating_material:
+        case item::Id::gas_mask:
+        case item::Id::holy_symbol:
+        case item::Id::horn_of_banishment:
+        case item::Id::horn_of_malice:
+        case item::Id::intr_acid_spit:
+        case item::Id::intr_acid_touch:
+        case item::Id::intr_bite:
+        case item::Id::intr_claw:
+        case item::Id::intr_dust_engulf:
+        case item::Id::intr_energy_breath:
+        case item::Id::intr_energy_engulf:
+        case item::Id::intr_fire_breath:
+        case item::Id::intr_fire_engulf:
+        case item::Id::intr_ghost_touch:
+        case item::Id::intr_headbutt:
+        case item::Id::intr_kick:
+        case item::Id::intr_maul:
+        case item::Id::intr_mind_leech_sting:
+        case item::Id::intr_net_throw:
+        case item::Id::intr_punch:
+        case item::Id::intr_punch_knockback:
+        case item::Id::intr_pus_spew:
+        case item::Id::intr_raven_peck:
+        case item::Id::intr_snake_venom_spit:
+        case item::Id::intr_spear_thrust:
+        case item::Id::intr_spores:
+        case item::Id::intr_sting:
+        case item::Id::intr_strangle:
+        case item::Id::intr_strike:
+        case item::Id::intr_vampiric_bite:
+        case item::Id::intr_web_bola:
+        case item::Id::iron_spike:
+        case item::Id::lantern:
+        case item::Id::medical_bag:
+        case item::Id::molotov:
+        case item::Id::necronomicon:
+        case item::Id::onyx_drop:
+        case item::Id::orb_of_life:
+        case item::Id::pistol_mag:
+        case item::Id::player_ghoul_claw:
+        case item::Id::player_kick:
+        case item::Id::player_punch:
+        case item::Id::player_stomp:
+        case item::Id::potion_blindness:
+        case item::Id::potion_conf:
+        case item::Id::potion_curing:
+        case item::Id::potion_descent:
+        case item::Id::potion_fortitude:
+        case item::Id::potion_insight:
+        case item::Id::potion_paralyze:
+        case item::Id::potion_poison:
+        case item::Id::potion_r_elec:
+        case item::Id::potion_r_fire:
+        case item::Id::potion_spirit:
+        case item::Id::potion_vitality:
+        case item::Id::refl_talisman:
+        case item::Id::resurrect_talisman:
+        case item::Id::revolver_bullet:
+        case item::Id::rifle_bullet:
+        case item::Id::rock:
+        case item::Id::rod_bless:
+        case item::Id::rod_cloud_minds:
+        case item::Id::rod_curing:
+        case item::Id::rod_opening:
+        case item::Id::rod_shockwave:
+        case item::Id::scroll_aura_of_decay:
+        case item::Id::scroll_aza_gaze:
+        case item::Id::scroll_bless:
+        case item::Id::scroll_blood_temper:
+        case item::Id::scroll_cataclysm:
+        case item::Id::scroll_control_object:
+        case item::Id::scroll_crimson_passage:
+        case item::Id::scroll_darkbolt:
+        case item::Id::scroll_enfeeble:
+        case item::Id::scroll_erudition:
+        case item::Id::scroll_haste:
+        case item::Id::scroll_heal:
+        case item::Id::scroll_invis:
+        case item::Id::scroll_light:
+        case item::Id::scroll_pestilence:
+        case item::Id::scroll_premonition:
+        case item::Id::scroll_resistance:
+        case item::Id::scroll_sacrifice_life:
+        case item::Id::scroll_see_invis:
+        case item::Id::scroll_slow:
+        case item::Id::scroll_spectral_wpns:
+        case item::Id::scroll_spell_shield:
+        case item::Id::scroll_telep:
+        case item::Id::scroll_terrify:
+        case item::Id::scroll_thorns:
+        case item::Id::scroll_transmut:
+        case item::Id::shotgun_shell:
+        case item::Id::smoke_grenade:
+        case item::Id::tele_ctrl_talisman:
+        case item::Id::thr_knife:
+        case item::Id::torture_collar:
+        case item::Id::trap_dart:
+        case item::Id::trap_dart_poison:
+        case item::Id::trap_spear:
+        case item::Id::trap_spear_poison:
+        case item::Id::trapezohedron:
+        case item::Id::witch_eye:
+        case item::Id::zombie_dust:
+        case item::Id::END:
+                break;
+        }
+
+        ASSERT(false);
+
+        return gfx::TileId::player_unarmed;
+}
+
+static gfx::TileId get_player_tile()
+{
+        const item::Item* const wpn = map::g_player->m_inv.item_in_slot(SlotId::wpn);
+
+        if (player_bon::is_bg(Bg::ghoul)) {
+                if (wpn) {
+                        return get_ghoul_tile_for_wpn_id(wpn->id());
+                }
+                else {
+                        return gfx::TileId::ghoul;
+                }
+        }
+        else {
+                if (wpn) {
+                        return get_player_tile_for_wpn_id(wpn->id());
+                }
+                else {
+                        return gfx::TileId::player_unarmed;
+                }
+        }
+}
 
 static void set_bg_color_obscured_terrain(
         const terrain::Terrain* const terrain,
@@ -510,28 +875,6 @@ static void draw_unseen_cells_from_player_memory()
                         draw_obj.color = draw_obj.color.shaded(80);
 
                         draw_obj.draw();
-                }
-        }
-}
-
-static gfx::TileId get_player_tile()
-{
-        const item::Item* const wpn = map::g_player->m_inv.item_in_slot(SlotId::wpn);
-
-        if (player_bon::is_bg(Bg::ghoul)) {
-                if (wpn) {
-                        return s_wpn_id_to_player_tile_ghoul.at(wpn->id());
-                }
-                else {
-                        return gfx::TileId::ghoul;
-                }
-        }
-        else {
-                if (wpn) {
-                        return s_wpn_id_to_player_tile.at(wpn->id());
-                }
-                else {
-                        return gfx::TileId::player_unarmed;
                 }
         }
 }
