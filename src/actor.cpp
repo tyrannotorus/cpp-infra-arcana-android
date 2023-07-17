@@ -719,7 +719,7 @@ int Actor::armor_points() const
                 }
 
                 if (player_bon::has_trait(Trait::callous)) {
-                        armor_points += 2;
+                        ++armor_points;
                 }
         }
 
