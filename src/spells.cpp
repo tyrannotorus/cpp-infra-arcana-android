@@ -1098,6 +1098,8 @@ void Spell::cast(
 
         bool allow_cast = true;
 
+        const int hp_before = caster->m_hp;
+
         if (spell_src == SpellSrc::learned) {
                 const Range cost = cost_range(skill, caster);
 
@@ -1145,7 +1147,8 @@ void Spell::cast(
                 // Grant regeneration from Flagellant galvanization trait?
                 if (actor::is_player(caster) &&
                     player_bon::has_trait(Trait::galvanization) &&
-                    (domain() == SpellDomain::blood)) {
+                    (domain() == SpellDomain::blood) &&
+                    (caster->m_hp < hp_before)) {
                         prop::Prop* const regen = prop::make(prop::Id::regenerating);
 
                         regen->set_duration(rnd::range(4, 6));

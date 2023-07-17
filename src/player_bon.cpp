@@ -856,7 +856,8 @@ static void update_trait_data()
         d.descr =
                 "Casting any spell from the Blood domain grants "
                 "Regeneration for 4-6 turns "
-                "(+1 extra hit point regenerated per turn)";
+                "(+1 extra hit point regenerated per turn), if "
+                "hit points are lost from casting the spell.";
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);
 
