@@ -905,21 +905,27 @@ private:
         int m_nr_wounds {1};
 };
 
+class Flagellant : public Prop
+{
+public:
+        Flagellant() :
+                Prop(Id::flagellant) {}
+
+        PropEnded on_hit(
+                int dmg,
+                DmgType dmg_type,
+                actor::Actor* attacker) override;
+};
+
 class Moribund : public Prop
 {
 public:
         Moribund() :
                 Prop(Id::moribund) {}
 
-        std::string name() const override;
-
-        std::string name_short() const override;
-
         int ability_mod(AbilityId ability) const override;
 
         int armor_points() const override;
-
-        bool has_bonus() const;
 };
 
 class HpSap : public Prop

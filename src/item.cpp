@@ -201,22 +201,13 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
 
                 // Bonus damage from Flagellant Moribund?
                 if (attacker && attacker->m_properties.has(prop::Id::moribund)) {
-                        auto* const moribund =
-                                static_cast<prop::Moribund*>(
-                                        attacker->m_properties.prop(
-                                                prop::Id::moribund));
+                        int moribund_bon = 3;
 
-                        const bool has_moribund_bon = moribund->has_bonus();
-
-                        if (has_moribund_bon) {
-                                int moribund_bon = 3;
-
-                                if (player_bon::has_trait(Trait::death_sense)) {
-                                        moribund_bon *= 2;
-                                }
-
-                                range.set_plus(range.plus() + moribund_bon);
+                        if (player_bon::has_trait(Trait::death_sense)) {
+                                moribund_bon *= 2;
                         }
+
+                        range.set_plus(range.plus() + moribund_bon);
                 }
         }
 

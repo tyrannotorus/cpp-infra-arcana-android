@@ -141,6 +141,7 @@ enum class Id
         sanctuary,
         astral_opium_addiction,
         meditative_focused,  // From Meditative trait
+        flagellant,          // Used for applying moribund when hit
         moribund,            // Flagellant low health bonuses
         thorns,              // From the Thorns spell
         crimson_passage,     // From the Crimson Passage spell

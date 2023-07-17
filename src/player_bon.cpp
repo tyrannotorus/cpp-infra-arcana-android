@@ -1109,9 +1109,9 @@ std::vector<ColoredString> bg_descr(const Bg id)
         case Bg::flagellant:
                 put("No shock received for taking damage.");
                 put("");
-                put("While health is reduced to 6 hit points or below, "
-                    "the following bonuses are received: "
-                    "+3 melee damage, +30% melee hit chance, +3 armor points.");
+                put("If health is reduced to 6 hit points or below when taking damage, "
+                    "the moribund status is applied for 6-8 turns "
+                    "(+3 melee damage, +30% melee hit chance, +3 armor points).");
                 put("");
                 put("Wears a torture collar which cannot be taken off; "
                     "walking requires extra turns, and stealth and evasion "
@@ -1523,12 +1523,12 @@ void pick_bg(const Bg bg)
                 pick_trait(Trait::self_aware);
                 pick_trait(Trait::tough);
 
-                prop::Prop* moribund = prop::make(prop::Id::moribund);
+                prop::Prop* flagellant_prop = prop::make(prop::Id::flagellant);
 
-                moribund->set_indefinite();
+                flagellant_prop->set_indefinite();
 
                 map::g_player->m_properties.apply(
-                        moribund,
+                        flagellant_prop,
                         prop::PropSrc::intr,
                         true,
                         Verbose::no);

@@ -22,6 +22,9 @@ Prop* make(const prop::Id id)
         case prop::Id::wound:
                 return new Wound();
 
+        case prop::Id::flagellant:
+                return new Flagellant();
+
         case prop::Id::moribund:
                 return new Moribund();
 

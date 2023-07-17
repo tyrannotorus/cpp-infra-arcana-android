@@ -1187,26 +1187,29 @@ void Wound::on_more(const Prop& new_prop)
         }
 }
 
-std::string Moribund::name() const
+PropEnded Flagellant::on_hit(
+        const int dmg,
+        const DmgType dmg_type,
+        actor::Actor* const attacker)
 {
-        if (!has_bonus()) {
-                return "";
+        (void)dmg_type;
+        (void)attacker;
+
+        if ((m_owner->m_hp - dmg) <= 6) {
+                Prop* const moribund = make(Id::moribund);
+
+                const Range duration(6, 8);
+
+                moribund->set_duration(duration.roll());
+
+                m_owner->m_properties.apply(moribund);
         }
 
-        return "Moribund";
-}
-
-std::string Moribund::name_short() const
-{
-        return has_bonus() ? "Moribund" : "";
+        return PropEnded::no;
 }
 
 int Moribund::ability_mod(AbilityId ability) const
 {
-        if (!has_bonus()) {
-                return 0;
-        }
-
         if (ability != AbilityId::melee) {
                 return 0;
         }
@@ -1222,10 +1225,6 @@ int Moribund::ability_mod(AbilityId ability) const
 
 int Moribund::armor_points() const
 {
-        if (!has_bonus()) {
-                return 0;
-        }
-
         int armor_bonus = 3;
 
         if (player_bon::has_trait(Trait::death_sense)) {
@@ -1233,11 +1232,6 @@ int Moribund::armor_points() const
         }
 
         return armor_bonus;
-}
-
-bool Moribund::has_bonus() const
-{
-        return m_owner->m_hp <= 6;
 }
 
 HpSap::HpSap() :

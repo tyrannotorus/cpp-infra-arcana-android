@@ -1283,13 +1283,18 @@ static void init_data_list()
         d.alignment = prop::PropAlignment::good;
         add(d);
 
-        d.id = prop::Id::moribund;
-        d.descr =
-                "While health is reduced to 6 hit points or below, "
-                "the following bonuses are received: "
-                "+3 melee damage, +30% melee hit chance, +3 armor points.";
+        d.id = prop::Id::flagellant;
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
+        d.alignment = prop::PropAlignment::good;
+        add(d);
+
+        d.id = prop::Id::moribund;
+        d.descr = "+3 melee damage, +30% melee hit chance, +3 armor points.";
+        d.name = "Moribund";
+        d.name_short = "Moribund";
+        d.allow_display_turns = true;
+        d.allow_test_on_bot = true;
         d.alignment = prop::PropAlignment::good;
         add(d);
 }

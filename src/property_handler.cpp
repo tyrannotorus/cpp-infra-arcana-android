@@ -1126,8 +1126,7 @@ void PropHandler::on_hit(
         for (size_t i = 0; i < m_props.size();) {
                 const auto& prop = m_props[i];
 
-                const PropEnded prop_ended =
-                        prop->on_hit(dmg, dmg_type, attacker);
+                const PropEnded prop_ended = prop->on_hit(dmg, dmg_type, attacker);
 
                 if (prop_ended == PropEnded::no) {
                         ++i;
