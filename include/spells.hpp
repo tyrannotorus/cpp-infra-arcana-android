@@ -2335,8 +2335,6 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int get_nr_turns_disabled_hp_regen() const;
-
         int get_min_hp_removed_for_bonus_effects() const;
 
         int get_moribund_hp_limit() const;

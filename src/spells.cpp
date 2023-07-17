@@ -5532,11 +5532,6 @@ std::vector<std::string> SpellSacrificeLife::descr_specific(
 // -----------------------------------------------------------------------------
 // Shed Impurity
 // -----------------------------------------------------------------------------
-int SpellShedImpurity::get_nr_turns_disabled_hp_regen() const
-{
-        return 2;
-}
-
 int SpellShedImpurity::get_min_hp_removed_for_bonus_effects() const
 {
         return 9;
@@ -5569,12 +5564,6 @@ void SpellShedImpurity::run_effect(
         }
 
         actor::hit(*caster, hp_removed, DmgType::pure, nullptr, AllowWound::no);
-
-        prop::Prop* const disabled_regen = prop::make(prop::Id::disabled_hp_regen);
-
-        disabled_regen->set_duration(get_nr_turns_disabled_hp_regen());
-
-        caster->m_properties.apply(disabled_regen);
 
         if (hp_removed >= get_min_hp_removed_for_bonus_effects()) {
                 caster->m_properties.end_prop(prop::Id::weakened);
@@ -5652,20 +5641,6 @@ std::vector<std::string> SpellShedImpurity::descr_specific(
                 " hit points would be removed.";
 
         descr.push_back(bonus_effect_descr);
-
-        const int nr_turns_disabled_hp_regen = get_nr_turns_disabled_hp_regen();
-
-        const std::string turns_str =
-                (nr_turns_disabled_hp_regen == 1)
-                ? "turn"
-                : "turns";
-
-        descr.emplace_back(
-                "Hit point regeneration is disabled for " +
-                std::to_string(get_nr_turns_disabled_hp_regen()) +
-                " " +
-                turns_str +
-                ".");
 
         return descr;
 }
