@@ -203,7 +203,7 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
                 if (attacker && attacker->m_properties.has(prop::Id::moribund)) {
                         int moribund_bon = 3;
 
-                        if (player_bon::has_trait(Trait::death_sense)) {
+                        if (player_bon::has_trait(Trait::fervor)) {
                                 moribund_bon *= 2;
                         }
 

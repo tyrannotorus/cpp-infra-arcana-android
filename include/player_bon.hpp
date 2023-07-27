@@ -88,7 +88,7 @@ enum class Trait
         unbreakable,
         callous,
         galvanization,
-        death_sense,
+        fervor,
 
         END
 };

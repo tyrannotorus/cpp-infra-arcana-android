@@ -861,9 +861,9 @@ static void update_trait_data()
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);
 
-        // --- Death Sense ---
-        d.id = Trait::death_sense;
-        d.title = "Death Sense";
+        // --- Fervor ---
+        d.id = Trait::fervor;
+        d.title = "Fervor";
         d.descr =
                 "Doubles all Flagellant bonuses gained when health is low";
         d.bg_prereq = Bg::flagellant;
