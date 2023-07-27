@@ -5542,7 +5542,7 @@ int SpellShedImpurity::get_min_hp_removed_for_bonus_effects() const
 
 int SpellShedImpurity::get_moribund_hp_limit() const
 {
-        return player_bon::g_flagellant_moribund_limit;
+        return player_bon::has_trait(Trait::memento_mori) ? 8 : 6;
 }
 
 int SpellShedImpurity::calc_nr_hp_removed(const actor::Actor* const caster) const

@@ -865,7 +865,16 @@ static void update_trait_data()
         d.id = Trait::fervor;
         d.title = "Fervor";
         d.descr =
-                "Doubles all Flagellant bonuses gained when health is low";
+                "Doubles all bonuses for the moribund effect.";
+        d.bg_prereq = Bg::flagellant;
+        set_trait_data(d);
+
+        // --- Memento Mori ---
+        d.id = Trait::memento_mori;
+        d.title = "Memento Mori";
+        d.descr =
+                "Raises the threshold of the moribund status to 8 hit points, "
+                "and doubles the duration of the effect.";
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);
 }

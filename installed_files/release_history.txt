@@ -7,6 +7,7 @@
 # Backgrounds and traits
 - The Flagellant "moribund" status (low health bonuses) is now applied for a certain duration when taking damage that reduces health to 6 hit points or below (previously it was always active while hit points were below the limit, and ended immediately when restored above the limit). The reason for this change is to allow the player to utilize the effect for a bit even if hit points are immediately restored above the limit (e.g. when using the Shed Impurity spell, see below).
 - The Galvanization trait only applies regeneration if hit points are lost from casting the spell (mostly/only applicable to the Shed Impurity spell, see below).
+- Added unique Flagellant trait "Memento Mori", which raises the threshold of the moribund status to 8 hit points, and doubles the duration of the effect.
 - Renamed the "Death Sense" Flagellant trait to "Fervor".
 - Flagellants also start with a potion of vitality.
 - For Flagellant characters, the number of turns spent is adjusted to a lower value (55% of the original value) when calculating score (Flagellants tend to spend a lot more turns, especially since they must wait every time they walk, so this is a compensation for a more comparable score).
