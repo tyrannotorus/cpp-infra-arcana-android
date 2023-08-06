@@ -2854,8 +2854,7 @@ std::vector<std::string> SpellPurge::descr_specific(
         std::vector<std::string> descr;
 
         descr.emplace_back(
-                "Destroys any altars, monoliths, or gongs adjacent to the "
-                "caster.");
+                "Destroys any altars, monoliths, gongs, or mirrors adjacent to the caster.");
 
         descr.emplace_back(
                 "All undead creatures adjacent to the caster (seen or not) are "

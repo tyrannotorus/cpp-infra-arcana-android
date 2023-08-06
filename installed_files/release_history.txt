@@ -22,6 +22,7 @@
 # Spells
 - Added spell "Shed Impurity" - a unique spell for the Flagellant background, that they start with. The spell lowers hit points to the limit where the Flagellant receives bonuses for having low hit points, and if enough hit points are lost, then some status effects such as poisoning are cured.
 - Added a new spell that heals other creatures, available only to monsters.
+- The Purge spell description now also includes mirrors in the list of objects it can destroy.
 
 # Items
 - Reworked the Incinerator - it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.
