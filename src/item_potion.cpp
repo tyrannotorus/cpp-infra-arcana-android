@@ -753,16 +753,14 @@ void Descent::quaff_impl(actor::Actor& actor)
 {
         (void)actor;
 
-        if (map::g_dlvl < (g_dlvl_last - 1)) {
+        if (map::g_dlvl < (g_dlvl_last + 1)) {
                 if (!map::g_player->m_properties.has(prop::Id::descend)) {
                         map::g_player->m_properties.apply(prop::make(prop::Id::descend));
                 }
         }
         else {
-                // Dungeon level is near the end
-                msg_log::add(
-                        "I feel a faint sinking sensation, "
-                        "but it soon disappears...");
+                // Cannot bypass the boss level.
+                msg_log::add("I feel a faint sinking sensation, but it soon disappears...");
         }
 
         identify(Verbose::yes);

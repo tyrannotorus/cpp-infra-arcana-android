@@ -26,6 +26,7 @@
 
 # Items
 - Reworked the Incinerator - it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.
+- Potion of Descent can now be used on all levels until "the end" (no spoilers), previously it only worked until a few levels before the end of the game.
 - Added more artifacts.
 
 # Monsters
