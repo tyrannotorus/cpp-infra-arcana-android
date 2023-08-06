@@ -329,9 +329,11 @@ static void update_trait_data()
         d.id = Trait::survivalist;
         d.title = "Survivalist";
         d.descr =
-                "You cannot become diseased, wounds do not affect your combat "
-                "abilities, and their negative effect on hit points and "
-                "regeneration is halved";
+                "You cannot become diseased, "
+                "wounds do not affect your combat abilities, "
+                "do not cause staggering (slow walking), "
+                "their negative effect on hit points and regeneration is halved, "
+                "and you die at six wounds instead of five.";
         d.on_picked = []() {
                 prop::Prop* prop = prop::make(prop::Id::r_disease);
 

@@ -1097,8 +1097,7 @@ std::string Wound::name_short() const
 int Wound::ability_mod(const AbilityId ability) const
 {
         // A player with Survivalist receives no ability penalties
-        if (actor::is_player(m_owner) &&
-            player_bon::has_trait(Trait::survivalist)) {
+        if (actor::is_player(m_owner) && player_bon::has_trait(Trait::survivalist)) {
                 return 0;
         }
 
@@ -1119,8 +1118,7 @@ int Wound::affect_max_hp(const int hp_max) const
         int hp_pen_pct = m_nr_wounds * pen_pct_per_wound;
 
         // The HP penalty is halved for a player with Survivalist
-        if (actor::is_player(m_owner) &&
-            player_bon::has_trait(Trait::survivalist)) {
+        if (actor::is_player(m_owner) && player_bon::has_trait(Trait::survivalist)) {
                 hp_pen_pct /= 2;
         }
 
@@ -1174,7 +1172,12 @@ void Wound::on_more(const Prop& new_prop)
 
         ++m_nr_wounds;
 
-        if (m_nr_wounds >= 5) {
+        const int nr_wounds_fatal =
+                player_bon::has_trait(Trait::survivalist)
+                ? 6
+                : 5;
+
+        if (m_nr_wounds >= nr_wounds_fatal) {
                 if (actor::is_player(m_owner)) {
                         msg_log::add("I succumb to my wounds!");
                 }

@@ -590,9 +590,8 @@ void draw()
                         "GJ MODE ENABLED",
                         Panel::screen,
                         {panels::x1(Panel::screen), 0},
-                        colors::black(),
-                        io::DrawBg::yes,
-                        colors::gold());
+                        colors::yellow(),
+                        io::DrawBg::yes);
         }
 
         // TODO: Testing "seen" panel.

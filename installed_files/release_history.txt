@@ -12,6 +12,7 @@
 - Flagellants also start with a potion of vitality.
 - For Flagellant characters, the number of turns spent is adjusted to a lower value (55% of the original value) when calculating score (Flagellants tend to spend a lot more turns, especially since they must wait every time they walk, so this is a compensation for a more comparable score).
 - Treasure Hunter increases items spawned on each floor by 1, instead of 1-2. See also general change to number of items spawned below.
+- Survivalist now also removes staggering from wounds, and raises the fatal limit to 6 wounds (default is 5). Also clarified in the wound status effect description that 5 concurrent wounds is fatal.
 
 # Map generation
 - Added a new special level

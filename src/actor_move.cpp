@@ -151,6 +151,10 @@ static void print_corpses_at_player_msgs()
 
 static bool is_player_staggering_from_wounds()
 {
+        if (player_bon::has_trait(Trait::survivalist)) {
+                return false;
+        }
+
         prop::Prop* const wound_prop = map::g_player->m_properties.prop(prop::Id::wound);
 
         int nr_wounds = 0;
@@ -292,7 +296,7 @@ static bool is_player_stagger()
 {
         const int enc = map::g_player->enc_percent();
 
-        return enc >= 100 || is_player_staggering_from_wounds();
+        return (enc >= 100) || is_player_staggering_from_wounds();
 }
 
 static bool is_player_torture_collared()

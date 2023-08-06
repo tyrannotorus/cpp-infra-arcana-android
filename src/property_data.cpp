@@ -656,10 +656,13 @@ static void init_data_list()
         d.id = prop::Id::wound;
         d.name = "Wounded";
         d.descr =
-                "For each wound: -5% melee hit chance, -5% chance to evade "
-                "attacks, -10% hit points, and reduced hit point generation "
-                "rate - also, walking takes extra turns if three or more "
-                "wounds are received.";
+                "For each wound: "
+                "-5% melee hit chance, "
+                "-5% chance to evade attacks, "
+                "-10% hit points, "
+                "and reduced hit point generation rate. "
+                "With three concurrent wounds, walking takes extra turns. "
+                "Five concurrent wounds is fatal.";
         d.msg_start_player = "I am wounded!";
         d.msg_res_player = "I resist wounding!";
         d.allow_display_turns = false;
