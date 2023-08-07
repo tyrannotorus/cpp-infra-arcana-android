@@ -1386,6 +1386,11 @@ public:
                 return SpellDomain::transmutation;
         }
 
+        bool is_tenebrous() const override
+        {
+                return true;
+        }
+
         SpellShock shock_type() const override
         {
                 return SpellShock::mild;
