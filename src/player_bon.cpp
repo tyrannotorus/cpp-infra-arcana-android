@@ -330,10 +330,12 @@ static void update_trait_data()
         d.title = "Survivalist";
         d.descr =
                 "You cannot become diseased, "
-                "wounds do not affect your combat abilities, "
-                "do not cause staggering (slow walking), "
-                "their negative effect on hit points and regeneration is halved, "
-                "and you die at six wounds instead of five.";
+                "only half your wounds count, "
+                "rounded down "
+                "(i.e. number of wounds are halved when calculating "
+                "combat, hit point and regeneration penalties, "
+                "slower walking speed happens at 6 wounds instead of 3, "
+                "and you die from 10 wounds instead of 5)";
         d.on_picked = []() {
                 prop::Prop* prop = prop::make(prop::Id::r_disease);
 
@@ -859,7 +861,7 @@ static void update_trait_data()
                 "Casting any spell from the Blood domain grants "
                 "Regeneration for 4-6 turns "
                 "(+1 extra hit point regenerated per turn), if "
-                "hit points are lost from casting the spell.";
+                "hit points are lost from casting the spell";
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);
 
@@ -867,7 +869,7 @@ static void update_trait_data()
         d.id = Trait::fervor;
         d.title = "Fervor";
         d.descr =
-                "Doubles all bonuses for the moribund effect.";
+                "Doubles all bonuses for the moribund effect";
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);
 
@@ -876,7 +878,7 @@ static void update_trait_data()
         d.title = "Memento Mori";
         d.descr =
                 "Raises the threshold of the moribund status to 8 hit points, "
-                "and doubles the duration of the effect.";
+                "and doubles the duration of the effect";
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);
 }

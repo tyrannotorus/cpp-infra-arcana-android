@@ -1096,16 +1096,17 @@ std::string Wound::name_short() const
 
 int Wound::ability_mod(const AbilityId ability) const
 {
-        // A player with Survivalist receives no ability penalties
+        int nr_wounds_used = m_nr_wounds;
+
         if (actor::is_player(m_owner) && player_bon::has_trait(Trait::survivalist)) {
-                return 0;
+                nr_wounds_used /= 2;
         }
 
         if (ability == AbilityId::melee) {
-                return (m_nr_wounds * -5);
+                return (nr_wounds_used * -5);
         }
         else if (ability == AbilityId::dodging) {
-                return (m_nr_wounds * -5);
+                return (nr_wounds_used * -5);
         }
 
         return 0;
@@ -1113,14 +1114,15 @@ int Wound::ability_mod(const AbilityId ability) const
 
 int Wound::affect_max_hp(const int hp_max) const
 {
+        int nr_wounds_used = m_nr_wounds;
+
+        if (actor::is_player(m_owner) && player_bon::has_trait(Trait::survivalist)) {
+                nr_wounds_used /= 2;
+        }
+
         const int pen_pct_per_wound = 10;
 
-        int hp_pen_pct = m_nr_wounds * pen_pct_per_wound;
-
-        // The HP penalty is halved for a player with Survivalist
-        if (actor::is_player(m_owner) && player_bon::has_trait(Trait::survivalist)) {
-                hp_pen_pct /= 2;
-        }
+        int hp_pen_pct = nr_wounds_used * pen_pct_per_wound;
 
         // Cap the penalty percentage
         hp_pen_pct = std::min(70, hp_pen_pct);
@@ -1140,10 +1142,7 @@ std::string Wound::get_all_wounds_heal_str() const
 
 std::string Wound::msg_end_player() const
 {
-        return (
-                (m_nr_wounds > 1)
-                        ? get_all_wounds_heal_str()
-                        : get_one_wound_heal_str());
+        return ((m_nr_wounds > 1) ? get_all_wounds_heal_str() : get_one_wound_heal_str());
 }
 
 void Wound::print_one_wound_healed_msg() const
@@ -1172,21 +1171,18 @@ void Wound::on_more(const Prop& new_prop)
 
         ++m_nr_wounds;
 
-        const int nr_wounds_fatal =
-                player_bon::has_trait(Trait::survivalist)
-                ? 6
-                : 5;
+        int nr_wounds_fatal = 5;
+
+        if (actor::is_player(m_owner) && player_bon::has_trait(Trait::survivalist)) {
+                nr_wounds_fatal *= 2;
+        }
 
         if (m_nr_wounds >= nr_wounds_fatal) {
                 if (actor::is_player(m_owner)) {
                         msg_log::add("I succumb to my wounds!");
                 }
 
-                actor::kill(
-                        *m_owner,
-                        IsDestroyed::no,
-                        AllowGore::no,
-                        AllowDropItems::yes);
+                actor::kill(*m_owner, IsDestroyed::no, AllowGore::no, AllowDropItems::yes);
         }
 }
 

@@ -151,10 +151,6 @@ static void print_corpses_at_player_msgs()
 
 static bool is_player_staggering_from_wounds()
 {
-        if (player_bon::has_trait(Trait::survivalist)) {
-                return false;
-        }
-
         prop::Prop* const wound_prop = map::g_player->m_properties.prop(prop::Id::wound);
 
         int nr_wounds = 0;
@@ -163,7 +159,11 @@ static bool is_player_staggering_from_wounds()
                 nr_wounds = static_cast<prop::Wound*>(wound_prop)->nr_wounds();
         }
 
-        const int min_nr_wounds_for_stagger = 3;
+        int min_nr_wounds_for_stagger = 3;
+
+        if (player_bon::has_trait(Trait::survivalist)) {
+                min_nr_wounds_for_stagger *= 2;
+        }
 
         return nr_wounds >= min_nr_wounds_for_stagger;
 }

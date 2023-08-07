@@ -63,11 +63,11 @@ static int calc_player_turns_per_hp_regen_rate()
                 nr_wounds = wound->nr_wounds();
         }
 
-        int wound_turns_penalty = nr_wounds * 4;
-
         if (player_bon::has_trait(Trait::survivalist)) {
-                wound_turns_penalty /= 2;
+                nr_wounds /= 2;
         }
+
+        int wound_turns_penalty = nr_wounds * 4;
 
         nr_turns_per_hp += wound_turns_penalty;
 

@@ -441,6 +441,12 @@ void hit(
 
         actor.m_properties.on_hit(dmg, dmg_type, attacker);
 
+        if (!actor.is_alive()) {
+                // This could happen for example if the player dies from too
+                // many wounds.
+                return;
+        }
+
         if ((dmg > 0) &&
             !(actor::is_player(&actor) && config::is_bot_playing())) {
                 actor.m_hp -= dmg;
