@@ -350,7 +350,6 @@ static void update_trait_data()
         d.on_removed = []() {
                 map::g_player->m_properties.end_prop(prop::Id::r_disease);
         };
-        d.trait_prereqs = {Trait::healer};
         d.blocked_for_bgs = {Bg::ghoul, Bg::flagellant};
         set_trait_data(d);
 
