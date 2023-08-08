@@ -21,9 +21,16 @@ static std::vector<std::unique_ptr<State>> s_current_states;
 
 static void run_state_iteration()
 {
+        const State* const current_state = states::current_state();
+
         states::start();
 
-        if (states::is_empty()) {
+        if ((states::current_state()) != current_state) {
+                // The state that was the current state before running "start"
+                // has been removed, or another state has been pushed on it. In
+                // either case rerun the iteration from start (otherwise "draw"
+                // and "update" will run for a different state than the one that
+                // was started).
                 return;
         }
 
@@ -293,6 +300,15 @@ bool is_current_state(const State* const state)
         }
 
         return state == s_current_states.back().get();
+}
+
+State* current_state()
+{
+        if (is_empty()) {
+                return nullptr;
+        }
+
+        return s_current_states.back().get();
 }
 
 bool is_empty()

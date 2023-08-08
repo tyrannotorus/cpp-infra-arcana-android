@@ -92,6 +92,9 @@ static void handle_show_player_info_command()
                 browse_spells->disable_allow_cast();
 
                 states::run_until_state_done(std::move(browse_spells));
+
+                // TODO: Consider this:
+                msg_log::more_prompt();
         } break;
 
         case 3: {

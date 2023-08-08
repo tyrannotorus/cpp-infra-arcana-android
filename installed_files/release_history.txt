@@ -64,6 +64,7 @@
 ##############################
 - Fixed a bug where creatures (e.g. the player) could get knocked into impassable terrain (such as walls), if they had physical damage resistance.
 - Fixed a bug that caused interruptions of longer player actions (handling armor or using the medical bag). The problem was that status effects that interrupt the player (fainting, burning, entangled, stuck, etc) would interrupt regardless of which creature it was applied to. The effect of this was probably most often noticeable when monsters outside view got stuck in mud.
+- Viewing information about known spells while picking a new trait was handled poorly if the player did not know any spells.
 - And more minor bug fixes...
 
 
