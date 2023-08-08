@@ -338,7 +338,7 @@
         <spawning>
             <min_dungeon_level>3</min_dungeon_level>
             <max_dungeon_level>19</max_dungeon_level>
-            <spawn_weight>10</spawn_weight>
+            <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
@@ -534,7 +534,7 @@
         <spawning>
             <min_dungeon_level>2</min_dungeon_level>
             <max_dungeon_level>7</max_dungeon_level>
-            <spawn_weight>20</spawn_weight>
+            <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
@@ -4688,7 +4688,7 @@
         <spawning>
             <min_dungeon_level>0</min_dungeon_level>
             <max_dungeon_level>6</max_dungeon_level>
-            <spawn_weight>50</spawn_weight>
+            <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
@@ -6577,7 +6577,7 @@
         <spawning>
             <min_dungeon_level>13</min_dungeon_level>
             <max_dungeon_level>18</max_dungeon_level>
-            <spawn_weight>50</spawn_weight>
+            <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
@@ -6671,7 +6671,7 @@
         <spawning>
             <min_dungeon_level>19</min_dungeon_level>
             <max_dungeon_level>-1</max_dungeon_level>
-            <spawn_weight>50</spawn_weight>
+            <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
@@ -8735,7 +8735,7 @@
         <spawning>
             <min_dungeon_level>1</min_dungeon_level>
             <max_dungeon_level>3</max_dungeon_level>
-            <spawn_weight>20</spawn_weight>
+            <spawn_weight>10</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
