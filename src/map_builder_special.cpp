@@ -386,14 +386,10 @@ void MapBuilderIntroForest::handle_template_pos(const P& p, const char c)
 
                 if (!is_door_adj) {
                         if (rnd::one_in(16)) {
-                                map::set_terrain(
-                                        terrain::make(
-                                                terrain::Id::rubble_low, p));
+                                terrain = terrain::make(terrain::Id::rubble_low, p);
                         }
                         else if (rnd::one_in(4)) {
-                                map::set_terrain(
-                                        terrain::make(
-                                                terrain::Id::rubble_high, p));
+                                terrain = terrain::make(terrain::Id::rubble_high, p);
                         }
                 }
 
@@ -406,8 +402,10 @@ void MapBuilderIntroForest::handle_template_pos(const P& p, const char c)
                                 wall->set_moss_grown();
                         }
 
-                        map::set_terrain(wall);
+                        terrain = wall;
                 }
+
+                map::set_terrain(terrain);
         } break;
 
         case '&': {
@@ -505,15 +503,11 @@ void MapBuilderIntroForest::on_template_built()
         }
 
         if (!highscores_lose.empty()) {
-                put_intro_forest_graves(
-                        m_possible_grave_positions,
-                        highscores_lose);
+                put_intro_forest_graves(m_possible_grave_positions, highscores_lose);
         }
 
         if (!highscores_win.empty()) {
-                put_intro_forest_statues(
-                        m_possible_statue_positions,
-                        highscores_win);
+                put_intro_forest_statues(m_possible_statue_positions, highscores_win);
         }
 }
 
