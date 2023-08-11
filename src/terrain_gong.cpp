@@ -660,11 +660,13 @@ SpawnMonsters::SpawnMonsters()
 
         summon_bucket.reserve(actor::g_data.size());
 
+        const Range allowed_spawn_lvl_range(map::g_dlvl - 2, map::g_dlvl + 2);
+
         for (const auto& it : actor::g_data) {
                 const actor::ActorData& data = it.second;
 
                 if (data.can_be_summoned_by_mon) {
-                        if (data.spawn_min_dlvl <= (map::g_dlvl + 3)) {
+                        if (allowed_spawn_lvl_range.is_in_range(data.spawn_min_dlvl)) {
                                 summon_bucket.push_back(data.id);
                         }
                 }

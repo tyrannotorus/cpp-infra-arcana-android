@@ -250,6 +250,61 @@ static void communicate_player_bash_failed(const P& pos, const audio::SfxId sfx)
         snd.run();
 }
 
+static std::vector<std::string> get_warded_door_summon_bucket_for_dlvl_range(
+        const Range range)
+{
+        std::vector<std::string> summon_bucket;
+
+        summon_bucket.reserve(actor::g_data.size());
+
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& data = it.second;
+
+                if (data.can_be_summoned_by_mon) {
+                        if (range.is_in_range(data.spawn_min_dlvl)) {
+                                summon_bucket.push_back(data.id);
+                        }
+                }
+        }
+
+        return summon_bucket;
+}
+
+static std::vector<std::string> get_warded_door_summon_bucket()
+{
+        // First, try with a narrow spawn range (it is best if the monsters
+        // spawned have an allowed minimum spawn level near the current dungeon
+        // level, so that they aren't too weak or powerful).
+        std::vector<std::string> summon_bucket =
+                get_warded_door_summon_bucket_for_dlvl_range(
+                        Range(map::g_dlvl - 2, map::g_dlvl + 2));
+
+        if (!summon_bucket.empty()) {
+                // At least one allowed monster found, good!
+
+                TRACE
+                        << "Found '"
+                        << summon_bucket.size()
+                        << "' allowed monsters in narrow spawn range"
+                        << std::endl;
+
+                return summon_bucket;
+        }
+
+        // No monsters found yet, do a second try with a wider range.
+        summon_bucket =
+                get_warded_door_summon_bucket_for_dlvl_range(
+                        Range(map::g_dlvl - 6, map::g_dlvl + 2));
+
+        TRACE
+                << "Found '"
+                << summon_bucket.size()
+                << "' allowed monsters in wide spawn range"
+                << std::endl;
+
+        return summon_bucket;
+}
+
 // -----------------------------------------------------------------------------
 // terrain
 // -----------------------------------------------------------------------------
@@ -1735,19 +1790,7 @@ void Door::try_trigger_ward_trap()
         // coupled with the "something approaches" message below.
         audio::play(audio::SfxId::thunder);
 
-        std::vector<std::string> summon_bucket;
-
-        summon_bucket.reserve(actor::g_data.size());
-
-        for (const auto& it : actor::g_data) {
-                const actor::ActorData& data = it.second;
-
-                if (data.can_be_summoned_by_mon) {
-                        if (data.spawn_min_dlvl <= (map::g_dlvl + 1)) {
-                                summon_bucket.push_back(data.id);
-                        }
-                }
-        }
+        const std::vector<std::string> summon_bucket = get_warded_door_summon_bucket();
 
         if (!summon_bucket.empty()) {
                 msg_log::add("Something approaches...");
