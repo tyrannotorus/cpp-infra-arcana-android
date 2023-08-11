@@ -119,8 +119,7 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
         const bool is_ethereal = actor_hit.m_properties.has(prop::Id::ethereal);
 
-        const bool is_hp_missing =
-                map::g_player->m_hp < actor::max_hp(*map::g_player);
+        const bool is_hp_missing = (map::g_player->m_hp < actor::max_hp(*map::g_player));
 
         const bool is_wounded = map::g_player->m_properties.has(prop::Id::wound);
 
@@ -307,10 +306,11 @@ void VampiricBite::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
-        m_actor_carrying->restore_hp(
-                dmg,
-                false,
-                Verbose::yes);
+        if (actor_hit.m_properties.has(prop::Id::r_phys)) {
+                return;
+        }
+
+        m_actor_carrying->restore_hp(dmg, false, Verbose::yes);
 }
 
 void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
