@@ -207,7 +207,7 @@ When various disturbing events occur, the shock value rises. When shock hits 100
    * The shock value is restored
    * Insanity rises
 
-Each time you travel to the next dungeon level, your shock is restored (you have escaped the horrors above, and is bestowed with a sense of progress). Also, standing in a lit area reduces your shock a bit (most characters start with an Electric Lantern, which can be useful to prevent shock from rising too high).
+Each time you travel to the next dungeon level, your shock is restored (you have escaped the horrors above, and are bestowed with a sense of progress). Also, standing in a lit area reduces your shock a bit (most characters start with an Electric Lantern, which can be useful to prevent shock from rising too high).
 
 If your Insanity reaches 100%, you are hopelessly lost, and the game is over.
 
