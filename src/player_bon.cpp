@@ -877,7 +877,7 @@ static void update_trait_data()
         d.title = "Memento Mori";
         d.descr =
                 "Raises the threshold of the moribund status to 8 hit points, "
-                "and doubles the duration of the effect";
+                "and increases the duration of the effect by 50% (rounded down)";
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);
 }
@@ -1123,7 +1123,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 put("No shock received for taking damage.");
                 put("");
                 put("If health is reduced to 6 hit points or below when taking damage, "
-                    "the moribund status is applied for 6-8 turns "
+                    "the moribund status is applied for 5-7 turns "
                     "(+3 melee damage, +30% melee hit chance, +3 armor points).");
                 put("");
                 put("Wears a torture collar which cannot be taken off; "

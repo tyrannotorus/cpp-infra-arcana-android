@@ -11,7 +11,7 @@
 
 # Traits
 - The Galvanization trait only applies regeneration if hit points are lost from casting the spell (mostly/only applicable to the Shed Impurity spell, see below).
-- Added unique Flagellant trait "Memento Mori", which raises the threshold of the moribund status to 8 hit points, and doubles the duration of the effect.
+- Added unique Flagellant trait "Memento Mori", which raises the threshold of the moribund status to 8 hit points, and increases the duration of the effect by 50%.
 - Renamed the "Death Sense" Flagellant trait to "Fervor".
 - Treasure Hunter increases items spawned on each floor by 1, instead of 1-2. See also general change to number of items spawned below.
 - Improved the Survivalist trait: "You cannot become diseased, only half your wounds count, rounded down (i.e. number of wounds are halved when calculating combat, hit point and regeneration penalties, slower walking speed happens at 6 wounds instead of 3, and you die from 10 wounds instead of 5)".

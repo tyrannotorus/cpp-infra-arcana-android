@@ -1197,11 +1197,11 @@ PropEnded Flagellant::on_hit(
         if ((m_owner->m_hp - dmg) <= hp_threshold) {
                 Prop* const moribund = make(Id::moribund);
 
-                Range duration(6, 8);
+                Range duration(5, 7);
 
                 if (player_bon::has_trait(Trait::memento_mori)) {
-                        duration.min *= 2;
-                        duration.max *= 2;
+                        duration.min += (duration.min / 2);
+                        duration.max += (duration.max / 2);
                 }
 
                 moribund->set_duration(duration.roll());
