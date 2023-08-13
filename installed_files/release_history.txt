@@ -60,6 +60,11 @@
 - Hazy Mirrors are now colored gray on the minimap when they have been activated.
 
 ##############################
+# Misc
+##############################
+- Added a hint popup with info about status effects.
+
+##############################
 # Fixes
 ##############################
 - Fixed a bug where creatures (e.g. the player) could get knocked into impassable terrain (such as walls), if they had physical damage resistance.

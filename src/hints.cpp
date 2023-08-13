@@ -90,6 +90,25 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "is to find a source of light - for example through "
                         "activating an Electric Lantern or igniting a Flare."};
 
+        case hints::Id::status_effects:
+                return {
+                        "Status effects",
+                        "A status effect has been applied. "
+                        "Status effects are various positive, negative or neutral effects "
+                        "applied on a creature. "
+                        "Some examples are confusion, burning, invisibility, or "
+                        "electricity resistance. "
+                        "A simple list of active status effects is shown in the normal "
+                        "game screen. "
+                        "In the character screen (accessed by pressing [C] or [@]), a more "
+                        "detailed list can be seen, including a description of each effect. "
+                        "In some cases status effects will end by themselves after a duration, "
+                        "these effects are shown with the first letter capitalized "
+                        "(e.g. \"Burning\"). "
+                        "In some cases the effect is \"permanent\", and is only removed if some "
+                        "special action is taken, for example using the medical bag to treat a "
+                        "wound - these effects are shown in all capital letters (e.g. WOUNDED)."};
+
         default:
                 ASSERT(false);
                 return {"", ""};

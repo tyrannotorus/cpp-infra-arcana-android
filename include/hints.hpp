@@ -18,6 +18,7 @@ enum class Id
         infected,
         overburdened,
         high_shock,
+        status_effects,
 
         END
 };

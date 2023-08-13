@@ -20,6 +20,7 @@
 #include "debug.hpp"
 #include "game.hpp"
 #include "gfx.hpp"
+#include "hints.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
@@ -293,6 +294,12 @@ void PropHandler::apply(
         if (actor::is_player(m_owner) &&
             prop->m_data.force_interrupt_player_on_start) {
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
+        }
+
+        if (actor::is_player(m_owner) &&
+            (verbose == Verbose::yes) &&
+            !prop->name_short().empty()) {
+                hints::display(hints::Id::status_effects);
         }
 }
 

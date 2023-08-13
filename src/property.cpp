@@ -675,11 +675,7 @@ void ZuulPossessPriest::on_placed()
 
                 prop->set_indefinite();
 
-                actor->m_properties.apply(
-                        prop,
-                        PropSrc::intr,
-                        true,
-                        Verbose::no);
+                actor->m_properties.apply(prop, PropSrc::intr, true, Verbose::no);
 
                 actor->restore_hp(999, false, Verbose::no);
         }
