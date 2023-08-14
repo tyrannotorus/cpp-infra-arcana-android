@@ -1132,8 +1132,7 @@ void Statue::topple(
                         actor_toppling);
 
                 if (actor_behind->is_alive()) {
-                        auto* const paralyzed =
-                                prop::make(prop::Id::paralyzed);
+                        auto* const paralyzed = prop::make(prop::Id::paralyzed);
 
                         paralyzed->set_duration(rnd::range(2, 3));
 
@@ -1217,6 +1216,13 @@ void Statue::bump(actor::Actor& actor_bumping)
         }
         else {
                 Terrain::bump(actor_bumping);
+        }
+}
+
+void Statue::on_new_turn()
+{
+        if (map::g_player->m_pos.is_adjacent(m_pos) && map::g_seen.at(m_pos)) {
+                hints::display(hints::Id::kick_statue);
         }
 }
 
@@ -2543,6 +2549,13 @@ void Brazier::hit(
         default:
         {
         } break;
+        }
+}
+
+void Brazier::on_new_turn()
+{
+        if (map::g_player->m_pos.is_adjacent(m_pos) && map::g_seen.at(m_pos)) {
+                hints::display(hints::Id::kick_brazier);
         }
 }
 

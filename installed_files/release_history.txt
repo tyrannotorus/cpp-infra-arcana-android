@@ -62,7 +62,7 @@
 ##############################
 # Misc
 ##############################
-- Added a hint popup with info about status effects.
+- Added hint popups with info about status effects, kicking braziers, and kicking statues.
 
 ##############################
 # Fixes

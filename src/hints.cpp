@@ -109,6 +109,18 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "special action is taken, for example using the medical bag to treat a "
                         "wound - these effects are shown in all capital letters (e.g. WOUNDED)."};
 
+        case hints::Id::kick_brazier:
+                return {
+                        "Kicking braziers",
+                        "Braziers can be kicked over to set creatures on fire "
+                        "in a small area."};
+
+        case hints::Id::kick_statue:
+                return {
+                        "Kicking statues",
+                        "Statues can be kicked over to "
+                        "damage and stun a creature on the other side."};
+
         default:
                 ASSERT(false);
                 return {"", ""};

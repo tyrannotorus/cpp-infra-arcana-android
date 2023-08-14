@@ -544,6 +544,8 @@ public:
                 const P& from_pos,
                 int dmg) override;
 
+        void on_new_turn() override;
+
 private:
         void add_light_hook(Array2<bool>& light) const override;
 };
@@ -710,6 +712,8 @@ public:
         Color color_default() const override;
 
         void bump(actor::Actor& actor_bumping) override;
+
+        void on_new_turn() override;
 
         void set_type(const StatueType type)
         {

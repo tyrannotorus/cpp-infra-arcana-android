@@ -19,6 +19,8 @@ enum class Id
         overburdened,
         high_shock,
         status_effects,
+        kick_statue,
+        kick_brazier,
 
         END
 };
