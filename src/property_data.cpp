@@ -518,7 +518,9 @@ static void init_data_list()
                 "Addicted to Astral Opium - the addiction will cease "
                 "eventually if Astral Opium is not used again, however the "
                 "abstinence will soon cause withdrawal symptoms "
-                "(increased minimum shock).";
+                "(increased minimum shock). "
+                "The addiction is too powerful and otherwordly to be cured by a "
+                "Potion of Fortitude.";
         d.msg_start_player = "That felt amazing!";
         d.msg_start_mon = "";
         d.msg_end_player =
