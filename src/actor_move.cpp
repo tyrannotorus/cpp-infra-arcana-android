@@ -149,25 +149,6 @@ static void print_corpses_at_player_msgs()
         }
 }
 
-static bool is_player_staggering_from_wounds()
-{
-        prop::Prop* const wound_prop = map::g_player->m_properties.prop(prop::Id::wound);
-
-        int nr_wounds = 0;
-
-        if (wound_prop) {
-                nr_wounds = static_cast<prop::Wound*>(wound_prop)->nr_wounds();
-        }
-
-        int min_nr_wounds_for_stagger = 3;
-
-        if (player_bon::has_trait(Trait::survivalist)) {
-                min_nr_wounds_for_stagger *= 2;
-        }
-
-        return nr_wounds >= min_nr_wounds_for_stagger;
-}
-
 static AllowAction pre_bump_terrains(
         actor::Actor& actor,
         const P& target)
@@ -292,11 +273,28 @@ static bool should_player_be_immobile()
         return map::g_player->enc_percent() >= g_enc_immobile_lvl;
 }
 
-static bool is_player_stagger()
+static bool is_player_staggering_from_wounds()
 {
-        const int enc = map::g_player->enc_percent();
+        prop::Prop* const wound_prop = map::g_player->m_properties.prop(prop::Id::wound);
 
-        return (enc >= 100) || is_player_staggering_from_wounds();
+        int nr_wounds = 0;
+
+        if (wound_prop) {
+                nr_wounds = static_cast<prop::Wound*>(wound_prop)->nr_wounds();
+        }
+
+        int min_nr_wounds_for_stagger = 3;
+
+        if (player_bon::has_trait(Trait::survivalist)) {
+                min_nr_wounds_for_stagger *= 2;
+        }
+
+        return nr_wounds >= min_nr_wounds_for_stagger;
+}
+
+static bool is_player_stagger_from_carry_weight()
+{
+        return (map::g_player->enc_percent() >= 100);
 }
 
 static bool is_player_torture_collared()
@@ -324,16 +322,19 @@ static void handle_player_slowed_movement(const P& target)
         if (is_player_torture_collared()) {
                 should_wait = true;
         }
-        else if (is_player_stagger()) {
-                msg_log::add("I stagger.", colors::msg_note());
+        else if (is_player_staggering_from_wounds()) {
+                msg_log::add("My wounds cause me to stagger.", colors::msg_note());
+
+                should_wait = true;
+        }
+        else if (is_player_stagger_from_carry_weight()) {
+                msg_log::add("I stagger under the weight of my carried load.", colors::msg_note());
 
                 should_wait = true;
         }
 
         if (should_wait) {
-                map::g_player->m_properties.apply(
-                        prop::make(
-                                prop::Id::waiting));
+                map::g_player->m_properties.apply(prop::make(prop::Id::waiting));
         }
 }
 
