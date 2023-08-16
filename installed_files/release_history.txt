@@ -24,6 +24,7 @@
 
 # Terrain objects
 - Hazy Mirrors are now colored gray on the minimap when they have been activated.
+- Hazy Mirrors are now also detected by the magic searching effect (the Clairvoyant ability).
 
 # Spells
 - Added spell "Shed Impurity" - a unique spell for the Flagellant background, that they start with. The spell lowers hit points to the limit where the Flagellant receives bonuses for having low hit points, and if enough hit points are lost, then some status effects such as poisoning are cured.

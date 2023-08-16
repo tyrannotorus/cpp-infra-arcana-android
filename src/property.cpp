@@ -3222,6 +3222,13 @@ PropEnded MagicSearching::on_actor_turn()
         const int x1 = std::min(map::w() - 1, orig_x + m_range);
         const int y1 = std::min(map::h() - 1, orig_y + m_range);
 
+        const std::vector<terrain::Id> terrain_types_revealed = {
+                terrain::Id::trap,
+                terrain::Id::door,
+                terrain::Id::monolith,
+                terrain::Id::mirror,
+                terrain::Id::stairs};
+
         for (int y = y0; y <= y1; ++y) {
                 for (int x = x0; x <= x1; ++x) {
                         const P p(x, y);
@@ -3230,10 +3237,14 @@ PropEnded MagicSearching::on_actor_turn()
 
                         const terrain::Id id = t->id();
 
-                        if ((id == terrain::Id::trap) ||
-                            (id == terrain::Id::door) ||
-                            (id == terrain::Id::monolith) ||
-                            (id == terrain::Id::stairs)) {
+                        const bool is_terrain_type_revealed =
+                                std::find(
+                                        std::begin(terrain_types_revealed),
+                                        std::end(terrain_types_revealed),
+                                        id) !=
+                                std::end(terrain_types_revealed);
+
+                        if (is_terrain_type_revealed) {
                                 if (t->is_hidden()) {
                                         map::update_vision();
 
