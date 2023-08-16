@@ -2992,10 +2992,10 @@ Range SpellLight::blind_duration_range(const SpellSkill skill) const
                 break;
 
         case SpellSkill::master:
-                return {2, 4};
+                return {1, 3};
 
         case SpellSkill::transcendent:
-                return {5, 7};
+                return {3, 5};
         }
 
         ASSERT(false);
@@ -3015,7 +3015,7 @@ void SpellLight::run_effect(
 {
         (void)seen_targets;
 
-        auto* radiant = prop::make(prop::Id::radiant_fov);
+        prop::Prop* radiant = prop::make(prop::Id::radiant_fov);
 
         radiant->set_duration(light_duration_range(skill).roll());
 
@@ -3024,7 +3024,7 @@ void SpellLight::run_effect(
         std::vector<prop::Prop*> properties;
 
         if (skill >= SpellSkill::master) {
-                auto* const prop = prop::make(prop::Id::blind);
+                prop::Prop* const prop = prop::make(prop::Id::blind);
 
                 prop->set_duration(blind_duration_range(skill).roll());
 
@@ -3032,7 +3032,7 @@ void SpellLight::run_effect(
         }
 
         if (skill == SpellSkill::transcendent) {
-                auto* const prop = prop::make(prop::Id::burning);
+                prop::Prop* const prop = prop::make(prop::Id::burning);
 
                 prop->set_duration(burning_duration_range().roll());
 

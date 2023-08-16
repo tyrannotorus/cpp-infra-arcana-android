@@ -1476,7 +1476,7 @@ private:
         {
                 (void)skill;
 
-                return 4;
+                return 5;
         }
 
         bool is_noisy(const SpellSkill skill) const override
