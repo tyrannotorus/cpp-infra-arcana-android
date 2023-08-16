@@ -482,22 +482,18 @@ DidAction Actor::try_attack(Actor& defender)
                         return DidAction::no;
                 }
 
+                // TODO: Why is this handled as a range value in the monster
+                // data, but monsters with melee cooldown have a property
+                // instead (melee_cooldown)? It should be unified.
                 if (m_data->ranged_cooldown_turns > 0) {
-                        auto* prop =
-                                prop::make(
-                                        prop::Id::disabled_ranged);
+                        prop::Prop* prop = prop::make(prop::Id::disabled_ranged);
 
                         prop->set_duration(m_data->ranged_cooldown_turns);
 
                         m_properties.apply(prop);
                 }
 
-                const auto did_attack =
-                        attack::ranged(
-                                this,
-                                m_pos,
-                                defender.m_pos,
-                                *att.wpn);
+                const auto did_attack = attack::ranged(this, m_pos, defender.m_pos, *att.wpn);
 
                 return did_attack;
         }

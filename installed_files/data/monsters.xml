@@ -4642,7 +4642,7 @@
         </audio>
 
         <attributes>
-            <hit_points>16</hit_points>
+            <hit_points>22</hit_points>
             <spirit>2</spirit>
             <speed>MONSPEED_FAST</speed>
             <shock_level>MONSHOCK_UNSETTLING</shock_level>
@@ -4668,10 +4668,11 @@
 
         <properties>
             <property>PROP_DARKVISION</property>
+            <property>PROP_MELEE_COOLDOWN</property>
         </properties>
 
         <ai>
-            <erratic_move_percent>25</erratic_move_percent>
+            <erratic_move_percent>15</erratic_move_percent>
             <turns_aware>10</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>

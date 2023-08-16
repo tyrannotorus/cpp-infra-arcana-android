@@ -37,8 +37,6 @@
 - Added more artifacts.
 
 # Monsters
-- Added more monsters
-- Tentacle Clusters can spawn randomly on the map (not just from spell side effects etc), although somewhat rarely
 - A few monsters wait for a turn when they see the player and are aware of the player. This only happens once, until the monster loses awareness again. It is intended to avoid some unfair instant deaths by allowing the player a chance to act first (for example Cultists and White Spiders have this behavior).
 - White Spider attacks have 20% chance to paralyze instead of 50%.
 - Reduced hit points of Ghosts (mainly to allow Flagellant players a better chance to counter them with the Thorns spell)
@@ -47,6 +45,8 @@
 - Byakhee spawn from level 8 instead of 6, and can only spawn in groups from level 10.
 - Mummies can now speak a phrase when they become aware, to alert other monsters.
 - When Major Clapham-Lee "calls forth his Tomb-Legions", the summoned monsters now wait a turn instead of acting immediately.
+- Tentacle Clusters can spawn randomly on the map (not just from spell side effects etc), although somewhat rarely
+- Added more monsters
 
 # Misc balancing
 - Reduced XP gained from seeing "terrifying" monsters from 10 to 8, and reduced XP for "mind shattering" monsters from 20 to 15 (rationale: there are more monsters now).
