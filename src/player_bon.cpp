@@ -185,7 +185,7 @@ static void update_trait_data()
         // --- Cool-headed ---
         d.id = Trait::cool_headed;
         d.title = "Cool-headed";
-        d.descr = "+20% shock resistance";
+        d.descr = "+20% mental shock resistance";
         set_trait_data(d);
 
         // --- Courageous ---
@@ -221,7 +221,7 @@ static void update_trait_data()
         // --- Fearless ---
         d.id = Trait::fearless;
         d.title = "Fearless";
-        d.descr = "You cannot become terrified, +10% shock resistance";
+        d.descr = "You cannot become terrified, +10% mental shock resistance";
         d.on_picked = []() {
                 prop::Prop* prop = prop::make(prop::Id::r_fear);
 
@@ -1097,7 +1097,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
         case Bg::exorcist:
                 put("Starts with a Holy Symbol, which can restore "
                     "spirit points and grant resistance against "
-                    "shock and fear.");
+                    "mental shock and fear.");
                 put("");
                 put("Cannot use manuscripts, altars, monoliths, or gongs, "
                     "but gains experience and spirit points for destroying "
@@ -1120,7 +1120,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 break;
 
         case Bg::flagellant:
-                put("No shock received for taking damage.");
+                put("No mental shock received for taking damage.");
                 put("");
                 put("If health is reduced to 6 hit points or below when taking damage, "
                     "the moribund status is applied for 5-7 turns "
@@ -1140,7 +1140,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                     ", all spells belonging to this domain are cast at "
                     "a higher skill level.");
                 put("");
-                put("-25% shock taken from casting memorized spells "
+                put("-25% mental shock taken from casting memorized spells "
                     "from the Blood domain.");
                 put("");
                 put_trait(Trait::self_aware);
@@ -1164,9 +1164,9 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 put("");
                 put("Can see in darkness.");
                 put("");
-                put("-50% shock taken from seeing monsters and standing "
-                    "in darkness, but also -50% shock reduction bonus "
-                    "from light.");
+                put("-50% mental shock taken from seeing monsters and "
+                    "standing in darkness, "
+                    "but also halved shock reduction bonus from light.");
                 put("");
                 put("-15% hit chance with firearms and thrown weapons.");
                 put("");
@@ -1183,7 +1183,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                     "a higher skill level. This choice also determines "
                     "starting spells.");
                 put("");
-                put("-50% shock taken from casting memorized spells, "
+                put("-50% mental shock taken from casting memorized spells, "
                     "and from using or identifying strange items "
                     "(e.g. drinking a potion, or casting a spell from "
                     "a manuscript).");
@@ -1197,7 +1197,7 @@ std::vector<ColoredString> bg_descr(const Bg id)
                 break;
 
         case Bg::rogue:
-                put("Shock received passively over time is reduced by 25%.");
+                put("Mental shock received passively over time is reduced by 25%.");
                 put("");
                 put("+10% chance to spot hidden monsters, doors, and traps.");
                 put("");
