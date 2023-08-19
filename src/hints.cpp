@@ -10,9 +10,11 @@
 #include <string>
 #include <utility>
 
+#include "actor.hpp"
 #include "config.hpp"
 #include "debug.hpp"
 #include "io.hpp"
+#include "map.hpp"
 #include "msg_log.hpp"
 #include "popup.hpp"
 #include "saving.hpp"
@@ -196,6 +198,10 @@ void load()
 void display(const Id id)
 {
         if (!should_display_hint(id)) {
+                return;
+        }
+
+        if (!map::g_player->is_alive()) {
                 return;
         }
 
