@@ -159,6 +159,12 @@ enum class ItemNameAttackInfo
         thrown
 };
 
+enum class ItemNameIdentified
+{
+        use_item_status,
+        force_identified
+};
+
 enum class ItemNameDmg
 {
         average,

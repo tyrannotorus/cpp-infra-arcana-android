@@ -412,7 +412,8 @@ void Item::on_player_reached_new_dlvl()
 std::string Item::name(
         const ItemNameType name_type,
         const ItemNameInfo info,
-        const ItemNameAttackInfo attack_info) const
+        const ItemNameAttackInfo attack_info,
+        const ItemNameIdentified id_type) const
 {
         auto name_type_used = name_type;
 
@@ -438,13 +439,12 @@ std::string Item::name(
                 info_str = name_info_str();
         }
 
-        const auto& names_used =
-                m_data->is_identified
+        const ItemName& names_used =
+                (m_data->is_identified || (id_type == ItemNameIdentified::force_identified))
                 ? m_data->base_name
                 : m_data->base_name_un_id;
 
-        const std::string base_name =
-                names_used.names[(size_t)name_type_used];
+        const std::string base_name = names_used.names[(size_t)name_type_used];
 
         std::string full_name;
 

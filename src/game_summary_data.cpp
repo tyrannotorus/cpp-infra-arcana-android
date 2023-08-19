@@ -145,7 +145,8 @@ static void collect_inventory(game_summary_data::GameSummaryData& d)
                                 item.name(
                                         ItemNameType::plural,
                                         ItemNameInfo::yes,
-                                        ItemNameAttackInfo::main_attack_mode)));
+                                        ItemNameAttackInfo::main_attack_mode,
+                                        ItemNameIdentified::force_identified)));
         };
 
         for (const InvSlot& slot : map::g_player->m_inv.m_slots) {

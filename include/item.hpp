@@ -75,7 +75,8 @@ public:
         std::string name(
                 ItemNameType name_type,
                 ItemNameInfo info = ItemNameInfo::yes,
-                ItemNameAttackInfo attack_info = ItemNameAttackInfo::none) const;
+                ItemNameAttackInfo attack_info = ItemNameAttackInfo::none,
+                ItemNameIdentified id_type = ItemNameIdentified::use_item_status) const;
 
         std::vector<std::string> descr() const;
 
