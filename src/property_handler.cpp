@@ -296,9 +296,15 @@ void PropHandler::apply(
                 map::g_player->interrupt_actions(ForceInterruptActions::yes);
         }
 
+        // Display a hint about status effects.
+        //
+        // NOTE: Infection status effects are excepted since they have their own
+        // hint and double popups should be avoided.
+        //
         if (actor::is_player(m_owner) &&
             (verbose == Verbose::yes) &&
-            !prop->name_short().empty()) {
+            !prop->name_short().empty() &&
+            (prop->id() != Id::infected)) {
                 hints::display(hints::Id::status_effects);
         }
 }
