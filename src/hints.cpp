@@ -69,10 +69,12 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "Medical Bag. It only requires a small number of turns "
                         "and resources, but if the work is interrupted, the "
                         "effort is wasted (no medical resources are lost "
-                        "on interruption however). An untreated infection "
-                        "will eventually turn into a disease (50% maximum "
-                        "hit points), which can only be removed through "
-                        "special means such as drinking certain potions."};
+                        "on interruption however)."
+
+                        "\n\nAn untreated infection will eventually turn into a "
+                        "disease (50% maximum hit points), "
+                        "which can only be removed through special means such as "
+                        "drinking certain potions."};
 
         case hints::Id::overburdened:
                 return {
