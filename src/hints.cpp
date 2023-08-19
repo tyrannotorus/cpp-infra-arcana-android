@@ -39,7 +39,7 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                 return {
                         "Fountains",
                         "Drinking from a fountain usually restores a bit of "
-                        "health, spirit, and shock (but they can sometimes "
+                        "health, spirit, and mental shock (but they can sometimes "
                         "have other effects, both good and bad!). Fountains "
                         "can be drunk from several times, but each time there "
                         "is a chance that it will dry up permanently."};
@@ -84,7 +84,7 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
         case hints::Id::high_shock:
                 return {
                         "High shock",
-                        "Being in a state of extreme shock (stress, paranoia) "
+                        "Being in a state of extreme mental shock (stress, paranoia) "
                         "will cause a sanity hit. One way to reduce shock, "
                         "and thereby avoiding or prolonging the sanity hit, "
                         "is to find a source of light - for example through "
@@ -100,14 +100,14 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "electricity resistance. "
                         "A simple list of active status effects is shown in the normal "
                         "game screen. "
-                        "In the character screen (accessed by pressing [C] or [@]), a more "
+
+                        "\n\nIn the character screen (accessed by pressing [C] or [@]), a more "
                         "detailed list can be seen, including a description of each effect. "
-                        "In some cases status effects will end by themselves after a duration, "
-                        "these effects are shown with the first letter capitalized "
-                        "(e.g. \"Burning\"). "
-                        "In some cases the effect is \"permanent\", and is only removed if some "
-                        "special action is taken, for example using the medical bag to treat a "
-                        "wound - these effects are shown in all capital letters (e.g. WOUNDED)."};
+
+                        "\n\nStatus effects shown with capital letters are \"permanent\", "
+                        "and are only removed if some special action is taken, for example "
+                        "using the medical bag to treat a wound - these effects are shown in all "
+                        "capital letters (e.g. WOUNDED)."};
 
         case hints::Id::kick_brazier:
                 return {
@@ -120,6 +120,23 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "Kicking statues",
                         "Statues can be kicked over to "
                         "damage and stun a creature on the other side."};
+
+        case hints::Id::temporary_and_permanent_shock:
+                return {
+                        "Temporary and permanent mental shock",
+
+                        "Some situations cause \"temporary\" mental shock, "
+                        "which is removed when the situation changes. "
+                        "Entering a dark area or standing next to bloodsplatter will "
+                        "cause your shock to spike until you move away, for example."
+
+                        "\n\nStanding in bright light will similarly reduce your shock "
+                        "until you return to the ambient subterranean gloom."
+
+                        "\n\nSeeing monsters, casting spells, spending time, etc cause "
+                        "\"permanent\" shock, which will never go away until "
+                        "the next floor is reached, insanity rises (due to shock at 100%), "
+                        "or the shock is cured somehow."};
 
         default:
                 ASSERT(false);

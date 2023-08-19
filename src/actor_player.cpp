@@ -30,6 +30,7 @@
 #include "fov.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
+#include "hints.hpp"
 #include "init.hpp"
 #include "insanity.hpp"
 #include "inventory.hpp"
@@ -726,17 +727,21 @@ double Actor::increased_tmp_shock_from_adjacent_terrain() const
 {
         double shock = 0.0;
 
-        for (const auto& d : dir_utils::g_dir_list_w_center) {
-                const auto p = m_pos + d;
+        for (const P& d : dir_utils::g_dir_list_w_center) {
+                const P p = m_pos + d;
 
-                const auto* const t = map::g_terrain.at(p);
+                const terrain::Terrain* const t = map::g_terrain.at(p);
 
                 const int terrain_shock = t->shock_when_adj();
 
-                shock +=
-                        shock_taken_after_mods(
-                                (double)terrain_shock,
-                                ShockSrc::misc);
+                shock += shock_taken_after_mods((double)terrain_shock, ShockSrc::misc);
+
+                // HACK: It is convenient to show the hint here since we are
+                // searching surrounding terrain anyway. But it makes this
+                // function less pure.
+                if (t->has_gore()) {
+                        hints::display(hints::Id::temporary_and_permanent_shock);
+                }
         }
 
         return shock;
@@ -762,10 +767,10 @@ void Actor::update_tmp_shock()
                 // Visual things that might affect shock.
 
                 increased_tmp_shock += increased_tmp_shock_from_dark();
+
                 reduced_tmp_shock += reduced_tmp_shock_from_light();
 
-                increased_tmp_shock +=
-                        increased_tmp_shock_from_adjacent_terrain();
+                increased_tmp_shock += increased_tmp_shock_from_adjacent_terrain();
         }
 
         if (m_properties.has(prop::Id::r_shock)) {

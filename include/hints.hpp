@@ -18,6 +18,7 @@ enum class Id
         infected,
         overburdened,
         high_shock,
+        temporary_and_permanent_shock,
         status_effects,
         kick_statue,
         kick_brazier,

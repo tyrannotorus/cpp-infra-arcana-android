@@ -234,7 +234,7 @@ static void player_regen_meditative_focused()
 
 static void player_std_turn()
 {
-        auto& player = *map::g_player;
+        actor::Actor& player = *map::g_player;
 
 #ifndef NDEBUG
         // Disease and infection should not be active at the same time
