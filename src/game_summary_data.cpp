@@ -141,10 +141,11 @@ static void collect_inventory(game_summary_data::GameSummaryData& d)
 {
         auto get_item_name = [](const item::Item& item) {
                 return (
-                        item.name(
-                                ItemNameType::plain,
-                                ItemNameInfo::yes,
-                                ItemNameAttackInfo::main_attack_mode));
+                        text_format::first_to_upper(
+                                item.name(
+                                        ItemNameType::plural,
+                                        ItemNameInfo::yes,
+                                        ItemNameAttackInfo::main_attack_mode)));
         };
 
         for (const InvSlot& slot : map::g_player->m_inv.m_slots) {

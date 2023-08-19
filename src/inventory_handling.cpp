@@ -533,13 +533,10 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
         }
 
         const bool is_plural =
-                m_viewed_item->m_nr_items > 1 &&
+                (m_viewed_item->m_nr_items > 1) &&
                 m_viewed_item->data().is_stackable;
 
-        const std::string ref_str =
-                is_plural
-                ? "They are "
-                : "It is ";
+        const std::string ref_str = is_plural ? "They are " : "It is ";
 
         const item::ItemData& d = m_viewed_item->data();
 
