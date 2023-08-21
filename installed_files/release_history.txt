@@ -54,8 +54,10 @@
 - Reduced XP gained from seeing "terrifying" monsters from 10 to 8, and reduced XP for "mind shattering" monsters from 20 to 15 (rationale: there are more monsters now).
 - On average, one less item is spawned on each floor in the mid game (10-19), this is intended to avoid players winning with a huge amount of items in the inventory, without making the early game harder or making exploration less rewarding in the late game. See also Treasure Hunter change above.
 
-# Other improvements
+# Other changes
 - In the game over summary screen, all items are shown with their identified names in the inventory section.
+- In the item knowledge section of the character screen ("C" or "@"), the real names of all identifiable items in the game are shown - so it is now possible to know exactly which effects an unidentified benign potion may possibly have, for example.
+- Removed the item knowledge section of the game over summary screen.
 - Added hint popups with info about status effects, shock level, kicking braziers, and kicking statues.
 - The "stagger" messages are now more specific, and describe why the player is staggering ("My wounds cause me to stagger.", or "I stagger under the weight of my carried load.").
 - "Shock" is referred to as "mental shock" when picking background and traits, since it could be confused with some type of shock damage (and this is probably often the first time a new player encounters this term in the game).

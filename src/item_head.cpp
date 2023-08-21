@@ -38,8 +38,10 @@ void GasMask::decr_turns_left(Inventory& carrier_inv)
         }
 }
 
-std::string GasMask::name_info_str() const
+std::string GasMask::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         return "(" + std::to_string(m_nr_turns_left) + " turns)";
 }
 

@@ -345,10 +345,7 @@ std::vector<std::string> Potion::descr_hook() const
 
 std::string Potion::alignment_str() const
 {
-        return (
-                (alignment() == PotionAlignment::good)
-                        ? "Benign"
-                        : "Malign");
+        return ((alignment() == PotionAlignment::good) ? "Benign" : "Malign");
 }
 
 void Potion::on_player_reached_new_dlvl_hook()
@@ -446,11 +443,14 @@ void Potion::on_collide(const P& pos, actor::Actor* const actor)
         }
 }
 
-std::string Potion::name_info_str() const
+std::string Potion::name_info_str(const ItemNameIdentified id_type) const
 {
         std::string str;
 
-        if (data().is_alignment_known && !data().is_identified) {
+        // Only display benign/malign status if alignment is known, and the
+        // potion is unidentified.
+        if (data().is_alignment_known &&
+            (!data().is_identified && (id_type != ItemNameIdentified::force_identified))) {
                 str = "(" + alignment_str() + ")";
         }
 

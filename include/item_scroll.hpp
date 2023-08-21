@@ -52,11 +52,13 @@ public:
                 return colors::magenta();
         }
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         ConsumeItem activate(actor::Actor* actor) override;
 
         std::string real_name() const;
+
+        std::string domain_str() const;
 
         std::vector<std::string> descr_hook() const override;
 

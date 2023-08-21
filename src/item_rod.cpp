@@ -330,12 +330,11 @@ void Rod::identify(const Verbose verbose)
         }
 }
 
-std::string Rod::name_info_str() const
+std::string Rod::name_info_str(const ItemNameIdentified id_type) const
 {
-        if (m_data->is_identified) {
+        if (m_data->is_identified || (id_type == ItemNameIdentified::force_identified)) {
                 if (m_nr_charge_turns_left > 0) {
-                        const auto turns_left_str =
-                                std::to_string(m_nr_charge_turns_left);
+                        const std::string turns_left_str = std::to_string(m_nr_charge_turns_left);
 
                         return "(" + turns_left_str + " turns)";
                 }

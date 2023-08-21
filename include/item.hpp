@@ -91,8 +91,12 @@ public:
         std::string plus_str(ItemNameAttackInfo attack_info) const;
 
         // E.g. "(Off)" for Lanterns, or "(4/7)" for Pistols
-        virtual std::string name_info_str() const
+        virtual std::string name_info_str(
+                const ItemNameIdentified id_type =
+                        ItemNameIdentified::use_item_status) const
         {
+                (void)id_type;
+
                 return "";
         }
 

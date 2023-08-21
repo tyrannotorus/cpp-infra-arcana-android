@@ -237,26 +237,6 @@ static void add_inventory_descr(
         lines.emplace_back("", colors::text());
 }
 
-static void add_item_knowledge_descr(
-        const game_summary_data::GameSummaryData& data,
-        std::vector<ColoredString>& lines)
-{
-        lines.emplace_back("Item knowledge", s_color_heading);
-
-        std::vector<ColoredString> item_knowledge = data.item_knowledge;
-
-        if (data.item_knowledge.empty()) {
-                lines.emplace_back(s_indent + "None", colors::text());
-        }
-        else {
-                for (const ColoredString& e : item_knowledge) {
-                        lines.emplace_back(s_indent + e.str, e.color);
-                }
-        }
-
-        lines.emplace_back("", colors::text());
-}
-
 static void add_player_history(
         const game_summary_data::GameSummaryData& data,
         std::vector<ColoredString>& lines)
@@ -320,7 +300,7 @@ void GameOverSummary::setup(const game_summary_data::GameSummaryData& data)
         add_unique_monsters_killed_descr(data, m_lines);
         add_last_messages(data, m_lines);
         add_inventory_descr(data, m_lines);
-        add_item_knowledge_descr(data, m_lines);
+        // add_item_knowledge_descr(data, m_lines);
         add_traits_descr(data, m_lines);
         add_player_history(data, m_lines);
 }

@@ -39,8 +39,10 @@ void AmmoMag::set_full_ammo()
         m_ammo = m_data->ranged.max_ammo;
 }
 
-std::string AmmoMag::name_info_str() const
+std::string AmmoMag::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         return "(" + std::to_string(m_ammo) + ")";
 }
 

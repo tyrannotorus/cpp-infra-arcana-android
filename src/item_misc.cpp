@@ -373,8 +373,10 @@ int MedicalBag::tot_turns_for_action() const
         return nr_turns;
 }
 
-std::string MedicalBag::name_info_str() const
+std::string MedicalBag::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         return "(" + std::to_string(m_nr_supplies) + " supplies)";
 }
 
@@ -397,8 +399,10 @@ void Lantern::randomize_duration()
         m_nr_turns_left = rnd::range(duration_min, duration_max);
 }
 
-std::string Lantern::name_info_str() const
+std::string Lantern::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         std::string inf = "(" + std::to_string(m_nr_turns_left) + " turns";
 
         if (m_is_activated) {
@@ -563,8 +567,10 @@ HornOfMalice::HornOfMalice(ItemData* const item_data) :
 {
 }
 
-std::string HornOfMalice::name_info_str() const
+std::string HornOfMalice::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         return "(" + std::to_string(m_charges) + " uses)";
 }
 
@@ -635,8 +641,10 @@ HornOfBanishment::HornOfBanishment(ItemData* const item_data) :
 {
 }
 
-std::string HornOfBanishment::name_info_str() const
+std::string HornOfBanishment::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         return "(" + std::to_string(m_charges) + " uses)";
 }
 
@@ -785,8 +793,10 @@ void HolySymbol::on_std_turn_in_inv_hook(InvType inv_type)
         }
 }
 
-std::string HolySymbol::name_info_str() const
+std::string HolySymbol::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         if (m_nr_charge_turns_left <= 0) {
                 return "";
         }
@@ -843,8 +853,10 @@ Clockwork::Clockwork(ItemData* const item_data) :
 {
 }
 
-std::string Clockwork::name_info_str() const
+std::string Clockwork::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         return "(" + std::to_string(m_charges) + " uses)";
 }
 

@@ -478,18 +478,27 @@ void Scroll::identify(const Verbose verbose)
         }
 }
 
-std::string Scroll::name_info_str() const
+std::string Scroll::domain_str() const
 {
-        if (m_data->is_spell_domain_known && !m_data->is_identified) {
-                const std::unique_ptr<const Spell> spell(make_spell());
+        const std::unique_ptr<const Spell> spell(make_spell());
 
-                const SpellDomain domain = spell->domain();
+        const SpellDomain domain = spell->domain();
 
-                if (domain != SpellDomain::END) {
-                        const auto domain_title =
-                                spells::spell_domain_title(domain);
+        if (domain == SpellDomain::END) {
+                return "";
+        }
 
-                        return "(" + domain_title + ")";
+        return spells::spell_domain_title(domain);
+}
+
+std::string Scroll::name_info_str(const ItemNameIdentified id_type) const
+{
+        if ((m_data->is_spell_domain_known && !m_data->is_identified) ||
+            (id_type == ItemNameIdentified::force_identified)) {
+                const std::string str = domain_str();
+
+                if (!str.empty()) {
+                        return "(" + str + ")";
                 }
         }
 

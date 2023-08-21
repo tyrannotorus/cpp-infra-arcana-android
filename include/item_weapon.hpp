@@ -44,7 +44,7 @@ public:
                 return colors::gray();
         }
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         const ItemData& ammo_data()
         {

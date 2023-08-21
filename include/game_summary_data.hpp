@@ -21,6 +21,13 @@ class InsSympt;
 
 namespace game_summary_data
 {
+struct ItemKnowledgeData
+{
+        std::string name {};
+        Color item_color;
+        bool is_identified {false};
+};
+
 struct TraitData
 {
         std::string name {};
@@ -58,7 +65,7 @@ struct GameSummaryData
         std::vector<HistoryEvent> player_history {};
         std::vector<Msg> msg_history {};
         std::vector<prop::PropListEntry> properties {};
-        std::vector<ColoredString> item_knowledge {};
+        std::vector<std::vector<ItemKnowledgeData>> item_knowledge {};
         std::vector<InventoryItemData> inventory {};
 };
 

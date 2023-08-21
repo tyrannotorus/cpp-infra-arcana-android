@@ -69,8 +69,10 @@ void Armor::hit(const int dmg)
         }
 }
 
-std::string Armor::name_info_str() const
+std::string Armor::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         const int ap = armor_points();
 
         const std::string ap_str = std::to_string(std::max(1, ap));

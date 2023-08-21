@@ -83,8 +83,10 @@ Color Wpn::color() const
         return m_data->color;
 }
 
-std::string Wpn::name_info_str() const
+std::string Wpn::name_info_str(const ItemNameIdentified id_type) const
 {
+        (void)id_type;
+
         if (!m_data->ranged.is_ranged_wpn ||
             m_data->ranged.has_infinite_ammo) {
                 return "";

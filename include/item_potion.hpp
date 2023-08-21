@@ -53,7 +53,7 @@ public:
                 return colors::light_blue();
         }
 
-        std::string name_info_str() const final;
+        std::string name_info_str(ItemNameIdentified id_type) const final;
 
         ConsumeItem activate(actor::Actor* actor) final;
 
@@ -69,10 +69,10 @@ public:
 
         virtual std::string real_name() const = 0;
 
+        virtual PotionAlignment alignment() const = 0;
+
 protected:
         virtual std::string descr_identified() const = 0;
-
-        virtual PotionAlignment alignment() const = 0;
 
         virtual void collide_hook(const P& pos, actor::Actor* actor) = 0;
 

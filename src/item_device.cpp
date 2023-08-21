@@ -261,9 +261,9 @@ ConsumeItem Device::activate(actor::Actor* const actor)
         return consumed;
 }
 
-std::string Device::name_info_str() const
+std::string Device::name_info_str(const ItemNameIdentified id_type) const
 {
-        if (m_data->is_identified) {
+        if (m_data->is_identified || (id_type == ItemNameIdentified::force_identified)) {
                 switch (m_condition) {
                 case Condition::breaking:
                         return "(breaking)";

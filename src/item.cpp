@@ -436,7 +436,7 @@ std::string Item::name(
         std::string info_str;
 
         if (info == ItemNameInfo::yes) {
-                info_str = name_info_str();
+                info_str = name_info_str(id_type);
         }
 
         const ItemName& names_used =

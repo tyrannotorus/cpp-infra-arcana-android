@@ -37,7 +37,7 @@ public:
 
         ~AmmoMag() = default;
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         void set_full_ammo();
 

@@ -35,7 +35,7 @@ public:
         void save_hook() const final;
         void load_hook() final;
 
-        std::string name_info_str() const final;
+        std::string name_info_str(ItemNameIdentified id_type) const final;
 
         std::vector<std::string> descr_hook() const final;
 

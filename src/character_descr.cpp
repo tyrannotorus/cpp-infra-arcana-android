@@ -163,47 +163,29 @@ static void add_item_knowledge_descr(
 {
         lines.emplace_back("Item knowledge", s_color_heading);
 
-        std::vector<ColoredString> item_knowledge = data.item_knowledge;
+        std::vector<std::vector<game_summary_data::ItemKnowledgeData>> item_knowledge =
+                data.item_knowledge;
 
-        if (data.item_knowledge.empty()) {
-                lines.emplace_back(s_indent + "None", colors::text());
-        }
-        else {
-                for (const ColoredString& e : item_knowledge) {
-                        lines.emplace_back(s_indent + e.str, e.color);
+        for (const std::vector<game_summary_data::ItemKnowledgeData>& items : item_knowledge) {
+                for (const game_summary_data::ItemKnowledgeData& e : items) {
+                        ColoredString line;
+
+                        line.str = e.name;
+                        line.color = e.item_color;
+
+                        if (!e.is_identified) {
+                                line.str = s_indent + text_format::pad_after("(?)", 10) + line.str;
+                                line.color = s_color_text_dark;
+                        }
+
+                        line.str = s_indent + line.str;
+
+                        lines.push_back(line);
                 }
+
+                lines.emplace_back("", colors::text());
         }
-
-        lines.emplace_back("", colors::text());
 }
-
-// static void add_scroll_descr(
-//         const game_summary_data::GameSummaryData& data,
-//         std::vector<ColoredString>& lines)
-// {
-//         lines.emplace_back("Manuscript knowledge", s_color_heading);
-
-//         std::vector<ColoredString> scroll_knowledge = data.scroll_knowledge;
-
-//         if (data.scroll_knowledge.empty()) {
-//                 lines.emplace_back(s_indent + "No known manuscripts", colors::text());
-//         }
-//         else {
-//                 std::sort(
-//                         std::begin(scroll_knowledge),
-//                         std::end(scroll_knowledge),
-//                         [](const ColoredString& e1,
-//                            const ColoredString& e2) {
-//                                 return e1.str < e2.str;
-//                         });
-
-//                 for (const ColoredString& e : scroll_knowledge) {
-//                         lines.emplace_back(s_indent + e.str, e.color);
-//                 }
-//         }
-
-//         lines.emplace_back("", colors::text());
-// }
 
 static void add_traits_descr(
         const game_summary_data::GameSummaryData& data,

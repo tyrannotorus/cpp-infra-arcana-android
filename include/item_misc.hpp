@@ -56,7 +56,7 @@ public:
                 return colors::green();
         }
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         void on_pickup_hook() override;
 
@@ -102,7 +102,7 @@ public:
 
         void load_hook() override;
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         ConsumeItem activate(actor::Actor* actor) override;
 
@@ -188,7 +188,7 @@ class HornOfMalice : public Item
 public:
         HornOfMalice(ItemData* item_data);
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         void save_hook() const override;
 
@@ -215,7 +215,7 @@ class HornOfBanishment : public Item
 public:
         HornOfBanishment(ItemData* item_data);
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         void save_hook() const override;
 
@@ -236,7 +236,7 @@ public:
 
         void on_std_turn_in_inv_hook(InvType inv_type) override;
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         void save_hook() const override;
 
@@ -258,7 +258,7 @@ public:
 
         ConsumeItem activate(actor::Actor* actor) override;
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         void save_hook() const override;
 

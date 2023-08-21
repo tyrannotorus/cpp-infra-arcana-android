@@ -37,7 +37,7 @@ public:
                 Headwear(item_data),
                 m_nr_turns_left(60) {}
 
-        std::string name_info_str() const override;
+        std::string name_info_str(ItemNameIdentified id_type) const override;
 
         void decr_turns_left(Inventory& carrier_inv);
 

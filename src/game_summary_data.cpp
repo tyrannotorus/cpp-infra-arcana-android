@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 
@@ -21,7 +22,11 @@
 #include "insanity.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_device.hpp"
 #include "item_factory.hpp"
+#include "item_potion.hpp"
+#include "item_rod.hpp"
+#include "item_scroll.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"
 #include "text_format.hpp"
@@ -29,6 +34,17 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+// Used as elements in lists to be sorted for the item knowledge section. The
+// sorting depends on what type of item it is, and may involve sorting on two
+// values (e.g. first domain and then name for scrolls), so we need both an item
+// object and the name that will be presented on the screen for comparison.
+template <typename T>
+struct ItemCompareElement
+{
+        std::unique_ptr<const T> item {};
+        std::string name {};
+};
+
 static void collect_nr_kills_tot(
         game_summary_data::GameSummaryData& d)
 {
@@ -68,39 +84,186 @@ static void collect_background_title(
         }
 }
 
-static std::vector<ColoredString> get_item_knowledge_names_for_type(
-        const ItemType item_type)
+// Convert a sorted list of item comparison elements to a list of item knowledge
+// entries with information to be presented to the player.
+template <typename T>
+static std::vector<game_summary_data::ItemKnowledgeData>
+sorted_item_list_to_item_knowledge_list(
+        const std::vector<ItemCompareElement<T>>& item_compare_list)
 {
-        std::vector<ColoredString> names;
+        std::vector<game_summary_data::ItemKnowledgeData> item_knowledge_list;
+
+        for (const ItemCompareElement<T>& compare_element : item_compare_list) {
+                game_summary_data::ItemKnowledgeData e;
+
+                const item::ItemData& item_data = compare_element.item->data();
+
+                e.name = compare_element.name;
+                e.item_color = item_data.color;
+                e.is_identified = item_data.is_identified;
+
+                item_knowledge_list.push_back(e);
+        }
+
+        return item_knowledge_list;
+}
+
+static std::vector<game_summary_data::ItemKnowledgeData> get_item_knowledge_names_for_potions()
+{
+        std::vector<ItemCompareElement<potion::Potion>> item_sort_list;
 
         for (int i = 0; i < (int)item::Id::END; ++i) {
                 const item::ItemData& item_data = item::g_data[i];
 
-                if ((item_data.type == item_type) &&
-                    (item_data.is_tried || item_data.is_identified)) {
-                        std::unique_ptr<item::Item> item(item::make(item_data.id));
+                if (item_data.type == ItemType::potion) {
+                        ItemCompareElement<potion::Potion> item_compare_element;
 
-                        const std::string name = item->name(ItemNameType::plain);
+                        item_compare_element.item.reset(
+                                static_cast<const potion::Potion*>(
+                                        item::make(item_data.id)));
 
-                        names.emplace_back(name, item_data.color);
+                        item_compare_element.name =
+                                item_compare_element.item->name(
+                                        ItemNameType::plain,
+                                        ItemNameInfo::yes,
+                                        ItemNameAttackInfo::none,
+                                        ItemNameIdentified::force_identified);
+
+                        item_sort_list.push_back(std::move(item_compare_element));
                 }
         }
 
-        // Sort the result so that the player cannot identify tried items from
-        // the order they appear in (e.g. if the first item is only tried and
-        // the next item is known, the player can know what the first item is if
-        // it always comes before the second item).
-
         std::sort(
-                std::begin(names),
-                std::end(names),
+                std::begin(item_sort_list),
+                std::end(item_sort_list),
                 [](
-                        const ColoredString& v1,
-                        const ColoredString& v2) {
-                        return v1.str < v2.str;
+                        const ItemCompareElement<potion::Potion>& v1,
+                        const ItemCompareElement<potion::Potion>& v2) {
+                        return (
+                                std::make_tuple(v1.item->alignment(), v1.name) <
+                                std::make_tuple(v2.item->alignment(), v2.name));
                 });
 
-        return names;
+        return sorted_item_list_to_item_knowledge_list(item_sort_list);
+}
+
+static std::vector<game_summary_data::ItemKnowledgeData> get_item_knowledge_names_for_scrolls()
+{
+        std::vector<ItemCompareElement<scroll::Scroll>> item_sort_list;
+
+        for (int i = 0; i < (int)item::Id::END; ++i) {
+                const item::ItemData& item_data = item::g_data[i];
+
+                if (item_data.type == ItemType::scroll) {
+                        ItemCompareElement<scroll::Scroll> item_compare_element;
+
+                        item_compare_element.item.reset(
+                                static_cast<const scroll::Scroll*>(
+                                        item::make(item_data.id)));
+
+                        item_compare_element.name =
+                                item_compare_element.item->name(
+                                        ItemNameType::plain,
+                                        ItemNameInfo::yes,
+                                        ItemNameAttackInfo::none,
+                                        ItemNameIdentified::force_identified);
+
+                        item_sort_list.push_back(std::move(item_compare_element));
+                }
+        }
+
+        std::sort(
+                std::begin(item_sort_list),
+                std::end(item_sort_list),
+                [](
+                        const ItemCompareElement<scroll::Scroll>& v1,
+                        const ItemCompareElement<scroll::Scroll>& v2) {
+                        return (
+                                std::make_tuple(v1.item->domain_str(), v1.name) <
+                                std::make_tuple(v2.item->domain_str(), v2.name));
+                });
+
+        return sorted_item_list_to_item_knowledge_list(item_sort_list);
+}
+
+static std::vector<game_summary_data::ItemKnowledgeData> get_item_knowledge_names_for_rods()
+{
+        std::vector<ItemCompareElement<rod::Rod>> item_sort_list;
+
+        for (int i = 0; i < (int)item::Id::END; ++i) {
+                const item::ItemData& item_data = item::g_data[i];
+
+                if (item_data.type == ItemType::rod) {
+                        ItemCompareElement<rod::Rod> item_compare_element;
+
+                        item_compare_element.item.reset(
+                                static_cast<const rod::Rod*>(
+                                        item::make(item_data.id)));
+
+                        // NOTE: We are not including extra info in the name,
+                        // since we don't want to display something like number
+                        // of turns left to recharge.
+                        item_compare_element.name =
+                                item_compare_element.item->name(
+                                        ItemNameType::plain,
+                                        ItemNameInfo::none,
+                                        ItemNameAttackInfo::none,
+                                        ItemNameIdentified::force_identified);
+
+                        item_sort_list.push_back(std::move(item_compare_element));
+                }
+        }
+
+        std::sort(
+                std::begin(item_sort_list),
+                std::end(item_sort_list),
+                [](
+                        const ItemCompareElement<rod::Rod>& v1,
+                        const ItemCompareElement<rod::Rod>& v2) {
+                        return v1.name < v2.name;
+                });
+
+        return sorted_item_list_to_item_knowledge_list(item_sort_list);
+}
+
+static std::vector<game_summary_data::ItemKnowledgeData> get_item_knowledge_names_for_devices()
+{
+        std::vector<ItemCompareElement<device::Device>> item_sort_list;
+
+        for (int i = 0; i < (int)item::Id::END; ++i) {
+                const item::ItemData& item_data = item::g_data[i];
+
+                if (item_data.type == ItemType::device) {
+                        ItemCompareElement<device::Device> item_compare_element;
+
+                        item_compare_element.item.reset(
+                                static_cast<const device::Device*>(
+                                        item::make(item_data.id)));
+
+                        // NOTE: We are not including extra info in the name,
+                        // since we don't want to display something like
+                        // "breaking".
+                        item_compare_element.name =
+                                item_compare_element.item->name(
+                                        ItemNameType::plain,
+                                        ItemNameInfo::none,
+                                        ItemNameAttackInfo::none,
+                                        ItemNameIdentified::force_identified);
+
+                        item_sort_list.push_back(std::move(item_compare_element));
+                }
+        }
+
+        std::sort(
+                std::begin(item_sort_list),
+                std::end(item_sort_list),
+                [](
+                        const ItemCompareElement<device::Device>& v1,
+                        const ItemCompareElement<device::Device>& v2) {
+                        return v1.name < v2.name;
+                });
+
+        return sorted_item_list_to_item_knowledge_list(item_sort_list);
 }
 
 template <typename T>
@@ -113,10 +276,10 @@ static void collect_item_knowledge(game_summary_data::GameSummaryData& d)
 {
         d.item_knowledge.clear();
 
-        append_to_vector(d.item_knowledge, get_item_knowledge_names_for_type(ItemType::potion));
-        append_to_vector(d.item_knowledge, get_item_knowledge_names_for_type(ItemType::scroll));
-        append_to_vector(d.item_knowledge, get_item_knowledge_names_for_type(ItemType::rod));
-        append_to_vector(d.item_knowledge, get_item_knowledge_names_for_type(ItemType::device));
+        d.item_knowledge.push_back(get_item_knowledge_names_for_potions());
+        d.item_knowledge.push_back(get_item_knowledge_names_for_scrolls());
+        d.item_knowledge.push_back(get_item_knowledge_names_for_rods());
+        d.item_knowledge.push_back(get_item_knowledge_names_for_devices());
 }
 
 static void collect_current_traits(
