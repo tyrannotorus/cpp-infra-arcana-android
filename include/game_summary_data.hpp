@@ -38,6 +38,7 @@ struct InventoryItemData
 {
         std::string slot_name {};
         std::string item_name {};
+        bool is_identified {};
 };
 
 struct GameSummaryData

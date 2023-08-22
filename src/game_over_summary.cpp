@@ -206,6 +206,14 @@ static void add_unique_monsters_killed_descr(
         lines.emplace_back("", s_color_info);
 }
 
+static Color get_inventory_item_color(const game_summary_data::InventoryItemData& item)
+{
+        return (
+                (item.item_name.empty() || item.is_identified)
+                        ? colors::text()
+                        : colors::magenta());
+}
+
 static void add_inventory_descr(
         const game_summary_data::GameSummaryData& data,
         std::vector<ColoredString>& lines)
@@ -217,9 +225,11 @@ static void add_inventory_descr(
         }
         else {
                 for (const game_summary_data::InventoryItemData& item : data.inventory) {
+                        const Color color = get_inventory_item_color(item);
+
                         if (item.slot_name.empty()) {
                                 // Is "backpack" item.
-                                lines.emplace_back(s_indent + item.item_name, colors::text());
+                                lines.emplace_back(s_indent + item.item_name, color);
                         }
                         else {
                                 // Is slot item (wielded, armor etc),
@@ -229,7 +239,7 @@ static void add_inventory_descr(
 
                                 str += item.item_name.empty() ? "<empty>" : item.item_name;
 
-                                lines.emplace_back(s_indent + str, colors::text());
+                                lines.emplace_back(s_indent + str, color);
                         }
                 }
         }

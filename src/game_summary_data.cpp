@@ -319,6 +319,8 @@ static void collect_inventory(game_summary_data::GameSummaryData& d)
 
                 if (slot.item) {
                         item_data.item_name = get_item_name(*slot.item);
+
+                        item_data.is_identified = slot.item->data().is_identified;
                 }
 
                 d.inventory.push_back(item_data);
@@ -328,6 +330,8 @@ static void collect_inventory(game_summary_data::GameSummaryData& d)
                 game_summary_data::InventoryItemData item_data;
 
                 item_data.item_name = get_item_name(*item);
+
+                item_data.is_identified = item->data().is_identified;
 
                 d.inventory.push_back(item_data);
         }
