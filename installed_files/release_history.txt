@@ -48,6 +48,7 @@
 - Mummies can now speak a phrase when they become aware, to alert other monsters.
 - When Major Clapham-Lee "calls forth his Tomb-Legions", the summoned monsters now wait a turn instead of acting immediately.
 - Tentacle Clusters can spawn randomly on the map (not just from spell side effects etc), although somewhat rarely
+- Many updates to the "hound" monsters (Fire Hound, Energy Hound): added more types, added sound effects, changed a lot of their stats.
 - Added more monsters
 
 # Misc balancing

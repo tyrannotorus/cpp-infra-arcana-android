@@ -47,10 +47,12 @@ enum class SfxId
         door_open,
         door_open_gate,
         door_open_metal,
+        earth_breath,
         electric_gun,
         electric_lantern,
         explosion,
         explosion_molotov,
+        fire_breath,
         flapping_wings,
         fountain_drink,
         gas,
@@ -66,6 +68,7 @@ enum class SfxId
         horn,
         insanity_rising,
         lever_pull,
+        lightning_breath,
         machine_gun_fire,
         machine_gun_reload,
         magic_trap_trigger,
@@ -102,6 +105,7 @@ enum class SfxId
         tomb_open,
         wade,
         wall_collapse,
+        water_breath,
         zombie_growl,
 
         // Ambient sounds

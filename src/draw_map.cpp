@@ -133,13 +133,14 @@ static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
         case item::Id::intr_bite:
         case item::Id::intr_claw:
         case item::Id::intr_dust_engulf:
-        case item::Id::intr_energy_breath:
+        case item::Id::intr_earth_breath:
         case item::Id::intr_energy_engulf:
         case item::Id::intr_fire_breath:
         case item::Id::intr_fire_engulf:
         case item::Id::intr_ghost_touch:
         case item::Id::intr_headbutt:
         case item::Id::intr_kick:
+        case item::Id::intr_lightning_breath:
         case item::Id::intr_maul:
         case item::Id::intr_mind_leech_sting:
         case item::Id::intr_net_throw:
@@ -154,6 +155,7 @@ static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
         case item::Id::intr_strangle:
         case item::Id::intr_strike:
         case item::Id::intr_vampiric_bite:
+        case item::Id::intr_water_breath:
         case item::Id::intr_web_bola:
         case item::Id::iron_spike:
         case item::Id::lantern:
@@ -326,13 +328,14 @@ static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
         case item::Id::intr_bite:
         case item::Id::intr_claw:
         case item::Id::intr_dust_engulf:
-        case item::Id::intr_energy_breath:
+        case item::Id::intr_earth_breath:
         case item::Id::intr_energy_engulf:
         case item::Id::intr_fire_breath:
         case item::Id::intr_fire_engulf:
         case item::Id::intr_ghost_touch:
         case item::Id::intr_headbutt:
         case item::Id::intr_kick:
+        case item::Id::intr_lightning_breath:
         case item::Id::intr_maul:
         case item::Id::intr_mind_leech_sting:
         case item::Id::intr_net_throw:
@@ -347,6 +350,7 @@ static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
         case item::Id::intr_strangle:
         case item::Id::intr_strike:
         case item::Id::intr_vampiric_bite:
+        case item::Id::intr_water_breath:
         case item::Id::intr_web_bola:
         case item::Id::iron_spike:
         case item::Id::lantern:

@@ -1510,10 +1510,12 @@ void Liquid::bump(actor::Actor& actor_bumping)
 {
         const prop::PropHandler& props = actor_bumping.m_properties;
 
+        // HACK: Explicit exception for monster ID MON_WATER_HOUND.
         if (props.has(prop::Id::ethereal) ||
             props.has(prop::Id::flying) ||
             props.has(prop::Id::tiny_flying) ||
-            actor_bumping.m_data->is_amphibian) {
+            actor_bumping.m_data->is_amphibian ||
+            (actor_bumping.id() == "MON_WATER_HOUND")) {
                 return;
         }
 

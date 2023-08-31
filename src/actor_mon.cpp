@@ -713,4 +713,9 @@ void Actor::add_spell(SpellSkill skill, Spell* const spell)
         m_mon_spells.push_back(spell_entry);
 }
 
+bool Actor::has_ai(const actor::AiId id) const
+{
+        return m_data->ai[(size_t)id];
+}
+
 }  // namespace actor

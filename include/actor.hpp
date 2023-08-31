@@ -248,6 +248,7 @@ public:
         std::string aware_msg_mon_hidden() const;
         void speak_phrase(AlertsMon alerts_others);
         void add_spell(SpellSkill skill, Spell* spell);
+        bool has_ai(actor::AiId id) const;
 
         // Common creature state (for player and monsters)
         P m_pos {};

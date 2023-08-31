@@ -20,6 +20,7 @@
 #include "array2.hpp"
 #include "audio_data.hpp"
 #include "debug.hpp"
+#include "direction.hpp"
 #include "draw_blast.hpp"
 #include "explosion.hpp"
 #include "fov.hpp"
@@ -30,6 +31,7 @@
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
+#include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_factory.hpp"
@@ -37,6 +39,9 @@
 #include "random.hpp"
 #include "saving.hpp"
 #include "sound.hpp"
+#include "terrain.hpp"
+#include "terrain_data.hpp"
+#include "terrain_factory.hpp"
 #include "text_format.hpp"
 #include "wpn_dmg.hpp"
 
@@ -412,6 +417,30 @@ void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
         prop->set_duration(7);
 
         actor_hit.m_properties.apply(prop);
+}
+
+WaterBreath::WaterBreath(ItemData* const item_data) :
+        Wpn(item_data) {}
+
+void WaterBreath::on_projectile_blocked(const P& pos)
+{
+        for (const P& d : dir_utils::g_dir_list_w_center) {
+                const P p_adj = pos + d;
+
+                const terrain::Terrain* terrain = map::g_terrain.at(p_adj);
+
+                if (!terrain->m_data->is_floor_like) {
+                        continue;
+                }
+
+                auto* const liquid =
+                        static_cast<terrain::Liquid*>(
+                                terrain::make(terrain::Id::liquid, p_adj));
+
+                liquid->m_type = LiquidType::water;
+
+                map::update_terrain(liquid);
+        }
 }
 
 PharaohStaff::PharaohStaff(ItemData* const item_data) :

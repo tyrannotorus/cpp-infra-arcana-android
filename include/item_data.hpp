@@ -94,13 +94,14 @@ enum class Id
         intr_bite,
         intr_claw,
         intr_dust_engulf,
-        intr_energy_breath,
+        intr_earth_breath,
         intr_energy_engulf,
         intr_fire_breath,
         intr_fire_engulf,
         intr_ghost_touch,
         intr_headbutt,
         intr_kick,
+        intr_lightning_breath,
         intr_maul,
         intr_mind_leech_sting,
         intr_net_throw,
@@ -115,6 +116,7 @@ enum class Id
         intr_strangle,
         intr_strike,
         intr_vampiric_bite,
+        intr_water_breath,
         intr_web_bola,
 
         // Armor

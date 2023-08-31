@@ -3131,6 +3131,206 @@
     </monster>
 
     <!--************************************************************-->
+    <!-- MON_EARTH_HOUND -->
+    <!--************************************************************-->
+    <monster id="MON_EARTH_HOUND">
+        <text>
+            <name_a>an Earth Hound</name_a>
+            <name_the>the Earth Hound</name_the>
+            <corpse_name_a></corpse_name_a>
+            <corpse_name_the></corpse_name_the>
+            <description>Forged from stone and soil by nefarious wizardry, it has been endowed with animation in the form of a dreadful beast. Its breath exhales an overwhelming density, a manifestation of pure weight and relentless impact.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>seems aggravated.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen>snarls.</aware_message_seen>
+            <aware_message_hidden>I hear a snarl.</aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_HOUND</tile>
+            <character>d</character>
+            <color>COLOR_BROWN</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen>SFX_DOG_SNARL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_DOG_SNARL</aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>32</hit_points>
+            <spirit>20</spirit>
+            <speed>MONSPEED_SLOW</speed>
+            <shock_level>MONSHOCK_FRIGHTENING</shock_level>
+            <melee>70</melee>
+            <ranged>65</ranged>
+            <dodging>10</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <size>MONSIZE_FLOOR</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <canine/>
+            <can_bleed>false</can_bleed>
+            <can_leave_corpse>false</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="ITEMINTR_EARTH_BREATH">
+                <damage>7</damage>
+                <property_applied>PROP_SLOWED</property_applied>
+            </attack>
+            <attack id="ITEMINTR_BITE">
+                <damage>8</damage>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>PROP_R_PARA</property>
+            <property>PROP_R_SLOW</property>
+            <property>PROP_R_POISON</property>
+            <property>PROP_R_DISEASE</property>
+            <property>PROP_DARKVISION</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>5</erratic_move_percent>
+            <turns_aware>12</turns_aware>
+            <ranged_cooldown_turns>1</ranged_cooldown_turns>
+            <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>7</min_dungeon_level>
+            <max_dungeon_level>15</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size weight="3">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_MONSTER</native_room>
+            <native_room>ROOM_RITUAL</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
+    <!-- MON_WATER_HOUND -->
+    <!--************************************************************-->
+    <monster id="MON_WATER_HOUND">
+        <text>
+            <name_a>a Water Hound</name_a>
+            <name_the>the Water Hound</name_the>
+            <corpse_name_a></corpse_name_a>
+            <corpse_name_the></corpse_name_the>
+            <description>Poured from brine and maelstrom by nefarious wizardry, it has been endowed with animation in the form of a dreadful beast. Its breath exhales the chaos of primordial waters.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>seems aggravated.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen>snarls.</aware_message_seen>
+            <aware_message_hidden>I hear a snarl.</aware_message_hidden>
+            <spell_message></spell_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_HOUND</tile>
+            <character>d</character>
+            <color>COLOR_LIGHT_BLUE</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen>SFX_DOG_SNARL</aware_sfx_seen>
+            <aware_sfx_hidden>SFX_DOG_SNARL</aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>16</hit_points>
+            <spirit>20</spirit>
+            <speed>MONSPEED_NORMAL</speed>
+            <shock_level>MONSHOCK_FRIGHTENING</shock_level>
+            <melee>70</melee>
+            <ranged>65</ranged>
+            <dodging>20</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <size>MONSIZE_FLOOR</size>
+            <always_prevent_knockback>false</always_prevent_knockback>
+            <canine/>
+            <can_bleed>false</can_bleed>
+            <can_leave_corpse>false</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="ITEMINTR_WATER_BREATH">
+                <damage>6</damage>
+                <property_applied duration="9">PROP_CONFUSED</property_applied>
+            </attack>
+            <attack id="ITEMINTR_BITE">
+                <damage>7</damage>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>PROP_R_CONF</property>
+            <property>PROP_R_FIRE</property>
+            <property>PROP_R_POISON</property>
+            <property>PROP_R_DISEASE</property>
+            <property>PROP_DARKVISION</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>5</erratic_move_percent>
+            <turns_aware>12</turns_aware>
+            <ranged_cooldown_turns>2</ranged_cooldown_turns>
+            <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
+            <looks>true</looks>
+            <avoids_blocking_friend>true</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>true</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>7</min_dungeon_level>
+            <max_dungeon_level>15</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size weight="3">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_MONSTER</native_room>
+            <native_room>ROOM_RITUAL</native_room>
+            <native_room>ROOM_DAMP</native_room>
+            <native_room>ROOM_POOL</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
     <!-- MON_FIRE_HOUND -->
     <!--************************************************************-->
     <monster id="MON_FIRE_HOUND">
@@ -3139,7 +3339,7 @@
             <name_the>the Fire Hound</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
-            <description>This extremely aggressive canine seems to be part corporeal and part fire. It breathes searing flames.</description>
+            <description>Erupted from embers and ashes by nefarious wizardry, it has been endowed with animation in the form of a dreadful beast. Its breath exhales searing flames.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -3162,7 +3362,7 @@
 
         <attributes>
             <hit_points>16</hit_points>
-            <spirit>0</spirit>
+            <spirit>20</spirit>
             <speed>MONSPEED_NORMAL</speed>
             <shock_level>MONSHOCK_FRIGHTENING</shock_level>
             <melee>70</melee>
@@ -3171,11 +3371,11 @@
             <stealth>0</stealth>
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
-            <can_bash_doors>false</can_bash_doors>
+            <can_bash_doors>true</can_bash_doors>
             <size>MONSIZE_FLOOR</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <canine/>
-            <can_bleed>true</can_bleed>
+            <can_bleed>false</can_bleed>
             <can_leave_corpse>false</can_leave_corpse>
             <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
         </attributes>
@@ -3186,7 +3386,7 @@
                 <property_applied>PROP_BURNING</property_applied>
             </attack>
             <attack id="ITEMINTR_BITE">
-                <damage>6</damage>
+                <damage>7</damage>
             </attack>
         </attacks>
 
@@ -3201,7 +3401,7 @@
         <ai>
             <erratic_move_percent>5</erratic_move_percent>
             <turns_aware>12</turns_aware>
-            <ranged_cooldown_turns>3</ranged_cooldown_turns>
+            <ranged_cooldown_turns>2</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
             <looks>true</looks>
             <avoids_blocking_friend>true</avoids_blocking_friend>
@@ -3214,30 +3414,31 @@
         </ai>
 
         <spawning>
-            <min_dungeon_level>8</min_dungeon_level>
-            <max_dungeon_level>27</max_dungeon_level>
+            <min_dungeon_level>7</min_dungeon_level>
+            <max_dungeon_level>15</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="2">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="3">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
+            <native_room>ROOM_RITUAL</native_room>
         </spawning>
     </monster>
 
     <!--************************************************************-->
-    <!-- MON_ENERGY_HOUND -->
+    <!-- MON_AIR_HOUND -->
     <!--************************************************************-->
-    <monster id="MON_ENERGY_HOUND">
+    <monster id="MON_AIR_HOUND">
         <text>
-            <name_a>an Energy Hound</name_a>
-            <name_the>the Energy Hound</name_the>
+            <name_a>an Air Hound</name_a>
+            <name_the>the Air Hound</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
-            <description>This extremely aggressive canine seems to be part corporeal and part energy. It breathes lightning.</description>
+            <description>Rushed from storm and cloud by nefarious wizardry, it has been endowed with animation in the form of a dreadful beast. Its breath exhales bolts of lightning.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems aggravated.</wary_message>
@@ -3250,7 +3451,7 @@
         <graphics>
             <tile>TILE_HOUND</tile>
             <character>d</character>
-            <color>COLOR_YELLOW</color>
+            <color>COLOR_LIGHT_CYAN</color>
         </graphics>
 
         <audio>
@@ -3259,49 +3460,47 @@
         </audio>
 
         <attributes>
-            <hit_points>24</hit_points>
-            <spirit>0</spirit>
+            <hit_points>12</hit_points>
+            <spirit>20</spirit>
             <speed>MONSPEED_NORMAL</speed>
             <shock_level>MONSHOCK_FRIGHTENING</shock_level>
-            <melee>80</melee>
-            <ranged>75</ranged>
-            <dodging>20</dodging>
+            <melee>70</melee>
+            <ranged>65</ranged>
+            <dodging>25</dodging>
             <stealth>0</stealth>
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
-            <can_bash_doors>false</can_bash_doors>
+            <can_bash_doors>true</can_bash_doors>
             <size>MONSIZE_FLOOR</size>
             <always_prevent_knockback>false</always_prevent_knockback>
             <canine/>
-            <can_bleed>true</can_bleed>
+            <can_bleed>false</can_bleed>
             <can_leave_corpse>false</can_leave_corpse>
             <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
         </attributes>
 
         <attacks>
-            <attack id="ITEMINTR_ENERGY_BREATH">
-                <damage>8</damage>
+            <attack id="ITEMINTR_LIGHTNING_BREATH">
+                <damage>5</damage>
                 <property_applied duration="2">PROP_PARALYZED</property_applied>
             </attack>
             <attack id="ITEMINTR_BITE">
-                <damage>10</damage>
+                <damage>7</damage>
             </attack>
         </attacks>
 
         <properties>
-            <property>PROP_R_FIRE</property>
             <property>PROP_R_POISON</property>
             <property>PROP_R_ELEC</property>
             <property>PROP_R_DISEASE</property>
             <property>PROP_DARKVISION</property>
-            <property>PROP_RADIANT_SELF</property>
         </properties>
 
         <ai>
             <erratic_move_percent>5</erratic_move_percent>
             <turns_aware>12</turns_aware>
-            <ranged_cooldown_turns>3</ranged_cooldown_turns>
-            <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
+            <ranged_cooldown_turns>2</ranged_cooldown_turns>
+            <is_pausing_on_player_seen>true</is_pausing_on_player_seen>
             <looks>true</looks>
             <avoids_blocking_friend>true</avoids_blocking_friend>
             <attacks>true</attacks>
@@ -3313,17 +3512,18 @@
         </ai>
 
         <spawning>
-            <min_dungeon_level>15</min_dungeon_level>
-            <max_dungeon_level>28</max_dungeon_level>
+            <min_dungeon_level>7</min_dungeon_level>
+            <max_dungeon_level>15</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="2">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="3">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
+            <native_room>ROOM_RITUAL</native_room>
         </spawning>
     </monster>
 
@@ -3817,7 +4017,7 @@
             <avoids_blocking_friend>true</avoids_blocking_friend>
             <attacks>true</attacks>
             <paths_to_target_when_aware>true</paths_to_target_when_aware>
-            <moves_to_target_when_los>false</moves_to_target_when_los>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
             <moves_to_lair>false</moves_to_lair>
             <moves_to_leader>true</moves_to_leader>
             <moves_randomly_when_unaware>true</moves_randomly_when_unaware>

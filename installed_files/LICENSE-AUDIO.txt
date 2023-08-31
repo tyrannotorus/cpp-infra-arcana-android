@@ -524,6 +524,16 @@ Original title:      Spaceship_Door_Open.wav
 License:             Attribution 4.0 International (CC BY 4.0) 
 Changes made:        Cut parts of the sound
 
+NOTE: The sound below ("Boom Kick") no longer exists on freesound.org (the link
+below is dead). The information provided below is according to the sound
+information on freesound.org at the time when the sound was downloaded.
+File:                sfx_earth_breath.ogg
+Source:              https://freesound.org/people/Goup_1/sounds/195396
+Author:              Goup_1 (username on freesound.org)
+Original title:      Boom Kick
+License:             Attribution 3.0 Unported (CC BY 3.0)
+Changes made:        Added echo, changed speed, etc
+
 File:                sfx_electric_lantern.ogg
 Source:              https://freesound.org/people/joedeshon/sounds/139062/
 Author:              joedeshon (username on freesound.org)
@@ -554,6 +564,13 @@ Source:              https://freesound.org/people/GowlerMusic/sounds/266566/
 Author:              GowlerMusic (username on freesound.org)
 Original title:      Gong Hit
 License:             Attribution 3.0 Unported (CC BY 3.0)
+
+File:                sfx_fire_breath.ogg
+Source:              https://freesound.org/people/hykenfreak/sounds/331621/
+Author:              hykenfreak (username on freesound.org)
+Original title:      Flame Ignition
+License:             Attribution 4.0 International (CC BY 4.0)
+Changes made:        Cut parts of the sound, increased speed
 
 File:                sfx_flapping_wings.ogg
 Source:              https://freesound.org/people/treyc/sounds/123912/
@@ -849,6 +866,9 @@ Author:              Yarmonics (username on freesound.org)
 Original title:      SF_2s quick metal click.wav
 License:             CC0 1.0 Universal (CC0 1.0)
 
+NOTE: The sound below ("Boom Kick") no longer exists on freesound.org (the link
+below is dead). The information provided below is according to the sound
+information on freesound.org at the time when the sound was downloaded.
 File:                sfx_monolith.ogg
 Source:              https://freesound.org/people/Goup_1/sounds/195396
 Author:              Goup_1 (username on freesound.org)
@@ -861,6 +881,13 @@ Author:              Nicistarful (username on freesound.org)
 Original title:      Fast Throttle Mechanic Lever
 License:             Attribution 3.0 Unported (CC BY 3.0)
 Changes made:        Cut part of the sound, and increased the speed
+
+File:                sfx_lightning_breath.ogg
+Source:              https://freesound.org/people/bajko/sounds/399656/
+Author:              bajko (username on freesound.org)
+Original title:      Thunder » sfx_thunder blast.wav
+License:             CC0 1.0 Universal (CC0 1.0)
+Changes made:        Cut parts of the sound (maybe some more changes)
 
 File:                sfx_thunder.ogg
 Source:              https://freesound.org/people/Kinoton/sounds/397952/
@@ -907,6 +934,13 @@ Source:              https://freesound.org/people/iwanPlays/sounds/567249/
 Author:              iwanPlays (username on freesound.org)
 License:             CC0 1.0 Universal (CC0 1.0)
 Original title:      Bricks/Stones/Rocks/Gravel Falling
+
+File:                sfx_water_breath.ogg
+Source:              https://freesound.org/people/trader_one/sounds/670518/
+Author:              trader_one (username on freesound.org)
+License:             CC0 1.0 Universal (CC0 1.0)
+Original title:      Distant waterfall
+Changes made:        Cut most of the sound, changed speed etc.
 
 File:                musica_cthulhiana_fragment_madness.ogg
 Source:              Track "Madness" from music album "Fragment" (2010, Prowler/Ghost Records)

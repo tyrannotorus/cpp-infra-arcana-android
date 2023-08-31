@@ -156,29 +156,34 @@ Item* make(const Id item_id, const int nr_items)
         case Id::player_kick:
         case Id::player_stomp:
         case Id::player_punch:
-        case Id::intr_kick:
+        case Id::intr_acid_spit:
+        case Id::intr_acid_touch:
         case Id::intr_bite:
         case Id::intr_claw:
-        case Id::intr_strike:
+        case Id::intr_earth_breath:
+        case Id::intr_energy_engulf:
+        case Id::intr_fire_breath:
+        case Id::intr_fire_engulf:
+        case Id::intr_ghost_touch:
+        case Id::intr_headbutt:
+        case Id::intr_kick:
+        case Id::intr_lightning_breath:
+        case Id::intr_maul:
+        case Id::intr_net_throw:
         case Id::intr_punch:
         case Id::intr_punch_knockback:
-        case Id::intr_headbutt:
-        case Id::intr_acid_spit:
-        case Id::intr_fire_breath:
-        case Id::intr_energy_breath:
-        case Id::intr_strangle:
-        case Id::intr_ghost_touch:
-        case Id::intr_sting:
-        case Id::intr_spear_thrust:
-        case Id::intr_net_throw:
-        case Id::intr_maul:
         case Id::intr_pus_spew:
-        case Id::intr_acid_touch:
-        case Id::intr_fire_engulf:
-        case Id::intr_energy_engulf:
+        case Id::intr_spear_thrust:
         case Id::intr_spores:
+        case Id::intr_sting:
+        case Id::intr_strangle:
+        case Id::intr_strike:
         case Id::intr_web_bola:
                 r = new Wpn(d);
+                break;
+
+        case Id::intr_water_breath:
+                r = new WaterBreath(d);
                 break;
 
         case Id::morphic_blaster:

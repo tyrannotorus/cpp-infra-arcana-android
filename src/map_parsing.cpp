@@ -13,25 +13,15 @@
 
 #include "actor.hpp"
 #include "array2.hpp"
-#include "colors.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
 #include "flood.hpp"
 #include "game_time.hpp"
-#include "gfx.hpp"
-#include "init.hpp"
 #include "map.hpp"
 #include "misc.hpp"
-#include "panel.hpp"
 #include "random.hpp"
 #include "rect.hpp"
-#include "state.hpp"
 #include "terrain.hpp"
-
-#ifndef NDEBUG
-#include "io.hpp"
-#include "viewport.hpp"
-#endif  // NDEBUG
 
 namespace map_parsers
 {
@@ -488,8 +478,8 @@ Array2<bool> cells_within_dist_of_others(
                                         break;
                                 }
                         }  // distance loop
-                }  // outer y loop
-        }  // outer x loop
+                }          // outer y loop
+        }                  // outer x loop
 
         return result;
 
@@ -559,8 +549,8 @@ Array2<bool> expand(const Array2<bool>& in, const R& area_allowed_to_modify)
                                         break;
                                 }
                         }  // Compare x loop
-                }  // y loop
-        }  // x loop
+                }          // y loop
+        }                  // x loop
 
         return result;
 

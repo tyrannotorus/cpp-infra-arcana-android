@@ -478,7 +478,7 @@ static void mon_act(actor::Actor& mon)
         // NOTE: Monsters try to detect the player visually on standard turns,
         // otherwise very fast monsters are much better at finding the player
 
-        if (mon.m_data->ai[(size_t)actor::AiId::avoids_blocking_friend] &&
+        if (mon.has_ai(actor::AiId::avoids_blocking_friend) &&
             !is_player_leader &&
             actor::is_player(mon.m_ai_state.target) &&
             mon.m_ai_state.is_target_seen &&
@@ -500,7 +500,7 @@ static void mon_act(actor::Actor& mon)
                 }
         }
 
-        if (mon.m_data->ai[(size_t)actor::AiId::attacks] &&
+        if (mon.has_ai(actor::AiId::attacks) &&
             mon.m_ai_state.target &&
             mon.m_ai_state.is_target_seen) {
                 const DidAction did_act = mon.try_attack(*mon.m_ai_state.target);
@@ -540,7 +540,7 @@ static void mon_act(actor::Actor& mon)
 
         erratic_move_pct = std::clamp(erratic_move_pct, 0, 95);
 
-        if (mon.m_data->ai[(size_t)actor::AiId::moves_randomly_when_unaware] &&
+        if (mon.has_ai(actor::AiId::moves_randomly_when_unaware) &&
             rnd::percent(erratic_move_pct)) {
                 const DidAction did_act = ai::action::move_to_random_adj_cell(mon);
 
@@ -551,7 +551,7 @@ static void mon_act(actor::Actor& mon)
 
         const bool is_terrified = mon.m_properties.has(prop::Id::terrified);
 
-        if (mon.m_data->ai[(size_t)actor::AiId::moves_to_target_when_los] &&
+        if (mon.has_ai(actor::AiId::moves_to_target_when_los) &&
             !is_terrified) {
                 const DidAction did_act = ai::action::move_to_target_simple(mon);
 
@@ -562,7 +562,10 @@ static void mon_act(actor::Actor& mon)
 
         std::vector<P> path;
 
-        if ((mon.m_data->ai[(size_t)actor::AiId::paths_to_target_when_aware] ||
+        if (((mon.has_ai(actor::AiId::paths_to_target_when_aware) &&
+              !(!mon.has_ai(actor::AiId::moves_to_target_when_los) &&
+                mon.m_ai_state.target &&
+                mon.m_ai_state.is_target_seen)) ||
              is_player_leader) &&
             !is_terrified) {
                 path = ai::info::find_path_to_target(mon);
@@ -584,7 +587,7 @@ static void mon_act(actor::Actor& mon)
                 }
         }
 
-        if ((mon.m_data->ai[(size_t)actor::AiId::moves_to_leader] || is_player_leader) &&
+        if ((mon.has_ai(actor::AiId::moves_to_leader) || is_player_leader) &&
             !mon.m_properties.has(prop::Id::frenzied) &&
             !is_terrified) {
                 path = ai::info::find_path_to_leader(mon);
@@ -596,11 +599,10 @@ static void mon_act(actor::Actor& mon)
                 }
         }
 
-        if (mon.m_data->ai[(size_t)actor::AiId::moves_to_lair] &&
+        if (mon.has_ai(actor::AiId::moves_to_lair) &&
             !is_player_leader &&
             !mon.m_properties.has(prop::Id::frenzied) &&
-            (!mon.m_ai_state.target ||
-             actor::is_player(mon.m_ai_state.target))) {
+            (!mon.m_ai_state.target || actor::is_player(mon.m_ai_state.target))) {
                 DidAction did_act =
                         ai::action::step_to_lair_if_los(
                                 mon,
@@ -626,7 +628,7 @@ static void mon_act(actor::Actor& mon)
                 }
         }
 
-        if (mon.m_data->ai[(size_t)actor::AiId::moves_randomly_when_unaware] &&
+        if (mon.has_ai(actor::AiId::moves_randomly_when_unaware) &&
             (!is_player_leader || rnd::one_in(8))) {
                 const DidAction did_act = ai::action::move_to_random_adj_cell(mon);
 

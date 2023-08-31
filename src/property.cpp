@@ -1371,20 +1371,20 @@ PropEnded Confused::affect_move_dir(Dir& dir)
                 return PropEnded::no;
         }
 
-        if (!rnd::one_in(8)) {
+        const int move_random_on_in_n = 6;
+
+        if (!rnd::one_in(move_random_on_in_n)) {
                 return PropEnded::no;
         }
 
         Array2<bool> blocked(map::dims());
 
         const R area_check_blocked(
-                m_owner->m_pos - P(1, 1),
-                m_owner->m_pos + P(1, 1));
+                m_owner->m_pos.with_offsets(-1, -1),
+                m_owner->m_pos.with_offsets(1, 1));
 
         map_parsers::BlocksActor(*m_owner, ParseActors::yes)
-                .run(blocked,
-                     area_check_blocked,
-                     MapParseMode::overwrite);
+                .run(blocked, area_check_blocked, MapParseMode::overwrite);
 
         std::vector<P> d_bucket;
 

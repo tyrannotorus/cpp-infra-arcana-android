@@ -139,6 +139,15 @@ public:
         void on_ranged_hit(actor::Actor& actor_hit) override;
 };
 
+class WaterBreath : public Wpn
+{
+public:
+        WaterBreath(ItemData* item_data);
+        ~WaterBreath() = default;
+
+        void on_projectile_blocked(const P& pos) override;
+};
+
 class PharaohStaff : public Wpn
 {
 public:

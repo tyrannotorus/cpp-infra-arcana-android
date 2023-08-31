@@ -25,32 +25,34 @@
 using StrToIdMap = std::unordered_map<std::string, item::Id>;
 
 static const StrToIdMap s_str_to_intr_item_id_map = {
-        {"ITEMINTR_KICK", item::Id::intr_kick},
+        {"ITEMINTR_ACID_SPIT", item::Id::intr_acid_spit},
+        {"ITEMINTR_ACID_TOUCH", item::Id::intr_acid_touch},
         {"ITEMINTR_BITE", item::Id::intr_bite},
         {"ITEMINTR_CLAW", item::Id::intr_claw},
-        {"ITEMINTR_STRIKE", item::Id::intr_strike},
+        {"ITEMINTR_DUST_ENGULF", item::Id::intr_dust_engulf},
+        {"ITEMINTR_EARTH_BREATH", item::Id::intr_earth_breath},
+        {"ITEMINTR_ENERGY_ENGULF", item::Id::intr_energy_engulf},
+        {"ITEMINTR_FIRE_BREATH", item::Id::intr_fire_breath},
+        {"ITEMINTR_FIRE_ENGULF", item::Id::intr_fire_engulf},
+        {"ITEMINTR_GHOST_TOUCH", item::Id::intr_ghost_touch},
+        {"ITEMINTR_HEADBUTT", item::Id::intr_headbutt},
+        {"ITEMINTR_KICK", item::Id::intr_kick},
+        {"ITEMINTR_LIGHTNING_BREATH", item::Id::intr_lightning_breath},
+        {"ITEMINTR_MAUL", item::Id::intr_maul},
+        {"ITEMINTR_MIND_LEECH_STING", item::Id::intr_mind_leech_sting},
+        {"ITEMINTR_NET_THROW", item::Id::intr_net_throw},
         {"ITEMINTR_PUNCH", item::Id::intr_punch},
         {"ITEMINTR_PUNCH_KNOCKBACK", item::Id::intr_punch_knockback},
-        {"ITEMINTR_HEADBUTT", item::Id::intr_headbutt},
-        {"ITEMINTR_ACID_SPIT", item::Id::intr_acid_spit},
-        {"ITEMINTR_SNAKE_VENOM_SPIT", item::Id::intr_snake_venom_spit},
-        {"ITEMINTR_FIRE_BREATH", item::Id::intr_fire_breath},
-        {"ITEMINTR_ENERGY_BREATH", item::Id::intr_energy_breath},
-        {"ITEMINTR_RAVEN_PECK", item::Id::intr_raven_peck},
-        {"ITEMINTR_VAMPIRIC_BITE", item::Id::intr_vampiric_bite},
-        {"ITEMINTR_STRANGLE", item::Id::intr_strangle},
-        {"ITEMINTR_GHOST_TOUCH", item::Id::intr_ghost_touch},
-        {"ITEMINTR_STING", item::Id::intr_sting},
-        {"ITEMINTR_MIND_LEECH_STING", item::Id::intr_mind_leech_sting},
-        {"ITEMINTR_SPEAR_THRUST", item::Id::intr_spear_thrust},
-        {"ITEMINTR_NET_THROW", item::Id::intr_net_throw},
-        {"ITEMINTR_MAUL", item::Id::intr_maul},
         {"ITEMINTR_PUS_SPEW", item::Id::intr_pus_spew},
-        {"ITEMINTR_ACID_TOUCH", item::Id::intr_acid_touch},
-        {"ITEMINTR_DUST_ENGULF", item::Id::intr_dust_engulf},
-        {"ITEMINTR_FIRE_ENGULF", item::Id::intr_fire_engulf},
-        {"ITEMINTR_ENERGY_ENGULF", item::Id::intr_energy_engulf},
+        {"ITEMINTR_RAVEN_PECK", item::Id::intr_raven_peck},
+        {"ITEMINTR_SNAKE_VENOM_SPIT", item::Id::intr_snake_venom_spit},
+        {"ITEMINTR_SPEAR_THRUST", item::Id::intr_spear_thrust},
         {"ITEMINTR_SPORES", item::Id::intr_spores},
+        {"ITEMINTR_STING", item::Id::intr_sting},
+        {"ITEMINTR_STRANGLE", item::Id::intr_strangle},
+        {"ITEMINTR_STRIKE", item::Id::intr_strike},
+        {"ITEMINTR_VAMPIRIC_BITE", item::Id::intr_vampiric_bite},
+        {"ITEMINTR_WATER_BREATH", item::Id::intr_water_breath},
         {"ITEMINTR_WEB_BOLA", item::Id::intr_web_bola},
 };
 
@@ -1278,9 +1280,34 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::ranged_wpn_intr);
+        d.id = Id::intr_earth_breath;
+        d.ranged.attack_msgs = {"", "breathes forth immense density"};
+        d.ranged.snd_msg = "I hear a hammering sound.";
+        d.ranged.attack_sfx = audio::SfxId::earth_breath;
+        d.ranged.projectile_color = colors::brown();
+        d.ranged.projectile_character = '*';
+        d.ranged.projectile_tile = gfx::TileId::blast1;
+        d.ranged.projectile_leaves_trail = false;
+        d.ranged.dmg_type = DmgType::blunt;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::ranged_wpn_intr);
+        d.id = Id::intr_water_breath;
+        d.ranged.attack_msgs = {"", "breathes forth a raging torrent"};
+        d.ranged.snd_msg = "I hear a gushing sound.";
+        d.ranged.attack_sfx = audio::SfxId::water_breath;
+        d.ranged.projectile_color = colors::light_blue();
+        d.ranged.projectile_character = '*';
+        d.ranged.projectile_tile = gfx::TileId::blast1;
+        d.ranged.projectile_leaves_trail = true;
+        d.ranged.dmg_type = DmgType::blunt;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::ranged_wpn_intr);
         d.id = Id::intr_fire_breath;
         d.ranged.attack_msgs = {"", "breathes fire"};
         d.ranged.snd_msg = "I hear a burst of flames.";
+        d.ranged.attack_sfx = audio::SfxId::fire_breath;
         d.ranged.projectile_color = colors::light_red();
         d.ranged.projectile_character = '*';
         d.ranged.projectile_tile = gfx::TileId::blast1;
@@ -1289,9 +1316,10 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::ranged_wpn_intr);
-        d.id = Id::intr_energy_breath;
+        d.id = Id::intr_lightning_breath;
         d.ranged.attack_msgs = {"", "breathes lightning"};
         d.ranged.snd_msg = "I hear a burst of lightning.";
+        d.ranged.attack_sfx = audio::SfxId::lightning_breath;
         d.ranged.projectile_color = colors::yellow();
         d.ranged.projectile_character = '*';
         d.ranged.projectile_tile = gfx::TileId::blast1;
