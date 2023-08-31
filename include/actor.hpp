@@ -204,6 +204,7 @@ public:
         int shock_tot() const;
         int insanity() const;
         item::Wpn& unarmed_wpn() const;
+        item::Wpn* make_kick_wpn(const Actor& mon_kicked) const;
         void set_unarmed_wpn(item::Wpn* wpn) const;
         void kick_mon(Actor& defender);
         // Only interrupts repeated commands like waiting.

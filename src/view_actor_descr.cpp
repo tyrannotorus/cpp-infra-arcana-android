@@ -270,34 +270,56 @@ static std::string get_mon_wielded_wpn_str(
 
 static std::string get_melee_hit_chance_descr(actor::Actor& actor)
 {
-        const auto* wielded_item =
-                map::g_player->m_inv.item_in_slot(SlotId::wpn);
+        const item::Item* wielded_item = map::g_player->m_inv.item_in_slot(SlotId::wpn);
 
-        const auto* const player_wpn =
+        const item::Wpn* const wpn =
                 wielded_item
                 ? static_cast<const item::Wpn*>(wielded_item)
                 : &map::g_player->unarmed_wpn();
 
-        if (!player_wpn) {
+        if (!wpn) {
                 ASSERT(false);
 
                 return "";
         }
 
-        const MeleeAttData att_data(map::g_player, actor, *player_wpn);
+        const std::unique_ptr<item::Wpn> kick(map::g_player->make_kick_wpn(actor));
 
-        const int hit_chance =
+        const MeleeAttData wpn_att_data(map::g_player, actor, *wpn);
+
+        const MeleeAttData kick_att_data(map::g_player, actor, *kick);
+
+        const int wpn_hit_chance =
                 ability_roll::success_chance_pct_actual(
-                        att_data.hit_chance_tot);
+                        wpn_att_data.hit_chance_tot);
 
-        std::string descr =
-                "The chance to hit " +
-                actor.name_the() +
-                " in melee combat is currently{_}{COLOR_LIGHT_GREEN}" +
-                std::to_string(hit_chance) +
-                "%{reset_color}";
+        const int kick_hit_chance =
+                ability_roll::success_chance_pct_actual(
+                        kick_att_data.hit_chance_tot);
 
-        if (att_data.is_backstab) {
+        std::string descr;
+
+        if (wpn_hit_chance == kick_hit_chance) {
+                descr =
+                        "The chance to hit " +
+                        actor.name_the() +
+                        " with a melee attack or kicking is currently{_}{COLOR_LIGHT_GREEN}" +
+                        std::to_string(wpn_hit_chance) +
+                        "%{reset_color}";
+        }
+        else {
+                descr =
+                        "The chance to hit " +
+                        actor.name_the() +
+                        " with a melee attack is currently{_}{COLOR_LIGHT_GREEN}" +
+                        std::to_string(wpn_hit_chance) +
+                        "%{reset_color}" +
+                        ", and the chance to hit by kicking is{_}{COLOR_LIGHT_GREEN}" +
+                        std::to_string(kick_hit_chance) +
+                        "%{reset_color}";
+        }
+
+        if (wpn_att_data.is_backstab) {
                 descr += " (because they are unaware)";
         }
 

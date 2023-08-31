@@ -832,23 +832,24 @@ void Actor::interrupt_actions(const ForceInterruptActions is_forced)
         player_state::g_auto_move_dir = Dir::END;
 }
 
-void Actor::kick_mon(Actor& defender)
+item::Wpn* Actor::make_kick_wpn(const Actor& mon_kicked) const
 {
-        item::Wpn* kick_wpn = nullptr;
-
-        const ActorData& d = *defender.m_data;
+        const ActorData& d = *mon_kicked.m_data;
 
         if ((d.actor_size == Size::floor) &&
-            defender.m_properties.has(prop::Id::small_crawling)) {
-                kick_wpn = static_cast<item::Wpn*>(item::make(item::Id::player_stomp));
+            mon_kicked.m_properties.has(prop::Id::small_crawling)) {
+                return static_cast<item::Wpn*>(item::make(item::Id::player_stomp));
         }
         else {
-                kick_wpn = static_cast<item::Wpn*>(item::make(item::Id::player_kick));
+                return static_cast<item::Wpn*>(item::make(item::Id::player_kick));
         }
+}
+
+void Actor::kick_mon(Actor& defender)
+{
+        std::unique_ptr<item::Wpn> kick_wpn(make_kick_wpn(defender));
 
         attack::melee(this, m_pos, defender.m_pos, *kick_wpn);
-
-        delete kick_wpn;
 }
 
 item::Wpn& Actor::unarmed_wpn() const

@@ -62,6 +62,7 @@
 - Added hint popups with info about status effects, shock level, kicking braziers, and kicking statues.
 - The "stagger" messages are now more specific, and describe why the player is staggering ("My wounds cause me to stagger.", or "I stagger under the weight of my carried load.").
 - "Shock" is referred to as "mental shock" when picking background and traits, since it could be confused with some type of shock damage (and this is probably often the first time a new player encounters this term in the game).
+- Added info about kick hit chance in the monster descriptions.
 
 ##############################
 # User interface
