@@ -32,6 +32,7 @@
 - The Purge spell description now also includes mirrors in the list of objects it can destroy.
 - The Transmutation spell is now "tenebrous" (temporarily forgotten when cast).
 - Reduced the duration of the blindness effect that Light spell causes at higher levels, and increased the spell cost from 2-4 spirit to 3-5.
+- Changed Control Object max distance from 2/4/6 to 3/4/5 (for basic/exptert/master).
 
 # Items
 - Reworked the Incinerator - it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.

@@ -2560,9 +2560,11 @@ int SpellControlObject::base_max_cost(const SpellSkill skill) const
 
 int SpellControlObject::max_dist(const SpellSkill skill) const
 {
-        const int k = (int)skill + 1;
+        int dist = (int)skill + 3;
 
-        return std::min(g_fov_radi_int, k * 2);
+        dist = std::min(g_fov_radi_int, dist);
+
+        return dist;
 }
 
 void SpellControlObject::run_effect(
@@ -2574,11 +2576,7 @@ void SpellControlObject::run_effect(
 
         const auto origin = caster->m_pos;
 
-        auto ctrl_obj_state =
-                std::make_unique<CtrlObj>(
-                        origin,
-                        max_dist(skill),
-                        skill);
+        auto ctrl_obj_state = std::make_unique<CtrlObj>(origin, max_dist(skill), skill);
 
         // Run the state immediately, so that spell side effects happen AFTER
         // the player has finished casting the spell.
