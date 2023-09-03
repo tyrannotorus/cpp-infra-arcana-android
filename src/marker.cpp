@@ -934,6 +934,10 @@ void ThrowingExplosive::on_draw()
 
 void ThrowingExplosive::on_moved()
 {
+        const std::string name = m_explosive.name(ItemNameType::a, ItemNameInfo::none);
+
+        msg_log::add("Throwing " + name + ".");
+
         view::print_location_info_msgs(m_pos);
 
         // TODO: This should not be specified here
