@@ -86,9 +86,13 @@ static void query_quit()
 {
         int choice = 0;
 
+        const std::string msg =
+                "Save and highscore will not be kept "
+                "(use stairs to save the game).";
+
         popup::Popup(popup::AddToMsgHistory::no)
                 .set_title("Quit the current game?")
-                .set_msg("Save and highscore are not kept.")
+                .set_msg(msg)
                 .setup_menu_mode(
                         {"(N)o", "(Y)es"},
                         {'n', 'y'},
