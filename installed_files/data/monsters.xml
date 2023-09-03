@@ -8936,14 +8936,13 @@
         <spawning>
             <min_dungeon_level>1</min_dungeon_level>
             <max_dungeon_level>3</max_dungeon_level>
-            <spawn_weight>10</spawn_weight>
+            <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_FEW</group_size>
             <group_size>MONGROUPSIZE_PACK</group_size>
-            <group_size required_dungeon_level="2">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_RITUAL</native_room>
             <native_room>ROOM_CAVE</native_room>
