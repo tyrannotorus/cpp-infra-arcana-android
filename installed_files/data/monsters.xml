@@ -4990,7 +4990,7 @@
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
-            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
@@ -5091,7 +5091,7 @@
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
-            <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
