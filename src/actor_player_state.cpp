@@ -45,6 +45,8 @@ Color g_lantern_color {};
 Actor* g_seen_mon_to_warn_about {nullptr};
 bool g_allow_print_mon_warning {false};
 
+bool g_did_warn_encumbered {false};
+
 void init()
 {
         g_active_medical_bag = nullptr;
@@ -81,6 +83,8 @@ void init()
 
         g_seen_mon_to_warn_about = nullptr;
         g_allow_print_mon_warning = false;
+
+        g_did_warn_encumbered = false;
 }
 
 }  // namespace actor::player_state

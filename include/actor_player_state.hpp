@@ -68,6 +68,9 @@ extern Color g_lantern_color;
 extern Actor* g_seen_mon_to_warn_about;
 extern bool g_allow_print_mon_warning;
 
+// Tracks if a warning should be printed for going over 100% carry weight.
+extern bool g_did_warn_encumbered;
+
 void init();
 
 }  // namespace player_state

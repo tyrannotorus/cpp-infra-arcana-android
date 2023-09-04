@@ -49,6 +49,38 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static bool is_player_stagger_from_carry_weight()
+{
+        return (map::g_player->enc_percent() >= 100);
+}
+
+static void handle_warn_player_encumbered()
+{
+        if (!is_player_stagger_from_carry_weight()) {
+                actor::player_state::g_did_warn_encumbered = false;
+
+                return;
+        }
+
+        // Player is staggering from carried weight.
+
+        if (actor::player_state::g_did_warn_encumbered) {
+                return;
+        }
+
+        // We have not yet warned about staggering.
+
+        msg_log::more_prompt();
+
+        msg_log::add(
+                "I am carrying too much weight, walking will be slower.",
+                colors::msg_note(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::yes);
+
+        actor::player_state::g_did_warn_encumbered = true;
+}
+
 static bool is_hostile_living_mon(const actor::Actor& actor)
 {
         if (actor::is_player(&actor)) {
@@ -545,9 +577,11 @@ static bool should_print_unload_wpn_hint()
 
 static void player_start_turn()
 {
-        auto& player = *map::g_player;
+        handle_warn_player_encumbered();
 
         map::update_vision();
+
+        actor::Actor& player = *map::g_player;
 
         // Set current temporary shock from darkness etc
         player.update_tmp_shock();
@@ -563,9 +597,9 @@ static void player_start_turn()
 
         player.mon_feeling();
 
-        const auto player_seen_actors = actor::seen_actors(player);
+        const std::vector<actor::Actor*> player_seen_actors = actor::seen_actors(player);
 
-        for (auto* actor : player_seen_actors) {
+        for (actor::Actor* actor : player_seen_actors) {
                 actor::make_player_aware_mon(*actor);
 
                 actor->m_properties.on_player_see();
