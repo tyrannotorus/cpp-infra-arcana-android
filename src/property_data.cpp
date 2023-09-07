@@ -1035,7 +1035,7 @@ static void init_data_list()
         d.std_rnd_turns = Range(6, 12);
         d.name = "Aura of Decay";
         d.name_short = "Decay Aura";
-        d.descr = "Adjacent creatures take damage.";
+        d.descr = "Creatures within a distance of two moves take damage each standard turn.";
         d.msg_start_player = "Withering surrounds me.";
         d.msg_start_mon = "appears to exude death and decay.";
         d.msg_end_player = "The decay subsides.";
