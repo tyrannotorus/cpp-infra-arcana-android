@@ -11,9 +11,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <optional>
 #include <ostream>
 #include <string>
+#include <unordered_map>
+#include <utility>
 
 #include "actor.hpp"
 #include "actor_data.hpp"
@@ -1079,14 +1080,18 @@ void Statue::topple(
                 ? AlertsMon::yes
                 : AlertsMon::no;
 
+        std::string snd_msg = "I hear a crash.";
+
         if (map::g_seen.at(m_pos)) {
                 msg_log::add("The statue topples over.");
+
+                snd_msg = "";
         }
 
         Snd snd(
-                "I hear a crash.",
+                snd_msg,
                 audio::SfxId::statue_crash,
-                IgnoreMsgIfOriginSeen::yes,
+                IgnoreMsgIfOriginSeen::no,
                 m_pos,
                 actor_toppling,
                 SndVol::low,
@@ -1094,7 +1099,7 @@ void Statue::topple(
 
         snd_emit::run(snd);
 
-        const auto dst_pos = m_pos + dir_utils::offset(direction);
+        const P dst_pos = m_pos + dir_utils::offset(direction);
 
         map::update_terrain(make(Id::rubble_low, m_pos));
 
@@ -1115,10 +1120,7 @@ void Statue::topple(
                                         *actor_behind);
 
                         if (is_player_seeing_actor) {
-                                msg_log::add(
-                                        "It falls on " +
-                                        actor_behind->name_a() +
-                                        ".");
+                                msg_log::add("It falls on " + actor_behind->name_a() + ".");
                         }
                 }
 
@@ -1129,7 +1131,10 @@ void Statue::topple(
                         actor_toppling);
 
                 if (actor_behind->is_alive()) {
-                        auto* const paralyzed = prop::make(prop::Id::paralyzed);
+                        // TODO: There should probably be a check if the
+                        // creature is immune to blunt/physical damage here.
+
+                        prop::Prop* const paralyzed = prop::make(prop::Id::paralyzed);
 
                         paralyzed->set_duration(rnd::range(2, 3));
 
@@ -1137,7 +1142,7 @@ void Statue::topple(
                 }
         }
 
-        const auto terrain_id = map::g_terrain.at(dst_pos)->id();
+        const Id terrain_id = map::g_terrain.at(dst_pos)->id();
 
         // NOTE: This is kinda hacky, but the rubble is mostly just for
         // decoration anyway, so it doesn't really matter.
@@ -2472,7 +2477,11 @@ void Brazier::hit(
         switch (dmg_type) {
         case DmgType::kicking:
         case DmgType::control_object_spell: {
-                ASSERT(actor);
+                if (!actor) {
+                        ASSERT(false);
+
+                        return;
+                }
 
                 if ((dmg_type == DmgType::kicking) &&
                     actor->m_properties.has(prop::Id::weakened)) {
@@ -2481,62 +2490,9 @@ void Brazier::hit(
                         return;
                 }
 
-                const auto alerts_mon =
-                        actor::is_player(actor)
-                        ? AlertsMon::yes
-                        : AlertsMon::no;
+                const Dir direction = dir_utils::dir(m_pos - from_pos);
 
-                if (map::g_seen.at(m_pos)) {
-                        msg_log::add("It topples over.");
-                }
-
-                Snd snd(
-                        "I hear a crash.",
-                        audio::SfxId::END,
-                        IgnoreMsgIfOriginSeen::yes,
-                        m_pos,
-                        actor,
-                        SndVol::low,
-                        alerts_mon);
-
-                snd_emit::run(snd);
-
-                const P dst_pos = m_pos + (m_pos - from_pos);
-
-                const P my_pos = m_pos;
-
-                map::update_terrain(make(Id::rubble_low, m_pos));
-
-                // NOTE: "this" is now deleted!
-
-                const auto* const tgt_f = map::g_terrain.at(dst_pos);
-
-                if (tgt_f->id() != terrain::Id::chasm) {
-                        P expl_pos;
-
-                        int expl_d = 0;
-
-                        if (tgt_f->is_projectile_passable()) {
-                                expl_pos = dst_pos;
-                                expl_d = -1;
-                        }
-                        else {
-                                expl_pos = my_pos;
-                                expl_d = -2;
-                        }
-
-                        // TODO: Emit sound from explosion center
-
-                        explosion::run(
-                                expl_pos,
-                                ExplType::apply_prop,
-                                EmitExplSnd::no,
-                                expl_d,
-                                ExplExclCenter::no,
-                                {prop::make(prop::Id::burning)});
-                }
-
-                map::update_vision();
+                topple(direction, *actor);
         } break;
 
         case DmgType::explosion:
@@ -2549,6 +2505,70 @@ void Brazier::hit(
         {
         } break;
         }
+}
+
+void Brazier::topple(const Dir direction, actor::Actor& actor)
+{
+        const auto alerts_mon =
+                actor::is_player(&actor)
+                ? AlertsMon::yes
+                : AlertsMon::no;
+
+        std::string snd_msg = "I hear a crash.";
+
+        if (map::g_seen.at(m_pos)) {
+                msg_log::add("It topples over.");
+
+                snd_msg = "";
+        }
+
+        Snd snd(
+                snd_msg,
+                audio::SfxId::END,
+                IgnoreMsgIfOriginSeen::no,
+                m_pos,
+                &actor,
+                SndVol::low,
+                alerts_mon);
+
+        snd_emit::run(snd);
+
+        const P dst_pos = m_pos + dir_utils::offset(direction);
+
+        const P my_pos = m_pos;
+
+        map::update_terrain(make(Id::rubble_low, m_pos));
+
+        // NOTE: "this" is now deleted!
+
+        const Terrain* const tgt_terrain = map::g_terrain.at(dst_pos);
+
+        if (tgt_terrain->id() != terrain::Id::chasm) {
+                P expl_pos;
+
+                int expl_d = 0;
+
+                if (tgt_terrain->is_projectile_passable()) {
+                        expl_pos = dst_pos;
+                        expl_d = -1;
+                }
+                else {
+                        expl_pos = my_pos;
+                        expl_d = -2;
+                }
+
+                // TODO: Emit sound from explosion center
+
+                explosion::run(
+                        expl_pos,
+                        ExplType::apply_prop,
+                        EmitExplSnd::no,
+                        expl_d,
+                        ExplExclCenter::no,
+                        {prop::make(prop::Id::burning)});
+        }
+
+        map::update_vision();
 }
 
 void Brazier::on_new_turn()

@@ -53,10 +53,9 @@ static Array2<int> calc_snd_flood(const Snd& snd, const int snd_max_dist)
 {
         Array2<bool> blocks_sound(map::dims());
 
-        map_parsers::BlocksSound()
-                .run(blocks_sound, blocks_sound.rect());
+        map_parsers::BlocksSound().run(blocks_sound, blocks_sound.rect());
 
-        const auto& origin = snd.origin();
+        const P origin = snd.origin();
 
         // Never block the origin - we want to be able to run the sound from
         // e.g. a closing door, after it was closed (and we don't want this to
@@ -64,13 +63,7 @@ static Array2<int> calc_snd_flood(const Snd& snd, const int snd_max_dist)
         // free here).
         blocks_sound.at(origin) = false;
 
-        auto flood =
-                floodfill(
-                        origin,
-                        blocks_sound,
-                        snd_max_dist,
-                        {-1, -1},
-                        true);
+        Array2<int> flood = floodfill(origin, blocks_sound, snd_max_dist, {-1, -1}, true);
 
         flood.at(origin.x, origin.y) = 0;
 
@@ -195,12 +188,12 @@ void run(Snd snd)
 
         const int snd_max_dist = get_max_dist(snd);
 
-        auto flood = calc_snd_flood(snd, snd_max_dist);
+        const Array2<int> flood = calc_snd_flood(snd, snd_max_dist);
 
-        const auto& origin = snd.origin();
+        const P origin = snd.origin();
 
-        for (auto* actor : game_time::g_actors) {
-                const auto& actor_pos = actor->m_pos;
+        for (actor::Actor* actor : game_time::g_actors) {
+                const P& actor_pos = actor->m_pos;
 
                 const int flood_val_at_actor = flood.at(actor_pos);
 
@@ -222,11 +215,7 @@ void run(Snd snd)
                         continue;
                 }
 
-                send_sound_to_actor(
-                        *actor,
-                        snd,
-                        flood_val_at_actor,
-                        snd_max_dist);
+                send_sound_to_actor(*actor, snd, flood_val_at_actor, snd_max_dist);
         }
 }
 

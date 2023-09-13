@@ -35,7 +35,7 @@ void hear_sound_player(
         const bool has_snd_msg = (!msg.empty() && msg != " ");
 
         if (has_snd_msg) {
-                const auto should_interrupt =
+                const MsgInterruptPlayer should_interrupt =
                         is_origin_seen_by_player
                         ? MsgInterruptPlayer::no
                         : MsgInterruptPlayer::yes;

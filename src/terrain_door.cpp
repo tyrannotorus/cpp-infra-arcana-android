@@ -195,9 +195,19 @@ static int calc_player_bash_chance(
         return destr_chance_pct;
 }
 
+static int calc_mon_bash_chance(const int jam_level)
+{
+        int destr_chance_pct = 7 - (jam_level * 2);
+
+        destr_chance_pct = std::max(1, destr_chance_pct);
+
+        return destr_chance_pct;
+}
+
 static void communicate_player_bash_futile(const audio::SfxId sfx)
 {
-        Snd snd("",
+        Snd snd(
+                "",
                 sfx,
                 IgnoreMsgIfOriginSeen::no,
                 map::g_player->m_pos,
@@ -212,10 +222,10 @@ static void communicate_player_bash_futile(const audio::SfxId sfx)
 
 static void communicate_player_bash_success(
         const P& pos,
-        const bool is_hidden,
         const audio::SfxId sfx,
         const std::string& door_name,
-        const std::string& break_descr)
+        const std::string& break_descr,
+        const bool is_hidden)
 {
         Snd snd(
                 "",
@@ -229,14 +239,55 @@ static void communicate_player_bash_success(
         snd.run();
 
         if (is_hidden) {
-                msg_log::add("A " + door_name + " crashes " + break_descr);
+                msg_log::add("A " + door_name + " crashes " + break_descr + "!");
         }
         else {
-                msg_log::add("The " + door_name + " crashes " + break_descr);
+                msg_log::add("The " + door_name + " crashes " + break_descr + "!");
         }
 }
 
-static void communicate_player_bash_failed(const P& pos, const audio::SfxId sfx)
+static void communicate_mon_bash_success(
+        const P& pos,
+        const audio::SfxId sfx,
+        const std::string& door_name,
+        const std::string& break_descr,
+        actor::Actor& mon)
+{
+        const bool is_actor_seen = actor::can_player_see_actor(mon);
+        const bool is_door_seen = map::g_seen.at(pos);
+
+        const std::string snd_msg =
+                (is_actor_seen || is_door_seen)
+                ? ""
+                : "I hear a door crashing open!";
+
+        // NOTE: When it's a monster bashing down the door, we make the
+        // sound alert other monsters since this causes nicer AI
+        // behavior (everyone near the door wants to run inside).
+        Snd snd(
+                snd_msg,
+                sfx,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                &mon,
+                SndVol::high,
+                AlertsMon::yes);
+
+        snd.run();
+
+        if (is_actor_seen) {
+                msg_log::add("The " + door_name + " crashes " + break_descr + "!");
+        }
+        else if (is_door_seen) {
+                msg_log::add("A " + door_name + " crashes " + break_descr + "!");
+
+                mon.make_player_aware_of_me();
+        }
+}
+
+static void communicate_player_bash_failed(
+        const P& pos,
+        const audio::SfxId sfx)
 {
         Snd snd(
                 "",
@@ -248,6 +299,258 @@ static void communicate_player_bash_failed(const P& pos, const audio::SfxId sfx)
                 AlertsMon::yes);
 
         snd.run();
+}
+
+static void communicate_mon_bash_failed(
+        const P& pos,
+        const audio::SfxId sfx,
+        actor::Actor& mon)
+{
+        Snd snd(
+                "I hear a loud banging.",
+                sfx,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                &mon,
+                SndVol::high,
+                AlertsMon::no);
+
+        snd.run();
+}
+
+static void communicate_player_open(
+        const P& pos,
+        const audio::SfxId sfx,
+        const std::string& door_name)
+{
+        if (!player_bon::has_trait(Trait::silent)) {
+                Snd snd(
+                        "",
+                        sfx,
+                        IgnoreMsgIfOriginSeen::yes,
+                        pos,
+                        map::g_player,
+                        SndVol::low,
+                        AlertsMon::yes);
+
+                snd.run();
+        }
+
+        msg_log::add("I open the " + door_name + ".");
+}
+
+static void communicate_mon_open(
+        const P& pos,
+        const audio::SfxId sfx,
+        const std::string& door_name,
+        actor::Actor& mon)
+{
+        const bool is_actor_seen = actor::can_player_see_actor(mon);
+        const bool is_door_seen = map::g_seen.at(pos);
+
+        const std::string snd_msg =
+                (is_actor_seen || is_door_seen)
+                ? ""
+                : "I hear a door open.";
+
+        Snd snd(
+                snd_msg,
+                sfx,
+                IgnoreMsgIfOriginSeen::no,
+                pos,
+                &mon,
+                SndVol::low,
+                AlertsMon::no);
+
+        snd.run();
+
+        if (is_actor_seen) {
+                const std::string actor_name_the =
+                        text_format::first_to_upper(
+                                mon.name_the());
+
+                msg_log::add(actor_name_the + " opens a " + door_name + ".");
+        }
+        else if (is_door_seen) {
+                msg_log::add("I see a " + door_name + " opening.");
+
+                mon.make_player_aware_of_me();
+        }
+}
+
+static void communicate_player_open_blind(
+        const P& pos,
+        const audio::SfxId sfx,
+        const std::string& door_name)
+{
+        Snd snd(
+                "",
+                sfx,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                map::g_player,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd.run();
+
+        msg_log::add("I fumble with a " + door_name + ", but manage to open it.");
+}
+
+static void communicate_mon_open_blind(
+        const P& pos,
+        const audio::SfxId sfx,
+        const std::string& door_name,
+        actor::Actor& mon)
+{
+        const bool is_actor_seen = actor::can_player_see_actor(mon);
+        const bool is_door_seen = map::g_seen.at(pos);
+
+        const std::string snd_msg =
+                (is_actor_seen || is_door_seen)
+                ? ""
+                : "I hear something open a door awkwardly.";
+
+        Snd snd(
+                snd_msg,
+                sfx,
+                IgnoreMsgIfOriginSeen::no,
+                pos,
+                &mon,
+                SndVol::low,
+                AlertsMon::no);
+
+        snd.run();
+
+        if (is_actor_seen) {
+                const std::string actor_name_the =
+                        text_format::first_to_upper(
+                                mon.name_the());
+
+                msg_log::add(
+                        actor_name_the +
+                        "fumbles, but manages to open a " +
+                        door_name +
+                        ".");
+        }
+        else if (is_door_seen) {
+                msg_log::add("I see a " + door_name + " open awkwardly.");
+
+                mon.make_player_aware_of_me();
+        }
+}
+
+static void communicate_player_fail_open_blind(
+        const P& pos,
+        const std::string& door_name)
+{
+        Snd snd(
+                "",
+                audio::SfxId::END,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                map::g_player,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd.run();
+
+        msg_log::add(
+                "I fumble blindly with a " +
+                door_name +
+                ", and fail to open it.");
+}
+
+static void communicate_mon_fail_open_blind(
+        const P& pos,
+        const std::string& door_name,
+        actor::Actor& mon)
+{
+        Snd snd(
+                "I hear something attempting to open a door.",
+                audio::SfxId::END,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                &mon,
+                SndVol::low,
+                AlertsMon::no);
+
+        snd.run();
+
+        const bool is_actor_seen = actor::can_player_see_actor(mon);
+
+        if (is_actor_seen) {
+                const std::string actor_name_the =
+                        text_format::first_to_upper(
+                                mon.name_the());
+
+                msg_log::add(
+                        actor_name_the +
+                        " fumbles blindly, and fails to open a " +
+                        door_name +
+                        ".");
+        }
+}
+
+static void communicate_player_close(
+        const P& pos,
+        const audio::SfxId sfx,
+        const std::string& door_name)
+{
+        if (!player_bon::has_trait(Trait::silent)) {
+                Snd snd(
+                        "",
+                        sfx,
+                        IgnoreMsgIfOriginSeen::yes,
+                        pos,
+                        map::g_player,
+                        SndVol::low,
+                        AlertsMon::yes);
+
+                snd.run();
+        }
+
+        msg_log::add("I close the " + door_name + ".");
+}
+
+static void communicate_player_close_blind(
+        const P& pos,
+        const audio::SfxId sfx,
+        const std::string& door_name)
+{
+        Snd snd(
+                "",
+                sfx,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                map::g_player,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd.run();
+
+        msg_log::add("I fumble with a " + door_name + ", but manage to close it.");
+}
+
+static void communicate_player_fail_close_blind(
+        const P& pos,
+        const std::string& door_name)
+{
+        Snd snd(
+                "",
+                audio::SfxId::END,
+                IgnoreMsgIfOriginSeen::yes,
+                pos,
+                map::g_player,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd.run();
+
+        msg_log::add(
+                "I fumble blindly with a " +
+                door_name +
+                ", and fail to close it.");
 }
 
 static std::vector<std::string> get_warded_door_summon_bucket_for_dlvl_range(
@@ -540,9 +843,9 @@ void Door::hit(
 void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
 {
         const bool is_player = actor::is_player(&actor);
-        const bool is_cell_seen = map::g_seen.at(m_pos);
+        const bool is_pos_seen = map::g_seen.at(m_pos);
 
-        if ((m_type == DoorType::metal) && is_player && is_cell_seen && !m_is_hidden) {
+        if ((m_type == DoorType::metal) && is_player && is_pos_seen && !m_is_hidden) {
                 msg_log::add(
                         "It seems futile.",
                         colors::msg_note(),
@@ -577,7 +880,7 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
         const audio::SfxId sfx_door_bang = get_bang_sfx(m_type);
         const audio::SfxId sfx_door_break = get_break_sfx(m_type);
 
-        const std::string break_descr = (m_type == DoorType::gate) ? "to the floor!" : "open!";
+        const std::string break_descr = (m_type == DoorType::gate) ? "to the floor" : "open";
 
         if (destr_chance_pct <= 0) {
                 if (map::g_seen.at(m_pos) && !m_is_hidden) {
@@ -587,10 +890,10 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
         else if (rnd::percent(destr_chance_pct)) {
                 communicate_player_bash_success(
                         m_pos,
-                        m_is_hidden,
                         sfx_door_break,
                         base_name_short(),
-                        break_descr);
+                        break_descr,
+                        m_is_hidden);
 
                 const P pos = m_pos;
 
@@ -611,8 +914,6 @@ void Door::player_bash(const DmgType dmg_type, const int dmg)
 
 void Door::mon_bash(actor::Actor& mon)
 {
-        // TODO: Refactor similarly to the player_bash function.
-
         ASSERT(m_ward_state != WardState::warded);
 
         const bool is_weak = mon.m_properties.has(prop::Id::weakened);
@@ -622,55 +923,32 @@ void Door::mon_bash(actor::Actor& mon)
         // NOTE: Unlike the player, monsters can (and will), attempt to bash
         // open metal doors, which should never succeed.
         if (!is_weak && (m_type != DoorType::metal)) {
-                destr_chance_pct = 7 - (m_jam_level * 2);
-                destr_chance_pct = std::max(1, destr_chance_pct);
+                destr_chance_pct = calc_mon_bash_chance(m_jam_level);
         }
 
         const audio::SfxId sfx_door_bang = get_bang_sfx(m_type);
         const audio::SfxId sfx_door_break = get_break_sfx(m_type);
 
-        const std::string break_descr = (m_type == DoorType::gate) ? "to the floor!" : "open!";
+        const std::string break_descr = (m_type == DoorType::gate) ? "to the floor" : "open";
 
         if (rnd::percent(destr_chance_pct)) {
-                // NOTE: When it's a monster bashing down the door, we make the
-                // sound alert other monsters since this causes nicer AI
-                // behavior (everyone near the door wants to run inside).
-                Snd snd(
-                        "I hear a door crashing open!",
-                        sfx_door_break,
-                        IgnoreMsgIfOriginSeen::yes,
+                // Destroyed
+
+                communicate_mon_bash_success(
                         m_pos,
-                        &mon,
-                        SndVol::high,
-                        AlertsMon::yes);
-
-                snd.run();
-
-                const bool can_player_see_actor = actor::can_player_see_actor(mon);
-                const bool is_pos_seen = map::g_seen.at(m_pos);
-
-                if (can_player_see_actor) {
-                        msg_log::add(
-                                "The " +
-                                base_name_short() +
-                                " crashes " +
-                                break_descr +
-                                "!");
-                }
-                else if (is_pos_seen) {
-                        msg_log::add(
-                                "A " +
-                                base_name_short() +
-                                " crashes " +
-                                break_descr +
-                                "!");
-                }
+                        sfx_door_break,
+                        base_name_short(),
+                        break_descr,
+                        mon);
 
                 const P pos = m_pos;
 
                 map::update_terrain(make(Id::rubble_low, m_pos));
 
-                if (can_player_see_actor || is_pos_seen) {
+                const bool is_actor_seen = actor::can_player_see_actor(mon);
+                const bool is_door_seen = map::g_seen.at(pos);
+
+                if (is_actor_seen || is_door_seen) {
                         map::memorize_terrain_at(pos);
                 }
 
@@ -678,16 +956,8 @@ void Door::mon_bash(actor::Actor& mon)
         }
         else {
                 // Not destroyed
-                Snd snd(
-                        "I hear a loud banging.",
-                        sfx_door_bang,
-                        IgnoreMsgIfOriginSeen::yes,
-                        mon.m_pos,
-                        &mon,
-                        SndVol::high,
-                        AlertsMon::no);
 
-                snd.run();
+                communicate_mon_bash_failed(m_pos, sfx_door_bang, mon);
         }
 }
 
@@ -1024,8 +1294,10 @@ void Door::bump(actor::Actor& actor_bumping)
                 // Print messages as if this was a wall.
 
                 if (is_seen) {
-                        TRACE << "Player bumped into secret door, "
-                              << "with vision in cell" << std::endl;
+                        TRACE
+                                << "Player bumped into secret door, "
+                                << "with vision in position"
+                                << std::endl;
 
                         msg_log::add(
                                 terrain::data(terrain::Id::wall)
@@ -1033,8 +1305,10 @@ void Door::bump(actor::Actor& actor_bumping)
                 }
                 else {
                         // Not seen by player
-                        TRACE << "Player bumped into secret door, "
-                              << "without vision in cell" << std::endl;
+                        TRACE
+                                << "Player bumped into secret door, "
+                                << "without vision in position"
+                                << std::endl;
 
                         msg_log::add(
                                 terrain::data(terrain::Id::wall)
@@ -1246,22 +1520,16 @@ bool Door::actor_try_jam(actor::Actor& actor_trying)
 void Door::actor_try_close(actor::Actor& actor_trying)
 {
         const bool is_player = actor::is_player(&actor_trying);
-        const bool tryer_is_blind = !actor_trying.m_properties.allow_see();
-
-        const bool player_see_tryer =
-                is_player
-                ? true
-                : actor::can_player_see_actor(actor_trying);
+        const bool is_door_seen = map::g_seen.at(m_pos);
 
         // Already closed?
         if (!m_is_open) {
                 if (is_player) {
-                        if (tryer_is_blind) {
-                                msg_log::add("I find nothing there to close.");
+                        if (is_door_seen) {
+                                msg_log::add("I see nothing there to close.");
                         }
                         else {
-                                // Can see
-                                msg_log::add("I see nothing there to close.");
+                                msg_log::add("I find nothing there to close.");
                         }
                 }
 
@@ -1310,7 +1578,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
         // Blocked?
         bool is_blocked_by_actor = false;
 
-        for (auto* actor : game_time::g_actors) {
+        for (actor::Actor* actor : game_time::g_actors) {
                 if ((actor->m_state != ActorState::destroyed) &&
                     (actor->m_pos == m_pos)) {
                         is_blocked_by_actor = true;
@@ -1320,18 +1588,18 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
         if (is_blocked_by_actor || map::g_items.at(m_pos)) {
                 if (is_player) {
-                        if (tryer_is_blind) {
-                                msg_log::add(
-                                        "Something is blocking the " +
-                                        base_name_short() +
-                                        ".");
-                        }
-                        else {
+                        if (is_door_seen) {
                                 // Can see
                                 msg_log::add(
                                         "The " +
                                         base_name_short() +
                                         " is blocked.");
+                        }
+                        else {
+                                msg_log::add(
+                                        "Something is blocking the " +
+                                        base_name_short() +
+                                        ".");
                         }
                 }
 
@@ -1341,79 +1609,32 @@ void Door::actor_try_close(actor::Actor& actor_trying)
         // Door can be closed.
         const audio::SfxId sfx_door_close = get_close_sfx(m_type);
 
-        if (tryer_is_blind) {
+        if (!is_door_seen) {
                 if (rnd::coin_toss()) {
                         m_is_open = false;
 
                         map::memorize_terrain_at(m_pos);
                         map::update_vision();
 
+                        ASSERT(is_player);
+
                         if (is_player) {
-                                Snd snd(
-                                        "",
-                                        sfx_door_close,
-                                        IgnoreMsgIfOriginSeen::yes,
+                                communicate_player_close_blind(
                                         m_pos,
-                                        &actor_trying,
-                                        SndVol::low,
-                                        AlertsMon::yes);
-
-                                snd.run();
-
-                                msg_log::add(
-                                        "I fumble with a " +
-                                        base_name_short() +
-                                        ", but manage to close it.");
-                        }
-                        else {
-                                // Monster closing
-                                Snd snd(
-                                        "I hear a door closing.",
                                         sfx_door_close,
-                                        IgnoreMsgIfOriginSeen::yes,
-                                        m_pos,
-                                        &actor_trying,
-                                        SndVol::low,
-                                        AlertsMon::no);
-
-                                snd.run();
-
-                                if (player_see_tryer) {
-                                        const std::string actor_name_the =
-                                                text_format::first_to_upper(
-                                                        actor_trying.name_the());
-
-                                        msg_log::add(
-                                                actor_name_the +
-                                                "fumbles, but manages to close a " +
-                                                base_name_short() +
-                                                ".");
-                                }
+                                        base_name_short());
                         }
 
                         game_time::tick();
                 }
                 else {
                         // Failed to close
-                        if (is_player) {
-                                msg_log::add(
-                                        "I fumble blindly with a " +
-                                        base_name_short() +
-                                        ", and fail to close it.");
-                        }
-                        else {
-                                // Monster failing to close
-                                if (player_see_tryer) {
-                                        const std::string actor_name_the =
-                                                text_format::first_to_upper(
-                                                        actor_trying.name_the());
+                        ASSERT(is_player);
 
-                                        msg_log::add(
-                                                actor_name_the +
-                                                " fumbles blindly, and fails to close a " +
-                                                base_name_short() +
-                                                ".");
-                                }
+                        if (is_player) {
+                                communicate_player_fail_close_blind(
+                                        m_pos,
+                                        base_name_short());
                         }
 
                         game_time::tick();
@@ -1429,49 +1650,13 @@ void Door::actor_try_close(actor::Actor& actor_trying)
         map::memorize_terrain_at(m_pos);
         map::update_vision();
 
+        ASSERT(is_player);
+
         if (is_player) {
-                if (!player_bon::has_trait(Trait::silent)) {
-                        Snd snd(
-                                "",
-                                sfx_door_close,
-                                IgnoreMsgIfOriginSeen::yes,
-                                m_pos,
-                                &actor_trying,
-                                SndVol::low,
-                                AlertsMon::yes);
-
-                        snd.run();
-                }
-
-                msg_log::add(
-                        "I close the " +
-                        base_name_short() +
-                        ".");
-        }
-        else {
-                // Monster closing
-                Snd snd(
-                        "I hear a door closing.",
-                        sfx_door_close,
-                        IgnoreMsgIfOriginSeen::yes,
+                communicate_player_close(
                         m_pos,
-                        &actor_trying,
-                        SndVol::low,
-                        AlertsMon::no);
-
-                snd.run();
-
-                if (player_see_tryer) {
-                        const std::string actor_name_the =
-                                text_format::first_to_upper(
-                                        actor_trying.name_the());
-
-                        msg_log::add(
-                                actor_name_the +
-                                " closes a " +
-                                base_name_short() +
-                                ".");
-                }
+                        sfx_door_close,
+                        base_name_short());
         }
 
         game_time::tick();
@@ -1483,12 +1668,6 @@ void Door::actor_try_open(actor::Actor& actor_trying)
         TRACE_FUNC_BEGIN;
 
         const bool is_player = actor::is_player(&actor_trying);
-        const bool player_see_door = map::g_seen.at(m_pos);
-
-        const bool player_see_tryer =
-                is_player
-                ? true
-                : actor::can_player_see_actor(actor_trying);
 
         const audio::SfxId sfx_door_open = get_open_sfx(m_type);
 
@@ -1510,162 +1689,56 @@ void Door::actor_try_open(actor::Actor& actor_trying)
                         m_is_open = true;
 
                         if (is_player) {
-                                if (!player_bon::has_trait(Trait::silent)) {
-                                        Snd snd(
-                                                "",
-                                                sfx_door_open,
-                                                IgnoreMsgIfOriginSeen::yes,
-                                                m_pos,
-                                                &actor_trying,
-                                                SndVol::low,
-                                                AlertsMon::yes);
-
-                                        snd.run();
-                                }
-
-                                msg_log::add(
-                                        "I open the " +
-                                        base_name_short() +
-                                        ".");
+                                communicate_player_open(
+                                        m_pos,
+                                        sfx_door_open,
+                                        base_name_short());
                         }
                         else {
-                                // Is monster
-                                Snd snd(
-                                        "I hear a door open.",
-                                        sfx_door_open,
-                                        IgnoreMsgIfOriginSeen::yes,
+                                communicate_mon_open(
                                         m_pos,
-                                        &actor_trying,
-                                        SndVol::low,
-                                        AlertsMon::no);
-
-                                snd.run();
-
-                                if (player_see_tryer) {
-                                        const std::string actor_name_the =
-                                                text_format::first_to_upper(
-                                                        actor_trying.name_the());
-
-                                        msg_log::add(
-                                                actor_name_the +
-                                                " opens a " +
-                                                base_name_short() +
-                                                ".");
-                                }
-                                else if (player_see_door) {
-                                        msg_log::add(
-                                                "I see a " +
-                                                base_name_short() +
-                                                " opening.");
-                                }
+                                        sfx_door_open,
+                                        base_name_short(),
+                                        actor_trying);
                         }
                 }
                 else {
                         // Tryer is blind
                         if (rnd::coin_toss()) {
-                                TRACE << "Tryer is blind, but open succeeded anyway"
-                                      << std::endl;
+                                TRACE
+                                        << "Tryer is blind, but open succeeded anyway"
+                                        << std::endl;
 
                                 m_is_open = true;
 
                                 if (is_player) {
-                                        Snd snd(
-                                                "",
-                                                sfx_door_open,
-                                                IgnoreMsgIfOriginSeen::yes,
+                                        communicate_player_open_blind(
                                                 m_pos,
-                                                &actor_trying,
-                                                SndVol::low,
-                                                AlertsMon::yes);
-
-                                        snd.run();
-
-                                        msg_log::add(
-                                                "I fumble with a " +
-                                                base_name_short() +
-                                                ", but manage to open it.");
+                                                sfx_door_open,
+                                                base_name_short());
                                 }
                                 else {
-                                        // Is monster
-                                        Snd snd(
-                                                "I hear something open a door awkwardly.",
-                                                sfx_door_open,
-                                                IgnoreMsgIfOriginSeen::yes,
+                                        communicate_mon_open_blind(
                                                 m_pos,
-                                                &actor_trying,
-                                                SndVol::low,
-                                                AlertsMon::no);
-
-                                        snd.run();
-
-                                        if (player_see_tryer) {
-                                                const std::string actor_name_the =
-                                                        text_format::first_to_upper(
-                                                                actor_trying.name_the());
-
-                                                msg_log::add(
-                                                        actor_name_the +
-                                                        "fumbles, but manages to open a " +
-                                                        base_name_short() +
-                                                        ".");
-                                        }
-                                        else if (player_see_door) {
-                                                msg_log::add(
-                                                        "I see a " +
-                                                        base_name_short() +
-                                                        " open awkwardly.");
-                                        }
+                                                sfx_door_open,
+                                                base_name_short(),
+                                                actor_trying);
                                 }
                         }
                         else {
-                                // Failed to open
+                                // Failed to open while blind
                                 TRACE << "Tryer is blind, and open failed" << std::endl;
 
                                 if (is_player) {
-                                        Snd snd(
-                                                "",
-                                                audio::SfxId::END,
-                                                IgnoreMsgIfOriginSeen::yes,
+                                        communicate_player_fail_open_blind(
                                                 m_pos,
-                                                &actor_trying,
-                                                SndVol::low,
-                                                AlertsMon::yes);
-
-                                        snd.run();
-
-                                        msg_log::add(
-                                                "I fumble blindly with a " +
-                                                base_name_short() +
-                                                ", and fail to open it.");
+                                                base_name_short());
                                 }
                                 else {
-                                        // Is monster
-
-                                        // Emitting the sound from the actor instead of the door,
-                                        // because the sound message should be received even if the
-                                        // door is seen
-                                        Snd snd(
-                                                "I hear something attempting to open a door.",
-                                                audio::SfxId::END,
-                                                IgnoreMsgIfOriginSeen::yes,
-                                                actor_trying.m_pos,
-                                                &actor_trying,
-                                                SndVol::low,
-                                                AlertsMon::no);
-
-                                        snd.run();
-
-                                        if (player_see_tryer) {
-                                                const std::string actor_name_the =
-                                                        text_format::first_to_upper(
-                                                                actor_trying.name_the());
-
-                                                msg_log::add(
-                                                        actor_name_the +
-                                                        " fumbles blindly, and fails to open a " +
-                                                        base_name_short() +
-                                                        ".");
-                                        }
+                                        communicate_mon_fail_open_blind(
+                                                m_pos,
+                                                base_name_short(),
+                                                actor_trying);
                                 }
 
                                 game_time::tick();
@@ -1686,6 +1759,9 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                 actor_trying.m_opening_door_pos = m_pos;
 
+                const bool is_actor_seen = actor::can_player_see_actor(actor_trying);
+                const bool is_door_seen = map::g_seen.at(m_pos);
+
                 const P pos = m_pos;
 
                 // NOTE: This might destroy the door:
@@ -1693,7 +1769,10 @@ void Door::actor_try_open(actor::Actor& actor_trying)
 
                 game_time::tick();
 
-                map::memorize_terrain_at(pos);
+                if (is_actor_seen || is_door_seen) {
+                        map::memorize_terrain_at(pos);
+                }
+
                 map::update_vision();
         }
 

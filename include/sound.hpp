@@ -31,6 +31,14 @@ enum class AlertsMon
         yes
 };
 
+// This can be used for configuring sounds so that the sound message is ignored
+// if the source is seen (typically because printing the sound message would be
+// redundant or not make sense, e.g. the player can see the Cultist firing a
+// pistol so there is no need to state that they hear it).
+//
+// If a creature is associated with the sound, then this creature is the source,
+// otherwise the source is the origin location.
+//
 enum class IgnoreMsgIfOriginSeen
 {
         no,

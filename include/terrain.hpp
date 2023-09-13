@@ -8,7 +8,6 @@
 #define TERRAIN_HPP
 
 #include <algorithm>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -548,6 +547,8 @@ public:
 
 private:
         void add_light_hook(Array2<bool>& light) const override;
+
+        void topple(Dir direction, actor::Actor& actor);
 };
 
 enum class WallType

@@ -35,7 +35,7 @@
 - Changed Control Object max distance from 2/4/6 to 3/4/5 (for basic/exptert/master).
 
 # Items
-- Reworked the Incinerator - it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.
+- Reworked the Incinerator, it is now called the "Morphic Blaster", and is a Mi-Go weapon that works more like the Electric Gun.
 - Potion of Descent can now be used on all levels until "the end" (no spoilers), previously it only worked until a few levels before the end of the game.
 - Added more artifacts.
 
@@ -58,7 +58,7 @@
 
 # Other changes
 - In the game over summary screen, all items are shown with their identified names in the inventory section.
-- In the item knowledge section of the character screen ("C" or "@"), the real names of all identifiable items in the game are shown - so it is now possible to know exactly which effects an unidentified benign potion may possibly have, for example.
+- In the item knowledge section of the character screen ("C" or "@"), the real names of all identifiable items in the game are shown, so it is now possible to know exactly which effects an unidentified benign potion may possibly have, for example.
 - Removed the item knowledge section of the game over summary screen.
 - Added hint popups with info about status effects, shock level, kicking braziers, and kicking statues.
 - The "stagger" messages are now more specific, and describe why the player is staggering ("My wounds cause me to stagger.", or "I stagger under the weight of my carried load.").
@@ -82,6 +82,9 @@
 - Fixed a bug that caused interruptions of longer player actions (handling armor or using the medical bag). The problem was that status effects that interrupt the player (fainting, burning, entangled, stuck, etc) would interrupt regardless of which creature it was applied to. The effect of this was probably most often noticeable when monsters outside view got stuck in mud.
 - Viewing information about known spells while picking a new trait was handled poorly if the player did not know any spells.
 - In the inventory section of the game over summary screen, only the plain, single item, names were used (e.g. "Throwing Knife"). Now plural names are used correctly (e.g. "6 Throwing Knives").
+- When monsters opened a door, the opened door was always updated in the player memory even if they did not see the door being opened.
+- Fixed some cases where redundant sound messages were printed when handling doors ("I hear a door open. I see a door opening.")
+- When kicking statues while blind, the sound message would never be printed ("I hear a crash.").
 - And more minor bug fixes...
 
 
