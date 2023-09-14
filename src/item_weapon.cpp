@@ -309,6 +309,10 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
 void VampiricBite::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
+        if (!m_actor_carrying || !m_actor_carrying->is_alive()) {
+                return;
+        }
+
         if (!actor_hit.is_alive()) {
                 return;
         }
