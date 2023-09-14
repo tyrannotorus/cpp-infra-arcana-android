@@ -658,7 +658,7 @@ void init()
                 "spikes with enough force to pierce flesh (or even rock). It "
                 "seems almost to be deliberately designed for cruelty, rather "
                 "than pure stopping power."};
-        d.weight = Weight::medium;
+        d.weight = (Weight::medium * 3) / 4;
         d.tile = gfx::TileId::tommy_gun;
         d.color = colors::dark_brown();
         d.melee.attack_msgs = {"strike", "strikes"};
