@@ -1393,7 +1393,7 @@ std::vector<std::string> SpellAuraOfDecay::descr_specific(
         descr.push_back(
                 "The spell does " +
                 dmg_range(skill).str() +
-                " damage.");
+                " damage to each creature.");
 
         if (skill == SpellSkill::transcendent) {
                 descr.emplace_back(
@@ -1923,7 +1923,7 @@ std::vector<std::string> SpellAzaGaze::descr_specific(
         descr.push_back(
                 "The spell does " +
                 dmg_range(skill).str() +
-                " damage.");
+                " damage to each creature.");
 
         descr.push_back(
                 "Causes the victims to faint for " +
