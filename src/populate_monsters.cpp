@@ -289,10 +289,9 @@ void make_group_at(
                 else {
                         // Not origin actor
 
-                        // The monster may have been assigned a leader when
-                        // placed (e.g. Ghouls allied to a player Ghoul, or
-                        // other special cases). If not, we assign the origin
-                        // monster as leader of this group.
+                        // If the monster has not already been assigned a leader
+                        // when placed, assign the origin monster as leader of
+                        // this group.
                         if (!actor->m_leader) {
                                 actor->m_leader = origin_actor;
                         }

@@ -3934,7 +3934,7 @@ int SpellHealOthers::mon_cooldown() const
 std::vector<actor::Actor*> SpellHealOthers::find_possible_actors_to_heal(
         const actor::Actor* const caster) const
 {
-        const std::vector<actor::Actor*> actors_in_group = caster->actors_in_same_group();
+        const std::vector<actor::Actor*> actors_in_group = caster->other_actors_in_same_group();
 
         Array2<bool> blocks_los(map::dims());
 

@@ -139,8 +139,13 @@ public:
 
         bool is_leader_of(const Actor* actor) const;
         bool is_actor_my_leader(const Actor* actor) const;
+
+        // NOTE: If the actor parameter is this actor, it is considered to be in
+        // the same group (the actor is in the same group as itself).
         bool is_in_same_group_as(const Actor* actor) const;
-        std::vector<Actor*> actors_in_same_group() const;
+
+        std::vector<Actor*> other_actors_in_same_group() const;
+        int nr_other_actors_in_same_group() const;
 
         int ability(AbilityId id, bool is_affected_by_props) const;
 

@@ -527,6 +527,10 @@ bool Actor::is_in_same_group_as(const Actor* actor) const
                 return false;
         }
 
+        if (actor == this) {
+                return true;
+        }
+
         // Consider the actors to be in the same group if one of the actors is
         // the leader of the other, or they have the same leader.
         return (
@@ -535,7 +539,7 @@ bool Actor::is_in_same_group_as(const Actor* actor) const
                 actor->is_actor_my_leader(m_leader));
 }
 
-std::vector<Actor*> Actor::actors_in_same_group() const
+std::vector<Actor*> Actor::other_actors_in_same_group() const
 {
         std::vector<Actor*> result;
 
@@ -543,9 +547,24 @@ std::vector<Actor*> Actor::actors_in_same_group() const
                 std::begin(game_time::g_actors),
                 std::end(game_time::g_actors),
                 std::back_inserter(result),
-                [this](const actor::Actor* const actor) { return is_in_same_group_as(actor); });
+                [this](const actor::Actor* const actor) {
+                        return (is_in_same_group_as(actor) && (actor != this));
+                });
 
         return result;
+}
+
+int Actor::nr_other_actors_in_same_group() const
+{
+        const int nr_in_group =
+                (int)std::count_if(
+                        std::begin(game_time::g_actors),
+                        std::end(game_time::g_actors),
+                        [this](const actor::Actor* const actor) {
+                                return (is_in_same_group_as(actor) && (actor != this));
+                        });
+
+        return nr_in_group;
 }
 
 bool Actor::restore_hp(

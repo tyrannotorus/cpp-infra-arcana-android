@@ -2757,13 +2757,15 @@ bool SpawnsZombiePartsOnDestroyed::is_allowed_to_spawn_parts_here() const
 void Breeds::on_std_turn()
 {
         const int spawn_new_one_in_n = 50;
+        const int group_limit = 40;
 
         if (actor::is_player(m_owner) ||
             !m_owner->is_alive() ||
             m_owner->m_properties.has(prop::Id::burning) ||
             m_owner->m_properties.has(prop::Id::paralyzed) ||
             (game_time::g_actors.size() >= g_max_nr_actors_on_map) ||
-            !rnd::one_in(spawn_new_one_in_n)) {
+            !rnd::one_in(spawn_new_one_in_n) ||
+            ((m_owner->nr_other_actors_in_same_group() + 1) >= group_limit)) {
                 return;
         }
 
@@ -2772,9 +2774,9 @@ void Breeds::on_std_turn()
                 ? m_owner->m_leader
                 : m_owner;
 
-        const auto area_allowed = R(m_owner->m_pos - 1, m_owner->m_pos + 1);
+        const R area_allowed(m_owner->m_pos - 1, m_owner->m_pos + 1);
 
-        auto spawned =
+        actor::MonSpawnResult spawned =
                 actor::spawn_random_position(
                         {m_owner->id()},
                         area_allowed)
