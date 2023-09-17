@@ -1923,7 +1923,7 @@ std::vector<std::string> SpellAzaGaze::descr_specific(
         descr.push_back(
                 "The spell does " +
                 dmg_range(skill).str() +
-                " damage per creature.");
+                " damage.");
 
         descr.push_back(
                 "Causes the victims to faint for " +
