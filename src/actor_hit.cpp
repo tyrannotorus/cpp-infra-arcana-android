@@ -241,6 +241,8 @@ static void on_actor_not_killed_by_hit(
 
         if (((hp_pct_before > hp_warn_lvl)) &&
             ((hp_pct_after <= hp_warn_lvl))) {
+                map::update_vision();
+
                 msg_log::more_prompt();
 
                 msg_log::add(

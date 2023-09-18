@@ -13,6 +13,8 @@
 #include <iterator>
 #include <optional>
 #include <ostream>
+#include <unordered_map>
+#include <utility>
 
 #include "actor.hpp"
 #include "actor_data.hpp"
@@ -3747,22 +3749,25 @@ std::string CrimsonPassage::name_short() const
         return "Crims Psg(" + nr_str + ")";
 }
 
+int CrimsonPassage::dmg_per_step()
+{
+        return 2;
+}
+
 PropEnded CrimsonPassage::on_moved_non_center_dir()
 {
-        const int dmg = 2;
-
-        if (m_owner->m_hp <= dmg) {
+        if (m_owner->m_hp <= dmg_per_step()) {
                 m_owner->m_properties.end_prop(id());
 
                 return PropEnded::yes;
         }
 
-        actor::hit(*m_owner, dmg, DmgType::pure, nullptr, AllowWound::no);
+        actor::hit(*m_owner, dmg_per_step(), DmgType::pure, nullptr, AllowWound::no);
 
         ++m_nr_steps_taken;
 
         if ((m_nr_steps_allowed != -1) &&
-            m_nr_steps_taken >= m_nr_steps_allowed) {
+            (m_nr_steps_taken >= m_nr_steps_allowed)) {
                 m_owner->m_properties.end_prop(id());
 
                 return PropEnded::yes;

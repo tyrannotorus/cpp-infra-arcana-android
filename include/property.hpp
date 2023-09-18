@@ -1832,6 +1832,8 @@ public:
                 m_nr_steps_allowed = nr_steps;
         }
 
+        static int dmg_per_step();
+
 private:
         int m_nr_steps_allowed {1};
         int m_nr_steps_taken {0};

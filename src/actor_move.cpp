@@ -18,7 +18,6 @@
 #include "array2.hpp"
 #include "attack.hpp"
 #include "colors.hpp"
-#include "common_text.hpp"
 #include "config.hpp"
 #include "debug.hpp"
 #include "game_time.hpp"
@@ -419,13 +418,19 @@ static void do_move_action_player(Dir dir)
 
         const P target = player.m_pos + dir_utils::offset(dir);
 
-        const bool has_crimson_passage = player.m_properties.has(prop::Id::crimson_passage);
+        bool is_crimson_passage_move = false;
 
         if (intended_dir == Dir::center) {
                 on_player_waiting();
         }
         else if (dir != Dir::center) {
                 const int dlvl_before = map::g_dlvl;
+
+                if (player.m_hp <= prop::CrimsonPassage::dmg_per_step()) {
+                        player.m_properties.end_prop(prop::Id::crimson_passage);
+                }
+
+                is_crimson_passage_move = player.m_properties.has(prop::Id::crimson_passage);
 
                 // NOTE: The player might bump the stairs here and go to a new
                 // dungeon level:
@@ -446,7 +451,7 @@ static void do_move_action_player(Dir dir)
                 // * the player was stuck (e.g. in a spider web)
 
                 const bool is_free_move =
-                        has_crimson_passage &&
+                        is_crimson_passage_move &&
                         (dir != Dir::center) &&
                         (dir != Dir::END);
 
