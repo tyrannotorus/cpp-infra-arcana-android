@@ -348,7 +348,11 @@ static void collect_total_shock_taken(game_summary_data::GameSummaryData& d)
         }
 
         // Calculate total shock from casting spells.
-        for (int domain_idx = 0; domain_idx < (int)SpellDomain::END; ++domain_idx) {
+        //
+        // NOTE: The iteration over spell domains INCLUDES "SpellDomain::END",
+        // which is used for domainless spells.
+        //
+        for (int domain_idx = 0; domain_idx <= (int)SpellDomain::END; ++domain_idx) {
                 const ShockSrc src = spells::spell_domain_to_shock_type((SpellDomain)domain_idx);
 
                 d.total_shock_from_casting_spells += d.total_shock_from_src[(size_t)src];

@@ -83,6 +83,7 @@
 - Fixed a bug that caused interruptions of longer player actions (handling armor or using the medical bag). The problem was that status effects that interrupt the player (fainting, burning, entangled, stuck, etc) would interrupt regardless of which creature it was applied to. The effect of this was probably most often noticeable when monsters outside view got stuck in mud.
 - Viewing information about known spells while picking a new trait was handled poorly if the player did not know any spells.
 - In the inventory section of the game over summary screen, only the plain, single item, names were used (e.g. "Throwing Knife"). Now plural names are used correctly (e.g. "6 Throwing Knives").
+- Shock from casting domainless spells (Exorcist unique spells) was not included when showing cost from casting learned spells in the character screen and game over summary screen.
 - When monsters opened a door, the opened door was always updated in the player memory even if they did not see the door being opened.
 - Fixed some cases where redundant sound messages were printed when handling doors ("I hear a door open. I see a door opening.")
 - When kicking statues while blind, the sound message would never be printed ("I hear a crash.").
