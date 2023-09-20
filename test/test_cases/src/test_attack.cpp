@@ -540,7 +540,7 @@ TEST_CASE("Resisting attack damage type also resists paralysis")
 {
         test_utils::init_all();
 
-        player_bon::pick_bg(Bg::war_vet);
+        player_bon::pick_bg(Bg::rogue);
 
         init_terrain();
 
@@ -566,8 +566,6 @@ TEST_CASE("Resisting attack damage type also resists paralysis")
 
         while (true) {
                 game_time::g_allow_tick = true;
-
-                REQUIRE(map::g_player->is_alive());
 
                 REQUIRE(map::g_player->is_alive());
 

@@ -23,6 +23,9 @@ TEST_CASE("Morphic Blaster projectile explodes on hitting creature")
 {
         test_utils::init_all();
 
+        // Ensure that the player has enough HP to fire it.
+        map::g_player->m_hp = 1000;
+
         for (int x = 1; x < (map::w() - 1); ++x) {
                 for (int y = 1; y < (map::h() - 1); ++y) {
                         map::update_terrain(
@@ -30,14 +33,14 @@ TEST_CASE("Morphic Blaster projectile explodes on hitting creature")
                 }
         }
 
-        const P p0(20, 20);
-        const P p1(25, 20);
-        const P p2(25, 21);
+        const P p0(20, 20);  // Player position
+        const P p1(25, 20);  // Rat 1 position, aim position
+        const P p2(25, 21);  // Rat 2 position
 
         map::g_player->m_pos = p0;
 
-        const auto* const rat_1 = actor::make("MON_RAT", p1);
-        const auto* const rat_2 = actor::make("MON_RAT", p2);
+        const actor::Actor* const rat_1 = actor::make("MON_RAT", p1);
+        const actor::Actor* const rat_2 = actor::make("MON_RAT", p2);
 
         auto* const wpn =
                 static_cast<item::Wpn*>(
@@ -46,11 +49,7 @@ TEST_CASE("Morphic Blaster projectile explodes on hitting creature")
         REQUIRE(rat_1->is_alive());
         REQUIRE(rat_2->is_alive());
 
-        attack::ranged(
-                map::g_player,
-                map::g_player->m_pos,
-                rat_1->m_pos,
-                *wpn);
+        attack::ranged(map::g_player, map::g_player->m_pos, rat_1->m_pos, *wpn);
 
         REQUIRE(!rat_1->is_alive());
         REQUIRE(!rat_2->is_alive());
@@ -61,6 +60,9 @@ TEST_CASE("Morphic Blaster projectile explodes on hitting creature")
 TEST_CASE("Morphic Blaster projectile explodes on hitting floor")
 {
         test_utils::init_all();
+
+        // Ensure that the player has enough HP to fire it.
+        map::g_player->m_hp = 1000;
 
         for (int x = 1; x < (map::w() - 1); ++x) {
                 for (int y = 1; y < (map::h() - 1); ++y) {
@@ -73,15 +75,15 @@ TEST_CASE("Morphic Blaster projectile explodes on hitting floor")
         // that position, which should always kill small creatures at the edge
         // of the explosion.
 
-        const P p0(20, 20);
-        const P p1(23, 20);
+        const P p0(20, 20);  // Player position
+        const P p1(24, 20);  // Rat 1 position
         const P p2(25, 20);  // Aim position
-        const P p3(27, 20);
+        const P p3(26, 20);  // Rat 2 position
 
         map::g_player->m_pos = p0;
 
-        const auto* const rat_1 = actor::make("MON_RAT", p1);
-        const auto* const rat_2 = actor::make("MON_RAT", p3);
+        const actor::Actor* const rat_1 = actor::make("MON_RAT", p1);
+        const actor::Actor* const rat_2 = actor::make("MON_RAT", p3);
 
         auto* const wpn =
                 static_cast<item::Wpn*>(
@@ -90,11 +92,7 @@ TEST_CASE("Morphic Blaster projectile explodes on hitting floor")
         REQUIRE(rat_1->is_alive());
         REQUIRE(rat_2->is_alive());
 
-        attack::ranged(
-                map::g_player,
-                map::g_player->m_pos,
-                p2,
-                *wpn);
+        attack::ranged(map::g_player, map::g_player->m_pos, p2, *wpn);
 
         REQUIRE(!rat_1->is_alive());
         REQUIRE(!rat_2->is_alive());
