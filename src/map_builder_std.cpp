@@ -521,7 +521,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Populate the map with traps
         // ---------------------------------------------------------------------
-        populate_traps::populate_std_lvl();
+        populate_traps::populate();
 
         if (!mapgen::g_is_map_valid) {
                 return false;

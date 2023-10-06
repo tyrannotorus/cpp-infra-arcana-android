@@ -255,8 +255,7 @@ static terrain::TrapImpl* try_make_impl(
         const P& pos,
         terrain::Trap* parent_trap)
 {
-        terrain::TrapImpl* impl =
-                make_trap_impl_from_id(trap_id, pos, parent_trap);
+        terrain::TrapImpl* impl = make_trap_impl_from_id(trap_id, pos, parent_trap);
 
         terrain::TrapPlacementValid valid = impl->on_place();
 
@@ -346,9 +345,7 @@ bool Trap::try_init_type(const TrapId id)
         }
 
         if (m_trap_impl) {
-                // "Mechanical" traps are always created as hidden, magical
-                // traps always created as visible.
-                m_is_hidden = !is_magical();
+                m_is_hidden = true;
 
                 return true;
         }

@@ -9,7 +9,7 @@
 
 namespace populate_traps
 {
-void populate_std_lvl();
+void populate();
 
 }  // namespace populate_traps
 

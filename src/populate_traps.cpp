@@ -50,7 +50,7 @@ static Fraction chance_for_trapped_room(const RoomType type)
                 break;
 
         case RoomType::crypt:
-                chance = {1, 30};
+                chance = {1, 12};
                 break;
 
         case RoomType::monster:
@@ -74,9 +74,6 @@ static Fraction chance_for_trapped_room(const RoomType type)
                 break;
 
         case RoomType::corr_link:
-                chance = {1, 30};
-                break;
-
         case RoomType::crawling_pit:
         case RoomType::forest:
         case RoomType::cave:
@@ -89,7 +86,7 @@ static Fraction chance_for_trapped_room(const RoomType type)
         return chance;
 }
 
-static std::vector<P> find_allowed_cells_in_room(
+static std::vector<P> find_allowed_positions_in_room(
         const Room& room,
         const Array2<bool>& blocked)
 {
@@ -153,7 +150,7 @@ static terrain::Trap* try_make_trap(const terrain::TrapId id, const P& pos)
 // -----------------------------------------------------------------------------
 namespace populate_traps
 {
-void populate_std_lvl()
+void populate()
 {
         TRACE_FUNC_BEGIN;
 
@@ -174,10 +171,7 @@ void populate_std_lvl()
                         continue;
                 }
 
-                auto trap_pos_bucket =
-                        find_allowed_cells_in_room(
-                                *room,
-                                blocked);
+                auto trap_pos_bucket = find_allowed_positions_in_room(*room, blocked);
 
                 rnd::shuffle(trap_pos_bucket);
 
