@@ -139,7 +139,7 @@ static void on_shift_released()
                 {
                 } break;
                 }  // Key down switch
-        }  // while polling event
+        }          // while polling event
 }
 
 static void handle_window_event()

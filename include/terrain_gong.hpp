@@ -226,9 +226,6 @@ public:
         bool is_allowed() const override;
 
         void run_effect() override;
-
-private:
-        item::Item* get_random_cursed_item() const;
 };
 
 class HpReduced : public Toll

@@ -240,9 +240,9 @@ void flash_at_actor(const actor::Actor& actor, const Color& color, const int spe
 
 bool step_flash_animations()
 {
-        const auto current_time_ms = SDL_GetTicks();
+        const uint32_t current_time_ms = SDL_GetTicks();
 
-        const auto d = current_time_ms - s_last_flash_animation_step_ms;
+        const uint32_t d = current_time_ms - s_last_flash_animation_step_ms;
 
         if (d < s_flash_animation_delay_ms) {
                 return false;

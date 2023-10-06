@@ -41,10 +41,10 @@ void draw_text_at_px(
         const int msg_w = (int)str.size();
         const int msg_px_w = msg_w * cell_px_w;
 
-        const auto sdl_color = color.sdl_color();
-        const auto sdl_bg_color = bg_color.sdl_color();
+        const SDL_Color sdl_color = color.sdl_color();
+        const SDL_Color sdl_bg_color = bg_color.sdl_color();
 
-        const auto sdl_color_gray = colors::gray();
+        const Color sdl_color_gray = colors::gray();
 
         const int screen_px_w = panel_px_w(Panel::screen);
         const int msg_px_x1 = px_pos.x + msg_px_w - 1;
@@ -99,12 +99,12 @@ void draw_text(
 {
         text.set_color(color);
 
-        auto origin_pos = pos;
+        const P origin_pos = pos;
 
-        for (const auto& action : text.actions()) {
+        for (const TextAction& action : text.actions()) {
                 switch (action.id) {
                 case TextActionId::write_str: {
-                        const auto px_pos = gui_to_px_coords(panel, pos);
+                        const P px_pos = gui_to_px_coords(panel, pos);
 
                         draw_text_at_px(
                                 action.str,
@@ -145,10 +145,7 @@ void draw_text_center(
         const int len_half = len / 2;
         const int x_pos_left = pos.x - len_half;
 
-        auto px_pos =
-                gui_to_px_coords(
-                        panel,
-                        P(x_pos_left, pos.y));
+        P px_pos = gui_to_px_coords(panel, {x_pos_left, pos.y});
 
         if (is_pixel_pos_adj_allowed) {
                 const int pixel_x_adj =
@@ -172,10 +169,7 @@ void draw_text_right(
 {
         const int x_pos_left = pos.x - (int)str.size() + 1;
 
-        auto px_pos =
-                gui_to_px_coords(
-                        panel,
-                        P(x_pos_left, pos.y));
+        P px_pos = gui_to_px_coords(panel, {x_pos_left, pos.y});
 
         draw_text_at_px(str, px_pos, color, draw_bg, bg_color);
 }

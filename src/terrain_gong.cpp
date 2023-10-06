@@ -50,9 +50,40 @@ struct P;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static item::Item* get_random_cursed_player_item()
+{
+        std::vector<item::Item*> cursed_items;
+
+        for (const InvSlot& slot : map::g_player->m_inv.m_slots) {
+                if (slot.item && slot.item->is_cursed()) {
+                        cursed_items.push_back(slot.item);
+                }
+        }
+
+        for (item::Item* const item : map::g_player->m_inv.m_backpack) {
+                if (item->is_cursed()) {
+                        cursed_items.push_back(item);
+                }
+        }
+
+        if (cursed_items.empty()) {
+                return nullptr;
+        }
+        else {
+                return rnd::element(cursed_items);
+        }
+}
+
 static std::unique_ptr<terrain::gong::Bonus> make_bonus(
         terrain::gong::BonusId id)
 {
+        // If the player has a cursed item, make the bless bonus most probable.
+        auto bless = std::make_unique<terrain::gong::Blessed>();
+
+        if (get_random_cursed_player_item() && bless->is_allowed() && rnd::coin_toss()) {
+                return bless;
+        }
+
         switch (id) {
         case terrain::gong::BonusId::upgrade_spell:
                 return std::make_unique<terrain::gong::UpgradeSpell>();
@@ -76,7 +107,7 @@ static std::unique_ptr<terrain::gong::Bonus> make_bonus(
                 return std::make_unique<terrain::gong::Healed>();
 
         case terrain::gong::BonusId::blessed:
-                return std::make_unique<terrain::gong::Blessed>();
+                return bless;
 
         case terrain::gong::BonusId::undefined:
         case terrain::gong::BonusId::END:
@@ -505,11 +536,9 @@ void Healed::run_effect()
 // -----------------------------------------------------------------------------
 bool Blessed::is_allowed() const
 {
-        const bool is_blessed =
-                map::g_player->m_properties.has(prop::Id::blessed);
+        const bool is_blessed = map::g_player->m_properties.has(prop::Id::blessed);
 
-        const bool has_cursed_item =
-                (get_random_cursed_item() != nullptr);
+        const bool has_cursed_item = (get_random_cursed_player_item() != nullptr);
 
         return !is_blessed || has_cursed_item;
 }
@@ -522,7 +551,7 @@ void Blessed::run_effect()
 
         map::g_player->m_properties.apply(blessed);
 
-        auto* const cursed_item = get_random_cursed_item();
+        auto* const cursed_item = get_random_cursed_player_item();
 
         if (cursed_item) {
                 const auto name =
@@ -535,30 +564,6 @@ void Blessed::run_effect()
                 cursed_item->current_curse().on_curse_end();
 
                 cursed_item->remove_curse();
-        }
-}
-
-item::Item* Blessed::get_random_cursed_item() const
-{
-        std::vector<item::Item*> cursed_items;
-
-        for (const auto& slot : map::g_player->m_inv.m_slots) {
-                if (slot.item && slot.item->is_cursed()) {
-                        cursed_items.push_back(slot.item);
-                }
-        }
-
-        for (auto* const item : map::g_player->m_inv.m_backpack) {
-                if (item->is_cursed()) {
-                        cursed_items.push_back(item);
-                }
-        }
-
-        if (cursed_items.empty()) {
-                return nullptr;
-        }
-        else {
-                return rnd::element(cursed_items);
         }
 }
 
