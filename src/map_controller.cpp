@@ -19,6 +19,7 @@
 #include "misc.hpp"
 #include "msg_log.hpp"
 #include "populate_monsters.hpp"
+#include "popup.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
@@ -29,7 +30,7 @@
 // -----------------------------------------------------------------------------
 // Map controllers
 // -----------------------------------------------------------------------------
-void MapControllerStd::on_start()
+void MapControllerStd::on_enter()
 {
         if (!map::g_player->m_properties.has(prop::Id::deaf)) {
                 audio::try_play_ambient(1);
@@ -52,7 +53,7 @@ void MapControllerStd::on_std_turn()
         }
 }
 
-void MapControllerBoss::on_start()
+void MapControllerBoss::on_enter()
 {
         audio::play(audio::SfxId::boss_voice1);
 
@@ -157,6 +158,50 @@ void MapControllerEgypt::on_std_turn()
                         m_has_triggered_awareness = true;
                 }
         }
+}
+
+void MapControllerEgypt::on_enter()
+{
+        const std::string msg =
+                "As I make my way into the depths, "
+                "I'm taken aback by the sudden change in surroundings. "
+                "The ancient architecture of this chamber is unlike anything I've seen before, "
+                "with intricate hieroglyphs carved into the stone walls."
+                "\n\n"
+                "The air is thick with the scent of sand "
+                "and an unfamiliar incense, "
+                "giving the impression of being transported to another time and place. "
+                "The silence is oppressive, broken only by the sound of my footsteps "
+                "echoing on the stone floor."
+                "\n\n"
+                "As I look closer at the carvings, "
+                "I can't help but wonder about the civilization that created them. "
+                "Who were they, and how did they manage to build something like "
+                "this deep underground?";
+
+        popup::Popup(popup::AddToMsgHistory::yes)
+                .set_msg(msg)
+                .run();
+}
+
+void MapControllerDeepOneLair::on_enter()
+{
+        const std::string msg =
+                "The walls here are slick with dampness, "
+                "and the air is heavy with the stench of saltwater "
+                "and the unmistakable odor of decay. "
+                "I can feel the humidity on my skin, "
+                "and my breaths come out in shallow gasps. "
+                "\n\n"
+                "There are tunnels leading deeper into underground waterways, "
+                "but I can only guess where they might lead. "
+                "It's as if the entire cave system is interconnected, "
+                "with passages that could possibly lead to the depths of the ocean or "
+                "subterranean lakes and rivers.";
+
+        popup::Popup(popup::AddToMsgHistory::yes)
+                .set_msg(msg)
+                .run();
 }
 
 // -----------------------------------------------------------------------------

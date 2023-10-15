@@ -244,6 +244,11 @@ void MapBuilderDeepOneLair::on_template_built()
         populate_items::make_items_on_floor();
 }
 
+std::unique_ptr<MapController> MapBuilderDeepOneLair::map_controller() const
+{
+        return std::make_unique<MapControllerDeepOneLair>();
+}
+
 // -----------------------------------------------------------------------------
 // MapBuilderMagicPool
 // -----------------------------------------------------------------------------

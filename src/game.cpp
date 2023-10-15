@@ -448,7 +448,7 @@ void GameState::on_start()
                 map::update_vision();
 
                 if (map_control::g_controller) {
-                        map_control::g_controller->on_start();
+                        map_control::g_controller->on_enter();
                 }
         }
 

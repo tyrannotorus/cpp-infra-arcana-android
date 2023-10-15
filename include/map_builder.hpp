@@ -120,6 +120,8 @@ private:
 
         void on_template_built() override;
 
+        std::unique_ptr<MapController> map_controller() const override;
+
         const char m_passage_symbol;
 };
 

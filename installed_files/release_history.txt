@@ -8,6 +8,9 @@
 * If the player has a cursed item, gongs have a high chance of giving the "bless" bonus (which also removes one curse).
 * Magic traps ("strange shape") starts hidden again just like mechanical traps, however traps are no longer spawned in corridors.
 
+# Special maps
+* Added intro message popups for some special levels.
+
 ============================================================
 = v22.1.0 (September 24, 2023)
 ============================================================

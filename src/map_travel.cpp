@@ -171,7 +171,7 @@ void go_to_nxt()
         trigger_insanity_sympts_for_descent();
 
         if (map_control::g_controller) {
-                map_control::g_controller->on_start();
+                map_control::g_controller->on_enter();
         }
 
         TRACE
