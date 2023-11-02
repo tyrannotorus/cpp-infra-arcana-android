@@ -249,11 +249,11 @@ set(COMMON_SRC
         src/mapgen_aux_rooms.cpp
         src/mapgen_bsp_split_rooms.cpp
         src/mapgen_connect_rooms.cpp
+        src/mapgen_corridor.cpp
         src/mapgen_decorate.cpp
         src/mapgen_doors.cpp
         src/mapgen_doors_and_keys.cpp
         src/mapgen_merge_regions.cpp
-        src/mapgen_valuable_terrain.cpp
         src/mapgen_pylon.cpp
         src/mapgen_region.cpp
         src/mapgen_river.cpp
@@ -261,6 +261,7 @@ set(COMMON_SRC
         src/mapgen_stairs.cpp
         src/mapgen_sub_rooms.cpp
         src/mapgen_utils.cpp
+        src/mapgen_valuable_terrain.cpp
         src/marker.cpp
         src/messages.cpp
         src/minimap.cpp
@@ -399,15 +400,23 @@ if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX
         set(DEBUG_COMPILE_FLAGS
                 -Wunused
                 -Wnull-dereference
-                # NOTE: For some reason, -O0 breaks the "ar" command when building
-                # with mingw (the command seems to freeze forever), but -Og works.
-                # -Og is also recommended by the gcc manual for debug builds.
-                -Og
                 -g
                 # Uncomment to generate gmon.out for gprof (must also be done for linker
                 # flags, see below)
                 # -pg
                 )
+
+        if(WIN32)
+                list(APPEND COMMON_COMPILE_FLAGS
+                        # NOTE: For some reason, -O0 breaks the "ar" command when building
+                        # with mingw (the command seems to freeze forever), but -Og works.
+                        -Og
+                        )
+        else()
+                list(APPEND COMMON_COMPILE_FLAGS
+                        -O0
+                        )
+        endif()
 
         if(DEBUG_SANITIZE)
                 list(APPEND DEBUG_COMPILE_FLAGS
