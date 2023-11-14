@@ -75,6 +75,13 @@ static void add_to_room_bucket(const RoomType type, const size_t nr)
 // that case we still want the same chance to make it dark).
 static int base_pct_chance_dark(const RoomType room_type)
 {
+        // TODO: Corridors could possibly be dark as well (maybe that's even
+        // more fitting, so they should have a pretty high chance)? But only if
+        // they have a significant size (significantly bigger than 1x1). And
+        // maybe also never if the corridor is widened (it's kind of annoying),
+        // if so use a Room member variable to tell if it's a a widened
+        // corridor.
+
         switch (room_type) {
         case RoomType::plain:
                 return 5;
@@ -116,7 +123,7 @@ static int base_pct_chance_dark(const RoomType room_type)
                 return 10;
 
         case RoomType::END_OF_STD_ROOMS:
-        case RoomType::corr_link:
+        case RoomType::corridor:
         case RoomType::crumble_room:
         case RoomType::river:
                 break;
@@ -368,8 +375,8 @@ Room* make(const RoomType type, const R& r)
         case RoomType::forest:
                 return new ForestRoom(r);
 
-        case RoomType::corr_link:
-                return new CorrLinkRoom(r);
+        case RoomType::corridor:
+                return new CorridorRoom(r);
 
         case RoomType::crumble_room:
                 return new CrumbleRoom(r);
@@ -414,12 +421,10 @@ Room* make_random_room(const R& r, const IsSubRoom is_subroom)
 
                         // NOTE: This must be set before "is_allowed()" below is
                         // called (some room types should never exist as sub
-                        // rooms)
-                        room->m_is_sub_room = is_subroom == IsSubRoom::yes;
+                        // rooms).
+                        room->m_is_sub_room = (is_subroom == IsSubRoom::yes);
 
-                        auto* const std_room = static_cast<StdRoom*>(room);
-
-                        if (std_room->is_allowed()) {
+                        if (room->is_allowed()) {
                                 s_room_bucket.erase(room_bucket);
 
                                 TRACE_FUNC_END_VERBOSE
@@ -475,30 +480,12 @@ std::vector<P> Room::positions_in_room() const
         return positions;
 }
 
-void Room::make_dark() const
-{
-        const size_t nr_positions = map::nr_positions();
-        for (size_t i = 0; i < nr_positions; ++i) {
-                if (map::g_room_map.at(i) == this) {
-                        map::g_dark.at(i) = true;
-                }
-        }
-
-        // Also make sub rooms dark
-        for (Room* const sub_room : m_sub_rooms) {
-                sub_room->make_dark();
-        }
-}
-
-// -----------------------------------------------------------------------------
-// Standard room
-// -----------------------------------------------------------------------------
-void StdRoom::on_pre_connect(Array2<bool>& door_proposals)
+void Room::on_pre_connect(Array2<bool>& door_proposals)
 {
         on_pre_connect_hook(door_proposals);
 }
 
-void StdRoom::on_post_connect(Array2<bool>& door_proposals)
+void Room::on_post_connect(Array2<bool>& door_proposals)
 {
         place_auto_terrains();
 
@@ -516,7 +503,7 @@ void StdRoom::on_post_connect(Array2<bool>& door_proposals)
                         // way, but currently the only map terrains that are
                         // light sources are braziers - so it works for now.
 
-                        const auto id = map::g_terrain.at(x, y)->id();
+                        const terrain::Id id = map::g_terrain.at(x, y)->id();
 
                         if (id == terrain::Id::brazier) {
                                 room_has_light_source = true;
@@ -525,20 +512,121 @@ void StdRoom::on_post_connect(Array2<bool>& door_proposals)
         }
 
         if (!room_has_light_source) {
-                int pct_chance_dark = base_pct_chance_dark(m_type) - 10;
+                const int base_pct_chance = base_pct_chance_dark(m_type);
 
-                // Increase chance with deeper dungeon levels
-                pct_chance_dark += map::g_dlvl;
+                if (base_pct_chance > 0) {
+                        int pct_chance_dark = base_pct_chance_dark(m_type) - 10;
 
-                pct_chance_dark = std::clamp(pct_chance_dark, 0, 100);
+                        // Increase chance with deeper dungeon levels
+                        pct_chance_dark += map::g_dlvl;
 
-                if (rnd::percent(pct_chance_dark)) {
-                        make_dark();
+                        pct_chance_dark = std::clamp(pct_chance_dark, 0, 100);
+
+                        if (rnd::percent(pct_chance_dark)) {
+                                make_dark();
+                        }
                 }
         }
 }
 
-P StdRoom::find_auto_terrain_placement(
+void Room::place_auto_terrains()
+{
+        TRACE_FUNC_BEGIN_VERBOSE;
+
+        // Make a terrain bucket
+        std::vector<terrain::Id> terrain_bucket;
+
+        const std::vector<RoomAutoTerrainRule> rules = auto_terrains_allowed();
+
+        if (rules.empty()) {
+                return;
+        }
+
+        for (const RoomAutoTerrainRule& rule : rules) {
+                // Insert N elements of the given Terrain ID.
+                terrain_bucket.insert(
+                        std::end(terrain_bucket),
+                        rule.nr_allowed,
+                        rule.id);
+        }
+
+        std::vector<P> adj_to_walls_bucket;
+        std::vector<P> away_from_walls_bucket;
+
+        get_positions_in_room_relative_to_walls(
+                *this,
+                adj_to_walls_bucket,
+                away_from_walls_bucket);
+
+        const bool should_convert_walls_to_pillars = rnd::coin_toss();
+
+        while (!terrain_bucket.empty()) {
+                // TODO: Do a random shuffle of the bucket instead, and pop
+                // elements
+                const auto terrain_idx =
+                        rnd::range(0, (int)terrain_bucket.size() - 1);
+
+                const auto id = terrain_bucket[terrain_idx];
+
+                terrain_bucket.erase(std::begin(terrain_bucket) + terrain_idx);
+
+                const P p =
+                        find_auto_terrain_placement(
+                                adj_to_walls_bucket,
+                                away_from_walls_bucket,
+                                id);
+
+                if (p.x >= 0) {
+                        // A good position was found
+
+                        const auto& d = terrain::data(id);
+
+                        TRACE_VERBOSE << "Placing terrain" << std::endl;
+
+                        ASSERT(map::is_pos_inside_outer_walls(p));
+
+                        terrain::Terrain* const terrain = terrain::make(d.id, p);
+
+                        // If the terrain is a wall, it may be converted to a pillar instead.
+                        if (should_convert_walls_to_pillars &&
+                            (terrain->id() == terrain::Id::wall)) {
+                                if (rnd::fraction(4, 5)) {
+                                        static_cast<terrain::Wall*>(terrain)
+                                                ->m_type = terrain::WallType::pillar;
+                                }
+                                else {
+                                        static_cast<terrain::Wall*>(terrain)
+                                                ->m_type = terrain::WallType::pillar_broken;
+                                }
+                        }
+
+                        map::set_terrain(terrain);
+
+                        // Erase all adjacent positions
+                        auto is_adj = [&](const P& other_p) {
+                                return is_pos_adj(p, other_p, true);
+                        };
+
+                        adj_to_walls_bucket.erase(
+                                std::remove_if(
+                                        std::begin(adj_to_walls_bucket),
+                                        std::end(adj_to_walls_bucket),
+                                        is_adj),
+                                std::end(adj_to_walls_bucket));
+
+                        away_from_walls_bucket.erase(
+                                std::remove_if(
+                                        std::begin(away_from_walls_bucket),
+                                        std::end(away_from_walls_bucket),
+                                        is_adj),
+                                std::end(away_from_walls_bucket));
+                }
+        }
+
+        TRACE_FUNC_END_VERBOSE;
+}
+
+P Room::find_auto_terrain_placement(
         const std::vector<P>& adj_to_walls,
         const std::vector<P>& away_from_walls,
         const terrain::Id id) const
@@ -597,79 +685,40 @@ P StdRoom::find_auto_terrain_placement(
         return {-1, -1};
 }
 
-void StdRoom::place_auto_terrains()
+void Room::make_dark() const
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
-        // Make a terrain bucket
-        std::vector<terrain::Id> terrain_bucket;
-
-        const auto rules = auto_terrains_allowed();
-
-        for (const auto& rule : rules) {
-                // Insert N elements of the given Terrain ID
-                terrain_bucket.insert(
-                        std::end(terrain_bucket),
-                        rule.nr_allowed,
-                        rule.id);
-        }
-
-        std::vector<P> adj_to_walls_bucket;
-        std::vector<P> away_from_walls_bucket;
-
-        get_positions_in_room_relative_to_walls(
-                *this,
-                adj_to_walls_bucket,
-                away_from_walls_bucket);
-
-        while (!terrain_bucket.empty()) {
-                // TODO: Do a random shuffle of the bucket instead, and pop
-                // elements
-                const auto terrain_idx =
-                        rnd::range(0, (int)terrain_bucket.size() - 1);
-
-                const auto id = terrain_bucket[terrain_idx];
-
-                terrain_bucket.erase(std::begin(terrain_bucket) + terrain_idx);
-
-                const P p = find_auto_terrain_placement(
-                        adj_to_walls_bucket,
-                        away_from_walls_bucket,
-                        id);
-
-                if (p.x >= 0) {
-                        // A good position was found
-
-                        const auto& d = terrain::data(id);
-
-                        TRACE_VERBOSE << "Placing terrain" << std::endl;
-
-                        ASSERT(map::is_pos_inside_outer_walls(p));
-
-                        map::set_terrain(terrain::make(d.id, p));
-
-                        // Erase all adjacent positions
-                        auto is_adj = [&](const P& other_p) {
-                                return is_pos_adj(p, other_p, true);
-                        };
-
-                        adj_to_walls_bucket.erase(
-                                std::remove_if(
-                                        std::begin(adj_to_walls_bucket),
-                                        std::end(adj_to_walls_bucket),
-                                        is_adj),
-                                std::end(adj_to_walls_bucket));
-
-                        away_from_walls_bucket.erase(
-                                std::remove_if(
-                                        std::begin(away_from_walls_bucket),
-                                        std::end(away_from_walls_bucket),
-                                        is_adj),
-                                std::end(away_from_walls_bucket));
+        const size_t nr_positions = map::nr_positions();
+        for (size_t i = 0; i < nr_positions; ++i) {
+                if (map::g_room_map.at(i) == this) {
+                        map::g_dark.at(i) = true;
                 }
         }
 
-        TRACE_FUNC_END_VERBOSE;
+        // Also make sub rooms dark
+        for (Room* const sub_room : m_sub_rooms) {
+                sub_room->make_dark();
+        }
+}
+
+// -----------------------------------------------------------------------------
+// Corridor
+// -----------------------------------------------------------------------------
+void CorridorRoom::on_post_connect_hook(Array2<bool>& door_proposals)
+{
+        (void)door_proposals;
+}
+
+std::vector<RoomAutoTerrainRule> CorridorRoom::auto_terrains_allowed() const
+{
+        return {};
+
+        // TODO: This can look good:
+        // return {
+        //         {terrain::Id::wall, 100}};
+
+        // return {
+        //         {terrain::Id::statue, rnd::one_in(2) ? rnd::range(10, 20) : 0},
+        //         {terrain::Id::chains, rnd::one_in(2) ? rnd::range(1, 2) : 0}};
 }
 
 // -----------------------------------------------------------------------------
@@ -978,8 +1027,7 @@ void CrawlingPitRoom::on_post_connect_hook(Array2<bool>& door_proposals)
                                 continue;
                         }
 
-                        map::set_terrain(
-                                terrain::make(terrain::Id::rubble_low, p));
+                        map::set_terrain(terrain::make(terrain::Id::rubble_low, p));
                 }
         }
 }
@@ -1100,8 +1148,7 @@ void CryptRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 // -----------------------------------------------------------------------------
 std::vector<RoomAutoTerrainRule> MonsterRoom::auto_terrains_allowed() const
 {
-        return {
-                {terrain::Id::rubble_low, rnd::range(3, 6)}};
+        return {{terrain::Id::rubble_low, rnd::range(3, 6)}};
 }
 
 bool MonsterRoom::is_allowed() const
@@ -1590,7 +1637,7 @@ void ChasmRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 // -----------------------------------------------------------------------------
 // River room
 // -----------------------------------------------------------------------------
-void RiverRoom::on_pre_connect(Array2<bool>& door_proposals)
+void RiverRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
 {
         TRACE_FUNC_BEGIN;
 

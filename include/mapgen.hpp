@@ -110,10 +110,6 @@ void make_floor(const Room& room);
 //------------------------------------------------------------------------------
 void connect_rooms();
 
-void valid_corridor_entries(
-        const Room& room,
-        std::vector<P>& out);
-
 // Used for finding suitable door positions, i.e. positions such as:
 // .#.
 // .x.
@@ -132,7 +128,7 @@ bool is_choke_point(
         const Array2<bool>& blocked,
         ChokePointData* out);
 
-void make_pathfind_corridor(
+bool try_make_pathfind_corridor(
         Room& room_0,
         Room& room_1,
         Array2<bool>* door_proposals = nullptr);

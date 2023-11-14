@@ -8,6 +8,9 @@
 * If the player has a cursed item, gongs have a high chance of giving the "bless" bonus (which also removes one curse).
 * Magic traps ("strange shape") starts hidden again just like mechanical traps, however traps are no longer spawned in corridors.
 
+# Map generation
+* Misc improvements to corridor generation (limited max corridor length, corridors occasionally connect to other corridors, some corridors are widened).
+
 # Special maps
 * Added intro message popups for some special levels.
 

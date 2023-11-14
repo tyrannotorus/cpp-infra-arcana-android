@@ -76,6 +76,9 @@ static void init_data_list()
         d.can_have_corpse = false;
         d.can_have_item = false;
         d.material_type = Material::stone;
+        // If walls are spawned automatically in rooms (e.g. to create a nice
+        // pattern), do not spawn walls next to other walls.
+        d.auto_spawn_placement = terrain::TerrainPlacement::away_from_walls;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::tree;

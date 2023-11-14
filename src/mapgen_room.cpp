@@ -174,14 +174,14 @@ static Room* make_template_room(const RoomTempl& templ, Region& region)
 
         const R r(p0, p1);
 
-        auto* room = new TemplateRoom(r, templ.type);
+        Room* room = new TemplateRoom(r, templ.type);
 
         mapgen::register_room(*room);
 
-        // Place terrains on the map based on the template
+        // Place terrains on the map based on the template.
 
         // NOTE: This must be done AFTER "register_room", since it may remove
-        // some of its cells from the global room map (e.g. untouched cells)
+        // some of its cells from the global room map (e.g. untouched cells).
         put_templ_terrains(templ, p0);
 
         region.main_room = room;
