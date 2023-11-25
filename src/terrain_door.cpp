@@ -845,7 +845,10 @@ void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
         const bool is_player = actor::is_player(&actor);
         const bool is_pos_seen = map::g_seen.at(m_pos);
 
-        if ((m_type == DoorType::metal) && is_player && is_pos_seen && !m_is_hidden) {
+        if ((m_type == DoorType::metal) &&
+            is_player &&
+            is_pos_seen &&
+            !m_is_hidden) {
                 msg_log::add(
                         "It seems futile.",
                         colors::msg_note(),

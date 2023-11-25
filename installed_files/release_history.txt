@@ -15,6 +15,13 @@
 # Special maps
 * Added intro message popups for some special levels.
 
+##############################
+# User interface
+##############################
+# Design
+- Added a flashing animation when bashing stuff (doors, corpses, ...).
+
+
 ============================================================
 = v22.1.0 (September 24, 2023)
 ============================================================

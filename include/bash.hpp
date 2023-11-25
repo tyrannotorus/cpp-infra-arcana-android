@@ -43,7 +43,7 @@ actor::Actor* get_corpse_to_bash_at(const P& pos);
 // Print a message as if the player is attacking the unseen terrain, but no
 // attack is actually performed. This is used when the player attacks unseen
 // terrain that is not possible to attack with the wielded weapon or kick.
-void do_fake_attack_on_unseen_terrain(const item::Item& wpn);
+void do_fake_attack_on_unseen_terrain(const P& pos, const item::Item& wpn);
 
 // Player kicks or strikes into open terrain, not hitting anything.
 void attack_air();

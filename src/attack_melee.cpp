@@ -778,7 +778,7 @@ static void do_melee_player_attacker(
                         print_attack_terrain_not_allowed_msg(*blocking_terrain, wpn);
                 }
                 else {
-                        bash::do_fake_attack_on_unseen_terrain(wpn);
+                        bash::do_fake_attack_on_unseen_terrain(aim_pos, wpn);
                 }
 
                 return;
@@ -856,7 +856,7 @@ static void do_melee_player_attacker(
 
         // --- Unseen position not possible to attack uknown monsters on. ---
         {
-                bash::do_fake_attack_on_unseen_terrain(wpn);
+                bash::do_fake_attack_on_unseen_terrain(aim_pos, wpn);
         }
 }
 

@@ -240,7 +240,7 @@ static void bash_something_at_pos(const P& pos)
                 // This is an UNSEEN position, and it is not a terrain that the
                 // player can attempt to attack unknown monsters on (i.e. it is
                 // not "floor" etc).
-                bash::do_fake_attack_on_unseen_terrain(*wpn);
+                bash::do_fake_attack_on_unseen_terrain(pos, *wpn);
         }
 }
 
@@ -318,6 +318,8 @@ void try_sprain_player()
 
 void attack_terrain(const P& att_pos, const item::Item& wpn)
 {
+        io::flash_at(att_pos, colors::gray());
+
         terrain::Terrain* const terrain = map::g_terrain.at(att_pos);
 
         print_player_attack_terrain_msg(*terrain, att_pos, wpn);
@@ -348,10 +350,10 @@ void attack_terrain(const P& att_pos, const item::Item& wpn)
 
 void attack_corpse(actor::Actor& mon, const item::Item& wpn)
 {
-        const bool is_seeing_cell = map::g_seen.at(mon.m_pos);
+        io::flash_at(mon.m_pos, colors::light_red());
 
         std::string corpse_name =
-                is_seeing_cell
+                map::g_seen.at(mon.m_pos)
                 ? mon.m_data->corpse_name_the
                 : "a corpse";
 
@@ -429,8 +431,10 @@ actor::Actor* get_corpse_to_bash_at(const P& pos)
         return corpse;
 }
 
-void do_fake_attack_on_unseen_terrain(const item::Item& wpn)
+void do_fake_attack_on_unseen_terrain(const P& pos, const item::Item& wpn)
 {
+        io::flash_at(pos, colors::gray());
+
         print_player_attack_unseen_terrain_msg(wpn);
 
         // Attacking ends cloaking and sanctuary.
