@@ -432,8 +432,21 @@ static void update_trait_data()
         d.blocked_for_bgs = {Bg::ghoul, Bg::war_vet, Bg::rogue};
         set_trait_data(d);
 
+        // --- Sage ---
+        d.id = Trait::sage;
+        d.title = "Sage";
+        d.descr =
+                "When focused, spells are also cast at a higher skill level, "
+                "and the duration to regain the focused state is reduced to "
+                "75-100 turns.";
+        d.trait_prereqs = {Trait::stout_spirit, Trait::meditative};
+        d.blocked_for_bgs = trait_data(Trait::meditative).blocked_for_bgs;
+        d.blocked_for_bgs.push_back(Bg::exorcist);
+        d.blocked_for_bgs.push_back(Bg::flagellant);
+        set_trait_data(d);
+
         // --- Absorption ---
-        d.id = Trait::absorb;
+        d.id = Trait::absorbtion;
         d.title = "Absorption";
         d.descr =
                 "1-6 spirit points are restored each time a spell is resisted "

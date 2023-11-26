@@ -642,6 +642,8 @@ static std::string get_skill_descr(
 
         std::vector<std::string> bon_words;
 
+        const prop::PropHandler& properties = map::g_player->m_properties;
+
         if (source == SpellSrc::manuscript) {
                 bon_words.emplace_back("manuscript");
         }
@@ -650,8 +652,13 @@ static std::string get_skill_descr(
                 bon_words.emplace_back("altar");
         }
 
-        if (map::g_player->m_properties.has(prop::Id::erudition)) {
+        if (properties.has(prop::Id::erudition)) {
                 bon_words.emplace_back("erudition");
+        }
+
+        if (properties.has(prop::Id::meditative_focused) &&
+            player_bon::has_trait(Trait::sage)) {
+                bon_words.emplace_back("focused");
         }
 
         if (map::g_player->m_inv.has_item_in_backpack(item::Id::necronomicon)) {
@@ -1221,7 +1228,7 @@ void Spell::on_resist(actor::Actor& target) const
                 target.m_properties.end_prop(prop::Id::r_spell);
         }
 
-        if (is_player && player_bon::has_trait(Trait::absorb)) {
+        if (is_player && player_bon::has_trait(Trait::absorbtion)) {
                 map::g_player->restore_sp(
                         rnd::range(1, 6),
                         false,  // Not allowed above max

@@ -183,7 +183,7 @@ static void player_regen_spell_shield()
 
 static void player_regen_meditative_focused()
 {
-        auto& player = *map::g_player;
+        actor::Actor& player = *map::g_player;
 
         if (player.m_properties.has(prop::Id::meditative_focused) ||
             player.m_properties.has(prop::Id::frenzied)) {
@@ -204,8 +204,7 @@ static void player_regen_meditative_focused()
 
         // Player has meditative trait.
 
-        int& nr_turns_until_focused =
-                actor::player_state::g_nr_turns_until_meditative_focused;
+        int& nr_turns_until_focused = actor::player_state::g_nr_turns_until_meditative_focused;
 
         if (nr_turns_until_focused <= 0) {
                 // Cooldown has finished, OR countdown not initialized.
@@ -221,7 +220,12 @@ static void player_regen_meditative_focused()
                         msg_log::more_prompt();
                 }
 
-                nr_turns_until_focused = rnd::range(125, 150);
+                const auto duration_range =
+                        player_bon::has_trait(Trait::sage)
+                        ? Range(75, 100)
+                        : Range(125, 150);
+
+                nr_turns_until_focused = duration_range.roll();
         }
 
         if (!player.m_properties.has(prop::Id::meditative_focused) &&

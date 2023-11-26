@@ -525,17 +525,24 @@ SpellSkill spell_skill(const SpellId id)
                 return SpellSkill::basic;
         }
 
+        const prop::PropHandler& properties = map::g_player->m_properties;
+
         SpellSkill skill = s_spell_skills[(size_t)id];
 
         // Altar skill bonus - max level is master.
-        if ((skill < SpellSkill::master) &&
-            is_getting_altar_bonus()) {
+        if ((skill < SpellSkill::master) && is_getting_altar_bonus()) {
                 skill = (SpellSkill)((int)skill + 1);
         }
 
         // Erudition skill bonus - max level is master.
+        if ((skill < SpellSkill::master) && properties.has(prop::Id::erudition)) {
+                skill = (SpellSkill)((int)skill + 1);
+        }
+
+        // Focused + Sage skill bonus - max level is master.
         if ((skill < SpellSkill::master) &&
-            map::g_player->m_properties.has(prop::Id::erudition)) {
+            properties.has(prop::Id::meditative_focused) &&
+            player_bon::has_trait(Trait::sage)) {
                 skill = (SpellSkill)((int)skill + 1);
         }
 
