@@ -246,6 +246,7 @@ public:
         AiAvailAttacksData avail_attacks(Actor& defender) const;
         AiAttData choose_attack(const AiAvailAttacksData& avail_attacks) const;
         DidAction try_attack(Actor& defender);
+        int nr_turns_to_be_aware(int factor = 1) const;
         void become_aware_player(AwareSource source, int factor = 1);
         void become_wary_player();
         void make_player_aware_of_me(int duration_factor = 1);

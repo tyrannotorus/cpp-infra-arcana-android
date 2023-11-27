@@ -320,13 +320,25 @@ std::string Actor::aware_msg_mon_hidden() const
         return m_data->aware_msg_mon_hidden;
 }
 
+int Actor::nr_turns_to_be_aware(const int factor) const
+{
+        int nr_turns = m_data->nr_turns_aware * factor;
+
+        if (player_bon::has_trait(Trait::elusive)) {
+                nr_turns = ((nr_turns + 1) / 2);
+        }
+
+        return nr_turns;
+}
+
 void Actor::become_aware_player(const AwareSource source, const int factor)
 {
         if (!is_alive() || is_actor_my_leader(map::g_player)) {
                 return;
         }
 
-        const int nr_turns = m_data->nr_turns_aware * factor;
+        const int nr_turns = nr_turns_to_be_aware(factor);
+
         const int aware_counter_before = m_mon_aware_state.aware_counter;
         const bool was_aware_before = is_aware_of_player();
 

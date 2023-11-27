@@ -79,6 +79,7 @@ enum class Trait
         indomitable_fury,
 
         // Unique for Rogue
+        elusive,
         vicious,
         ruthless,
 

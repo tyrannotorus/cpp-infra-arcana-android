@@ -441,6 +441,8 @@ static void update_trait_data()
                 "75-100 turns.";
         d.trait_prereqs = {Trait::stout_spirit, Trait::meditative};
         d.blocked_for_bgs = trait_data(Trait::meditative).blocked_for_bgs;
+        // TODO: Consider allowing it for Exorcists (and have third level spells
+        // for them, probably also traits for the third level spells).
         d.blocked_for_bgs.push_back(Bg::exorcist);
         d.blocked_for_bgs.push_back(Bg::flagellant);
         set_trait_data(d);
@@ -839,6 +841,15 @@ static void update_trait_data()
                 "attacks cause fear";
         d.trait_prereqs = {Trait::adept_melee, Trait::tough};
         d.bg_prereq = Bg::ghoul;
+        set_trait_data(d);
+
+        // --- Elusive ---
+        d.id = Trait::elusive;
+        d.title = "Elusive";
+        d.descr =
+                "Creatures only remember you for half the normal duration "
+                "(rounded up).";
+        d.bg_prereq = Bg::rogue;
         set_trait_data(d);
 
         // --- Vicious ---
