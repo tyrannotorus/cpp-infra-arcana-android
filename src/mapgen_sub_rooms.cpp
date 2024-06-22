@@ -45,6 +45,8 @@ static bool is_large_room(const R& area)
 static void put_inner_wall(const P& pos)
 {
         if (map::g_dlvl >= g_dlvl_first_late_game) {
+                // In late game (caves), make the inner room look like old ruins.
+
                 std::vector<int> terrain_weights = {
                         3,  // Wall
                         1,  // High rubble

@@ -12,12 +12,17 @@
 #include "colors.hpp"
 #include "global.hpp"
 #include "terrain.hpp"
-#include "terrain_data.hpp"
 
 namespace actor
 {
 class Actor;
 }  // namespace actor
+
+namespace terrain
+{
+struct TerrainData;
+}  // namespace terrain
+
 struct P;
 
 namespace terrain
@@ -46,8 +51,6 @@ public:
 
 private:
         Color color_default() const override;
-
-        void activate();
 
         bool m_is_activated {false};
 };

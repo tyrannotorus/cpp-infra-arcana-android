@@ -68,8 +68,8 @@ static const std::string s_intro_msg_default =
         "and decrepit old church building. This is the access point to the "
         "domains of the abhorred \"Cult of Starry Wisdom\". "
         "I am determined to enter these sprawling catacombs and rob them of "
-        "treasures and knowledge. At the depths of the abyss lies my true "
-        "destiny, an artifact of non-human origin referred to as "
+        "treasures and knowledge. Somewhere below lies my true destiny, "
+        "an artifact of non-human origin referred to as "
         "{COLOR_YELLOW}\"The shining Trapezohedron\"{reset_color} "
         "- a window to all the secrets of the universe!";
 
@@ -78,7 +78,7 @@ static const std::string s_intro_msg_exorcist =
         "and decrepit old church building. This is the access point to the "
         "domains of the abhorred \"Cult of Starry Wisdom\". "
         "I am determined to enter these sprawling catacombs and purge them of "
-        "the corruption that dwells within. At the depths of the abyss lies "
+        "the corruption that dwells within. Somewhere below lies "
         "an artifact of non-human origin referred to as "
         "{COLOR_YELLOW}\"The shining Trapezohedron\"{reset_color} "
         "- rumored to be a window to all the secrets of the universe. "

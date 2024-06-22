@@ -12,16 +12,17 @@ namespace hints
 enum class Id
 {
         altars,
-        fountains,
         destroying_corpses,
-        unload_weapons,
-        infected,
-        overburdened,
+        fountains,
         high_shock,
-        temporary_and_permanent_shock,
-        status_effects,
-        kick_statue,
+        infected,
         kick_brazier,
+        kick_statue,
+        overburdened,
+        status_effects,
+        study_inscription,
+        temporary_and_permanent_shock,
+        unload_weapons,
 
         END
 };

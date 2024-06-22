@@ -458,9 +458,19 @@ void forget_spell(const SpellId id)
 
 bool recall_spell(const SpellId id)
 {
+        TRACE_FUNC_BEGIN;
+
+        TRACE << "Trying to recall spell id '" << (int)id << "'" << std::endl;
+
         if (!is_spell_forgotten(id)) {
+                TRACE << "Spell not forgotten" << std::endl;
+
+                TRACE_FUNC_END;
+
                 return false;
         }
+
+        TRACE << "Spell is forgotten, recalling" << std::endl;
 
         std::unique_ptr<const Spell> spell(spells::make(id));
 
@@ -469,6 +479,8 @@ bool recall_spell(const SpellId id)
         msg_log::add("I remember how to cast " + name + " again!");
 
         s_is_forgotten[(size_t)id] = false;
+
+        TRACE_FUNC_END;
 
         return true;
 }

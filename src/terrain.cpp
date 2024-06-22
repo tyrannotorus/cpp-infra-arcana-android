@@ -58,6 +58,7 @@
 #include "saving.hpp"
 #include "sound.hpp"
 #include "state.hpp"
+#include "study_inscription.hpp"
 #include "terrain_dmg.hpp"
 #include "terrain_door.hpp"
 #include "terrain_factory.hpp"
@@ -213,6 +214,96 @@ static WasDestroyed on_new_turn_terrain_burning(terrain::Terrain& terrain)
         }
 
         return WasDestroyed::no;
+}
+
+// Used for toppling statues or urns.
+//
+// NOTE: The object will be deleted!
+//
+static void topple_object(
+        const terrain::Terrain& terrain,
+        const std::string& name,
+        const Dir direction,
+        actor::Actor* const actor_toppling)
+{
+        const auto alerts_mon =
+                actor::is_player(actor_toppling)
+                ? AlertsMon::yes
+                : AlertsMon::no;
+
+        std::string snd_msg = "I hear a crash.";
+
+        if (map::g_seen.at(terrain.pos())) {
+                msg_log::add("The " + name + " topples over.");
+
+                snd_msg = "";
+        }
+
+        Snd snd(
+                snd_msg,
+                audio::SfxId::statue_crash,
+                IgnoreMsgIfOriginSeen::no,
+                terrain.pos(),
+                actor_toppling,
+                SndVol::low,
+                alerts_mon);
+
+        snd_emit::run(snd);
+
+        const P dst_pos = terrain.pos() + dir_utils::offset(direction);
+
+        map::update_terrain(make(terrain::Id::rubble_low, terrain.pos()));
+
+        // NOTE: This object is now deleted!
+
+        actor::Actor* const actor_behind = map::living_actor_at(dst_pos);
+
+        if (actor_behind &&
+            actor_behind->is_alive() &&
+            !actor_behind->m_properties.has(prop::Id::ethereal)) {
+                if (actor::is_player(actor_behind)) {
+                        msg_log::add("It falls on me!");
+                }
+                else {
+                        // Monster is hit
+                        const bool is_player_seeing_actor =
+                                actor::can_player_see_actor(
+                                        *actor_behind);
+
+                        if (is_player_seeing_actor) {
+                                msg_log::add("It falls on " + actor_behind->name_a() + ".");
+                        }
+                }
+
+                actor::hit(
+                        *actor_behind,
+                        rnd::range(3, 6),
+                        DmgType::blunt,
+                        actor_toppling);
+
+                if (actor_behind->is_alive()) {
+                        // TODO: There should probably be a check if the
+                        // creature is immune to blunt/physical damage here.
+
+                        prop::Prop* const paralyzed = prop::make(prop::Id::paralyzed);
+
+                        paralyzed->set_duration(rnd::range(2, 3));
+
+                        actor_behind->m_properties.apply(paralyzed);
+                }
+        }
+
+        const terrain::Id terrain_id = map::g_terrain.at(dst_pos)->id();
+
+        // NOTE: This is kinda hacky, but the rubble is mostly just for
+        // decoration anyway, so it doesn't really matter.
+        if (terrain_id == terrain::Id::floor ||
+            terrain_id == terrain::Id::grass ||
+            terrain_id == terrain::Id::carpet) {
+                map::update_terrain(make(terrain::Id::rubble_low, dst_pos));
+        }
+
+        map::update_vision();
 }
 
 // -----------------------------------------------------------------------------
@@ -618,9 +709,7 @@ Color Floor::color_default() const
 // Wall
 // -----------------------------------------------------------------------------
 Wall::Wall(const P& p, const TerrainData* const data) :
-        Terrain(p, data),
-        m_type(WallType::common),
-        m_is_mossy(false) {}
+        Terrain(p, data) {}
 
 void Wall::hit(
         const DmgType dmg_type,
@@ -703,16 +792,6 @@ std::string Wall::name(const Article article) const
                 name_str = "alien wall";
                 break;
 
-        case WallType::pillar:
-                article_str = "a";
-                name_str = "pillar";
-                break;
-
-        case WallType::pillar_broken:
-                article_str = "a";
-                name_str = "broken pillar";
-                break;
-
         case WallType::cave:
                 article_str = "a";
                 name_str = "cavern wall";
@@ -753,10 +832,6 @@ Color Wall::color_default() const
         case WallType::mi_go:
                 return colors::orange();
 
-        case WallType::pillar:
-        case WallType::pillar_broken:
-                return colors::gray();
-
         case WallType::common:
         case WallType::common_alt:
                 // Return the wall color of the current map
@@ -778,12 +853,6 @@ gfx::TileId Wall::front_wall_tile() const
 
         case WallType::common_alt:
                 return gfx::TileId::wall_front_alt1;
-
-        case WallType::pillar:
-                return gfx::TileId::pillar;
-
-        case WallType::pillar_broken:
-                return gfx::TileId::pillar_broken;
 
         case WallType::cliff:
         case WallType::cave:
@@ -807,12 +876,6 @@ gfx::TileId Wall::top_wall_tile() const
         case WallType::common:
         case WallType::common_alt:
                 return gfx::TileId::wall_top;
-
-        case WallType::pillar:
-                return gfx::TileId::pillar;
-
-        case WallType::pillar_broken:
-                return gfx::TileId::pillar_broken;
 
         case WallType::cliff:
         case WallType::cave:
@@ -838,6 +901,203 @@ void Wall::set_rnd_common_wall()
 void Wall::set_moss_grown()
 {
         m_is_mossy = true;
+}
+
+// -----------------------------------------------------------------------------
+// Pillar
+// -----------------------------------------------------------------------------
+Pillar::Pillar(const P& p, const TerrainData* const data) :
+        Terrain(p, data)
+{
+}
+
+void Pillar::bump(actor::Actor& actor_bumping)
+{
+        if (!actor::is_player(&actor_bumping)) {
+                return;
+        }
+
+        if (m_is_inscribed && !m_has_player_studied_inscription && map::g_seen.at(m_pos)) {
+                study_inscription::run();
+
+                m_has_player_studied_inscription = true;
+
+                game_time::tick();
+
+                return;
+        }
+
+        Terrain::bump(actor_bumping);
+}
+
+void Pillar::hit(
+        const DmgType dmg_type,
+        actor::Actor* const actor,
+        const P& from_pos,
+        int dmg)
+{
+        (void)actor;
+        (void)from_pos;
+        (void)dmg;
+
+        switch (dmg_type) {
+        case DmgType::pure:
+        case DmgType::explosion: {
+                if ((dmg_type == DmgType::pure) || rnd::coin_toss()) {
+                        destr_stone_wall(m_pos);
+                }
+                else {
+                        map::update_terrain(make(Id::rubble_high, m_pos));
+                }
+
+                map::update_vision();
+        } break;
+
+        default:
+        {
+        } break;
+        }
+}
+
+void Pillar::on_new_turn()
+{
+        if (can_be_studied() &&
+            map::g_player->m_pos.is_adjacent(m_pos) &&
+            map::g_seen.at(m_pos)) {
+                hints::display(hints::Id::study_inscription);
+        }
+}
+
+std::string Pillar::name(const Article article) const
+{
+        std::string article_str;
+        std::string name_str;
+
+        if (m_is_broken) {
+                article_str = "a";
+                name_str = "broken pillar";
+        }
+        else if (m_is_inscribed) {
+                article_str = "an";
+                name_str = "inscribed pillar";
+        }
+        else {
+                article_str = "a";
+                name_str = "pillar";
+        }
+
+        if (article == Article::the) {
+                article_str = "the";
+        }
+
+        return article_str + " " + name_str;
+}
+
+Color Pillar::color_default() const
+{
+        if (m_is_inscribed && !m_has_player_studied_inscription) {
+                return colors::light_sepia();
+        }
+        else {
+                return colors::gray();
+        }
+}
+
+gfx::TileId Pillar::tile() const
+{
+        if (m_is_inscribed) {
+                return gfx::TileId::pillar_inscribed;
+        }
+        else if (m_is_broken) {
+                return gfx::TileId::pillar_broken;
+        }
+        else {
+                return gfx::TileId::pillar;
+        }
+}
+
+// -----------------------------------------------------------------------------
+// Petroglyph
+// -----------------------------------------------------------------------------
+Petroglyph::Petroglyph(const P& p, const TerrainData* const data) :
+        Terrain(p, data)
+{
+}
+
+void Petroglyph::bump(actor::Actor& actor_bumping)
+{
+        if (!actor::is_player(&actor_bumping)) {
+                return;
+        }
+
+        if (!m_has_player_studied_inscription && map::g_seen.at(m_pos)) {
+                study_inscription::run();
+
+                m_has_player_studied_inscription = true;
+
+                game_time::tick();
+
+                return;
+        }
+
+        Terrain::bump(actor_bumping);
+}
+
+void Petroglyph::hit(
+        const DmgType dmg_type,
+        actor::Actor* const actor,
+        const P& from_pos,
+        int dmg)
+{
+        (void)actor;
+        (void)from_pos;
+        (void)dmg;
+
+        switch (dmg_type) {
+        case DmgType::pure:
+        case DmgType::explosion: {
+                if ((dmg_type == DmgType::pure) || rnd::coin_toss()) {
+                        destr_stone_wall(m_pos);
+                }
+                else {
+                        map::update_terrain(make(Id::rubble_high, m_pos));
+                }
+
+                map::update_vision();
+        } break;
+
+        default:
+        {
+        } break;
+        }
+}
+
+void Petroglyph::on_new_turn()
+{
+        if (can_be_studied() &&
+            map::g_player->m_pos.is_adjacent(m_pos) &&
+            map::g_seen.at(m_pos)) {
+                hints::display(hints::Id::study_inscription);
+        }
+}
+
+std::string Petroglyph::name(const Article article) const
+{
+        const std::string article_str = (article == Article::a) ? "a" : "the";
+
+        const std::string name_str = "petroglyph";
+
+        return article_str + " " + name_str;
+}
+
+Color Petroglyph::color_default() const
+{
+        if (m_has_player_studied_inscription) {
+                return colors::gray();
+        }
+        else {
+                return colors::light_sepia();
+        }
 }
 
 // -----------------------------------------------------------------------------
@@ -1075,84 +1335,7 @@ void Statue::topple(
         const Dir direction,
         actor::Actor* const actor_toppling)
 {
-        const auto alerts_mon =
-                actor::is_player(actor_toppling)
-                ? AlertsMon::yes
-                : AlertsMon::no;
-
-        std::string snd_msg = "I hear a crash.";
-
-        if (map::g_seen.at(m_pos)) {
-                msg_log::add("The statue topples over.");
-
-                snd_msg = "";
-        }
-
-        Snd snd(
-                snd_msg,
-                audio::SfxId::statue_crash,
-                IgnoreMsgIfOriginSeen::no,
-                m_pos,
-                actor_toppling,
-                SndVol::low,
-                alerts_mon);
-
-        snd_emit::run(snd);
-
-        const P dst_pos = m_pos + dir_utils::offset(direction);
-
-        map::update_terrain(make(Id::rubble_low, m_pos));
-
-        // NOTE: This object is now deleted!
-
-        actor::Actor* const actor_behind = map::living_actor_at(dst_pos);
-
-        if (actor_behind &&
-            actor_behind->is_alive() &&
-            !actor_behind->m_properties.has(prop::Id::ethereal)) {
-                if (actor::is_player(actor_behind)) {
-                        msg_log::add("It falls on me!");
-                }
-                else {
-                        // Monster is hit
-                        const bool is_player_seeing_actor =
-                                actor::can_player_see_actor(
-                                        *actor_behind);
-
-                        if (is_player_seeing_actor) {
-                                msg_log::add("It falls on " + actor_behind->name_a() + ".");
-                        }
-                }
-
-                actor::hit(
-                        *actor_behind,
-                        rnd::range(3, 6),
-                        DmgType::blunt,
-                        actor_toppling);
-
-                if (actor_behind->is_alive()) {
-                        // TODO: There should probably be a check if the
-                        // creature is immune to blunt/physical damage here.
-
-                        prop::Prop* const paralyzed = prop::make(prop::Id::paralyzed);
-
-                        paralyzed->set_duration(rnd::range(2, 3));
-
-                        actor_behind->m_properties.apply(paralyzed);
-                }
-        }
-
-        const Id terrain_id = map::g_terrain.at(dst_pos)->id();
-
-        // NOTE: This is kinda hacky, but the rubble is mostly just for
-        // decoration anyway, so it doesn't really matter.
-        if (terrain_id == terrain::Id::floor ||
-            terrain_id == terrain::Id::grass ||
-            terrain_id == terrain::Id::carpet) {
-                map::update_terrain(make(Id::rubble_low, dst_pos));
-        }
-
-        map::update_vision();
+        topple_object(*this, "statue", direction, actor_toppling);
 }
 
 bool Statue::allow_player_melee_attack(
@@ -1213,11 +1396,15 @@ void Statue::hit(
 
 void Statue::bump(actor::Actor& actor_bumping)
 {
-        if (!m_inscr.empty() && actor::is_player(&actor_bumping)) {
-                msg_log::add(m_inscr);
+        if (!actor::is_player(&actor_bumping)) {
+                return;
+        }
+
+        if (!map::g_seen.at(m_pos) || m_inscr.empty()) {
+                Terrain::bump(actor_bumping);
         }
         else {
-                Terrain::bump(actor_bumping);
+                msg_log::add(m_inscr);
         }
 }
 
@@ -1280,6 +1467,146 @@ Color Statue::color_default() const
 void Statue::set_player_bg(const Bg bg)
 {
         m_player_bg = bg;
+}
+
+// -----------------------------------------------------------------------------
+// Statue
+// -----------------------------------------------------------------------------
+Urn::Urn(const P& p, const TerrainData* const data) :
+        Terrain(p, data)
+{
+}
+
+void Urn::bump(actor::Actor& actor_bumping)
+{
+        if (!actor::is_player(&actor_bumping)) {
+                return;
+        }
+
+        if (m_is_inscribed && !m_has_player_studied_inscription && map::g_seen.at(m_pos)) {
+                study_inscription::run();
+
+                m_has_player_studied_inscription = true;
+
+                game_time::tick();
+
+                return;
+        }
+
+        Terrain::bump(actor_bumping);
+}
+
+void Urn::topple(
+        const Dir direction,
+        actor::Actor* const actor_toppling)
+{
+        topple_object(*this, "urn", direction, actor_toppling);
+}
+
+bool Urn::allow_player_melee_attack(
+        const DmgType dmg_type,
+        const item::Item& wpn) const
+{
+        (void)wpn;
+
+        switch (dmg_type) {
+        case DmgType::kicking:
+                return true;
+                break;
+
+        default:
+                break;
+        }
+
+        return false;
+}
+
+void Urn::hit(
+        const DmgType dmg_type,
+        actor::Actor* const actor,
+        const P& from_pos,
+        int dmg)
+{
+        (void)dmg;
+
+        switch (dmg_type) {
+        case DmgType::kicking:
+        case DmgType::control_object_spell: {
+                ASSERT(actor);
+
+                if ((dmg_type == DmgType::kicking) &&
+                    actor->m_properties.has(prop::Id::weakened)) {
+                        msg_log::add("It wiggles a bit.");
+
+                        return;
+                }
+
+                const auto direction = dir_utils::dir(m_pos - from_pos);
+
+                // NOTE: This call deletes the object!
+                topple(direction, actor);
+        } break;
+
+        case DmgType::explosion:
+        case DmgType::pure: {
+                map::update_terrain(make(Id::rubble_low, m_pos));
+                map::update_vision();
+        } break;
+
+        default:
+        {
+        } break;
+        }
+}
+
+void Urn::on_new_turn()
+{
+        if (can_be_studied() &&
+            map::g_player->m_pos.is_adjacent(m_pos) &&
+            map::g_seen.at(m_pos)) {
+                hints::display(hints::Id::study_inscription);
+        }
+}
+
+std::string Urn::name(const Article article) const
+{
+        std::string article_str;
+        std::string name_str;
+
+        if (m_is_inscribed) {
+                article_str = "an";
+                name_str = "inscribed urn";
+        }
+        else {
+                article_str = "an";
+                name_str = "urn";
+        }
+
+        if (article == Article::the) {
+                article_str = "the";
+        }
+
+        return article_str + " " + name_str;
+}
+
+gfx::TileId Urn::tile() const
+{
+        if (m_is_inscribed) {
+                return gfx::TileId::urn_inscribed;
+        }
+        else {
+                return gfx::TileId::urn;
+        }
+}
+
+Color Urn::color_default() const
+{
+        if (m_is_inscribed && !m_has_player_studied_inscription) {
+                return colors::light_sepia();
+        }
+        else {
+                return colors::gray();
+        }
 }
 
 // -----------------------------------------------------------------------------

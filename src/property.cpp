@@ -3030,6 +3030,7 @@ void AuraOfDecay::run_effect_on_env_at(const P& p) const
         } break;
 
         case terrain::Id::wall:
+        case terrain::Id::pillar:
         case terrain::Id::rubble_high: {
                 if (rnd::one_in(250)) {
                         if (map::g_seen.at(p)) {

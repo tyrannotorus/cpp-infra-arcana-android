@@ -44,10 +44,6 @@ public:
 
         virtual ~Potion() = default;
 
-        void save_hook() const override;
-
-        void load_hook() override;
-
         Color interface_color() const final
         {
                 return colors::light_blue();
@@ -59,13 +55,11 @@ public:
 
         std::vector<std::string> descr_hook() const final;
 
-        void on_player_reached_new_dlvl_hook() final;
-
-        void on_actor_turn_in_inv_hook(InvType inv_type) override;
-
         void on_collide(const P& pos, actor::Actor* actor);
 
         void identify(Verbose verbose) final;
+
+        void reveal_alignment() const;
 
         virtual std::string real_name() const = 0;
 
@@ -80,9 +74,6 @@ protected:
 
 private:
         std::string alignment_str() const;
-
-        int m_alignment_feeling_dlvl_countdown;
-        int m_alignment_feeling_turn_countdown;
 };
 
 class Vitality : public Potion

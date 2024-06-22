@@ -15,6 +15,7 @@
 #include "audio_data.hpp"
 #include "colors.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "map.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
@@ -34,6 +35,30 @@ void MapControllerStd::on_enter()
 {
         if (!map::g_player->m_properties.has(prop::Id::deaf)) {
                 audio::try_play_ambient(1);
+        }
+
+        if (map::g_dlvl == (g_dlvl_first_mid_game / 2)) {
+                const std::string msg =
+                        "I did not expect this place to run this deep, "
+                        "it is not possible! "
+                        "Also there are unmistakable signs of an ancient civilization, "
+                        "defying all logic and reason!\n\n"
+                        "The way back seems lost somehow, "
+                        "could I ever return even if I wanted to?";
+
+                popup::Popup(popup::AddToMsgHistory::yes)
+                        .set_msg(msg)
+                        .run();
+        }
+        else if (map::g_dlvl == g_dlvl_first_mid_game) {
+                const std::string msg =
+                        "It goes on forever! This cannot be real! "
+                        "I feel like I am walking in a dream; "
+                        "The horror is utterly crushing.";
+
+                popup::Popup(popup::AddToMsgHistory::yes)
+                        .set_msg(msg)
+                        .run();
         }
 }
 

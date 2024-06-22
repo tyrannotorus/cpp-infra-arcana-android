@@ -22,8 +22,8 @@
 #include "pos.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "terrain_data.hpp"
 #include "terrain_factory.hpp"
-#include "terrain_monolith.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -119,7 +119,7 @@ namespace mapgen
 {
 void make_monoliths()
 {
-        std::vector<int> nr_weights = {
+        const std::vector<int> nr_weights = {
                 50,  // 0 monolith(s)
                 50,  // 1 -
                 1,   // 2 -
@@ -132,11 +132,9 @@ void make_monoliths()
 
 void make_mirrors()
 {
-        std::vector<int> nr_weights = {
-                2,   // 0 mirrors(s)
-                16,  // 1 -
-                2,   // 2 -
-                1,   // 3 -
+        const std::vector<int> nr_weights = {
+                15,  // 0 mirrors(s)
+                1,   // 1 -
         };
 
         const int nr_to_spawn = rnd::weighted_choice(nr_weights);

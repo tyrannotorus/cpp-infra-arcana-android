@@ -506,6 +506,15 @@ bool MapBuilderStd::build_specific()
         }
 
         // ---------------------------------------------------------------------
+        // Put inscribed terrain
+        // ---------------------------------------------------------------------
+        mapgen::put_inscribed_terrain();
+
+        if (!mapgen::g_is_map_valid) {
+                return false;
+        }
+
+        // ---------------------------------------------------------------------
         // Populate the map with monsters
         // ---------------------------------------------------------------------
         for (const auto* const room : map::g_room_list) {

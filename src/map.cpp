@@ -374,6 +374,33 @@ void memorize_terrain_at(const P& p)
         else if (id == terrain::Id::monolith) {
                 memory.appearance.minimap_color = terrain->color_default();
         }
+        else if (id == terrain::Id::urn) {
+                const bool can_study =
+                        static_cast<const terrain::Urn*>(terrain)->can_be_studied();
+
+                memory.appearance.minimap_color =
+                        can_study
+                        ? terrain->color()
+                        : minimap_wall_color;
+        }
+        else if (id == terrain::Id::pillar) {
+                const bool can_study =
+                        static_cast<const terrain::Pillar*>(terrain)->can_be_studied();
+
+                memory.appearance.minimap_color =
+                        can_study
+                        ? terrain->color()
+                        : minimap_wall_color;
+        }
+        else if (id == terrain::Id::petroglyph) {
+                const bool can_study =
+                        static_cast<const terrain::Petroglyph*>(terrain)->can_be_studied();
+
+                memory.appearance.minimap_color =
+                        can_study
+                        ? terrain->color()
+                        : minimap_wall_color;
+        }
         else if (id == terrain::Id::mirror) {
                 const auto* const mirror = static_cast<const terrain::Mirror*>(terrain);
 

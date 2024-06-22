@@ -229,22 +229,8 @@ void load()
 }
 
 Scroll::Scroll(item::ItemData* const item_data) :
-        Item(item_data),
-        m_domain_feeling_dlvl_countdown(rnd::range(1, 3)),
-        m_domain_feeling_turn_countdown(rnd::range(100, 200))
+        Item(item_data)
 {
-}
-
-void Scroll::save_hook() const
-{
-        saving::put_int(m_domain_feeling_dlvl_countdown);
-        saving::put_int(m_domain_feeling_turn_countdown);
-}
-
-void Scroll::load_hook()
-{
-        m_domain_feeling_dlvl_countdown = saving::get_int();
-        m_domain_feeling_turn_countdown = saving::get_int();
 }
 
 std::string Scroll::real_name() const
@@ -284,72 +270,39 @@ std::vector<std::string> Scroll::descr_hook() const
         }
 }
 
-void Scroll::on_player_reached_new_dlvl_hook()
+void Scroll::reveal_domain() const
 {
-        auto& d = data();
-
-        if (d.is_spell_domain_known ||
-            d.is_identified ||
-            (m_domain_feeling_dlvl_countdown <= 0)) {
+        if (m_data->is_spell_domain_known || m_data->is_identified) {
                 return;
         }
 
-        --m_domain_feeling_dlvl_countdown;
-}
+        TRACE << "Scroll domain discovered" << std::endl;
 
-void Scroll::on_actor_turn_in_inv_hook(const InvType inv_type)
-{
-        (void)inv_type;
+        const std::string name_plural =
+                m_data->base_name_un_id.names[(size_t)ItemNameType::plural];
 
-        if (!actor::is_player(m_actor_carrying)) {
-                return;
-        }
+        const std::unique_ptr<const Spell> spell(make_spell());
 
-        auto& d = data();
+        const SpellDomain domain = spell->domain();
 
-        if (d.is_spell_domain_known ||
-            d.is_identified ||
-            (m_domain_feeling_dlvl_countdown > 0) ||
-            !map::g_player->m_properties.allow_act()) {
-                return;
-        }
+        if (domain != SpellDomain::END) {
+                const std::string domain_str =
+                        text_format::first_to_lower(
+                                spells::spell_domain_title(
+                                        spell->domain()));
 
-        ASSERT(m_domain_feeling_turn_countdown > 0);
-
-        --m_domain_feeling_turn_countdown;
-
-        if (m_domain_feeling_turn_countdown <= 0) {
-                TRACE << "Scroll domain discovered" << std::endl;
-
-                const std::string name_plural =
-                        d.base_name_un_id.names[(size_t)ItemNameType::plural];
-
-                const std::unique_ptr<const Spell> spell(make_spell());
-
-                const auto domain = spell->domain();
-
-                if (domain != SpellDomain::END) {
-                        const std::string domain_str =
-                                text_format::first_to_lower(
-                                        spells::spell_domain_title(
-                                                spell->domain()));
-
-                        if (!domain_str.empty()) {
-                                msg_log::add(
-                                        std::string(
-                                                "I feel like " +
-                                                name_plural +
-                                                " belong to the " +
-                                                domain_str +
-                                                " domain."),
-                                        colors::text(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
-                        }
+                if (!domain_str.empty()) {
+                        msg_log::add(
+                                std::string(
+                                        "I feel like " +
+                                        name_plural +
+                                        " belong to the " +
+                                        domain_str +
+                                        " domain."));
                 }
-
-                d.is_spell_domain_known = true;
         }
+
+        m_data->is_spell_domain_known = true;
 }
 
 ItemPrePickResult Scroll::pre_pickup_hook()

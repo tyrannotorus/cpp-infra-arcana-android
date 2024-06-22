@@ -209,6 +209,11 @@ static void bash_something_at_pos(const P& pos)
 
                         return;
                 }
+                else if (!bash::is_open_terrain(*terrain)) {
+                        bash::do_fake_attack_on_unseen_terrain(pos, *kick_wpn);
+
+                        return;
+                }
         }
 
         if (is_player_pos) {

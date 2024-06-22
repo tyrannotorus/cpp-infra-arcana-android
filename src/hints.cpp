@@ -113,6 +113,16 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "using the medical bag to treat a wound - these effects are shown in all "
                         "capital letters (e.g. WOUNDED)."};
 
+        case hints::Id::study_inscription:
+                return {
+                        "Inscriptions",
+                        "There is an inscription here, studying it will yield some experience."
+
+                        "\n\nIt may also recall a spell that you have forgotten, "
+                        "or reveal something about carried manuscripts or potions. "
+                        "The chance to reveal information about such items is higher with "
+                        "more unknown items carried."};
+
         case hints::Id::kick_brazier:
                 return {
                         "Kicking braziers",
@@ -138,7 +148,7 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "until you return to the ambient subterranean gloom."
 
                         "\n\nSeeing monsters, casting spells, spending time, etc cause "
-                        "\"permanent\" shock, which will never go away until "
+                        "\"permanent\" shock, which will not go away until "
                         "the next floor is reached, insanity rises (due to shock at 100%), "
                         "or the shock is cured somehow."};
 

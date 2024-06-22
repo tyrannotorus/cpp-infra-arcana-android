@@ -133,6 +133,7 @@ set(COMMON_SRC
         include/sound.hpp
         include/spells.hpp
         include/state.hpp
+        include/study_inscription.hpp
         include/teleport.hpp
         include/terrain.hpp
         include/terrain_data.hpp
@@ -254,6 +255,7 @@ set(COMMON_SRC
         src/mapgen_doors.cpp
         src/mapgen_doors_and_keys.cpp
         src/mapgen_merge_regions.cpp
+        src/mapgen_put_inscribed_terrain.cpp
         src/mapgen_pylon.cpp
         src/mapgen_region.cpp
         src/mapgen_river.cpp
@@ -291,6 +293,7 @@ set(COMMON_SRC
         src/sound.cpp
         src/spells.cpp
         src/state.cpp
+        src/study_inscription.cpp
         src/teleport.cpp
         src/terrain.cpp
         src/terrain_data.cpp

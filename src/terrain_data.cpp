@@ -12,6 +12,7 @@
 
 #include "actor.hpp"
 #include "debug.hpp"
+#include "gfx.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "terrain.hpp"
@@ -79,6 +80,35 @@ static void init_data_list()
         // If walls are spawned automatically in rooms (e.g. to create a nice
         // pattern), do not spawn walls next to other walls.
         d.auto_spawn_placement = terrain::TerrainPlacement::away_from_walls;
+        add_to_list_and_reset(d);
+
+        d.id = terrain::Id::pillar;
+        d.character = '|';
+        d.tile = gfx::TileId::pillar;
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.is_sound_passable = false;
+        d.is_projectile_passable = false;
+        d.is_los_passable = false;
+        d.is_smoke_passable = false;
+        d.can_have_gore = false;
+        d.can_have_corpse = false;
+        d.can_have_item = false;
+        d.material_type = Material::stone;
+        d.auto_spawn_placement = terrain::TerrainPlacement::away_from_walls;
+        add_to_list_and_reset(d);
+
+        d.id = terrain::Id::petroglyph;
+        d.character = '|';
+        d.tile = gfx::TileId::petroglyph;
+        d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
+        d.is_projectile_passable = false;
+        d.is_los_passable = false;
+        d.can_have_blood = false;  // We don't want to mess with the color
+        d.can_have_gore = false;
+        d.can_have_corpse = false;
+        d.can_have_item = false;
+        d.shock_when_adjacent = 0;
+        d.material_type = Material::stone;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::tree;
@@ -189,7 +219,7 @@ static void init_data_list()
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::pylon;
-        d.character = '|';
+        d.character = '4';
         d.tile = gfx::TileId::END;  // This is set elsewhere
         d.is_projectile_passable = false;
         d.is_los_passable = true;
@@ -340,6 +370,19 @@ static void init_data_list()
         d.can_have_item = false;
         d.material_type = Material::stone;
         d.auto_spawn_placement = terrain::TerrainPlacement::away_from_walls;
+        add_to_list_and_reset(d);
+
+        d.id = terrain::Id::urn;
+        d.character = '8';
+        d.tile = gfx::TileId::urn;
+        d.is_projectile_passable = true;
+        d.is_los_passable = true;
+        d.can_have_blood = false;
+        d.can_have_gore = false;
+        d.can_have_corpse = false;
+        d.can_have_item = false;
+        d.material_type = Material::stone;  // Good enough.
+        d.auto_spawn_placement = terrain::TerrainPlacement::either;
         add_to_list_and_reset(d);
 
         d.id = terrain::Id::cocoon;

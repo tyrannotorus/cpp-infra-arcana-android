@@ -53,6 +53,7 @@
 #include "manual.hpp"
 #include "map.hpp"
 #include "map_travel.hpp"
+#include "mapgen.hpp"
 #include "marker.hpp"
 #include "minimap.hpp"
 #include "msg_log.hpp"
@@ -72,6 +73,7 @@
 #include "saving.hpp"
 #include "sound.hpp"
 #include "state.hpp"
+#include "study_inscription.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
@@ -607,7 +609,12 @@ static GameCmd to_cmd_default(const io::InputData& input)
                 }
 
         case SDLK_F6:
-                return GameCmd::debug_f6;
+                if (input.is_shift_held) {
+                        return GameCmd::debug_shift_f6;
+                }
+                else {
+                        return GameCmd::debug_f6;
+                }
 
         case SDLK_F7:
                 return GameCmd::debug_f7;
@@ -1141,13 +1148,32 @@ void handle(const GameCmd cmd)
                         terrain::Id::cocoon,
                         terrain::Id::alchemist_bench,
                         terrain::Id::cabinet,
+                        terrain::Id::pillar,
+                        terrain::Id::urn,
+                        terrain::Id::petroglyph,
                 };
 
                 int dx = 1;
 
                 for (const terrain::Id id : terrain_ids) {
-                        map::update_terrain(
-                                terrain::make(id, map::g_player->m_pos.with_x_offset(dx)));
+                        terrain::Terrain* const terrain =
+                                terrain::make(
+                                        id,
+                                        map::g_player->m_pos.with_x_offset(dx));
+
+                        // Set pillars to inscribed (most interesting type).
+                        if (id == terrain::Id::pillar) {
+                                static_cast<terrain::Pillar*>(terrain)
+                                        ->set_inscribed();
+                        }
+
+                        // Set urns to inscribed (most interesting type).
+                        if (id == terrain::Id::urn) {
+                                static_cast<terrain::Urn*>(terrain)
+                                        ->set_inscribed();
+                        }
+
+                        map::update_terrain(terrain);
 
                         ++dx;
                 }
@@ -1163,6 +1189,10 @@ void handle(const GameCmd cmd)
                         map::g_player->m_pos.with_y_offset(1),
                         knockback::KnockbackSource::other,
                         Verbose::no);
+        } break;
+
+        case GameCmd::debug_shift_f6: {
+                mapgen::put_inscribed_terrain();
         } break;
 
         case GameCmd::debug_f6: {

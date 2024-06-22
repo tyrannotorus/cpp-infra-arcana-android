@@ -43,10 +43,6 @@ public:
 
         ~Scroll() = default;
 
-        void save_hook() const override;
-
-        void load_hook() override;
-
         Color interface_color() const override
         {
                 return colors::magenta();
@@ -62,19 +58,13 @@ public:
 
         std::vector<std::string> descr_hook() const override;
 
-        void on_player_reached_new_dlvl_hook() final;
-
-        void on_actor_turn_in_inv_hook(InvType inv_type) override;
-
         ItemPrePickResult pre_pickup_hook() override;
 
         void identify(Verbose verbose) override;
 
-        Spell* make_spell() const;
+        void reveal_domain() const;
 
-private:
-        int m_domain_feeling_dlvl_countdown;
-        int m_domain_feeling_turn_countdown;
+        Spell* make_spell() const;
 };
 
 }  // namespace scroll

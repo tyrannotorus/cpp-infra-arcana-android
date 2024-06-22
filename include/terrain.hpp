@@ -326,6 +326,13 @@ public:
 
         virtual std::string name(Article article) const = 0;
 
+        virtual void set_inscribed() {}
+
+        virtual bool allow_inscribe() const
+        {
+                return false;
+        }
+
         const TerrainData* m_data {nullptr};
         ItemContainer m_item_container {};
         BurnState m_burn_state {BurnState::not_burned};
@@ -353,11 +360,10 @@ protected:
         bool m_is_hidden {false};
         gfx::TileId m_gore_tile {gfx::TileId::END};
         char m_gore_character {0};
+        bool m_is_bloody {false};
         P m_pos {};
 
 private:
-        bool m_is_bloody {false};
-
         // Corrupted by a Strange Color monster
         int m_nr_turns_color_corrupted {-1};
 
@@ -555,8 +561,6 @@ enum class WallType
 {
         common,
         common_alt,
-        pillar,
-        pillar_broken,
         cave,
         egypt,
         mi_go,
@@ -588,8 +592,97 @@ public:
                 const P& from_pos,
                 int dmg) override;
 
-        WallType m_type;
-        bool m_is_mossy;
+        WallType m_type {WallType::common};
+        bool m_is_mossy {false};
+};
+
+class Pillar : public Terrain
+{
+public:
+        Pillar(const P& p, const TerrainData* data);
+
+        Pillar() = delete;
+
+        gfx::TileId tile() const override;
+
+        std::string name(Article article) const override;
+
+        Color color_default() const override;
+
+        void bump(actor::Actor& actor_bumping) override;
+
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
+
+        void on_new_turn() override;
+
+        void set_inscribed() override
+        {
+                m_is_inscribed = true;
+                m_has_player_studied_inscription = false;
+                m_is_broken = false;
+                m_is_bloody = false;
+        }
+
+        bool can_be_studied() const
+        {
+                return m_is_inscribed && !m_has_player_studied_inscription;
+        }
+
+        bool allow_inscribe() const override
+        {
+                return !m_is_inscribed;
+        }
+
+        bool can_have_blood() const override
+        {
+                return !m_is_inscribed;
+        }
+
+        void set_broken()
+        {
+                m_is_inscribed = false;
+                m_has_player_studied_inscription = false;
+                m_is_broken = false;
+        }
+
+private:
+        bool m_is_inscribed {};
+        bool m_has_player_studied_inscription {false};
+        bool m_is_broken {};
+};
+
+class Petroglyph : public Terrain
+{
+public:
+        Petroglyph(const P& p, const TerrainData* data);
+
+        Petroglyph() = delete;
+
+        std::string name(Article article) const override;
+
+        Color color_default() const override;
+
+        void bump(actor::Actor& actor_bumping) override;
+
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
+
+        void on_new_turn() override;
+
+        bool can_be_studied() const
+        {
+                return !m_has_player_studied_inscription;
+        }
+
+private:
+        bool m_has_player_studied_inscription {false};
 };
 
 class RubbleLow : public Terrain
@@ -746,6 +839,55 @@ private:
         StatueType m_type;
         std::string m_inscr {};
         Bg m_player_bg;
+};
+
+class Urn : public Terrain
+{
+public:
+        Urn(const P& p, const TerrainData* data);
+        Urn() = delete;
+
+        std::string name(Article article) const override;
+
+        gfx::TileId tile() const override;
+
+        Color color_default() const override;
+
+        void bump(actor::Actor& actor_bumping) override;
+
+        void on_new_turn() override;
+
+        void topple(Dir direction, actor::Actor* actor_toppling = nullptr);
+
+        bool allow_player_melee_attack(
+                DmgType dmg_type,
+                const item::Item& wpn) const override;
+
+        void hit(
+                DmgType dmg_type,
+                actor::Actor* actor,
+                const P& from_pos,
+                int dmg) override;
+
+        void set_inscribed() override
+        {
+                m_is_inscribed = true;
+                m_has_player_studied_inscription = false;
+        }
+
+        bool can_be_studied() const
+        {
+                return m_is_inscribed && !m_has_player_studied_inscription;
+        }
+
+        bool allow_inscribe() const override
+        {
+                return !m_is_inscribed;
+        }
+
+private:
+        bool m_is_inscribed {false};
+        bool m_has_player_studied_inscription {false};
 };
 
 class Stalagmite : public Terrain

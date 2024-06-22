@@ -6,22 +6,27 @@
 
 #include "terrain_mirror.hpp"
 
+#include <algorithm>
+#include <iterator>
+#include <vector>
+
 #include "actor.hpp"
+#include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
 #include "common_text.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
-#include "inventory_handling.hpp"
+#include "inventory.hpp"
 #include "item.hpp"
-#include "item_factory.hpp"
+#include "item_data.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
-#include "player_spells.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
+#include "terrain_data.hpp"
 #include "terrain_factory.hpp"
 #include "text_format.hpp"
 
@@ -30,54 +35,42 @@ struct P;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static bool player_has_unidentified_item()
+static std::vector<item::Item*> find_identifiable_items()
 {
+        std::vector<item::Item*> result;
+
         const Inventory& inv = map::g_player->m_inv;
 
-        if (
-                std::any_of(
-                        std::begin(inv.m_slots),
-                        std::end(inv.m_slots),
-                        [](const InvSlot& slot) {
-                                return slot.item && !slot.item->data().is_identified;
-                        })) {
-                return true;
+        std::for_each(
+                std::begin(inv.m_slots),
+                std::end(inv.m_slots),
+                [&result](const InvSlot& slot) {
+                        if (slot.item && !slot.item->data().is_identified) {
+                                result.push_back(slot.item);
+                        }
+                });
+
+        std::copy_if(
+                std::begin(inv.m_backpack),
+                std::end(inv.m_backpack),
+                std::back_inserter(result),
+                [](const item::Item* const item) {
+                        return !item->data().is_identified;
+                });
+
+        return result;
+}
+
+static bool player_has_unidentified_item()
+{
+        return !find_identifiable_items().empty();
+}
+
+static void identify_items()
+{
+        for (item::Item* const item : find_identifiable_items()) {
+                item->identify(Verbose::yes);
         }
-
-        if (
-                std::any_of(
-                        std::begin(inv.m_backpack),
-                        std::end(inv.m_backpack),
-                        [](const item::Item* item) {
-                                return !item->data().is_identified;
-                        })) {
-                return true;
-        }
-
-        return false;
-}
-
-static void identify_item()
-{
-        msg_log::add(
-                "I feel compelled to focus on one of my possessions. "
-                "Suddenly, the mirror reveals its true nature to me.");
-
-        msg_log::more_prompt();
-
-        states::push(std::make_unique<SelectIdentify>());
-}
-
-static bool recall_all_spells()
-{
-        return player_spells::recall_all_spells();
-}
-
-static void incr_xp()
-{
-        msg_log::add("I feel like I have gleaned a small bit of knowledge.");
-
-        game::incr_player_xp(2);
 }
 
 // -----------------------------------------------------------------------------
@@ -170,40 +163,25 @@ void Mirror::bump(actor::Actor& actor_bumping)
 
         msg_log::add("I stare deep into the " + name(Article::the) + ".");
 
-        if (m_is_activated) {
+        if (m_is_activated || !player_has_unidentified_item()) {
                 msg_log::add("Nothing happens.");
         }
         else {
-                activate();
+                audio::play(audio::SfxId::mirror_activate);
+
+                msg_log::more_prompt();
+
+                identify_items();
+
+                m_is_activated = true;
+
+                map::g_player->incr_shock(8.0, ShockSrc::misc);
 
                 map::memorize_terrain_at(m_pos);
                 map::update_vision();
 
                 game_time::tick();
         }
-}
-
-void Mirror::activate()
-{
-        audio::play(audio::SfxId::mirror_activate);
-
-        msg_log::more_prompt();
-
-        bool did_apply_effect = recall_all_spells();
-
-        if (!did_apply_effect && player_has_unidentified_item() && rnd::one_in(4)) {
-                identify_item();
-
-                did_apply_effect = true;
-        }
-
-        if (!did_apply_effect) {
-                incr_xp();
-        }
-
-        m_is_activated = true;
-
-        map::g_player->incr_shock(8.0, ShockSrc::misc);
 }
 
 }  // namespace terrain

@@ -462,7 +462,7 @@ File:                sfx_door_bang_metal.ogg
 Source:              https://freesound.org/people/qubodup/sounds/448947/
 Author:              qubodup (username on freesound.org)
 Original title:      Creepy Metal Door Bang
-License:             Attribution 4.0 International (CC BY 4.0) 
+License:             Attribution 4.0 International (CC BY 4.0)
 Changes made:        Cut most of the sound
 
 File:                sfx_door_break.ogg
@@ -472,14 +472,14 @@ Original title:      wooden door smash open.wav
 License:             Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)
 
 File:                sfx_door_break_gate.ogg
-Source:              https://freesound.org/people/SamsterBirdies/sounds/587443/
-Author:              SamsterBirdies (username on freesound.org)
-Original title:      Scrap metal dropping / crashing
-License:             CC0 1.0 Universal (CC0 1.0)
-Source:              https://freesound.org/people/DJT4NN3R/sounds/449992/
-Author:              DJT4NN3R (username on freesound.org)
-Original title:      whoosh_short_low.wav
-License:             CC0 1.0 Universal (CC0 1.0
+Source (1):          https://freesound.org/people/SamsterBirdies/sounds/587443/
+Author (1):          SamsterBirdies (username on freesound.org)
+Original title (1):  Scrap metal dropping / crashing
+License (1):         CC0 1.0 Universal (CC0 1.0)
+Source (2):          https://freesound.org/people/DJT4NN3R/sounds/449992/
+Author (2):          DJT4NN3R (username on freesound.org)
+Original title (2):  whoosh_short_low.wav
+License (2):         CC0 1.0 Universal (CC0 1.0)
 Changes made:        Cut most of the sounds, mix, reverb.
 
 File:                sfx_door_close.ogg
@@ -928,6 +928,17 @@ Author:              InspectorJ (username on freesound.org)
 License:             Attribution 3.0 Unported (CC BY 3.0)
 Original title:      Splash, Jumping, C.wav
 Changes made:        Cut most of the sound, reduced the speed
+
+File:                sfx_study_inscription.ogg
+Source (1):          https://freesound.org/people/IENBA/sounds/701052/
+Author (1):          IENBA (username on freesound.org)
+Original title (1):  Oniric Voices
+License (1):         CC0 1.0 Universal (CC0 1.0)
+Source (2):          https://freesound.org/people/EpicSoundEffects/sounds/475875/
+Author (2):          EpicSoundEffects (username on freesound.org)
+Original title (2):  ESE - WHOOSH - CALM - Breath.wav
+License (2):         CC0 1.0 Universal (CC0 1.0)
+Changes made:        Mixd samples of files 1 and 2 above.
 
 File:                sfx_wall_collapse.ogg
 Source:              https://freesound.org/people/iwanPlays/sounds/567249/

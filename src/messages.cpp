@@ -19,13 +19,18 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<std::string> menu_quotes;
+static std::vector<std::string> s_menu_quotes;
 
-static std::vector<std::string> read_message_file(const std::string& filename)
+static std::vector<std::string> s_terrain_inscription_messages_generic;
+static std::vector<std::string> s_terrain_inscription_messages_reveal_knowledge;
+
+static std::vector<std::string> read_msg_file(const std::string& filename)
 {
-        std::ifstream message_file(filename.c_str());
+        TRACE << "Reading message file at: '" << filename << "'" << std::endl;
 
-        if (!message_file) {
+        std::ifstream msg_file(filename.c_str());
+
+        if (!msg_file) {
                 TRACE_ERROR_RELEASE
                         << "Unable to load message file: "
                         << filename
@@ -39,13 +44,15 @@ static std::vector<std::string> read_message_file(const std::string& filename)
         std::string str;
         std::vector<std::string> lines;
 
-        while (std::getline(message_file, str)) {
-                if (!str.empty()) {
+        while (std::getline(msg_file, str)) {
+                if (!str.empty() && (str[0] != ' ') && (str[0] != '#')) {
+                        TRACE << str << std::endl;
+
                         lines.push_back(str);
                 }
         }
 
-        message_file.close();
+        msg_file.close();
 
         return lines;
 }
@@ -57,12 +64,31 @@ namespace messages
 {
 void init()
 {
-        menu_quotes = read_message_file(paths::messages_dir() + "menu_quotes.txt");
+        const std::string dir = paths::messages_dir();
+
+        s_menu_quotes =
+                read_msg_file(dir + "menu_quotes.txt");
+
+        s_terrain_inscription_messages_generic =
+                read_msg_file(dir + "terrain_inscription_messages_generic.txt");
+
+        s_terrain_inscription_messages_reveal_knowledge =
+                read_msg_file(dir + "terrain_inscription_messages_reveal_knowledge.txt");
 }
 
 std::string get_random_menu_quote()
 {
-        return rnd::element(menu_quotes);
+        return rnd::element(s_menu_quotes);
+}
+
+std::string get_random_terrain_inscription_msg_generic()
+{
+        return rnd::element(s_terrain_inscription_messages_generic);
+}
+
+std::string get_random_terrain_inscription_msg_reveal_knowledge()
+{
+        return rnd::element(s_terrain_inscription_messages_reveal_knowledge);
 }
 
 }  // namespace messages

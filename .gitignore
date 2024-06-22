@@ -15,6 +15,7 @@ CppCheckResults.xml
 *.depend
 *.pyc
 clang-tidy-commands.log
+.cache
 
 # Vim temporary files
 *.swp
@@ -23,4 +24,4 @@ clang-tidy-commands.log
 GPATH
 GRTAGS
 GTAGS
-.cache
+

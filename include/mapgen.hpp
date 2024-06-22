@@ -77,6 +77,8 @@ void make_mirrors();
 
 void make_pylons();
 
+void put_inscribed_terrain();
+
 //------------------------------------------------------------------------------
 // Room reshaping utils (called by the room objects)
 //------------------------------------------------------------------------------

@@ -25,8 +25,11 @@
 // -----------------------------------------------------------------------------
 static int roll_nr_pylons_to_make()
 {
-        // Weight for 0 pylons, 1 pylon, etc.
-        std::vector<int> nr_weights = {20, 5, 1};
+        const std::vector<int> nr_weights = {
+                20,  // 0 pylon(s)
+                4,   // 1 -
+                1,   // 2 -
+        };
 
         return rnd::weighted_choice(nr_weights);
 }

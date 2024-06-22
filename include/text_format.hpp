@@ -14,7 +14,7 @@
 namespace text_format
 {
 // Reads a line of space separated words, and splits them into several lines
-// with the given maximum width.  If any single word in the "line" parameter is
+// with the given maximum width. If any single word in the "line" parameter is
 // longer than the maximum width, this word will NOT be split (the entire word
 // is simply added to the output vector, breaking the maximum width).
 std::vector<std::string> split(std::string line, int max_w);

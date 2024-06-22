@@ -5,6 +5,8 @@
 # Gameplay
 ##############################
 # Terrain objects
+- Some terrain objects are now "inscribed" and can be studied by bumping them. This gives XP, can recall forgotten spells, and gives a "feeling" regarding carried items (e.g. if a potion is benign or malign). Item "feelings" no longer happen passively over time.
+- Hazy Mirrors no longer recall forgotten spells, instead they identify all carried items. They are also much rarer than before.
 - If the player has a cursed item, gongs have a high chance of giving the "bless" bonus (which also removes one curse).
 - Magic traps ("strange shape") starts hidden again just like mechanical traps, however traps are no longer spawned in corridors.
 

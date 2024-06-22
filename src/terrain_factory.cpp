@@ -36,6 +36,14 @@ Terrain* make(const Id id, const P& pos)
                 return new Wall(pos, d);
                 break;
 
+        case Id::pillar:
+                return new Pillar(pos, d);
+                break;
+
+        case Id::petroglyph:
+                return new Petroglyph(pos, d);
+                break;
+
         case Id::tree:
                 return new Tree(pos, d);
                 break;
@@ -110,6 +118,10 @@ Terrain* make(const Id id, const P& pos)
 
         case Id::statue:
                 return new Statue(pos, d);
+                break;
+
+        case Id::urn:
+                return new Urn(pos, d);
                 break;
 
         case Id::cocoon:

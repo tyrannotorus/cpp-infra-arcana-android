@@ -100,6 +100,7 @@ enum class SfxId
         statue_crash,
         strange_device_activate,
         strange_device_damaged,
+        study_inscription,
         swim,
         thunder,
         tomb_open,

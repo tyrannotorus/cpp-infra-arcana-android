@@ -585,19 +585,19 @@ void Room::place_auto_terrains()
 
                         ASSERT(map::is_pos_inside_outer_walls(p));
 
-                        terrain::Terrain* const terrain = terrain::make(d.id, p);
+                        terrain::Terrain* terrain {nullptr};
 
                         // If the terrain is a wall, it may be converted to a pillar instead.
                         if (should_convert_walls_to_pillars &&
-                            (terrain->id() == terrain::Id::wall)) {
-                                if (rnd::fraction(4, 5)) {
-                                        static_cast<terrain::Wall*>(terrain)
-                                                ->m_type = terrain::WallType::pillar;
+                            (d.id == terrain::Id::wall)) {
+                                terrain = terrain::make(terrain::Id::pillar, p);
+
+                                if (rnd::one_in(5)) {
+                                        static_cast<terrain::Pillar*>(terrain)->set_broken();
                                 }
-                                else {
-                                        static_cast<terrain::Wall*>(terrain)
-                                                ->m_type = terrain::WallType::pillar_broken;
-                                }
+                        }
+                        else {
+                                terrain = terrain::make(d.id, p);
                         }
 
                         map::set_terrain(terrain);
@@ -741,6 +741,7 @@ std::vector<RoomAutoTerrainRule> PlainRoom::auto_terrains_allowed() const
         return {
                 {terrain::Id::brazier, rnd::one_in(4) ? 1 : 0},
                 {terrain::Id::statue, rnd::one_in(7) ? rnd::range(1, 4) : 0},
+                {terrain::Id::urn, rnd::one_in(7) ? rnd::range(1, 4) : 0},
                 {terrain::Id::fountain, rnd::one_in(fountain_one_in_n) ? 1 : 0},
                 {terrain::Id::chains, rnd::one_in(7) ? rnd::range(1, 2) : 0}};
 }
@@ -771,7 +772,8 @@ std::vector<RoomAutoTerrainRule> HumanRoom::auto_terrains_allowed() const
         std::vector<RoomAutoTerrainRule> result;
 
         result.emplace_back(terrain::Id::brazier, rnd::range(0, 2));
-        result.emplace_back(terrain::Id::statue, rnd::range(0, 4));
+        result.emplace_back(terrain::Id::statue, rnd::range(0, 3));
+        result.emplace_back(terrain::Id::urn, rnd::range(0, 3));
 
         // Control how many item container terrains that can spawn in the room
         std::vector<terrain::Id> item_containers = {
@@ -1117,6 +1119,7 @@ std::vector<RoomAutoTerrainRule> CryptRoom::auto_terrains_allowed() const
 {
         return {
                 {terrain::Id::tomb, rnd::one_in(6) ? 2 : 1},
+                {terrain::Id::urn, rnd::range(0, 4)},
                 {terrain::Id::rubble_low, rnd::range(1, 4)}};
 }
 
@@ -1453,7 +1456,8 @@ std::vector<RoomAutoTerrainRule> CaveRoom::auto_terrains_allowed() const
 {
         return {
                 {terrain::Id::rubble_low, rnd::range(2, 4)},
-                {terrain::Id::stalagmite, rnd::range(1, 4)}};
+                {terrain::Id::stalagmite, rnd::range(1, 4)},
+                {terrain::Id::urn, rnd::one_in(7) ? rnd::range(1, 4) : 0}};
 }
 
 bool CaveRoom::is_allowed() const

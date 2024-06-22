@@ -44,6 +44,7 @@ static bool allow_place_pillar_at(const P& pos)
                 const auto id = map::g_terrain.at(check_p)->id();
 
                 if ((id == terrain::Id::wall) ||
+                    (id == terrain::Id::pillar) ||
                     (id == terrain::Id::rubble_high) ||
                     (id == terrain::Id::grate)) {
                         return false;
@@ -55,18 +56,15 @@ static bool allow_place_pillar_at(const P& pos)
 
 static void place_pillar_at(const P& pos)
 {
-        auto* const wall =
-                static_cast<terrain::Wall*>(
-                        terrain::make(terrain::Id::wall, pos));
+        auto* const pillar =
+                static_cast<terrain::Pillar*>(
+                        terrain::make(terrain::Id::pillar, pos));
 
-        if (rnd::fraction(4, 5)) {
-                wall->m_type = terrain::WallType::pillar;
-        }
-        else {
-                wall->m_type = terrain::WallType::pillar_broken;
+        if (rnd::one_in(5)) {
+                pillar->set_broken();
         }
 
-        map::set_terrain(wall);
+        map::set_terrain(pillar);
 }
 
 static void place_wall_pillar_at(const P& pos)

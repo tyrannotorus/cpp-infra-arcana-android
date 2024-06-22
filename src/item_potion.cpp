@@ -200,22 +200,8 @@ void load()
 }
 
 Potion::Potion(item::ItemData* const item_data) :
-        Item(item_data),
-        m_alignment_feeling_dlvl_countdown(rnd::range(1, 3)),
-        m_alignment_feeling_turn_countdown(rnd::range(100, 200))
+        Item(item_data)
 {
-}
-
-void Potion::save_hook() const
-{
-        saving::put_int(m_alignment_feeling_dlvl_countdown);
-        saving::put_int(m_alignment_feeling_turn_countdown);
-}
-
-void Potion::load_hook()
-{
-        m_alignment_feeling_dlvl_countdown = saving::get_int();
-        m_alignment_feeling_turn_countdown = saving::get_int();
 }
 
 ConsumeItem Potion::activate(actor::Actor* const actor)
@@ -348,62 +334,29 @@ std::string Potion::alignment_str() const
         return ((alignment() == PotionAlignment::good) ? "Benign" : "Malign");
 }
 
-void Potion::on_player_reached_new_dlvl_hook()
+void Potion::reveal_alignment() const
 {
-        auto& d = data();
-
-        if (d.is_alignment_known ||
-            d.is_identified ||
-            (m_alignment_feeling_dlvl_countdown <= 0)) {
+        if (m_data->is_alignment_known || m_data->is_identified) {
                 return;
         }
 
-        --m_alignment_feeling_dlvl_countdown;
-}
+        TRACE << "Potion alignment discovered" << std::endl;
 
-void Potion::on_actor_turn_in_inv_hook(const InvType inv_type)
-{
-        (void)inv_type;
+        const std::string name_plural =
+                m_data->base_name_un_id.names[(size_t)ItemNameType::plural];
 
-        if (!actor::is_player(m_actor_carrying)) {
-                return;
-        }
+        const std::string align_str =
+                text_format::first_to_lower(alignment_str());
 
-        auto& d = data();
+        msg_log::add(
+                std::string(
+                        "I feel like " +
+                        name_plural +
+                        " are " +
+                        align_str +
+                        "."));
 
-        if (d.is_alignment_known ||
-            d.is_identified ||
-            (m_alignment_feeling_dlvl_countdown > 0) ||
-            !map::g_player->m_properties.allow_act()) {
-                return;
-        }
-
-        ASSERT(m_alignment_feeling_turn_countdown > 0);
-
-        --m_alignment_feeling_turn_countdown;
-
-        if (m_alignment_feeling_turn_countdown <= 0) {
-                TRACE << "Potion alignment discovered" << std::endl;
-
-                const std::string name_plural =
-                        d.base_name_un_id.names[(size_t)ItemNameType::plural];
-
-                const std::string align_str =
-                        text_format::first_to_lower(alignment_str());
-
-                msg_log::add(
-                        std::string(
-                                "I feel like " +
-                                name_plural +
-                                " are " +
-                                align_str +
-                                "."),
-                        colors::text(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
-
-                d.is_alignment_known = true;
-        }
+        m_data->is_alignment_known = true;
 }
 
 void Potion::on_collide(const P& pos, actor::Actor* const actor)

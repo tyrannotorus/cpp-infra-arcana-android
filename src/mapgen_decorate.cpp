@@ -34,8 +34,7 @@ static void decorate_walls()
 
                 int rubble_one_in_n = 10;
 
-                const bool is_common_wall =
-                        wall->m_type == terrain::WallType::common;
+                const bool is_common_wall = wall->m_type == terrain::WallType::common;
 
                 if (is_common_wall && (map::g_dlvl >= g_dlvl_first_late_game)) {
                         // Late game common wall, put a lot of rubble to make it
@@ -44,8 +43,7 @@ static void decorate_walls()
                 }
 
                 if (rnd::one_in(rubble_one_in_n)) {
-                        auto* const t =
-                                terrain::make(terrain::Id::rubble_high, p);
+                        auto* const t = terrain::make(terrain::Id::rubble_high, p);
 
                         map::set_terrain(t);
                 }
