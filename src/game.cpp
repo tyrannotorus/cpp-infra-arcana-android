@@ -61,6 +61,9 @@ static int s_xp_accum = 0;
 static TimeData s_start_time;
 static IsWin s_is_win = IsWin::no;
 
+static int s_death_overlay_tint = 0;
+static int s_death_overlay_last_update_cycle = 0;
+
 static std::vector<HistoryEvent> s_history_events;
 
 static const std::string s_intro_msg_default =
@@ -116,6 +119,9 @@ void init()
         s_xp_pct = 0;
         s_xp_accum = 0;
         s_is_win = IsWin::no;
+
+        s_death_overlay_tint = 100;
+        s_death_overlay_last_update_cycle = 0;
 
         s_history_events.clear();
 }
@@ -506,6 +512,22 @@ void GameState::draw()
         io::draw_flash_animations();
 
         draw_health_bars();
+
+        if (map::g_player->is_alive() == false) {
+                const int current_cycle = io::graphics_cycle_nr(io::GraphicsCycle::fast);
+
+                if (current_cycle > s_death_overlay_last_update_cycle) {
+                        s_death_overlay_last_update_cycle = current_cycle;
+
+                        const int min_tint = 30;
+
+                        s_death_overlay_tint = std::max(min_tint, s_death_overlay_tint - 10);
+                }
+
+                io::draw_rectangle_filled_mod_blending(
+                        io::gui_to_px_rect(panels::area(Panel::screen)),
+                        colors::red().tinted(s_death_overlay_tint));
+        }
 }
 
 void GameState::update()
