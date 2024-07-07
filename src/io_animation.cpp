@@ -149,7 +149,7 @@ void init_animation()
 
                 switch (cycle) {
                 case GraphicsCycle::fast:
-                        delay = 300;
+                        delay = 200;
                         break;
 
                 case GraphicsCycle::slow:
