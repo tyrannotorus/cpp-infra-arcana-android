@@ -74,14 +74,14 @@ static bool try_use_talisman_of_resurrection(actor::Actor& actor)
                 }
         }
 
-        actor.restore_hp(999, false, Verbose::no);
-
         actor.m_properties.end_prop(
                 prop::Id::wound,
                 prop::PropEndConfig(
                         prop::PropEndAllowCallEndHook::no,
                         prop::PropEndAllowMsg::no,
                         prop::PropEndAllowHistoricMsg::no));
+
+        actor.restore_hp(999, false, Verbose::no);
 
         if (map::g_terrain.at(actor.m_pos)->id() == terrain::Id::chasm) {
                 // Player died due to falling down a chasm - go to next level

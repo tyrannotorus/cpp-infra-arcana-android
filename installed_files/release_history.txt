@@ -29,6 +29,11 @@
 - The screen fades to red when the player dies.
 
 
+##############################
+# Fixes
+##############################
+- The Talisman of Resurrection first restored all hit points and then healed all wounds, which could leave the player with lower than full health - fixed by reversing the order.
+
 ============================================================
 = v22.1.0 (September 24, 2023)
 ============================================================
