@@ -513,6 +513,7 @@ void GameState::draw()
 
         draw_health_bars();
 
+        // If the player is dead, fade to red.
         if (map::g_player->is_alive() == false) {
                 const int current_cycle = io::graphics_cycle_nr(io::GraphicsCycle::fast);
 
@@ -525,7 +526,7 @@ void GameState::draw()
                 }
 
                 io::draw_rectangle_filled_mod_blending(
-                        io::gui_to_px_rect(panels::area(Panel::screen)),
+                        io::gui_to_px_rect(panels::area(Panel::map)),
                         colors::red().tinted(s_death_overlay_tint));
         }
 }
