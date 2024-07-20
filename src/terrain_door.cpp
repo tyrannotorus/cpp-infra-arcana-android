@@ -31,6 +31,7 @@
 #include "item_factory.hpp"
 #include "item_weapon.hpp"
 #include "map.hpp"
+#include "minimap.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
@@ -1184,6 +1185,32 @@ Color Door::color_default() const
         }
 
         return color;
+}
+
+std::optional<map::MinimapAppearance> Door::minimap_appearance() const
+{
+        if (is_hidden()) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.symbol = map::MinimapSymbol::rectangle_filled;
+
+        if (type() == terrain::DoorType::metal) {
+                appearance.color = colors::light_teal();
+                appearance.legend_text = "Door (metal)";
+        }
+        else if (is_warded()) {
+                appearance.color = colors::light_red();
+                appearance.legend_text = "Door (warded)";
+        }
+        else {
+                appearance.color = colors::light_white();
+                appearance.legend_text = "Door";
+        }
+
+        return appearance;
 }
 
 char Door::character() const

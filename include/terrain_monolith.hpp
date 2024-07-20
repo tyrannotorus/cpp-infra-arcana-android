@@ -31,6 +31,10 @@ public:
 
         std::string name(Article article) const override;
 
+        Color color_default() const override;
+
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         void hit(
@@ -40,8 +44,6 @@ public:
                 int dmg) override;
 
 private:
-        Color color_default() const override;
-
         void activate();
 
         bool m_is_activated {false};

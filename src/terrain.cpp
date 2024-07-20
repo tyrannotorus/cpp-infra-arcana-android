@@ -45,6 +45,7 @@
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "map_travel.hpp"
+#include "minimap.hpp"
 #include "msg_log.hpp"
 #include "pickup.hpp"
 #include "player_bon.hpp"
@@ -605,6 +606,11 @@ Color Terrain::color_bg() const
         return colors::yellow();
 }
 
+std::optional<map::MinimapAppearance> Terrain::minimap_appearance() const
+{
+        return {};
+}
+
 void Terrain::clear_gore()
 {
         m_gore_tile = gfx::TileId::END;
@@ -1003,6 +1009,21 @@ Color Pillar::color_default() const
         }
 }
 
+std::optional<map::MinimapAppearance> Pillar::minimap_appearance() const
+{
+        if (!can_be_studied()) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Inscribed Object";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
+}
+
 gfx::TileId Pillar::tile() const
 {
         if (m_is_inscribed) {
@@ -1098,6 +1119,21 @@ Color Petroglyph::color_default() const
         else {
                 return colors::light_sepia();
         }
+}
+
+std::optional<map::MinimapAppearance> Petroglyph::minimap_appearance() const
+{
+        if (!can_be_studied()) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Inscribed Object";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
 }
 
 // -----------------------------------------------------------------------------
@@ -1609,6 +1645,21 @@ Color Urn::color_default() const
         }
 }
 
+std::optional<map::MinimapAppearance> Urn::minimap_appearance() const
+{
+        if (!can_be_studied()) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Inscribed Object";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
+}
+
 // -----------------------------------------------------------------------------
 // Stalagmite
 // -----------------------------------------------------------------------------
@@ -1770,6 +1821,17 @@ std::string Stairs::name(const Article article) const
 Color Stairs::color_default() const
 {
         return colors::yellow();
+}
+
+std::optional<map::MinimapAppearance> Stairs::minimap_appearance() const
+{
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Stairs";
+        appearance.symbol = map::MinimapSymbol::rectangle_filled;
+
+        return appearance;
 }
 
 void Stairs::add_light_hook(Array2<bool>& light) const
@@ -2002,6 +2064,16 @@ Color Liquid::color_default() const
         return colors::yellow();
 }
 
+std::optional<map::MinimapAppearance> Liquid::minimap_appearance() const
+{
+        map::MinimapAppearance appearance;
+
+        appearance.color = colors::blue();
+        appearance.symbol = map::MinimapSymbol::rectangle_filled;
+
+        return appearance;
+}
+
 // -----------------------------------------------------------------------------
 // Chasm
 // -----------------------------------------------------------------------------
@@ -2066,6 +2138,21 @@ std::string CrystalKey::name(const Article article) const
 Color CrystalKey::color_default() const
 {
         return m_is_active ? colors::light_red() : colors::gray();
+}
+
+std::optional<map::MinimapAppearance> CrystalKey::minimap_appearance() const
+{
+        if (!m_is_active) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Gleaming Crystal";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
 }
 
 gfx::TileId CrystalKey::tile() const
@@ -2238,7 +2325,18 @@ std::string Altar::name(const Article article) const
 
 Color Altar::color_default() const
 {
-        return colors::white();
+        return colors::light_sepia();
+}
+
+std::optional<map::MinimapAppearance> Altar::minimap_appearance() const
+{
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Altar";
+        appearance.symbol = map::MinimapSymbol::rectangle_filled;
+
+        return appearance;
 }
 
 // -----------------------------------------------------------------------------
@@ -2919,6 +3017,17 @@ Color Brazier::color_default() const
         return colors::yellow();
 }
 
+std::optional<map::MinimapAppearance> Brazier::minimap_appearance() const
+{
+        map::MinimapAppearance appearance;
+
+        appearance.color = colors::dark_yellow();
+        appearance.legend_text = "Brazier";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
+}
+
 // -----------------------------------------------------------------------------
 // Item container
 // -----------------------------------------------------------------------------
@@ -3327,6 +3436,21 @@ Color Tomb::color_default() const
 
         ASSERT("Failed to set Tomb color" && false);
         return colors::black();
+}
+
+std::optional<map::MinimapAppearance> Tomb::minimap_appearance() const
+{
+        if (m_is_open) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = colors::gray();
+        appearance.legend_text = "Tomb";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
 }
 
 void Tomb::bump(actor::Actor& actor_bumping)
@@ -4016,6 +4140,21 @@ Color Fountain::color_default() const
                 // No drinks left
                 return colors::gray();
         }
+}
+
+std::optional<map::MinimapAppearance> Fountain::minimap_appearance() const
+{
+        if (!m_has_drinks_left) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Fountain";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
 }
 
 std::string Fountain::name(const Article article) const

@@ -47,8 +47,8 @@ enum class DoorType
 enum class WardState
 {
         not_warded,  // Has never been warded.
-        warded,  // Is warded.
-        unwarded,  // Was warded, but ward has been removed.
+        warded,      // Is warded.
+        unwarded,    // Was warded, but ward has been removed.
 };
 
 class Door : public Terrain
@@ -77,6 +77,10 @@ public:
         std::string base_name_short() const;  // E.g. "door"
 
         std::string name(Article article) const override;
+
+        Color color_default() const override;
+
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
 
         char character() const override;
 
@@ -174,8 +178,6 @@ public:
         }
 
 private:
-        Color color_default() const override;
-
         void bash(DmgType dmg_type, actor::Actor& actor, int dmg);
         void player_bash(DmgType dmg_type, int dmg);
         void mon_bash(actor::Actor& mon);

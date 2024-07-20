@@ -902,4 +902,19 @@ Color Gong::color_default() const
         return m_is_used ? colors::gray() : colors::brown();
 }
 
+std::optional<map::MinimapAppearance> Gong::minimap_appearance() const
+{
+        if (m_is_used) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Temple Gong";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
+}
+
 }  // namespace terrain

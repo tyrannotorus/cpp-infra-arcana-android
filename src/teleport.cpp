@@ -296,8 +296,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         if (actor::is_player(&actor)) {
                 for (auto* const other_actor : game_time::g_actors) {
-                        if (!is_void_traveler_affecting_player_teleport(
-                                    *other_actor)) {
+                        if (!is_void_traveler_affecting_player_teleport(*other_actor)) {
                                 continue;
                         }
 

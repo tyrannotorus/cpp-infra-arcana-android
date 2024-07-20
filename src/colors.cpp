@@ -383,14 +383,9 @@ Color Color::tinted(int pct) const
         const auto current_g = m_sdl_color.g;
         const auto current_b = m_sdl_color.b;
 
-        const auto new_r =
-                (uint8_t)((double)current_r + ((double)(255 - current_r) * f));
-
-        const auto new_g =
-                (uint8_t)((double)current_g + ((double)(255 - current_g) * f));
-
-        const auto new_b =
-                (uint8_t)((double)current_b + ((double)(255 - current_b) * f));
+        const auto new_r = (uint8_t)((double)current_r + ((double)(255 - current_r) * f));
+        const auto new_g = (uint8_t)((double)current_g + ((double)(255 - current_g) * f));
+        const auto new_b = (uint8_t)((double)current_b + ((double)(255 - current_b) * f));
 
         return {new_r, new_g, new_b};
 }

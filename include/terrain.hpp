@@ -19,6 +19,11 @@
 #include "property_data.hpp"
 #include "terrain_data.hpp"
 
+namespace map
+{
+struct MinimapAppearance;
+}  // namespace map
+
 namespace io
 {
 enum class GraphicsCycle;
@@ -184,6 +189,8 @@ public:
         }
 
         Color color_bg() const;
+
+        virtual std::optional<map::MinimapAppearance> minimap_appearance() const;
 
         virtual bool is_walkable() const
         {
@@ -539,6 +546,8 @@ public:
 
         Color color_default() const override;
 
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
+
         bool allow_player_melee_attack(
                 DmgType dmg_type,
                 const item::Item& wpn) const override;
@@ -609,6 +618,8 @@ public:
 
         Color color_default() const override;
 
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         void hit(
@@ -665,6 +676,8 @@ public:
         std::string name(Article article) const override;
 
         Color color_default() const override;
+
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
 
         void bump(actor::Actor& actor_bumping) override;
 
@@ -853,6 +866,8 @@ public:
 
         Color color_default() const override;
 
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         void on_new_turn() override;
@@ -916,6 +931,8 @@ public:
         std::string name(Article article) const override;
 
         Color color_default() const override;
+
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
 
         void bump(actor::Actor& actor_bumping) override;
 
@@ -984,6 +1001,8 @@ public:
 
         Color color_default() const override;
 
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
+
         void bump(actor::Actor& actor_bumping) override;
 
         void hit(
@@ -1027,6 +1046,8 @@ public:
         gfx::TileId tile() const override;
 
         Color color_default() const override;
+
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
 
         void bump(actor::Actor& actor_bumping) override;
 
@@ -1084,6 +1105,8 @@ public:
         Altar() = delete;
 
         Color color_default() const override;
+
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
 
         void bump(actor::Actor& actor_bumping) override;
 
@@ -1159,6 +1182,8 @@ public:
         gfx::TileId tile() const override;
 
         Color color_default() const override;
+
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
 
         void bump(actor::Actor& actor_bumping) override;
 
@@ -1354,6 +1379,8 @@ public:
         std::string name(Article article) const override;
 
         Color color_default() const override;
+
+        std::optional<map::MinimapAppearance> minimap_appearance() const override;
 
         void on_new_turn() override;
 

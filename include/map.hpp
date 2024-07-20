@@ -61,6 +61,20 @@ struct ChokePointData
 
 namespace map
 {
+enum class MinimapSymbol
+{
+        rectangle_filled,
+        rectangle_filled_small,
+        rectangle_edge,
+};
+
+struct MinimapAppearance
+{
+        Color color {};
+        std::string legend_text;
+        MinimapSymbol symbol {MinimapSymbol::rectangle_filled};
+};
+
 struct PlayerMemoryAppearance
 {
         bool is_defined() const
@@ -73,7 +87,7 @@ struct PlayerMemoryAppearance
         std::string name;
         Color color {};
 
-        Color minimap_color {};
+        MinimapAppearance minimap {};
 };
 
 struct PlayerMemoryTerrain

@@ -100,18 +100,24 @@ static void free_layers_owned_memory()
         }
 }
 
-static bool allow_memorize_terrain(const terrain::Terrain& terrain)
+static bool is_dark_floor(const terrain::Terrain& terrain)
 {
+        // Terrain is considered dark floor here if:
+        //
+        // * It is dark, AND
+        // * It does NOT block walking (e.g. floor, open doors), AND
+        // * It is floor-like OR hidden terrain (e.g. floor, low rubble, hidden traps etc)
+        //
+        // This terrain will not be memorized on the regular game map (but will be memorized on the
+        // minimap).
+        //
+
         const bool blocks_walking = !terrain.is_walkable();
         const bool is_dark = map::g_dark.at(terrain.pos());
-        const bool is_floor = terrain.m_data->is_floor_like;
+        const bool is_floor_like = terrain.m_data->is_floor_like;
         const bool is_hidden = terrain.is_hidden();
 
-        // Memorize the terrain if:
-        // * It is not dark, or
-        // * It is not floor, and not hidden (e.g. walls, revealed traps, water, open doors), or
-        // * It blocks walking (e.g. hidden doors)
-        return !is_dark || (!is_floor && !is_hidden) || blocks_walking;
+        return is_dark && !blocks_walking && (is_floor_like || is_hidden);
 }
 
 // -----------------------------------------------------------------------------
@@ -343,86 +349,23 @@ void memorize_terrain_at(const P& p)
 {
         const terrain::Terrain* const terrain = g_terrain.at(p);
         PlayerMemoryTerrain& memory = g_terrain_memory.at(p);
-        const terrain::Id id = terrain->id();
         const bool blocks_walking = !terrain->is_walkable();
-        const Color& minimap_wall_color = colors::sepia();
 
-        if (id == terrain::Id::stairs) {
-                memory.appearance.minimap_color = colors::yellow();
-        }
-        else if (id == terrain::Id::door) {
-                const auto* const door = static_cast<const terrain::Door*>(terrain);
+        const std::optional<MinimapAppearance> special_minimap_appearance =
+                terrain->minimap_appearance();
 
-                if (door->is_hidden()) {
-                        memory.appearance.minimap_color = minimap_wall_color;
-                }
-                else {
-                        if (door->type() == terrain::DoorType::metal) {
-                                memory.appearance.minimap_color = colors::light_teal();
-                        }
-                        else if (door->is_warded()) {
-                                memory.appearance.minimap_color = colors::light_red();
-                        }
-                        else {
-                                memory.appearance.minimap_color = colors::light_white();
-                        }
-                }
-        }
-        else if (id == terrain::Id::fountain) {
-                memory.appearance.minimap_color = terrain->color_default();
-        }
-        else if (id == terrain::Id::monolith) {
-                memory.appearance.minimap_color = terrain->color_default();
-        }
-        else if (id == terrain::Id::urn) {
-                const bool can_study =
-                        static_cast<const terrain::Urn*>(terrain)->can_be_studied();
-
-                memory.appearance.minimap_color =
-                        can_study
-                        ? terrain->color()
-                        : minimap_wall_color;
-        }
-        else if (id == terrain::Id::pillar) {
-                const bool can_study =
-                        static_cast<const terrain::Pillar*>(terrain)->can_be_studied();
-
-                memory.appearance.minimap_color =
-                        can_study
-                        ? terrain->color()
-                        : minimap_wall_color;
-        }
-        else if (id == terrain::Id::petroglyph) {
-                const bool can_study =
-                        static_cast<const terrain::Petroglyph*>(terrain)->can_be_studied();
-
-                memory.appearance.minimap_color =
-                        can_study
-                        ? terrain->color()
-                        : minimap_wall_color;
-        }
-        else if (id == terrain::Id::mirror) {
-                const auto* const mirror = static_cast<const terrain::Mirror*>(terrain);
-
-                memory.appearance.minimap_color =
-                        mirror->is_activated()
-                        ? terrain->color_default()
-                        : colors::orange();
-        }
-        else if (id == terrain::Id::crystal_key) {
-                memory.appearance.minimap_color = terrain->color_default();
-        }
-        else if (id == terrain::Id::liquid) {
-                memory.appearance.minimap_color = colors::blue();
+        if (special_minimap_appearance) {
+                memory.appearance.minimap = special_minimap_appearance.value();
         }
         else if (blocks_walking) {
-                memory.appearance.minimap_color = minimap_wall_color;
+                memory.appearance.minimap.color = minimap::wall_color();
         }
         else {
-                memory.appearance.minimap_color = colors::dark_gray_brown();
+                memory.appearance.minimap.color = minimap::floor_color();
         }
 
-        if (allow_memorize_terrain(*terrain)) {
+        // TODO: Perhaps dark floor should not be memorized on the minimap either?
+        if (!is_dark_floor(*terrain)) {
                 const std::string name = text_format::first_to_upper(terrain->name(Article::a));
 
                 memory.id = terrain->id();
@@ -461,14 +404,16 @@ void memorize_item_at(const P& p)
         memory.appearance.name = name;
         memory.appearance.color = item->color();
 
-        memory.appearance.minimap_color = colors::light_magenta();
+        memory.appearance.minimap.color = colors::light_magenta();
+        memory.appearance.minimap.legend_text = "Item";
+        memory.appearance.minimap.symbol = MinimapSymbol::rectangle_filled;
 
         if ((item->data().type == ItemType::ranged_wpn) &&
             !item->data().ranged.has_infinite_ammo) {
                 const auto* wpn = static_cast<const item::Wpn*>(item);
 
                 if (wpn->m_ammo_loaded == 0) {
-                        memory.appearance.minimap_color = colors::magenta();
+                        memory.appearance.minimap.color = colors::magenta();
                 }
         }
 }
@@ -477,8 +422,7 @@ void clear_player_memory_at(const P& p)
 {
         map::g_terrain_memory.at(p) = {};
 
-        map::g_terrain_memory.at(p).appearance.minimap_color =
-                colors::black();
+        map::g_terrain_memory.at(p).appearance.minimap.color = colors::black();
 
         map::g_item_memory.at(p) = {};
 }

@@ -133,6 +133,21 @@ Color Mirror::color_default() const
         return m_is_activated ? colors::gray() : colors::sepia();
 }
 
+std::optional<map::MinimapAppearance> Mirror::minimap_appearance() const
+{
+        if (m_is_activated) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = colors::orange();
+        appearance.legend_text = "Hazy Mirror";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
+}
+
 void Mirror::bump(actor::Actor& actor_bumping)
 {
         if (!actor::is_player(&actor_bumping)) {

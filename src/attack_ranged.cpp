@@ -923,8 +923,7 @@ static void draw_projectiles(ProjectileFireData& fire_data)
         states::draw();
 
         for (Projectile& projectile : fire_data.projectiles) {
-                projectile.draw_obj.pos =
-                        viewport::to_view_pos(projectile.pos);
+                projectile.draw_obj.pos = viewport::to_view_pos(projectile.pos);
 
                 if (should_draw_projectile_as_travelling(projectile)) {
                         // Draw travelling projectile.
@@ -939,8 +938,7 @@ static void draw_projectiles(ProjectileFireData& fire_data)
                 else if (should_draw_projectile_as_hit(projectile)) {
                         // Draw projectile hit.
                         projectile.draw_obj.tile =
-                                (projectile.draw_obj.tile ==
-                                 gfx::TileId::blast1)
+                                (projectile.draw_obj.tile == gfx::TileId::blast1)
                                 ? gfx::TileId::blast2
                                 : gfx::TileId::blast1;
 

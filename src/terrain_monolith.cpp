@@ -78,6 +78,21 @@ Color Monolith::color_default() const
         return m_is_activated ? colors::gray() : colors::light_cyan();
 }
 
+std::optional<map::MinimapAppearance> Monolith::minimap_appearance() const
+{
+        if (m_is_activated) {
+                return {};
+        }
+
+        map::MinimapAppearance appearance;
+
+        appearance.color = color_default();
+        appearance.legend_text = "Monolith";
+        appearance.symbol = map::MinimapSymbol::rectangle_edge;
+
+        return appearance;
+}
+
 void Monolith::bump(actor::Actor& actor_bumping)
 {
         if (!actor::is_player(&actor_bumping)) {
@@ -92,7 +107,8 @@ void Monolith::bump(actor::Actor& actor_bumping)
                         msg_log::add(
                                 "There is a carved rock defiled with blasphemous carvings here. "
                                 "It must be destroyed!");
-                } else {
+                }
+                else {
                         msg_log::add("There is a carved rock here.");
                 }
 

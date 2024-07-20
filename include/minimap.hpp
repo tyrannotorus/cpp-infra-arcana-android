@@ -9,6 +9,8 @@
 
 #include "state.hpp"
 
+class Color;
+
 // -----------------------------------------------------------------------------
 // ViewMinimap
 // -----------------------------------------------------------------------------
@@ -35,6 +37,9 @@ namespace minimap
 void clear();
 
 void update();
+
+Color wall_color();
+Color floor_color();
 
 }  // namespace minimap
 
