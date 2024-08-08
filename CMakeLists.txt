@@ -401,26 +401,17 @@ if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX
                 )
 
         set(DEBUG_COMPILE_FLAGS
-                -Wunused
                 -Wnull-dereference
                 -g
+                # NOTE: For some reason, -O0 breaks the "ar" command when building
+                # with mingw (the command seems to freeze forever), but -Og works.
+                # -Og seems to be the preferable setting overall anyway.
+                -Og
                 # Uncomment to generate gmon.out for gprof (must also be done for linker
                 # flags, see below)
                 # -pg
                 )
-
-        if(WIN32)
-                list(APPEND COMMON_COMPILE_FLAGS
-                        # NOTE: For some reason, -O0 breaks the "ar" command when building
-                        # with mingw (the command seems to freeze forever), but -Og works.
-                        -Og
-                        )
-        else()
-                list(APPEND COMMON_COMPILE_FLAGS
-                        -O0
-                        )
-        endif()
-
+        
         if(DEBUG_SANITIZE)
                 list(APPEND DEBUG_COMPILE_FLAGS
                         -fsanitize=address
