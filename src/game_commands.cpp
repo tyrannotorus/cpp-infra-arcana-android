@@ -215,27 +215,26 @@ static void handle_fire_command()
         }
 }
 
-static void handle_toggle_lantern_command()
+static void handle_activate_item_shortcut_command(const item::Id item_id)
 {
-        item::Item* lantern = nullptr;
+        item::Item* item = nullptr;
 
-        for (auto* const item : map::g_player->m_inv.m_backpack) {
-                if (item->id() == item::Id::lantern) {
-                        lantern = item;
+        for (auto* const found_item : map::g_player->m_inv.m_backpack) {
+                if (found_item->id() == item_id) {
+                        item = found_item;
 
                         break;
                 }
         }
 
-        if (lantern) {
-                lantern->activate(map::g_player);
+        if (item) {
+                item->activate(map::g_player);
         }
         else {
-                std::unique_ptr<item::Item> tmp_lantern(
-                        item::make(item::Id::lantern));
+                std::unique_ptr<item::Item> tmp_item(item::make(item_id));
 
                 const std::string name =
-                        tmp_lantern->name(
+                        tmp_item->name(
                                 ItemNameType::a,
                                 ItemNameInfo::none,
                                 ItemNameAttackInfo::none);
@@ -537,6 +536,9 @@ static GameCmd to_cmd_default(const io::InputData& input)
 
         case 't':
                 return GameCmd::throw_item;
+
+        case 'b':
+                return GameCmd::use_medical_bag;
 
         case 'l':
         case 'e':
@@ -936,8 +938,12 @@ void handle(const GameCmd cmd)
                 }
         } break;
 
+        case GameCmd::use_medical_bag: {
+                handle_activate_item_shortcut_command(item::Id::medical_bag);
+        } break;
+
         case GameCmd::toggle_lantern: {
-                handle_toggle_lantern_command();
+                handle_activate_item_shortcut_command(item::Id::lantern);
         } break;
 
         case GameCmd::look: {

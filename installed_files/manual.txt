@@ -13,7 +13,6 @@ Gameplay commands:
    h (M)     MESSAGE history
    i         INVENTORY (wield, equip, remove, consume, or activate items)
    k (w)     KICK or strike objects, or DESTROY CORPSES
-   l (e)     Toggle LANTERN
    m         Show MAP
    n (o)     Make NOISE
    p         DISARM trap
@@ -21,13 +20,17 @@ Gameplay commands:
    5 (.)     WAIT one turn (numpad '5' or the period key)
              (This also rearranges pistol magazines if possible, or feeds on a
              corpse if playing as the Ghoul character)
-   s         WAIT five turns, or until something happens
    t         THROW item, throw lit EXPLOSIVE
    u (G)     UNLOAD firearm on the ground, or pick up item
    v         LOOK, VIEW descriptions of things on the map
    x         CAST spell
    z         SWAP to readied weapon
    Q         QUIT
+
+Optional convenience commands and shortcuts:
+   b         Use MEDICAL BAG
+   l (e)     Toggle LANTERN
+   s         WAIT five turns, or until something happens
    Shift     Hold while pressing a move key to move until interrupted
    Tab       MELEE ATTACK adjacent monster (or further away if wielding a
              melee weapon with long reach)
