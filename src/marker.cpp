@@ -1724,7 +1724,11 @@ CtrlObjActionPtr CtrlObj::query_control() const
 
         int choice = 0;
 
-        popup.setup_menu_mode(menu_labels, menu_keys, &choice);
+        popup.setup_menu_mode(
+                menu_labels,
+                menu_keys,
+                popup::MenuModeShowCancelHint::no,
+                &choice);
 
         popup.set_title("Control object");
 

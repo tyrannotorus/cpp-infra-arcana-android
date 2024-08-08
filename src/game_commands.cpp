@@ -98,6 +98,7 @@ static void query_quit()
                 .setup_menu_mode(
                         {"(N)o", "(Y)es"},
                         {'n', 'y'},
+                        popup::MenuModeShowCancelHint::no,
                         &choice)
                 .run();
 
@@ -249,7 +250,6 @@ static void handle_game_menu_command()
                 "(T)ome of Wisdom",
                 "(O)ptions",
                 "(Q)uit",
-                "(C)ancel",
         };
 
         int choice = 0;
@@ -257,7 +257,8 @@ static void handle_game_menu_command()
         popup::Popup(popup::AddToMsgHistory::no)
                 .setup_menu_mode(
                         choices,
-                        {'t', 'o', 'q', 'c'},
+                        {'t', 'o', 'q'},
+                        popup::MenuModeShowCancelHint::yes,
                         &choice)
                 .run();
 

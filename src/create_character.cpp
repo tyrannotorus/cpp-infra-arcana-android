@@ -59,6 +59,7 @@ static void handle_show_player_info_command()
                          'x',
                          'v',
                          'm'},
+                        popup::MenuModeShowCancelHint::yes,
                         &choice)
                 .run();
 
@@ -497,6 +498,7 @@ void PickTraitState::update()
                                         .setup_menu_mode(
                                                 {"(Y)es", "(N)o"},
                                                 {'y', 'n'},
+                                                popup::MenuModeShowCancelHint::no,
                                                 &choice)
                                         .run();
 
@@ -850,6 +852,7 @@ void RemoveTraitState::update()
                         .setup_menu_mode(
                                 {"(Y)es", "(N)o"},
                                 {'y', 'n'},
+                                popup::MenuModeShowCancelHint::no,
                                 &choice)
                         .run();
 

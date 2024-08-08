@@ -76,7 +76,9 @@ public:
         }
 
 protected:
-        MedBagAction choose_action() const;
+        // Two different ways of choosing action, depending on user settings:
+        MedBagAction choose_action_auto() const;
+        MedBagAction choose_action_manual() const;
 
         int tot_suppl_for_action(MedBagAction action) const;
 

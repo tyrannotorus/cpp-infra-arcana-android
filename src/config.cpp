@@ -75,6 +75,7 @@ static bool s_warn_on_throw_valuable = false;
 static bool s_warn_on_light_explosive = false;
 static bool s_warn_on_drink_malign_potion = false;
 static bool s_warn_on_ranged_wpn_melee = false;
+static bool s_is_medical_bag_auto_choice = false;
 static bool s_is_ranged_wpn_auto_reload = false;
 static bool s_is_intro_lvl_skipped = false;
 static bool s_is_intro_popup_skipped = false;
@@ -309,6 +310,7 @@ static void set_default_variables()
         s_warn_on_light_explosive = true;
         s_warn_on_drink_malign_potion = true;
         s_warn_on_ranged_wpn_melee = true;
+        s_is_medical_bag_auto_choice = false;
         s_is_ranged_wpn_auto_reload = false;
         s_delay_projectile_draw = 50;
         s_delay_explosion = 300;
@@ -439,6 +441,9 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_warn_on_ranged_wpn_melee = lines.front() == "1";
         remove_line(lines);
 
+        s_is_medical_bag_auto_choice = lines.front() == "1";
+        remove_line(lines);
+
         s_is_ranged_wpn_auto_reload = lines.front() == "1";
         remove_line(lines);
 
@@ -518,6 +523,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(s_warn_on_light_explosive ? "1" : "0");
         lines.emplace_back(s_warn_on_drink_malign_potion ? "1" : "0");
         lines.emplace_back(s_warn_on_ranged_wpn_melee ? "1" : "0");
+        lines.emplace_back(s_is_medical_bag_auto_choice ? "1" : "0");
         lines.emplace_back(s_is_ranged_wpn_auto_reload ? "1" : "0");
         lines.push_back(std::to_string(s_delay_projectile_draw));
         lines.push_back(std::to_string(s_delay_explosion));
@@ -595,6 +601,7 @@ void init()
         s_options.emplace_back(std::make_unique<InputModeOption>());
         s_options.emplace_back(std::make_unique<AnyKeyConfirmMoreOption>());
         s_options.emplace_back(std::make_unique<AutoSelectMenuOption>());
+        s_options.emplace_back(std::make_unique<MedicalBagAutoChoiceOption>());
         s_options.emplace_back(std::make_unique<AutoReloadOption>());
 
         // Gameplay
@@ -805,6 +812,11 @@ bool warn_on_drink_malign_potion()
 bool warn_on_ranged_wpn_melee()
 {
         return s_warn_on_ranged_wpn_melee;
+}
+
+bool is_medical_bag_auto_choice()
+{
+        return s_is_medical_bag_auto_choice;
 }
 
 bool is_ranged_wpn_auto_reload()
@@ -1759,6 +1771,39 @@ void WarnRangedWeaponMeleeOption::change(OptionChangeCommand command) const
         (void)command;
 
         s_warn_on_ranged_wpn_melee = !s_warn_on_ranged_wpn_melee;
+}
+
+std::string MedicalBagAutoChoiceOption::name() const
+{
+        return "Auto medical bag choice";
+}
+
+std::string MedicalBagAutoChoiceOption::descr() const
+{
+        return (
+                "Automatically choose Medical Bag action, "
+                "according to the following priority: "
+                "\n1) Treat infection"
+                "\n2) Treat wound"
+                // "\n3) Quick patch-up"
+                "\nIf this option is disabled, the action is chosen in a popup menu instead.");
+}
+
+std::string MedicalBagAutoChoiceOption::value_str() const
+{
+        return s_is_medical_bag_auto_choice ? "Yes" : "No";
+}
+
+OptionSubmenuType MedicalBagAutoChoiceOption::submenu_type() const
+{
+        return OptionSubmenuType::input;
+}
+
+void MedicalBagAutoChoiceOption::change(OptionChangeCommand command) const
+{
+        (void)command;
+
+        s_is_medical_bag_auto_choice = !s_is_medical_bag_auto_choice;
 }
 
 std::string AutoReloadOption::name() const

@@ -86,6 +86,7 @@ bool warn_on_throw_valuable();
 bool warn_on_light_explosive();
 bool warn_on_drink_malign_potion();
 bool warn_on_ranged_wpn_melee();
+bool is_medical_bag_auto_choice();
 bool is_ranged_wpn_auto_reload();
 bool is_intro_lvl_skipped();
 bool is_intro_popup_skipped();

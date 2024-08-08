@@ -24,6 +24,12 @@ enum class AddToMsgHistory
         yes
 };
 
+enum class MenuModeShowCancelHint
+{
+        no,
+        yes
+};
+
 class PopupState;
 
 // Frontend for the PopupState class. To display a popup, the calling code shall
@@ -51,6 +57,7 @@ public:
         Popup& setup_menu_mode(
                 const std::vector<std::string>& choices,
                 const std::vector<char>& menu_keys,
+                MenuModeShowCancelHint show_cancel_hint,
                 int* menu_choice_result);
 
         Popup& setup_number_query_mode(
@@ -127,6 +134,7 @@ private:
 
         std::vector<std::string> m_menu_choices {};
         std::vector<char> m_menu_keys {};
+        MenuModeShowCancelHint m_show_cancel_hint {MenuModeShowCancelHint::no};
         int* m_menu_choice_result {nullptr};
         MenuBrowser m_browser {};
 };

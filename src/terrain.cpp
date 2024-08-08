@@ -1736,10 +1736,9 @@ void Stairs::bump(actor::Actor& actor_bumping)
         popup::Popup(popup::AddToMsgHistory::no)
                 .set_title("A staircase leading downwards")
                 .setup_menu_mode(
-                        {"(D)escend",
-                         "(S)ave and quit",
-                         "(space, esc) Cancel"},
-                        {'d', 's', 0},
+                        {"(D)escend", "(S)ave and quit"},
+                        {'d', 's'},
+                        popup::MenuModeShowCancelHint::yes,
                         &choice)
                 .run();
 

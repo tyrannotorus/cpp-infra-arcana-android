@@ -18,6 +18,7 @@
 #include "audio_data.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
+#include "config.hpp"
 #include "create_character.hpp"
 #include "debug.hpp"
 #include "game.hpp"
@@ -27,6 +28,7 @@
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
+#include "popup.hpp"
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
@@ -132,13 +134,14 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
 
         // OK, we are allowed to use the medical bag
 
-        m_current_action = choose_action();
+        if (config::is_medical_bag_auto_choice()) {
+                m_current_action = choose_action_auto();
+        }
+        else {
+                m_current_action = choose_action_manual();
+        }
 
         if (m_current_action == MedBagAction::END) {
-                msg_log::clear();
-
-                msg_log::add("There is nothing to treat.");
-
                 return ConsumeItem::no;
         }
 
@@ -186,7 +189,7 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
         return ConsumeItem::no;
 }
 
-MedBagAction MedicalBag::choose_action() const
+MedBagAction MedicalBag::choose_action_auto() const
 {
         // Infection?
         if (map::g_player->m_properties.has(prop::Id::infected)) {
@@ -196,6 +199,60 @@ MedBagAction MedicalBag::choose_action() const
         // Wound?
         if (map::g_player->m_properties.has(prop::Id::wound)) {
                 return MedBagAction::treat_wound;
+        }
+
+        msg_log::clear();
+
+        msg_log::add("There is nothing to treat.");
+
+        return MedBagAction::END;
+}
+
+MedBagAction MedicalBag::choose_action_manual() const
+{
+        auto cost_info_hint = [this](const MedBagAction action) {
+                const int cost = tot_suppl_for_action(action);
+
+                return "(supplies: " + std::to_string(cost) + ")";
+        };
+
+        const std::vector<std::string> choices = {
+                "(i) Sanitize infection " + cost_info_hint(MedBagAction::sanitize_infection),
+                "(w) Treat wound " + cost_info_hint(MedBagAction::treat_wound),
+        };
+
+        int choice = -1;
+
+        const std::string title = "Select treatment";
+
+        popup::Popup(popup::AddToMsgHistory::no)
+                .set_title(title)
+                .set_msg("Available supplies: " + std::to_string(m_nr_supplies))
+                .setup_menu_mode(
+                        choices,
+                        {'i', 'w'},
+                        popup::MenuModeShowCancelHint::yes,
+                        &choice)
+                .run();
+
+        switch (choice) {
+        case 0:
+                if (map::g_player->m_properties.has(prop::Id::infected)) {
+                        return MedBagAction::sanitize_infection;
+                }
+                else {
+                        msg_log::add("I am not infected.");
+                }
+                break;
+
+        case 1:
+                if (map::g_player->m_properties.has(prop::Id::wound)) {
+                        return MedBagAction::treat_wound;
+                }
+                else {
+                        msg_log::add("I have no wounds to treat.");
+                }
+                break;
         }
 
         return MedBagAction::END;

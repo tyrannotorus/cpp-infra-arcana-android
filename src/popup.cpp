@@ -149,6 +149,7 @@ void Popup::copy_common_config(
 Popup& Popup::setup_menu_mode(
         const std::vector<std::string>& choices,
         const std::vector<char>& menu_keys,
+        const MenuModeShowCancelHint show_cancel_hint,
         int* menu_choice_result)
 {
         auto new_popup_state = std::make_unique<MenuPopupState>();
@@ -157,6 +158,7 @@ Popup& Popup::setup_menu_mode(
 
         new_popup_state->m_menu_choices = choices;
         new_popup_state->m_menu_keys = menu_keys;
+        new_popup_state->m_show_cancel_hint = show_cancel_hint;
         new_popup_state->m_menu_choice_result = menu_choice_result;
 
         m_popup_state = std::move(new_popup_state);
@@ -265,13 +267,15 @@ void MsgPopupState::draw()
                         ? (int)msg_lines[0].size()
                         : text_max_w;
 
+                const auto title_w = (int)m_title.size();
+
                 const auto confirm_line_w = (int)common_text::g_confirm_hint.size();
 
                 const int padding = 12;
 
                 horizontal_line_w =
                         std::max(
-                                {(int)m_title.size() + padding,
+                                {title_w + padding,
                                  msg_line_w,
                                  confirm_line_w + padding});
 
@@ -421,7 +425,7 @@ void MenuPopupState::draw()
 
         int horizontal_line_w = 0;
 
-        if (nr_msg_lines <= 1) {
+        {
                 const auto msg_line_w =
                         (nr_msg_lines == 0)
                         ? 0
@@ -429,22 +433,21 @@ void MenuPopupState::draw()
 
                 const auto title_w = (int)m_title.size();
 
+                const auto cancel_line_w =
+                        (m_show_cancel_hint == MenuModeShowCancelHint::yes)
+                        ? (int)common_text::g_cancel_hint.size()
+                        : 0;
+
+                const int padding = 12;
+
                 horizontal_line_w =
                         std::max(
-                                {title_w,
-                                 choice_lines_max_w,
-                                 msg_line_w});
+                                {title_w + padding,
+                                 msg_line_w,
+                                 choice_lines_max_w + padding,
+                                 cancel_line_w + padding});
 
-                // Make the horizontal line somewhat wider than the title or
-                // widest choice string
-                horizontal_line_w += 12;
-
-                // ...but not wider than the maximum text width
                 horizontal_line_w = std::min(horizontal_line_w, text_max_w);
-        }
-        else {
-                // More than one message line
-                horizontal_line_w = text_max_w;
         }
 
         draw_box(panels::area(Panel::screen));
@@ -549,7 +552,21 @@ void MenuPopupState::draw()
                 ++y;
         }
 
+        if (m_show_cancel_hint == MenuModeShowCancelHint::yes) {
+                ++y;
+        }
+
         draw_horizontal_line(horizontal_line_w, y);
+
+        if (m_show_cancel_hint == MenuModeShowCancelHint::yes) {
+                io::draw_text_center(
+                        " " + common_text::g_cancel_hint + " ",
+                        Panel::screen,
+                        {panels::center_x(Panel::screen), y},
+                        colors::menu_dark(),
+                        io::DrawBg::yes,
+                        colors::black());
+        }
 }
 
 void MenuPopupState::update()

@@ -52,6 +52,7 @@ static bool query_overwrite_savefile()
                 .setup_menu_mode(
                         {"(Y)es", "(N)o"},
                         {'y', 'n'},
+                        popup::MenuModeShowCancelHint::no,
                         &choice)
                 .run();
 
