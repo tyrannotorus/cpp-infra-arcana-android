@@ -93,7 +93,12 @@ static std::string trait_descr_for_spell(
                 str += " " + line;
         }
 
-        const auto cost_str = spell->cost_range(skill).str();
+        // Assert that the player character has been initialized, as it is used
+        // below, and also spell costs might be affected by whether the caster
+        // is the player or not.
+        ASSERT(actor::is_player(map::g_player));
+
+        const auto cost_str = spell->cost_range(skill, map::g_player).str();
         const auto sp_str = std::to_string(map::g_player->m_sp);
         const auto max_sp_str = std::to_string(actor::max_sp(*map::g_player));
 

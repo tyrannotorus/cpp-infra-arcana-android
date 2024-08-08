@@ -976,7 +976,7 @@ Range Spell::cost_range(
         const SpellSkill skill,
         const actor::Actor* const caster) const
 {
-        const int cost_max = base_max_cost(skill);
+        const int cost_max = base_max_cost(skill, caster);
         const int cost_min = (cost_max + 1) / 2;
 
         Range range(cost_min, cost_max);
@@ -1175,7 +1175,7 @@ void Spell::cast(
             caster->is_alive() &&
             !player_bon::is_bg(Bg::exorcist) &&
             allow_cast &&
-            (base_max_cost(skill) > 0) &&
+            (base_max_cost(skill, caster) > 0) &&
             rnd::one_in(7)) {
                 // Run a random side effect.
                 const int d = 3;
@@ -1358,9 +1358,12 @@ Range SpellAuraOfDecay::duration_range(const SpellSkill skill) const
         return duration_range;
 }
 
-int SpellAuraOfDecay::base_max_cost(const SpellSkill skill) const
+int SpellAuraOfDecay::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 6;
 }
@@ -2003,9 +2006,12 @@ int SpellCataclysm::nr_explosions(const SpellSkill skill) const
         return 1;
 }
 
-int SpellCataclysm::base_max_cost(const SpellSkill skill) const
+int SpellCataclysm::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 7;
 }
@@ -2555,8 +2561,12 @@ std::vector<std::string> SpellSpectralWeapons::descr_specific(
 // -----------------------------------------------------------------------------
 // Control Object
 // -----------------------------------------------------------------------------
-int SpellControlObject::base_max_cost(const SpellSkill skill) const
+int SpellControlObject::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
+        (void)caster;
+
         if (skill == SpellSkill::transcendent) {
                 return 1;
         }
@@ -2925,6 +2935,25 @@ Range SpellBless::duration_range(SpellSkill skill) const
         return {1, 1};
 }
 
+int SpellBless::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
+{
+        (void)skill;
+
+        // This spell is cheaper for Exorcists. For other characters it should
+        // be an expensive spell that is difficult to keep enabled all the time,
+        // but for Exorcists it should be more available, since it fits their
+        // theme very well.
+
+        if (actor::is_player(caster) && player_bon::is_bg(Bg::exorcist)) {
+                return 4;
+        }
+        else {
+                return 8;
+        }
+}
+
 void SpellBless::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill,
@@ -3091,9 +3120,12 @@ std::vector<std::string> SpellLight::descr_specific(
 // -----------------------------------------------------------------------------
 // Invisibility
 // -----------------------------------------------------------------------------
-int SpellInvis::base_max_cost(const SpellSkill skill) const
+int SpellInvis::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 8;
 }
@@ -3176,9 +3208,12 @@ std::vector<std::string> SpellInvis::descr_specific(
 // -----------------------------------------------------------------------------
 // See Invisible
 // -----------------------------------------------------------------------------
-int SpellSeeInvis::base_max_cost(const SpellSkill skill) const
+int SpellSeeInvis::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 8;
 }
@@ -3249,8 +3284,12 @@ bool SpellSeeInvis::allow_mon_cast_now(
 // -----------------------------------------------------------------------------
 // Spell Shield
 // -----------------------------------------------------------------------------
-int SpellSpellShield::base_max_cost(const SpellSkill skill) const
+int SpellSpellShield::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
+        (void)caster;
+
         return 5 - (int)skill;
 }
 
@@ -3316,9 +3355,12 @@ Range SpellHaste::duration_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellHaste::base_max_cost(const SpellSkill skill) const
+int SpellHaste::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 5;
 }
@@ -3391,9 +3433,12 @@ Range SpellPremonition::duration_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellPremonition::base_max_cost(const SpellSkill skill) const
+int SpellPremonition::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 7;
 }
@@ -3433,8 +3478,12 @@ std::vector<std::string> SpellPremonition::descr_specific(
 // -----------------------------------------------------------------------------
 // Erudition
 // -----------------------------------------------------------------------------
-int SpellErudition::base_max_cost(const SpellSkill skill) const
+int SpellErudition::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
+        (void)caster;
+
         return 7 - (int)skill;
 }
 
@@ -3522,9 +3571,12 @@ std::vector<std::string> SpellErudition::descr_specific(
 // -----------------------------------------------------------------------------
 // Identify
 // -----------------------------------------------------------------------------
-int SpellIdentify::base_max_cost(const SpellSkill skill) const
+int SpellIdentify::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 7;
 }
@@ -3832,9 +3884,12 @@ bool SpellKnockBack::allow_mon_cast_now(
 // -----------------------------------------------------------------------------
 // Curse
 // -----------------------------------------------------------------------------
-int SpellCurse::base_max_cost(const SpellSkill skill) const
+int SpellCurse::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 3;
 }
@@ -3926,9 +3981,12 @@ bool SpellCurse::allow_mon_cast_now(
 // -----------------------------------------------------------------------------
 // Heal Others
 // -----------------------------------------------------------------------------
-int SpellHealOthers::base_max_cost(const SpellSkill skill) const
+int SpellHealOthers::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 6;
 }
@@ -4039,9 +4097,12 @@ Range SpellEnfeeble::duration_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellEnfeeble::base_max_cost(const SpellSkill skill) const
+int SpellEnfeeble::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 5;
 }
@@ -4173,9 +4234,12 @@ Range SpellSlow::duration_range(const SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellSlow::base_max_cost(const SpellSkill skill) const
+int SpellSlow::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 5;
 }
@@ -4307,9 +4371,12 @@ Range SpellTerrify::duration_range(SpellSkill skill) const
         return {1, 1};
 }
 
-int SpellTerrify::base_max_cost(const SpellSkill skill) const
+int SpellTerrify::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 5;
 }
@@ -4740,9 +4807,12 @@ Range SpellHeal::regen_duration() const
         return {50, 100};
 }
 
-int SpellHeal::base_max_cost(const SpellSkill skill) const
+int SpellHeal::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 6;
 }
@@ -5268,9 +5338,12 @@ Range SpellBloodTempering::duration_range(SpellSkill skill) const
         return duration_range;
 }
 
-int SpellBloodTempering::base_max_cost(const SpellSkill skill) const
+int SpellBloodTempering::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         return 8;
 }
@@ -5400,9 +5473,12 @@ SpellShock SpellCrimsonPassage::shock_type() const
                         : SpellShock::disturbing);
 }
 
-int SpellCrimsonPassage::base_max_cost(const SpellSkill skill) const
+int SpellCrimsonPassage::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
         // If the effect is already active, the spell is free to cast.
 

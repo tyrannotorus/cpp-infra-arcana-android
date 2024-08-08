@@ -234,7 +234,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const = 0;
 
 protected:
-        virtual int base_max_cost(SpellSkill skill) const = 0;
+        virtual int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const = 0;
 
         virtual bool is_noisy(SpellSkill skill) const = 0;
 
@@ -292,7 +294,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 protected:
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -349,7 +353,9 @@ public:
 protected:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -406,7 +412,9 @@ public:
 protected:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -461,7 +469,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 protected:
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -518,7 +528,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -559,7 +571,9 @@ public:
         virtual std::vector<std::string> descr_specific(
                 SpellSkill skill) const = 0;
 
-        virtual int base_max_cost(SpellSkill skill) const = 0;
+        virtual int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const = 0;
 };
 
 class ForceBolt : public BoltImpl
@@ -609,9 +623,12 @@ public:
         std::vector<std::string> descr_specific(
                 SpellSkill skill) const override;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 2;
         }
@@ -659,9 +676,12 @@ public:
         std::vector<std::string> descr_specific(
                 SpellSkill skill) const override;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 4;
         }
@@ -721,9 +741,13 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
-                return m_impl->base_max_cost(skill);
+                (void)caster;
+
+                return m_impl->base_max_cost(skill, caster);
         }
 
         bool is_noisy(const SpellSkill skill) const override
@@ -788,9 +812,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 8;
         }
@@ -872,7 +899,9 @@ private:
 
         int nr_destruction_sweeps(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -932,9 +961,12 @@ public:
 private:
         int nr_rats_summoned(SpellSkill skill) const;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 7;
         }
@@ -988,9 +1020,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 6;
         }
@@ -1051,7 +1086,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         int max_dist(SpellSkill skill) const;
 
@@ -1102,9 +1139,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 7;
         }
@@ -1163,9 +1203,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 5;
         }
@@ -1224,9 +1267,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 4;
         }
@@ -1287,9 +1333,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 0;
         }
@@ -1346,12 +1395,9 @@ public:
         Range duration_range(SpellSkill skill) const;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
-        {
-                (void)skill;
-
-                return 8;
-        }
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1413,9 +1459,12 @@ private:
 
         int chance_weapon(SpellSkill skill, int plus) const;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 4;
         }
@@ -1472,9 +1521,12 @@ private:
 
         Range burning_duration_range() const;
 
-        int base_max_cost(SpellSkill skill) const override
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 5;
         }
@@ -1540,9 +1592,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 8;
         }
@@ -1605,9 +1660,12 @@ public:
 private:
         int invis_duration(SpellSkill skill) const;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 8;
         }
@@ -1668,7 +1726,9 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(SpellSkill skill) const override;
 };
@@ -1723,7 +1783,9 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1781,7 +1843,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1838,7 +1902,9 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1889,7 +1955,9 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1938,7 +2006,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1994,7 +2064,9 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -2054,9 +2126,12 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 7;
         }
@@ -2120,7 +2195,9 @@ public:
 private:
         Range duration_range(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -2177,9 +2254,12 @@ private:
         Range duration_range(SpellSkill skill) const;
         Range dmg_range(SpellSkill skill) const;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 4;
         }
@@ -2235,7 +2315,9 @@ public:
 private:
         int nr_steps_allowed(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(SpellSkill skill) const override;
 };
@@ -2286,9 +2368,12 @@ public:
 private:
         int nr_sp_per_hp(SpellSkill skill) const;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 0;
         }
@@ -2346,9 +2431,12 @@ private:
 
         int calc_nr_hp_removed(const actor::Actor* caster) const;
 
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 0;
         }
@@ -2414,9 +2502,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 7;
         }
@@ -2482,9 +2573,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 6;
         }
@@ -2557,9 +2651,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 6;
         }
@@ -2622,7 +2719,9 @@ public:
 private:
         int nr_hp_restored(SpellSkill skill) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -2687,9 +2786,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 7;
         }
@@ -2755,9 +2857,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 7;
         }
@@ -2823,9 +2928,12 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
-        int base_max_cost(const SpellSkill skill) const override
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
         {
                 (void)skill;
+                (void)caster;
 
                 return 4;
         }
@@ -2892,7 +3000,9 @@ protected:
 
         actor::Actor* find_random_actor_to_heal(const actor::Actor* caster) const;
 
-        int base_max_cost(SpellSkill skill) const override;
+        int base_max_cost(
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
