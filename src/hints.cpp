@@ -108,10 +108,9 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "\n\nIn the character screen (accessed by pressing [C] or [@]), a more "
                         "detailed list can be seen, including a description of each effect. "
 
-                        "\n\nStatus effects shown with capital letters are \"permanent\", "
+                        "\n\nStatus effects shown with CAPITAL LETTERS are \"permanent\", "
                         "and are only removed if some special action is taken, for example "
-                        "using the medical bag to treat a wound - these effects are shown in all "
-                        "capital letters (e.g. WOUNDED)."};
+                        "using the medical bag to treat a wound."};
 
         case hints::Id::study_inscription:
                 return {
