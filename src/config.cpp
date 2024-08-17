@@ -1785,7 +1785,7 @@ std::string MedicalBagAutoChoiceOption::descr() const
                 "according to the following priority: "
                 "\n1) Treat infection"
                 "\n2) Treat wound"
-                // "\n3) Quick patch-up"
+                "\n3) Quick patch-up"
                 "\nIf this option is disabled, the action is chosen in a popup menu instead.");
 }
 

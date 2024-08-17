@@ -171,12 +171,12 @@ Hit Points, Wounds and healing
 The state of your physical health is described in two ways:
 
    (1) Hit Points (HP)
-This represents minor wounds like bruises and sprains, and also general combat morale, fatigue, stance, etc. If your HP reaches 0, it means you received a killing blow, or the circumstances are such that you can no longer fight back (you are fallen, pinned or completely exhausted). Hit Points usually regenerate automatically over time.
+This represents minor injuries such as bruises, sprains, or light bleeding - and also general combat morale, fatigue, stance, etc. If your Hit Points reach 0, it means you received a killing blow, or the circumstances are such that you can no longer fight back (you are fallen, pinned or completely exhausted). Hit Points usually regenerate automatically over time.
 
    (2) Wounds
 This represents more serious long-term damage. Wounds are received when you take a high amount of damage in one hit. Each Wound reduces your fighting abilities, maximum HP, and HP regeneration rate. Five concurrent wounds results in death.
 
-There is an item called a "Medical Bag", which has a certain number of "supplies". When activated, it will either sanitize an infection or treat a Wound. When bitten or clawed by certain monsters, you can become Infected; This should be treated before the infection turns into a disease! Treating infections only requires a few supplies, while treating wounds require more.
+There is an item called a "Medical Bag", which has a certain number of "supplies". When activated, it can be used to either sanitize an infection, treat a WOUND, or do a quick patch-up that restores some Hit Points. When bitten or clawed by certain monsters, you can become Infected; This should be treated before the infection turns into a disease! Treating infections or doing a quick patch-up only require a few supplies, while treating wounds requires more.
 
 --------------------------------------------------------------------------------
 Spirit and spell casting

@@ -6,6 +6,7 @@
 ##############################
 # Items
 - When using the Medical Bag, a menu is now shown where you can select the treatment to perform. Also added an option to automatically choose treatment like before.
+- Added an additional Medical Bag action called "quick patch-up", which restores some hit points.
 
 # Terrain objects
 - Some terrain objects are now "inscribed" and can be studied by bumping them. This gives XP, can recall forgotten spells, and gives a "feeling" regarding carried items (e.g. if a potion is benign or malign). Item "feelings" no longer happen passively over time.

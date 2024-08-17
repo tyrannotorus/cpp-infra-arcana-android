@@ -27,6 +27,7 @@ struct ItemData;
 
 enum class MedBagAction
 {
+        quick_patch_up,
         treat_wound,
         sanitize_infection,
         END
@@ -82,11 +83,12 @@ protected:
 
         int tot_suppl_for_action(MedBagAction action) const;
 
-        int tot_turns_for_action() const;
+        int tot_turns_for_action(MedBagAction action) const;
 
         void stop_action();
 
         static const int m_max_starting_supplies {24};
+        static const int m_hp_restored_by_quick_patch_up {10};
 
         int m_nr_supplies {m_max_starting_supplies};
         int m_nr_turns_left_action {-1};

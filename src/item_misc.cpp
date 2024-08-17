@@ -159,11 +159,15 @@ ConsumeItem MedicalBag::activate(actor::Actor* const actor)
         // Action can be done
         actor::player_state::g_active_medical_bag = this;
 
-        m_nr_turns_left_action = tot_turns_for_action();
+        m_nr_turns_left_action = tot_turns_for_action(m_current_action);
 
         std::string start_msg;
 
         switch (m_current_action) {
+        case MedBagAction::quick_patch_up:
+                start_msg = "I patch up some minor injuries.";
+                break;
+
         case MedBagAction::treat_wound:
                 start_msg = "I start treating a wound";
                 break;
@@ -201,6 +205,11 @@ MedBagAction MedicalBag::choose_action_auto() const
                 return MedBagAction::treat_wound;
         }
 
+        // Quick patch-up?
+        if (map::g_player->m_hp < actor::max_hp(*map::g_player)) {
+                return MedBagAction::quick_patch_up;
+        }
+
         msg_log::clear();
 
         msg_log::add("There is nothing to treat.");
@@ -212,11 +221,20 @@ MedBagAction MedicalBag::choose_action_manual() const
 {
         auto cost_info_hint = [this](const MedBagAction action) {
                 const int cost = tot_suppl_for_action(action);
+                const int turns = tot_turns_for_action(action);
 
-                return "(supplies: " + std::to_string(cost) + ")";
+                return (
+                        "(supplies: " +
+                        std::to_string(cost) +
+                        ", turns: " +
+                        std::to_string(turns) +
+                        ")");
         };
 
         const std::vector<std::string> choices = {
+                ("(q) Quick patch-up, restores " +
+                 std::to_string(m_hp_restored_by_quick_patch_up) +
+                 " hit points " + cost_info_hint(MedBagAction::quick_patch_up)),
                 "(i) Sanitize infection " + cost_info_hint(MedBagAction::sanitize_infection),
                 "(w) Treat wound " + cost_info_hint(MedBagAction::treat_wound),
         };
@@ -230,13 +248,22 @@ MedBagAction MedicalBag::choose_action_manual() const
                 .set_msg("Available supplies: " + std::to_string(m_nr_supplies))
                 .setup_menu_mode(
                         choices,
-                        {'i', 'w'},
+                        {'q', 'i', 'w'},
                         popup::MenuModeShowCancelHint::yes,
                         &choice)
                 .run();
 
         switch (choice) {
-        case 0:
+        case 0: {
+                if (map::g_player->m_hp < actor::max_hp(*map::g_player)) {
+                        return MedBagAction::quick_patch_up;
+                }
+                else {
+                        msg_log::add("There are no minor injuries to patch up.");
+                }
+        } break;
+
+        case 1:
                 if (map::g_player->m_properties.has(prop::Id::infected)) {
                         return MedBagAction::sanitize_infection;
                 }
@@ -245,7 +272,7 @@ MedBagAction MedicalBag::choose_action_manual() const
                 }
                 break;
 
-        case 1:
+        case 2:
                 if (map::g_player->m_properties.has(prop::Id::wound)) {
                         return MedBagAction::treat_wound;
                 }
@@ -264,10 +291,20 @@ void MedicalBag::continue_action()
 
         // Check if current action should be stopped.
         switch (m_current_action) {
+        case MedBagAction::quick_patch_up: {
+                if (map::g_player->m_hp >= actor::max_hp(*map::g_player)) {
+                        // Player already has full HP, presumably they were
+                        // healed by something else, or regenerated health.
+                        stop_action();
+
+                        return;
+                }
+        } break;
+
         case MedBagAction::treat_wound: {
                 if (!map::g_player->m_properties.has(prop::Id::wound)) {
-                        // Player is no longer wounded, presumably it was healed
-                        // by something else.
+                        // Player is no longer wounded, presumably they were
+                        // healed by something else.
                         stop_action();
 
                         return;
@@ -304,10 +341,13 @@ void MedicalBag::finish_current_action()
         actor::player_state::g_active_medical_bag = nullptr;
 
         switch (m_current_action) {
+        case MedBagAction::quick_patch_up: {
+                map::g_player->restore_hp(m_hp_restored_by_quick_patch_up);
+        } break;
+
         case MedBagAction::treat_wound: {
                 auto* const prop =
-                        map::g_player->m_properties.prop(
-                                prop::Id::wound);
+                        map::g_player->m_properties.prop(prop::Id::wound);
 
                 if (!prop) {
                         ASSERT(false);
@@ -344,8 +384,7 @@ void MedicalBag::finish_current_action()
         m_current_action = MedBagAction::END;
 
         if (m_nr_supplies <= 0) {
-                map::g_player->m_inv
-                        .remove_item_in_backpack_with_ptr(this, true);
+                map::g_player->m_inv.remove_item_in_backpack_with_ptr(this, true);
 
                 game::add_history_event("Ran out of medical supplies");
         }
@@ -399,29 +438,54 @@ void MedicalBag::interrupted(const ForceInterruptActions is_forced)
 
 int MedicalBag::tot_suppl_for_action(const MedBagAction action) const
 {
-        const bool is_healer = player_bon::has_trait(Trait::healer);
-
-        const int div = is_healer ? 2 : 1;
+        int cost = 0;
 
         switch (action) {
+        case MedBagAction::quick_patch_up:
+                cost = 2;
+                break;
+
         case MedBagAction::treat_wound:
-                return 8 / div;
+                cost = 8;
+                break;
 
         case MedBagAction::sanitize_infection:
-                return 2 / div;
+                cost = 2;
+                break;
 
         case MedBagAction::END:
+                ASSERT(false);
                 break;
         }
 
-        ASSERT(false);
+        if (player_bon::has_trait(Trait::healer)) {
+                cost /= 2;
+        }
 
-        return 0;
+        return cost;
 }
 
-int MedicalBag::tot_turns_for_action() const
+int MedicalBag::tot_turns_for_action(const MedBagAction action) const
 {
-        int nr_turns = 10;
+        int nr_turns = 0;
+
+        switch (action) {
+        case MedBagAction::quick_patch_up:
+                nr_turns = 4;
+                break;
+
+        case MedBagAction::treat_wound:
+                nr_turns = 16;
+                break;
+
+        case MedBagAction::sanitize_infection:
+                nr_turns = 8;
+                break;
+
+        case MedBagAction::END:
+                ASSERT(false);
+                break;
+        }
 
         if (player_bon::has_trait(Trait::healer)) {
                 nr_turns /= 2;
