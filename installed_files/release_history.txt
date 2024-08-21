@@ -44,6 +44,7 @@
 # Fixes
 ##############################
 - The Talisman of Resurrection first restored all hit points and then healed all wounds, which could leave the player with lower than full health - fixed by reversing the order.
+- For Exorcist spell traits, available spirit info is no longer printed in the character info screen, only when picking a trait (also the character info screen could show wrong numbers).
 
 ============================================================
 = v22.1.0 (September 24, 2023)

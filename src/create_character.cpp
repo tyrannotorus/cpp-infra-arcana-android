@@ -624,6 +624,10 @@ void PickTraitState::draw()
 
         std::string descr = player_bon::trait_descr(trait_marked);
 
+        std::string descr_extra = player_bon::trait_descr_extra_when_picking(trait_marked);
+
+        text_format::append_with_space(descr, descr_extra);
+
         const std::vector<std::string> formatted_descr =
                 text_format::split(
                         descr,

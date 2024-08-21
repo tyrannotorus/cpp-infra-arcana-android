@@ -19,12 +19,6 @@ namespace game_summary_data
 struct GameSummaryData;
 }  // namespace game_summary_data
 
-// This is a class for presenting a "player character description", it can
-// present this in the following formats:
-//
-// * As its own game state in a separate screen.
-// * Copied to the clipboard.
-//
 class CharacterDescr : public InfoScreenState
 {
 public:

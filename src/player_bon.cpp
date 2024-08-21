@@ -39,6 +39,7 @@ struct TraitData
         Trait id {Trait::END};
         std::string title {};
         std::string descr {};
+        std::string extra_descr_when_picking {};
         std::function<void()> on_picked {};
         std::function<void()> on_removed {};
         std::vector<Trait> trait_prereqs {};
@@ -99,19 +100,25 @@ static std::string trait_descr_for_spell(
         ASSERT(actor::is_player(map::g_player));
 
         const auto cost_str = spell->cost_range(skill, map::g_player).str();
+
+        str += (" This spell costs " +
+                cost_str +
+                " spirit to cast.");
+
+        return str;
+}
+
+static std::string get_player_available_sp_str()
+{
         const auto sp_str = std::to_string(map::g_player->m_sp);
         const auto max_sp_str = std::to_string(actor::max_sp(*map::g_player));
 
-        str +=
-                " This spell costs " +
-                cost_str +
-                " spirit to cast, you currently have " +
+        return (
+                "You currently have " +
                 sp_str +
                 "/" +
                 max_sp_str +
-                " spirit.";
-
-        return str;
+                " spirit.");
 }
 
 static TraitData& trait_data(const Trait id)
@@ -554,10 +561,8 @@ static void update_trait_data()
         // --- Cast Bless ---
         d.id = Trait::cast_bless_i;
         d.title = "Cast Bless";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::bless,
-                        SpellSkill::basic);
+        d.descr = trait_descr_for_spell(SpellId::bless, SpellSkill::basic);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
                 player_spells::learn_spell(
                         SpellId::bless,
@@ -572,19 +577,13 @@ static void update_trait_data()
         // --- Cast Bless II ---
         d.id = Trait::cast_bless_ii;
         d.title = "Cast Bless II";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::bless,
-                        SpellSkill::expert);
+        d.descr = trait_descr_for_spell(SpellId::bless, SpellSkill::expert);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::incr_spell_skill(
-                        SpellId::bless,
-                        Verbose::no);
+                player_spells::incr_spell_skill(SpellId::bless, Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::set_spell_skill(
-                        SpellId::bless,
-                        SpellSkill::basic);
+                player_spells::set_spell_skill(SpellId::bless, SpellSkill::basic);
         };
         d.trait_prereqs = {Trait::cast_bless_i};
         d.bg_prereq = Bg::exorcist;
@@ -593,14 +592,10 @@ static void update_trait_data()
         // --- Cast Cleansing Fire ---
         d.id = Trait::cast_cleansing_fire_i;
         d.title = "Cast Cleansing Fire";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::cleansing_fire,
-                        SpellSkill::basic);
+        d.descr = trait_descr_for_spell(SpellId::cleansing_fire, SpellSkill::basic);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::learn_spell(
-                        SpellId::cleansing_fire,
-                        Verbose::no);
+                player_spells::learn_spell(SpellId::cleansing_fire, Verbose::no);
         };
         d.on_removed = []() {
                 player_spells::remove_learned_spell(SpellId::cleansing_fire);
@@ -611,14 +606,10 @@ static void update_trait_data()
         // --- Cast Cleansing Fire II ---
         d.id = Trait::cast_cleansing_fire_ii;
         d.title = "Cast Cleansing Fire II";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::cleansing_fire,
-                        SpellSkill::expert);
+        d.descr = trait_descr_for_spell(SpellId::cleansing_fire, SpellSkill::expert);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::incr_spell_skill(
-                        SpellId::cleansing_fire,
-                        Verbose::no);
+                player_spells::incr_spell_skill(SpellId::cleansing_fire, Verbose::no);
         };
         d.on_removed = []() {
                 player_spells::set_spell_skill(
@@ -632,14 +623,10 @@ static void update_trait_data()
         // --- Cast Heal ---
         d.id = Trait::cast_heal_i;
         d.title = "Cast Heal";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::heal,
-                        SpellSkill::basic);
+        d.descr = trait_descr_for_spell(SpellId::heal, SpellSkill::basic);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::learn_spell(
-                        SpellId::heal,
-                        Verbose::no);
+                player_spells::learn_spell(SpellId::heal, Verbose::no);
         };
         d.on_removed = []() {
                 player_spells::remove_learned_spell(SpellId::heal);
@@ -650,19 +637,13 @@ static void update_trait_data()
         // --- Cast Heal II ---
         d.id = Trait::cast_heal_ii;
         d.title = "Cast Heal II";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::heal,
-                        SpellSkill::expert);
+        d.descr = trait_descr_for_spell(SpellId::heal, SpellSkill::expert);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::incr_spell_skill(
-                        SpellId::heal,
-                        Verbose::no);
+                player_spells::incr_spell_skill(SpellId::heal, Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::set_spell_skill(
-                        SpellId::heal,
-                        SpellSkill::basic);
+                player_spells::set_spell_skill(SpellId::heal, SpellSkill::basic);
         };
         d.trait_prereqs = {Trait::cast_heal_i};
         d.bg_prereq = Bg::exorcist;
@@ -671,14 +652,10 @@ static void update_trait_data()
         // --- Cast Light ---
         d.id = Trait::cast_light_i;
         d.title = "Cast Light";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::light,
-                        SpellSkill::basic);
+        d.descr = trait_descr_for_spell(SpellId::light, SpellSkill::basic);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::learn_spell(
-                        SpellId::light,
-                        Verbose::no);
+                player_spells::learn_spell(SpellId::light, Verbose::no);
         };
         d.on_removed = []() {
                 player_spells::remove_learned_spell(SpellId::light);
@@ -689,19 +666,13 @@ static void update_trait_data()
         // --- Cast Light II ---
         d.id = Trait::cast_light_ii;
         d.title = "Cast Light II";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::light,
-                        SpellSkill::expert);
+        d.descr = trait_descr_for_spell(SpellId::light, SpellSkill::expert);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::incr_spell_skill(
-                        SpellId::light,
-                        Verbose::no);
+                player_spells::incr_spell_skill(SpellId::light, Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::set_spell_skill(
-                        SpellId::light,
-                        SpellSkill::basic);
+                player_spells::set_spell_skill(SpellId::light, SpellSkill::basic);
         };
         d.trait_prereqs = {Trait::cast_light_i};
         d.bg_prereq = Bg::exorcist;
@@ -710,14 +681,10 @@ static void update_trait_data()
         // --- Cast Sanctuary ---
         d.id = Trait::cast_sanctuary_i;
         d.title = "Cast Sanctuary";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::sanctuary,
-                        SpellSkill::basic);
+        d.descr = trait_descr_for_spell(SpellId::sanctuary, SpellSkill::basic);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::learn_spell(
-                        SpellId::sanctuary,
-                        Verbose::no);
+                player_spells::learn_spell(SpellId::sanctuary, Verbose::no);
         };
         d.on_removed = []() {
                 player_spells::remove_learned_spell(SpellId::sanctuary);
@@ -728,19 +695,13 @@ static void update_trait_data()
         // --- Cast Sanctuary II ---
         d.id = Trait::cast_sanctuary_ii;
         d.title = "Cast Sanctuary II";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::sanctuary,
-                        SpellSkill::expert);
+        d.descr = trait_descr_for_spell(SpellId::sanctuary, SpellSkill::expert);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::incr_spell_skill(
-                        SpellId::sanctuary,
-                        Verbose::no);
+                player_spells::incr_spell_skill(SpellId::sanctuary, Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::set_spell_skill(
-                        SpellId::sanctuary,
-                        SpellSkill::basic);
+                player_spells::set_spell_skill(SpellId::sanctuary, SpellSkill::basic);
         };
         d.trait_prereqs = {Trait::cast_sanctuary_i};
         d.bg_prereq = Bg::exorcist;
@@ -749,14 +710,10 @@ static void update_trait_data()
         // --- Cast See Invisible ---
         d.id = Trait::cast_see_invisible_i;
         d.title = "Cast See Invisible";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::see_invis,
-                        SpellSkill::basic);
+        d.descr = trait_descr_for_spell(SpellId::see_invis, SpellSkill::basic);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::learn_spell(
-                        SpellId::see_invis,
-                        Verbose::no);
+                player_spells::learn_spell(SpellId::see_invis, Verbose::no);
         };
         d.on_removed = []() {
                 player_spells::remove_learned_spell(SpellId::see_invis);
@@ -767,19 +724,13 @@ static void update_trait_data()
         // --- Cast See Invisible II ---
         d.id = Trait::cast_see_invisible_ii;
         d.title = "Cast See Invisible II";
-        d.descr =
-                trait_descr_for_spell(
-                        SpellId::see_invis,
-                        SpellSkill::expert);
+        d.descr = trait_descr_for_spell(SpellId::see_invis, SpellSkill::expert);
+        d.extra_descr_when_picking = get_player_available_sp_str();
         d.on_picked = []() {
-                player_spells::incr_spell_skill(
-                        SpellId::see_invis,
-                        Verbose::no);
+                player_spells::incr_spell_skill(SpellId::see_invis, Verbose::no);
         };
         d.on_removed = []() {
-                player_spells::set_spell_skill(
-                        SpellId::see_invis,
-                        SpellSkill::basic);
+                player_spells::set_spell_skill(SpellId::see_invis, SpellSkill::basic);
         };
         d.trait_prereqs = {Trait::cast_see_invisible_i};
         d.bg_prereq = Bg::exorcist;
@@ -1010,7 +961,7 @@ void load()
 
         s_trait_log.resize(nr_trait_log_entries);
 
-        for (auto& e : s_trait_log) {
+        for (player_bon::TraitLogEntry& e : s_trait_log) {
                 e.clvl = saving::get_int();
 
                 e.trait_id = (Trait)saving::get_int();
@@ -1298,6 +1249,11 @@ std::string occultist_domain_descr(const OccultistDomain domain)
 std::string trait_descr(const Trait id)
 {
         return trait_data(id).descr;
+}
+
+std::string trait_descr_extra_when_picking(const Trait id)
+{
+        return trait_data(id).extra_descr_when_picking;
 }
 
 TraitPrereqData trait_prereqs(

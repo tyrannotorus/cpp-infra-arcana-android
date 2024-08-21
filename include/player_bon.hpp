@@ -172,6 +172,11 @@ std::string trait_title(Trait id);
 
 std::string trait_descr(Trait id);
 
+// Can provide extra information, such as how much spirit the player has, so
+// that this can be shown only when picking a new trait. Such information should
+// not be shown for example in the character description.
+std::string trait_descr_extra_when_picking(Trait id);
+
 std::string bg_title(Bg id);
 
 std::string occultist_profession_title(OccultistDomain domain);
