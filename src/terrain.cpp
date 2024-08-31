@@ -2208,7 +2208,7 @@ void CrystalKey::player_deactivate()
 
         msg_log::add("I sense that a path has opened somewhere.");
 
-        game::incr_player_xp(3, Verbose::yes);
+        game::incr_player_xp(g_xp_on_deactivate_crystal_key, Verbose::yes);
 
         deactivate();
 
@@ -2271,7 +2271,7 @@ void Altar::hit(
 
                         msg_log::add(msg);
 
-                        game::incr_player_xp(10);
+                        game::incr_player_xp(g_xp_on_exorcist_destroy_altar);
 
                         map::g_player->restore_sp(999, false, Verbose::no);
                         map::g_player->restore_sp(10, true);

@@ -315,7 +315,7 @@ ItemPrePickResult Scroll::pre_pickup_hook()
 
         msg_log::add("I destroy the profane text!");
 
-        game::incr_player_xp(5);
+        game::incr_player_xp(g_xp_on_exorcist_destroy_scroll);
 
         map::g_player->restore_sp(999, false, Verbose::no);
         map::g_player->restore_sp(7, true);

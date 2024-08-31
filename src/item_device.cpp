@@ -91,7 +91,7 @@ void Device::identify(const Verbose verbose)
 
                 game::add_history_event("Comprehended " + name_after);
 
-                game::incr_player_xp(15);
+                game::incr_player_xp(g_xp_on_identify_device);
         }
 }
 

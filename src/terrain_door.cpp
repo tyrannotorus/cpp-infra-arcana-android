@@ -1471,7 +1471,7 @@ void Door::reveal(const PrintRevealMsg print_reveal_msg)
 
 void Door::on_revealed_from_searching()
 {
-        game::incr_player_xp(2);
+        game::incr_player_xp(g_xp_on_reveal_door);
 }
 
 void Door::reveal_stuck_status(const PrintRevealMsg print_reveal_msg)

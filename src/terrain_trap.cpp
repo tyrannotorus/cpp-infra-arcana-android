@@ -644,7 +644,7 @@ void Trap::reveal(const PrintRevealMsg print_reveal_msg)
 
 void Trap::on_revealed_from_searching()
 {
-        game::incr_player_xp(1);
+        game::incr_player_xp(g_xp_on_reveal_trap);
 }
 
 std::string Trap::name(const Article article) const

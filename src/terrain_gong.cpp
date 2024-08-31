@@ -878,7 +878,7 @@ void Gong::hit(
 
                         msg_log::add(msg);
 
-                        game::incr_player_xp(10);
+                        game::incr_player_xp(g_xp_on_exorcist_destroy_gong);
 
                         map::g_player->restore_sp(999, false, Verbose::no);
                         map::g_player->restore_sp(10, true);

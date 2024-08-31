@@ -54,7 +54,7 @@ void Monolith::hit(
 
                         msg_log::add(msg);
 
-                        game::incr_player_xp(15);
+                        game::incr_player_xp(g_xp_on_exorcist_destroy_monolith);
 
                         map::g_player->restore_sp(999, false, Verbose::no);
                         map::g_player->restore_sp(10, true);
@@ -144,7 +144,7 @@ void Monolith::activate()
 
         audio::play(audio::SfxId::monolith);
 
-        game::incr_player_xp(20);
+        game::incr_player_xp(g_xp_on_activate_monolith);
 
         m_is_activated = true;
 

@@ -74,6 +74,20 @@ inline constexpr int g_hit_chance_pen_vs_unseen = 25;
 
 inline constexpr int g_player_max_clvl = 12;
 
+inline constexpr int g_xp_on_new_dlvl = 5;
+inline constexpr int g_xp_on_reveal_door = 2;
+inline constexpr int g_xp_on_reveal_trap = 1;
+inline constexpr int g_xp_on_study_inscription = 4;
+inline constexpr int g_xp_on_activate_monolith = 20;
+inline constexpr int g_xp_on_deactivate_crystal_key = 3;
+inline constexpr int g_xp_on_identify_pylon = 8;
+inline constexpr int g_xp_on_identify_device = 15;
+
+inline constexpr int g_xp_on_exorcist_destroy_altar = 10;
+inline constexpr int g_xp_on_exorcist_destroy_scroll = 5;
+inline constexpr int g_xp_on_exorcist_destroy_gong = 10;
+inline constexpr int g_xp_on_exorcist_destroy_monolith = 15;
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------

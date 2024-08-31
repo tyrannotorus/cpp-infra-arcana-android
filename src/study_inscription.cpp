@@ -187,7 +187,7 @@ void run()
 
         msg_log::add(msg);
 
-        game::incr_player_xp(4);
+        game::incr_player_xp(g_xp_on_study_inscription);
 
         msg_log::more_prompt();
 

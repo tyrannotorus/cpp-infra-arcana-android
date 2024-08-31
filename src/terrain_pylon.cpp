@@ -229,7 +229,7 @@ void PylonImpl::reveal() const
 
         msg_log::add("I now know that " + fake_name + " " + descr + ".");
 
-        game::incr_player_xp(8);
+        game::incr_player_xp(g_xp_on_identify_pylon);
 }
 
 // -----------------------------------------------------------------------------
