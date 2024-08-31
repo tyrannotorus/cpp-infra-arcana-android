@@ -147,7 +147,7 @@ public:
         std::vector<Actor*> other_actors_in_same_group() const;
         int nr_other_actors_in_same_group() const;
 
-        int ability(AbilityId id, bool is_affected_by_props) const;
+        int ability(AbilityId id, bool is_affected_by_props = true) const;
 
         bool restore_hp(
                 int hp_restored,

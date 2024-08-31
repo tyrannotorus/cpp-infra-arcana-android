@@ -412,6 +412,28 @@ int Doomed::ability_mod(const AbilityId ability) const
         return 0;
 }
 
+int Premonition::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::dodging:
+                return 75;
+
+        default:
+                return 0;
+        }
+}
+
+int Entangled::ability_mod(AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::dodging:
+                return -20;
+
+        default:
+                return 0;
+        }
+}
+
 void Entangled::on_applied()
 {
         // TODO: Rather than doing this on the "on_applied" hook (which should
@@ -482,6 +504,17 @@ bool Entangled::try_player_end_with_machete()
         }
 
         return false;
+}
+
+int Stuck::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::dodging:
+                return -20;
+
+        default:
+                return 0;
+        }
 }
 
 PropEnded Stuck::affect_move_dir(Dir& dir)
@@ -961,6 +994,17 @@ PropEnded Poisoned::on_actor_turn()
         return PropEnded::no;
 }
 
+int Aiming::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::ranged:
+                return 10;
+
+        default:
+                return 0;
+        }
+}
+
 PropEnded Aiming::on_hit(
         const int dmg,
         const DmgType dmg_type,
@@ -973,6 +1017,20 @@ PropEnded Aiming::on_hit(
         m_owner->m_properties.end_prop(id());
 
         return PropEnded::yes;
+}
+
+int Terrified::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::dodging:
+                return 20;
+
+        case AbilityId::ranged:
+                return -20;
+
+        default:
+                return 0;
+        }
 }
 
 bool Terrified::allow_attack_melee(const Verbose verbose) const
@@ -1070,6 +1128,9 @@ int Nailed::ability_mod(const AbilityId ability) const
                 return -10;
 
         case AbilityId::melee:
+                return -20;
+
+        case AbilityId::dodging:
                 return -20;
 
         default:
@@ -1635,10 +1696,11 @@ int AstralOpiumAddict::player_extra_min_shock() const
 
 int Frenzied::ability_mod(const AbilityId ability) const
 {
-        if (ability == AbilityId::melee) {
+        switch (ability) {
+        case AbilityId::melee:
                 return 10;
-        }
-        else {
+
+        default:
                 return 0;
         }
 }
@@ -1801,6 +1863,13 @@ bool Frenzied::allow_pray(Verbose verbose) const
         return false;
 }
 
+int Burning::ability_mod(const AbilityId ability) const
+{
+        (void)ability;
+
+        return -30;
+}
+
 PropEnded Burning::on_actor_turn()
 {
         if (actor::is_player(m_owner)) {
@@ -1911,6 +1980,26 @@ PropActResult Recloaks::on_act()
         return {};
 }
 
+int Blind::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::searching:
+                return -9999;
+
+        case AbilityId::ranged:
+                return -20;
+
+        case AbilityId::melee:
+                return -20;
+
+        case AbilityId::dodging:
+                return -50;
+
+        default:
+                return 0;
+        }
+}
+
 bool Blind::allow_read_absolute(const Verbose verbose) const
 {
         if (actor::is_player(m_owner) && (verbose == Verbose::yes)) {
@@ -1934,6 +2023,17 @@ void MeleeCooldown::on_melee_attack()
         m_owner->m_properties.apply(disabled_melee);
 }
 
+int Paralyzed::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::dodging:
+                return -999;
+
+        default:
+                return 0;
+        }
+}
+
 void Paralyzed::on_applied()
 {
         if (actor::is_player(m_owner)) {
@@ -1943,6 +2043,17 @@ void Paralyzed::on_applied()
                 if (explosive) {
                         explosive->on_player_paralyzed();
                 }
+        }
+}
+
+int Fainted::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::dodging:
+                return -999;
+
+        default:
+                return 0;
         }
 }
 
@@ -3197,6 +3308,18 @@ PropActResult AlliesPlayerGhoul::on_act()
         result.prop_ended = PropEnded::yes;
 
         return result;
+}
+
+int HitChancePenaltyCurse::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::melee:
+        case AbilityId::ranged:
+                return -10;
+
+        default:
+                return 0;
+        }
 }
 
 void MagicSearching::save() const

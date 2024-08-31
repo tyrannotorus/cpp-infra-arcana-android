@@ -174,6 +174,8 @@ void draw_rectangle(R, const Color&) {}
 
 void draw_rectangle_filled(R, const Color&, const uint8_t) {}
 
+void draw_rectangle_filled_mod_blending(R, const Color&, uint8_t) {}
+
 void TileDrawObj::draw() const {}
 
 void CharacterDrawObj::draw() const {}

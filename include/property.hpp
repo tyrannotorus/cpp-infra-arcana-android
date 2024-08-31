@@ -407,19 +407,7 @@ public:
         Terrified() :
                 Prop(Id::terrified) {}
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                switch (ability) {
-                case AbilityId::dodging:
-                        return 20;
-
-                case AbilityId::ranged:
-                        return -20;
-
-                default:
-                        return 0;
-                }
-        }
+        int ability_mod(AbilityId ability) const override;
 
         bool allow_attack_melee(Verbose verbose) const override;
 
@@ -543,15 +531,7 @@ public:
         Aiming() :
                 Prop(Id::aiming) {}
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                if (ability == AbilityId::ranged) {
-                        return 10;
-                }
-                else {
-                        return 0;
-                }
-        }
+        int ability_mod(AbilityId ability) const override;
 
         PropEnded on_hit(
                 int dmg,
@@ -574,25 +554,7 @@ public:
                 return false;
         }
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                switch (ability) {
-                case AbilityId::searching:
-                        return -9999;
-
-                case AbilityId::ranged:
-                        return -20;
-
-                case AbilityId::melee:
-                        return -20;
-
-                case AbilityId::dodging:
-                        return -50;
-
-                default:
-                        return 0;
-                }
-        }
+        int ability_mod(AbilityId ability) const override;
 };
 
 class Recloaks : public Prop
@@ -666,17 +628,7 @@ public:
         Premonition() :
                 Prop(Id::premonition) {}
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                (void)ability;
-
-                if (ability == AbilityId::dodging) {
-                        return 75;
-                }
-                else {
-                        return 0;
-                }
-        }
+        int ability_mod(AbilityId ability) const override;
 };
 
 class MagicSearching : public Prop
@@ -720,6 +672,8 @@ public:
 
         void on_applied() override;
 
+        int ability_mod(AbilityId ability) const override;
+
         PropEnded affect_move_dir(Dir& dir) override;
 
 private:
@@ -731,6 +685,8 @@ class Stuck : public Prop
 public:
         Stuck() :
                 Prop(Id::stuck) {}
+
+        int ability_mod(AbilityId ability) const override;
 
         PropEnded affect_move_dir(Dir& dir) override;
 };
@@ -753,11 +709,7 @@ public:
 
         bool allow_attack_ranged(Verbose verbose) const override;
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                (void)ability;
-                return -30;
-        }
+        int ability_mod(AbilityId ability) const override;
 
         std::optional<Color> override_actor_color() const override;
 };
@@ -1116,15 +1068,7 @@ public:
 
         void on_applied() override;
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                if (ability == AbilityId::dodging) {
-                        return -999;
-                }
-                else {
-                        return 0;
-                }
-        }
+        int ability_mod(AbilityId ability) const override;
 
         bool allow_act() const override
         {
@@ -1152,15 +1096,7 @@ public:
 
         bool should_update_vision_on_toggled() const override;
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                if (ability == AbilityId::dodging) {
-                        return -999;
-                }
-                else {
-                        return 0;
-                }
-        }
+        int ability_mod(AbilityId ability) const override;
 
         bool allow_act() const override
         {
@@ -1663,17 +1599,7 @@ public:
         HitChancePenaltyCurse() :
                 Prop(Id::hit_chance_penalty_curse) {}
 
-        int ability_mod(const AbilityId ability) const override
-        {
-                switch (ability) {
-                case AbilityId::melee:
-                case AbilityId::ranged:
-                        return -10;
-
-                default:
-                        return 0;
-                }
-        }
+        int ability_mod(AbilityId ability) const override;
 };
 
 class IncreasedShockCurse : public Prop

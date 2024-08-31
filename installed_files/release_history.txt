@@ -28,6 +28,9 @@
 # Special maps
 - Added intro message popups for some special levels.
 
+# Misc balancing
+- Reworked and unified how dodging penalties are calculated for melee and ranged attacks. This should not have much effect on how the game plays, but hit chances may be affected in some cases (for example being stuck now also gives a dodging penalty against ranged attacks, and confusion no longer gives a dodging penalty at all).
+
 ##############################
 # User interface
 ##############################
