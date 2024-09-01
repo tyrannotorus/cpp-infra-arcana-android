@@ -165,7 +165,7 @@ void run()
 
         TRACE << "Found '" << forgotten_spells.size() << "' forgotten spells" << std::endl;
 
-        const bool should_recall_spell = (!forgotten_spells.empty() && rnd::coin_toss());
+        const bool should_recall_spell = (!forgotten_spells.empty() && rnd::fraction(3, 4));
 
         TRACE << "Should recall spell: '" << should_recall_spell << "'" << std::endl;
 
@@ -182,7 +182,9 @@ void run()
 
         TRACE << "Found '" << unknown_items.size() << "' unknown items" << std::endl;
 
-        const int pct_chance_to_reveal = (int)unknown_items.size() * 10;
+        const int pct_chance_to_reveal = (int)unknown_items.size() * 40;
+
+        TRACE << "Percent chance to reveal item: '" << pct_chance_to_reveal << "'" << std::endl;
 
         const bool should_reveal_item = rnd::percent(pct_chance_to_reveal);
 
