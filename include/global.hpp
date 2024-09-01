@@ -82,6 +82,8 @@ inline constexpr int g_xp_on_activate_monolith = 20;
 inline constexpr int g_xp_on_deactivate_crystal_key = 3;
 inline constexpr int g_xp_on_identify_pylon = 8;
 inline constexpr int g_xp_on_identify_device = 15;
+inline constexpr int g_xp_on_drink_insight_potion = 5;
+inline constexpr int g_xp_on_drink_from_xp_fountain = 2;
 
 inline constexpr int g_xp_on_exorcist_destroy_altar = 10;
 inline constexpr int g_xp_on_exorcist_destroy_scroll = 5;

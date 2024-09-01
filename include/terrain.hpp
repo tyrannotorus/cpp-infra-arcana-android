@@ -340,6 +340,11 @@ public:
                 return false;
         }
 
+        virtual bool can_be_studied() const
+        {
+                return false;
+        }
+
         const TerrainData* m_data {nullptr};
         ItemContainer m_item_container {};
         BurnState m_burn_state {BurnState::not_burned};
@@ -638,7 +643,7 @@ public:
                 m_is_bloody = false;
         }
 
-        bool can_be_studied() const
+        bool can_be_studied() const override
         {
                 return m_is_inscribed && !m_has_player_studied_inscription;
         }
@@ -689,7 +694,7 @@ public:
 
         void on_new_turn() override;
 
-        bool can_be_studied() const
+        bool can_be_studied() const override
         {
                 return !m_has_player_studied_inscription;
         }
@@ -890,7 +895,7 @@ public:
                 m_has_player_studied_inscription = false;
         }
 
-        bool can_be_studied() const
+        bool can_be_studied() const override
         {
                 return m_is_inscribed && !m_has_player_studied_inscription;
         }

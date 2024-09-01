@@ -108,6 +108,29 @@ static const std::vector<std::string> s_win_msg_default = {
          "sow death and madness. The destinies of all things on earth, "
          "living and dead, are mine."}};
 
+static double mon_shock_lvl_to_shock_value(const MonShockLvl shock_lvl)
+{
+        switch (shock_lvl) {
+        case MonShockLvl::unsettling:
+                return 2.0;
+
+        case MonShockLvl::frightening:
+                return 4.0;
+
+        case MonShockLvl::terrifying:
+                return 10.0;
+
+        case MonShockLvl::mind_shattering:
+                return 33.0;
+
+        case MonShockLvl::none:
+        case MonShockLvl::END:
+                return 0.0;
+        }
+
+        return 0.0;
+}
+
 // -----------------------------------------------------------------------------
 // game
 // -----------------------------------------------------------------------------
@@ -300,34 +323,9 @@ void player_discover_monster(actor::Actor& actor)
 
         d.has_player_seen = true;
 
-        int xp_gained = 0;
-        double shock_value = 0.0;
+        const int xp_gained = mon_shock_lvl_to_xp(d.mon_shock_lvl);
 
-        switch (d.mon_shock_lvl) {
-        case MonShockLvl::unsettling:
-                xp_gained = 3;
-                shock_value = 2.0;
-                break;
-
-        case MonShockLvl::frightening:
-                xp_gained = 5;
-                shock_value = 4.0;
-                break;
-
-        case MonShockLvl::terrifying:
-                xp_gained = 8;
-                shock_value = 10.0;
-                break;
-
-        case MonShockLvl::mind_shattering:
-                xp_gained = 15;
-                shock_value = 33.0;
-                break;
-
-        case MonShockLvl::none:
-        case MonShockLvl::END:
-                break;
-        }
+        const double shock_value = mon_shock_lvl_to_shock_value(d.mon_shock_lvl);
 
         if (xp_gained <= 0) {
                 return;
@@ -346,6 +344,29 @@ void player_discover_monster(actor::Actor& actor)
         map::g_player->incr_shock(shock_value, ShockSrc::see_mon);
 
         actor::player_state::g_allow_print_mon_warning = false;
+}
+
+int mon_shock_lvl_to_xp(const MonShockLvl shock_lvl)
+{
+        switch (shock_lvl) {
+        case MonShockLvl::unsettling:
+                return 3;
+
+        case MonShockLvl::frightening:
+                return 5;
+
+        case MonShockLvl::terrifying:
+                return 8;
+
+        case MonShockLvl::mind_shattering:
+                return 15;
+
+        case MonShockLvl::none:
+        case MonShockLvl::END:
+                return 0;
+        }
+
+        return 0;
 }
 
 void on_mon_killed(actor::Actor& actor)

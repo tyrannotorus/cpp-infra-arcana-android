@@ -1147,6 +1147,7 @@ void handle(const GameCmd cmd)
                 // Spawn some of the lootable/usable terrain objects.
 
                 const std::vector<terrain::Id> terrain_ids = {
+                        terrain::Id::fountain,
                         terrain::Id::monolith,
                         terrain::Id::mirror,
                         terrain::Id::gong,

@@ -48,6 +48,7 @@ void set_is_win();
 TimeData start_time();
 
 void player_discover_monster(actor::Actor& actor);
+int mon_shock_lvl_to_xp(MonShockLvl shock_lvl);
 
 void on_mon_killed(actor::Actor& actor);
 

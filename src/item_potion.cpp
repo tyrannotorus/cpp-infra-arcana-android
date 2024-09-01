@@ -697,7 +697,7 @@ void Insight::quaff_impl(actor::Actor& actor)
         // the player identifies all items)
         msg_log::add("I feel insightful.");
 
-        game::incr_player_xp(5);
+        game::incr_player_xp(g_xp_on_drink_insight_potion);
 
         msg_log::more_prompt();
 }

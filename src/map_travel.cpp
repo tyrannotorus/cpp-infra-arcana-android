@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -32,11 +33,22 @@
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "saving.hpp"
+#include "terrain.hpp"
 #include "viewport.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+#ifndef NDEBUG
+static int s_estimated_avail_xp_items = 0;
+static int s_estimated_avail_xp_terrain = 0;
+static int s_estimated_avail_xp_monsters = 0;
+static int s_estimated_avail_xp_descend = 0;
+std::set<item::Id> s_item_ids_estimated_xp_for;
+std::set<terrain::Id> s_pylon_ids_estimated_xp_for;
+std::set<std::string> s_mon_ids_estimated_xp_for;
+#endif  // NDEBUG
+
 static std::vector<MapType> s_map_list;
 
 static void trigger_insanity_sympts_for_descent()
@@ -56,6 +68,152 @@ static void trigger_insanity_sympts_for_descent()
         }
 }
 
+#ifndef NDEBUG
+static void update_estimated_total_avail_xp()
+{
+        //
+        // DESCEND
+        //
+        s_estimated_avail_xp_descend += g_xp_on_new_dlvl;
+
+        //
+        // ITEMS
+        //
+
+        std::vector<const item::Item*> items;
+
+        auto has_estimated_for_item = [](const item::Id id) {
+                return s_item_ids_estimated_xp_for.find(id) != s_item_ids_estimated_xp_for.end();
+        };
+
+        // Collect items on floor.
+        for (const item::Item* const item : map::g_items) {
+                if (item) {
+                        items.push_back(item);
+                }
+        }
+
+        // Collect items in monster "backpacks".
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if (!actor::is_player(actor)) {
+                        items.insert(
+                                std::end(items),
+                                std::cbegin(actor->m_inv.m_backpack),
+                                std::cend(actor->m_inv.m_backpack));
+                }
+        }
+
+        // Collect items in item container terrains (chests, ...).
+        for (const terrain::Terrain* const terrain : map::g_terrain) {
+                items.insert(
+                        std::end(items),
+                        std::cbegin(terrain->m_item_container.items()),
+                        std::cend(terrain->m_item_container.items()));
+        }
+
+        for (const item::Item* const item : items) {
+                if (item->id() == item::Id::potion_insight) {
+                        s_estimated_avail_xp_items += g_xp_on_drink_insight_potion;
+                }
+
+                if (item->data().xp_on_found <= 0) {
+                        continue;
+                }
+
+                if (has_estimated_for_item(item->id())) {
+                        continue;
+                }
+
+                s_item_ids_estimated_xp_for.insert(item->id());
+
+                s_estimated_avail_xp_items += item->data().xp_on_found;
+        }
+
+        //
+        // MONSTERS
+        //
+
+        auto has_estimated_for_mon = [](const std::string id) {
+                return s_mon_ids_estimated_xp_for.find(id) != s_mon_ids_estimated_xp_for.end();
+        };
+
+        for (const actor::Actor* const actor : game_time::g_actors) {
+                if (actor::is_player(actor) || has_estimated_for_mon(actor->id())) {
+                        continue;
+                }
+
+                s_mon_ids_estimated_xp_for.insert(actor->id());
+
+                s_estimated_avail_xp_monsters +=
+                        game::mon_shock_lvl_to_xp(
+                                actor->m_data->mon_shock_lvl);
+        }
+
+        //
+        // TERRAIN
+        //
+
+        auto has_estimated_for_terrain = [](const terrain::Id id) {
+                return s_pylon_ids_estimated_xp_for.find(id) != s_pylon_ids_estimated_xp_for.end();
+        };
+
+        for (const terrain::Terrain* const terrain : map::g_terrain) {
+                switch (terrain->id()) {
+                case terrain::Id::monolith: {
+                        s_estimated_avail_xp_terrain += g_xp_on_activate_monolith;
+                } break;
+
+                case terrain::Id::crystal_key: {
+                        s_estimated_avail_xp_terrain += g_xp_on_deactivate_crystal_key;
+                } break;
+
+                case terrain::Id::door: {
+                        if (terrain->is_hidden()) {
+                                s_estimated_avail_xp_terrain += g_xp_on_reveal_door;
+                        }
+                } break;
+
+                case terrain::Id::trap: {
+                        if (terrain->is_hidden()) {
+                                s_estimated_avail_xp_terrain += g_xp_on_reveal_trap;
+                        }
+                } break;
+
+                case terrain::Id::pylon: {
+                        if (!has_estimated_for_terrain(terrain->id())) {
+                                s_pylon_ids_estimated_xp_for.insert(terrain::Id());
+
+                                s_estimated_avail_xp_terrain += g_xp_on_identify_pylon;
+                        }
+                } break;
+
+                case terrain::Id::fountain: {
+                        const auto* const fountain =
+                                static_cast<const terrain::Fountain*>(terrain);
+
+                        if (fountain->effect() == terrain::FountainEffect::xp) {
+                                // Estimating 3 quaffs available (sometimes it
+                                // can be much more).
+                                s_estimated_avail_xp_terrain +=
+                                        g_xp_on_drink_from_xp_fountain * 3;
+
+                                static int bla = 0;
+                                bla += g_xp_on_drink_from_xp_fountain * 3;
+                                TRACE << "### " << bla << std::endl;
+                        }
+                }
+
+                default: {
+                } break;
+                }
+
+                if (terrain->can_be_studied()) {
+                        s_estimated_avail_xp_terrain += g_xp_on_study_inscription;
+                }
+        }
+}
+#endif  // NDEBUG
+
 // -----------------------------------------------------------------------------
 // map_travel
 // -----------------------------------------------------------------------------
@@ -63,6 +221,16 @@ namespace map_travel
 {
 void init()
 {
+#ifndef NDEBUG
+        s_estimated_avail_xp_items = 0;
+        s_estimated_avail_xp_terrain = 0;
+        s_estimated_avail_xp_monsters = 0;
+        s_estimated_avail_xp_descend = 0;
+        s_item_ids_estimated_xp_for.clear();
+        s_pylon_ids_estimated_xp_for.clear();
+        s_mon_ids_estimated_xp_for.clear();
+#endif  // NDEBUG
+
         // Forest + dungeon + boss + trapezohedron
         const size_t nr_lvl_tot = g_dlvl_last + 3;
 
@@ -173,6 +341,23 @@ void go_to_nxt()
         if (map_control::g_controller) {
                 map_control::g_controller->on_enter();
         }
+
+#ifndef NDEBUG
+        update_estimated_total_avail_xp();
+
+        const int estimated_avail_xp_tot =
+                s_estimated_avail_xp_items +
+                s_estimated_avail_xp_monsters +
+                s_estimated_avail_xp_terrain +
+                s_estimated_avail_xp_descend;
+
+        TRACE << "Estimated total XP available current run:" << std::endl;
+        TRACE << "Items    : " << s_estimated_avail_xp_items << std::endl;
+        TRACE << "Monsters : " << s_estimated_avail_xp_monsters << std::endl;
+        TRACE << "Terrain  : " << s_estimated_avail_xp_terrain << std::endl;
+        TRACE << "Descend  : " << s_estimated_avail_xp_descend << std::endl;
+        TRACE << "TOTAL    : " << estimated_avail_xp_tot << std::endl;
+#endif  // NDEBUG
 
         TRACE
                 << "Dungeon level '" << map::g_dlvl << "' ready"
