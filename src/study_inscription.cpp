@@ -133,6 +133,16 @@ static void reveal_random_item(const std::vector<const item::Item*>& items)
         TRACE_FUNC_END;
 }
 
+static std::string get_random_study_message(const bool force_reveal_knowledge_msg)
+{
+        if (force_reveal_knowledge_msg) {
+                return messages::get_random_terrain_inscription_msg_reveal_knowledge();
+        }
+        else {
+                return messages::get_random_terrain_inscription_msg_any();
+        }
+}
+
 // -----------------------------------------------------------------------------
 // study_inscription
 // -----------------------------------------------------------------------------
@@ -180,10 +190,9 @@ void run()
 
         audio::play(audio::SfxId::study_inscription);
 
-        const std::string msg =
-                (should_recall_spell || should_reveal_item)
-                ? messages::get_random_terrain_inscription_msg_reveal_knowledge()
-                : messages::get_random_terrain_inscription_msg_generic();
+        const bool force_reveal_knowledge_msg = (should_recall_spell || should_reveal_item);
+
+        const std::string msg = get_random_study_message(force_reveal_knowledge_msg);
 
         msg_log::add(msg);
 

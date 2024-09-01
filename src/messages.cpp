@@ -91,4 +91,16 @@ std::string get_random_terrain_inscription_msg_reveal_knowledge()
         return rnd::element(s_terrain_inscription_messages_reveal_knowledge);
 }
 
+std::string get_random_terrain_inscription_msg_any()
+{
+        std::vector<std::string> all_msgs = s_terrain_inscription_messages_generic;
+
+        all_msgs.insert(
+                std::end(all_msgs),
+                std::cbegin(s_terrain_inscription_messages_reveal_knowledge),
+                std::cend(s_terrain_inscription_messages_reveal_knowledge));
+
+        return rnd::element(all_msgs);
+}
+
 }  // namespace messages
