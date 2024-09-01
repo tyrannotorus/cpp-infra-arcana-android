@@ -75,12 +75,12 @@ inline constexpr int g_hit_chance_pen_vs_unseen = 25;
 inline constexpr int g_player_max_clvl = 12;
 
 inline constexpr int g_xp_on_new_dlvl = 5;
-inline constexpr int g_xp_on_reveal_door = 2;
+inline constexpr int g_xp_on_reveal_door = 1;
 inline constexpr int g_xp_on_reveal_trap = 1;
 inline constexpr int g_xp_on_study_inscription = 4;
 inline constexpr int g_xp_on_activate_monolith = 20;
 inline constexpr int g_xp_on_deactivate_crystal_key = 3;
-inline constexpr int g_xp_on_identify_pylon = 8;
+inline constexpr int g_xp_on_identify_pylon = 5;
 inline constexpr int g_xp_on_identify_device = 15;
 inline constexpr int g_xp_on_drink_insight_potion = 5;
 inline constexpr int g_xp_on_drink_from_xp_fountain = 2;
