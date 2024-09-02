@@ -16,6 +16,7 @@
 
 # Monsters
 - Some creatures are now "flammable" (e.g. mold, worm masses). If ignited, these burn permanently and will also ignite any other adjacent flammable creatures.
+- Added more monsters.
 
 # Map generation
 - Misc improvements to corridor generation (limited max corridor length, corridors occasionally connect to other corridors, some corridors are widened).

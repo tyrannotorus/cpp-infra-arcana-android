@@ -8761,6 +8761,108 @@
     </monster>
 
     <!--************************************************************-->
+    <!-- MON_CLEAR_MOLD -->
+    <!--************************************************************-->
+    <monster id="MON_CLEAR_MOLD">
+        <text>
+            <name_a>Clear Mold</name_a>
+            <name_the>the Clear Mold</name_the>
+            <corpse_name_a></corpse_name_a>
+            <corpse_name_the></corpse_name_the>
+            <description>A sickly growth thriving in damp areas. It produces toxic spores which it stores in its slimy heads. Almost invisible to the naked eye, it spreads like a creeping pestilence.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>false</allow_speed_description>
+            <wary_message>seems disturbed.</wary_message>
+            <smell_message></smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message></spell_message>
+            <death_message>is destroyed.</death_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_FUNGI</tile>
+            <character>e</character>
+            <color>COLOR_WHITE</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>1</hit_points>
+            <spirit>1</spirit>
+            <speed>MONSPEED_SLOW</speed>
+            <shock_level>MONSHOCK_NONE</shock_level>
+            <melee>70</melee>
+            <ranged>0</ranged>
+            <dodging>-50</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>false</can_bash_doors>
+            <size>MONSIZE_FLOOR</size>
+            <always_prevent_knockback>true</always_prevent_knockback>
+            <can_bleed>false</can_bleed>
+            <can_leave_corpse>false</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="ITEMINTR_SPORES">
+                <damage>1</damage>
+                <property_applied duration="8">PROP_POISONED</property_applied>
+            </attack>
+        </attacks>
+
+        <properties>
+            <property>PROP_INVIS</property>
+            <property>PROP_BREEDS</property>
+            <property>PROP_R_POISON</property>
+            <property>PROP_R_SLEEP</property>
+            <property>PROP_R_FEAR</property>
+            <property>PROP_R_CONF</property>
+            <property>PROP_R_BREATH</property>
+            <property>PROP_R_DISEASE</property>
+            <property>PROP_R_BLIND</property>
+            <property>PROP_SHORT_HEARING_RANGE</property>
+            <property>PROP_FLAMMABLE</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>0</erratic_move_percent>
+            <turns_aware>10</turns_aware>
+            <ranged_cooldown_turns>0</ranged_cooldown_turns>
+            <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
+            <looks>false</looks>
+            <avoids_blocking_friend>false</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>false</paths_to_target_when_aware>
+            <moves_to_target_when_los>false</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>false</moves_to_leader>
+            <moves_randomly_when_unaware>false</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>3</min_dungeon_level>
+            <max_dungeon_level>15</max_dungeon_level>
+            <spawn_weight>5</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
+            <group_size>MONGROUPSIZE_FEW</group_size>
+            <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_DAMP</native_room>
+            <native_room>ROOM_FOREST</native_room>
+            <native_room>ROOM_CHASM</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
     <!-- MON_MOLD_HALLUC -->
     <!--************************************************************-->
     <monster id="MON_MOLD_HALLUC">
