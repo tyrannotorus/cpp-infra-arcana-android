@@ -14,6 +14,9 @@
 - If the player has a cursed item, gongs have a high chance of giving the "bless" bonus (which also removes one curse).
 - Magic traps ("strange shape") starts hidden again just like mechanical traps, however traps are no longer spawned in corridors.
 
+# Monsters
+- Some creatures are now "flammable" (e.g. mold, worm masses). If ignited, these burn permanently and will also ignite any other adjacent flammable creatures.
+
 # Map generation
 - Misc improvements to corridor generation (limited max corridor length, corridors occasionally connect to other corridors, some corridors are widened).
 - Changed some room templates that were annoying to explore, or created dead-end corridors that looked like they led to a secret door.

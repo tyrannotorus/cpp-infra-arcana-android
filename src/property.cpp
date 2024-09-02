@@ -1863,6 +1863,13 @@ bool Frenzied::allow_pray(Verbose verbose) const
         return false;
 }
 
+void Burning::on_applied()
+{
+        if (m_owner->m_properties.has(Id::flammable)) {
+                set_indefinite();
+        }
+}
+
 int Burning::ability_mod(const AbilityId ability) const
 {
         (void)ability;
@@ -1949,6 +1956,27 @@ bool Burning::allow_attack_ranged(const Verbose verbose) const
         }
 
         return false;
+}
+
+PropEnded Flammable::on_actor_turn()
+{
+        if (!m_owner->m_properties.has(Id::burning)) {
+                return PropEnded::no;
+        }
+
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if ((actor != m_owner) &&
+                    actor->is_alive() &&
+                    actor->m_properties.has(Id::flammable) &&
+                    m_owner->m_pos.is_adjacent(actor->m_pos) &&
+                    !actor->m_properties.has(Id::burning)) {
+                        // NOTE: Flammable creatures always burn forever
+                        // (handled by the burning property).
+                        actor->m_properties.apply(make(Id::burning));
+                }
+        }
+
+        return PropEnded::no;
 }
 
 std::optional<Color> Burning::override_actor_color() const

@@ -95,6 +95,9 @@ static const std::pair<prop::Id, std::string> s_custom_props[] = {
          "They regenerate health over time"},
         {prop::Id::explodes_on_death,
          "They explode on death"},
+        {prop::Id::flammable,
+         "They are very flammable, and will quickly ignite other nearby "
+         "flammable creatures"},
 };
 
 struct MonShockStrings

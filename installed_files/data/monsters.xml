@@ -514,6 +514,7 @@
         <properties>
             <property>PROP_DARKVISION</property>
             <property>PROP_R_ACID</property>
+            <property>PROP_FLAMMABLE</property>
         </properties>
 
         <ai>
@@ -6950,6 +6951,7 @@
             <property>PROP_R_PARA</property>
             <property>PROP_REDUCED_PIERCE_DMG</property>
             <property>PROP_SHORT_HEARING_RANGE</property>
+            <property>PROP_FLAMMABLE</property>
         </properties>
 
         <ai>
@@ -7045,6 +7047,7 @@
             <property>PROP_R_POISON</property>
             <property>PROP_R_DISEASE</property>
             <property>PROP_SHORT_HEARING_RANGE</property>
+            <property>PROP_FLAMMABLE</property>
         </properties>
 
         <ai>
@@ -7142,6 +7145,7 @@
             <property>PROP_R_DISEASE</property>
             <property>PROP_SHORT_HEARING_RANGE</property>
             <property>PROP_CORPSE_EATER</property>
+            <property>PROP_FLAMMABLE</property>
         </properties>
 
         <ai>
@@ -8722,6 +8726,7 @@
             <property>PROP_R_DISEASE</property>
             <property>PROP_R_BLIND</property>
             <property>PROP_SHORT_HEARING_RANGE</property>
+            <property>PROP_FLAMMABLE</property>
         </properties>
 
         <ai>
@@ -8822,6 +8827,7 @@
             <property>PROP_R_DISEASE</property>
             <property>PROP_R_BLIND</property>
             <property>PROP_SHORT_HEARING_RANGE</property>
+            <property>PROP_FLAMMABLE</property>
         </properties>
 
         <ai>
@@ -8916,6 +8922,7 @@
             <property>PROP_R_BLIND</property>
             <property>PROP_R_CONF</property>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_FLAMMABLE</property>
         </properties>
 
         <ai>

@@ -304,6 +304,9 @@ Prop* make(const prop::Id id)
         case prop::Id::reduced_pierce_dmg:
                 return new Prop(id);
 
+        case prop::Id::flammable:
+                return new Flammable();
+
         case prop::Id::short_hearing_range:
                 return new Prop(id);
 

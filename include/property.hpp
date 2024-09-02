@@ -697,6 +697,8 @@ public:
         Burning() :
                 Prop(Id::burning) {}
 
+        void on_applied() override;
+
         PropEnded on_actor_turn() override;
 
         bool allow_read_chance(
@@ -712,6 +714,15 @@ public:
         int ability_mod(AbilityId ability) const override;
 
         std::optional<Color> override_actor_color() const override;
+};
+
+class Flammable : public Prop
+{
+public:
+        Flammable() :
+                Prop(Id::flammable) {}
+
+        PropEnded on_actor_turn() override;
 };
 
 class Confused : public Prop

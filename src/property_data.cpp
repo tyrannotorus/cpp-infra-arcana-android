@@ -78,6 +78,7 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_RADIANT_FOV", prop::Id::radiant_fov},
         {"PROP_RECLOAKS", prop::Id::recloaks},
         {"PROP_REDUCED_PIERCE_DMG", prop::Id::reduced_pierce_dmg},
+        {"PROP_FLAMMABLE", prop::Id::flammable},
         {"PROP_REGENERATING", prop::Id::regenerating},
         {"PROP_SEE_INVIS", prop::Id::see_invis},
         {"PROP_SHORT_HEARING_RANGE", prop::Id::short_hearing_range},
@@ -1046,6 +1047,9 @@ static void init_data_list()
         add(d);
 
         d.id = prop::Id::reduced_pierce_dmg;
+        add(d);
+
+        d.id = prop::Id::flammable;
         add(d);
 
         d.id = prop::Id::vortex;

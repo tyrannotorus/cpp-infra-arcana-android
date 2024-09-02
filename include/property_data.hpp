@@ -91,6 +91,7 @@ enum class Id
         frenzy_player_on_seen,  // Ghastly Light
         aura_of_decay,          // Damages adjacent hostile creatures
         reduced_pierce_dmg,     // E.g. worm masses
+        flammable,              // E.g. mold, spreads burning to other flammable creatures.
         short_hearing_range,
         frenzies_self,       // E.g. Apes
         frenzies_followers,  // E.g. Pickman
