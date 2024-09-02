@@ -1360,12 +1360,12 @@ bool CtrlObjStrike::can_control(
         } break;
 
         case terrain::Id::brazier:
-        case terrain::Id::statue: {
+        case terrain::Id::statue:
+        case terrain::Id::urn: {
                 return true;
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 
@@ -1392,7 +1392,8 @@ DidAction CtrlObjStrike::run(
         } break;
 
         case terrain::Id::brazier:
-        case terrain::Id::statue: {
+        case terrain::Id::statue:
+        case terrain::Id::urn: {
                 const std::string query_msg =
                         common_text::g_direction_query +
                         " " +
@@ -1406,6 +1407,8 @@ DidAction CtrlObjStrike::run(
                         CopyToMsgHistory::no);
 
                 const auto input_dir = query::dir(AllowCenter::no);
+
+                msg_log::clear();
 
                 if (input_dir == Dir::END) {
                         return DidAction::no;
