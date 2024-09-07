@@ -91,7 +91,7 @@ static bool is_hostile_living_mon(const actor::Actor& actor)
                 return false;
         }
 
-        if (!actor.is_alive()) {
+        if (!actor::is_alive(actor)) {
                 return false;
         }
 
@@ -196,14 +196,14 @@ static void make_aware_of_unseeable_mon_by_vigilant(actor::Actor& mon)
 {
         const bool is_cell_seen = map::g_seen.at(mon.m_pos);
 
-        if (!mon.is_player_aware_of_me()) {
+        if (!actor::is_player_aware_of_me(mon)) {
                 if (is_cell_seen) {
                         // The cell is seen - the monster must be invisible
                         ASSERT(
                                 mon.m_properties.has(prop::Id::invis) ||
                                 mon.m_properties.has(prop::Id::cloaked));
 
-                        print_aware_invis_mon_msg(mon);
+                        print_player_aware_invis_mon_msg(mon);
                 }
                 else {
                         // Became aware of a monster in an unseen cell
@@ -220,7 +220,7 @@ static void on_player_spot_sneaking_mon(actor::Actor& mon)
 {
         mon.make_player_aware_of_me();
 
-        const std::string mon_name = mon.name_a();
+        const std::string mon_name = actor::name_a(mon);
 
         msg_log::add(
                 "I spot " + mon_name + "!",
@@ -273,7 +273,7 @@ static void warn_player_about_mon(const actor::Actor& actor)
                 // The message log is empty, or player is busy with an action,
                 // print a warning with a message.
 
-                const auto name_a = text_format::first_to_upper(actor.name_a());
+                const auto name_a = text_format::first_to_upper(actor::name_a(actor));
 
                 // If the player is busy, there is no need for a "more" prompt,
                 // since the player will be queried to abort anyway.
@@ -324,7 +324,7 @@ static void update_player_unseen_monster(
         actor::Actor& mon,
         const Array2<int>& vigilant_flood)
 {
-        if (!mon.is_player_aware_of_me()) {
+        if (!actor::is_player_aware_of_me(mon)) {
                 mon.m_mon_aware_state.is_msg_mon_in_view_printed = false;
         }
 
@@ -458,10 +458,7 @@ static void player_try_spot_hidden_terrain()
         }
 
         // NOTE: Skill value retrieved here is always at least 1
-        const int player_search_skill =
-                map::g_player->ability(
-                        AbilityId::searching,
-                        true);
+        const int player_search_skill = actor::ability(*map::g_player, AbilityId::searching);
 
         const size_t nr_positions = map::nr_positions();
         for (size_t i = 0; i < nr_positions; ++i) {
@@ -627,7 +624,7 @@ static void player_start_turn()
                 // NOTE: This may kill the player
                 on_player_shock_over_limit();
 
-                if (!player.is_alive()) {
+                if (!actor::is_alive(player)) {
                         return;
                 }
         }
@@ -644,7 +641,7 @@ static void player_start_turn()
 
 static void mon_start_turn(actor::Actor& mon)
 {
-        if (mon.is_aware_of_player()) {
+        if (actor::is_aware_of_player(mon)) {
                 --mon.m_mon_aware_state.aware_counter;
                 --mon.m_mon_aware_state.wary_counter;
         }

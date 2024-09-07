@@ -30,7 +30,7 @@ static std::string calc_game_summary_file_path()
                 game::start_time().time_str(TimeType::second, false);
 
         const std::string game_summary_filename =
-                map::g_player->name_a() +
+                actor::name_a(*map::g_player) +
                 "_" +
                 game_summary_time_stamp +
                 ".txt";

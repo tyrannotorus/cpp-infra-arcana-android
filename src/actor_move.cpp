@@ -84,7 +84,7 @@ static void player_bump_known_hostile_mon(actor::Actor& mon)
 
 static void player_bump_unkown_hostile_mon(actor::Actor& mon)
 {
-        actor::print_aware_invis_mon_msg(mon);
+        actor::print_player_aware_invis_mon_msg(mon);
 
         mon.make_player_aware_of_me();
 
@@ -93,10 +93,10 @@ static void player_bump_unkown_hostile_mon(actor::Actor& mon)
 
 static void player_displace_allied_mon(actor::Actor& mon, const P& new_mon_pos)
 {
-        if (mon.is_player_aware_of_me()) {
+        if (actor::is_player_aware_of_me(mon)) {
                 std::string mon_name =
                         can_player_see_actor(mon)
-                        ? mon.name_a()
+                        ? actor::name_a(mon)
                         : "it";
 
                 msg_log::add("I displace " + mon_name + ".");
@@ -171,7 +171,7 @@ static void print_ooze_enter_terrain_msg(
         const actor::Actor& actor,
         const terrain::Terrain& terrain)
 {
-        const auto mon_name = text_format::first_to_upper(actor.name_the());
+        const auto mon_name = text_format::first_to_upper(actor::name_the(actor));
         const auto ter_name = terrain.name(Article::the);
 
         std::string preposition = "through";
@@ -198,7 +198,7 @@ static void print_small_creature_enter_terrain_msg(
         const actor::Actor& actor,
         const terrain::Terrain& terrain)
 {
-        const auto mon_name = text_format::first_to_upper(actor.name_the());
+        const auto mon_name = text_format::first_to_upper(actor::name_the(actor));
         const auto ter_name = terrain.name(Article::the);
 
         msg_log::add(mon_name + " squirms through " + ter_name + ".");
@@ -347,7 +347,7 @@ static void move_player_non_center_direction(const P& target)
 
         actor::Actor* const mon = map::living_actor_at(target);
 
-        const bool is_aware_of_mon = (mon && mon->is_player_aware_of_me());
+        const bool is_aware_of_mon = (mon && actor::is_player_aware_of_me(*mon));
 
         if (mon && !player.is_leader_of(mon) && is_aware_of_mon) {
                 player_bump_known_hostile_mon(*mon);
@@ -404,7 +404,7 @@ static void do_move_action_player(Dir dir)
 {
         actor::Actor& player = *map::g_player;
 
-        if (!player.is_alive()) {
+        if (!actor::is_alive(player)) {
                 return;
         }
 
@@ -471,7 +471,7 @@ static void sanity_check_mon_direction(const actor::Actor& mon, const Dir dir)
         TRACE
                 << "Illegal direction parameter "
                 << "'" << (int)dir << "' "
-                << "given for monster '" << mon.name_a() + "'"
+                << "given for monster '" << actor::name_a(mon) + "'"
                 << std::endl;
         PANIC;
 }
@@ -485,7 +485,7 @@ static void sanity_check_mon_not_outside_map(const actor::Actor& mon)
         }
 
         TRACE
-                << "Monster '" << mon.name_a() << "' "
+                << "Monster '" << actor::name_a(mon) << "' "
                 << "outside map, at "
                 << mon.m_pos.x << "," << mon.m_pos.y
                 << std::endl;
@@ -506,7 +506,7 @@ static void sanity_check_mon_can_move_into_terrain(
                 return;
         }
 
-        const std::string mon_name = mon.name_a();
+        const std::string mon_name = actor::name_a(mon);
 
         const std::string terrain_name =
                 map::g_terrain.at(target_pos)->name(Article::a);
@@ -545,8 +545,8 @@ static void sanity_check_no_living_actor_at_target_pos(
                 return;
         }
 
-        const std::string mon_name_1 = mon.name_a();
-        const std::string mon_name_2 = mon_2->name_a();
+        const std::string mon_name_1 = actor::name_a(mon);
+        const std::string mon_name_2 = actor::name_a(*mon_2);
 
         TRACE
                 << "Monster '" << mon_name_1 << "' "

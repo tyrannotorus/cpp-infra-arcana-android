@@ -385,17 +385,19 @@ static void update_trait_data()
 
                 const int spi_incr = 2;
 
-                map::g_player->change_max_sp(
+                actor::change_max_sp(
+                        *map::g_player,
                         spi_incr,
                         Verbose::no);
 
-                map::g_player->restore_sp(
+                actor::restore_sp(
+                        *map::g_player,
                         spi_incr,
-                        false,  // Not allowed above max
+                        actor::AllowRestoreAboveMax::no,
                         Verbose::no);
         };
         d.on_removed = []() {
-                map::g_player->change_max_sp(-2, Verbose::no);
+                actor::change_max_sp(*map::g_player, -2, Verbose::no);
         };
         set_trait_data(d);
 
@@ -480,15 +482,16 @@ static void update_trait_data()
         d.on_picked = []() {
                 const int hp_incr = 6;
 
-                map::g_player->change_max_hp(hp_incr, Verbose::no);
+                actor::change_max_hp(*map::g_player, hp_incr, Verbose::no);
 
-                map::g_player->restore_hp(
+                actor::restore_hp(
+                        *map::g_player,
                         hp_incr,
-                        false,  // Not allowed above max
+                        actor::AllowRestoreAboveMax::no,
                         Verbose::no);
         };
         d.on_removed = []() {
-                map::g_player->change_max_hp(-6, Verbose::no);
+                actor::change_max_hp(*map::g_player, -6, Verbose::no);
         };
         set_trait_data(d);
 
@@ -1555,13 +1558,13 @@ void pick_bg(const Bg bg)
 
                 player_spells::learn_spell(SpellId::frenzy, Verbose::no);
 
-                map::g_player->change_max_hp(8, Verbose::no);
+                actor::change_max_hp(*map::g_player, 8, Verbose::no);
         } break;
 
         case Bg::occultist: {
                 pick_trait(Trait::stout_spirit);
 
-                map::g_player->change_max_sp(3, Verbose::no);
+                actor::change_max_sp(*map::g_player, 3, Verbose::no);
         } break;
 
         case Bg::rogue: {

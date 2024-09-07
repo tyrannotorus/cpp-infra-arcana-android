@@ -466,7 +466,7 @@ void delete_and_remove_room_from_list(Room* const room)
 actor::Actor* living_actor_at(const P& pos)
 {
         for (auto* const actor : game_time::g_actors) {
-                if ((actor->m_pos == pos) && actor->is_alive()) {
+                if ((actor->m_pos == pos) && actor::is_alive(*actor)) {
                         return actor;
                 }
         }

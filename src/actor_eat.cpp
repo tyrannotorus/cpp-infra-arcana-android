@@ -100,7 +100,7 @@ static void print_feed_msg(
                 if (can_player_see_actor(actor)) {
                         const std::string actor_name_the =
                                 text_format::first_to_upper(
-                                        actor.name_the());
+                                        actor::name_the(actor));
 
                         msg_log::add(
                                 actor_name_the +
@@ -193,7 +193,7 @@ void heal_from_eating(actor::Actor& actor)
 {
         const int hp_restored = rnd::range(3, 4);
 
-        actor.restore_hp(hp_restored, false, Verbose::no);
+        actor::restore_hp(actor, hp_restored, actor::AllowRestoreAboveMax::no, Verbose::no);
 
         if (is_player(&actor)) {
                 auto* const prop = actor.m_properties.prop(prop::Id::wound);

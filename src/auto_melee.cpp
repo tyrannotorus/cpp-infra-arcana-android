@@ -62,8 +62,8 @@ static std::vector<actor::Actor*> get_all_foes_aware_of()
         for (actor::Actor* const actor : game_time::g_actors) {
                 if (!is_player(actor) &&
                     !map::g_player->is_leader_of(actor) &&
-                    actor->is_player_aware_of_me() &&
-                    actor->is_alive()) {
+                    actor::is_player_aware_of_me(*actor) &&
+                    actor::is_alive(*actor)) {
                         actors.push_back(actor);
                 }
         }

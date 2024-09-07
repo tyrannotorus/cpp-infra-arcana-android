@@ -262,8 +262,50 @@ static void interrupt_equip(const ForceInterruptActions is_forced)
 // -----------------------------------------------------------------------------
 namespace actor
 {
+void make_player_aware_mon(Actor& actor)
+{
+        if (is_player(&actor)) {
+                ASSERT(false);
+
+                return;
+        }
+
+        // NOTE: This will also "discover" the monster (give XP), if seen.
+        actor.make_player_aware_of_me();
+}
+
+void make_player_aware_seen_monsters()
+{
+        const auto player_seen_actors = actor::seen_actors(*map::g_player);
+
+        for (auto* actor : player_seen_actors) {
+                make_player_aware_mon(*actor);
+        }
+}
+
+void print_player_aware_invis_mon_msg(const Actor& mon)
+{
+        std::string mon_ref;
+
+        if (mon.m_data->is_ghost) {
+                mon_ref = "some foul entity";
+        }
+        else if (mon.m_data->is_humanoid) {
+                mon_ref = "someone";
+        }
+        else {
+                mon_ref = "a creature";
+        }
+
+        msg_log::add(
+                "There is " + mon_ref + " here!",
+                colors::msg_note(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::yes);
+}
+
 // -----------------------------------------------------------------------------
-// Player
+// Actor
 // -----------------------------------------------------------------------------
 void Actor::save() const
 {
@@ -572,7 +614,7 @@ void Actor::mon_feeling() const
         for (Actor* actor : game_time::g_actors) {
                 if (actor::is_player(actor) ||
                     map::g_player->is_leader_of(actor) ||
-                    !actor->is_alive()) {
+                    !actor::is_alive(*actor)) {
                         // Not a hostile living monster
                         continue;
                 }
@@ -646,12 +688,12 @@ void Actor::add_shock_from_seen_monsters()
 
         for (Actor* actor : game_time::g_actors) {
                 if (actor::is_player(actor) ||
-                    !actor->is_alive() ||
+                    !actor::is_alive(*actor) ||
                     (is_leader_of(actor))) {
                         continue;
                 }
 
-                if (!actor->is_player_aware_of_me()) {
+                if (!actor::is_player_aware_of_me(*actor)) {
                         continue;
                 }
 

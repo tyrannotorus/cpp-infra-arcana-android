@@ -56,7 +56,7 @@ static void print_creature_hit_msg(const actor::Actor& actor)
 {
         const std::string name =
                 actor::can_player_see_actor(actor)
-                ? text_format::first_to_upper(actor.name_the())
+                ? text_format::first_to_upper(actor::name_the(actor))
                 : "An unseen creature";
 
         msg_log::add(name + " is hit.", colors::msg_good());
@@ -247,7 +247,8 @@ void throw_item(
                 if (map::g_seen.at(p)) {
                         const std::string name_the =
                                 text_format::first_to_upper(
-                                        actor_throwing.name_the());
+                                        actor::name_the(
+                                                actor_throwing));
 
                         msg_log::add(
                                 name_the +
@@ -362,7 +363,7 @@ void throw_item(
                                 // good to make the throwing code more generic,
                                 // it should not know about potions!
                                 if (is_potion) {
-                                        if (actor_here->is_alive()) {
+                                        if (actor::is_alive(*actor_here)) {
                                                 apply_potion_on_actor(item_thrown, *actor_here);
 
                                                 on_attack_performed(actor_throwing);
@@ -391,7 +392,7 @@ void throw_item(
 
                                 break;
                         }  // if attack success
-                }  // if actor hit
+                }          // if actor hit
 
                 const auto* terrain_here = map::g_terrain.at(pos);
 

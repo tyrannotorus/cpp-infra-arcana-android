@@ -266,7 +266,7 @@ ConsumeItem Rod::activate(actor::Actor* const actor)
                 msg_log::add("Nothing happens.");
         }
 
-        if (map::g_player->is_alive()) {
+        if (actor::is_alive(*map::g_player)) {
                 game_time::tick();
         }
 
@@ -369,7 +369,7 @@ void Curing::run_effect()
                 }
         }
 
-        if (player.restore_hp(3, false)) {
+        if (actor::restore_hp(player, 3, actor::AllowRestoreAboveMax::no)) {
                 is_something_healed = true;
         }
 
@@ -452,8 +452,7 @@ void Shockwave::run_effect()
         }
 
         for (actor::Actor* actor : game_time::g_actors) {
-                if (actor::is_player(actor) ||
-                    !actor->is_alive()) {
+                if (actor::is_player(actor) || !actor::is_alive(*actor)) {
                         continue;
                 }
 
@@ -467,7 +466,7 @@ void Shockwave::run_effect()
 
                 if (actor::can_player_see_actor(*actor)) {
                         std::string msg =
-                                text_format::first_to_upper(actor->name_the()) +
+                                text_format::first_to_upper(actor::name_the(*actor)) +
                                 " is hit!";
 
                         msg = text_format::first_to_upper(msg);
@@ -482,7 +481,7 @@ void Shockwave::run_effect()
                         map::g_player);
 
                 // Surived the damage? Knock the monster back
-                if (actor->is_alive()) {
+                if (actor::is_alive(*actor)) {
                         knockback::run(
                                 *actor,
                                 player_pos,

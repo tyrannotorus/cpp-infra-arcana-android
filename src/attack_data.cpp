@@ -43,12 +43,12 @@ static bool is_defender_aware_of_attack(
         }
         else if (actor::is_player(&defender)) {
                 // Monster attacking player
-                return attacker->is_player_aware_of_me();
+                return actor::is_player_aware_of_me(*attacker);
         }
         else if (actor::is_player(attacker)) {
                 // Player attacking monster
                 return (
-                        defender.is_aware_of_player() ||
+                        actor::is_aware_of_player(defender) ||
                         defender.is_actor_my_leader(map::g_player));
         }
         else if (defender.is_actor_my_leader(map::g_player)) {
@@ -56,21 +56,21 @@ static bool is_defender_aware_of_attack(
 
                 // The player-allied monster is considered aware, if the player
                 // is aware of the attacker.
-                return attacker->is_player_aware_of_me();
+                return actor::is_player_aware_of_me(*attacker);
         }
         else {
                 // Player-allied monster attacking hostile monster
 
                 // The hostile monster is considererd aware, if it is aware of
                 // the player.
-                return defender.is_aware_of_player();
+                return actor::is_aware_of_player(defender);
         }
 }
 
 static int get_attacker_melee_skill(const actor::Actor* const attacker)
 {
         if (attacker) {
-                return attacker->ability(AbilityId::melee);
+                return actor::ability(*attacker, AbilityId::melee);
         }
         else {
                 // No attacker (e.g. trap), use default value
@@ -81,7 +81,7 @@ static int get_attacker_melee_skill(const actor::Actor* const attacker)
 static int get_attacker_ranged_skill(const actor::Actor* const attacker)
 {
         if (attacker) {
-                return attacker->ability(AbilityId::ranged);
+                return actor::ability(*attacker, AbilityId::ranged);
         }
         else {
                 // No attacker (e.g. trap), use default value
@@ -186,7 +186,7 @@ MeleeAttData::MeleeAttData(
 
         const bool allow_positive_doge = is_defender_aware && !is_defender_handling_equipment;
 
-        const int dodging_ability = defender->ability(AbilityId::dodging);
+        const int dodging_ability = actor::ability(*defender, AbilityId::dodging);
 
         if (allow_positive_doge || (dodging_ability < 0)) {
                 dodging_mod -= dodging_ability;
@@ -331,7 +331,7 @@ RangedAttData::RangedAttData(
 
         const bool allow_positive_doge = is_defender_aware && !is_defender_handling_equipment;
 
-        const int dodging_ability = defender->ability(AbilityId::dodging);
+        const int dodging_ability = actor::ability(*defender, AbilityId::dodging);
 
         if (allow_positive_doge || (dodging_ability < 0)) {
                 dodging_mod = -dodging_ability;
@@ -478,9 +478,11 @@ ThrowAttData::ThrowAttData(
                 actor::is_player(defender) &&
                 is_player_handling_equipment();
 
-        const bool allow_positive_doge = is_defender_aware && !is_defender_handling_equipment;
+        const bool allow_positive_doge =
+                is_defender_aware &&
+                !is_defender_handling_equipment;
 
-        const int dodging_ability = defender->ability(AbilityId::dodging);
+        const int dodging_ability = actor::ability(*defender, AbilityId::dodging);
 
         if (allow_positive_doge || (dodging_ability < 0)) {
                 dodging_mod = -dodging_ability;

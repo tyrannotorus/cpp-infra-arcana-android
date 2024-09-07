@@ -44,7 +44,7 @@ static const std::unordered_map<AbilityId, std::string> s_ability_id_to_str_map 
 // -----------------------------------------------------------------------------
 int AbilityValues::val(
         const AbilityId id,
-        const bool is_affected_by_props,
+        const AbilityAffectedByProperties affected_by_props,
         const actor::Actor& actor) const
 {
         int ret = m_ability_list[(size_t)id];
@@ -53,7 +53,7 @@ int AbilityValues::val(
                 ASSERT(ret == 0);
         }
 
-        if (is_affected_by_props) {
+        if (affected_by_props == AbilityAffectedByProperties::yes) {
                 ret += actor.m_properties.ability_mod(id);
         }
 

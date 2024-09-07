@@ -147,7 +147,7 @@ static map::MinimapAppearance get_top_memory_appearance_at_map_pos(const P& pos)
                 map::MinimapAppearance player_appearance;
 
                 player_appearance.color = colors::light_green();
-                player_appearance.legend_text = map::g_player->name_the();
+                player_appearance.legend_text = actor::name_the(*map::g_player);
 
                 return player_appearance;
         }

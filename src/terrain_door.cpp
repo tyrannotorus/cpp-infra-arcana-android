@@ -368,7 +368,7 @@ static void communicate_mon_open(
         if (is_actor_seen) {
                 const std::string actor_name_the =
                         text_format::first_to_upper(
-                                mon.name_the());
+                                actor::name_the(mon));
 
                 msg_log::add(actor_name_the + " opens a " + door_name + ".");
         }
@@ -426,7 +426,7 @@ static void communicate_mon_open_blind(
         if (is_actor_seen) {
                 const std::string actor_name_the =
                         text_format::first_to_upper(
-                                mon.name_the());
+                                actor::name_the(mon));
 
                 msg_log::add(
                         actor_name_the +
@@ -483,7 +483,7 @@ static void communicate_mon_fail_open_blind(
         if (is_actor_seen) {
                 const std::string actor_name_the =
                         text_format::first_to_upper(
-                                mon.name_the());
+                                actor::name_the(mon));
 
                 msg_log::add(
                         actor_name_the +
@@ -1578,7 +1578,7 @@ void Door::actor_try_close(actor::Actor& actor_trying)
 
                 for (const actor::Actor* const actor : game_time::g_actors) {
                         if ((actor == m_actor_currently_opening) &&
-                            actor->is_alive()) {
+                            actor::is_alive(*actor)) {
                                 is_opening_actor_alive = true;
                         }
                 }

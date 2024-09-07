@@ -223,7 +223,7 @@ TimeData start_time()
 
 void incr_player_xp(const int xp_gained, const Verbose verbose)
 {
-        if (!map::g_player->is_alive()) {
+        if (!actor::is_alive(*map::g_player)) {
                 return;
         }
 
@@ -253,26 +253,30 @@ void incr_player_xp(const int xp_gained, const Verbose verbose)
                         {
                                 const int hp_gained = 1;
 
-                                map::g_player->change_max_hp(
+                                actor::change_max_hp(
+                                        *map::g_player,
                                         hp_gained,
                                         Verbose::no);
 
-                                map::g_player->restore_hp(
+                                actor::restore_hp(
+                                        *map::g_player,
                                         hp_gained,
-                                        false,
+                                        actor::AllowRestoreAboveMax::no,
                                         Verbose::no);
                         }
 
                         {
-                                const int spi_gained = 1;
+                                const int sp_gained = 1;
 
-                                map::g_player->change_max_sp(
-                                        spi_gained,
+                                actor::change_max_sp(
+                                        *map::g_player,
+                                        sp_gained,
                                         Verbose::no);
 
-                                map::g_player->restore_sp(
-                                        spi_gained,
-                                        false,
+                                actor::restore_sp(
+                                        *map::g_player,
+                                        sp_gained,
+                                        actor::AllowRestoreAboveMax::no,
                                         Verbose::no);
                         }
 
@@ -331,7 +335,7 @@ void player_discover_monster(actor::Actor& actor)
                 return;
         }
 
-        const std::string name = actor.name_a();
+        const std::string name = actor::name_a(actor);
 
         msg_log::add("I have discovered " + name + "!");
 
@@ -384,7 +388,7 @@ void on_mon_killed(actor::Actor& actor)
         }
 
         if (d.is_unique) {
-                const std::string name = actor.name_the();
+                const std::string name = actor::name_the(actor);
 
                 add_history_event("Defeated " + name);
         }
@@ -495,7 +499,7 @@ void GameState::on_start()
                 map::g_player->m_properties.apply(cursed);
                 map::g_player->m_properties.apply(diseased);
 
-                map::g_player->change_max_hp(-4, Verbose::yes);
+                actor::change_max_hp(*map::g_player, -4, Verbose::yes);
         }
 
         s_start_time = current_time();
@@ -535,7 +539,7 @@ void GameState::draw()
         draw_health_bars();
 
         // If the player is dead, fade to red.
-        if (map::g_player->is_alive() == false) {
+        if (!actor::is_alive(*map::g_player)) {
                 const int current_cycle = io::graphics_cycle_nr(io::GraphicsCycle::fast);
 
                 if (current_cycle > s_death_overlay_last_update_cycle) {
@@ -594,7 +598,7 @@ void GameState::update()
                 // We have quit the current game, or the player is dead?
                 if (!map::g_player ||
                     !states::contains_state(StateId::game) ||
-                    !map::g_player->is_alive()) {
+                    !actor::is_alive(*map::g_player)) {
                         break;
                 }
 
@@ -607,7 +611,7 @@ void GameState::update()
         }
 
         // Player is dead?
-        if (map::g_player && !map::g_player->is_alive()) {
+        if (map::g_player && !actor::is_alive(*map::g_player)) {
                 TRACE << "Player died" << std::endl;
 
                 audio::play(audio::SfxId::death);

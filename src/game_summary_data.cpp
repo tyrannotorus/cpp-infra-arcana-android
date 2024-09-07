@@ -370,7 +370,7 @@ GameSummaryData collect()
 
         d.highscore = highscore::make_entry_from_current_session();
 
-        d.player_name = map::g_player->name_a();
+        d.player_name = actor::name_a(*map::g_player);
         d.xp = game::xp_accumulated();
         d.clvl = game::clvl();
         d.dlvl = map::g_dlvl;

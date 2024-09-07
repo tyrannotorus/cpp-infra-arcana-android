@@ -117,7 +117,7 @@ static std::string get_mon_memory_turns_descr(
                 return "";
         }
 
-        const std::string name_a = text_format::first_to_upper(actor.name_a());
+        const std::string name_a = text_format::first_to_upper(actor::name_a(actor));
 
         if (nr_turns_aware < 50) {
                 const std::string nr_turns_aware_str =
@@ -171,7 +171,7 @@ static std::string get_mon_speed_descr(
 
         if (actor_data.is_unique) {
                 return (
-                        actor.name_the() +
+                        actor::name_the(actor) +
                         " appears to move{_}" +
                         speed_type_str +
                         ".");
@@ -235,7 +235,7 @@ static std::string get_mon_shock_descr(
 
         const std::string prefix_str =
                 actor_data.is_unique
-                ? (actor.name_the() + " is ")
+                ? (actor::name_the(actor) + " is ")
                 : ("They are ");
 
         return (
@@ -259,7 +259,7 @@ static std::string get_mon_wielded_wpn_str(
 
         const std::string pronoun_str =
                 actor_data.is_unique
-                ? actor.name_the()
+                ? actor::name_the(actor)
                 : "It";
 
         const std::string wpn_name_a =
@@ -305,7 +305,7 @@ static std::string get_melee_hit_chance_descr(actor::Actor& actor)
         if (wpn_hit_chance == kick_hit_chance) {
                 descr =
                         "The chance to hit " +
-                        actor.name_the() +
+                        actor::name_the(actor) +
                         " with a melee attack or kicking is currently{_}{COLOR_LIGHT_GREEN}" +
                         std::to_string(wpn_hit_chance) +
                         "%{reset_color}";
@@ -313,7 +313,7 @@ static std::string get_melee_hit_chance_descr(actor::Actor& actor)
         else {
                 descr =
                         "The chance to hit " +
-                        actor.name_the() +
+                        actor::name_the(actor) +
                         " with a melee attack is currently{_}{COLOR_LIGHT_GREEN}" +
                         std::to_string(wpn_hit_chance) +
                         "%{reset_color}" +
@@ -343,7 +343,7 @@ static std::string get_sneak_chance_descr(actor::Actor& actor)
 
         std::string descr =
                 "The chance to remain undetected by " +
-                actor.name_the() +
+                actor::name_the(actor) +
                 " is currently{_}{COLOR_LIGHT_GREEN}" +
                 std::to_string(tot_value) +
                 "%{reset_color}.";
@@ -502,7 +502,7 @@ static std::string auto_description_str(actor::Actor& actor)
         const auto& ai = actor_data.ai;
         const auto looks = ai[(size_t)actor::AiId::looks];
 
-        if (!actor.is_aware_of_player() &&
+        if (!actor::is_aware_of_player(actor) &&
             !actor.is_actor_my_leader(map::g_player) &&
             looks) {
                 text_format::append_with_space(
@@ -659,7 +659,7 @@ void ViewActorDescr::draw()
                 Text text;
 
                 text.set_w(panels::w(Panel::info_screen_content));
-                text.set_str(m_actor.descr());
+                text.set_str(actor::descr(m_actor));
                 text.set_color(colors::text());
 
                 text.draw(Panel::info_screen_content, {0, y});
@@ -720,5 +720,5 @@ void ViewActorDescr::update()
 
 std::string ViewActorDescr::title() const
 {
-        return text_format::first_to_upper(m_actor.name_a());
+        return text_format::first_to_upper(actor::name_a(m_actor));
 }

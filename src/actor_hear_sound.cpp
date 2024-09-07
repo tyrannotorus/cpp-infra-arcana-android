@@ -77,7 +77,7 @@ void hear_sound_mon(Actor& actor, const Snd& snd)
                 return;
         }
 
-        if (actor.is_alive() && snd.is_alerting_mon()) {
+        if (actor::is_alive(actor) && snd.is_alerting_mon()) {
                 actor.become_aware_player(AwareSource::heard_sound);
         }
 }

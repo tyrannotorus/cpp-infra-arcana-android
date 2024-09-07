@@ -133,7 +133,7 @@ std::string InsScream::start_msg() const
 
 void InsBabbling::babble() const
 {
-        const std::string player_name = map::g_player->name_the();
+        const std::string player_name = actor::name_the(*map::g_player);
 
         for (int i = rnd::range(1, 3); i > 0; --i) {
                 msg_log::add(player_name + ": " + actor::get_cultist_phrase());

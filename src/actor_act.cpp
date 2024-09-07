@@ -95,7 +95,7 @@ static void player_act()
 
         actor::Actor& player = *map::g_player;
 
-        if (!player.is_alive()) {
+        if (!actor::is_alive(player)) {
                 return;
         }
 
@@ -336,24 +336,22 @@ static void mon_act(actor::Actor& mon)
 
                 if (leader_leader) {
                         TRACE << "Monster with name '"
-                              << mon.name_a()
+                              << actor::name_a(mon)
                               << "' has a leader with name '"
-                              << mon.m_leader->name_a()
+                              << actor::name_a(*mon.m_leader)
                               << "', which also has a leader (not allowed!), "
                               << "with name '"
-                              << leader_leader->name_a()
+                              << actor::name_a(*leader_leader)
                               << "'"
                               << std::endl
                               << "Monster is summoned?: "
                               << mon.m_properties.has(prop::Id::summoned)
                               << std::endl
                               << "Leader is summoned?: "
-                              << mon.m_leader->m_properties.has(
-                                         prop::Id::summoned)
+                              << mon.m_leader->m_properties.has(prop::Id::summoned)
                               << std::endl
                               << "Leader's leader is summoned?: "
-                              << leader_leader->m_properties.has(
-                                         prop::Id::summoned)
+                              << leader_leader->m_properties.has(prop::Id::summoned)
                               << std::endl;
 
                         ASSERT(false);
@@ -364,8 +362,8 @@ static void mon_act(actor::Actor& mon)
         // ---------------------------------------------------------------------
         // Skip every second action while unaware
         // ---------------------------------------------------------------------
-        if (!mon.is_aware_of_player() &&
-            !mon.is_wary_of_player() &&
+        if (!actor::is_aware_of_player(mon) &&
+            !actor::is_wary_of_player(mon) &&
             !is_player_leader) {
                 mon.m_ai_state.is_waiting_unaware = !mon.m_ai_state.is_waiting_unaware;
 
@@ -418,16 +416,15 @@ static void mon_act(actor::Actor& mon)
         // closer than another enemy who is in the same room.
         mon.m_ai_state.target = map::random_closest_actor(mon.m_pos, target_bucket);
 
-        if (mon.is_aware_of_player() || mon.is_wary_of_player()) {
+        if (actor::is_aware_of_player(mon) || actor::is_wary_of_player(mon)) {
                 mon.m_ai_state.is_roaming_allowed = MonRoamingAllowed::yes;
 
                 // Occasionally make a sound - but only if the monster does not
                 // have a leader - otherwise it gets very spammy.
-                const bool has_living_leader =
-                        mon.m_leader && mon.m_leader->is_alive();
+                const bool has_living_leader = mon.m_leader && actor::is_alive(*mon.m_leader);
 
                 if (!has_living_leader &&
-                    mon.is_alive() &&
+                    actor::is_alive(mon) &&
                     rnd::one_in(12)) {
                         mon.speak_phrase(AlertsMon::no);
                 }
@@ -444,7 +441,7 @@ static void mon_act(actor::Actor& mon)
         // Wait a turn when seeing the player (to avoid unfair deaths)
         // ---------------------------------------------------------------------
         if (mon.m_data->is_pausing_on_player_seen) {
-                if (mon.is_aware_of_player()) {
+                if (actor::is_aware_of_player(mon)) {
                         if (actor::is_player(mon.m_ai_state.target) &&
                             mon.m_ai_state.is_target_seen &&
                             mon.m_ai_state.do_wait_on_player_seen_aware) {

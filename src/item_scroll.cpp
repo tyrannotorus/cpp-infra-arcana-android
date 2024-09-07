@@ -317,8 +317,9 @@ ItemPrePickResult Scroll::pre_pickup_hook()
 
         game::incr_player_xp(g_xp_on_exorcist_destroy_scroll);
 
-        map::g_player->restore_sp(999, false, Verbose::no);
-        map::g_player->restore_sp(7, true);
+        actor::restore_sp(*map::g_player, 999, actor::AllowRestoreAboveMax::no, Verbose::no);
+
+        actor::restore_sp(*map::g_player, 7, actor::AllowRestoreAboveMax::yes);
 
         return ItemPrePickResult::destroy_item;
 }

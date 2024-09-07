@@ -99,7 +99,7 @@ struct Projectile
                 if (p.actor_hit) {
                         os
                                 << " - ACTOR HIT: "
-                                << p.actor_hit->name_a();
+                                << actor::name_a(*p.actor_hit);
                 }
 
                 if (p.terrain_hit) {
@@ -211,7 +211,8 @@ static void print_mon_fire_ranged_msg(const RangedAttData& att_data)
 
         const std::string attacker_name_the =
                 text_format::first_to_upper(
-                        att_data.attacker->name_the());
+                        actor::name_the(
+                                *att_data.attacker));
 
         const std::string attack_verb =
                 att_data.att_item->data().ranged.attack_msgs.other;
@@ -282,7 +283,7 @@ static void print_projectile_hit_mon_msg(const Projectile& projectile)
         if (can_player_see_actor(defender)) {
                 other_name =
                         text_format::first_to_upper(
-                                defender.name_the());
+                                actor::name_the(defender));
         }
 
         const std::string dmg_punct =
@@ -471,7 +472,7 @@ static void hit_actor_with_projectile(
 
         wpn.on_projectile_blocked(projectile.pos);
 
-        if (projectile.actor_hit->is_alive()) {
+        if (actor::is_alive(*projectile.actor_hit)) {
                 apply_ranged_attack_props(projectile, wpn);
 
                 // Knock-back?
@@ -1059,7 +1060,7 @@ DidAction ranged(
 
                 // Player could have for example fired an explosive weapon into
                 // a wall and killed themselves - if so, abort early.
-                if (!map::g_player->is_alive()) {
+                if (!actor::is_alive(*map::g_player)) {
                         return DidAction::yes;
                 }
         }

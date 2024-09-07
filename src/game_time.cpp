@@ -191,7 +191,7 @@ static void run_std_turn_events()
                         // Actor not destroyed
                         if (!actor::is_player(actor)) {
                                 // Count down player awareness of the monster
-                                if (actor->is_player_aware_of_me() &&
+                                if (actor::is_player_aware_of_me(*actor) &&
                                     !actor::can_player_see_actor(*actor)) {
                                         --actor->m_mon_aware_state
                                                   .player_aware_of_me_counter;
@@ -206,7 +206,7 @@ static void run_std_turn_events()
                         ++i;
                 }
 
-                if (!map::g_player || !map::g_player->is_alive()) {
+                if (!map::g_player || !actor::is_alive(*map::g_player)) {
                         return;
                 }
 
@@ -425,7 +425,7 @@ void add_actor(actor::Actor* actor)
         for (actor::Actor* const existing_actor : g_actors) {
                 ASSERT(actor != existing_actor);
 
-                if (actor->is_alive() && existing_actor->is_alive()) {
+                if (actor::is_alive(*actor) && actor::is_alive(*existing_actor)) {
                         const P& new_actor_p = actor->m_pos;
                         const P& existing_actor_p = existing_actor->m_pos;
 
@@ -444,7 +444,7 @@ void reset_current_actor_idx()
 
 void tick()
 {
-        if (!map::g_player || !map::g_player->is_alive()) {
+        if (!map::g_player || !actor::is_alive(*map::g_player)) {
                 return;
         }
 
@@ -504,7 +504,7 @@ void tick()
                         break;
                 }
 
-                if (!map::g_player || !map::g_player->is_alive()) {
+                if (!map::g_player || !actor::is_alive(*map::g_player)) {
                         return;
                 }
         }

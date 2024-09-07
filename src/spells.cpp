@@ -372,7 +372,7 @@ static void side_effect_flay_human(const Context& context)
                 // NOTE: The target of the spell side effect may be the caster
                 // itself, if caster is a monster.
                 if (!actor::is_player(actor) &&
-                    actor->is_alive() &&
+                    actor::is_alive(*actor) &&
                     actor_data->is_humanoid &&
                     actor_data->can_leave_corpse &&
                     (actor_data->mon_shock_lvl <= MonShockLvl::frightening) &&
@@ -396,7 +396,7 @@ static void side_effect_flay_human(const Context& context)
         if (actor::can_player_see_actor(*target_actor)) {
                 const auto name =
                         text_format::first_to_upper(
-                                target_actor->name_the());
+                                actor::name_the(*target_actor));
 
                 msg_log::add(name + " is suddenly flayed alive!");
         }
@@ -1077,7 +1077,7 @@ void Spell::cast(
                                 if (is_mon_seen) {
                                         mon_name =
                                                 text_format::first_to_upper(
-                                                        caster->name_the());
+                                                        actor::name_the(*caster));
                                 }
                                 else {
                                         // Cannot see monster.
@@ -1140,7 +1140,7 @@ void Spell::cast(
                 actor::is_player(caster) &&
                 caster->m_properties.has(prop::Id::meditative_focused);
 
-        if (allow_cast && caster->is_alive()) {
+        if (allow_cast && actor::is_alive(*caster)) {
                 TRACE
                         << "Running spell effect for spell "
                         << "'" << name() << "'"
@@ -1172,7 +1172,7 @@ void Spell::cast(
         }
 
         if (actor::is_player(caster) &&
-            caster->is_alive() &&
+            actor::is_alive(*caster) &&
             !player_bon::is_bg(Bg::exorcist) &&
             allow_cast &&
             (base_max_cost(skill, caster) > 0) &&
@@ -1229,9 +1229,10 @@ void Spell::on_resist(actor::Actor& target) const
         }
 
         if (is_player && player_bon::has_trait(Trait::absorbtion)) {
-                map::g_player->restore_sp(
+                actor::restore_sp(
+                        *map::g_player,
                         rnd::range(1, 6),
-                        false,  // Not allowed above max
+                        actor::AllowRestoreAboveMax::no,
                         Verbose::yes);
         }
 }
@@ -1538,7 +1539,7 @@ void Darkbolt::on_hit(
                 }
         }
 
-        if (!actor_hit.is_alive()) {
+        if (!actor::is_alive(actor_hit)) {
                 return;
         }
 
@@ -1647,7 +1648,7 @@ void SpellBolt::run_effect(
                         // Target is monster
                         const std::string name_the =
                                 player_see_tgt
-                                ? text_format::first_to_upper(target->name_the())
+                                ? text_format::first_to_upper(actor::name_the(*target))
                                 : "It";
 
                         str_begin = name_the + " is";
@@ -1803,7 +1804,7 @@ void SpellAzaGaze::apply_properties_on_target(
         actor::Actor& target,
         SpellSkill skill) const
 {
-        if (!target.is_alive()) {
+        if (!actor::is_alive(target)) {
                 return;
         }
 
@@ -2029,7 +2030,7 @@ void SpellCataclysm::run_effect(
                 std::string caster_name =
                         is_player
                         ? "me"
-                        : caster->name_the();
+                        : actor::name_the(*caster);
 
                 msg_log::add("Destruction rages around " + caster_name + "!");
         }
@@ -2304,7 +2305,7 @@ void SpellPestilence::run_effect(
 
                 if (!actor::is_player(caster)) {
                         if (actor::can_player_see_actor(*caster)) {
-                                caster_str = caster->name_the();
+                                caster_str = actor::name_the(*caster);
                         }
                         else {
                                 caster_str = "it";
@@ -2439,7 +2440,7 @@ void SpellSpectralWeapons::on_mon_summoned(
         }
 
         if (actor::can_player_see_actor(*mon)) {
-                msg_log::add(mon->name_a() + " appears!");
+                msg_log::add(actor::name_a(*mon) + " appears!");
         }
 }
 
@@ -2838,7 +2839,7 @@ void SpellPurge::run_effect(
                 // Is adjacent undead creature
 
                 if (actor::can_player_see_actor(*actor)) {
-                        const auto name = text_format::first_to_upper(actor->name_the());
+                        const auto name = text_format::first_to_upper(actor::name_the(*actor));
 
                         msg_log::add(name + " is struck.", colors::msg_good());
 
@@ -2851,7 +2852,7 @@ void SpellPurge::run_effect(
                         DmgType::pure,
                         caster);
 
-                if (actor->is_alive()) {
+                if (actor::is_alive(*actor)) {
                         prop::Prop* const fear = prop::make(prop::Id::terrified);
 
                         fear->set_duration(fear_duration_range().roll());
@@ -3277,7 +3278,7 @@ bool SpellSeeInvis::allow_mon_cast_now(
 
         return (
                 !mon.m_properties.has(prop::Id::see_invis) &&
-                mon.is_aware_of_player() &&
+                actor::is_aware_of_player(mon) &&
                 rnd::one_in(8));
 }
 
@@ -3850,7 +3851,7 @@ void SpellKnockBack::run_effect(
         }
         else {
                 // Target is monster
-                target_str = target->name_the();
+                target_str = actor::name_the(*target);
 
                 msg_clr =
                         map::g_player->is_leader_of(target)
@@ -3999,7 +4000,8 @@ int SpellHealOthers::mon_cooldown() const
 std::vector<actor::Actor*> SpellHealOthers::find_possible_actors_to_heal(
         const actor::Actor* const caster) const
 {
-        const std::vector<actor::Actor*> actors_in_group = caster->other_actors_in_same_group();
+        const std::vector<actor::Actor*> actors_in_group =
+                actor::other_actors_in_same_group(caster);
 
         Array2<bool> blocks_los(map::dims());
 
@@ -4061,7 +4063,7 @@ void SpellHealOthers::run_effect(
 
         draw_blast_at_seen_actors({actor_to_heal}, colors::light_green());
 
-        actor_to_heal->restore_hp(hp_healed);
+        actor::restore_hp(*actor_to_heal, hp_healed);
 }
 
 bool SpellHealOthers::allow_mon_cast_now(
@@ -4523,7 +4525,7 @@ void SpellDisease::run_effect(
                 const std::string actor_name =
                         actor::is_player(target)
                         ? "me"
-                        : target->name_the();
+                        : actor::name_the(*target);
 
                 msg_log::add(
                         "A horrible disease is starting to afflict " +
@@ -4691,7 +4693,7 @@ void SpellSummonMon::summon(const std::string& id, actor::Actor* caster) const
 
         if (actor::can_player_see_actor(*mon)) {
                 msg_log::add(
-                        text_format::first_to_upper(mon->name_a()) +
+                        text_format::first_to_upper(actor::name_a(*mon)) +
                         " appears!");
 
                 actor::make_player_aware_mon(*mon);
@@ -4854,7 +4856,7 @@ void SpellHeal::run_effect(
                 caster->m_properties.apply(prop);
         }
 
-        caster->restore_hp(nr_hp_restored(skill));
+        actor::restore_hp(*caster, nr_hp_restored(skill));
 }
 
 bool SpellHeal::allow_mon_cast_now(
@@ -5007,7 +5009,7 @@ void SpellBurn::run_effect(
                 const std::string actor_name =
                         actor::is_player(target)
                         ? "me"
-                        : target->name_the();
+                        : actor::name_the(*target);
 
                 msg_log::add("Flames are rising around " + actor_name + "!");
         }
@@ -5581,7 +5583,7 @@ void SpellSacrificeLife::run_effect(
 
         const int sp_gained = hp_drained * nr_sp_per_hp(skill);
 
-        caster->restore_sp(sp_gained, true);
+        actor::restore_sp(*caster, sp_gained, actor::AllowRestoreAboveMax::yes);
 }
 
 std::vector<std::string> SpellSacrificeLife::descr_specific(

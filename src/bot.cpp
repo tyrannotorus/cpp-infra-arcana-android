@@ -216,7 +216,7 @@ static void bot_act()
 
                 ASSERT(map::is_pos_inside_map(actor->m_pos));
 
-                if (!actor->is_alive()) {
+                if (!actor::is_alive(*actor)) {
                         continue;
                 }
 
@@ -226,8 +226,7 @@ static void bot_act()
                         const auto* const other_actor =
                                 game_time::g_actors[inner_idx];
 
-                        if ((outer_idx == inner_idx) ||
-                            !other_actor->is_alive()) {
+                        if ((outer_idx == inner_idx) || !actor::is_alive(*other_actor)) {
                                 continue;
                         }
 

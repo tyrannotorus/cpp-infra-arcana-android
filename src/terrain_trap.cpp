@@ -99,7 +99,7 @@ static void communicate_magic_trap_trigger(
                 if (can_player_see_actor || can_player_see_trap) {
                         const std::string actor_name =
                                 can_player_see_actor
-                                ? actor.name_the()
+                                ? actor::name_the(actor)
                                 : "it";
 
                         msg_log::add("A beam of light shoots out under " + actor_name + ".");
@@ -528,7 +528,7 @@ void Trap::bump(actor::Actor& actor_bumping)
 
                 // Put some extra restrictions on monsters triggering traps.
                 if (!actor_bumping.m_ai_state.is_target_seen ||
-                    !actor_bumping.is_aware_of_player() ||
+                    !actor::is_aware_of_player(actor_bumping) ||
                     is_hidden()) {
                         TRACE_FUNC_END_VERBOSE;
 
@@ -1042,7 +1042,7 @@ void TrapSummonMon::trigger()
 
                                         const std::string name_a =
                                                 text_format::first_to_upper(
-                                                        mon->name_a());
+                                                        actor::name_a(*mon));
 
                                         msg_log::add(name_a + " appears!");
                                 }
@@ -1207,7 +1207,7 @@ void TrapWeb::trigger()
                 if (actor::can_player_see_actor(*actor_here)) {
                         const std::string actor_name =
                                 text_format::first_to_upper(
-                                        actor_here->name_the());
+                                        actor::name_the(*actor_here));
 
                         msg_log::add(actor_name + " is entangled in a huge spider web!");
                 }
@@ -1427,7 +1427,7 @@ void TrapUnlearnSpell::try_unlearn_for_monster(actor::Actor& actor) const
         if (player_sees_actor) {
                 const std::string actor_name =
                         text_format::first_to_upper(
-                                actor.name_the());
+                                actor::name_the(actor));
 
                 msg_log::add("A misty haze surrounds " + actor_name + ".");
         }

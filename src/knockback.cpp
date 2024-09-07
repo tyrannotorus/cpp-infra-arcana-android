@@ -129,12 +129,12 @@ void run(
         bool player_is_aware_of_actor = true;
 
         if (!is_player) {
-                player_is_aware_of_actor = actor.is_player_aware_of_me();
+                player_is_aware_of_actor = actor::is_player_aware_of_me(actor);
         }
 
         std::string actor_name =
                 player_can_see_actor
-                ? text_format::first_to_upper(actor.name_the())
+                ? text_format::first_to_upper(actor::name_the(actor))
                 : "It";
 
         if ((verbose == Verbose::yes) && player_is_aware_of_actor) {
@@ -195,7 +195,7 @@ void run(
                 mob->bump(actor);
         }
 
-        if (!actor.is_alive()) {
+        if (!actor::is_alive(actor)) {
                 TRACE_FUNC_END;
                 return;
         }

@@ -185,7 +185,7 @@ ConsumeItem Device::activate(actor::Actor* const actor)
         } break;
         }
 
-        if (!map::g_player->is_alive()) {
+        if (!actor::is_alive(*map::g_player)) {
                 return ConsumeItem::no;
         }
 
@@ -334,7 +334,7 @@ ConsumeItem Rejuvenator::run_effect()
                 map::g_player->m_properties.end_prop(prop_id);
         }
 
-        map::g_player->restore_hp(999);
+        actor::restore_hp(*map::g_player, 999);
 
         map::g_player->incr_shock(50.0, ShockSrc::use_strange_item);
 
@@ -363,7 +363,7 @@ ConsumeItem Translocator::run_effect()
                 // Seen targets are available
                 for (auto* actor : seen_foes) {
                         msg_log::add(
-                                text_format::first_to_upper(actor->name_the()) +
+                                text_format::first_to_upper(actor::name_the(*actor)) +
                                 " is teleported.");
 
                         draw_blast_at_cells(
@@ -461,7 +461,7 @@ ConsumeItem ForceField::run_effect()
 
                 // Destroy corpses in cells with force fields
                 for (auto* const actor : actors_here) {
-                        if (actor->is_corpse()) {
+                        if (actor::is_corpse(*actor)) {
                                 actor->m_state = ActorState::destroyed;
 
                                 terrain::make_blood(p);

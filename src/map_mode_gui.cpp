@@ -332,8 +332,7 @@ static void draw_armor(const int y, const Panel panel)
                 label_color(),
                 io::DrawBg::no);
 
-        const std::string armor_str =
-                std::to_string(map::g_player->armor_points());
+        const std::string armor_str = std::to_string(actor::armor_points(*map::g_player));
 
         io::draw_text_right(
                 armor_str,
@@ -346,7 +345,7 @@ static void draw_armor(const int y, const Panel panel)
 static void draw_name(const int y, const Panel panel)
 {
         io::draw_text_center(
-                map::g_player->name_the(),
+                actor::name_the(*map::g_player),
                 panel,
                 {panels::w(panel) / 2, y},
                 colors::light_sepia(),

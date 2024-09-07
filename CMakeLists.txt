@@ -161,6 +161,7 @@ set(COMMON_SRC
         src/ability_values.cpp
         src/actor.cpp
         src/actor_act.cpp
+        src/actor_common.cpp
         src/actor_cycle_graphics.cpp
         src/actor_data.cpp
         src/actor_death.cpp

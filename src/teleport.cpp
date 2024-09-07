@@ -51,7 +51,7 @@
 static bool is_void_traveler_affecting_player_teleport(
         const actor::Actor& actor)
 {
-        const auto actor_id = actor.id();
+        const std::string actor_id = actor::id(actor);
 
         const bool is_void_traveler =
                 (actor_id == "MON_VOID_TRAVELER") ||
@@ -62,7 +62,7 @@ static bool is_void_traveler_affecting_player_teleport(
                 (actor.m_state == ActorState::alive) &&
                 actor.m_properties.allow_act() &&
                 !actor.is_actor_my_leader(map::g_player) &&
-                actor.is_aware_of_player());
+                actor::is_aware_of_player(actor));
 }
 
 static std::vector<P> get_free_positions_around_pos(
@@ -314,7 +314,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
                         const std::string actor_name_a =
                                 text_format::first_to_upper(
-                                        other_actor->name_a());
+                                        actor::name_a(*other_actor));
 
                         msg_log::add(
                                 actor_name_a +
@@ -359,7 +359,7 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
                 const std::string actor_name_the =
                         text_format::first_to_upper(
-                                actor.name_the());
+                                actor::name_the(actor));
 
                 const auto msg_ending =
                         player_can_see_actor

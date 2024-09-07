@@ -73,7 +73,7 @@ static bool is_player_aware_of_hostile_mon_at(const P& pos)
 
         return (
                 mon &&
-                mon->is_player_aware_of_me() &&
+                actor::is_player_aware_of_me(*mon) &&
                 !map::g_player->is_leader_of(mon));
 }
 
@@ -353,7 +353,7 @@ bool Doomed::allow_read_chance(const Verbose verbose) const
                         else if (actor::can_player_see_actor(*m_owner)) {
                                 const std::string name =
                                         text_format::first_to_upper(
-                                                m_owner->name_the());
+                                                actor::name_the(*m_owner));
 
                                 msg_log::add(
                                         name +
@@ -379,7 +379,7 @@ bool Doomed::allow_cast_intr_spell_chance(const Verbose verbose) const
                         else if (actor::can_player_see_actor(*m_owner)) {
                                 const std::string name =
                                         text_format::first_to_upper(
-                                                m_owner->name_the());
+                                                actor::name_the(*m_owner));
 
                                 msg_log::add(
                                         name +
@@ -465,7 +465,7 @@ PropEnded Entangled::affect_move_dir(Dir& dir)
                 if (actor::can_player_see_actor(*m_owner)) {
                         const std::string actor_name_the =
                                 text_format::first_to_upper(
-                                        m_owner->name_the());
+                                        actor::name_the(*m_owner));
 
                         msg_log::add(
                                 actor_name_the + " struggles to tear free.",
@@ -533,7 +533,7 @@ PropEnded Stuck::affect_move_dir(Dir& dir)
                 if (actor::can_player_see_actor(*m_owner)) {
                         const std::string actor_name_the =
                                 text_format::first_to_upper(
-                                        m_owner->name_the());
+                                        actor::name_the(*m_owner));
 
                         msg_log::add(
                                 actor_name_the + " struggles to pull free.",
@@ -712,7 +712,7 @@ void ZuulPossessPriest::on_placed()
 
                 actor->m_properties.apply(prop, PropSrc::intr, true, Verbose::no);
 
-                actor->restore_hp(999, false, Verbose::no);
+                actor::restore_hp(*actor, 999, actor::AllowRestoreAboveMax::no, Verbose::no);
         }
 }
 
@@ -723,7 +723,7 @@ void PossessedByZuul::on_death()
         if (actor::can_player_see_actor(*m_owner)) {
                 const std::string& name1 =
                         text_format::first_to_upper(
-                                m_owner->name_the());
+                                actor::name_the(*m_owner));
 
                 const std::string& name2 = actor::g_data["MON_ZUUL"].name_the;
 
@@ -763,7 +763,7 @@ void Shapeshifts::on_placed()
 
 void Shapeshifts::on_std_turn()
 {
-        if (!m_owner->is_alive()) {
+        if (!actor::is_alive(*m_owner)) {
                 return;
         }
 
@@ -834,7 +834,7 @@ void Shapeshifts::shapeshift(const Verbose verbose) const
                 }
 
                 if (!d.can_be_shapeshifted_into ||
-                    (d.id == m_owner->id()) ||
+                    (d.id == actor::id(*m_owner)) ||
                     (d.id == "MON_SHAPESHIFTER") ||
                     !d.is_auto_spawn_allowed ||
                     d.is_unique ||
@@ -915,7 +915,7 @@ PropEnded ZealotStop::affect_move_dir(Dir& dir)
 {
         const int stop_pct_chance = 7;
 
-        if (!m_owner->is_alive() ||
+        if (!actor::is_alive(*m_owner) ||
             !m_owner->m_properties.allow_act() ||
             (dir == Dir::center) ||
             m_owner->m_properties.has(prop::Id::burning) ||
@@ -928,7 +928,7 @@ PropEnded ZealotStop::affect_move_dir(Dir& dir)
         }
 
         if (actor::can_player_see_actor(*m_owner)) {
-                const auto name = text_format::first_to_upper(m_owner->name_the());
+                const auto name = text_format::first_to_upper(actor::name_the(*m_owner));
 
                 msg_log::add(name + " stops and gropes about.");
         }
@@ -940,7 +940,7 @@ PropEnded ZealotStop::affect_move_dir(Dir& dir)
 
 PropEnded Poisoned::on_actor_turn()
 {
-        if (!m_owner->is_alive()) {
+        if (!actor::is_alive(*m_owner)) {
                 return PropEnded::no;
         }
 
@@ -982,7 +982,7 @@ PropEnded Poisoned::on_actor_turn()
                 // Is seen monster
                 const std::string actor_name_the =
                         text_format::first_to_upper(
-                                m_owner->name_the());
+                                actor::name_the(*m_owner));
 
                 msg_log::add(
                         actor_name_the +
@@ -1089,7 +1089,7 @@ PropEnded Nailed::affect_move_dir(Dir& dir)
                 if (actor::can_player_see_actor(*m_owner)) {
                         const std::string actor_name_the =
                                 text_format::first_to_upper(
-                                        m_owner->name_the());
+                                        actor::name_the(*m_owner));
 
                         msg_log::add(
                                 actor_name_the + " struggles in pain!",
@@ -1099,7 +1099,7 @@ PropEnded Nailed::affect_move_dir(Dir& dir)
 
         actor::hit(*m_owner, rnd::range(1, 3), DmgType::pure, nullptr);
 
-        if (!m_owner->is_alive() || !rnd::one_in(4)) {
+        if (!actor::is_alive(*m_owner) || !rnd::one_in(4)) {
                 return PropEnded::no;
         }
 
@@ -1112,7 +1112,7 @@ PropEnded Nailed::affect_move_dir(Dir& dir)
                 else if (actor::can_player_see_actor(*m_owner)) {
                         const std::string actor_name_the =
                                 text_format::first_to_upper(
-                                        m_owner->name_the());
+                                        actor::name_the(*m_owner));
 
                         msg_log::add(actor_name_the + " tears out a spike!");
                 }
@@ -1716,7 +1716,7 @@ bool Frenzied::allow_move_dir(const Dir dir)
         const actor::Actor* actor_at_tgt = map::living_actor_at(new_pos);
 
         if (actor_at_tgt &&
-            actor_at_tgt->is_player_aware_of_me() &&
+            actor::is_player_aware_of_me(*actor_at_tgt) &&
             !actor_at_tgt->is_actor_my_leader(map::g_player)) {
                 // There is a known hostile monster at the target position,
                 // allow "moving" into it (i.e. try attacking it).
@@ -1898,7 +1898,7 @@ bool Burning::allow_read_chance(const Verbose verbose) const
                         else if (actor::can_player_see_actor(*m_owner)) {
                                 const std::string name =
                                         text_format::first_to_upper(
-                                                m_owner->name_the());
+                                                actor::name_the(*m_owner));
 
                                 msg_log::add(
                                         name +
@@ -1924,7 +1924,7 @@ bool Burning::allow_cast_intr_spell_chance(const Verbose verbose) const
                         else if (actor::can_player_see_actor(*m_owner)) {
                                 const std::string name =
                                         text_format::first_to_upper(
-                                                m_owner->name_the());
+                                                actor::name_the(*m_owner));
 
                                 msg_log::add(
                                         name +
@@ -1966,7 +1966,7 @@ PropEnded Flammable::on_actor_turn()
 
         for (actor::Actor* const actor : game_time::g_actors) {
                 if ((actor != m_owner) &&
-                    actor->is_alive() &&
+                    actor::is_alive(*actor) &&
                     actor->m_properties.has(Id::flammable) &&
                     m_owner->m_pos.is_adjacent(actor->m_pos) &&
                     !actor->m_properties.has(Id::burning)) {
@@ -1986,7 +1986,7 @@ std::optional<Color> Burning::override_actor_color() const
 
 PropActResult Recloaks::on_act()
 {
-        if (m_owner->is_alive() &&
+        if (actor::is_alive(*m_owner) &&
             !m_owner->m_properties.has(prop::Id::cloaked) &&
             rnd::one_in(8)) {
                 Prop* prop_cloaked = prop::make(prop::Id::cloaked);
@@ -2351,7 +2351,7 @@ void LgtSens::raise_extra_damage_to(const int dmg)
 
 PropActResult Vortex::on_act()
 {
-        if (actor::is_player(m_owner) || !m_owner->is_alive()) {
+        if (actor::is_player(m_owner) || !actor::is_alive(*m_owner)) {
                 return {};
         }
 
@@ -2417,7 +2417,7 @@ PropActResult Vortex::on_act()
 
         if (actor::can_player_see_actor(*m_owner)) {
                 const auto name_the = text_format::first_to_upper(
-                        m_owner->name_the());
+                        actor::name_the(*m_owner));
 
                 msg_log::add(name_the + " pulls me!");
         }
@@ -2500,7 +2500,7 @@ void SplitsOnDeath::on_death()
                 // NOTE: This is printed instead of the standard death message
                 const std::string name =
                         text_format::first_to_upper(
-                                m_owner->name_the());
+                                actor::name_the(*m_owner));
 
                 msg_log::add(name + " splits.");
         }
@@ -2508,7 +2508,7 @@ void SplitsOnDeath::on_death()
         actor::Actor* const leader = m_owner->m_leader;
 
         const auto spawned =
-                actor::spawn(pos, {2, m_owner->id()}, map::rect())
+                actor::spawn(pos, {2, actor::id(*m_owner)}, map::rect())
                         .make_aware_of_player()
                         .set_leader(leader);
 
@@ -2550,7 +2550,7 @@ void OthersTerrifiedOnDeath::on_death()
                         continue;
                 }
 
-                if (!actor->is_alive()) {
+                if (!actor::is_alive(*actor)) {
                         continue;
                 }
 
@@ -2574,7 +2574,7 @@ void OthersTerrifiedOnDeath::on_death()
 
 PropActResult CorpseEater::on_act()
 {
-        if (!m_owner->is_alive()) {
+        if (!actor::is_alive(*m_owner)) {
                 return {};
         }
 
@@ -2603,7 +2603,7 @@ PropActResult Teleports::on_act()
 {
         const int teleport_one_in_n = 12;
 
-        if (!m_owner->is_alive() || !rnd::one_in(teleport_one_in_n)) {
+        if (!actor::is_alive(*m_owner) || !rnd::one_in(teleport_one_in_n)) {
                 return {};
         }
 
@@ -2623,7 +2623,7 @@ PropActResult TeleportsAway::on_act()
         const bool is_player_near = (dist <= 1);
 
         if (!is_player_near ||
-            !m_owner->is_alive() ||
+            !actor::is_alive(*m_owner) ||
             m_owner->is_actor_my_leader(map::g_player)) {
                 return {};
         }
@@ -2679,18 +2679,18 @@ void AltersEnv::on_std_turn()
 
 void Regenerating::on_std_turn()
 {
-        if (!m_owner->is_alive() ||
+        if (!actor::is_alive(*m_owner) ||
             m_owner->m_properties.has(prop::Id::burning) ||
             m_owner->m_properties.has(prop::Id::disabled_hp_regen)) {
                 return;
         }
 
-        m_owner->restore_hp(1, false, Verbose::no);
+        actor::restore_hp(*m_owner, 1, actor::AllowRestoreAboveMax::no, Verbose::no);
 }
 
 PropActResult CorpseRises::on_act()
 {
-        if (!m_owner->is_corpse() ||
+        if (!actor::is_corpse(*m_owner) ||
             map::living_actor_at(m_owner->m_pos)) {
                 return {};
         }
@@ -2752,7 +2752,7 @@ void CorpseRises::on_death()
 {
         // If we have already risen before, and were killed again leaving a
         // corpse, destroy the corpse to prevent rising multiple times
-        if (m_owner->is_corpse() && m_has_risen) {
+        if (actor::is_corpse(*m_owner) && m_has_risen) {
                 m_owner->m_state = ActorState::destroyed;
                 m_owner->m_properties.on_destroyed_alive();
         }
@@ -2805,7 +2805,7 @@ void SpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
 
         const int mon_choice = rnd::weighted_choice(weights);
 
-        const std::string my_name = m_owner->name_the();
+        const std::string my_name = actor::name_the(*m_owner);
 
         std::string spawn_msg;
 
@@ -2901,12 +2901,12 @@ void Breeds::on_std_turn()
         const int group_limit = 40;
 
         if (actor::is_player(m_owner) ||
-            !m_owner->is_alive() ||
+            !actor::is_alive(*m_owner) ||
             m_owner->m_properties.has(prop::Id::burning) ||
             m_owner->m_properties.has(prop::Id::paralyzed) ||
             (game_time::g_actors.size() >= g_max_nr_actors_on_map) ||
             !rnd::one_in(spawn_new_one_in_n) ||
-            ((m_owner->nr_other_actors_in_same_group() + 1) >= group_limit)) {
+            ((actor::nr_other_actors_in_same_group(m_owner) + 1) >= group_limit)) {
                 return;
         }
 
@@ -2919,7 +2919,7 @@ void Breeds::on_std_turn()
 
         actor::MonSpawnResult spawned =
                 actor::spawn_random_position(
-                        {m_owner->id()},
+                        {actor::id(*m_owner)},
                         area_allowed)
                         .set_leader(leader_of_spawned_mon);
 
@@ -2935,13 +2935,14 @@ void Breeds::on_std_turn()
 
                         if (actor::can_player_see_actor(*spawned_mon)) {
                                 const std::string name =
-                                        text_format::first_to_upper(spawned_mon->name_a());
+                                        text_format::first_to_upper(
+                                                actor::name_a(*spawned_mon));
 
                                 msg_log::add(name + " is spawned.");
                         }
                 });
 
-        if (m_owner->is_aware_of_player()) {
+        if (actor::is_aware_of_player(*m_owner)) {
                 spawned.make_aware_of_player();
         }
 }
@@ -2951,8 +2952,8 @@ void VomitsOoze::on_std_turn()
         const int spawn_new_one_in_n = m_has_triggered_before ? 15 : 5;
 
         if (actor::is_player(m_owner) ||
-            !m_owner->is_alive() ||
-            !m_owner->is_aware_of_player() ||
+            !actor::is_alive(*m_owner) ||
+            !actor::is_aware_of_player(*m_owner) ||
             m_owner->m_properties.has(prop::Id::burning) ||
             m_owner->m_properties.has(prop::Id::paralyzed) ||
             (game_time::g_actors.size() >= g_max_nr_actors_on_map) ||
@@ -2985,7 +2986,7 @@ void VomitsOoze::on_std_turn()
         if (actor::can_player_see_actor(*m_owner)) {
                 const auto parent_name =
                         text_format::first_to_upper(
-                                m_owner->name_the());
+                                actor::name_the(*m_owner));
 
                 msg_log::add(parent_name + " spews ooze.");
         }
@@ -3018,7 +3019,7 @@ void VomitsOoze::on_std_turn()
 
         map::update_vision();
 
-        if (m_owner->is_aware_of_player()) {
+        if (actor::is_aware_of_player(*m_owner)) {
                 spawned.make_aware_of_player();
         }
 
@@ -3027,7 +3028,7 @@ void VomitsOoze::on_std_turn()
 
 void ConfusesAdjacent::on_std_turn()
 {
-        if (!m_owner->is_alive() ||
+        if (!actor::is_alive(*m_owner) ||
             !actor::can_player_see_actor(*m_owner) ||
             !map::g_player->m_pos.is_adjacent(m_owner->m_pos)) {
                 return;
@@ -3035,7 +3036,7 @@ void ConfusesAdjacent::on_std_turn()
 
         if (!map::g_player->m_properties.has(prop::Id::confused)) {
                 const std::string msg =
-                        text_format::first_to_upper(m_owner->name_the()) +
+                        text_format::first_to_upper(actor::name_the(*m_owner)) +
                         " bewilders me.";
 
                 msg_log::add(msg);
@@ -3056,7 +3057,7 @@ void FrenzyPlayerOnSeen::on_player_see()
 
         if (!properties.has(prop::Id::frenzied) &&
             rnd::one_in(taunt_on_in_n)) {
-                const std::string name = text_format::first_to_upper(m_owner->name_the());
+                const std::string name = text_format::first_to_upper(actor::name_the(*m_owner));
 
                 msg_log::add(name + " is taunting me!");
 
@@ -3087,7 +3088,7 @@ int AuraOfDecay::range() const
 
 void AuraOfDecay::on_std_turn()
 {
-        if (!m_owner->is_alive()) {
+        if (!actor::is_alive(*m_owner)) {
                 return;
         }
 
@@ -3202,7 +3203,7 @@ void AuraOfDecay::print_msg_actor_hit(const actor::Actor& actor) const
 PropActResult MajorClaphamSummon::on_act()
 {
         if (actor::is_player(m_owner) ||
-            !m_owner->is_alive() ||
+            !actor::is_alive(*m_owner) ||
             !actor::is_player(m_owner->m_ai_state.target) ||
             !m_owner->m_ai_state.is_target_seen) {
                 return {};
@@ -3284,7 +3285,7 @@ PropActResult MajorClaphamSummon::on_act()
 PropActResult AlliesPlayerGhoul::on_act()
 {
         if (actor::is_player(m_owner) ||
-            !m_owner->is_alive() ||
+            !actor::is_alive(*m_owner) ||
             !player_bon::is_bg(Bg::ghoul) ||
             m_owner->is_actor_my_leader(map::g_player)) {
                 return {};
@@ -3308,11 +3309,11 @@ PropActResult AlliesPlayerGhoul::on_act()
                 }
 
                 if (actor::can_player_see_actor(*actor) &&
-                    actor->is_alive() &&
+                    actor::is_alive(*actor) &&
                     !actor->is_actor_my_leader(map::g_player)) {
                         const std::string actor_name =
                                 text_format::first_to_upper(
-                                        actor->name_the());
+                                        actor::name_the(*actor));
 
                         const std::string pronoun =
                                 actor->m_data->is_unique
@@ -3427,7 +3428,7 @@ PropEnded MagicSearching::on_actor_turn()
                         const auto& p = actor->m_pos;
 
                         if (actor::is_player(actor) ||
-                            !actor->is_alive() ||
+                            !actor::is_alive(*actor) ||
                             (king_dist(map::g_player->m_pos, p) > m_range)) {
                                 continue;
                         }
@@ -3450,7 +3451,7 @@ bool CannotReadCurse::allow_read_absolute(const Verbose verbose) const
 
 PropActResult FrenziesSelf::on_act()
 {
-        if (!m_owner->is_alive()) {
+        if (!actor::is_alive(*m_owner)) {
                 return {};
         }
 
@@ -3483,7 +3484,7 @@ PropActResult FrenziesSelf::on_act()
 
 PropActResult FrenziesFollowers::on_act()
 {
-        if (!m_owner->is_alive()) {
+        if (!actor::is_alive(*m_owner)) {
                 return {};
         }
 
@@ -3534,7 +3535,7 @@ PropActResult FrenziesFollowers::on_act()
         snd.run();
 
         if (actor::can_player_see_actor(*m_owner)) {
-                const std::string name = text_format::first_to_upper(m_owner->name_the());
+                const std::string name = text_format::first_to_upper(actor::name_the(*m_owner));
 
                 msg_log::add(name + " stirs up a great frenzy!");
         }
@@ -3561,9 +3562,9 @@ PropActResult FrenziesFollowers::on_act()
 
 PropActResult SummonsLocusts::on_act()
 {
-        if (!m_owner->is_alive() ||
+        if (!actor::is_alive(*m_owner) ||
             m_has_summoned ||
-            !m_owner->is_aware_of_player()) {
+            !actor::is_aware_of_player(*m_owner)) {
                 return {};
         }
 
@@ -3581,7 +3582,7 @@ PropActResult SummonsLocusts::on_act()
         }
 
         if (actor::can_player_see_actor(*m_owner)) {
-                const std::string name = text_format::first_to_upper(m_owner->name_the());
+                const std::string name = text_format::first_to_upper(actor::name_the(*m_owner));
 
                 msg_log::add(name + " calls a plague of Locusts!");
 
@@ -3738,7 +3739,7 @@ PropEnded Thorns::on_hit(
                 return PropEnded::no;
         }
 
-        if (!m_owner->is_alive()) {
+        if (!actor::is_alive(*m_owner)) {
                 return PropEnded::no;
         }
 
@@ -3802,7 +3803,7 @@ void Thorns::print_msg_player_retaliate_mon(
         std::string target_name;
 
         if (player_see_target) {
-                target_name = target.name_the();
+                target_name = actor::name_the(target);
         }
         else {
                 target_name = "it";
@@ -3821,7 +3822,7 @@ void Thorns::print_msg_mon_retaliate_player() const
         std::string retaliator_name;
 
         if (player_see_retaliator) {
-                retaliator_name = m_owner->name_the();
+                retaliator_name = actor::name_the(*m_owner);
         }
         else {
                 retaliator_name = "it";
@@ -3850,14 +3851,14 @@ void Thorns::print_msg_mon_retaliate_mon(
         if (player_see_retaliator) {
                 retaliator_name =
                         text_format::first_to_upper(
-                                m_owner->name_the());
+                                actor::name_the(*m_owner));
         }
         else {
                 retaliator_name = "It";
         }
 
         if (player_see_target) {
-                target_name = target.name_the();
+                target_name = actor::name_the(target);
         }
         else {
                 target_name = "it";

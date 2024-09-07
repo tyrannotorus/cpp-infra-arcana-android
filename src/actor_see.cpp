@@ -33,7 +33,7 @@ static bool is_seeable_for_mon(
         const actor::Actor& other,
         const Array2<bool>& hard_blocked_los)
 {
-        if ((&mon == &other) || (!other.is_alive())) {
+        if ((&mon == &other) || (!actor::is_alive(other))) {
                 return true;
         }
 
@@ -88,7 +88,7 @@ static std::vector<actor::Actor*> seen_actors_player()
                         continue;
                 }
 
-                if (!actor->is_alive()) {
+                if (!actor::is_alive(*actor)) {
                         continue;
                 }
 
@@ -141,7 +141,7 @@ static std::vector<actor::Actor*> seen_actors_mon(const actor::Actor& mon)
                         continue;
                 }
 
-                if (!other_actor->is_alive()) {
+                if (!actor::is_alive(*other_actor)) {
                         continue;
                 }
 
@@ -206,7 +206,7 @@ bool can_player_see_actor(const Actor& other)
                 return true;
         }
 
-        if (!other.is_alive() && map::g_seen.at(other.m_pos)) {
+        if (!actor::is_alive(other) && map::g_seen.at(other.m_pos)) {
                 // Dead actor in seen cell
                 return true;
         }
@@ -278,7 +278,7 @@ bool can_mon_see_actor(
                         // Player-allied monster looking at a hostile monster -
                         // they are considered aware of monsters that the player
                         // is aware of.
-                        return other.is_player_aware_of_me();
+                        return is_player_aware_of_me(other);
                 }
         }
         else {
@@ -289,7 +289,7 @@ bool can_mon_see_actor(
                         // player-allied monster - they are considered aware of
                         // the player or player-allied monster if they are aware
                         // of the player.
-                        return mon.is_aware_of_player();
+                        return is_aware_of_player(mon);
                 }
                 else {
                         // Hostile monster looking at a hostile monster - they
@@ -337,7 +337,7 @@ std::vector<Actor*> seeable_foes_for_mon(const Actor& mon)
                         continue;
                 }
 
-                if (!other_actor->is_alive()) {
+                if (!actor::is_alive(*other_actor)) {
                         continue;
                 }
 

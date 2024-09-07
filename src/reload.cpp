@@ -48,7 +48,7 @@ static void msg_reload_fumble(
                 if (actor::can_player_see_actor(actor)) {
                         const std::string name_the =
                                 text_format::first_to_upper(
-                                        actor.name_the());
+                                        actor::name_the(actor));
 
                         msg_log::add(
                                 name_the +
@@ -113,7 +113,7 @@ static void msg_reloaded(
                 if (actor::can_player_see_actor(actor)) {
                         const std::string name_the =
                                 text_format::first_to_upper(
-                                        actor.name_the());
+                                        actor::name_the(actor));
 
                         msg_log::add(name_the + " reloads.");
                 }

@@ -652,16 +652,16 @@ static void draw_dead_actors()
         for (actor::Actor* actor : game_time::g_actors) {
                 const P& p = actor->m_pos;
 
-                if (!map::g_seen.at(p) || !actor->is_corpse()) {
+                if (!map::g_seen.at(p) || !actor::is_corpse(*actor)) {
                         continue;
                 }
 
                 io::MapDrawObj draw_obj;
 
                 draw_obj.pos = viewport::to_view_pos(p);
-                draw_obj.color = actor->color();
-                draw_obj.tile = actor->tile();
-                draw_obj.character = actor->character();
+                draw_obj.color = actor::color(*actor);
+                draw_obj.tile = actor::tile(*actor);
+                draw_obj.character = actor::character(*actor);
 
                 adapt_color_for_light_level(draw_obj.color, p);
 
@@ -736,8 +736,8 @@ static void draw_mobiles()
 
 static void draw_living_seen_monster(const actor::Actor& mon)
 {
-        const gfx::TileId mon_tile = mon.tile();
-        const char mon_char = mon.character();
+        const gfx::TileId mon_tile = actor::tile(mon);
+        const char mon_char = actor::character(mon);
 
         if ((mon_tile == gfx::TileId::END) ||
             (mon_char == 0) ||
@@ -748,9 +748,9 @@ static void draw_living_seen_monster(const actor::Actor& mon)
         io::MapDrawObj draw_obj;
 
         draw_obj.pos = viewport::to_view_pos(mon.m_pos);
-        draw_obj.color = mon.color();
-        draw_obj.tile = mon.tile();
-        draw_obj.character = mon.character();
+        draw_obj.color = actor::color(mon);
+        draw_obj.tile = actor::tile(mon);
+        draw_obj.character = actor::character(mon);
 
         if (map::g_player->is_leader_of(&mon)) {
                 // The monster is player-friendly
@@ -758,7 +758,7 @@ static void draw_living_seen_monster(const actor::Actor& mon)
         }
         else {
                 // The monster is hostile
-                if (mon.is_aware_of_player()) {
+                if (actor::is_aware_of_player(mon)) {
                         // Monster is aware of player
                         if (mon.m_properties.has_temporary_negative_prop_mon()) {
                                 draw_obj.color_bg = colors::mon_temp_property();
@@ -780,7 +780,7 @@ static void draw_living_seen_monster(const actor::Actor& mon)
 
 static void draw_living_hidden_monster(const actor::Actor& mon)
 {
-        if (!mon.is_player_aware_of_me()) {
+        if (!actor::is_player_aware_of_me(mon)) {
                 return;
         }
 
@@ -805,7 +805,7 @@ static void draw_living_hidden_monster(const actor::Actor& mon)
 static void draw_living_monsters()
 {
         for (actor::Actor* actor : game_time::g_actors) {
-                if (actor::is_player(actor) || !actor->is_alive()) {
+                if (actor::is_player(actor) || !actor::is_alive(*actor)) {
                         continue;
                 }
 
@@ -891,7 +891,7 @@ static void draw_player_character()
                 return;
         }
 
-        const Color color = player.color();
+        const Color color = actor::color(player);
         const Color color_bg = colors::black();
 
         gfx::TileId tile = get_player_tile();

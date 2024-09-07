@@ -71,7 +71,7 @@ static WeightedItems<std::string> valid_auto_spawn_monsters(
         std::set<std::string> spawned_ids;
 
         for (const actor::Actor* const actor : game_time::g_actors) {
-                spawned_ids.insert(actor->id());
+                spawned_ids.insert(actor::id(*actor));
         }
 
         for (const auto& it : actor::g_data) {

@@ -246,7 +246,7 @@ static void player_std_turn()
                !player.m_properties.has(prop::Id::infected));
 #endif  // NDEBUG
 
-        if (!player.is_alive()) {
+        if (!actor::is_alive(player)) {
                 return;
         }
 
@@ -257,7 +257,7 @@ static void player_std_turn()
         if (actor::player_state::g_active_explosive) {
                 actor::player_state::g_active_explosive->on_std_turn_player_hold_ignited();
 
-                if (!map::g_player->is_alive()) {
+                if (!actor::is_alive(*map::g_player)) {
                         return;
                 }
         }
@@ -281,7 +281,7 @@ static void mon_std_turn(actor::Actor& mon)
         // NOTE: Monsters try to detect the player visually on standard turns,
         // otherwise very fast monsters are much better at finding the player.
         const bool should_look =
-                mon.is_alive() &&
+                actor::is_alive(mon) &&
                 mon.m_data->ai[(size_t)actor::AiId::looks] &&
                 !actor::is_player(mon.m_leader) &&
                 !map::g_player->m_properties.has(prop::Id::sanctuary) &&
@@ -299,7 +299,7 @@ static void std_turn_common(actor::Actor& actor)
                 actor::hit(actor, 1, DmgType::light, nullptr);
         }
 
-        if (!actor.is_alive()) {
+        if (!actor::is_alive(actor)) {
                 return;
         }
 
@@ -358,7 +358,7 @@ static void std_turn_common(actor::Actor& actor)
         const bool regen_sp_this_turn = ((game_time::turn_nr() % regen_sp_n_turns) == 0);
 
         if (regen_sp_this_turn) {
-                actor.restore_sp(1, false, Verbose::no);
+                actor::restore_sp(actor, 1, actor::AllowRestoreAboveMax::no, Verbose::no);
         }
 }
 

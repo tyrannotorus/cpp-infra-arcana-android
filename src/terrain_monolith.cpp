@@ -56,8 +56,16 @@ void Monolith::hit(
 
                         game::incr_player_xp(g_xp_on_exorcist_destroy_monolith);
 
-                        map::g_player->restore_sp(999, false, Verbose::no);
-                        map::g_player->restore_sp(10, true);
+                        actor::restore_sp(
+                                *map::g_player,
+                                999,
+                                actor::AllowRestoreAboveMax::no,
+                                Verbose::no);
+
+                        actor::restore_sp(
+                                *map::g_player,
+                                10,
+                                actor::AllowRestoreAboveMax::yes);
                 }
                 break;
 

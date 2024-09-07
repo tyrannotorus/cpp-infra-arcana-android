@@ -56,7 +56,7 @@ static void save_modules()
 
         ASSERT(s_lines.empty());
 
-        saving::put_str(map::g_player->name_a());
+        saving::put_str(actor::name_a(*map::g_player));
 
         game::save();
         scroll::save();

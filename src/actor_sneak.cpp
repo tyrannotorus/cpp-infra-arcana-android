@@ -17,30 +17,21 @@
 // -----------------------------------------------------------------------------
 static int calc_sneak_skill_mod(const actor::SneakParameters& data)
 {
-        return data.actor_sneaking->ability(AbilityId::stealth, true);
+        return actor::ability(*data.actor_sneaking, AbilityId::stealth);
 }
 
 static int calc_search_mod(const actor::SneakParameters& data)
 {
-        const int search_skill =
-                data.actor_searching->ability(
-                        AbilityId::searching,
-                        true);
+        const int search_skill = actor::ability(*data.actor_searching, AbilityId::searching);
 
-        const int mod =
-                actor::is_player(data.actor_searching)
-                ? -search_skill
-                : 0;
+        const int mod = actor::is_player(data.actor_searching) ? -search_skill : 0;
 
         return mod;
 }
 
 static int calc_dist_mod(const actor::SneakParameters& data)
 {
-        const int dist =
-                king_dist(
-                        data.actor_sneaking->m_pos,
-                        data.actor_searching->m_pos);
+        const int dist = king_dist(data.actor_sneaking->m_pos, data.actor_searching->m_pos);
 
         // Distance  Sneak bonus
         // ----------------------

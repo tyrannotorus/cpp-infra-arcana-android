@@ -210,7 +210,7 @@ void display(const Id id)
                 return;
         }
 
-        if (!map::g_player->is_alive()) {
+        if (!actor::is_alive(*map::g_player)) {
                 return;
         }
 

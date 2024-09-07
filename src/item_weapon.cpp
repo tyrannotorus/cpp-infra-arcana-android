@@ -151,7 +151,7 @@ void PlayerGhoulClaw::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 actor::heal_from_eating(*map::g_player);
         }
 
-        if (actor_hit.is_alive()) {
+        if (actor::is_alive(actor_hit)) {
                 // Poison victim from Ghoul Toxic trait?
                 if (player_bon::has_trait(Trait::toxic) &&
                     rnd::fraction(3, 4)) {
@@ -281,7 +281,7 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (!actor_hit.is_alive()) {
+        if (!actor::is_alive(actor_hit)) {
                 return;
         }
 
@@ -309,11 +309,11 @@ void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
 void VampiricBite::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
-        if (!m_actor_carrying || !m_actor_carrying->is_alive()) {
+        if (!m_actor_carrying || !actor::is_alive(*m_actor_carrying)) {
                 return;
         }
 
-        if (!actor_hit.is_alive()) {
+        if (!actor::is_alive(actor_hit)) {
                 return;
         }
 
@@ -321,14 +321,18 @@ void VampiricBite::on_melee_hit(actor::Actor& actor_hit, const int dmg)
                 return;
         }
 
-        m_actor_carrying->restore_hp(dmg, false, Verbose::yes);
+        actor::restore_hp(
+                *m_actor_carrying,
+                dmg,
+                actor::AllowRestoreAboveMax::no,
+                Verbose::yes);
 }
 
 void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (!actor_hit.is_alive() ||
+        if (!actor::is_alive(actor_hit) ||
             !actor::is_player(&actor_hit)) {
                 return;
         }
@@ -342,14 +346,14 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
                 if (player_see_mon) {
                         const std::string mon_name_the =
-                                text_format::first_to_upper(mon->name_the());
+                                text_format::first_to_upper(actor::name_the(*mon));
 
                         msg_log::add(mon_name_the + " looks shocked!");
                 }
 
                 actor::hit(*mon, rnd::range(3, 15), DmgType::pure, &actor_hit);
 
-                if (mon->is_alive()) {
+                if (actor::is_alive(*mon)) {
                         mon->m_properties.apply(prop::make(prop::Id::confused));
                         mon->m_properties.apply(prop::make(prop::Id::terrified));
                 }
@@ -375,7 +379,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (!actor_hit.is_alive()) {
+        if (!actor::is_alive(actor_hit)) {
                 return;
         }
 
@@ -399,7 +403,7 @@ void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 
 void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
 {
-        if (!actor_hit.is_alive()) {
+        if (!actor::is_alive(actor_hit)) {
                 return;
         }
 
@@ -468,11 +472,11 @@ void PharaohStaff::on_std_turn_in_inv_hook(const InvType inv_type)
                      MapParseMode::overwrite);
 
         for (auto* const actor : game_time::g_actors) {
-                if (actor::is_player(actor) || !actor->is_alive()) {
+                if (actor::is_player(actor) || !actor::is_alive(*actor)) {
                         continue;
                 }
 
-                if (!actor->is_aware_of_player()) {
+                if (!actor::is_aware_of_player(*actor)) {
                         continue;
                 }
 
@@ -493,8 +497,8 @@ void PharaohStaff::on_std_turn_in_inv_hook(const InvType inv_type)
 void PharaohStaff::on_mon_see_player_carrying(actor::Actor& mon) const
 {
         // TODO: Consider an "is_mummy" actor data field
-        if ((mon.id() != "MON_MUMMY") &&
-            (mon.id() != "MON_CROC_HEAD_MUMMY")) {
+        if ((actor::id(mon) != "MON_MUMMY") &&
+            (actor::id(mon) != "MON_CROC_HEAD_MUMMY")) {
                 return;
         }
 
@@ -510,7 +514,7 @@ void PharaohStaff::on_mon_see_player_carrying(actor::Actor& mon) const
                 if (actor::can_player_see_actor(mon)) {
                         const auto name_the =
                                 text_format::first_to_upper(
-                                        mon.name_the());
+                                        actor::name_the(mon));
 
                         msg_log::add(name_the + " bows before me.");
                 }
@@ -521,7 +525,7 @@ void PharaohStaff::on_melee_hit(actor::Actor& actor_hit, const int dmg)
 {
         (void)dmg;
 
-        if (!actor_hit.is_alive()) {
+        if (!actor::is_alive(actor_hit)) {
                 return;
         }
 
@@ -610,7 +614,7 @@ void ShadowDagger::hit_normal_creature(actor::Actor& actor) const
 
 void ShadowDagger::hit_radiant_creature(actor::Actor& actor) const
 {
-        if (!actor.is_alive()) {
+        if (!actor::is_alive(actor)) {
                 return;
         }
 
@@ -620,7 +624,7 @@ void ShadowDagger::hit_radiant_creature(actor::Actor& actor) const
         if (player_see_target || player_see_pos) {
                 const std::string target_name =
                         player_see_target
-                        ? text_format::first_to_upper(actor.name_the())
+                        ? text_format::first_to_upper(actor::name_the(actor))
                         : "It";
 
                 msg_log::add(target_name + " is assailed by dark energy.");
@@ -635,7 +639,7 @@ void ShadowDagger::hit_radiant_creature(actor::Actor& actor) const
 
 void ZombieDust::on_ranged_hit(actor::Actor& actor_hit)
 {
-        if (!actor_hit.is_alive()) {
+        if (!actor::is_alive(actor_hit)) {
                 return;
         }
 

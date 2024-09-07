@@ -111,8 +111,16 @@ void Mirror::hit(
 
                         game::incr_player_xp(2);
 
-                        map::g_player->restore_sp(999, false, Verbose::no);
-                        map::g_player->restore_sp(3, true);
+                        actor::restore_sp(
+                                *map::g_player,
+                                999,
+                                actor::AllowRestoreAboveMax::no,
+                                Verbose::no);
+
+                        actor::restore_sp(
+                                *map::g_player,
+                                3,
+                                actor::AllowRestoreAboveMax::yes);
                 }
                 break;
 

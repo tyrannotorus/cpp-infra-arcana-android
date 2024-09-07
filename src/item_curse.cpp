@@ -485,7 +485,9 @@ std::string Heavy::curse_msg(const item::Item& item) const
 Shriek::Shriek()
 
 {
-        auto player_name = text_format::to_upper(map::g_player->name_the());
+        const std::string player_name =
+                text_format::to_upper(
+                        actor::name_the(*map::g_player));
 
         m_words = {
                 player_name,

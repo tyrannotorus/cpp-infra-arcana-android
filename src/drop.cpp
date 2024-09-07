@@ -111,7 +111,7 @@ void drop_item_from_inv(
                 if (can_player_see_actor(actor)) {
                         const std::string mon_name_the =
                                 text_format::first_to_upper(
-                                        actor.name_the());
+                                        actor::name_the(actor));
 
                         msg_log::add(mon_name_the + " drops " + item_ref + ".");
                 }

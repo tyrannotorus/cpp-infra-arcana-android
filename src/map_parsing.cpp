@@ -193,7 +193,7 @@ bool BlocksWalking::parse_mob(const terrain::Terrain& f) const
 
 bool BlocksWalking::parse_actor(const actor::Actor& a) const
 {
-        return a.is_alive();
+        return actor::is_alive(a);
 }
 
 bool BlocksActor::parse_terrain(
@@ -212,7 +212,7 @@ bool BlocksActor::parse_mob(const terrain::Terrain& f) const
 
 bool BlocksActor::parse_actor(const actor::Actor& a) const
 {
-        return a.is_alive();
+        return actor::is_alive(a);
 }
 
 bool BlocksProjectiles::parse_terrain(
@@ -245,7 +245,7 @@ bool BlocksSound::parse_mob(const terrain::Terrain& f) const
 
 bool LivingActorsAdjToPos::parse_actor(const actor::Actor& a) const
 {
-        if (!a.is_alive()) {
+        if (!actor::is_alive(a)) {
                 return false;
         }
 

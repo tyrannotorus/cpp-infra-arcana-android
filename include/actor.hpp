@@ -96,109 +96,123 @@ enum class AwareSource
         heard_sound,
         attacked,
         spell_victim,
-        other
+        other,
 };
 
+// Allow filling HP/SP above max limit?
+enum class AllowRestoreAboveMax
+{
+        no,
+        yes,
+};
+
+// -----------------------------------------------------------------------------
+// Common functions
+// -----------------------------------------------------------------------------
 void init_actor(Actor& actor, const P& pos, ActorData& data);
+
+std::string id(const actor::Actor& actor);
+Color color(const Actor& actor);
+gfx::TileId tile(const Actor& actor);
+char character(const Actor& actor);
+std::string name_the(const Actor& actor);
+std::string name_a(const Actor& actor);
+std::string descr(const Actor& actor);
 
 int max_hp(const Actor& actor);
 int max_sp(const Actor& actor);
 
 bool is_player(const Actor* actor);
 
-void print_aware_invis_mon_msg(const Actor& mon);
-
-void make_player_aware_mon(Actor& actor);
-void make_player_aware_seen_monsters();
-
 void add_light(const Actor& actor, Array2<bool>& light_map);
 
 SpellSkill spell_skill(const Actor& actor, SpellId id);
+
+int ability(
+        const Actor& actor,
+        AbilityId id,
+        AbilityAffectedByProperties affected_by_props = AbilityAffectedByProperties::yes);
+
+bool restore_hp(
+        Actor& actor,
+        int hp_restored,
+        AllowRestoreAboveMax allow_above_max = AllowRestoreAboveMax::no,
+        Verbose verbose = Verbose::yes);
+
+bool restore_sp(
+        Actor& actor,
+        int spi_restored,
+        AllowRestoreAboveMax allow_above_max = AllowRestoreAboveMax::no,
+        Verbose verbose = Verbose::yes);
+
+void change_max_hp(
+        Actor& actor,
+        int change,
+        Verbose verbose = Verbose::yes);
+
+void change_max_sp(
+        Actor& actor,
+        int change,
+        Verbose verbose = Verbose::yes);
+
+bool is_alive(const actor::Actor& actor);
+
+bool is_corpse(const actor::Actor& actor);
+
+std::string death_msg(const actor::Actor& actor);
+
+int armor_points(const actor::Actor& actor);
+
+// NOTE: If the actors are the same actor, they are considered to be in the same
+// group (the actor is in the same group as itself).
+bool is_in_same_group(const Actor* actor_1, const Actor* actor_2);
+
+std::vector<Actor*> other_actors_in_same_group(const actor::Actor* actor);
+int nr_other_actors_in_same_group(const actor::Actor* actor);
+
+// -----------------------------------------------------------------------------
+// Player specific functions
+// -----------------------------------------------------------------------------
+void make_player_aware_mon(Actor& actor);
+void make_player_aware_seen_monsters();
+
+void print_player_aware_invis_mon_msg(const Actor& mon);
+
+// -----------------------------------------------------------------------------
+// Monster specific functions
+// -----------------------------------------------------------------------------
+bool is_aware_of_player(const actor::Actor& actor);
+bool is_wary_of_player(const actor::Actor& actor);
+bool is_player_aware_of_me(const actor::Actor& actor);
 
 std::string get_cultist_phrase();
 std::string get_cultist_aware_msg_seen(const Actor& actor);
 std::string get_cultist_aware_msg_hidden();
 
-// TODO: This class has too many public functions, make it more minimal.
+// -----------------------------------------------------------------------------
+// Actor
+// -----------------------------------------------------------------------------
 class Actor
 {
 public:
         virtual ~Actor();
 
-        std::string id() const
-        {
-                return m_data->id;
-        }
-
-        Color color() const;
-        gfx::TileId tile() const;
-        char character() const;
-        std::string name_the() const;
-        std::string name_a() const;
-        std::string descr() const;
-
+        // NOTE: These functions should be member functions, since otherwise the
+        // parameters would be very confusing and there would be a high risk of
+        // mistakes. I.e. it would look something like this:
+        //
+        //     bool is_leader(const Actor& follower, const Actor* const leader)
+        //
+        // And the call would look like this:
+        //
+        //     is_leader(actor, other_actor)
+        //
         bool is_leader_of(const Actor* actor) const;
         bool is_actor_my_leader(const Actor* actor) const;
 
-        // NOTE: If the actor parameter is this actor, it is considered to be in
-        // the same group (the actor is in the same group as itself).
-        bool is_in_same_group_as(const Actor* actor) const;
-
-        std::vector<Actor*> other_actors_in_same_group() const;
-        int nr_other_actors_in_same_group() const;
-
-        int ability(AbilityId id, bool is_affected_by_props = true) const;
-
-        bool restore_hp(
-                int hp_restored,
-                bool is_allowed_above_max = false,
-                Verbose verbose = Verbose::yes);
-
-        bool restore_sp(
-                int spi_restored,
-                bool is_allowed_above_max = false,
-                Verbose verbose = Verbose::yes);
-
-        void change_max_hp(
-                int change,
-                Verbose verbose = Verbose::yes);
-
-        void change_max_sp(
-                int change,
-                Verbose verbose = Verbose::yes);
-
-        int armor_points() const;
-
-        bool is_alive() const
-        {
-                return m_state == ActorState::alive;
-        }
-
-        bool is_corpse() const
-        {
-                return m_state == ActorState::corpse;
-        }
-
-        std::string death_msg() const;
-
-        bool is_aware_of_player() const
-        {
-                return m_mon_aware_state.aware_counter > 0;
-        }
-
-        bool is_wary_of_player() const
-        {
-                return m_mon_aware_state.wary_counter > 0;
-        }
-
-        bool is_player_aware_of_me() const
-        {
-                return m_mon_aware_state.player_aware_of_me_counter > 0;
-        }
-
         // ==================================================
         // Player specific public functions
-        // TODO: Most/all of these should be free functions instead, refactor.
+        // TODO: These should be free functions instead, refactor.
         // ==================================================
         void save() const;
         void load();
@@ -240,7 +254,7 @@ public:
 
         // ==================================================
         // Monster specific public functions
-        // TODO: Most/all of these should be free functions instead, refactor.
+        // TODO: These should be free functions instead, refactor.
         // ==================================================
         bool is_sneaking() const;
         AiAvailAttacksData avail_attacks(Actor& defender) const;
@@ -283,12 +297,10 @@ public:
 private:
         // ==================================================
         // Player specific private functions
-        // TODO: Most/all of these should be free functions instead, refactor.
+        // TODO: These should be free functions instead, refactor.
         // ==================================================
         int shock_resistance(ShockSrc shock_src) const;
-        double shock_taken_after_mods(
-                double base_shock,
-                ShockSrc shock_src) const;
+        double shock_taken_after_mods(double base_shock, ShockSrc shock_src) const;
         double increased_tmp_chock_on_blind() const;
         double increased_tmp_shock_from_dark() const;
         double reduced_tmp_shock_from_light() const;
@@ -297,7 +309,7 @@ private:
 
         // ==================================================
         // Monster specific private functions
-        // TODO: Most/all of these should be free functions instead, refactor.
+        // TODO: These should be free functions instead, refactor.
         // ==================================================
         void print_player_see_mon_become_aware_msg() const;
         void print_player_see_mon_become_wary_msg() const;

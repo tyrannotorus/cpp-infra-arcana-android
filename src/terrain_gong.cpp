@@ -393,7 +393,7 @@ bool GainHp::is_allowed() const
 
 void GainHp::run_effect()
 {
-        map::g_player->change_max_hp(2);
+        actor::change_max_hp(*map::g_player, 2);
 }
 
 // -----------------------------------------------------------------------------
@@ -406,7 +406,7 @@ bool GainSp::is_allowed() const
 
 void GainSp::run_effect()
 {
-        map::g_player->change_max_sp(1);
+        actor::change_max_sp(*map::g_player, 1);
 }
 
 // -----------------------------------------------------------------------------
@@ -526,9 +526,7 @@ void Healed::run_effect()
                 map::g_player->m_properties.end_prop(prop_id);
         }
 
-        map::g_player->restore_hp(
-                999,     // HP restored
-                false);  // Not allowed above max
+        actor::restore_hp(*map::g_player, 999, actor::AllowRestoreAboveMax::no);
 }
 
 // -----------------------------------------------------------------------------
@@ -577,7 +575,7 @@ std::vector<BonusId> HpReduced::bonuses_only_allowed_with() const
 
 void HpReduced::run_effect()
 {
-        map::g_player->change_max_hp(-2);
+        actor::change_max_hp(*map::g_player, -2);
 }
 
 // -----------------------------------------------------------------------------
@@ -590,7 +588,7 @@ std::vector<BonusId> SpReduced::bonuses_only_allowed_with() const
 
 void SpReduced::run_effect()
 {
-        map::g_player->change_max_sp(-1);
+        actor::change_max_sp(*map::g_player, -1);
 }
 
 // -----------------------------------------------------------------------------
@@ -880,8 +878,16 @@ void Gong::hit(
 
                         game::incr_player_xp(g_xp_on_exorcist_destroy_gong);
 
-                        map::g_player->restore_sp(999, false, Verbose::no);
-                        map::g_player->restore_sp(10, true);
+                        actor::restore_sp(
+                                *map::g_player,
+                                999,
+                                actor::AllowRestoreAboveMax::no,
+                                Verbose::no);
+
+                        actor::restore_sp(
+                                *map::g_player,
+                                10,
+                                actor::AllowRestoreAboveMax::yes);
                 }
                 break;
 

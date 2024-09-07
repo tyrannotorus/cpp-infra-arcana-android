@@ -34,6 +34,14 @@ enum class ActionResult
         success_critical
 };
 
+// Should the retrieved ability be affected by applied actor properties, or just
+// be the "raw" ability?
+enum class AbilityAffectedByProperties
+{
+        no,
+        yes,
+};
+
 // Each actor has an instance of this class
 class AbilityValues
 {
@@ -47,8 +55,9 @@ public:
 
         void reset();
 
-        int val(AbilityId id,
-                bool is_affected_by_props,
+        int val(
+                AbilityId id,
+                AbilityAffectedByProperties affected_by_props,
                 const actor::Actor& actor) const;
 
         int raw_val(const AbilityId id) const

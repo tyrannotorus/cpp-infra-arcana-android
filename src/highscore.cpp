@@ -209,7 +209,7 @@ HighscoreEntry make_entry_from_current_session(
 
         e.game_summary_file_path = game_summary_file_path;
         e.date = current_time().time_str(TimeType::day, true);
-        e.name = map::g_player->name_a();
+        e.name = actor::name_a(*map::g_player);
         e.xp = game::xp_accumulated();
         e.lvl = game::clvl();
         e.dlvl = map::g_dlvl;

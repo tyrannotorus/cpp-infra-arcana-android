@@ -342,7 +342,7 @@ void MedicalBag::finish_current_action()
 
         switch (m_current_action) {
         case MedBagAction::quick_patch_up: {
-                map::g_player->restore_hp(m_hp_restored_by_quick_patch_up);
+                actor::restore_hp(*map::g_player, m_hp_restored_by_quick_patch_up);
         } break;
 
         case MedBagAction::treat_wound: {
@@ -744,7 +744,7 @@ void HornOfBanishmentHeard::run(actor::Actor& actor) const
                 if (actor::can_player_see_actor(actor)) {
                         const std::string name_the =
                                 text_format::first_to_upper(
-                                        actor.name_the());
+                                        actor::name_the(actor));
 
                         msg_log::add(
                                 name_the +
@@ -949,7 +949,7 @@ void HolySymbol::load_hook()
 
 void HolySymbol::run_effect()
 {
-        map::g_player->restore_sp(rnd::range(1, 4));
+        actor::restore_sp(*map::g_player, rnd::range(1, 4));
 
         const int prop_duration = rnd::range(6, 12);
 
@@ -1011,7 +1011,7 @@ ConsumeItem Clockwork::activate(actor::Actor* const actor)
 
         map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
-        if (!map::g_player->is_alive()) {
+        if (!actor::is_alive(*map::g_player)) {
                 return ConsumeItem::no;
         }
 
@@ -1033,7 +1033,7 @@ OrbOfLife::OrbOfLife(ItemData* const item_data) :
 
 void OrbOfLife::on_pickup_hook()
 {
-        map::g_player->change_max_hp(4, Verbose::yes);
+        actor::change_max_hp(*map::g_player, 4, Verbose::yes);
 
         auto* prop_r_poison = prop::make(prop::Id::r_poison);
         prop_r_poison->set_indefinite();
@@ -1046,7 +1046,7 @@ void OrbOfLife::on_pickup_hook()
 
 void OrbOfLife::on_removed_from_inv_hook()
 {
-        map::g_player->change_max_hp(-4, Verbose::yes);
+        actor::change_max_hp(*map::g_player, -4, Verbose::yes);
 
         clear_carrier_props();
 }
@@ -1081,8 +1081,16 @@ ItemPrePickResult Necronomicon::pre_pickup_hook()
 
                 game::incr_player_xp(10);
 
-                map::g_player->restore_sp(999, false, Verbose::no);
-                map::g_player->restore_sp(11, true);
+                actor::restore_sp(
+                        *map::g_player,
+                        999,
+                        actor::AllowRestoreAboveMax::no,
+                        Verbose::no);
+
+                actor::restore_sp(
+                        *map::g_player,
+                        11,
+                        actor::AllowRestoreAboveMax::yes);
 
                 return ItemPrePickResult::destroy_item;
         }
@@ -1160,7 +1168,10 @@ ConsumeItem BoneCharm::activate(actor::Actor* actor)
 
                 trap->disarm();
 
-                map::g_player->restore_sp(rnd::range(1, 6), true);
+                actor::restore_sp(
+                        *map::g_player,
+                        rnd::range(1, 6),
+                        actor::AllowRestoreAboveMax::yes);
         }
 
         return ConsumeItem::yes;

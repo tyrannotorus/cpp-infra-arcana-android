@@ -261,7 +261,7 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
 
                 map::g_player->incr_shock(12.0, ShockSrc::use_strange_item);
 
-                if (!map::g_player->is_alive()) {
+                if (!actor::is_alive(*map::g_player)) {
                         return ConsumeItem::yes;
                 }
         }
@@ -278,7 +278,7 @@ ConsumeItem Potion::activate(actor::Actor* const actor)
                 }
         }
 
-        if (map::g_player->is_alive()) {
+        if (actor::is_alive(*map::g_player)) {
                 game_time::tick();
         }
 
@@ -365,18 +365,15 @@ void Potion::on_collide(const P& pos, actor::Actor* const actor)
         const auto* const terrain = map::g_terrain.at(pos);
 
         if (actor) {
-                ASSERT(actor->is_alive());
+                ASSERT(actor::is_alive(*actor));
 
-                if (actor->is_player_aware_of_me()) {
+                if (actor::is_player_aware_of_me(*actor)) {
                         const std::string actor_name =
                                 actor::can_player_see_actor(*actor)
-                                ? actor->name_the()
+                                ? actor::name_the(*actor)
                                 : "it";
 
-                        msg_log::add(
-                                "The potion shatters on " +
-                                actor_name +
-                                ".");
+                        msg_log::add("The potion shatters on " + actor_name + ".");
 
                         actor->make_player_aware_of_me();
                 }
@@ -426,7 +423,7 @@ void Vitality::quaff_impl(actor::Actor& actor)
                 actor.m_properties.end_prop(prop_id);
         }
 
-        actor.restore_hp(999, false);
+        actor::restore_hp(actor, 999, actor::AllowRestoreAboveMax::no);
 
         actor.m_properties.apply(prop::make(prop::Id::regenerating));
 
@@ -453,7 +450,7 @@ void Spirit::quaff_impl(actor::Actor& actor)
 
         const int sp_restored = std::max(10, sp_max - actor.m_sp);
 
-        actor.restore_sp(sp_restored, true);
+        actor::restore_sp(actor, sp_restored, actor::AllowRestoreAboveMax::yes);
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
@@ -637,7 +634,13 @@ void Curing::quaff_impl(actor::Actor& actor)
                 }
         }
 
-        if (actor.restore_hp(3, false)) {
+        const bool did_restore_hp =
+                actor::restore_hp(
+                        actor,
+                        3,
+                        actor::AllowRestoreAboveMax::no);
+
+        if (did_restore_hp) {
                 is_noticable = true;
         }
 

@@ -79,7 +79,7 @@ static int hit_armor_and_calc_new_damage(actor::Actor& actor, int dmg)
         // NOTE: We retrieve armor points BEFORE damaging the armor, since the
         // armor should reduce damage taken by the current (pre-hit) armor value
         // even if it gets damaged or destroyed.
-        const int armor_points = actor.armor_points();
+        const int armor_points = actor::armor_points(actor);
 
         // Danage worn armor.
         if (actor.m_data->is_humanoid) {
@@ -398,7 +398,7 @@ void hit(
 
         const int hp_pct_before = (actor.m_hp * 100) / max_hp(actor);
 
-        if (actor.is_corpse() && !actor::is_player(&actor)) {
+        if (actor::is_corpse(actor) && !actor::is_player(&actor)) {
                 hit_corpse(actor, dmg, dmg_type);
 
                 return;
@@ -411,7 +411,7 @@ void hit(
         }
 
         // Property resists damage?
-        const auto verbose = actor.is_alive() ? Verbose::yes : Verbose::no;
+        const auto verbose = actor::is_alive(actor) ? Verbose::yes : Verbose::no;
 
         const bool is_dmg_resisted = actor.m_properties.is_resisting_dmg(dmg_type, verbose);
 
@@ -443,7 +443,7 @@ void hit(
 
         actor.m_properties.on_hit(dmg, dmg_type, attacker);
 
-        if (!actor.is_alive()) {
+        if (!actor::is_alive(actor)) {
                 // This could happen for example if the player dies from too
                 // many wounds.
                 return;
@@ -504,7 +504,7 @@ void hit_sp(
         else if (can_player_see_actor(actor)) {
                 const std::string actor_name_the =
                         text_format::first_to_upper(
-                                actor.name_the());
+                                actor::name_the(actor));
 
                 msg_log::add(actor_name_the + " has no spirit left!");
         }

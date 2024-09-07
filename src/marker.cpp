@@ -1210,7 +1210,8 @@ DidAction CtrlObjCloseDoor::run(
                 if (actor::can_player_see_actor(*actor_here)) {
                         actor_name =
                                 text_format::first_to_upper(
-                                        actor_here->name_the());
+                                        actor::name_the(
+                                                *actor_here));
                 }
                 else {
                         actor_name = "Something";

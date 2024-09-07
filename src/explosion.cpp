@@ -224,7 +224,7 @@ static void apply_explosion_on_pos(
                         DmgType::explosion,
                         nullptr);
 
-                if (living_actor->is_alive() &&
+                if (actor::is_alive(*living_actor) &&
                     actor::is_player(living_actor)) {
                         // Player survived being hit by an explosion, that's
                         // pretty cool!
@@ -348,10 +348,10 @@ void run(
         for (auto* actor : game_time::g_actors) {
                 const P& pos = actor->m_pos;
 
-                if (actor->is_alive()) {
+                if (actor::is_alive(*actor)) {
                         living_actors.at(pos) = actor;
                 }
-                else if (actor->is_corpse()) {
+                else if (actor::is_corpse(*actor)) {
                         corpses.at(pos).push_back(actor);
                 }
         }

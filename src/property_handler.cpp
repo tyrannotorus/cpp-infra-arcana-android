@@ -233,8 +233,7 @@ void PropHandler::apply(
                 }
 
                 if (is_resisting) {
-                        if ((verbose == Verbose::yes) &&
-                            m_owner->is_alive()) {
+                        if ((verbose == Verbose::yes) && actor::is_alive(*m_owner)) {
                                 print_resist_msg(*prop);
                         }
 
@@ -259,7 +258,7 @@ void PropHandler::apply(
 
         // The property should be applied individually
 
-        if ((verbose == Verbose::yes) && m_owner->is_alive()) {
+        if ((verbose == Verbose::yes) && actor::is_alive(*m_owner)) {
                 print_start_msg(*prop);
         }
 
@@ -269,7 +268,7 @@ void PropHandler::apply(
 
         incr_prop_count(prop->m_id);
 
-        if ((verbose == Verbose::yes) && m_owner->is_alive()) {
+        if ((verbose == Verbose::yes) && actor::is_alive(*m_owner)) {
                 if (prop->should_update_vision_on_toggled()) {
                         map::update_vision();
                         actor::make_player_aware_seen_monsters();
@@ -329,7 +328,7 @@ void PropHandler::print_resist_msg(const Prop& prop)
                         if (!msg.empty()) {
                                 const std::string monster_name =
                                         text_format::first_to_upper(
-                                                m_owner->name_the());
+                                                actor::name_the(*m_owner));
 
                                 msg_log::add(monster_name + " " + msg);
                         }
@@ -361,7 +360,7 @@ void PropHandler::print_start_msg(const Prop& prop)
                         if (!msg.empty()) {
                                 const std::string actor_name_the =
                                         text_format::first_to_upper(
-                                                m_owner->name_the());
+                                                actor::name_the(*m_owner));
 
                                 msg_log::add(actor_name_the + " " + msg);
                         }
@@ -563,7 +562,7 @@ void PropHandler::on_prop_end(
                         if (!msg.empty()) {
                                 const std::string actor_name_the =
                                         text_format::first_to_upper(
-                                                m_owner->name_the());
+                                                actor::name_the(*m_owner));
 
                                 msg_log::add(
                                         actor_name_the + " " + msg);
@@ -616,7 +615,7 @@ void PropHandler::on_placed()
         for (auto& prop : m_props) {
                 prop->on_placed();
 
-                if (!m_owner->is_alive()) {
+                if (!actor::is_alive(*m_owner)) {
                         break;
                 }
         }
@@ -883,14 +882,14 @@ bool PropHandler::is_resisting_dmg(
                 }
                 else {
                         // Is monster
-                        if (m_owner->is_player_aware_of_me()) {
+                        if (actor::is_player_aware_of_me(*m_owner)) {
                                 const bool can_player_see_mon =
                                         actor::can_player_see_actor(*m_owner);
 
                                 const std::string mon_name =
                                         can_player_see_mon
                                         ? text_format::first_to_upper(
-                                                  m_owner->name_the())
+                                                  actor::name_the(*m_owner))
                                         : "It";
 
                                 msg_log::add(

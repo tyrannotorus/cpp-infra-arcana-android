@@ -106,7 +106,7 @@ BinaryAnswer query_player_attack_mon_with_ranged_wpn(
 
         const bool can_see_mon = can_player_see_actor(mon);
 
-        const std::string mon_name = can_see_mon ? mon.name_the() : "it";
+        const std::string mon_name = can_see_mon ? actor::name_the(mon) : "it";
 
         const std::string msg =
                 "Attack " +

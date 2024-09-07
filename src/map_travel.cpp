@@ -138,11 +138,11 @@ static void update_estimated_total_avail_xp()
         };
 
         for (const actor::Actor* const actor : game_time::g_actors) {
-                if (actor::is_player(actor) || has_estimated_for_mon(actor->id())) {
+                if (actor::is_player(actor) || has_estimated_for_mon(actor::id(*actor))) {
                         continue;
                 }
 
-                s_mon_ids_estimated_xp_for.insert(actor->id());
+                s_mon_ids_estimated_xp_for.insert(actor::id(*actor));
 
                 s_estimated_avail_xp_monsters +=
                         game::mon_shock_lvl_to_xp(

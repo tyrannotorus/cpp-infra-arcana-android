@@ -70,7 +70,7 @@ static void update_flash_with_seen_actor(io::FlashData& flash)
         // Update rectangle to this actor's position.
         flash.px_rect = map_pos_to_px_rect(flash.actor_flashed_at->m_pos);
 
-        if (!flash.actor_flashed_at->is_alive()) {
+        if (!actor::is_alive(*flash.actor_flashed_at)) {
                 // The actor is dead - fade out faster.
                 flash.alpha_pct -= flash.alpha_pct_decr_step;
         }

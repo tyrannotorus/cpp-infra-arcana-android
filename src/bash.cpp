@@ -135,7 +135,7 @@ static void bash_something_at_pos(const P& pos)
         const bool is_player_pos = (pos == map::g_player->m_pos);
 
         // --- Kick living actor that the player is AWARE of? ---
-        if (!is_player_pos && actor && actor->is_player_aware_of_me()) {
+        if (!is_player_pos && actor && actor::is_player_aware_of_me(*actor)) {
                 const bool is_melee_allowed =
                         map::g_player->m_properties.allow_attack_melee(
                                 Verbose::yes);
@@ -333,7 +333,7 @@ void attack_terrain(const P& att_pos, const item::Item& wpn)
                 bash::try_sprain_player();
         }
 
-        if (!map::g_player->is_alive()) {
+        if (!actor::is_alive(*map::g_player)) {
                 return;
         }
 
@@ -389,7 +389,7 @@ void attack_corpse(actor::Actor& mon, const item::Item& wpn)
                 std::vector<actor::Actor*> corpses_here;
 
                 for (actor::Actor* const actor : game_time::g_actors) {
-                        if ((actor->m_pos == mon.m_pos) && actor->is_corpse()) {
+                        if ((actor->m_pos == mon.m_pos) && actor::is_corpse(*actor)) {
                                 corpses_here.push_back(actor);
                         }
                 }

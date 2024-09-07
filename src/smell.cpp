@@ -172,7 +172,7 @@ void put_smell_for_mon(const actor::Actor& mon)
 {
         const std::string* const msg_ptr = &mon.m_data->smell_msg;
 
-        if (msg_ptr->empty() || !mon.is_alive()) {
+        if (msg_ptr->empty() || !actor::is_alive(mon)) {
                 return;
         }
 

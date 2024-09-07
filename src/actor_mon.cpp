@@ -136,6 +136,21 @@ static void apply_mon_reaction_time_on_aware(actor::Actor& actor)
 // -----------------------------------------------------------------------------
 namespace actor
 {
+bool is_aware_of_player(const actor::Actor& actor)
+{
+        return actor.m_mon_aware_state.aware_counter > 0;
+}
+
+bool is_wary_of_player(const actor::Actor& actor)
+{
+        return actor.m_mon_aware_state.wary_counter > 0;
+}
+
+bool is_player_aware_of_me(const actor::Actor& actor)
+{
+        return actor.m_mon_aware_state.player_aware_of_me_counter > 0;
+}
+
 std::string get_cultist_phrase()
 {
         std::vector<std::string> phrase_bucket = {
@@ -198,7 +213,7 @@ std::string get_cultist_aware_msg_seen(const Actor& actor)
 {
         const std::string name_the =
                 text_format::first_to_upper(
-                        actor.name_the());
+                        actor::name_the(actor));
 
         return name_the + ": " + get_cultist_phrase();
 }
@@ -209,7 +224,7 @@ std::string get_cultist_aware_msg_hidden()
 }
 
 // -----------------------------------------------------------------------------
-// Monster
+// Actor
 // -----------------------------------------------------------------------------
 std::vector<Actor*> Actor::foes_aware_of() const
 {
@@ -219,14 +234,14 @@ std::vector<Actor*> Actor::foes_aware_of() const
                 // Player allied monster - add all player hostile monsters which
                 // the player is aware of.
                 for (auto* const actor : game_time::g_actors) {
-                        if (!actor::is_player(actor) &&
+                        if (!is_player(actor) &&
                             !actor->is_actor_my_leader(map::g_player) &&
-                            actor->is_player_aware_of_me()) {
+                            actor::is_player_aware_of_me(*actor)) {
                                 result.push_back(actor);
                         }
                 }
         }
-        else if (is_aware_of_player()) {
+        else if (is_aware_of_player(*this)) {
                 // Player-hostile monster aware of the player - add the player,
                 // and all creatures allied to the player.
                 result.push_back(map::g_player);
@@ -245,16 +260,24 @@ std::vector<Actor*> Actor::foes_aware_of() const
 bool Actor::is_sneaking() const
 {
         // NOTE: We require a stealth ability greater than zero, both for the
-        // basic skill value, AND when including properties properties -
-        // This prevents monsters who should never be able to sneak from
-        // suddenly gaining this ability due to some bonus
+        // basic skill value, AND when including current properties - This
+        // prevents monsters who should never be able to sneak from suddenly
+        // gaining this ability due to some bonus.
 
-        const int stealth_base = ability(AbilityId::stealth, false);
+        const int stealth_base =
+                actor::ability(
+                        *this,
+                        AbilityId::stealth,
+                        AbilityAffectedByProperties::no);
 
-        const int stealth_current = ability(AbilityId::stealth, true);
+        const int stealth_current =
+                actor::ability(
+                        *this,
+                        AbilityId::stealth,
+                        AbilityAffectedByProperties::yes);
 
         return (
-                (!is_player_aware_of_me()) &&
+                (!is_player_aware_of_me(*this)) &&
                 (stealth_base > 0) &&
                 (stealth_current > 0) &&
                 !is_actor_my_leader(map::g_player));
@@ -306,7 +329,7 @@ std::string Actor::aware_msg_mon_seen() const
                 return "";
         }
 
-        const std::string name = text_format::first_to_upper(name_the());
+        const std::string name = text_format::first_to_upper(name_the(*this));
 
         return name + " " + msg_end;
 }
@@ -333,14 +356,14 @@ int Actor::nr_turns_to_be_aware(const int factor) const
 
 void Actor::become_aware_player(const AwareSource source, const int factor)
 {
-        if (!is_alive() || is_actor_my_leader(map::g_player)) {
+        if (!is_alive(*this) || is_actor_my_leader(map::g_player)) {
                 return;
         }
 
         const int nr_turns = nr_turns_to_be_aware(factor);
 
         const int aware_counter_before = m_mon_aware_state.aware_counter;
-        const bool was_aware_before = is_aware_of_player();
+        const bool was_aware_before = is_aware_of_player(*this);
 
         m_mon_aware_state.aware_counter = std::max(nr_turns, aware_counter_before);
 
@@ -383,7 +406,7 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
 
 void Actor::become_wary_player()
 {
-        if (!is_alive() || is_actor_my_leader(map::g_player)) {
+        if (!is_alive(*this) || is_actor_my_leader(map::g_player)) {
                 return;
         }
 
@@ -408,7 +431,7 @@ void Actor::become_wary_player()
 
 void Actor::print_player_see_mon_become_aware_msg() const
 {
-        std::string msg = text_format::first_to_upper(name_the()) + " sees me!";
+        std::string msg = text_format::first_to_upper(name_the(*this)) + " sees me!";
 
         const std::string dir_str =
                 dir_utils::compass_dir_name(map::g_player->m_pos, m_pos);
@@ -424,7 +447,7 @@ void Actor::print_player_see_mon_become_wary_msg() const
                 return;
         }
 
-        std::string msg = text_format::first_to_upper(name_the());
+        std::string msg = text_format::first_to_upper(name_the(*this));
 
         msg += " " + m_data->wary_msg;
 
@@ -448,18 +471,18 @@ void Actor::make_player_aware_of_me(int duration_factor)
                         nr_turns,
                         m_mon_aware_state.player_aware_of_me_counter);
 
-        if (is_alive() && can_player_see_actor(*this)) {
+        if (is_alive(*this) && can_player_see_actor(*this)) {
                 game::player_discover_monster(*this);
         }
 }
 
 DidAction Actor::try_attack(Actor& defender)
 {
-        if (!is_alive()) {
+        if (!is_alive(*this)) {
                 return DidAction::no;
         }
 
-        if (!is_aware_of_player() && !actor::is_player(m_leader)) {
+        if (!is_aware_of_player(*this) && !actor::is_player(m_leader)) {
                 return DidAction::no;
         }
 

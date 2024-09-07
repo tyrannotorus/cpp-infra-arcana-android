@@ -125,7 +125,7 @@ static void scorch_actor(actor::Actor& actor)
         else if (actor::can_player_see_actor(actor)) {
                 const std::string name_the =
                         text_format::first_to_upper(
-                                actor.name_the());
+                                actor::name_the(actor));
 
                 msg_log::add(
                         name_the +
@@ -260,7 +260,7 @@ static void topple_object(
         actor::Actor* const actor_behind = map::living_actor_at(dst_pos);
 
         if (actor_behind &&
-            actor_behind->is_alive() &&
+            actor::is_alive(*actor_behind) &&
             !actor_behind->m_properties.has(prop::Id::ethereal)) {
                 if (actor::is_player(actor_behind)) {
                         msg_log::add("It falls on me!");
@@ -272,7 +272,7 @@ static void topple_object(
                                         *actor_behind);
 
                         if (is_player_seeing_actor) {
-                                msg_log::add("It falls on " + actor_behind->name_a() + ".");
+                                msg_log::add("It falls on " + actor::name_a(*actor_behind) + ".");
                         }
                 }
 
@@ -282,7 +282,7 @@ static void topple_object(
                         DmgType::blunt,
                         actor_toppling);
 
-                if (actor_behind->is_alive()) {
+                if (actor::is_alive(*actor_behind)) {
                         // TODO: There should probably be a check if the
                         // creature is immune to blunt/physical damage here.
 
@@ -1908,7 +1908,7 @@ void Liquid::bump(actor::Actor& actor_bumping)
             props.has(prop::Id::flying) ||
             props.has(prop::Id::tiny_flying) ||
             actor_bumping.m_data->is_amphibian ||
-            (actor_bumping.id() == "MON_WATER_HOUND")) {
+            (actor::id(actor_bumping) == "MON_WATER_HOUND")) {
                 return;
         }
 
@@ -2273,8 +2273,16 @@ void Altar::hit(
 
                         game::incr_player_xp(g_xp_on_exorcist_destroy_altar);
 
-                        map::g_player->restore_sp(999, false, Verbose::no);
-                        map::g_player->restore_sp(10, true);
+                        actor::restore_sp(
+                                *map::g_player,
+                                999,
+                                actor::AllowRestoreAboveMax::no,
+                                Verbose::no);
+
+                        actor::restore_sp(
+                                *map::g_player,
+                                10,
+                                actor::AllowRestoreAboveMax::yes);
                 }
                 break;
 
@@ -3749,13 +3757,15 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
                                 mon->m_properties.apply(prop);
 
                                 if (m_appearance == TombAppearance::marvelous) {
-                                        mon->change_max_hp(
+                                        actor::change_max_hp(
+                                                *mon,
                                                 mon->m_hp,
                                                 Verbose::no);
 
-                                        mon->restore_hp(
+                                        actor::restore_hp(
+                                                *mon,
                                                 999,
-                                                false,
+                                                actor::AllowRestoreAboveMax::no,
                                                 Verbose::no);
                                 }
                         });
@@ -4265,8 +4275,19 @@ void Fountain::bump(actor::Actor& actor_bumping)
         switch (m_fountain_effect) {
         case FountainEffect::refreshing: {
                 msg_log::add("It's very refreshing.");
-                map::g_player->restore_hp(1, false, Verbose::no);
-                map::g_player->restore_sp(1, false, Verbose::no);
+
+                actor::restore_hp(
+                        *map::g_player,
+                        1,
+                        actor::AllowRestoreAboveMax::no,
+                        Verbose::no);
+
+                actor::restore_sp(
+                        *map::g_player,
+                        1,
+                        actor::AllowRestoreAboveMax::no,
+                        Verbose::no);
+
                 map::g_player->restore_shock(5, true);
         } break;
 

@@ -150,7 +150,7 @@ void print_location_info_msgs(const P& pos)
 
                 // Describe dead actors
                 for (auto* actor : game_time::g_actors) {
-                        if (actor->is_corpse() && actor->m_pos == pos) {
+                        if (actor::is_corpse(*actor) && actor->m_pos == pos) {
                                 ASSERT(!actor->m_data->corpse_name_a.empty());
 
                                 str = text_format::first_to_upper(
@@ -177,16 +177,14 @@ void print_living_actor_info_msg(const P& pos)
 {
         auto* actor = map::living_actor_at(pos);
 
-        if (!actor ||
-            actor::is_player(actor) ||
-            !actor->is_alive()) {
+        if (!actor || actor::is_player(actor) || !actor::is_alive(*actor)) {
                 return;
         }
 
         if (actor::can_player_see_actor(*actor)) {
                 const std::string str =
                         text_format::first_to_upper(
-                                actor->name_a());
+                                actor::name_a(*actor));
 
                 msg_log::add(
                         str + ".",
@@ -197,7 +195,7 @@ void print_living_actor_info_msg(const P& pos)
         }
         else {
                 // Cannot see actor
-                if (actor->is_player_aware_of_me()) {
+                if (actor::is_player_aware_of_me(*actor)) {
                         msg_log::add(
                                 "There is a creature here.",
                                 colors::text(),

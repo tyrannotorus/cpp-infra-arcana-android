@@ -112,8 +112,7 @@ void MapControllerBoss::on_std_turn()
         }
 
         for (const auto* const actor : game_time::g_actors) {
-                if ((actor->id() == "MON_THE_HIGH_PRIEST") &&
-                    actor->is_alive()) {
+                if ((actor::id(*actor) == "MON_THE_HIGH_PRIEST") && actor::is_alive(*actor)) {
                         // The boss is still alive
                         return;
                 }
@@ -154,7 +153,7 @@ void MapControllerEgypt::on_std_turn()
                 bool is_in_aware_dist = false;
 
                 for (actor::Actor* const actor : game_time::g_actors) {
-                        if ((actor->id() == "MON_KHEPHREN") &&
+                        if ((actor::id(*actor) == "MON_KHEPHREN") &&
                             (king_dist(map::g_player->m_pos, actor->m_pos) <= aware_dist)) {
                                 is_in_aware_dist = true;
                                 break;

@@ -91,7 +91,7 @@ static void print_mon_melee_miss_actor_msg(const MeleeAttData& att_data)
         if (is_player_seeing_attacker) {
                 attacker_name =
                         text_format::first_to_upper(
-                                att_data.attacker->name_the());
+                                actor::name_the(*att_data.attacker));
         }
         else {
                 attacker_name = "It";
@@ -104,7 +104,7 @@ static void print_mon_melee_miss_actor_msg(const MeleeAttData& att_data)
         }
         else {
                 if (is_player_seeing_defender) {
-                        defender_name = att_data.defender->name_the();
+                        defender_name = actor::name_the(*att_data.defender);
                 }
                 else {
                         defender_name = "it";
@@ -135,7 +135,7 @@ static void print_player_melee_hit_actor_msg(
         std::string other_name;
 
         if (can_player_see_actor(*att_data.defender)) {
-                other_name = att_data.defender->name_the();
+                other_name = actor::name_the(*att_data.defender);
         }
         else {
                 // Player cannot see defender
@@ -231,7 +231,7 @@ static void print_mon_melee_hit_actor_msg(const int dmg, const MeleeAttData& att
         if (is_player_seeing_attacker) {
                 attacker_name =
                         text_format::first_to_upper(
-                                att_data.attacker->name_the());
+                                actor::name_the(*att_data.attacker));
         }
         else {
                 attacker_name = "It";
@@ -247,7 +247,7 @@ static void print_mon_melee_hit_actor_msg(const int dmg, const MeleeAttData& att
         }
         else {
                 if (is_player_seeing_defender) {
-                        defender_name = att_data.defender->name_the();
+                        defender_name = actor::name_the(*att_data.defender);
                 }
                 else {
                         defender_name = "it";
@@ -262,7 +262,7 @@ static void print_mon_melee_hit_actor_msg(const int dmg, const MeleeAttData& att
 
         if (!att_data.att_item->data().is_intr &&
             // TODO: This is hacky
-            (att_data.attacker->id() != "MON_SPECTRAL_WPN")) {
+            (actor::id(*att_data.attacker) != "MON_SPECTRAL_WPN")) {
                 const std::string wpn_name_a =
                         att_data.att_item->name(
                                 ItemNameType::a,
@@ -312,7 +312,7 @@ static void print_no_attacker_hit_mon_melee_msg(
 {
         const std::string other_name =
                 text_format::first_to_upper(
-                        att_data.defender->name_the());
+                        actor::name_the(*att_data.defender));
 
         Color msg_color = colors::msg_good();
 
@@ -597,7 +597,7 @@ static void melee_hit_actor(
 
         wpn.on_melee_hit(defender, dmg);
 
-        if (defender.is_alive()) {
+        if (actor::is_alive(defender)) {
                 apply_melee_attack_props(defender, attacker, wpn);
 
                 if (wpn.data().melee.knocks_back) {
@@ -785,7 +785,7 @@ static void do_melee_player_attacker(
         }
 
         // --- Attack known actor? ---
-        if (defender && defender->is_player_aware_of_me()) {
+        if (defender && actor::is_player_aware_of_me(*defender)) {
                 const bool is_melee_allowed =
                         map::g_player->m_properties.allow_attack_melee(
                                 Verbose::yes);

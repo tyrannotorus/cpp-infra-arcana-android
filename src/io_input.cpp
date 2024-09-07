@@ -392,6 +392,15 @@ InputData read_input()
         s_is_window_resized = false;
         s_last_window_resize_ms = 0;
 
+        //
+        // TODO: This loop handles too much details concerning rendering, it is weird that the input
+        // processing loop has so much responsibility over this. It should be moved elsewhere, and
+        // this loop should only call a function that processes the rendering stuff.
+        //
+        // When this is done, it can probably be called similarly from other places such as when
+        // running projectile animations (so that flash animations are processed simultaneously for
+        // example).
+        //
         while (!s_is_done_reading_input) {
                 sleep(1);
 

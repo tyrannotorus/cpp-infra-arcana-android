@@ -98,7 +98,7 @@ static void draw_health_bar(const actor::Actor& actor)
 void draw_health_bars()
 {
         for (auto* actor : game_time::g_actors) {
-                if (actor->is_alive() && can_player_see_actor(*actor)) {
+                if (actor::is_alive(*actor) && can_player_see_actor(*actor)) {
                         draw_health_bar(*actor);
                 }
         }

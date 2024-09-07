@@ -142,7 +142,7 @@ static void try_cast(Spell* const spell)
 
         msg_log::add("I cast " + spell->name() + "!");
 
-        if (map::g_player->is_alive()) {
+        if (actor::is_alive(*map::g_player)) {
                 const std::vector<actor::Actor*> seen_foes =
                         actor::seen_foes(*map::g_player);
 

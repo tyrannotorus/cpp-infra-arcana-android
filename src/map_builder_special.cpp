@@ -945,7 +945,7 @@ void MapBuilderBoss::on_template_built()
         actor::Actor* high_priest = nullptr;
 
         for (actor::Actor* const actor : game_time::g_actors) {
-                if (actor->id() == "MON_THE_HIGH_PRIEST") {
+                if (actor::id(*actor) == "MON_THE_HIGH_PRIEST") {
                         high_priest = actor;
 
                         break;
