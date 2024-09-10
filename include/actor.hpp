@@ -178,6 +178,8 @@ void make_player_aware_seen_monsters();
 
 void print_player_aware_invis_mon_msg(const Actor& mon);
 
+void update_player_fov();
+
 // -----------------------------------------------------------------------------
 // Monster specific functions
 // -----------------------------------------------------------------------------
@@ -216,7 +218,6 @@ public:
         // ==================================================
         void save() const;
         void load();
-        void update_fov();
         void update_mon_awareness() const;
         void incr_shock(double shock, ShockSrc shock_src);
         void restore_shock(int amount_restored, bool is_temp_shock_restored);

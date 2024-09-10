@@ -271,7 +271,7 @@ static void player_act()
 
                 actor::player_state::g_has_taken_auto_move_step = true;
 
-                player.update_fov();
+                actor::update_player_fov();
 
                 if (actor::player_state::g_auto_move_dir == Dir::END) {
                         return;

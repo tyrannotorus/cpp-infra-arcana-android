@@ -288,7 +288,7 @@ void update_vision()
 {
         update_light_map();
 
-        g_player->update_fov();
+        actor::update_player_fov();
 
         g_player->update_mon_awareness();
 

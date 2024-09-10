@@ -173,6 +173,7 @@ set(COMMON_SRC
         src/actor_mon.cpp
         src/actor_move.cpp
         src/actor_player.cpp
+        src/actor_player_fov.cpp
         src/actor_player_state.cpp
         src/actor_see.cpp
         src/actor_sneak.cpp

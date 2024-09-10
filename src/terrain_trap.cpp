@@ -415,7 +415,7 @@ void Trap::trigger_start(const actor::Actor* actor)
                         reveal(PrintRevealMsg::no);
                 }
 
-                map::g_player->update_fov();
+                actor::update_player_fov();
 
                 states::draw();
         }
