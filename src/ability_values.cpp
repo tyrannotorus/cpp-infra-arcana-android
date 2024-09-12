@@ -104,7 +104,7 @@ int AbilityValues::val(
                                 ret += 10;
                         }
 
-                        if (player_bon::has_trait(Trait::expert_marksman)) {
+                        if (player_bon::has_trait(Trait::master_marksman)) {
                                 ret += 10;
                         }
 
