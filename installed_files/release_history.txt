@@ -21,6 +21,7 @@
 # Map generation
 - Misc improvements to corridor generation (limited max corridor length, corridors occasionally connect to other corridors, some corridors are widened).
 - Changed some room templates that were annoying to explore, or created dead-end corridors that looked like they led to a secret door.
+- Crypt rooms (tomb rooms) can also spawn in the late game caves.
 
 # Backgrounds (classes)
 - For Exorcists, the Bless spell now only have a default max cost of 4 spirit (half of the normal 8 max cost).

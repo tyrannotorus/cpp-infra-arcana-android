@@ -322,6 +322,7 @@ void init_room_bucket()
                 add_to_room_bucket(RoomType::pool, rnd::range(2, 3));
                 add_to_room_bucket(RoomType::chasm, 2);
                 add_to_room_bucket(RoomType::forest, 2);
+                add_to_room_bucket(RoomType::crypt, rnd::range(1, 2));
 
                 const size_t nr_cave_rooms = s_room_bucket.size() * 2;
 
@@ -1119,13 +1120,13 @@ std::vector<RoomAutoTerrainRule> CryptRoom::auto_terrains_allowed() const
 {
         return {
                 {terrain::Id::tomb, rnd::one_in(6) ? 2 : 1},
-                {terrain::Id::urn, rnd::range(0, 4)},
-                {terrain::Id::rubble_low, rnd::range(1, 4)}};
+                {terrain::Id::urn, rnd::range(0, 3)},
+                {terrain::Id::rubble_low, rnd::range(0, 3)}};
 }
 
 bool CryptRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 2 && m_r.max_dim() <= 12;
+        return m_r.min_dim() >= 2 && m_r.max_dim() <= 14;
 }
 
 void CryptRoom::on_pre_connect_hook(Array2<bool>& door_proposals)

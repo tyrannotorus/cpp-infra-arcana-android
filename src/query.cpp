@@ -165,7 +165,15 @@ void wait_for_msg_more()
                         if ((input.key == SDLK_SPACE) ||
                             (input.key == SDLK_ESCAPE) ||
                             (input.key == SDLK_RETURN) ||
-                            (input.key == SDLK_TAB)) {
+                            (input.key == SDLK_TAB)
+#ifndef NDEBUG
+                            ||
+                            // Cheat key for descending
+                            (input.key == SDLK_F2) ||
+                            // Cheat key for teleporting
+                            (input.key == SDLK_F7)
+#endif  // NDEBUG
+                        ) {
                                 break;
                         }
                 }

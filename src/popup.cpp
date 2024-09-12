@@ -369,6 +369,10 @@ void MsgPopupState::update()
         case SDLK_SPACE:
         case SDLK_ESCAPE:
         case SDLK_RETURN:
+#ifndef NDEBUG
+        // Cheat key for descending
+        case SDLK_F2:
+#endif  // NDEBUG
                 states::pop();
                 break;
 

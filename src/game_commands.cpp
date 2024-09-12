@@ -1140,7 +1140,7 @@ void handle(const GameCmd cmd)
                         init::g_is_cheat_vision_enabled = true;
                 }
 
-                map::g_player->update_fov();
+                actor::update_player_fov();
         } break;
 
         case GameCmd::debug_shift_f4: {

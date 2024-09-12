@@ -196,10 +196,6 @@ static void update_estimated_total_avail_xp()
                                 // can be much more).
                                 s_estimated_avail_xp_terrain +=
                                         g_xp_on_drink_from_xp_fountain * 3;
-
-                                static int bla = 0;
-                                bla += g_xp_on_drink_from_xp_fountain * 3;
-                                TRACE << "### " << bla << std::endl;
                         }
                 }
 

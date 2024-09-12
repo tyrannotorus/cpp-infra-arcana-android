@@ -179,15 +179,21 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         if (map::g_dlvl >= g_dlvl_first_late_game) {
                 for (const auto& p : map::rect().positions()) {
-                        auto* const t = map::g_terrain.at(p);
+                        terrain::Terrain* const t = map::g_terrain.at(p);
 
-                        if (t->id() == terrain::Id::floor) {
+                        switch (t->id()) {
+                        case terrain::Id::floor: {
                                 static_cast<terrain::Floor*>(t)->m_type =
                                         terrain::FloorType::cave;
-                        }
-                        else if (t->id() == terrain::Id::wall) {
+                        } break;
+
+                        case terrain::Id::wall: {
                                 static_cast<terrain::Wall*>(t)->m_type =
                                         terrain::WallType::cave;
+                        } break;
+
+                        default: {
+                        } break;
                         }
                 }
         }

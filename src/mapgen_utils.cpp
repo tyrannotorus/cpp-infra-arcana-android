@@ -266,14 +266,14 @@ void make_pillars_in_room(const Room& room)
         const P& room_p0(room.m_r.p0);
         const P& room_p1(room.m_r.p1);
 
-        Range step_range(1, 4);
+        Range step_range(1, 3);
 
         const int dx = step_range.roll();
         const int dy = step_range.roll();
 
         const int place_one_in_n = rnd::range(1, 4);
 
-        const bool use_pillar_wall_type = rnd::coin_toss();
+        const bool use_pillars = rnd::coin_toss();
 
         for (int y = room_p0.y + 1; y <= room_p1.y - 1; y += dy) {
                 for (int x = room_p0.x + 1; x <= room_p1.x - 1; x += dx) {
@@ -284,7 +284,7 @@ void make_pillars_in_room(const Room& room)
                         }
 
                         if (rnd::one_in(place_one_in_n)) {
-                                if (use_pillar_wall_type) {
+                                if (use_pillars) {
                                         place_pillar_at(p);
                                 }
                                 else {
