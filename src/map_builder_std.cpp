@@ -498,7 +498,9 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // NOTE: This depends on choke point data having been gathered
         // (including player side and stairs side)
-        mapgen::make_mirrors();
+        if (map::g_dlvl <= g_dlvl_last_mid_game) {
+                mapgen::make_mirrors();
+        }
 
         if (!mapgen::g_is_map_valid) {
                 return false;
