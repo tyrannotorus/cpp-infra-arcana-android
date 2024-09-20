@@ -201,8 +201,10 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // BSP split rooms
         // ---------------------------------------------------------------------
-        // TODO: Allow in late game as well?
-        if (map::g_dlvl <= g_dlvl_last_mid_game) {
+        // NOTE: Occasionally bsp splitting rooms is allowed late game as well,
+        // as it looks really good, and gives a vague sense of ruins - but it
+        // leads to less open maps.
+        if ((map::g_dlvl <= g_dlvl_last_mid_game) || rnd::one_in(4)) {
                 mapgen::bsp_split_rooms();
         }
 
