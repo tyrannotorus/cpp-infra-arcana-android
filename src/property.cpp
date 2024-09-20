@@ -1283,7 +1283,7 @@ int Moribund::ability_mod(AbilityId ability) const
 
         int melee_bonus = 30;
 
-        if (player_bon::has_trait(Trait::fervor)) {
+        if (player_bon::has_trait(Trait::enthusiasm)) {
                 melee_bonus *= 2;
         }
 
@@ -1294,7 +1294,7 @@ int Moribund::armor_points() const
 {
         int armor_bonus = 3;
 
-        if (player_bon::has_trait(Trait::fervor)) {
+        if (player_bon::has_trait(Trait::enthusiasm)) {
                 armor_bonus *= 2;
         }
 

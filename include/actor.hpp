@@ -141,7 +141,7 @@ bool restore_hp(
 
 bool restore_sp(
         Actor& actor,
-        int spi_restored,
+        int sp_restored,
         AllowRestoreAboveMax allow_above_max = AllowRestoreAboveMax::no,
         Verbose verbose = Verbose::yes);
 
@@ -179,6 +179,12 @@ void make_player_aware_seen_monsters();
 void print_player_aware_invis_mon_msg(const Actor& mon);
 
 void update_player_fov();
+
+int player_exorcist_max_fervor();
+
+bool restore_exorcist_fervor(
+        int fervor_restored,
+        Verbose verbose = Verbose::yes);
 
 // -----------------------------------------------------------------------------
 // Monster specific functions

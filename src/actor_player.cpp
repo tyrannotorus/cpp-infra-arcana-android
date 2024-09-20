@@ -304,6 +304,46 @@ void print_player_aware_invis_mon_msg(const Actor& mon)
                 MorePromptOnMsg::yes);
 }
 
+int player_exorcist_max_fervor()
+{
+        const int k = 10;
+
+        int i = 2;
+
+        if (player_bon::has_trait(Trait::strong_spirit)) {
+                ++i;
+        }
+
+        if (player_bon::has_trait(Trait::mighty_spirit)) {
+                ++i;
+        }
+
+        return k * i;
+}
+
+bool restore_exorcist_fervor(int fervor_restored, Verbose verbose)
+{
+        const int limit =
+                std::max(
+                        player_state::g_exorcist_fervor,
+                        player_exorcist_max_fervor());
+
+        const int fervor_before = player_state::g_exorcist_fervor;
+
+        player_state::g_exorcist_fervor =
+                std::min(
+                        player_state::g_exorcist_fervor + fervor_restored,
+                        limit);
+
+        const bool is_fervor_gained = player_state::g_exorcist_fervor > fervor_before;
+
+        if ((verbose == Verbose::yes) && is_fervor_gained) {
+                msg_log::add("I feel more fervent!", colors::msg_good());
+        }
+
+        return is_fervor_gained;
+}
+
 // -----------------------------------------------------------------------------
 // Actor
 // -----------------------------------------------------------------------------

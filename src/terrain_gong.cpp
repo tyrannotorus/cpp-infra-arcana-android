@@ -884,10 +884,7 @@ void Gong::hit(
                                 actor::AllowRestoreAboveMax::no,
                                 Verbose::no);
 
-                        actor::restore_sp(
-                                *map::g_player,
-                                10,
-                                actor::AllowRestoreAboveMax::yes);
+                        actor::restore_exorcist_fervor(10);
                 }
                 break;
 

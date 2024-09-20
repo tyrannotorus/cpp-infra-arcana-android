@@ -60,6 +60,9 @@ extern double g_player_total_shock_from_src[(size_t)ShockSrc::END];
 extern int g_nr_turns_until_r_spell;
 extern int g_nr_turns_until_meditative_focused;
 
+// Exorcist fervor
+extern int g_exorcist_fervor;
+
 // Current color for lantern flickering effect
 extern Color g_lantern_color;
 

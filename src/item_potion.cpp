@@ -450,7 +450,10 @@ void Spirit::quaff_impl(actor::Actor& actor)
 
         const int sp_restored = std::max(10, sp_max - actor.m_sp);
 
-        actor::restore_sp(actor, sp_restored, actor::AllowRestoreAboveMax::yes);
+        actor::restore_sp(
+                actor,
+                sp_restored,
+                actor::AllowRestoreAboveMax::yes);
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);

@@ -13,6 +13,7 @@
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_death.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
@@ -285,18 +286,21 @@ static void on_light_sensitive_player_hit_by_light()
         msg_log::add("I am wracked by light!", colors::msg_bad());
 }
 
-static int absorb_dmg_for_prolonged_life_player(int dmg)
+static int absorb_dmg_for_prolonged_life_exorcist(int dmg)
 {
-        // Soak up as much damage as possible with SP instead of HP (but never
-        // reduce SP below 1).
+        // Of the damage that the player does not have HP to cover, soak up as
+        // much damage as possible with fervor.
         const int missing_hp = (dmg - map::g_player->m_hp) + 1;
 
         if (missing_hp > 0) {
-                const int sp_dmg = std::min(missing_hp, map::g_player->m_sp - 1);
+                const int fervor_dmg =
+                        std::min(
+                                missing_hp,
+                                actor::player_state::g_exorcist_fervor);
 
-                map::g_player->m_sp -= sp_dmg;
+                actor::player_state::g_exorcist_fervor -= fervor_dmg;
 
-                dmg -= sp_dmg;
+                dmg -= fervor_dmg;
         }
 
         return dmg;
@@ -425,9 +429,9 @@ void hit(
                         dmg = hit_armor_and_calc_new_damage(actor, dmg);
                 }
 
-                // Soaking up damage with SP instead due to Prolonged Life?
+                // Soaking up damage with fervor instead due to Prolonged Life?
                 if (actor::is_player(&actor) && player_bon::has_trait(Trait::prolonged_life)) {
-                        dmg = absorb_dmg_for_prolonged_life_player(dmg);
+                        dmg = absorb_dmg_for_prolonged_life_exorcist(dmg);
 
                         if (dmg <= 0) {
                                 map::g_player->interrupt_actions(ForceInterruptActions::no);

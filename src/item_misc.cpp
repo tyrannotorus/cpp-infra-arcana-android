@@ -1087,10 +1087,7 @@ ItemPrePickResult Necronomicon::pre_pickup_hook()
                         actor::AllowRestoreAboveMax::no,
                         Verbose::no);
 
-                actor::restore_sp(
-                        *map::g_player,
-                        11,
-                        actor::AllowRestoreAboveMax::yes);
+                actor::restore_exorcist_fervor(30);
 
                 return ItemPrePickResult::destroy_item;
         }

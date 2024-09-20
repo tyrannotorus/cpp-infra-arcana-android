@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "actor.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "colors.hpp"
 #include "config.hpp"
@@ -224,6 +225,44 @@ static void draw_sp(const int y, const Panel panel)
                 panel,
                 {sp_x + sp_str_w, y},
                 colors::light_blue(),
+                io::DrawBg::no);
+}
+
+static void draw_exorcist_fervor(const int y, const Panel panel)
+{
+        const int fervor = actor::player_state::g_exorcist_fervor;
+        const int max_fervor = actor::player_exorcist_max_fervor();
+        const int fervor_pct_of_max_possible = (fervor * 100) / max_fervor;
+
+        io::draw_text(
+                "Fervor",
+                panel,
+                {0, y},
+                label_color(),
+                io::DrawBg::no);
+
+        const std::string fervor_str = std::to_string(fervor);
+        const std::string max_fervor_str = std::to_string(max_fervor);
+
+        const int fervor_str_w = (int)fervor_str.length();
+        const int max_fervor_str_w = (int)max_fervor_str.length();
+        const int tot_w = fervor_str_w + 1 + max_fervor_str_w;
+        const int fervor_x = panels::w(panel) - tot_w;
+
+        const int tint_pct = std::min(100 - fervor_pct_of_max_possible, 60);
+
+        io::draw_text(
+                fervor_str,
+                panel,
+                {fervor_x, y},
+                colors::red().tinted(tint_pct),
+                io::DrawBg::no);
+
+        io::draw_text(
+                "/" + max_fervor_str,
+                panel,
+                {fervor_x + fervor_str_w, y},
+                colors::red(),
                 io::DrawBg::no);
 }
 
@@ -560,7 +599,13 @@ void draw()
         draw_char_lvl_and_xp(y++, panel);
         draw_dlvl(y++, panel);
         draw_hp(y++, panel);
+
         draw_sp(y++, panel);
+
+        if (player_bon::is_bg(Bg::exorcist)) {
+                draw_exorcist_fervor(y++, panel);
+        }
+
         draw_shock(y++, panel);
         draw_insanity(y++, panel);
 

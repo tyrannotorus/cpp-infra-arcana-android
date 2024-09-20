@@ -4,15 +4,15 @@
 ##############################
 # Gameplay
 ##############################
-# Items
-- When using the Medical Bag, a menu is now shown where you can select the treatment to perform. Also added an option to automatically choose treatment like before.
-- Added an additional Medical Bag action called "quick patch-up", which restores some hit points.
-
 # Terrain objects
 - Some terrain objects are now "inscribed" and can be studied by bumping them. This gives XP, can recall forgotten spells, and gives a "feeling" regarding carried items (e.g. if a potion is benign or malign). Item "feelings" no longer happen passively over time.
 - Hazy Mirrors no longer recall forgotten spells, instead they identify all carried items. They are also much rarer than before.
 - If the player has a cursed item, gongs have a high chance of giving the "bless" bonus (which also removes one curse).
 - Magic traps ("strange shape") starts hidden again just like mechanical traps, however traps are no longer spawned in corridors.
+
+# Items
+- When using the Medical Bag, a menu is now shown where you can select the treatment to perform. Also added an option to automatically choose treatment like before.
+- Added an additional Medical Bag action called "quick patch-up", which restores some hit points.
 
 # Monsters
 - Some creatures are now "flammable" (e.g. mold, worm masses). If ignited, these burn permanently and will also ignite any other adjacent flammable creatures.
@@ -24,6 +24,8 @@
 - Crypt rooms (tomb rooms) can also spawn in the late game caves.
 
 # Backgrounds (classes)
+- Exorcists can no longer store spirit points above max level indefinitely, instead they gain fervor points for destroying manuscripts, altars, etc. Fervor can be used for casting spells, and is used automatically when there is not enough spirit points to cast from. The "Prolonged Life" trait also uses fervor instead of spirit.
+- Due to the above change, the Flagellant trait "Fervor" has been renamed to "Enthusiasm".
 - For Exorcists, the Bless spell now only have a default max cost of 4 spirit (half of the normal 8 max cost).
 
 # Traits

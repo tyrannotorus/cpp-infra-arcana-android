@@ -40,6 +40,8 @@ double g_player_total_shock_from_src[(size_t)ShockSrc::END] {};
 int g_nr_turns_until_r_spell {-1};
 int g_nr_turns_until_meditative_focused {-1};
 
+int g_exorcist_fervor {0};
+
 Color g_lantern_color {};
 
 Actor* g_seen_mon_to_warn_about {nullptr};
@@ -78,6 +80,8 @@ void init()
 
         g_nr_turns_until_r_spell = -1;
         g_nr_turns_until_meditative_focused = -1;
+
+        g_exorcist_fervor = 0;
 
         g_lantern_color = {};
 

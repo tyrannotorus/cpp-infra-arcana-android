@@ -325,9 +325,7 @@ static void std_turn_common(actor::Actor& actor)
 
         const bool is_sp_above_max = (actor.m_sp > actor::max_sp(actor));
 
-        const bool is_exorcist = player_bon::is_bg(Bg::exorcist);
-
-        if (!is_exorcist && is_sp_above_max && decr_this_turn) {
+        if (is_sp_above_max && decr_this_turn) {
                 --actor.m_sp;
         }
 
@@ -358,7 +356,11 @@ static void std_turn_common(actor::Actor& actor)
         const bool regen_sp_this_turn = ((game_time::turn_nr() % regen_sp_n_turns) == 0);
 
         if (regen_sp_this_turn) {
-                actor::restore_sp(actor, 1, actor::AllowRestoreAboveMax::no, Verbose::no);
+                actor::restore_sp(
+                        actor,
+                        1,
+                        actor::AllowRestoreAboveMax::no,
+                        Verbose::no);
         }
 }
 

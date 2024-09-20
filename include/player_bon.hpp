@@ -90,7 +90,7 @@ enum class Trait
         unbreakable,
         callous,
         galvanization,
-        fervor,
+        enthusiasm,
         memento_mori,
 
         END

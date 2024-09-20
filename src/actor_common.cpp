@@ -475,7 +475,7 @@ bool restore_hp(
 
 bool restore_sp(
         Actor& actor,
-        const int spi_restored,
+        const int sp_restored,
         const AllowRestoreAboveMax allow_above_max,
         const Verbose verbose)
 {
@@ -489,12 +489,11 @@ bool restore_sp(
 
         const int sp_before = actor.m_sp;
 
-        actor.m_sp = std::min(actor.m_sp + spi_restored, limit);
+        actor.m_sp = std::min(actor.m_sp + sp_restored, limit);
 
-        const bool is_spi_gained = actor.m_sp > sp_before;
+        const bool is_sp_gained = actor.m_sp > sp_before;
 
-        if (verbose == Verbose::yes &&
-            is_spi_gained) {
+        if ((verbose == Verbose::yes) && is_sp_gained) {
                 if (is_player(&actor)) {
                         msg_log::add("I feel more spirited!", colors::msg_good());
                 }
@@ -509,7 +508,7 @@ bool restore_sp(
                 }
         }
 
-        return is_spi_gained;
+        return is_sp_gained;
 }
 
 void change_max_hp(

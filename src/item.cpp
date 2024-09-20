@@ -199,11 +199,11 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
                         }
                 }
 
-                // Bonus damage from Flagellant Moribund?
+                // Bonus damage from Flagellant Enthusiasm?
                 if (attacker && attacker->m_properties.has(prop::Id::moribund)) {
                         int moribund_bon = 3;
 
-                        if (player_bon::has_trait(Trait::fervor)) {
+                        if (player_bon::has_trait(Trait::enthusiasm)) {
                                 moribund_bon *= 2;
                         }
 

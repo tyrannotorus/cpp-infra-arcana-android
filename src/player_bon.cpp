@@ -14,6 +14,7 @@
 
 #include "actor.hpp"
 #include "actor_data.hpp"
+#include "actor_player_state.hpp"
 #include "colors.hpp"
 #include "create_character.hpp"
 #include "debug.hpp"
@@ -110,15 +111,21 @@ static std::string trait_descr_for_spell(
 
 static std::string get_player_available_sp_str()
 {
-        const auto sp_str = std::to_string(map::g_player->m_sp);
-        const auto max_sp_str = std::to_string(actor::max_sp(*map::g_player));
+        const std::string sp_str = std::to_string(map::g_player->m_sp);
+        const std::string max_sp_str = std::to_string(actor::max_sp(*map::g_player));
 
-        return (
-                "You currently have " +
-                sp_str +
-                "/" +
-                max_sp_str +
-                " spirit.");
+        std::string descr = "You currently have " + sp_str + "/" + max_sp_str + " spirit";
+
+        if (player_bon::is_bg(Bg::exorcist)) {
+                const std::string fp_str = std::to_string(actor::player_state::g_exorcist_fervor);
+                const std::string max_fp_str = std::to_string(actor::player_exorcist_max_fervor());
+
+                descr += " and " + fp_str + "/" + max_fp_str + " fervor";
+        }
+
+        descr += ".";
+
+        return descr;
 }
 
 static TraitData& trait_data(const Trait id)
@@ -191,7 +198,8 @@ static void update_trait_data()
                 Bg::ghoul,
                 Bg::exorcist,
                 Bg::occultist,
-                Bg::flagellant};
+                Bg::flagellant,
+        };
         set_trait_data(d);
 
         // --- Cool-headed ---
@@ -372,6 +380,9 @@ static void update_trait_data()
                 "+2 spirit points, increased spirit regeneration rate, you "
                 "can defy harmful spells (it takes 125-150 turns to regain "
                 "spell resistance after a spell is blocked)";
+        // NOTE: Exorcists start with Stout Spirit, there is no point in having
+        // it grant extra max Fervor (only the other two Spirit upgrade traits
+        // need to grant this).
         d.on_picked = []() {
                 prop::Prop* prop = prop::make(prop::Id::r_spell);
 
@@ -409,6 +420,9 @@ static void update_trait_data()
                 "+2 spirit points, increased spirit regeneration rate, it "
                 "takes 75-100 turns to regain spell resistance after a spell "
                 "is blocked";
+        if (player_bon::is_bg(Bg::exorcist)) {
+                d.descr += ", +10 maximum Fervor";
+        }
         d.trait_prereqs = {Trait::stout_spirit};
         set_trait_data(d);
 
@@ -420,6 +434,9 @@ static void update_trait_data()
                 "+2 spirit points, increased spirit regeneration rate, it "
                 "takes 25-50 turns to regain spell resistance after a spell "
                 "is blocked";
+        if (player_bon::is_bg(Bg::exorcist)) {
+                d.descr += ", +10 maximum Fervor";
+        }
         d.trait_prereqs = {Trait::strong_spirit};
         set_trait_data(d);
 
@@ -744,7 +761,7 @@ static void update_trait_data()
         d.title = "Prolonged Life";
         d.descr =
                 "Any fatal damage received is instead drained fom your "
-                "spirit points";
+                "fervor points";
         d.bg_prereq = Bg::exorcist;
         set_trait_data(d);
 
@@ -847,9 +864,8 @@ static void update_trait_data()
         d.bg_prereq = Bg::flagellant;
         set_trait_data(d);
 
-        // --- Fervor ---
-        d.id = Trait::fervor;
-        d.title = "Fervor";
+        d.id = Trait::enthusiasm;
+        d.title = "Enthusiasm";
         d.descr =
                 "Doubles all bonuses for the moribund effect";
         d.bg_prereq = Bg::flagellant;
@@ -1078,16 +1094,16 @@ std::vector<ColoredString> bg_descr(const Bg id)
 
         switch (id) {
         case Bg::exorcist:
+                put("Cannot use manuscripts, altars, monoliths, or gongs, "
+                    "but instead gains experience and fervor for destroying "
+                    "these (manuscripts are destroyed when picking them up). "
+                    "Fervor can be used for casting spells - these points "
+                    "are used automatically when there is not enough "
+                    "spirit points to cast from.");
+                put("");
                 put("Starts with a Holy Symbol, which can restore "
                     "spirit points and grant resistance against "
                     "mental shock and fear.");
-                put("");
-                put("Cannot use manuscripts, altars, monoliths, or gongs, "
-                    "but gains experience and spirit points for destroying "
-                    "these (manuscripts are destroyed when picking them up).");
-                put("");
-                put("Spirit points gained above the maximum level can be kept "
-                    "indefinitely until they are spent.");
                 put("");
                 put("Gains a bonus trait at character levels " +
                     std::to_string(s_exorcist_bon_trait_lvl_1) +

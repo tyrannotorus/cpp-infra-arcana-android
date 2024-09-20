@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "actor.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "browser.hpp"
@@ -102,15 +103,27 @@ static void try_cast(Spell* const spell)
 
         msg_log::clear();
 
-        const SpellSkill skill =
-                actor::spell_skill(*map::g_player, spell->id());
+        const SpellSkill skill = actor::spell_skill(*map::g_player, spell->id());
 
         const Range cost_range = spell->cost_range(skill, map::g_player);
 
-        const int resource_avail =
-                (spell->cost_type() == SpellCostType::spirit)
-                ? map::g_player->m_sp
-                : map::g_player->m_hp;
+        int resource_avail = 0;
+
+        switch (spell->cost_type()) {
+        case SpellCostType::spirit: {
+                resource_avail = map::g_player->m_sp;
+
+                // If the player is an Exorcist, also take fervor into account
+                // (Exorcists can cast with fervor if SP runs out).
+                if (player_bon::is_bg(Bg::exorcist)) {
+                        resource_avail += actor::player_state::g_exorcist_fervor;
+                }
+        } break;
+
+        case SpellCostType::hit_points: {
+                resource_avail = map::g_player->m_hp;
+        }
+        }
 
         if (cost_range.max >= resource_avail) {
                 const std::string resource_name =

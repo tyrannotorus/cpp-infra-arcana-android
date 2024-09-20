@@ -21,6 +21,7 @@
 #include "actor_death.hpp"
 #include "actor_factory.hpp"
 #include "actor_hit.hpp"
+#include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
@@ -619,6 +620,28 @@ WeightedItems<SpellSideEffect> s_spell_side_effects {
                 70,  // swap_wall_floor
         }};
 
+static void run_random_side_effect(actor::Actor& caster)
+{
+        // Run a random side effect.
+        const int d = 3;
+
+        const R rect(
+                {std::max(0, caster.m_pos.x - d),
+                 std::max(0, caster.m_pos.y - d)},
+                {std::min(map::w() - 1, caster.m_pos.x + d),
+                 std::min(map::h() - 1, caster.m_pos.y + d)});
+
+        std::vector<P> nearby_positions = rect.positions();
+
+        rnd::shuffle(nearby_positions);
+
+        const SpellSideEffect& side_effect_function = s_spell_side_effects.roll();
+
+        TRACE << "Running spell side effect" << std::endl;
+
+        side_effect_function({caster, nearby_positions});
+}
+
 }  // namespace spell_side_effects
 
 static std::string get_noise_descr(const bool is_noisy)
@@ -718,6 +741,87 @@ static void end_properties_for_casting_spell(
                         caster.m_properties.end_prop(prop::Id::erudition);
                 }
         }
+}
+
+static std::string generate_mon_cast_msg(const actor::Actor& caster)
+{
+        std::string spell_msg = caster.m_data->spell_msg;
+
+        if (spell_msg.empty()) {
+                return "";
+        }
+
+        const bool is_mon_seen = actor::can_player_see_actor(caster);
+
+        const std::string mon_name =
+                is_mon_seen
+                ? text_format::first_to_upper(actor::name_the(caster))
+                : (caster.m_data->is_humanoid ? "Someone" : "Something");
+
+        spell_msg = mon_name + " " + spell_msg;
+
+        return spell_msg;
+}
+
+static int absorb_sp_cost_with_exorcist_fervor(int sp_cost)
+{
+        const int missing_sp = (sp_cost - map::g_player->m_sp) + 1;
+
+        if (missing_sp > 0) {
+                const int cost_reduction =
+                        std::min(
+                                missing_sp,
+                                actor::player_state::g_exorcist_fervor);
+
+                sp_cost -= cost_reduction;
+
+                actor::player_state::g_exorcist_fervor -= cost_reduction;
+        }
+
+        return sp_cost;
+}
+
+static void apply_spell_cost(
+        actor::Actor& caster,
+        int cost,
+        const SpellCostType cost_type)
+{
+        switch (cost_type) {
+        case SpellCostType::spirit: {
+                if (actor::is_player(&caster) && player_bon::is_bg(Bg::exorcist)) {
+                        cost = absorb_sp_cost_with_exorcist_fervor(cost);
+                }
+
+                if (cost > 0) {
+                        actor::hit_sp(caster, cost, nullptr, Verbose::no);
+                }
+        } break;
+
+        case SpellCostType::hit_points: {
+                actor::hit(caster, cost, DmgType::pure, nullptr, AllowWound::no);
+        } break;
+        }
+}
+
+static bool should_give_regen_from_flagellant_trait(
+        const actor::Actor& caster,
+        const int hp_before_casting,
+        const SpellDomain spell_domain)
+{
+        return (
+                actor::is_player(&caster) &&
+                player_bon::has_trait(Trait::galvanization) &&
+                (spell_domain == SpellDomain::blood) &&
+                (caster.m_hp < hp_before_casting));
+}
+
+static void apply_regen_from_flagellant_trait()
+{
+        prop::Prop* const regen = prop::make(prop::Id::regenerating);
+
+        regen->set_duration(rnd::range(4, 6));
+
+        map::g_player->m_properties.apply(regen);
 }
 
 // -----------------------------------------------------------------------------
@@ -1036,8 +1140,7 @@ void Spell::cast(
 
                 int shock = shock_value();
 
-                if (map::g_player->m_inv.has_item_in_backpack(
-                            item::Id::necronomicon)) {
+                if (map::g_player->m_inv.has_item_in_backpack(item::Id::necronomicon)) {
                         shock *= 2;
                 }
 
@@ -1066,29 +1169,7 @@ void Spell::cast(
 
                 // Make sound if noisy - casting from scrolls is always noisy.
                 if (is_noisy(skill) || (spell_src == SpellSrc::manuscript)) {
-                        const bool is_mon_seen =
-                                actor::can_player_see_actor(*caster);
-
-                        std::string spell_msg = caster->m_data->spell_msg;
-
-                        if (!spell_msg.empty()) {
-                                std::string mon_name;
-
-                                if (is_mon_seen) {
-                                        mon_name =
-                                                text_format::first_to_upper(
-                                                        actor::name_the(*caster));
-                                }
-                                else {
-                                        // Cannot see monster.
-                                        mon_name =
-                                                caster->m_data->is_humanoid
-                                                ? "Someone"
-                                                : "Something";
-                                }
-
-                                spell_msg = mon_name + " " + spell_msg;
-                        }
+                        const std::string spell_msg = generate_mon_cast_msg(*caster);
 
                         Snd snd(
                                 spell_msg,
@@ -1108,32 +1189,21 @@ void Spell::cast(
         const int hp_before = caster->m_hp;
 
         if (spell_src == SpellSrc::learned) {
-                const Range cost = cost_range(skill, caster);
+                const Range range = cost_range(skill, caster);
 
-                if (cost.min > 0) {
-                        if (cost_type() == SpellCostType::spirit) {
-                                // Spell costs spirit to cast.
-                                actor::hit_sp(
-                                        *caster,
-                                        cost.roll(),
-                                        nullptr,
-                                        Verbose::no);
-                        }
-                        else {
-                                // Spell costs hit points to cast.
-                                actor::hit(
-                                        *caster,
-                                        cost.roll(),
-                                        DmgType::pure,
-                                        nullptr,
-                                        AllowWound::no);
-                        }
+                if (range.min > 0) {
+                        TRACE
+                                << "Applying spell cost for spell "
+                                << "'" << name() << "', "
+                                << "caster "
+                                << "'" << actor::name_a(*caster) << "'"
+                                << std::endl;
+
+                        apply_spell_cost(*caster, range.roll(), cost_type());
                 }
 
                 // Check properties which MAY allow casting.
-                allow_cast =
-                        properties.allow_cast_intr_spell_chance(
-                                Verbose::yes);
+                allow_cast = properties.allow_cast_intr_spell_chance(Verbose::yes);
         }
 
         const bool is_focused_player =
@@ -1143,7 +1213,9 @@ void Spell::cast(
         if (allow_cast && actor::is_alive(*caster)) {
                 TRACE
                         << "Running spell effect for spell "
-                        << "'" << name() << "'"
+                        << "'" << name() << "', "
+                        << "caster "
+                        << "'" << actor::name_a(*caster) << "'"
                         << std::endl;
 
                 // Here we run the actual casting of the spell itself:
@@ -1151,16 +1223,8 @@ void Spell::cast(
 
                 end_properties_for_casting_spell(*caster, id());
 
-                // Grant regeneration from Flagellant galvanization trait?
-                if (actor::is_player(caster) &&
-                    player_bon::has_trait(Trait::galvanization) &&
-                    (domain() == SpellDomain::blood) &&
-                    (caster->m_hp < hp_before)) {
-                        prop::Prop* const regen = prop::make(prop::Id::regenerating);
-
-                        regen->set_duration(rnd::range(4, 6));
-
-                        properties.apply(regen);
+                if (should_give_regen_from_flagellant_trait(*caster, hp_before, domain())) {
+                        apply_regen_from_flagellant_trait();
                 }
 
                 // Disable tenebrous spell for the player?
@@ -1177,25 +1241,7 @@ void Spell::cast(
             allow_cast &&
             (base_max_cost(skill, caster) > 0) &&
             rnd::one_in(7)) {
-                // Run a random side effect.
-                const int d = 3;
-
-                const R rect(
-                        {std::max(0, caster->m_pos.x - d),
-                         std::max(0, caster->m_pos.y - d)},
-                        {std::min(map::w() - 1, caster->m_pos.x + d),
-                         std::min(map::h() - 1, caster->m_pos.y + d)});
-
-                std::vector<P> nearby_positions = rect.positions();
-
-                rnd::shuffle(nearby_positions);
-
-                const spell_side_effects::SpellSideEffect& side_effect =
-                        spell_side_effects::s_spell_side_effects.roll();
-
-                TRACE << "Running spell side effect" << std::endl;
-
-                side_effect({*caster, nearby_positions});
+                spell_side_effects::run_random_side_effect(*caster);
         }
 
         const bool is_casting_from_item = (spell_src == SpellSrc::item);
