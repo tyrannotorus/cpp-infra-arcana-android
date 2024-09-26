@@ -30,6 +30,7 @@
 #include "panel.hpp"
 #include "populate_monsters.hpp"
 #include "random.hpp"
+#include "room_auto_spawn_terrain.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_factory.hpp"
@@ -41,24 +42,41 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<RoomType> s_room_bucket;
+static std::vector<room::RoomType> s_room_bucket;
 
-static const std::unordered_map<std::string, RoomType> s_str_to_room_type_map = {
-        {"ROOM_PLAIN", RoomType::plain},
-        {"ROOM_HUMAN", RoomType::human},
-        {"ROOM_RITUAL", RoomType::ritual},
-        {"ROOM_JAIL", RoomType::jail},
-        {"ROOM_SPIDER", RoomType::spider},
-        {"ROOM_CRAWLING_PIT", RoomType::crawling_pit},
-        {"ROOM_CRYPT", RoomType::crypt},
-        {"ROOM_MONSTER", RoomType::monster},
-        {"ROOM_DAMP", RoomType::damp},
-        {"ROOM_POOL", RoomType::pool},
-        {"ROOM_CAVE", RoomType::cave},
-        {"ROOM_CHASM", RoomType::chasm},
-        {"ROOM_FOREST", RoomType::forest}};
+static const std::unordered_map<std::string, room::RoomType> s_str_to_room_type_map = {
+        {"ROOM_PLAIN", room::RoomType::plain},
+        {"ROOM_HUMAN", room::RoomType::human},
+        {"ROOM_RITUAL", room::RoomType::ritual},
+        {"ROOM_JAIL", room::RoomType::jail},
+        {"ROOM_SPIDER", room::RoomType::spider},
+        {"ROOM_CRAWLING_PIT", room::RoomType::crawling_pit},
+        {"ROOM_CRYPT", room::RoomType::crypt},
+        {"ROOM_MONSTER", room::RoomType::monster},
+        {"ROOM_DAMP", room::RoomType::damp},
+        {"ROOM_POOL", room::RoomType::pool},
+        {"ROOM_CAVE", room::RoomType::cave},
+        {"ROOM_CHASM", room::RoomType::chasm},
+        {"ROOM_FOREST", room::RoomType::forest},
+};
 
-static void add_to_room_bucket(const RoomType type, const size_t nr)
+static const std::unordered_map<room::RoomType, std::string> s_room_type_to_str_map = {
+        {room::RoomType::plain, "ROOM_PLAIN"},
+        {room::RoomType::human, "ROOM_HUMAN"},
+        {room::RoomType::ritual, "ROOM_RITUAL"},
+        {room::RoomType::jail, "ROOM_JAIL"},
+        {room::RoomType::spider, "ROOM_SPIDER"},
+        {room::RoomType::crawling_pit, "ROOM_CRAWLING_PIT"},
+        {room::RoomType::crypt, "ROOM_CRYPT"},
+        {room::RoomType::monster, "ROOM_MONSTER"},
+        {room::RoomType::damp, "ROOM_DAMP"},
+        {room::RoomType::pool, "ROOM_POOL"},
+        {room::RoomType::cave, "ROOM_CAVE"},
+        {room::RoomType::chasm, "ROOM_CHASM"},
+        {room::RoomType::forest, "ROOM_FOREST"},
+};
+
+static void add_to_room_bucket(const room::RoomType type, const size_t nr)
 {
         if (nr > 0) {
                 s_room_bucket.reserve(s_room_bucket.size() + nr);
@@ -73,7 +91,7 @@ static void add_to_room_bucket(const RoomType type, const size_t nr)
 // RoomType doesn't have to be an instance of the corresponding Room child class
 // (it could be for example a TemplateRoom object with RoomType "ritual", in
 // that case we still want the same chance to make it dark).
-static int base_pct_chance_dark(const RoomType room_type)
+static int base_pct_chance_dark(const room::RoomType room_type)
 {
         // TODO: Corridors could possibly be dark as well (maybe that's even
         // more fitting, so they should have a pretty high chance)? But only if
@@ -83,195 +101,59 @@ static int base_pct_chance_dark(const RoomType room_type)
         // corridor.
 
         switch (room_type) {
-        case RoomType::plain:
+        case room::RoomType::plain:
                 return 5;
 
-        case RoomType::human:
+        case room::RoomType::human:
                 return 10;
 
-        case RoomType::ritual:
+        case room::RoomType::ritual:
                 return 15;
 
-        case RoomType::jail:
+        case room::RoomType::jail:
                 return 60;
 
-        case RoomType::spider:
+        case room::RoomType::spider:
                 return 50;
 
-        case RoomType::crawling_pit:
+        case room::RoomType::crawling_pit:
                 return 75;
 
-        case RoomType::crypt:
+        case room::RoomType::crypt:
                 return 60;
 
-        case RoomType::monster:
+        case room::RoomType::monster:
                 return 80;
 
-        case RoomType::damp:
+        case room::RoomType::damp:
                 return 25;
 
-        case RoomType::pool:
+        case room::RoomType::pool:
                 return 25;
 
-        case RoomType::cave:
+        case room::RoomType::cave:
                 return 30;
 
-        case RoomType::chasm:
+        case room::RoomType::chasm:
                 return 25;
 
-        case RoomType::forest:
+        case room::RoomType::forest:
                 return 10;
 
-        case RoomType::END_OF_STD_ROOMS:
-        case RoomType::corridor:
-        case RoomType::crumble_room:
-        case RoomType::river:
+        case room::RoomType::END_OF_STD_ROOMS:
+        case room::RoomType::corridor:
+        case room::RoomType::crumble_room:
+        case room::RoomType::river:
                 break;
         }
 
         return 0;
 }
 
-static int walk_blockers_in_dir(const Dir dir, const P& pos)
-{
-        int nr_blockers = 0;
-
-        switch (dir) {
-        case Dir::right:
-                for (int dy = -1; dy <= 1; ++dy) {
-                        const auto* const t = map::g_terrain.at(pos.x + 1, pos.y + dy);
-
-                        if (!t->is_walkable()) {
-                                nr_blockers += 1;
-                        }
-                }
-                break;
-
-        case Dir::down:
-                for (int dx = -1; dx <= 1; ++dx) {
-                        const auto* const t = map::g_terrain.at(pos.x + dx, pos.y + 1);
-
-                        if (!t->is_walkable()) {
-                                nr_blockers += 1;
-                        }
-                }
-                break;
-
-        case Dir::left:
-                for (int dy = -1; dy <= 1; ++dy) {
-                        const auto* const t = map::g_terrain.at(pos.x - 1, pos.y + dy);
-
-                        if (!t->is_walkable()) {
-                                nr_blockers += 1;
-                        }
-                }
-                break;
-
-        case Dir::up:
-                for (int dx = -1; dx <= 1; ++dx) {
-                        const auto* const t = map::g_terrain.at(pos.x + dx, pos.y - 1);
-
-                        if (!t->is_walkable()) {
-                                nr_blockers += 1;
-                        }
-                }
-                break;
-
-        case Dir::down_left:
-        case Dir::down_right:
-        case Dir::up_left:
-        case Dir::up_right:
-        case Dir::center:
-        case Dir::END:
-                break;
-        }
-
-        return nr_blockers;
-}  // walk_blockers_in_dir
-
-static void get_positions_in_room_relative_to_walls(
-        const Room& room,
-        std::vector<P>& adj_to_walls,
-        std::vector<P>& away_from_walls)
-{
-        TRACE_FUNC_BEGIN_VERBOSE;
-
-        adj_to_walls.clear();
-
-        away_from_walls.clear();
-
-        std::vector<P> pos_bucket;
-
-        pos_bucket.clear();
-
-        const auto& r = room.m_r;
-
-        for (int x = r.p0.x; x <= r.p1.x; ++x) {
-                for (int y = r.p0.y; y <= r.p1.y; ++y) {
-                        if (map::g_room_map.at(x, y) != &room) {
-                                continue;
-                        }
-
-                        auto* const t = map::g_terrain.at(x, y);
-
-                        if (t->is_walkable() && t->m_data->is_floor_like) {
-                                pos_bucket.emplace_back(x, y);
-                        }
-                }
-        }
-
-        for (P& pos : pos_bucket) {
-                const int nr_r = walk_blockers_in_dir(Dir::right, pos);
-                const int nr_d = walk_blockers_in_dir(Dir::down, pos);
-                const int nr_l = walk_blockers_in_dir(Dir::left, pos);
-                const int nr_u = walk_blockers_in_dir(Dir::up, pos);
-
-                const bool is_zero_all_dir =
-                        nr_r == 0 &&
-                        nr_d == 0 &&
-                        nr_l == 0 &&
-                        nr_u == 0;
-
-                if (is_zero_all_dir) {
-                        away_from_walls.push_back(pos);
-                        continue;
-                }
-
-                bool is_door_adjacent = false;
-
-                for (int dx = -1; dx <= 1; ++dx) {
-                        for (int dy = -1; dy <= 1; ++dy) {
-                                const auto* const t =
-                                        map::g_terrain.at(
-                                                pos.x + dx, pos.y + dy);
-
-                                if (t->id() == terrain::Id::door) {
-                                        is_door_adjacent = true;
-                                }
-                        }
-                }
-
-                if (is_door_adjacent) {
-                        continue;
-                }
-
-                if ((nr_r == 3 && nr_u == 1 && nr_d == 1 && nr_l == 0) ||
-                    (nr_r == 1 && nr_u == 3 && nr_d == 0 && nr_l == 1) ||
-                    (nr_r == 1 && nr_u == 0 && nr_d == 3 && nr_l == 1) ||
-                    (nr_r == 0 && nr_u == 1 && nr_d == 1 && nr_l == 3)) {
-                        adj_to_walls.push_back(pos);
-
-                        continue;
-                }
-        }
-
-        TRACE_FUNC_END_VERBOSE;
-}
-
 // -----------------------------------------------------------------------------
-// Room factory
+// room
 // -----------------------------------------------------------------------------
-namespace room_factory
+namespace room
 {
 void init_room_bucket()
 {
@@ -296,7 +178,7 @@ void init_room_bucket()
                 add_to_room_bucket(RoomType::plain, nr_plain_rooms);
         }
         else if (dlvl <= g_dlvl_last_mid_game) {
-                add_to_room_bucket(RoomType::human, rnd::range(2, 3));
+                add_to_room_bucket(RoomType::human, 3);
                 add_to_room_bucket(RoomType::jail, rnd::range(1, 2));
                 add_to_room_bucket(RoomType::ritual, 2);
                 add_to_room_bucket(RoomType::spider, rnd::range(1, 3));
@@ -323,6 +205,7 @@ void init_room_bucket()
                 add_to_room_bucket(RoomType::chasm, 2);
                 add_to_room_bucket(RoomType::forest, 2);
                 add_to_room_bucket(RoomType::crypt, rnd::range(1, 2));
+                add_to_room_bucket(RoomType::ritual, rnd::range(1, 2));
 
                 const size_t nr_cave_rooms = s_room_bucket.size() * 2;
 
@@ -454,7 +337,17 @@ RoomType str_to_room_type(const std::string& str)
         return s_str_to_room_type_map.at(str);
 }
 
-}  // namespace room_factory
+#ifndef NDEBUG
+std::string room_type_to_str(const RoomType type)
+{
+        if (s_room_type_to_str_map.find(type) == std::end(s_room_type_to_str_map)) {
+                return "ROOM N/A";
+        }
+        else {
+                return s_room_type_to_str_map.at(type);
+        }
+}
+#endif  // NDEBUG
 
 // -----------------------------------------------------------------------------
 // Room
@@ -468,7 +361,7 @@ std::vector<P> Room::positions_in_room() const
 {
         std::vector<P> positions;
 
-        positions.reserve(m_r.w() * m_r.h());
+        positions.reserve((size_t)m_r.w() * (size_t)m_r.h());
 
         for (int x = m_r.p0.x; x <= m_r.p1.x; ++x) {
                 for (int y = m_r.p0.y; y <= m_r.p1.y; ++y) {
@@ -488,7 +381,7 @@ void Room::on_pre_connect(Array2<bool>& door_proposals)
 
 void Room::on_post_connect(Array2<bool>& door_proposals)
 {
-        place_auto_terrains();
+        place_auto_terrains(*this);
 
         on_post_connect_hook(door_proposals);
 
@@ -528,162 +421,6 @@ void Room::on_post_connect(Array2<bool>& door_proposals)
                         }
                 }
         }
-}
-
-void Room::place_auto_terrains()
-{
-        TRACE_FUNC_BEGIN_VERBOSE;
-
-        // Make a terrain bucket
-        std::vector<terrain::Id> terrain_bucket;
-
-        const std::vector<RoomAutoTerrainRule> rules = auto_terrains_allowed();
-
-        if (rules.empty()) {
-                return;
-        }
-
-        for (const RoomAutoTerrainRule& rule : rules) {
-                // Insert N elements of the given Terrain ID.
-                terrain_bucket.insert(
-                        std::end(terrain_bucket),
-                        rule.nr_allowed,
-                        rule.id);
-        }
-
-        std::vector<P> adj_to_walls_bucket;
-        std::vector<P> away_from_walls_bucket;
-
-        get_positions_in_room_relative_to_walls(
-                *this,
-                adj_to_walls_bucket,
-                away_from_walls_bucket);
-
-        const bool should_convert_walls_to_pillars = rnd::coin_toss();
-
-        while (!terrain_bucket.empty()) {
-                // TODO: Do a random shuffle of the bucket instead, and pop
-                // elements
-                const auto terrain_idx =
-                        rnd::range(0, (int)terrain_bucket.size() - 1);
-
-                const auto id = terrain_bucket[terrain_idx];
-
-                terrain_bucket.erase(std::begin(terrain_bucket) + terrain_idx);
-
-                const P p =
-                        find_auto_terrain_placement(
-                                adj_to_walls_bucket,
-                                away_from_walls_bucket,
-                                id);
-
-                if (p.x >= 0) {
-                        // A good position was found
-
-                        const auto& d = terrain::data(id);
-
-                        TRACE_VERBOSE << "Placing terrain" << std::endl;
-
-                        ASSERT(map::is_pos_inside_outer_walls(p));
-
-                        terrain::Terrain* terrain {nullptr};
-
-                        // If the terrain is a wall, it may be converted to a pillar instead.
-                        if (should_convert_walls_to_pillars &&
-                            (d.id == terrain::Id::wall)) {
-                                terrain = terrain::make(terrain::Id::pillar, p);
-
-                                if (rnd::one_in(5)) {
-                                        static_cast<terrain::Pillar*>(terrain)->set_broken();
-                                }
-                        }
-                        else {
-                                terrain = terrain::make(d.id, p);
-                        }
-
-                        map::set_terrain(terrain);
-
-                        // Erase all adjacent positions
-                        auto is_adj = [&](const P& other_p) {
-                                return is_pos_adj(p, other_p, true);
-                        };
-
-                        adj_to_walls_bucket.erase(
-                                std::remove_if(
-                                        std::begin(adj_to_walls_bucket),
-                                        std::end(adj_to_walls_bucket),
-                                        is_adj),
-                                std::end(adj_to_walls_bucket));
-
-                        away_from_walls_bucket.erase(
-                                std::remove_if(
-                                        std::begin(away_from_walls_bucket),
-                                        std::end(away_from_walls_bucket),
-                                        is_adj),
-                                std::end(away_from_walls_bucket));
-                }
-        }
-
-        TRACE_FUNC_END_VERBOSE;
-}
-
-P Room::find_auto_terrain_placement(
-        const std::vector<P>& adj_to_walls,
-        const std::vector<P>& away_from_walls,
-        const terrain::Id id) const
-{
-        TRACE_FUNC_BEGIN_VERBOSE;
-
-        const bool is_adj_to_walls_avail = !adj_to_walls.empty();
-        const bool is_away_from_walls_avail = !away_from_walls.empty();
-
-        if (!is_adj_to_walls_avail &&
-            !is_away_from_walls_avail) {
-                TRACE_FUNC_END_VERBOSE << "No eligible positions found" << std::endl;
-
-                return {-1, -1};
-        }
-
-        // TODO: This method is crap, use a bucket instead!
-
-        const int nr_attempts_to_find_pos = 100;
-
-        for (int i = 0; i < nr_attempts_to_find_pos; ++i) {
-                const auto& d = terrain::data(id);
-
-                if (is_adj_to_walls_avail &&
-                    (d.auto_spawn_placement ==
-                     terrain::TerrainPlacement::adj_to_walls)) {
-                        TRACE_FUNC_END_VERBOSE;
-                        return rnd::element(adj_to_walls);
-                }
-
-                if (is_away_from_walls_avail &&
-                    (d.auto_spawn_placement ==
-                     terrain::TerrainPlacement::away_from_walls)) {
-                        TRACE_FUNC_END_VERBOSE;
-                        return rnd::element(away_from_walls);
-                }
-
-                if (d.auto_spawn_placement == terrain::TerrainPlacement::either) {
-                        if (rnd::coin_toss()) {
-                                if (is_adj_to_walls_avail) {
-                                        TRACE_FUNC_END_VERBOSE;
-                                        return rnd::element(adj_to_walls);
-                                }
-                        }
-                        else {
-                                // Coint toss
-                                if (is_away_from_walls_avail) {
-                                        TRACE_FUNC_END_VERBOSE;
-                                        return rnd::element(away_from_walls);
-                                }
-                        }
-                }
-        }
-
-        TRACE_FUNC_END_VERBOSE;
-        return {-1, -1};
 }
 
 void Room::make_dark() const
@@ -774,7 +511,10 @@ std::vector<RoomAutoTerrainRule> HumanRoom::auto_terrains_allowed() const
 
         result.emplace_back(terrain::Id::brazier, rnd::range(0, 2));
         result.emplace_back(terrain::Id::statue, rnd::range(0, 3));
-        result.emplace_back(terrain::Id::urn, rnd::range(0, 3));
+
+        if (rnd::one_in(3)) {
+                result.emplace_back(terrain::Id::urn, rnd::range(0, 3));
+        }
 
         // Control how many item container terrains that can spawn in the room
         std::vector<terrain::Id> item_containers = {
@@ -794,7 +534,7 @@ std::vector<RoomAutoTerrainRule> HumanRoom::auto_terrains_allowed() const
 
 bool HumanRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 3 && m_r.max_dim() <= 8;
+        return (m_r.min_dim() >= 3) && (m_r.max_dim() <= 8);
 }
 
 void HumanRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -870,12 +610,25 @@ void JailRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 // -----------------------------------------------------------------------------
 std::vector<RoomAutoTerrainRule> RitualRoom::auto_terrains_allowed() const
 {
-        return {
-                {terrain::Id::altar, 1},
-                {terrain::Id::gong, rnd::one_in(3) ? 1 : 0},
-                {terrain::Id::alchemist_bench, rnd::one_in(4) ? 1 : 0},
-                {terrain::Id::brazier, rnd::range(2, 4)},
-                {terrain::Id::chains, rnd::one_in(7) ? rnd::range(1, 2) : 0}};
+        if (map::g_dlvl <= g_dlvl_last_mid_game) {
+                return {
+                        {terrain::Id::altar, 1},
+                        {terrain::Id::gong, rnd::one_in(3) ? 1 : 0},
+                        {terrain::Id::alchemist_bench, rnd::one_in(4) ? 1 : 0},
+                        {terrain::Id::brazier, rnd::range(1, 4)},
+                        {terrain::Id::chains, rnd::one_in(7) ? rnd::range(1, 2) : 0},
+                        {terrain::Id::urn, rnd::one_in(3) ? rnd::range(1, 2) : 0},
+                };
+        }
+        else {
+                // Late game
+                return {
+                        {terrain::Id::altar, 1},
+                        {terrain::Id::rubble_low, rnd::range(1, 2)},
+                        {terrain::Id::stalagmite, rnd::range(1, 2)},
+                        {terrain::Id::urn, rnd::range(1, 4)},
+                };
+        }
 }
 
 bool RitualRoom::is_allowed() const
@@ -887,8 +640,14 @@ void RitualRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
 {
         (void)door_proposals;
 
-        if (rnd::coin_toss()) {
-                mapgen::cut_room_corners(*this);
+        if ((map::g_dlvl >= g_dlvl_first_late_game) ||
+            ((map::g_dlvl >= g_dlvl_first_mid_game) && rnd::one_in(4))) {
+                mapgen::cavify_room(*this);
+        }
+        else {
+                if (rnd::coin_toss()) {
+                        mapgen::cut_room_corners(*this);
+                }
         }
 
         if (rnd::fraction(1, 4)) {
@@ -950,8 +709,7 @@ void RitualRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 // -----------------------------------------------------------------------------
 std::vector<RoomAutoTerrainRule> SpiderRoom::auto_terrains_allowed() const
 {
-        return {
-                {terrain::Id::cocoon, rnd::range(0, 3)}};
+        return {{terrain::Id::cocoon, rnd::range(0, 3)}};
 }
 
 bool SpiderRoom::is_allowed() const
@@ -1121,7 +879,8 @@ std::vector<RoomAutoTerrainRule> CryptRoom::auto_terrains_allowed() const
         return {
                 {terrain::Id::tomb, rnd::one_in(6) ? 2 : 1},
                 {terrain::Id::urn, rnd::range(0, 3)},
-                {terrain::Id::rubble_low, rnd::range(0, 3)}};
+                {terrain::Id::rubble_low, rnd::range(0, 3)},
+        };
 }
 
 bool CryptRoom::is_allowed() const
@@ -1224,8 +983,12 @@ void MonsterRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 // -----------------------------------------------------------------------------
 std::vector<RoomAutoTerrainRule> DampRoom::auto_terrains_allowed() const
 {
-        return {
-                {terrain::Id::vines, rnd::coin_toss() ? rnd::range(2, 8) : 0}};
+        if (rnd::coin_toss()) {
+                return {{terrain::Id::vines, rnd::range(2, 8)}};
+        }
+        else {
+                return {};
+        }
 }
 
 bool DampRoom::is_allowed() const
@@ -1294,8 +1057,12 @@ void DampRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 // -----------------------------------------------------------------------------
 std::vector<RoomAutoTerrainRule> PoolRoom::auto_terrains_allowed() const
 {
-        return {
-                {terrain::Id::vines, rnd::coin_toss() ? rnd::range(2, 8) : 0}};
+        if (rnd::coin_toss()) {
+                return {{terrain::Id::vines, rnd::range(2, 8)}};
+        }
+        else {
+                return {};
+        }
 }
 
 bool PoolRoom::is_allowed() const
@@ -1335,7 +1102,7 @@ void PoolRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
         std::vector<P> origin_bucket;
 
-        origin_bucket.reserve(m_r.w() * m_r.h());
+        origin_bucket.reserve((size_t)m_r.w() * (size_t)m_r.h());
 
         for (int x = 0; x < blocked.w(); ++x) {
                 for (int y = 0; y < blocked.w(); ++y) {
@@ -1455,10 +1222,19 @@ void PoolRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 // -----------------------------------------------------------------------------
 std::vector<RoomAutoTerrainRule> CaveRoom::auto_terrains_allowed() const
 {
-        return {
+        std::vector<RoomAutoTerrainRule> result {
                 {terrain::Id::rubble_low, rnd::range(2, 4)},
                 {terrain::Id::stalagmite, rnd::range(1, 4)},
-                {terrain::Id::urn, rnd::one_in(7) ? rnd::range(1, 4) : 0}};
+                {terrain::Id::urn, rnd::one_in(7) ? rnd::range(1, 4) : 0},
+        };
+
+        if ((map::g_dlvl >= g_dlvl_first_late_game) && m_is_sub_room) {
+                result.emplace_back(terrain::Id::chest, rnd::range(1, 3));
+                result.emplace_back(terrain::Id::tomb, rnd::coin_toss() ? rnd::range(1, 2) : 0);
+                result.emplace_back(terrain::Id::altar, rnd::one_in(6) ? 1 : 0);
+        }
+
+        return result;
 }
 
 bool CaveRoom::is_allowed() const
@@ -2129,3 +1905,5 @@ void RiverRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
         TRACE_FUNC_END;
 
 }  // RiverRoom::on_pre_connect
+
+}  // namespace room

@@ -179,9 +179,9 @@ int g_dlvl = 0;
 
 Color g_wall_color;
 
-std::vector<Room*> g_room_list;
+std::vector<room::Room*> g_room_list;
 
-Array2<Room*> g_room_map(0, 0);
+Array2<room::Room*> g_room_map(0, 0);
 
 std::vector<ChokePointData> g_choke_point_data;
 
@@ -450,7 +450,7 @@ void update_light_map()
         memcpy(g_light.data(), light_tmp.data(), g_light.length());
 }
 
-void delete_and_remove_room_from_list(Room* const room)
+void delete_and_remove_room_from_list(room::Room* const room)
 {
         for (size_t i = 0; i < g_room_list.size(); ++i) {
                 if (g_room_list[i] == room) {

@@ -83,9 +83,9 @@ void reserve_river(Array2<Region>& regions)
                         P(1, 2));
         }
 
-        Room* const room = room_factory::make(RoomType::river, room_rect);
+        room::Room* const room = room::make(room::RoomType::river, room_rect);
 
-        auto* const river_room = static_cast<RiverRoom*>(room);
+        auto* const river_room = static_cast<room::RiverRoom*>(room);
 
         river_room->m_axis = axis;
 

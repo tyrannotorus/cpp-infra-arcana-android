@@ -34,7 +34,7 @@ static bool is_floor(const P& pos)
 }
 
 static bsp::BlockedSplitPositions find_blocked_split_positions(
-        const Room& room)
+        const room::Room& room)
 {
         bsp::BlockedSplitPositions blocked;
 
@@ -65,7 +65,7 @@ static bool allow_split_room_size(const R& r)
         return (max_dim) < (min_dim * 2);
 }
 
-static std::vector<Room*> try_bsp_split_room(Room& room)
+static std::vector<room::Room*> try_bsp_split_room(room::Room& room)
 {
         // Abort if any cell in the room rectangle belongs to another room, or
         // contains something other than floor
@@ -102,7 +102,7 @@ static std::vector<Room*> try_bsp_split_room(Room& room)
                 map::set_terrain(terrain::make(terrain::Id::wall, pos));
         }
 
-        std::vector<Room*> new_rooms;
+        std::vector<room::Room*> new_rooms;
 
         for (const auto& child_rect : child_rects) {
                 auto* const sub_room =
@@ -119,8 +119,8 @@ static std::vector<Room*> try_bsp_split_room(Room& room)
 }
 
 static std::vector<P> find_edge(
-        const Room& room_1,
-        const Room& room_2)
+        const room::Room& room_1,
+        const room::Room& room_2)
 {
         const auto r1 = room_1.m_r;
         const auto r2 = room_2.m_r;
@@ -139,7 +139,7 @@ static std::vector<P> find_edge(
 
                 edge_rect.p0.y = edge_rect.p1.y =
                         (r1.p0.y < r2.p0.y)
-                        ? (r1.p1.y + 1)  // Room 1 is above
+                        ? (r1.p1.y + 1)   // Room 1 is above
                         : (r2.p1.y + 1);  // Room 2 is above
 
                 ASSERT(edge_rect.h() == 1);
@@ -156,7 +156,7 @@ static std::vector<P> find_edge(
 
                 edge_rect.p0.x = edge_rect.p1.x =
                         (r1.p0.x < r2.p0.x)
-                        ? (r1.p1.x + 1)  // Room 1 is to the left
+                        ? (r1.p1.x + 1)   // Room 1 is to the left
                         : (r2.p1.x + 1);  // Room 2 is to the left
 
                 ASSERT(edge_rect.w() == 1);

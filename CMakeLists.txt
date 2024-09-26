@@ -128,6 +128,7 @@ set(COMMON_SRC
         include/rect.hpp
         include/reload.hpp
         include/room.hpp
+        include/room_auto_spawn_terrain.hpp
         include/saving.hpp
         include/smell.hpp
         include/sound.hpp
@@ -290,6 +291,7 @@ set(COMMON_SRC
         src/random.cpp
         src/reload.cpp
         src/room.cpp
+        src/room_auto_spawn_terrain.cpp
         src/saving.cpp
         src/smell.cpp
         src/sound.cpp

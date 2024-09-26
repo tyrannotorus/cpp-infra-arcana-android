@@ -155,37 +155,37 @@ P offset(const Dir dir)
 
         switch (dir) {
         case Dir::down_left:
-                return P(-1, 1);
+                return {-1, 1};
 
         case Dir::down:
-                return P(0, 1);
+                return {0, 1};
 
         case Dir::down_right:
-                return P(1, 1);
+                return {1, 1};
 
         case Dir::left:
-                return P(-1, 0);
+                return {-1, 0};
 
         case Dir::center:
-                return P(0, 0);
+                return {0, 0};
 
         case Dir::right:
-                return P(1, 0);
+                return {1, 0};
 
         case Dir::up_left:
-                return P(-1, -1);
+                return {-1, -1};
 
         case Dir::up:
-                return P(0, -1);
+                return {0, -1};
 
         case Dir::up_right:
-                return P(1, -1);
+                return {1, -1};
 
         case Dir::END:
-                return P(0, 0);
+                return {0, 0};
         }
 
-        return P(0, 0);
+        return {0, 0};
 }
 
 P rnd_adj_pos(const P& origin, const bool is_center_allowed)

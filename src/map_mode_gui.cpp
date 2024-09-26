@@ -31,6 +31,7 @@
 #include "player_bon.hpp"
 #include "property_handler.hpp"
 #include "rect.hpp"
+#include "room.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -626,6 +627,24 @@ void draw()
         draw_turn_number(y++, panel);
 
         ++y;
+
+#ifndef NDEBUG
+        const room::Room* const room = map::g_room_map.at(map::g_player->m_pos);
+
+        if (room) {
+                const std::string room_name = room::room_type_to_str(room->m_type);
+
+                if (!room_name.empty()) {
+                        io::draw_text(
+                                room_name,
+                                Panel::map_gui_stats,
+                                {0, y},
+                                colors::yellow());
+
+                        y += 2;
+                }
+        }
+#endif  // NDEBUG
 
         draw_properties(y, panel);
 

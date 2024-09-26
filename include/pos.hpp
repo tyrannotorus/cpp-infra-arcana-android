@@ -67,76 +67,76 @@ public:
 
         P operator+(const P& p) const
         {
-                return P(x + p.x, y + p.y);
+                return {x + p.x, y + p.y};
         }
 
         P operator+(const int v) const
         {
-                return P(x + v, y + v);
+                return {x + v, y + v};
         }
 
         P operator+(Dir dir) const;
 
         P operator-(const P& p) const
         {
-                return P(x - p.x, y - p.y);
+                return {x - p.x, y - p.y};
         }
 
         P operator-(const int v) const
         {
-                return P(x - v, y - v);
+                return {x - v, y - v};
         }
 
         P operator-(Dir dir) const;
 
         P with_offsets(const int x_offset, const int y_offset) const
         {
-                return P(x + x_offset, y + y_offset);
+                return {x + x_offset, y + y_offset};
         }
 
         P with_offsets(const P& offsets) const
         {
-                return P(x + offsets.x, y + offsets.y);
+                return {x + offsets.x, y + offsets.y};
         }
 
         P with_x_offset(const int offset) const
         {
-                return P(x + offset, y);
+                return {x + offset, y};
         }
 
         P with_y_offset(const int offset) const
         {
-                return P(x, y + offset);
+                return {x, y + offset};
         }
 
         P scaled_up(const P& p) const
         {
-                return P(x * p.x, y * p.y);
+                return {x * p.x, y * p.y};
         }
 
         P scaled_up(const int x_factor, const int y_factor) const
         {
-                return P(x * x_factor, y * y_factor);
+                return {x * x_factor, y * y_factor};
         }
 
         P scaled_up(const int v) const
         {
-                return P(x * v, y * v);
+                return {x * v, y * v};
         }
 
         P scaled_down(const int x_denom, const int y_denom) const
         {
-                return P(x / x_denom, y / y_denom);
+                return {x / x_denom, y / y_denom};
         }
 
         P scaled_down(const int v) const
         {
-                return P(x / v, y / v);
+                return {x / v, y / v};
         }
 
         P scaled_down(const P& denoms) const
         {
-                return P(x / denoms.x, y / denoms.y);
+                return {x / denoms.x, y / denoms.y};
         }
 
         bool operator==(const P& p) const

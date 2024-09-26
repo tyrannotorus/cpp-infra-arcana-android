@@ -398,7 +398,7 @@ public:
         std::string land_on_hard_snd_msg;
         audio::SfxId land_on_hard_sfx;
 
-        std::vector<RoomType> native_rooms;
+        std::vector<room::RoomType> native_rooms;
         std::vector<terrain::Id> native_containers;
 
         int ability_mods_while_equipped[(size_t)AbilityId::END];

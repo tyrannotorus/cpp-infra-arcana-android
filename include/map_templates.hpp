@@ -31,12 +31,12 @@ struct RoomTempl
 {
         RoomTempl() :
                 symbols(P(0, 0)),
-                type((RoomType)0),
+                type((room::RoomType)0),
                 base_templ_idx(0) {}
 
         Array2<char> symbols;
 
-        RoomType type;
+        room::RoomType type;
 
         // Each template in the data file is rotated/flipped to create variants
         // - this is the index of the origin template from the file (i.e. there

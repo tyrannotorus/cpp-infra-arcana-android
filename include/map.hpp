@@ -42,7 +42,10 @@ class Terrain;
 enum class Id;
 }  // namespace terrain
 
+namespace room
+{
 class Room;
+}  // namespace room
 
 struct ChokePointData
 {
@@ -121,10 +124,10 @@ extern int g_dlvl;
 extern Color g_wall_color;
 
 // This vector is the room memory owner
-extern std::vector<Room*> g_room_list;
+extern std::vector<room::Room*> g_room_list;
 
 // Helper array, for convenience and optimization
-extern Array2<Room*> g_room_map;
+extern Array2<room::Room*> g_room_map;
 
 // NOTE: This data is only intended to be used for the purpose of map generation
 // (and placing items etc), it is NOT updated while playing the map.
@@ -163,7 +166,7 @@ void clear_player_memory_at(const P& p);
 
 void update_light_map();
 
-void delete_and_remove_room_from_list(Room* room);
+void delete_and_remove_room_from_list(room::Room* room);
 
 actor::Actor* living_actor_at(const P& pos);
 actor::Actor* first_corpse_at(const P& pos);

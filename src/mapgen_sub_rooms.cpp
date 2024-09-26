@@ -154,7 +154,7 @@ static R get_random_inner_walls_area(
 
 static bool allow_put_inner_walls(
         const R& inner_walls_area,
-        const Room& outer_room)
+        const room::Room& outer_room)
 {
         // Rules to allow building:
         // * Cells belonging to the outer room must be floor
@@ -183,7 +183,7 @@ static bool allow_put_inner_walls(
 }
 
 static bool try_make_inner_room(
-        Room& outer_room,
+        room::Room& outer_room,
         const P& inner_walls_max_dims)
 {
         const auto& outer_room_area = outer_room.m_r;
@@ -290,7 +290,7 @@ static bool try_make_inner_room(
         return true;
 }
 
-static void make_sub_rooms_for(Room& outer_room)
+static void make_sub_rooms_for(room::Room& outer_room)
 {
         if (!outer_room.allow_sub_rooms()) {
                 return;
@@ -319,7 +319,7 @@ static void make_sub_rooms_for(Room& outer_room)
 
         const bool is_outer_std_room =
                 ((int)outer_room.m_type <
-                 (int)RoomType::END_OF_STD_ROOMS);
+                 (int)room::RoomType::END_OF_STD_ROOMS);
 
         // To build a room inside a room, the outer room shall:
         // * Be a standard room, and

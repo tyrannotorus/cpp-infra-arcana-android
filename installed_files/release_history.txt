@@ -21,7 +21,9 @@
 # Map generation
 - Misc improvements to corridor generation (limited max corridor length, corridors occasionally connect to other corridors, some corridors are widened).
 - Changed some room templates that were annoying to explore, or created dead-end corridors that looked like they led to a secret door.
-- Crypt rooms (tomb rooms) can also spawn in the late game caves.
+- The ruins in the late game caves can contain chests, tombs, or altars.
+- Crypt rooms (tomb rooms) and ritual rooms (rooms with altars) can also spawn in the late game caves.
+- Made some improvements to where terrain objects can spawn in rooms, for example previously some terrain like chests or cabinets could never spawn in the corner of a room.
 
 # Backgrounds (classes)
 - Exorcists can no longer store spirit points above max level indefinitely, instead they gain fervor points for destroying manuscripts, altars, etc. Fervor can be used for casting spells, and is used automatically when there is not enough spirit points to cast from. The "Prolonged Life" trait also uses fervor instead of spirit.

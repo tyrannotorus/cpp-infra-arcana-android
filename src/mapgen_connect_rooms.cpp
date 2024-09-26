@@ -31,16 +31,16 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static bool is_standard_room_type(const Room& r)
+static bool is_standard_room_type(const room::Room& r)
 {
-        return (r.m_type < RoomType::END_OF_STD_ROOMS);
+        return (r.m_type < room::RoomType::END_OF_STD_ROOMS);
 }
 
 static bool is_rooms_directly_connected(
-        const Room* const room0,
-        const Room* const room1)
+        const room::Room* const room0,
+        const room::Room* const room1)
 {
-        const std::vector<Room*>& room0_connections = room0->m_rooms_con_to;
+        const std::vector<room::Room*>& room0_connections = room0->m_rooms_con_to;
 
         return (
                 std::find(
@@ -50,8 +50,8 @@ static bool is_rooms_directly_connected(
 }
 
 static bool is_other_room_between_rooms(
-        const Room* const room0,
-        const Room* const room1)
+        const room::Room* const room0,
+        const room::Room* const room1)
 {
         const P c0(room0->m_r.center());
         const P c1(room1->m_r.center());
@@ -63,14 +63,14 @@ static bool is_other_room_between_rooms(
 
         for (int x = x0; x <= x1; ++x) {
                 for (int y = y0; y <= y1; ++y) {
-                        const Room* const room_here = map::g_room_map.at(x, y);
+                        const room::Room* const room_here = map::g_room_map.at(x, y);
 
                         // TODO: Corridors should perhaps no longer be an
                         // exception now if they are more like regular rooms.
                         if (room_here &&
                             (room_here != room0) &&
                             (room_here != room1) &&
-                            (room_here->m_type != RoomType::corridor) &&
+                            (room_here->m_type != room::RoomType::corridor) &&
                             !room_here->m_is_sub_room) {
                                 return true;
                         }
@@ -94,11 +94,11 @@ static void mark_doors_as_non_blocking(Array2<bool>& blocked)
 
 static bool try_make_random_connection()
 {
-        Room* room0 = rnd::element(map::g_room_list);
+        room::Room* room0 = rnd::element(map::g_room_list);
 
         // Room 0 must be a connectable room type (an actual room), but
         // occasionally a corridor is allowed.
-        const bool is_room_0_corridor = (room0->m_type == RoomType::corridor);
+        const bool is_room_0_corridor = (room0->m_type == room::RoomType::corridor);
 
         if (!is_standard_room_type(*room0) &&
             !(is_room_0_corridor && rnd::one_in(4))) {
@@ -106,7 +106,7 @@ static bool try_make_random_connection()
         }
 
         // Finding second room to connect to.
-        Room* room1 = rnd::element(map::g_room_list);
+        room::Room* room1 = rnd::element(map::g_room_list);
 
         // Room 1 must not be the same as room 0, and it must be a connectable
         // room (connections are only allowed between two standard rooms, or

@@ -178,7 +178,7 @@ struct ActorData
         bool can_bleed;
         bool can_leave_corpse;
         bool prio_corpse_bash;
-        std::vector<RoomType> native_rooms;
+        std::vector<room::RoomType> native_rooms;
         std::vector<StartingAllyEntry> starting_allies;
 };
 

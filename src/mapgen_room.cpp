@@ -136,7 +136,7 @@ static void put_templ_terrains(const RoomTempl& templ, const P& p0)
 
         auto liquid_type = LiquidType::water;
 
-        if (templ.type == RoomType::damp) {
+        if (templ.type == room::RoomType::damp) {
                 liquid_type = rnd::coin_toss() ? LiquidType::water : LiquidType::mud;
         }
 
@@ -161,7 +161,7 @@ static void put_templ_terrains(const RoomTempl& templ, const P& p0)
         }
 }
 
-static Room* make_template_room(const RoomTempl& templ, Region& region)
+static room::Room* make_template_room(const RoomTempl& templ, Region& region)
 {
         const P dims(templ.symbols.dims());
 
@@ -174,7 +174,7 @@ static Room* make_template_room(const RoomTempl& templ, Region& region)
 
         const R r(p0, p1);
 
-        Room* room = new TemplateRoom(r, templ.type);
+        room::Room* room = new room::TemplateRoom(r, templ.type);
 
         mapgen::register_room(*room);
 
@@ -191,7 +191,7 @@ static Room* make_template_room(const RoomTempl& templ, Region& region)
 
 }  // make_template_room
 
-static Room* try_make_template_room(Region& region)
+static room::Room* try_make_template_room(Region& region)
 {
         const P max_dims(region.r.dims());
 
@@ -222,7 +222,7 @@ static Room* try_make_template_room(Region& region)
 // -----------------------------------------------------------------------------
 namespace mapgen
 {
-Room* make_room(Region& region)
+room::Room* make_room(Region& region)
 {
         ASSERT(!region.main_room);
 
@@ -246,7 +246,7 @@ Room* make_room(Region& region)
 
         const auto room_rect = region.rnd_room_rect();
 
-        auto* room = room_factory::make_random_room(room_rect, IsSubRoom::no);
+        auto* room = room::make_random_room(room_rect, IsSubRoom::no);
 
         register_room(*room);
 
@@ -258,9 +258,9 @@ Room* make_room(Region& region)
         return room;
 }
 
-Room* make_room(const R& r, const IsSubRoom is_sub_room)
+room::Room* make_room(const R& r, const IsSubRoom is_sub_room)
 {
-        auto* room = room_factory::make_random_room(r, is_sub_room);
+        auto* room = room::make_random_room(r, is_sub_room);
 
         register_room(*room);
 

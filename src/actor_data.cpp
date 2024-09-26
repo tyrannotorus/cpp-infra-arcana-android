@@ -520,7 +520,7 @@ static void dump_native_room(
         actor::ActorData& data)
 {
         const auto room_type =
-                room_factory::str_to_room_type(
+                room::str_to_room_type(
                         xml::get_text_str(native_room_e));
 
         data.native_rooms.push_back(room_type);

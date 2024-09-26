@@ -117,7 +117,7 @@ static WeightedItems<std::string> valid_auto_spawn_monsters(
 }
 
 static bool make_random_group_for_room(
-        const RoomType room_type,
+        const room::RoomType room_type,
         const std::vector<P>& sorted_free_cells,
         Array2<bool>& blocked_out)
 {
@@ -466,9 +466,9 @@ void populate_std_lvl()
         auto blocked = forbidden_spawn_positions();
 
         // First, attempt to populate all non-plain standard rooms
-        for (Room* const room : map::g_room_list) {
-                if ((room->m_type == RoomType::plain) ||
-                    (room->m_type >= RoomType::END_OF_STD_ROOMS)) {
+        for (room::Room* const room : map::g_room_list) {
+                if ((room->m_type == room::RoomType::plain) ||
+                    (room->m_type >= room::RoomType::END_OF_STD_ROOMS)) {
                         continue;
                 }
 
@@ -561,11 +561,11 @@ void populate_std_lvl()
 
         for (int y = 1; y < map::h() - 1; ++y) {
                 for (int x = 1; x < map::w() - 1; ++x) {
-                        Room* const room = map::g_room_map.at(x, y);
+                        room::Room* const room = map::g_room_map.at(x, y);
 
                         if (!blocked.at(x, y) &&
                             room &&
-                            (room->m_type == RoomType::plain)) {
+                            (room->m_type == room::RoomType::plain)) {
                                 origin_bucket.emplace_back(x, y);
                         }
                 }
@@ -580,7 +580,7 @@ void populate_std_lvl()
 
                         const bool did_make_group =
                                 make_random_group_for_room(
-                                        RoomType::plain,
+                                        room::RoomType::plain,
                                         sorted_free_cells,
                                         blocked);
 
@@ -593,7 +593,7 @@ void populate_std_lvl()
         TRACE_FUNC_END;
 }  // populate_std_lvl
 
-void populate_lvl_as_room_types(const std::vector<RoomType>& room_types)
+void populate_lvl_as_room_types(const std::vector<room::RoomType>& room_types)
 {
         TRACE_FUNC_BEGIN;
 

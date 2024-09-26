@@ -107,7 +107,7 @@ bool MapBuilderStd::build_specific()
         mapgen::g_door_proposals.resize(map::dims());
 
         // NOTE: This must be called before any rooms are created
-        room_factory::init_room_bucket();
+        room::init_room_bucket();
 
         Array2<Region> regions = init_regions();
 
@@ -612,7 +612,7 @@ bool MapBuilderStd::build_specific()
         // Sanity check room sizes
         // ---------------------------------------------------------------------
         for (auto* const room : map::g_room_list) {
-                if (room->m_type >= RoomType::END_OF_STD_ROOMS) {
+                if (room->m_type >= room::RoomType::END_OF_STD_ROOMS) {
                         continue;
                 }
 
@@ -628,6 +628,7 @@ bool MapBuilderStd::build_specific()
                 return false;
         }
 
+#ifdef NDEBUG
         for (auto* const room : map::g_room_list) {
                 delete room;
         }
@@ -635,6 +636,7 @@ bool MapBuilderStd::build_specific()
         map::g_room_list.clear();
 
         map::g_room_map.resize({0, 0});
+#endif  // NDEBUG
 
         TRACE_FUNC_END;
 

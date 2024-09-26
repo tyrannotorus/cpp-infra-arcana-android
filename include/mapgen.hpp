@@ -13,7 +13,10 @@
 #include "map.hpp"
 #include "map_templates.hpp"
 
+namespace room
+{
 class Room;
+}  // namespace room
 
 struct Region
 {
@@ -31,7 +34,7 @@ public:
 
         R rnd_room_rect() const;
 
-        Room* main_room;
+        room::Room* main_room;
         R r;
         bool is_free;
 };
@@ -88,24 +91,24 @@ void put_inscribed_terrain();
 // reference. For other reshape functions, the room may expand beyond its
 // initial rectangle, so in those cases the functions need to modify the data of
 // the room object.
-void cut_room_corners(const Room& room);
-void make_pillars_in_room(const Room& room);
-void cavify_room(Room& room);
+void cut_room_corners(const room::Room& room);
+void make_pillars_in_room(const room::Room& room);
+void cavify_room(room::Room& room);
 
 //------------------------------------------------------------------------------
 // Room creation
 //------------------------------------------------------------------------------
 // NOTE: All "make_room..." functions handle all the necessary steps such as
 // creating floor on the map, creating room objects and registering them, et c.
-Room* make_room(Region& region);
+room::Room* make_room(Region& region);
 
-Room* make_room(const R& r, IsSubRoom is_sub_room);
+room::Room* make_room(const R& r, IsSubRoom is_sub_room);
 
 // Low level functions related to room creation - these are only necessary when
 // creating rooms by other methods than the "make_room" functions above.
-void register_room(Room& room);
+void register_room(room::Room& room);
 
-void make_floor(const Room& room);
+void make_floor(const room::Room& room);
 
 //------------------------------------------------------------------------------
 // Misc utils
@@ -131,8 +134,8 @@ bool is_choke_point(
         ChokePointData* out);
 
 bool try_make_pathfind_corridor(
-        Room& room_0,
-        Room& room_1,
+        room::Room& room_0,
+        room::Room& room_1,
         Array2<bool>* door_proposals = nullptr);
 
 std::vector<P> rnd_walk(

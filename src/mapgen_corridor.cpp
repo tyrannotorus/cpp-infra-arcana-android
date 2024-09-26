@@ -78,7 +78,7 @@ static std::vector<std::pair<P, P>> get_entries_pairs_with_shortest_dist(
 // NOTE: This function only cares about possible entries for this room by itself
 // - it may for example return entry point positions that are actually adjacent
 // to floors in other rooms.
-static void valid_corridor_entries(const Room& room, std::vector<P>& out)
+static void valid_corridor_entries(const room::Room& room, std::vector<P>& out)
 {
         TRACE_FUNC_BEGIN_VERBOSE;
 
@@ -164,14 +164,14 @@ static void valid_corridor_entries(const Room& room, std::vector<P>& out)
 
 static bool is_adjacent_to_blocked_position_not_in_rooms(
         const P& pos,
-        const Room& room_0,
-        const Room& room_1,
+        const room::Room& room_0,
+        const room::Room& room_1,
         const Array2<bool>& blocked)
 {
         for (const P& d : dir_utils::g_dir_list) {
                 const P p(pos + d);
 
-                const Room* const other_room = map::g_room_map.at(p);
+                const room::Room* const other_room = map::g_room_map.at(p);
 
                 const bool is_any_of_rooms =
                         (other_room == &room_0) ||
@@ -188,8 +188,8 @@ static bool is_adjacent_to_blocked_position_not_in_rooms(
 static bool get_blocked_positions_for_path(
         const P& p0,
         const P& p1,
-        const Room& room_0,
-        const Room& room_1,
+        const room::Room& room_0,
+        const room::Room& room_1,
         Array2<bool>& result)
 {
         Array2<bool> blocked_tmp(map::dims());
@@ -199,7 +199,7 @@ static bool get_blocked_positions_for_path(
         for (size_t i = 0; i < nr_positions; ++i) {
                 const bool is_wall = map::g_terrain.at(i)->id() == terrain::Id::wall;
 
-                const Room* const room_ptr = map::g_room_map.at(i);
+                const room::Room* const room_ptr = map::g_room_map.at(i);
 
                 blocked_tmp.at(i) = !is_wall || room_ptr;
         }
@@ -231,7 +231,7 @@ static bool get_blocked_positions_for_path(
 
 static bool is_path_circle_around_room(
         const std::vector<P>& path,
-        const Room& room)
+        const room::Room& room)
 {
         bool is_left_of_room = false;
         bool is_right_of_room = false;
@@ -287,8 +287,8 @@ static std::vector<P> widen_corridor(
 
 static void make_corridor_room(
         const std::vector<P>& corridor_positions,
-        Room& room_0,
-        Room& room_1)
+        room::Room& room_0,
+        room::Room& room_1)
 {
         R room_rect(INT_MAX, INT_MAX, 0, 0);
 
@@ -304,7 +304,7 @@ static void make_corridor_room(
         ASSERT(room_rect.p0.x <= room_rect.p1.x);
         ASSERT(room_rect.p0.y <= room_rect.p1.y);
 
-        Room* corridor_room = room_factory::make(RoomType::corridor, room_rect);
+        room::Room* corridor_room = room::make(room::RoomType::corridor, room_rect);
 
         mapgen::register_room(*corridor_room);
 
@@ -318,10 +318,10 @@ static void make_corridor_room(
 static void make_corridor(
         const std::vector<P>& path,
         const Array2<bool>& blocks_path,
-        Room& room_0,
-        Room& room_1)
+        room::Room& room_0,
+        room::Room& room_1)
 {
-        std::vector<Room*> prev_links;
+        std::vector<room::Room*> prev_links;
 
         bool should_widen_corridor = false;
 
@@ -371,8 +371,8 @@ static void make_corridor(
 namespace mapgen
 {
 bool try_make_pathfind_corridor(
-        Room& room_0,
-        Room& room_1,
+        room::Room& room_0,
+        room::Room& room_1,
         Array2<bool>* const door_proposals)
 {
         ASSERT(map::is_area_inside_map(room_0.m_r));

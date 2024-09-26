@@ -38,7 +38,7 @@ void populate_std_lvl();
 
 // Convenient function for special levels which should auto-spawn monsters
 // instead of according to design (or in addition to hand-placed monsters)
-void populate_lvl_as_room_types(const std::vector<RoomType>& room_types);
+void populate_lvl_as_room_types(const std::vector<room::RoomType>& room_types);
 
 }  // namespace populate_mon
 

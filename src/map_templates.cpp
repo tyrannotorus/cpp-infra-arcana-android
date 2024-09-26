@@ -236,9 +236,7 @@ static void load_room_templates()
                                                 type_pos,
                                                 line.size() - type_pos);
 
-                                templ.type =
-                                        room_factory::str_to_room_type(
-                                                type_str);
+                                templ.type = room::str_to_room_type(type_str);
                         }
                         else {
                                 // Not a name line
@@ -307,7 +305,7 @@ static bool is_templ_allowed_to_be_placed(const RoomTempl& templ)
         // Only plain room templates are allowed to be reused
         const auto status = s_room_templ_status[templ.base_templ_idx];
         const bool is_unused = status == RoomTemplStatus::unused;
-        const bool is_plain = templ.type == RoomType::plain;
+        const bool is_plain = templ.type == room::RoomType::plain;
 
         return is_unused || is_plain;
 }

@@ -317,9 +317,9 @@ void MapBuilderMagicPool::on_template_built()
 {
         populate_items::make_items_on_floor();
 
-        const std::vector<RoomType> mon_room_types = {
-                RoomType::cave,
-                RoomType::forest};
+        const std::vector<room::RoomType> mon_room_types = {
+                room::RoomType::cave,
+                room::RoomType::forest};
 
         populate_mon::populate_lvl_as_room_types(mon_room_types);
 }

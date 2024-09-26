@@ -15,6 +15,11 @@
 #include "rect.hpp"
 #include "terrain_data.hpp"
 
+template <typename T>
+class Array2;
+
+namespace room
+{
 // Room theming occurs both pre- and post-connect (before/after corridors).
 //
 // > In pre-connect, reshaping is performed, e.g. plus-shape, cavern-shape,
@@ -38,8 +43,6 @@
 // RoomType ids which doesn't have a corresponding Room class at all.
 
 class Room;
-template <typename T>
-class Array2;
 
 enum class RoomType
 {
@@ -80,9 +83,6 @@ struct RoomAutoTerrainRule
         terrain::Id id;
         int nr_allowed;
 };
-
-namespace room_factory
-{
 void init_room_bucket();
 
 // NOTE: These functions do not make rooms on the map, just create Room objects.
@@ -94,7 +94,9 @@ Room* make_random_room(const R& r, IsSubRoom is_subroom);
 
 RoomType str_to_room_type(const std::string& str);
 
-}  // namespace room_factory
+#ifndef NDEBUG
+std::string room_type_to_str(RoomType type);
+#endif  // NDEBUG
 
 class Room
 {
@@ -109,6 +111,11 @@ public:
 
         void on_pre_connect(Array2<bool>& door_proposals);
         void on_post_connect(Array2<bool>& door_proposals);
+
+        virtual std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const
+        {
+                return {};
+        }
 
         virtual void populate_monsters() const {}
 
@@ -144,18 +151,6 @@ protected:
                 (void)door_proposals;
         }
 
-        virtual std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const
-        {
-                return {};
-        }
-
-        void place_auto_terrains();
-
-        P find_auto_terrain_placement(
-                const std::vector<P>& adj_to_walls,
-                const std::vector<P>& away_from_walls,
-                terrain::Id id) const;
-
         void make_dark() const;
 };
 
@@ -165,9 +160,9 @@ public:
         PlainRoom(R r) :
                 Room(r, RoomType::plain) {}
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -181,9 +176,9 @@ public:
 
         bool is_allowed() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -195,9 +190,9 @@ public:
         JailRoom(R r) :
                 Room(r, RoomType::jail) {}
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -211,9 +206,9 @@ public:
 
         bool is_allowed() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -232,9 +227,9 @@ public:
                 return 1;
         }
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -250,9 +245,9 @@ public:
 
         void populate_monsters() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -268,9 +263,9 @@ public:
 
         bool is_allowed() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -284,9 +279,9 @@ public:
 
         bool is_allowed() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -300,9 +295,9 @@ public:
 
         bool is_allowed() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -316,9 +311,9 @@ public:
 
         bool is_allowed() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -332,9 +327,9 @@ public:
 
         bool is_allowed() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -348,9 +343,9 @@ public:
 
         bool is_allowed() const override;
 
-protected:
         std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const override;
 
+protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
@@ -432,5 +427,7 @@ public:
 
         Axis m_axis;
 };
+
+}  // namespace room
 
 #endif  // ROOM_HPP

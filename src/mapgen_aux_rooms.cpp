@@ -108,9 +108,9 @@ static bool try_make_aux_room(
 
                 // Make a "crumble room"?
                 if (rnd::one_in(30)) {
-                        Room* const room =
-                                room_factory::make(
-                                        RoomType::crumble_room,
+                        room::Room* const room =
+                                room::make(
+                                        room::RoomType::crumble_room,
                                         aux_rect);
 
                         mapgen::register_room(*room);
@@ -162,7 +162,7 @@ void make_aux_rooms(Array2<Region>& regions)
                         const Region& region = regions.at(region_x, region_y);
 
                         if (region.main_room) {
-                                Room& main_r = *region.main_room;
+                                room::Room& main_r = *region.main_room;
 
                                 // Right
                                 if (rnd::fraction(3, 4)) {

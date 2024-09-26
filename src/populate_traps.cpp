@@ -28,58 +28,58 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static Fraction chance_for_trapped_room(const RoomType type)
+static Fraction chance_for_trapped_room(const room::RoomType type)
 {
         Fraction chance(-1, -1);
 
         switch (type) {
-        case RoomType::plain:
+        case room::RoomType::plain:
                 chance = {1, 20};
                 break;
 
-        case RoomType::human:
+        case room::RoomType::human:
                 chance = {1, 12};
                 break;
 
-        case RoomType::ritual:
+        case room::RoomType::ritual:
                 chance = {1, 12};
                 break;
 
-        case RoomType::spider:
+        case room::RoomType::spider:
                 chance = {2, 3};
                 break;
 
-        case RoomType::crypt:
+        case room::RoomType::crypt:
                 chance = {1, 12};
                 break;
 
-        case RoomType::monster:
+        case room::RoomType::monster:
                 chance = {1, 30};
                 break;
 
-        case RoomType::chasm:
+        case room::RoomType::chasm:
                 chance = {1, 30};
                 break;
 
-        case RoomType::damp:
+        case room::RoomType::damp:
                 chance = {1, 30};
                 break;
 
-        case RoomType::pool:
+        case room::RoomType::pool:
                 chance = {1, 30};
                 break;
 
-        case RoomType::jail:
+        case room::RoomType::jail:
                 chance = {1, 30};
                 break;
 
-        case RoomType::corridor:
-        case RoomType::crawling_pit:
-        case RoomType::forest:
-        case RoomType::cave:
-        case RoomType::END_OF_STD_ROOMS:
-        case RoomType::river:
-        case RoomType::crumble_room:
+        case room::RoomType::corridor:
+        case room::RoomType::crawling_pit:
+        case room::RoomType::forest:
+        case room::RoomType::cave:
+        case room::RoomType::END_OF_STD_ROOMS:
+        case room::RoomType::river:
+        case room::RoomType::crumble_room:
                 break;
         }
 
@@ -87,7 +87,7 @@ static Fraction chance_for_trapped_room(const RoomType type)
 }
 
 static std::vector<P> find_allowed_positions_in_room(
-        const Room& room,
+        const room::Room& room,
         const Array2<bool>& blocked)
 {
         std::vector<P> positions;
@@ -163,7 +163,7 @@ void populate()
 
         blocked.at(player_p) = true;
 
-        for (Room* const room : map::g_room_list) {
+        for (room::Room* const room : map::g_room_list) {
                 const Fraction chance_trapped =
                         chance_for_trapped_room(room->m_type);
 
@@ -182,7 +182,7 @@ void populate()
 
                 for (int i = 0; i < nr_traps; ++i) {
                         const terrain::TrapId trap_type =
-                                (room->m_type == RoomType::spider)
+                                (room->m_type == room::RoomType::spider)
                                 ? terrain::TrapId::web
                                 : terrain::TrapId::any;
 

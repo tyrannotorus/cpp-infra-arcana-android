@@ -87,11 +87,11 @@ bool g_is_map_valid = true;
 Array2<bool> g_door_proposals(0, 0);
 
 // Adds the room to the room list and the room map
-void register_room(Room& room)
+void register_room(room::Room& room)
 {
 #ifndef NDEBUG
         // Check that the room has not already been added
-        for (Room* const room_in_list : map::g_room_list) {
+        for (room::Room* const room_in_list : map::g_room_list) {
                 ASSERT(room_in_list != &room);
         }
 #endif  // NDEBUG
@@ -113,7 +113,7 @@ void register_room(Room& room)
         }
 }
 
-void make_floor(const Room& room)
+void make_floor(const room::Room& room)
 {
         for (int x = room.m_r.p0.x; x <= room.m_r.p1.x; ++x) {
                 for (int y = room.m_r.p0.y; y <= room.m_r.p1.y; ++y) {
@@ -125,7 +125,7 @@ void make_floor(const Room& room)
         }
 }
 
-void cut_room_corners(const Room& room)
+void cut_room_corners(const room::Room& room)
 {
         // Never cut the room corners if it's a "small" room
         if (room.m_r.min_dim() < 6) {
@@ -223,7 +223,7 @@ void cut_room_corners(const Room& room)
 
                                         const P check_p(p + d);
 
-                                        const Room* const room_here =
+                                        const room::Room* const room_here =
                                                 map::g_room_map.at(check_p);
 
                                         const terrain::Id id =
@@ -261,7 +261,7 @@ void cut_room_corners(const Room& room)
         }
 }
 
-void make_pillars_in_room(const Room& room)
+void make_pillars_in_room(const room::Room& room)
 {
         const P& room_p0(room.m_r.p0);
         const P& room_p1(room.m_r.p1);
@@ -298,7 +298,7 @@ void make_pillars_in_room(const Room& room)
         }
 }
 
-void cavify_room(Room& room)
+void cavify_room(room::Room& room)
 {
         if (room.m_is_sub_room) {
                 return;
