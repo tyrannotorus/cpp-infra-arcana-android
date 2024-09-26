@@ -32,6 +32,9 @@
 - Added trait "Sage" - This is an upgrade of the "Meditative" trait, spells are also cast at a higher skill level when "Focused", and the duration to regain the focused state is reduced.
 - Added trait "Elusive" - A unique trait for Rogues, that makes creatures only remember you for half the normal duration.
 
+# Spells
+- Increased duration of the See Invisible spell.
+
 # Special maps
 - Added intro message popups for some special levels.
 

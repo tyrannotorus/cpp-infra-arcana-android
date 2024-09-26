@@ -3033,10 +3033,7 @@ std::vector<std::string> SpellBless::descr_specific(
                 descr.emplace_back("The spell lasts indefinitely.");
         }
         else {
-                descr.push_back(
-                        "The spell lasts " +
-                        duration_range(skill).str() +
-                        " turns.");
+                descr.push_back("The spell lasts " + duration_range(skill).str() + " turns.");
         }
 
         return descr;
@@ -3269,16 +3266,17 @@ Range SpellSeeInvis::duration_range(SpellSkill skill) const
 {
         switch (skill) {
         case SpellSkill::basic:
-                return {5, 10};
+                return {15, 30};
 
         case SpellSkill::expert:
-                return {40, 80};
+                return {60, 120};
 
         case SpellSkill::master:
                 return {250, 500};
 
         case SpellSkill::transcendent:
-                return {600, 1200};
+                // Unexpected, the spell should be indefinite
+                break;
         }
 
         ASSERT(false);
@@ -3295,7 +3293,12 @@ void SpellSeeInvis::run_effect(
 
         prop::Prop* prop = prop::make(prop::Id::see_invis);
 
-        prop->set_duration(duration_range(skill).roll());
+        if (skill == SpellSkill::transcendent) {
+                prop->set_indefinite();
+        }
+        else {
+                prop->set_duration(duration_range(skill).roll());
+        }
 
         caster->m_properties.apply(prop);
 }
@@ -3305,13 +3308,14 @@ std::vector<std::string> SpellSeeInvis::descr_specific(
 {
         std::vector<std::string> descr;
 
-        descr.emplace_back(
-                "Grants the caster the ability to see the invisible.");
+        descr.emplace_back("Grants the caster the ability to see the invisible.");
 
-        descr.push_back(
-                "The spell lasts " +
-                duration_range(skill).str() +
-                " turns.");
+        if (skill == SpellSkill::transcendent) {
+                descr.emplace_back("The spell lasts indefinitely.");
+        }
+        else {
+                descr.push_back("The spell lasts " + duration_range(skill).str() + " turns.");
+        }
 
         return descr;
 }
