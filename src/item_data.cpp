@@ -2054,9 +2054,8 @@ void init()
         d.base_descr = {
                 "A focal point providing strength and guidance for the "
                 "spirit and mind. "
-                "Praying over the symbol restores 1-4 spirit points, and "
-                "grants resistance against shock and fear for "
-                "6-12 turns.",
+                "Praying over the symbol grants 1-4 spirit points, and "
+                "resistance against shock and fear for 6-12 turns.",
 
                 "Some time must pass before the prayer is guaranteed to have "
                 "an effect again, however it can be attempted before this "

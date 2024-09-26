@@ -825,19 +825,14 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
         }
 
         if (m_has_failed_attempt) {
-                msg_log::add(
-                        "I have no faith that this would help me at "
-                        "the moment.");
+                msg_log::add("I have no faith that this would help me at the moment.");
 
                 return ConsumeItem::no;
         }
 
         // Is not in failed state
 
-        const std::string my_name =
-                name(
-                        ItemNameType::plain,
-                        ItemNameInfo::none);
+        const std::string my_name = name(ItemNameType::plain, ItemNameInfo::none);
 
         std::string pray_msg;
 
@@ -863,8 +858,7 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
 
                 const int duration_pct = rnd::range(175, 200);
 
-                m_nr_charge_turns_left =
-                        (m_nr_charge_turns_left * duration_pct) / 100;
+                m_nr_charge_turns_left = (m_nr_charge_turns_left * duration_pct) / 100;
 
                 msg_log::add("This feels useless!");
 
@@ -949,12 +943,15 @@ void HolySymbol::load_hook()
 
 void HolySymbol::run_effect()
 {
-        actor::restore_sp(*map::g_player, rnd::range(1, 4));
+        actor::restore_sp(
+                *map::g_player,
+                rnd::range(1, 4),
+                actor::AllowRestoreAboveMax::yes);
 
         const int prop_duration = rnd::range(6, 12);
 
-        auto* r_fear = prop::make(prop::Id::r_fear);
-        auto* r_shock = prop::make(prop::Id::r_shock);
+        prop::Prop* r_fear = prop::make(prop::Id::r_fear);
+        prop::Prop* r_shock = prop::make(prop::Id::r_shock);
 
         r_fear->set_duration(prop_duration);
         r_shock->set_duration(prop_duration);

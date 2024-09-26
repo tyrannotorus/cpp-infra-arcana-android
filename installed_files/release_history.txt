@@ -10,9 +10,22 @@
 - If the player has a cursed item, gongs have a high chance of giving the "bless" bonus (which also removes one curse).
 - Magic traps ("strange shape") starts hidden again just like mechanical traps, however traps are no longer spawned in corridors.
 
+# Backgrounds (classes)
+- Exorcists can no longer store spirit points above max level indefinitely, instead they gain fervor points for destroying manuscripts, altars, etc. Fervor can be used for casting spells, and is used automatically when there is not enough spirit points to cast from. The "Prolonged Life" trait also uses fervor instead of spirit.
+- Due to the above change, the Flagellant trait "Fervor" has been renamed to "Enthusiasm".
+- For Exorcists, the Bless spell now only have a default max cost of 4 spirit (half of the normal 8 max cost).
+
+# Traits
+- Added trait "Sage" - This is an upgrade of the "Meditative" trait, spells are also cast at a higher skill level when "Focused", and the duration to regain the focused state is reduced.
+- Added trait "Elusive" - A unique trait for Rogues, that makes creatures only remember you for half the normal duration.
+
 # Items
 - When using the Medical Bag, a menu is now shown where you can select the treatment to perform. Also added an option to automatically choose treatment like before.
 - Added an additional Medical Bag action called "quick patch-up", which restores some hit points.
+- The Exorcist Holy Symbol can now raise spirit above max limit (instead of just restoring spirit).
+
+# Spells
+- Increased duration of the See Invisible spell.
 
 # Monsters
 - Some creatures are now "flammable" (e.g. mold, worm masses). If ignited, these burn permanently and will also ignite any other adjacent flammable creatures.
@@ -24,18 +37,6 @@
 - The ruins in the late game caves can contain chests, tombs, or altars.
 - Crypt rooms (tomb rooms) and ritual rooms (rooms with altars) can also spawn in the late game caves.
 - Made some improvements to where terrain objects can spawn in rooms, for example previously some terrain like chests or cabinets could never spawn in the corner of a room.
-
-# Backgrounds (classes)
-- Exorcists can no longer store spirit points above max level indefinitely, instead they gain fervor points for destroying manuscripts, altars, etc. Fervor can be used for casting spells, and is used automatically when there is not enough spirit points to cast from. The "Prolonged Life" trait also uses fervor instead of spirit.
-- Due to the above change, the Flagellant trait "Fervor" has been renamed to "Enthusiasm".
-- For Exorcists, the Bless spell now only have a default max cost of 4 spirit (half of the normal 8 max cost).
-
-# Traits
-- Added trait "Sage" - This is an upgrade of the "Meditative" trait, spells are also cast at a higher skill level when "Focused", and the duration to regain the focused state is reduced.
-- Added trait "Elusive" - A unique trait for Rogues, that makes creatures only remember you for half the normal duration.
-
-# Spells
-- Increased duration of the See Invisible spell.
 
 # Special maps
 - Added intro message popups for some special levels.
