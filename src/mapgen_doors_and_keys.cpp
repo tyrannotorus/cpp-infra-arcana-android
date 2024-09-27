@@ -30,7 +30,7 @@ static std::vector<const ChokePointData*> find_all_chokepoints_with_door()
 {
         std::vector<const ChokePointData*> chokepoints;
 
-        for (const ChokePointData& chokepoint : map::g_choke_point_data) {
+        for (const ChokePointData& chokepoint : map::g_chokepoint_data) {
                 if (chokepoint.sides[0].empty() || chokepoint.sides[1].empty()) {
                         continue;
                 }

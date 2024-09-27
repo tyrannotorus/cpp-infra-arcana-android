@@ -267,6 +267,7 @@ set(COMMON_SRC
         src/mapgen_sub_rooms.cpp
         src/mapgen_utils.cpp
         src/mapgen_valuable_terrain.cpp
+        src/mapgen_chokepoint_data.cpp
         src/marker.cpp
         src/messages.cpp
         src/minimap.cpp

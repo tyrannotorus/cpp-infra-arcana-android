@@ -50,8 +50,6 @@ extern bool g_is_map_valid;
 extern Array2<bool> g_door_proposals;
 
 // Standard dungeon level
-// TODO: Consider moving to MapBuilderStd
-bool make_std_lvl();
 
 //------------------------------------------------------------------------------
 // Map generation steps (in no particular order)
@@ -128,10 +126,9 @@ void connect_rooms();
 //
 bool is_passage(const P& pos, const Array2<bool>& blocked);
 
-bool is_choke_point(
-        const P& p,
-        const Array2<bool>& blocked,
-        ChokePointData* out);
+// Calculates and writes map chokepoint data to the chokepoint data array in the
+// map namespace. This function requires that the stairs have been placed.
+void calc_chokepoint_data();
 
 bool try_make_pathfind_corridor(
         room::Room& room_0,

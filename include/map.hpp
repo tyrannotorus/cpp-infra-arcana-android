@@ -131,7 +131,7 @@ extern Array2<room::Room*> g_room_map;
 
 // NOTE: This data is only intended to be used for the purpose of map generation
 // (and placing items etc), it is NOT updated while playing the map.
-extern std::vector<ChokePointData> g_choke_point_data;
+extern std::vector<ChokePointData> g_chokepoint_data;
 
 void init();
 void cleanup();

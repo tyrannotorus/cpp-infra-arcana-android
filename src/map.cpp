@@ -183,7 +183,7 @@ std::vector<room::Room*> g_room_list;
 
 Array2<room::Room*> g_room_map(0, 0);
 
-std::vector<ChokePointData> g_choke_point_data;
+std::vector<ChokePointData> g_chokepoint_data;
 
 void init()
 {
@@ -244,7 +244,7 @@ void reset(const P& dims)
 
         g_room_map.resize(s_dims);
 
-        g_choke_point_data.clear();
+        g_chokepoint_data.clear();
 
         const std::vector<Color> wall_color_bucket = {
                 colors::gray(),

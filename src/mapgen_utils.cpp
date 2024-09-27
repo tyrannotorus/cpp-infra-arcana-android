@@ -434,106 +434,6 @@ bool is_passage(const P& pos, const Array2<bool>& blocked)
         return is_passage_hor || is_passage_ver;
 }
 
-bool is_choke_point(
-        const P& p,
-        const Array2<bool>& blocked,
-        ChokePointData* out)
-{
-        // Assuming that the tested position is free
-        ASSERT(!blocked.at(p));
-
-        // Robustness for release mode
-        if (blocked.at(p)) {
-                // This is weird, invalidate the map
-                g_is_map_valid = false;
-
-                return false;
-        }
-
-        // First, there must be exactly two free cells cardinally adjacent to
-        // the tested position
-        P p_side1;
-        P p_side2;
-
-        for (const P& d : dir_utils::g_cardinal_list) {
-                const P adj_p(p + d);
-
-                if (!blocked.at(adj_p)) {
-                        if (p_side1.x == 0) {
-                                p_side1 = adj_p;
-                        }
-                        else if (p_side2.x == 0) {
-                                p_side2 = adj_p;
-                        }
-                        else {
-                                // Both p0 and p1 has already been set
-
-                                // This is not a choke point, bye!
-                                return false;
-                        }
-                }
-        }
-
-        // OK, the position has exactly two free cardinally adjacent cells
-
-        // Check that the two sides can reach each other
-        auto flood_side1 = floodfill(p_side1, blocked);
-
-        if (flood_side1.at(p_side2) == 0) {
-                // The two sides were already separated from each other
-                return false;
-        }
-
-        // Check if this position can completely separate the two sides
-        auto blocked_cpy(blocked);
-
-        blocked_cpy.at(p) = true;
-
-        // Do another floodfill from side 1
-        flood_side1 = floodfill(p_side1, blocked_cpy);
-
-        if (flood_side1.at(p_side2) > 0) {
-                // The two sides can still reach each other - not a choke point
-                return false;
-        }
-
-        // OK, this is a "true" choke point, time to gather more information!
-
-        if (out) {
-                out->p = p;
-        }
-
-        // Do a floodfill from side 2
-        const auto flood_side2 = floodfill(p_side2, blocked_cpy);
-
-        if (out) {
-                // Prepare for at least the worst case of push-backs
-                const size_t nr_positions = map::nr_positions();
-                out->sides[0].reserve(nr_positions);
-                out->sides[1].reserve(nr_positions);
-
-                // Add the origin positions for both sides (they have flood
-                // value 0)
-                out->sides[0].push_back(p_side1);
-                out->sides[1].push_back(p_side2);
-
-                for (int x = 0; x < map::w(); ++x) {
-                        for (int y = 0; y < map::h(); ++y) {
-                                if (flood_side1.at(x, y) > 0) {
-                                        ASSERT(flood_side2.at(x, y) == 0);
-
-                                        out->sides[0].emplace_back(x, y);
-                                }
-                                else if (flood_side2.at(x, y) > 0) {
-                                        out->sides[1].emplace_back(x, y);
-                                }
-                        }
-                }
-        }
-
-        return true;
-}
-
 std::vector<P> pathfinder_walk(const P& p0, const P& p1, const bool is_smooth)
 {
         std::vector<P> result;
@@ -617,23 +517,23 @@ void make_explore_spawn_weights(
         }
 
         // Put extra weight for "optional" areas behind choke points
-        for (const ChokePointData& choke_point : map::g_choke_point_data) {
+        for (const ChokePointData& chokepoint : map::g_chokepoint_data) {
                 // If the player and the stairs are on the same side of the
                 // choke point, this means that the "other" side is an optional
                 // map branch.
-                if (choke_point.player_side == choke_point.stairs_side) {
-                        ASSERT(choke_point.player_side == 0 || choke_point.player_side == 1);
+                if (chokepoint.player_side == chokepoint.stairs_side) {
+                        ASSERT(chokepoint.player_side == 0 || chokepoint.player_side == 1);
 
                         // Robustness for release mode
-                        if (choke_point.player_side != 0 &&
-                            choke_point.player_side != 1) {
+                        if (chokepoint.player_side != 0 &&
+                            chokepoint.player_side != 1) {
                                 continue;
                         }
 
-                        const int other_side_idx = (choke_point.player_side == 0) ? 1 : 0;
+                        const int other_side_idx = (chokepoint.player_side == 0) ? 1 : 0;
 
                         const std::vector<P>& other_side_positions =
-                                choke_point.sides[other_side_idx];
+                                chokepoint.sides[other_side_idx];
 
                         // NOTE: To avoid leaning heavily towards only putting
                         // stuff in big hidden areas, we divide the weight given
@@ -645,7 +545,7 @@ void make_explore_spawn_weights(
                         // Increase weight for being in an optional map branch.
                         int weight_inc = std::max(1, (250 / weight_div));
 
-                        terrain::Terrain* const terrain = map::g_terrain.at(choke_point.p);
+                        terrain::Terrain* const terrain = map::g_terrain.at(chokepoint.p);
 
                         // Increase weight if behind hidden/stuck/warded doors.
                         if (terrain->id() == terrain::Id::door) {
