@@ -648,7 +648,8 @@ void draw()
                 debug_str,
                 Panel::map_gui_stats,
                 {0, y},
-                colors::yellow());
+                colors::yellow(),
+                io::DrawBg::no);
 
         y += 2;
 #endif  // NDEBUG

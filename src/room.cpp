@@ -640,7 +640,7 @@ std::vector<RoomAutoTerrainRule> RitualRoom::auto_terrains_allowed() const
 
 bool RitualRoom::is_allowed() const
 {
-        return m_r.min_dim() >= 4 && m_r.max_dim() <= 9;
+        return (m_r.min_dim()) >= 4 && (m_r.max_dim() <= 9);
 }
 
 void RitualRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
@@ -665,48 +665,64 @@ void RitualRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
 void RitualRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 {
         (void)door_proposals;
+}
 
-        Array2<bool> blocked(map::dims());
+void RitualRoom::affect_surroundings_hook()
+{
+        if (!rnd::fraction(3, 5)) {
+                return;
+        }
+
+        Array2<bool> blocks_walking(map::dims());
 
         map_parsers::BlocksWalking(ParseActors::no)
-                .run(blocked, blocked.rect());
+                .run(blocks_walking, blocks_walking.rect());
 
-        const int bloody_chamber_pct = 60;
+        P origin(-1, -1);
+        std::vector<P> origin_bucket;
 
-        if (rnd::percent(bloody_chamber_pct)) {
-                P origin(-1, -1);
-                std::vector<P> origin_bucket;
+        std::vector<P> room_positions = positions_in_room();
 
-                for (int y = m_r.p0.y; y <= m_r.p1.y; ++y) {
-                        for (int x = m_r.p0.x; x <= m_r.p1.x; ++x) {
-                                if (map::g_terrain.at(x, y)->id() == terrain::Id::altar) {
-                                        origin = P(x, y);
-                                        y = 999;
-                                        x = 999;
-                                }
-                                else {
-                                        if (!blocked.at(x, y)) {
-                                                origin_bucket.emplace_back(x, y);
-                                        }
-                                }
+        for (const P& pos : room_positions) {
+                if (map::g_terrain.at(pos)->id() == terrain::Id::altar) {
+                        origin = pos;
+                        break;
+                }
+                else {
+                        if (!blocks_walking.at(pos)) {
+                                origin_bucket.emplace_back(pos);
                         }
                 }
+        }
 
-                if (!origin_bucket.empty()) {
-                        if (origin.x == -1) {
-                                origin = rnd::element(origin_bucket);
-                        }
+        if (origin.x == -1) {
+                if (origin_bucket.empty()) {
+                        return;
+                }
 
-                        for (const P& d : dir_utils::g_dir_list) {
-                                if (rnd::percent(bloody_chamber_pct / 2)) {
-                                        const P pos = origin + d;
+                origin = rnd::element(origin_bucket);
+        }
 
-                                        if (!blocked.at(pos)) {
-                                                terrain::make_gore(pos);
-                                                terrain::make_blood(pos);
-                                        }
-                                }
-                        }
+        for (const P& pos : map::positions()) {
+                if (map::g_terrain.at(pos)->id() == terrain::Id::door) {
+                        blocks_walking.at(pos) = false;
+                }
+        }
+
+        const int travel_limit = rnd::range_binom(2, 14, 0.3);
+
+        // NOTE: The "make_gore"/"make_blood" functions called below put
+        // gore/blood in a 3x3 area, with a random chance for each position.
+        const Fraction blood_chance(1, 4);
+
+        const Array2<int> flood = floodfill(origin, blocks_walking, travel_limit);
+
+        for (const P& pos : map::positions()) {
+                const bool is_reached = (flood.at(pos) > 0) || (pos == origin);
+
+                if (is_reached && ((pos == origin) || blood_chance.roll())) {
+                        terrain::make_gore(pos);
+                        terrain::make_blood(pos);
                 }
         }
 }
@@ -753,7 +769,7 @@ void SpiderRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
 void SpiderRoom::affect_surroundings_hook()
 {
-        P starting_pos(-1, -1);
+        P origin(-1, -1);
 
         std::vector<P> room_positions = positions_in_room();
 
@@ -776,11 +792,11 @@ void SpiderRoom::affect_surroundings_hook()
 
         for (const P& pos : room_positions) {
                 if (!blocks_walking.at(pos) && !blocks_traps.at(pos)) {
-                        starting_pos = pos;
+                        origin = pos;
                 }
         }
 
-        if (starting_pos.x == -1) {
+        if (origin.x == -1) {
                 return;
         }
 
@@ -788,10 +804,10 @@ void SpiderRoom::affect_surroundings_hook()
 
         const Fraction web_chance(1, 6);
 
-        const Array2<int> flood = floodfill(starting_pos, blocks_walking, travel_limit);
+        const Array2<int> flood = floodfill(origin, blocks_walking, travel_limit);
 
         for (const P& pos : map::positions()) {
-                const bool is_reached = (flood.at(pos) > 0) || (pos == starting_pos);
+                const bool is_reached = (flood.at(pos) > 0) || (pos == origin);
 
                 if (is_reached &&
                     !blocks_traps.at(pos) &&
@@ -803,8 +819,6 @@ void SpiderRoom::affect_surroundings_hook()
 
                         if (trap) {
                                 map::set_terrain(trap);
-
-                                TRACE << "### WEB, " << pos.x << "," << pos.y << std::endl;
                         }
                 }
         }

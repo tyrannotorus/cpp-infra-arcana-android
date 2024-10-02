@@ -230,6 +230,8 @@ protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
+
+        void affect_surroundings_hook() override;
 };
 
 class SpiderRoom : public Room

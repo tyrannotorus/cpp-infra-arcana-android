@@ -477,7 +477,7 @@ static void init_data_list()
         d.id = terrain::Id::altar;
         d.character = '_';
         d.tile = gfx::TileId::altar;
-        d.can_have_blood = false;
+        d.can_have_blood = true;
         d.can_have_gore = false;
         d.can_have_corpse = false;
         d.can_have_item = false;
