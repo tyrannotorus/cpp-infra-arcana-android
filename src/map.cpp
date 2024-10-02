@@ -279,6 +279,11 @@ R rect()
         return {{0, 0}, s_dims - 1};
 }
 
+std::vector<P> positions()
+{
+        return rect().positions();
+}
+
 size_t nr_positions()
 {
         return (size_t)s_dims.x * (size_t)s_dims.y;

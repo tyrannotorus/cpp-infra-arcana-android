@@ -254,7 +254,7 @@ public:
                 return m_data->can_have_gore;
         }
 
-        virtual bool can_have_trap() const
+        bool can_have_trap() const
         {
                 return m_data->can_have_trap;
         }

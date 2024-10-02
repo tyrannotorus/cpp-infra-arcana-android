@@ -32,11 +32,12 @@
 - Added more monsters.
 
 # Map generation
-- Misc improvements to corridor generation (limited max corridor length, corridors occasionally connect to other corridors, some corridors are widened).
-- Changed some room templates that were annoying to explore, or created dead-end corridors that looked like they led to a secret door.
 - The ruins in the late game caves can contain chests, tombs, or altars.
 - Crypt rooms (tomb rooms) and ritual rooms (rooms with altars) can also spawn in the late game caves.
 - Made some improvements to where terrain objects can spawn in rooms, for example previously some terrain like chests or cabinets could never spawn in the corner of a room.
+- Some rooms can now spread terrain outside of themselves (e.g. spider rooms can create webs in nearby areas outside of the room).
+- Misc improvements to corridor generation (limited max corridor length, corridors occasionally connect to other corridors, some corridors are widened).
+- Changed some room templates that were annoying to explore, or created dead-end corridors that looked like they led to a secret door.
 
 # Special maps
 - Added intro message popups for some special levels.

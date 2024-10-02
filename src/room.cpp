@@ -29,11 +29,13 @@
 #include "misc.hpp"
 #include "panel.hpp"
 #include "populate_monsters.hpp"
+#include "populate_traps.hpp"
 #include "random.hpp"
 #include "room_auto_spawn_terrain.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_factory.hpp"
+#include "terrain_trap.hpp"
 
 #ifndef NDEBUG
 #include "io.hpp"
@@ -423,6 +425,11 @@ void Room::on_post_connect(Array2<bool>& door_proposals)
         }
 }
 
+void Room::affect_surroundings()
+{
+        affect_surroundings_hook();
+}
+
 void Room::make_dark() const
 {
         const size_t nr_positions = map::nr_positions();
@@ -742,6 +749,65 @@ void SpiderRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
 void SpiderRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 {
         (void)door_proposals;
+}
+
+void SpiderRoom::affect_surroundings_hook()
+{
+        P starting_pos(-1, -1);
+
+        std::vector<P> room_positions = positions_in_room();
+
+        rnd::shuffle(room_positions);
+
+        Array2<bool> blocks_walking(map::dims());
+        Array2<bool> blocks_traps(map::dims());
+
+        map_parsers::BlocksWalking(ParseActors::no)
+                .run(blocks_walking, blocks_walking.rect());
+
+        map_parsers::BlocksTraps()
+                .run(blocks_traps, blocks_traps.rect());
+
+        for (const P& pos : map::positions()) {
+                if (map::g_terrain.at(pos)->id() == terrain::Id::door) {
+                        blocks_walking.at(pos) = false;
+                }
+        }
+
+        for (const P& pos : room_positions) {
+                if (!blocks_walking.at(pos) && !blocks_traps.at(pos)) {
+                        starting_pos = pos;
+                }
+        }
+
+        if (starting_pos.x == -1) {
+                return;
+        }
+
+        const int travel_limit = rnd::range_binom(3, 12, 0.4);
+
+        const Fraction web_chance(1, 6);
+
+        const Array2<int> flood = floodfill(starting_pos, blocks_walking, travel_limit);
+
+        for (const P& pos : map::positions()) {
+                const bool is_reached = (flood.at(pos) > 0) || (pos == starting_pos);
+
+                if (is_reached &&
+                    !blocks_traps.at(pos) &&
+                    web_chance.roll()) {
+                        terrain::Trap* const trap =
+                                populate_traps::try_make_trap(
+                                        terrain::TrapId::web,
+                                        pos);
+
+                        if (trap) {
+                                map::set_terrain(trap);
+
+                                TRACE << "### WEB, " << pos.x << "," << pos.y << std::endl;
+                        }
+                }
+        }
 }
 
 // -----------------------------------------------------------------------------

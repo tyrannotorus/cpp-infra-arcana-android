@@ -46,7 +46,7 @@ static Fraction chance_for_trapped_room(const room::RoomType type)
                 break;
 
         case room::RoomType::spider:
-                chance = {2, 3};
+                // NOTE: Spider rooms place webs themselves.
                 break;
 
         case room::RoomType::crypt:
@@ -111,15 +111,66 @@ static std::vector<P> find_allowed_positions_in_room(
         return positions;
 }
 
-static terrain::Trap* try_make_trap(const terrain::TrapId id, const P& pos)
+// -----------------------------------------------------------------------------
+// populate_std_lvl
+// -----------------------------------------------------------------------------
+namespace populate_traps
 {
-        const auto* const t = map::g_terrain.at(pos);
+void populate()
+{
+        TRACE_FUNC_BEGIN;
+
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksWalking(ParseActors::no)
+                .run(blocked, blocked.rect());
+
+        const P& player_p = map::g_player->m_pos;
+
+        blocked.at(player_p) = true;
+
+        for (room::Room* const room : map::g_room_list) {
+                const Fraction chance_trapped = chance_for_trapped_room(room->m_type);
+
+                if ((chance_trapped.num == -1) || !chance_trapped.roll()) {
+                        continue;
+                }
+
+                auto trap_pos_bucket = find_allowed_positions_in_room(*room, blocked);
+
+                rnd::shuffle(trap_pos_bucket);
+
+                const int nr_traps =
+                        std::min(
+                                rnd::range(1, 3),
+                                (int)trap_pos_bucket.size());
+
+                for (int i = 0; i < nr_traps; ++i) {
+                        const terrain::TrapId trap_type = terrain::TrapId::any;
+
+                        const auto pos = trap_pos_bucket[i];
+
+                        terrain::Trap* const trap = try_make_trap(trap_type, pos);
+
+                        if (trap) {
+                                map::set_terrain(trap);
+                        }
+                }
+        }  // room loop
+
+        TRACE_FUNC_END;
+}
+
+terrain::Trap* try_make_trap(const terrain::TrapId id, const P& pos)
+{
+        const terrain::Terrain* const t = map::g_terrain.at(pos);
 
         if (!t->can_have_trap()) {
-                TRACE << "Cannot place trap on terrain id: "
-                      << (int)t->id() << std::endl
-                      << "Trap id: "
-                      << int(id) << std::endl;
+                TRACE
+                        << "Cannot place trap on terrain id: "
+                        << (int)t->id() << std::endl
+                        << "Trap id: "
+                        << int(id) << std::endl;
 
                 ASSERT(false);
 
@@ -143,60 +194,6 @@ static terrain::Trap* try_make_trap(const terrain::TrapId id, const P& pos)
         }
 
         return trap;
-}
-
-// -----------------------------------------------------------------------------
-// populate_std_lvl
-// -----------------------------------------------------------------------------
-namespace populate_traps
-{
-void populate()
-{
-        TRACE_FUNC_BEGIN;
-
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksWalking(ParseActors::no)
-                .run(blocked, blocked.rect());
-
-        const P& player_p = map::g_player->m_pos;
-
-        blocked.at(player_p) = true;
-
-        for (room::Room* const room : map::g_room_list) {
-                const Fraction chance_trapped =
-                        chance_for_trapped_room(room->m_type);
-
-                if ((chance_trapped.num == -1) || !chance_trapped.roll()) {
-                        continue;
-                }
-
-                auto trap_pos_bucket = find_allowed_positions_in_room(*room, blocked);
-
-                rnd::shuffle(trap_pos_bucket);
-
-                const int nr_traps =
-                        std::min(
-                                rnd::range(1, 3),
-                                (int)trap_pos_bucket.size());
-
-                for (int i = 0; i < nr_traps; ++i) {
-                        const terrain::TrapId trap_type =
-                                (room->m_type == room::RoomType::spider)
-                                ? terrain::TrapId::web
-                                : terrain::TrapId::any;
-
-                        const auto pos = trap_pos_bucket[i];
-
-                        auto* const trap = try_make_trap(trap_type, pos);
-
-                        if (trap) {
-                                map::set_terrain(trap);
-                        }
-                }
-        }  // room loop
-
-        TRACE_FUNC_END;
 }
 
 }  // namespace populate_traps

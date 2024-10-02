@@ -629,21 +629,28 @@ void draw()
         ++y;
 
 #ifndef NDEBUG
+        std::string debug_str =
+                std::to_string(map::g_player->m_pos.x) +
+                "," +
+                std::to_string(map::g_player->m_pos.y);
+
         const room::Room* const room = map::g_room_map.at(map::g_player->m_pos);
 
         if (room) {
                 const std::string room_name = room::room_type_to_str(room->m_type);
 
-                if (!room_name.empty()) {
-                        io::draw_text(
-                                room_name,
-                                Panel::map_gui_stats,
-                                {0, y},
-                                colors::yellow());
-
-                        y += 2;
-                }
+                text_format::append_with_space(
+                        debug_str,
+                        room::room_type_to_str(room->m_type));
         }
+
+        io::draw_text(
+                debug_str,
+                Panel::map_gui_stats,
+                {0, y},
+                colors::yellow());
+
+        y += 2;
 #endif  // NDEBUG
 
         draw_properties(y, panel);

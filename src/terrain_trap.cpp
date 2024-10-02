@@ -644,7 +644,9 @@ void Trap::reveal(const PrintRevealMsg print_reveal_msg)
 
 void Trap::on_revealed_from_searching()
 {
-        game::incr_player_xp(g_xp_on_reveal_trap);
+        if (type() != TrapId::web) {
+                game::incr_player_xp(g_xp_on_reveal_trap);
+        }
 }
 
 std::string Trap::name(const Article article) const
@@ -1226,12 +1228,10 @@ void TrapWeb::trigger()
         // Players getting stuck in spider webs alerts all spiders
         if (actor::is_player(actor_here)) {
                 for (actor::Actor* const actor : game_time::g_actors) {
-                        if (actor::is_player(actor) ||
-                            !actor->m_data->is_spider) {
-                                continue;
+                        if (!actor::is_player(actor) &&
+                            actor->m_data->is_spider) {
+                                actor->become_aware_player(actor::AwareSource::other);
                         }
-
-                        actor->become_aware_player(actor::AwareSource::other);
                 }
         }
 

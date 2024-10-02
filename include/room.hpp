@@ -20,17 +20,30 @@ class Array2;
 
 namespace room
 {
-// Room theming occurs both pre- and post-connect (before/after corridors).
+// Room theming occurs in three steps:
 //
-// > In pre-connect, reshaping is performed, e.g. plus-shape, cavern-shape,
-//   pillars, etc)
+//   1) Pre-connect (before corridors):
+//
+//   In pre-connect, reshaping is performed, e.g. plus-shape, cavern-shape,
+//   pillars, etc.
 //
 //   When pre-connect starts, it is assumed that all (standard) rooms are
 //   rectangular with unbroken walls.
 //
-// > In post-connect, auto-terrains such as chests and altars are placed, as
+//   2) Post-connect (after corridors):
+//
+//   In post-connect, auto-terrains such as chests and altars are placed, as
 //   well as room-specific stuff like trees, altars, etc. It can then be
 //   verified for each terrain that the map is still connected.
+//
+//   3) Affect surroundings (after doors are placed):
+//
+//   Here the rooms may put terrain outside of themselves, e.g. spider webs
+//   outside of a spider room.
+//
+//   This hook is called with a random room order, since several rooms may put
+//   terrain in overlapping areas, and creation order should not determine which
+//   room goes first.
 //
 // As a rule of thumb, place walkable terrains in the pre-connect step, and
 // blocking terrains in the post-connect step.
@@ -111,6 +124,7 @@ public:
 
         void on_pre_connect(Array2<bool>& door_proposals);
         void on_post_connect(Array2<bool>& door_proposals);
+        void affect_surroundings();
 
         virtual std::vector<RoomAutoTerrainRule> auto_terrains_allowed() const
         {
@@ -149,6 +163,10 @@ protected:
         virtual void on_post_connect_hook(Array2<bool>& door_proposals)
         {
                 (void)door_proposals;
+        }
+
+        virtual void affect_surroundings_hook()
+        {
         }
 
         void make_dark() const;
@@ -233,6 +251,8 @@ protected:
         void on_pre_connect_hook(Array2<bool>& door_proposals) override;
 
         void on_post_connect_hook(Array2<bool>& door_proposals) override;
+
+        void affect_surroundings_hook() override;
 };
 
 class CrawlingPitRoom : public Room

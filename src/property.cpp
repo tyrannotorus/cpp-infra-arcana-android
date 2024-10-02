@@ -491,7 +491,11 @@ bool Entangled::try_player_end_with_machete()
         item::Item* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         if (item && (item->id() == item::Id::machete)) {
-                msg_log::add("I cut myself free with my Machete.");
+                msg_log::add(
+                        "I cut myself free with my Machete.",
+                        colors::text(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::yes);
 
                 m_owner->m_properties.end_prop(
                         id(),

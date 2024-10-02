@@ -142,7 +142,7 @@ bool MapBuilderStd::build_specific()
 
         for (int x = 0; x < 3; ++x) {
                 for (int y = 0; y < 3; ++y) {
-                        auto& region = regions.at(x, y);
+                        Region& region = regions.at(x, y);
 
                         if (!region.main_room && region.is_free) {
                                 mapgen::make_room(region);
@@ -178,7 +178,7 @@ bool MapBuilderStd::build_specific()
         // Set all floor and walls to cave in late game
         // ---------------------------------------------------------------------
         if (map::g_dlvl >= g_dlvl_first_late_game) {
-                for (const auto& p : map::rect().positions()) {
+                for (const P& p : map::rect().positions()) {
                         terrain::Terrain* const t = map::g_terrain.at(p);
 
                         switch (t->id()) {
@@ -230,7 +230,7 @@ bool MapBuilderStd::build_specific()
         std::sort(
                 std::begin(map::g_room_list),
                 std::end(map::g_room_list),
-                [](const auto r0, const auto r1) {
+                [](const room::Room* const r0, const room::Room* const r1) {
                         return r0->m_type < r1->m_type;
                 });
 
@@ -239,7 +239,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         TRACE << "Running pre-connect for all rooms" << std::endl;
 
-        for (auto* const room : map::g_room_list) {
+        for (room::Room* const room : map::g_room_list) {
                 room->on_pre_connect(mapgen::g_door_proposals);
         }
 
@@ -261,7 +261,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         TRACE << "Running post-connect for all rooms" << std::endl;
 
-        for (auto* const room : map::g_room_list) {
+        for (room::Room* const room : map::g_room_list) {
                 room->on_post_connect(mapgen::g_door_proposals);
         }
 
@@ -274,6 +274,26 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         if (map::g_dlvl <= g_dlvl_last_mid_game) {
                 mapgen::make_doors();
+        }
+
+        if (!mapgen::g_is_map_valid) {
+                return false;
+        }
+
+        // ---------------------------------------------------------------------
+        // Run the affect surroundings hook on all rooms
+        // ---------------------------------------------------------------------
+        TRACE << "Running affect surroundings for all rooms" << std::endl;
+
+        // This is executed in random room order, since nearby rooms may create
+        // overlapping areas of terrain, and it shouldn't depend on creation
+        // order which room goes first.
+        std::vector<room::Room*> rooms_copy = map::g_room_list;
+
+        rnd::shuffle(rooms_copy);
+
+        for (room::Room* const room : rooms_copy) {
+                room->affect_surroundings();
         }
 
         if (!mapgen::g_is_map_valid) {
@@ -340,12 +360,12 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Make some doors leading to "optional" areas secret or stuck
         // ---------------------------------------------------------------------
-        for (const auto& chokepoint : map::g_chokepoint_data) {
+        for (const ChokePointData& chokepoint : map::g_chokepoint_data) {
                 if (chokepoint.player_side != chokepoint.stairs_side) {
                         continue;
                 }
 
-                auto* const terrain = map::g_terrain.at(chokepoint.p);
+                terrain::Terrain* const terrain = map::g_terrain.at(chokepoint.p);
 
                 if (terrain->id() == terrain::Id::door) {
                         auto* const door = static_cast<terrain::Door*>(terrain);
@@ -413,7 +433,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Populate the map with monsters
         // ---------------------------------------------------------------------
-        for (const auto* const room : map::g_room_list) {
+        for (const room::Room* const room : map::g_room_list) {
                 room->populate_monsters();
         }
 
@@ -497,7 +517,7 @@ bool MapBuilderStd::build_specific()
         // ---------------------------------------------------------------------
         // Sanity check room sizes
         // ---------------------------------------------------------------------
-        for (auto* const room : map::g_room_list) {
+        for (room::Room* const room : map::g_room_list) {
                 if (room->m_type >= room::RoomType::END_OF_STD_ROOMS) {
                         continue;
                 }
@@ -515,7 +535,7 @@ bool MapBuilderStd::build_specific()
         }
 
 #ifdef NDEBUG
-        for (auto* const room : map::g_room_list) {
+        for (room::Room* const room : map::g_room_list) {
                 delete room;
         }
 

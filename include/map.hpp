@@ -143,6 +143,7 @@ int w();
 int h();
 const P& dims();
 R rect();
+std::vector<P> positions();
 size_t nr_positions();
 
 // Updates light map, player fov (etc).
