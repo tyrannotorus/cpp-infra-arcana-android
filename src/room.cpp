@@ -152,6 +152,15 @@ static int base_pct_chance_dark(const room::RoomType room_type)
         return 0;
 }
 
+static void mark_doors_as_non_blocking(Array2<bool>& blocked)
+{
+        for (const P& pos : map::positions()) {
+                if (map::g_terrain.at(pos)->id() == terrain::Id::door) {
+                        blocked.at(pos) = false;
+                }
+        }
+}
+
 // -----------------------------------------------------------------------------
 // room
 // -----------------------------------------------------------------------------
@@ -681,9 +690,7 @@ void RitualRoom::affect_surroundings_hook()
         P origin(-1, -1);
         std::vector<P> origin_bucket;
 
-        std::vector<P> room_positions = positions_in_room();
-
-        for (const P& pos : room_positions) {
+        for (const P& pos : positions_in_room()) {
                 if (map::g_terrain.at(pos)->id() == terrain::Id::altar) {
                         origin = pos;
                         break;
@@ -703,24 +710,20 @@ void RitualRoom::affect_surroundings_hook()
                 origin = rnd::element(origin_bucket);
         }
 
-        for (const P& pos : map::positions()) {
-                if (map::g_terrain.at(pos)->id() == terrain::Id::door) {
-                        blocks_walking.at(pos) = false;
-                }
-        }
+        mark_doors_as_non_blocking(blocks_walking);
 
         const int travel_limit = rnd::range_binom(2, 14, 0.3);
 
         // NOTE: The "make_gore"/"make_blood" functions called below put
         // gore/blood in a 3x3 area, with a random chance for each position.
-        const Fraction blood_chance(1, 4);
+        const Fraction chance_to_place(1, 4);
 
         const Array2<int> flood = floodfill(origin, blocks_walking, travel_limit);
 
         for (const P& pos : map::positions()) {
                 const bool is_reached = (flood.at(pos) > 0) || (pos == origin);
 
-                if (is_reached && ((pos == origin) || blood_chance.roll())) {
+                if (is_reached && ((pos == origin) || chance_to_place.roll())) {
                         terrain::make_gore(pos);
                         terrain::make_blood(pos);
                 }
@@ -784,11 +787,7 @@ void SpiderRoom::affect_surroundings_hook()
         map_parsers::BlocksTraps()
                 .run(blocks_traps, blocks_traps.rect());
 
-        for (const P& pos : map::positions()) {
-                if (map::g_terrain.at(pos)->id() == terrain::Id::door) {
-                        blocks_walking.at(pos) = false;
-                }
-        }
+        mark_doors_as_non_blocking(blocks_walking);
 
         for (const P& pos : room_positions) {
                 if (!blocks_walking.at(pos) && !blocks_traps.at(pos)) {
@@ -802,16 +801,14 @@ void SpiderRoom::affect_surroundings_hook()
 
         const int travel_limit = rnd::range_binom(3, 12, 0.4);
 
-        const Fraction web_chance(1, 6);
+        const Fraction chance_to_place(1, 6);
 
         const Array2<int> flood = floodfill(origin, blocks_walking, travel_limit);
 
         for (const P& pos : map::positions()) {
                 const bool is_reached = (flood.at(pos) > 0) || (pos == origin);
 
-                if (is_reached &&
-                    !blocks_traps.at(pos) &&
-                    web_chance.roll()) {
+                if (is_reached && !blocks_traps.at(pos) && chance_to_place.roll()) {
                         terrain::Trap* const trap =
                                 populate_traps::try_make_trap(
                                         terrain::TrapId::web,
@@ -1028,32 +1025,49 @@ void MonsterRoom::on_pre_connect_hook(Array2<bool>& door_proposals)
 void MonsterRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 {
         (void)door_proposals;
+}
 
-        Array2<bool> blocked(map::dims());
+void MonsterRoom::affect_surroundings_hook()
+{
+        if (!rnd::fraction(3, 5)) {
+                return;
+        }
+
+        Array2<bool> blocks_walking(map::dims());
 
         map_parsers::BlocksWalking(ParseActors::no)
-                .run(blocked, blocked.rect());
+                .run(blocks_walking, blocks_walking.rect());
 
-        int nr_blood_put = 0;
+        std::vector<P> origin_bucket;
 
-        // TODO: Hacky, needs improving
-        const int nr_tries = 1000;
-
-        for (int i = 0; i < nr_tries; ++i) {
-                for (int x = m_r.p0.x; x <= m_r.p1.x; ++x) {
-                        for (int y = m_r.p0.y; y <= m_r.p1.y; ++y) {
-                                if (!blocked.at(x, y) &&
-                                    map::g_room_map.at(x, y) == this &&
-                                    rnd::fraction(2, 5)) {
-                                        terrain::make_gore({x, y});
-                                        terrain::make_blood({x, y});
-                                        nr_blood_put++;
-                                }
-                        }
+        for (const P& pos : positions_in_room()) {
+                if (!blocks_walking.at(pos)) {
+                        origin_bucket.emplace_back(pos);
                 }
+        }
 
-                if (nr_blood_put > 0) {
-                        break;
+        if (origin_bucket.empty()) {
+                return;
+        }
+
+        const P origin = rnd::element(origin_bucket);
+
+        mark_doors_as_non_blocking(blocks_walking);
+
+        const int travel_limit = rnd::range_binom(2, 14, 0.3);
+
+        // NOTE: The "make_gore"/"make_blood" functions called below put
+        // gore/blood in a 3x3 area, with a random chance for each position.
+        const Fraction chance_to_place(1, 4);
+
+        const Array2<int> flood = floodfill(origin, blocks_walking, travel_limit);
+
+        for (const P& pos : map::positions()) {
+                const bool is_reached = (flood.at(pos) > 0) || (pos == origin);
+
+                if (is_reached && ((pos == origin) || chance_to_place.roll())) {
+                        terrain::make_gore(pos);
+                        terrain::make_blood(pos);
                 }
         }
 }
