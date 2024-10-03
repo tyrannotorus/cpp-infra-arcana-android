@@ -323,18 +323,6 @@ static void make_corridor(
 {
         std::vector<room::Room*> prev_links;
 
-        bool should_widen_corridor = false;
-
-        if (map::g_dlvl <= g_dlvl_last_early_game) {
-                should_widen_corridor = rnd::one_in(5);
-        }
-        else if (map::g_dlvl <= g_dlvl_last_mid_game) {
-                should_widen_corridor = rnd::one_in(3);
-        }
-        else {
-                should_widen_corridor = true;
-        }
-
         std::vector<P> corridor_positions;
         corridor_positions.reserve(map::nr_positions());
 
@@ -343,13 +331,16 @@ static void make_corridor(
 
                 corridor_positions.push_back(p);
 
-                if (should_widen_corridor) {
-                        // In early and mid game, widen *every* position if the corridor should be
-                        // widened at all. In the late game, only randomly widen some positions to
-                        // give the corridor a more natural/cave look.
-                        const bool should_widen_this_pos =
-                                ((map::g_dlvl < g_dlvl_first_late_game) ||
-                                 rnd::one_in(6));
+                // In late game, make corridors wider for a more "cavernous" look.
+                //
+                // This should never be done in early/mid game though, as it can create some small
+                // false corridors (that look like they lead to a secret door), at least with the
+                // current implementation.
+                //
+                if (map::g_dlvl >= g_dlvl_first_late_game) {
+                        // Only randomly widen some positions to give the corridor a more
+                        // natural/cave look.
+                        const bool should_widen_this_pos = rnd::one_in(6);
 
                         if (should_widen_this_pos) {
                                 std::vector<P> widened_positins = widen_corridor(p, blocks_path);
