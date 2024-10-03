@@ -365,8 +365,7 @@ std::string room_type_to_str(const RoomType type)
 // -----------------------------------------------------------------------------
 Room::Room(R r, RoomType type) :
         m_r(r),
-        m_type(type),
-        m_is_sub_room(false) {}
+        m_type(type) {}
 
 std::vector<P> Room::positions_in_room() const
 {
@@ -436,6 +435,19 @@ void Room::on_post_connect(Array2<bool>& door_proposals)
 
 void Room::affect_surroundings()
 {
+        // If this room has been split (BSP splitting), do not run the affect
+        // surroundings hook. This is because for split rooms it can sometimes
+        // happen that there is only a single position left of the room - a
+        // passage in the wall between the two rooms it has been split into.
+        //
+        // This room should obviously not do things like spreading blood if it's
+        // a ritual room. The player will not even be aware that there is such a
+        // "room" there.
+        //
+        if (m_is_split) {
+                return;
+        }
+
         affect_surroundings_hook();
 }
 
@@ -723,6 +735,8 @@ void RitualRoom::affect_surroundings_hook()
         for (const P& pos : map::positions()) {
                 const bool is_reached = (flood.at(pos) > 0) || (pos == origin);
 
+                // Always try to place at the origin, and for all other
+                // positions run a random chance.
                 if (is_reached && ((pos == origin) || chance_to_place.roll())) {
                         terrain::make_gore(pos);
                         terrain::make_blood(pos);
@@ -1029,10 +1043,6 @@ void MonsterRoom::on_post_connect_hook(Array2<bool>& door_proposals)
 
 void MonsterRoom::affect_surroundings_hook()
 {
-        if (!rnd::fraction(3, 5)) {
-                return;
-        }
-
         Array2<bool> blocks_walking(map::dims());
 
         map_parsers::BlocksWalking(ParseActors::no)
@@ -1056,16 +1066,12 @@ void MonsterRoom::affect_surroundings_hook()
 
         const int travel_limit = rnd::range_binom(2, 14, 0.3);
 
-        // NOTE: The "make_gore"/"make_blood" functions called below put
-        // gore/blood in a 3x3 area, with a random chance for each position.
-        const Fraction chance_to_place(1, 4);
-
         const Array2<int> flood = floodfill(origin, blocks_walking, travel_limit);
 
         for (const P& pos : map::positions()) {
                 const bool is_reached = (flood.at(pos) > 0) || (pos == origin);
 
-                if (is_reached && ((pos == origin) || chance_to_place.roll())) {
+                if (is_reached) {
                         terrain::make_gore(pos);
                         terrain::make_blood(pos);
                 }

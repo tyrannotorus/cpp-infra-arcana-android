@@ -148,11 +148,12 @@ public:
                 return true;
         }
 
-        R m_r;
-        const RoomType m_type;
-        bool m_is_sub_room;
-        std::vector<Room*> m_rooms_con_to;
-        std::vector<Room*> m_sub_rooms;
+        R m_r {};
+        const RoomType m_type {(RoomType)0};
+        bool m_is_sub_room {false};
+        bool m_is_split {false};
+        std::vector<Room*> m_rooms_con_to {};
+        std::vector<Room*> m_sub_rooms {};
 
 protected:
         virtual void on_pre_connect_hook(Array2<bool>& door_proposals)

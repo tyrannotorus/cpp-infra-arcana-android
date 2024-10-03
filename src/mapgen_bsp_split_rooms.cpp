@@ -68,27 +68,25 @@ static bool allow_split_room_size(const R& r)
 static std::vector<room::Room*> try_bsp_split_room(room::Room& room)
 {
         // Abort if any cell in the room rectangle belongs to another room, or
-        // contains something other than floor
+        // contains something other than floor.
         for (const P& pos : room.m_r.positions()) {
-                const bool is_this_room =
-                        (map::g_room_map.at(pos) == &room);
+                const bool is_this_room = (map::g_room_map.at(pos) == &room);
 
                 if (!is_this_room) {
                         return {};
                 }
 
-                const bool is_floor =
-                        map::g_terrain.at(pos)->id() ==
-                        terrain::Id::floor;
+                const bool is_floor = (map::g_terrain.at(pos)->id() == terrain::Id::floor);
 
                 if (!is_floor) {
                         return {};
                 }
         }
 
-        const auto blocked_positions = find_blocked_split_positions(room);
+        const bsp::BlockedSplitPositions blocked_positions =
+                find_blocked_split_positions(room);
 
-        const auto child_rects =
+        const std::vector<R> child_rects =
                 bsp::try_split(
                         room.m_r,
                         child_room_min_size,
@@ -98,20 +96,22 @@ static std::vector<room::Room*> try_bsp_split_room(room::Room& room)
                 return {};
         }
 
-        for (const auto pos : room.m_r.positions()) {
+        for (const P& pos : room.m_r.positions()) {
                 map::set_terrain(terrain::make(terrain::Id::wall, pos));
         }
 
         std::vector<room::Room*> new_rooms;
 
-        for (const auto& child_rect : child_rects) {
-                auto* const sub_room =
-                        mapgen::make_room(child_rect, IsSubRoom::yes);
+        for (const R& child_rect : child_rects) {
+                room::Room* const sub_room = mapgen::make_room(child_rect, IsSubRoom::yes);
 
                 new_rooms.push_back(sub_room);
 
                 room.m_sub_rooms.push_back(sub_room);
         }
+
+        // Mark the "top" room as split.
+        room.m_is_split = true;
 
         ASSERT(new_rooms.size() == 2);
 
@@ -188,15 +188,17 @@ static auto split_original_rooms(
                         continue;
                 }
 
-                auto& room = *map::g_room_list[i];
+                room::Room& room = *map::g_room_list[i];
 
                 if (!allow_split_room_size(room.m_r)) {
                         continue;
                 }
 
-                const auto new_rooms = try_bsp_split_room(room);
+                const std::vector<room::Room*> new_rooms = try_bsp_split_room(room);
 
                 if (new_rooms.size() != 2) {
+                        ASSERT(new_rooms.empty());
+
                         continue;
                 }
 
@@ -210,7 +212,7 @@ static auto split_original_rooms(
                         *(std::end(map::g_room_list) - 1) ==
                         new_rooms[1]);
 
-                const auto edge = find_edge(*new_rooms[0], *new_rooms[1]);
+                const std::vector<P> edge = find_edge(*new_rooms[0], *new_rooms[1]);
 
                 edges.push_back(edge);
         }
@@ -229,15 +231,17 @@ static auto split_new_rooms(
                         continue;
                 }
 
-                auto& room = *map::g_room_list[i];
+                room::Room& room = *map::g_room_list[i];
 
                 const auto new_rooms = try_bsp_split_room(room);
 
                 if (new_rooms.size() != 2) {
+                        ASSERT(new_rooms.empty());
+
                         continue;
                 }
 
-                const auto edge = find_edge(*new_rooms[0], *new_rooms[1]);
+                const std::vector<P> edge = find_edge(*new_rooms[0], *new_rooms[1]);
 
                 edges.push_back(edge);
         }
