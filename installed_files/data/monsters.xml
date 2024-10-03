@@ -2257,7 +2257,7 @@
 
         <ai>
             <erratic_move_percent>25</erratic_move_percent>
-            <turns_aware>5</turns_aware>
+            <turns_aware>6</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
             <looks>true</looks>
@@ -2349,7 +2349,7 @@
 
         <ai>
             <erratic_move_percent>25</erratic_move_percent>
-            <turns_aware>5</turns_aware>
+            <turns_aware>6</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <is_pausing_on_player_seen>true</is_pausing_on_player_seen>
             <looks>true</looks>
@@ -2441,7 +2441,7 @@
 
         <ai>
             <erratic_move_percent>25</erratic_move_percent>
-            <turns_aware>5</turns_aware>
+            <turns_aware>6</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
             <looks>true</looks>
@@ -2534,7 +2534,7 @@
 
         <ai>
             <erratic_move_percent>25</erratic_move_percent>
-            <turns_aware>5</turns_aware>
+            <turns_aware>6</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
             <looks>true</looks>

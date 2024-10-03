@@ -1228,9 +1228,10 @@ void TrapWeb::trigger()
         // Players getting stuck in spider webs alerts all spiders
         if (actor::is_player(actor_here)) {
                 for (actor::Actor* const actor : game_time::g_actors) {
-                        if (!actor::is_player(actor) &&
-                            actor->m_data->is_spider) {
-                                actor->become_aware_player(actor::AwareSource::other);
+                        if (!actor::is_player(actor) && actor->m_data->is_spider) {
+                                const int factor = 2;
+
+                                actor->become_aware_player(actor::AwareSource::other, factor);
                         }
                 }
         }
