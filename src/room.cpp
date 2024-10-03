@@ -724,7 +724,7 @@ void RitualRoom::affect_surroundings_hook()
 
         mark_doors_as_non_blocking(blocks_walking);
 
-        const int travel_limit = rnd::range_binom(2, 14, 0.3);
+        const int travel_limit = rnd::range_binom(2, 12, 0.3);
 
         // NOTE: The "make_gore"/"make_blood" functions called below put
         // gore/blood in a 3x3 area, with a random chance for each position.
@@ -1064,7 +1064,7 @@ void MonsterRoom::affect_surroundings_hook()
 
         mark_doors_as_non_blocking(blocks_walking);
 
-        const int travel_limit = rnd::range_binom(2, 14, 0.3);
+        const int travel_limit = rnd::range_binom(2, 12, 0.3);
 
         const Array2<int> flood = floodfill(origin, blocks_walking, travel_limit);
 
