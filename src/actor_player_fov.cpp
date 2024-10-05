@@ -6,13 +6,22 @@
 
 #include "actor.hpp"
 
+#include <cstddef>
+#include <vector>
+
 #include "array2.hpp"
+#include "debug.hpp"
 #include "direction.hpp"
 #include "fov.hpp"
 #include "init.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "minimap.hpp"
+#include "pos.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "rect.hpp"
+#include "terrain_data.hpp"
 
 // -----------------------------------------------------------------------------
 // Private

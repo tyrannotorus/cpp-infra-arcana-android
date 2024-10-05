@@ -11,12 +11,12 @@
 #include <vector>
 
 #include "global.hpp"
-#include "pos.hpp"
 #include "rect.hpp"
 #include "terrain_data.hpp"
 
 template <typename T>
 class Array2;
+struct P;
 
 namespace room
 {

@@ -7,6 +7,7 @@
 #ifndef ACTOR_PLAYER_STATE_HPP
 #define ACTOR_PLAYER_STATE_HPP
 
+#include <cstddef>
 #include <memory>
 
 #include "colors.hpp"

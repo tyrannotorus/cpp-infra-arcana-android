@@ -73,7 +73,6 @@
 #include "saving.hpp"
 #include "sound.hpp"
 #include "state.hpp"
-#include "study_inscription.hpp"
 #include "teleport.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"

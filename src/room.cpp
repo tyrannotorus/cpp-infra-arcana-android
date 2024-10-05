@@ -9,37 +9,29 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
-#include <functional>
 #include <iterator>
 #include <numeric>
 #include <ostream>
 #include <unordered_map>
+#include <utility>
 
 #include "actor_data.hpp"
 #include "array2.hpp"
-#include "colors.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
 #include "flood.hpp"
 #include "global.hpp"
-#include "init.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "mapgen.hpp"
-#include "misc.hpp"
-#include "panel.hpp"
 #include "populate_monsters.hpp"
 #include "populate_traps.hpp"
+#include "pos.hpp"
 #include "random.hpp"
 #include "room_auto_spawn_terrain.hpp"
-#include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_factory.hpp"
 #include "terrain_trap.hpp"
-
-#ifndef NDEBUG
-#include "io.hpp"
-#endif  // NDEBUG
 
 // -----------------------------------------------------------------------------
 // Private

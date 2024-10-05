@@ -6,20 +6,44 @@
 
 #include "actor.hpp"
 
+#include <algorithm>
 #include <climits>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
+#include "ability_values.hpp"
+#include "actor_data.hpp"
 #include "actor_items.hpp"
 #include "actor_player_state.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
+#include "colors.hpp"
+#include "debug.hpp"
+#include "direction.hpp"
 #include "fov.hpp"
 #include "game_time.hpp"
+#include "gfx.hpp"
+#include "global.hpp"
+#include "inventory.hpp"
 #include "item.hpp"
+#include "item_data.hpp"
 #include "item_explosive.hpp"
 #include "item_misc.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
+#include "player_bon.hpp"
 #include "player_spells.hpp"
+#include "pos.hpp"
+#include "property.hpp"
+#include "property_data.hpp"
+#include "property_handler.hpp"
+#include "random.hpp"
+#include "rect.hpp"
+#include "spells.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------

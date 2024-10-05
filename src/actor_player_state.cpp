@@ -6,9 +6,7 @@
 
 #include "actor_player_state.hpp"
 
-#include "item.hpp"
 #include "item_explosive.hpp"
-#include "item_misc.hpp"
 #include "item_weapon.hpp"
 
 namespace actor::player_state

@@ -7,6 +7,7 @@
 #include "actor.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <string>
 #include <vector>
@@ -14,7 +15,9 @@
 #include "ability_values.hpp"
 #include "actor_data.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
 #include "attack.hpp"
+#include "debug.hpp"
 #include "direction.hpp"
 #include "fov.hpp"
 #include "game.hpp"
@@ -22,7 +25,6 @@
 #include "global.hpp"
 #include "gods.hpp"
 #include "inventory.hpp"
-#include "item.hpp"
 #include "item_data.hpp"
 #include "item_weapon.hpp"
 #include "line_calc.hpp"
@@ -36,6 +38,7 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
+#include "rect.hpp"
 #include "reload.hpp"
 #include "sound.hpp"
 #include "spells.hpp"
