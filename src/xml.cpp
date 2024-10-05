@@ -31,15 +31,16 @@ void load_file(const std::string& path, Doc& to_doc)
 {
         TRACE << "Loading xml file at: " << path << std::endl;
 
-        const auto load_result = to_doc.LoadFile(path.c_str());
+        const tinyxml2::XMLError load_result = to_doc.LoadFile(path.c_str());
 
         if (load_result != tinyxml2::XML_SUCCESS) {
-                TRACE_ERROR_RELEASE << "Failed to find or read xml file at: "
-                                    << path
-                                    << std::endl
-                                    << "tinyxml2 reported error: "
-                                    << to_doc.ErrorName()
-                                    << std::endl;
+                TRACE_ERROR_RELEASE
+                        << "Failed to find or read xml file at: "
+                        << path
+                        << std::endl
+                        << "tinyxml2 reported error: "
+                        << to_doc.ErrorName()
+                        << std::endl;
 
                 PANIC;
         }
@@ -82,7 +83,7 @@ bool get_text_bool(const Element* const e)
 {
         bool value = false;
 
-        const auto result = e->QueryBoolText(&value);
+        const tinyxml2::XMLError result = e->QueryBoolText(&value);
 
         if (result != tinyxml2::XML_SUCCESS) {
                 TRACE_ERROR_RELEASE
@@ -102,7 +103,7 @@ int get_text_int(const Element* const e)
 {
         int value = false;
 
-        const auto result = e->QueryIntText(&value);
+        const tinyxml2::XMLError result = e->QueryIntText(&value);
 
         if (result != tinyxml2::XML_SUCCESS) {
                 TRACE_ERROR_RELEASE
@@ -127,8 +128,7 @@ int get_attribute_int(const Element* const e, const std::string& name)
 {
         int result = 0;
 
-        const auto conv_result =
-                e->QueryAttribute(to_c_str(name), &result);
+        const int conv_result = e->QueryAttribute(to_c_str(name), &result);
 
         if (conv_result != tinyxml2::XML_SUCCESS) {
                 TRACE_ERROR_RELEASE
@@ -151,7 +151,7 @@ bool try_get_attribute_str(
         const std::string& name,
         std::string& result)
 {
-        const auto* str = e->Attribute(name.c_str());
+        const char* str = e->Attribute(name.c_str());
 
         if (str) {
                 result = str;
