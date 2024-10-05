@@ -1367,8 +1367,12 @@
             <item_set percent_chance="1">ITEMSET_MAJOR_TREASURE</item_set>
         </items>
 
+        <properties>
+            <property>PROP_DARKVISION</property>
+        </properties>
+
         <ai>
-            <erratic_move_percent>5</erratic_move_percent>
+            <erratic_move_percent>60</erratic_move_percent>
             <turns_aware>16</turns_aware>
             <ranged_cooldown_turns>1</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
@@ -1686,9 +1690,9 @@
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="4">MONGROUPSIZE_ALONE</group_size>
+            <group_size weight="2">MONGROUPSIZE_ALONE</group_size>
             <group_size weight="4">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="6" required_dungeon_level="24">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_SPIDER</native_room>
             <native_room>ROOM_FOREST</native_room>
@@ -2192,6 +2196,10 @@
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CAVE</native_room>
         </spawning>
+
+        <starting_allies>
+            <monster id="MON_SENTRY_DRONE" min="1" max="1"/>
+        </starting_allies>
     </monster>
 
     <!--************************************************************-->
@@ -2231,7 +2239,7 @@
             <shock_level>MONSHOCK_UNSETTLING</shock_level>
             <melee>70</melee>
             <ranged>0</ranged>
-            <dodging>10</dodging>
+            <dodging>20</dodging>
             <stealth>0</stealth>
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
@@ -2278,8 +2286,8 @@
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="3">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="1">MONGROUPSIZE_FEW</group_size>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <group_size required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_SPIDER</native_room>
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CAVE</native_room>
@@ -2323,7 +2331,7 @@
             <shock_level>MONSHOCK_UNSETTLING</shock_level>
             <melee>70</melee>
             <ranged>0</ranged>
-            <dodging>10</dodging>
+            <dodging>20</dodging>
             <stealth>0</stealth>
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
@@ -2370,8 +2378,8 @@
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="3">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="1">MONGROUPSIZE_FEW</group_size>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <group_size required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_SPIDER</native_room>
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CAVE</native_room>
@@ -2415,7 +2423,7 @@
             <shock_level>MONSHOCK_UNSETTLING</shock_level>
             <melee>70</melee>
             <ranged>0</ranged>
-            <dodging>10</dodging>
+            <dodging>20</dodging>
             <stealth>0</stealth>
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
@@ -2462,8 +2470,8 @@
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="3">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="1">MONGROUPSIZE_FEW</group_size>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <group_size required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_SPIDER</native_room>
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CAVE</native_room>
@@ -2555,9 +2563,9 @@
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="4">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="8">MONGROUPSIZE_PACK</group_size>
-            <group_size weight="1">MONGROUPSIZE_SWARM</group_size>
+            <group_size weight="2">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="4">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1" required_dungeon_level="14">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_SPIDER</native_room>
             <native_room>ROOM_FOREST</native_room>
@@ -3216,14 +3224,14 @@
 
         <spawning>
             <min_dungeon_level>7</min_dungeon_level>
-            <max_dungeon_level>15</max_dungeon_level>
+            <max_dungeon_level>19</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="3">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1" required_dungeon_level="12">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_RITUAL</native_room>
@@ -3315,14 +3323,14 @@
 
         <spawning>
             <min_dungeon_level>7</min_dungeon_level>
-            <max_dungeon_level>15</max_dungeon_level>
+            <max_dungeon_level>19</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="3">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1" required_dungeon_level="12">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_RITUAL</native_room>
@@ -3416,14 +3424,14 @@
 
         <spawning>
             <min_dungeon_level>7</min_dungeon_level>
-            <max_dungeon_level>15</max_dungeon_level>
+            <max_dungeon_level>19</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="3">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1" required_dungeon_level="12">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_RITUAL</native_room>
@@ -3514,14 +3522,14 @@
 
         <spawning>
             <min_dungeon_level>7</min_dungeon_level>
-            <max_dungeon_level>15</max_dungeon_level>
+            <max_dungeon_level>19</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="3">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="1">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1" required_dungeon_level="12">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_RITUAL</native_room>
@@ -5004,7 +5012,7 @@
     </monster>
 
     <!--************************************************************-->
-    <!-- MON_GHOST -->
+    <!-- MON_WRAITH -->
     <!--************************************************************-->
     <monster id="MON_WRAITH">
         <text>
@@ -5092,7 +5100,7 @@
 
         <spawning>
             <min_dungeon_level>20</min_dungeon_level>
-            <max_dungeon_level>999</max_dungeon_level>
+            <max_dungeon_level>28</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
@@ -5102,9 +5110,6 @@
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CRYPT</native_room>
             <native_room>ROOM_CAVE</native_room>
-            <native_room>ROOM_CHASM</native_room>
-            <native_room>ROOM_DAMP</native_room>
-            <native_room>ROOM_POOL</native_room>
         </spawning>
     </monster>
 
@@ -5752,6 +5757,7 @@
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="4">MONGROUPSIZE_ALONE</group_size>
             <group_size weight="1" required_dungeon_level="10">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="10" required_dungeon_level="20">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_CAVE</native_room>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_FOREST</native_room>
@@ -6102,6 +6108,11 @@
             <spell skill="SPELLSKILL_EXPERT">SPELL_CURSE</spell>
         </spells>
 
+        <properties>
+            <property>PROP_DARKVISION</property>
+            <property>PROP_R_SLEEP</property>
+        </properties>
+
         <ai>
             <erratic_move_percent>5</erratic_move_percent>
             <turns_aware>999</turns_aware>
@@ -6128,6 +6139,7 @@
             <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CRYPT</native_room>
         </spawning>
     </monster>
 
@@ -6188,6 +6200,11 @@
             </attack>
         </attacks>
 
+        <properties>
+            <property>PROP_DARKVISION</property>
+            <property>PROP_R_SLEEP</property>
+        </properties>
+
         <ai>
             <erratic_move_percent>15</erratic_move_percent>
             <turns_aware>999</turns_aware>
@@ -6211,12 +6228,14 @@
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="20">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="60">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="10">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="10">MONGROUPSIZE_ALONE</group_size>
+            <group_size weight="20">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="40">MONGROUPSIZE_PACK</group_size>
             <group_size weight="1">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CRYPT</native_room>
+            <native_room>ROOM_MONSTER</native_room>
         </spawning>
     </monster>
 
@@ -6286,6 +6305,8 @@
 
         <properties>
             <property>PROP_SUMMONS_LOCUSTS</property>
+            <property>PROP_DARKVISION</property>
+            <property>PROP_R_SLEEP</property>
         </properties>
 
         <spells>
@@ -6393,6 +6414,11 @@
             </attack>
         </attacks>
 
+        <properties>
+            <property>PROP_DARKVISION</property>
+            <property>PROP_R_SLEEP</property>
+        </properties>
+
         <spells>
             <spell skill="SPELLSKILL_EXPERT">SPELL_DARKBOLT</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_DISEASE</spell>
@@ -6432,7 +6458,12 @@
             <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CRYPT</native_room>
         </spawning>
+
+        <starting_allies>
+            <monster id="MON_CROC_HEAD_MUMMY" min="2" max="3"/>
+        </starting_allies>
     </monster>
 
     <!--************************************************************-->
@@ -6764,6 +6795,7 @@
         <attacks>
             <attack id="ITEMINTR_BITE">
                 <damage>7</damage>
+                <property_applied percent_chance="33">PROP_INFECTED</property_applied>
             </attack>
         </attacks>
 
@@ -6858,6 +6890,7 @@
         <attacks>
             <attack id="ITEMINTR_BITE">
                 <damage>8</damage>
+                <property_applied percent_chance="66">PROP_INFECTED</property_applied>
             </attack>
         </attacks>
 
@@ -6994,7 +7027,6 @@
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_CAVE</native_room>
             <native_room>ROOM_FOREST</native_room>
-            <native_room>ROOM_CRYPT</native_room>
         </spawning>
     </monster>
 
@@ -7178,8 +7210,8 @@
 
         <spawning>
             <min_dungeon_level>20</min_dungeon_level>
-            <max_dungeon_level>27</max_dungeon_level>
-            <spawn_weight>100</spawn_weight>
+            <max_dungeon_level>26</max_dungeon_level>
+            <spawn_weight>75</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
@@ -7191,7 +7223,6 @@
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_CAVE</native_room>
             <native_room>ROOM_FOREST</native_room>
-            <native_room>ROOM_CRYPT</native_room>
         </spawning>
     </monster>
 
@@ -7289,6 +7320,8 @@
             <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CHASM</native_room>
+            <native_room>ROOM_FOREST</native_room>
         </spawning>
     </monster>
 
@@ -7388,6 +7421,8 @@
             <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CHASM</native_room>
+            <native_room>ROOM_FOREST</native_room>
         </spawning>
     </monster>
 
@@ -7488,6 +7523,8 @@
             <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CHASM</native_room>
+            <native_room>ROOM_FOREST</native_room>
         </spawning>
     </monster>
 
@@ -8145,7 +8182,7 @@
 
         <attacks>
             <attack id="ITEMINTR_BITE">
-                <damage>15</damage>
+                <damage>25</damage>
             </attack>
         </attacks>
 
@@ -8157,7 +8194,7 @@
 
         <ai>
             <erratic_move_percent>15</erratic_move_percent>
-            <turns_aware>12</turns_aware>
+            <turns_aware>15</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
             <looks>true</looks>
@@ -8216,13 +8253,13 @@
         </audio>
 
         <attributes>
-            <hit_points>70</hit_points>
+            <hit_points>85</hit_points>
             <spirit>40</spirit>
             <speed>MONSPEED_FAST</speed>
             <shock_level>MONSHOCK_MIND_SHATTERING</shock_level>
             <melee>90</melee>
             <ranged>0</ranged>
-            <dodging>40</dodging>
+            <dodging>45</dodging>
             <stealth>0</stealth>
             <searching>0</searching>
             <can_open_doors>false</can_open_doors>
@@ -8236,7 +8273,7 @@
 
         <attacks>
             <attack id="ITEMINTR_BITE">
-                <damage>12</damage>
+                <damage>14</damage>
                 <property_applied>PROP_POISONED</property_applied>
             </attack>
         </attacks>
@@ -8249,7 +8286,7 @@
 
         <ai>
             <erratic_move_percent>15</erratic_move_percent>
-            <turns_aware>10</turns_aware>
+            <turns_aware>15</turns_aware>
             <ranged_cooldown_turns>0</ranged_cooldown_turns>
             <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
             <looks>true</looks>
@@ -9242,6 +9279,7 @@
             <spell skill="SPELLSKILL_MASTER">SPELL_SPELL_SHIELD</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_AURA_OF_DECAY</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_BURN</spell>
+            <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_DARKBOLT</spell>
         </spells>
 
         <properties>
@@ -9270,7 +9308,7 @@
 
         <spawning>
             <min_dungeon_level>24</min_dungeon_level>
-            <max_dungeon_level>28</max_dungeon_level>
+            <max_dungeon_level>999</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
@@ -9279,6 +9317,8 @@
             <group_size>MONGROUPSIZE_ALONE</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CHASM</native_room>
+            <native_room>ROOM_FOREST</native_room>
         </spawning>
     </monster>
 

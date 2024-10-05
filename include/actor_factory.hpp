@@ -7,6 +7,7 @@
 #ifndef ACTOR_FACTORY_HPP
 #define ACTOR_FACTORY_HPP
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -47,6 +48,8 @@ MonSpawnResult spawn(
 MonSpawnResult spawn_random_position(
         const std::vector<std::string>& monster_ids,
         const R& area_allowed);
+
+void spawn_starting_allies(actor::Actor& main_actor);
 
 }  // namespace actor
 

@@ -10,6 +10,8 @@
 #include <cstddef>
 #include <iterator>
 #include <ostream>
+#include <unordered_map>
+#include <utility>
 
 #include "actor.hpp"
 #include "actor_data.hpp"
@@ -63,7 +65,7 @@ static actor::MonSpawnResult spawn_at_positions(
 
         for (size_t i = 0; i < nr_to_spawn; ++i) {
                 const auto& pos = positions[i];
-                const auto id = ids[i];
+                const std::string& id = ids[i];
 
                 actor::Actor* const new_mon = spawn_at(pos, id);
 
@@ -73,6 +75,34 @@ static actor::MonSpawnResult spawn_at_positions(
         }
 
         return result;
+}
+
+static std::vector<std::string> ids_for_starting_allies(
+        const actor::StartingAllyEntry& allies_entry)
+{
+        return {(size_t)allies_entry.nr.roll(), allies_entry.id};
+}
+
+static void disable_player_feeling_msg(
+        const std::vector<actor::Actor*>& actors)
+{
+        std::for_each(
+                std::begin(actors),
+                std::end(actors),
+                [](auto* mon) {
+                        mon->m_mon_aware_state
+                                .is_player_feeling_msg_allowed = false;
+                });
+}
+
+static actor::Actor* find_top_leader(actor::Actor& actor)
+{
+        if (actor.m_leader) {
+                return find_top_leader(*actor.m_leader);
+        }
+        else {
+                return &actor;
+        }
 }
 
 // -----------------------------------------------------------------------------
@@ -130,11 +160,10 @@ Actor* make(const std::string& id, const P& pos)
 
 #ifndef NDEBUG
         if (map::nr_positions() != 0) {
-                const auto* const t = map::g_terrain.at(pos);
+                const terrain::Terrain* const t = map::g_terrain.at(pos);
 
                 if (t->id() == terrain::Id::door) {
-                        const auto* const door =
-                                static_cast<const terrain::Door*>(t);
+                        const auto* const door = static_cast<const terrain::Door*>(t);
 
                         ASSERT(
                                 door->is_open() ||
@@ -198,6 +227,27 @@ MonSpawnResult spawn_random_position(
         rnd::shuffle(free_positions);
 
         return spawn_at_positions(free_positions, monster_ids);
+}
+
+void spawn_starting_allies(actor::Actor& main_actor)
+{
+        const std::vector<actor::StartingAllyEntry>& allies =
+                main_actor.m_data->starting_allies;
+
+        for (const actor::StartingAllyEntry& entry : allies) {
+                const std::vector<std::string> ids = ids_for_starting_allies(entry);
+
+                actor::Actor* const top_leader = find_top_leader(main_actor);
+
+                const actor::MonSpawnResult summoned =
+                        spawn(
+                                main_actor.m_pos,
+                                ids,
+                                map::rect())
+                                .set_leader(top_leader);
+
+                disable_player_feeling_msg(summoned.monsters);
+        }
 }
 
 }  // namespace actor

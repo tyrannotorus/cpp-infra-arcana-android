@@ -30,54 +30,12 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<std::string> ids_for_starting_allies(
-        const actor::StartingAllyEntry& allies_entry)
-{
-        return {(size_t)allies_entry.nr.roll(), allies_entry.id};
-}
-
-static void disable_player_feeling_msg(
-        const std::vector<actor::Actor*>& actors)
-{
-        std::for_each(
-                std::begin(actors),
-                std::end(actors),
-                [](auto* mon) {
-                        mon->m_mon_aware_state
-                                .is_player_feeling_msg_allowed = false;
-                });
-}
-
-static actor::Actor* find_top_leader(actor::Actor& actor)
-{
-        if (actor.m_leader) {
-                return find_top_leader(*actor.m_leader);
-        }
-        else {
-                return &actor;
-        }
-}
-
-static void spawn_starting_allies()
+static void spawn_starting_allies_for_all_mon()
 {
         for (size_t i = 0; i < game_time::g_actors.size(); ++i) {
                 actor::Actor* const actor = game_time::g_actors[i];
 
-                const std::vector<actor::StartingAllyEntry>& allies =
-                        actor->m_data->starting_allies;
-
-                for (const actor::StartingAllyEntry& entry : allies) {
-                        const std::vector<std::string> ids = ids_for_starting_allies(entry);
-
-                        const actor::MonSpawnResult summoned =
-                                actor::spawn(
-                                        actor->m_pos,
-                                        ids,
-                                        map::rect())
-                                        .set_leader(find_top_leader(*actor));
-
-                        disable_player_feeling_msg(summoned.monsters);
-                }
+                actor::spawn_starting_allies(*actor);
         }
 }
 
@@ -159,7 +117,7 @@ void MapBuilder::build()
 
         gods::set_random_god();
 
-        spawn_starting_allies();
+        spawn_starting_allies_for_all_mon();
 
         map_control::g_controller = map_controller();
 

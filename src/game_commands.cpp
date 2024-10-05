@@ -1315,10 +1315,15 @@ void handle(const GameCmd cmd)
 
                 const std::string mon_id = mon_ids[idx_to_spawn];
 
-                actor::spawn(
-                        map::g_player->m_pos.with_x_offset(2),
-                        {(size_t)nr_to_spawn, mon_id},
-                        map::rect());
+                actor::MonSpawnResult spawned =
+                        actor::spawn(
+                                map::g_player->m_pos.with_x_offset(2),
+                                {(size_t)nr_to_spawn, mon_id},
+                                map::rect());
+
+                for (actor::Actor* const actor : spawned.monsters) {
+                        actor::spawn_starting_allies(*actor);
+                }
         } break;
 
         case GameCmd::debug_f10: {

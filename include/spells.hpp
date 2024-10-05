@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "global.hpp"
-#include "player_bon.hpp"
 #include "random.hpp"
 
 class Spell;
