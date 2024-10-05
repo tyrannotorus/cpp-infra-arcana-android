@@ -25,3 +25,5 @@ GPATH
 GRTAGS
 GTAGS
 
+# Temporary files
+tmp/
