@@ -25,7 +25,7 @@
 #include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio_data.hpp"
-#include "auto_melee.hpp"
+#include "auto_interact.hpp"
 #include "bash.hpp"
 #include "character_descr.hpp"
 #include "close.hpp"
@@ -547,7 +547,7 @@ static GameCmd to_cmd_default(const io::InputData& input)
                 return GameCmd::look;
 
         case SDLK_TAB:
-                return GameCmd::auto_melee;
+                return GameCmd::auto_interact;
 
         case 'x':
                 return GameCmd::cast_spell;
@@ -949,8 +949,8 @@ void handle(const GameCmd cmd)
                 states::push(std::make_unique<Viewing>(map::g_player->m_pos));
         } break;
 
-        case GameCmd::auto_melee: {
-                auto_melee::run();
+        case GameCmd::auto_interact: {
+                auto_interact::run();
         } break;
 
         case GameCmd::cast_spell: {

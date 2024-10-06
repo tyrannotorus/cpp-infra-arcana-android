@@ -7,9 +7,13 @@
 #ifndef DISARM_HPP
 #define DISARM_HPP
 
+struct P;
+
 namespace disarm
 {
 void player_disarm();
+
+void player_disarm_at_pos(const P& pos);
 
 }  // namespace disarm
 

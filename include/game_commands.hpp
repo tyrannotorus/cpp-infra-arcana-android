@@ -50,7 +50,7 @@ enum class GameCmd
         toggle_lantern,
         use_medical_bag,
         look,
-        auto_melee,
+        auto_interact,
         cast_spell,
         make_noise,
         disarm,

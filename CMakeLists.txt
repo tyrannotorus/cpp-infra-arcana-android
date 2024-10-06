@@ -35,7 +35,7 @@ set(COMMON_SRC
         include/attack_internal.hpp
         include/audio.hpp
         include/audio_data.hpp
-        include/auto_melee.hpp
+        include/auto_interact.hpp
         include/bash.hpp
         include/bot.hpp
         include/browser.hpp
@@ -186,7 +186,7 @@ set(COMMON_SRC
         src/attack_melee.cpp
         src/attack_ranged.cpp
         src/audio_data.cpp
-        src/auto_melee.cpp
+        src/auto_interact.cpp
         src/bash.cpp
         src/bot.cpp
         src/browser.cpp
@@ -252,6 +252,7 @@ set(COMMON_SRC
         src/map_travel.cpp
         src/mapgen_aux_rooms.cpp
         src/mapgen_bsp_split_rooms.cpp
+        src/mapgen_chokepoint_data.cpp
         src/mapgen_connect_rooms.cpp
         src/mapgen_corridor.cpp
         src/mapgen_decorate.cpp
@@ -267,7 +268,6 @@ set(COMMON_SRC
         src/mapgen_sub_rooms.cpp
         src/mapgen_utils.cpp
         src/mapgen_valuable_terrain.cpp
-        src/mapgen_chokepoint_data.cpp
         src/marker.cpp
         src/messages.cpp
         src/minimap.cpp

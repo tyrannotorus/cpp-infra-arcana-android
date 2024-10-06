@@ -142,6 +142,11 @@ public:
 
         void player_try_spot_hidden();
 
+        bool has_started_trigger() const
+        {
+                return m_nr_turns_until_trigger > 0;
+        }
+
 private:
         Color color_default() const override;
 

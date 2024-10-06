@@ -320,7 +320,7 @@ static void bot_act()
 
         // Send a TAB command to attack nearby monsters.
         if (rnd::coin_toss()) {
-                game_commands::handle(GameCmd::auto_melee);
+                game_commands::handle(GameCmd::auto_interact);
 
                 return;
         }

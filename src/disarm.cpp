@@ -26,57 +26,41 @@
 #include "terrain_data.hpp"
 #include "terrain_trap.hpp"
 
-namespace disarm
-{
-void player_disarm()
+// -----------------------------------------------------------------------------
+// Private
+// -----------------------------------------------------------------------------
+static bool handle_player_allowed_disarm_traps()
 {
         if (!map::g_player->m_properties.allow_see()) {
                 msg_log::add("Not while blind.");
 
-                return;
+                return false;
         }
 
         if (map::g_player->m_properties.has(prop::Id::entangled)) {
                 msg_log::add("Not while entangled.");
 
-                return;
+                return false;
         }
 
         if (map::g_player->m_properties.has(prop::Id::stuck)) {
                 msg_log::add("Not while stuck.");
 
-                return;
+                return false;
         }
 
-        const std::string hint =
-                common_text::g_direction_query +
-                " " +
-                common_text::g_cancel_hint;
+        return true;
+}
 
-        msg_log::add(
-                hint,
-                colors::light_white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
-
-        const auto input_dir = query::dir(AllowCenter::yes);
-
-        msg_log::clear();
-
-        if (input_dir == Dir::END) {
-                return;
-        }
-
-        const auto pos = map::g_player->m_pos + dir_utils::offset(input_dir);
-
+static void try_disarm_terrain_at(const P& pos)
+{
         if (!map::g_seen.at(pos)) {
                 msg_log::add("I cannot see there.");
 
                 return;
         }
 
-        auto* const terrain = map::g_terrain.at(pos);
+        terrain::Terrain* const terrain = map::g_terrain.at(pos);
 
         terrain::Trap* trap = nullptr;
 
@@ -123,7 +107,55 @@ void player_disarm()
         if (did_disarm) {
                 game_time::tick();
         }
+}
 
-}  // player_disarm
+// -----------------------------------------------------------------------------
+// disarm
+// -----------------------------------------------------------------------------
+namespace disarm
+{
+void player_disarm()
+{
+        const bool is_allowed = handle_player_allowed_disarm_traps();
+
+        if (!is_allowed) {
+                return;
+        }
+
+        const std::string hint =
+                common_text::g_direction_query +
+                " " +
+                common_text::g_cancel_hint;
+
+        msg_log::add(
+                hint,
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+
+        const Dir input_dir = query::dir(AllowCenter::yes);
+
+        msg_log::clear();
+
+        if (input_dir == Dir::END) {
+                return;
+        }
+
+        const P pos = map::g_player->m_pos + dir_utils::offset(input_dir);
+
+        try_disarm_terrain_at(pos);
+}
+
+void player_disarm_at_pos(const P& pos)
+{
+        const bool is_allowed = handle_player_allowed_disarm_traps();
+
+        if (!is_allowed) {
+                return;
+        }
+
+        try_disarm_terrain_at(pos);
+}
 
 }  // namespace disarm

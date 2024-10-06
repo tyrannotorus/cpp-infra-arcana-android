@@ -7,9 +7,9 @@
 #ifndef AUTO_MELEE_HPP
 #define AUTO_MELEE_HPP
 
-namespace auto_melee
+namespace auto_interact
 {
 void run();
-}  // namespace auto_melee
+}  // namespace auto_interact
 
 #endif  // AUTO_MELEE_HPP

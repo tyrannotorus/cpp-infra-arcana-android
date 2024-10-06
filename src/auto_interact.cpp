@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#include "auto_melee.hpp"
+#include "auto_interact.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -16,6 +16,8 @@
 #include "attack.hpp"
 #include "bash.hpp"
 #include "config.hpp"
+#include "direction.hpp"
+#include "disarm.hpp"
 #include "game_time.hpp"
 #include "inventory.hpp"
 #include "item_data.hpp"
@@ -27,6 +29,7 @@
 #include "pos.hpp"
 #include "query.hpp"
 #include "terrain.hpp"
+#include "terrain_trap.hpp"
 
 namespace item
 {
@@ -146,20 +149,13 @@ static actor::Actor* find_reachable_actor(
         return nullptr;
 }
 
-// -----------------------------------------------------------------------------
-// auto_melee
-// -----------------------------------------------------------------------------
-namespace auto_melee
+static bool try_auto_melee()
 {
-void run()
-{
-        map::update_vision();
-
         std::vector<actor::Actor*> actors = get_all_foes_aware_of();
 
         if (actors.empty()) {
                 // Player is not aware of any hostile monsters.
-                return;
+                return false;
         }
 
         sort_by_closest_to_player(actors);
@@ -171,7 +167,7 @@ void run()
         actor::Actor* actor_to_attack = find_reachable_actor(actors, wpn.data().melee.reach);
 
         if (!actor_to_attack) {
-                return;
+                return false;
         }
 
         // If this is also a ranged weapon, ask if player really intended to use
@@ -185,13 +181,78 @@ void run()
                 msg_log::clear();
 
                 if (answer == BinaryAnswer::no) {
-                        return;
+                        return false;
                 }
         }
 
         actor::player_state::g_target = actor_to_attack;
 
         attack::melee(map::g_player, map::g_player->m_pos, actor_to_attack->m_pos, wpn);
+
+        return true;
 }
 
-}  // namespace auto_melee
+static void try_auto_disarm()
+{
+        P pos_to_disarm {-1, -1};
+
+        for (const P& d : dir_utils::g_dir_list) {
+                const P p_adj = map::g_player->m_pos + d;
+
+                if (!map::g_seen.at(p_adj)) {
+                        continue;
+                }
+
+                const terrain::Terrain* const terrain = map::g_terrain.at(p_adj);
+
+                if (terrain->is_hidden()) {
+                        continue;
+                }
+
+                if (terrain->id() != terrain::Id::trap) {
+                        continue;
+                }
+
+                const auto* const trap = static_cast<const terrain::Trap*>(terrain);
+
+                if (trap->is_magical()) {
+                        // Magical traps cannot be disarmed normally.
+                        continue;
+                }
+
+                if (trap->has_started_trigger()) {
+                        // A trap that has started triggering cannot be disarmed.
+                        continue;
+                }
+
+                pos_to_disarm = terrain->pos();
+
+                break;
+        }
+
+        if (pos_to_disarm.x == -1) {
+                return;
+        }
+
+        disarm::player_disarm_at_pos(pos_to_disarm);
+}
+
+// -----------------------------------------------------------------------------
+// auto_interace
+// -----------------------------------------------------------------------------
+namespace auto_interact
+{
+void run()
+{
+        map::update_vision();
+
+        bool did_interact = try_auto_melee();
+
+        if (did_interact) {
+                return;
+        }
+
+        try_auto_disarm();
+}
+
+}  // namespace auto_interact
