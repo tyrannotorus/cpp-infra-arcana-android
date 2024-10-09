@@ -602,6 +602,7 @@ void init()
         s_options.emplace_back(std::make_unique<MasterVolumeOption>());
         s_options.emplace_back(std::make_unique<AmbientAudioEnabledOption>());
         s_options.emplace_back(std::make_unique<PreloadAmbientAudioOption>());
+        s_options.emplace_back(std::make_unique<AudioBufferSizeOption>());
 
         // Input
         s_options.emplace_back(std::make_unique<InputModeOption>());
@@ -1057,6 +1058,58 @@ void PreloadAmbientAudioOption::change(const OptionChangeCommand command) const
         (void)command;
 
         s_is_ambient_audio_preloaded = !s_is_ambient_audio_preloaded;
+}
+
+std::string AudioBufferSizeOption::name() const
+{
+        return "Audio buffer size";
+}
+
+std::string AudioBufferSizeOption::descr() const
+{
+        return (
+                "Lower values decrease latency, but may cause "
+                "sound crackling (audio buffer underruns) "
+                "on devices with slow CPU.\n"
+                "Increase it to get smoother sound, "
+                "but with the cost of increasing sound delay.\n"
+                "Changing this option requires restarting the game.");
+}
+
+std::string AudioBufferSizeOption::value_str() const
+{
+        return std::to_string(s_audio_buffer_size);
+}
+
+OptionSubmenuType AudioBufferSizeOption::submenu_type() const
+{
+        return OptionSubmenuType::audio;
+}
+
+void AudioBufferSizeOption::change(const OptionChangeCommand command) const
+{
+        const Range allowed_range(512, 4096);
+
+        if ((command == OptionChangeCommand::enter) ||
+            (command == OptionChangeCommand::right)) {
+                // Enter or right
+                s_audio_buffer_size <<= 1;
+        }
+        else {
+                // Left
+                s_audio_buffer_size >>= 1;
+        }
+
+        s_audio_buffer_size =
+                std::clamp(
+                        s_audio_buffer_size,
+                        allowed_range.min,
+                        allowed_range.max);
+
+        TRACE
+                << "Audio buffer size: "
+                << s_audio_buffer_size
+                << std::endl;
 }
 
 std::string InputModeOption::name() const
