@@ -75,6 +75,7 @@ bool use_trap_color_when_obscured();
 int master_volume_pct();
 bool is_ambient_audio_enabled();
 bool is_ambient_audio_preloaded();
+int audio_buffer_size();
 bool is_bot_playing();
 void enable_bot_playing();
 void toggle_bot_playing();

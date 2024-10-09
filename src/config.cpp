@@ -94,6 +94,7 @@ static int s_master_volume_pct_option = 100;
 static int s_master_volume_pct_adjusted = 100;
 static bool s_is_ambient_audio_enabled = false;
 static bool s_is_ambient_audio_preloaded = false;
+static int s_audio_buffer_size = 512;
 static int s_window_px_w = -1;
 static int s_window_px_h = -1;
 static int s_gui_cell_px_w = -1;
@@ -295,6 +296,7 @@ static void set_default_variables()
         s_master_volume_pct_option = s_master_volume_pct_adjusted = 100;
         s_is_ambient_audio_enabled = true;
         s_is_ambient_audio_preloaded = false;
+        s_audio_buffer_size = 512;
         s_renderer_type = RendererType::auto_select;
         s_is_fullscreen = true;
         s_video_scale_factor = calc_default_video_scale_factor(native_res);
@@ -374,6 +376,9 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         remove_line(lines);
 
         s_is_ambient_audio_preloaded = lines.front() == "1";
+        remove_line(lines);
+
+        s_audio_buffer_size = to_int(lines.front());
         remove_line(lines);
 
         s_input_mode = (InputMode)to_int(lines.front());
@@ -502,6 +507,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(std::to_string(s_master_volume_pct_adjusted));
         lines.emplace_back(s_is_ambient_audio_enabled ? "1" : "0");
         lines.emplace_back(s_is_ambient_audio_preloaded ? "1" : "0");
+        lines.push_back(std::to_string(s_audio_buffer_size));
         lines.push_back(std::to_string((int)s_input_mode));
         lines.push_back(std::to_string(s_window_px_w));
         lines.push_back(std::to_string(s_window_px_h));
@@ -757,6 +763,11 @@ bool is_ambient_audio_enabled()
 bool is_ambient_audio_preloaded()
 {
         return s_is_ambient_audio_preloaded;
+}
+
+int audio_buffer_size()
+{
+        return s_audio_buffer_size;
 }
 
 bool is_bot_playing()

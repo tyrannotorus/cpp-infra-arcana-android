@@ -508,7 +508,7 @@ void init_sdl()
         const int audio_freq = 44100;
         const Uint16 audio_format = MIX_DEFAULT_FORMAT;
         const int audio_channels = MIX_DEFAULT_CHANNELS;
-        const int audio_buffers = 512;
+        const int audio_buffers = config::audio_buffer_size();
 
         const int result =
                 Mix_OpenAudio(
