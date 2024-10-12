@@ -105,7 +105,8 @@ static const std::unordered_map<std::string, SpellId> s_str_to_spell_id_map = {
         {"SPELL_SLOW", SpellId::slow},
         {"SPELL_SPECTRAL_WEAPONS", SpellId::spectral_weapons},
         {"SPELL_SPELL_SHIELD", SpellId::spell_shield},
-        {"SPELL_SUMMON", SpellId::summon},
+        {"SPELL_SUMMON_RANDOM", SpellId::summon_random},
+        {"SPELL_SUMMON_WATER_CREATURE", SpellId::summon_water_creature},
         {"SPELL_SUMMON_TENTACLES", SpellId::summon_tentacles},
         {"SPELL_TELEPORT", SpellId::teleport},
         {"SPELL_TERRIFY", SpellId::terrify},
@@ -859,11 +860,14 @@ Spell* make(const SpellId spell_id)
         case SpellId::aza_gaze:
                 return new SpellAzaGaze();
 
-        case SpellId::summon:
-                return new SpellSummonMon();
+        case SpellId::summon_random:
+                return new SpellSummon(new SummonRandom);
+
+        case SpellId::summon_water_creature:
+                return new SpellSummon(new SummonWaterCreature);
 
         case SpellId::summon_tentacles:
-                return new SpellSummonTentacles();
+                return new SpellSummon(new SummonTentacles);
 
         case SpellId::heal:
                 return new SpellHeal();
@@ -4602,9 +4606,41 @@ bool SpellDisease::allow_mon_cast_now(
 }
 
 // -----------------------------------------------------------------------------
-// Summon monster
+// Summon spells
 // -----------------------------------------------------------------------------
-void SpellSummonMon::run_effect(
+std::vector<std::string> SummonWaterCreature::filter_allowed_ids(
+        const std::vector<std::string>& summon_bucket) const
+{
+        // Return all creatures with the "water creature" property.
+        std::vector<std::string> result;
+
+        std::copy_if(
+                std::cbegin(summon_bucket),
+                std::cend(summon_bucket),
+                std::back_inserter(result),
+                [](const std::string& id) {
+                        const actor::ActorData& data = actor::g_data.at(id);
+
+                        return data.natural_props[(size_t)prop::Id::water_creature];
+                });
+
+        return result;
+}
+
+std::vector<std::string> SummonTentacles::filter_allowed_ids(
+        const std::vector<std::string>& summon_bucket) const
+{
+        (void)summon_bucket;
+
+        return {"MON_TENTACLE_CLUSTER"};
+}
+
+std::string SummonTentacles::appear_msg_override() const
+{
+        return "Monstrous tentacles rise up from the ground!";
+}
+
+void SpellSummon::run_effect(
         actor::Actor* const caster,
         const SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
@@ -4613,40 +4649,43 @@ void SpellSummonMon::run_effect(
 
         Range mon_dlvl_range = get_allowed_mon_dlvl_range(skill);
 
-        std::vector<std::string> summon_bucket =
-                make_summon_bucket(mon_dlvl_range);
+        TRACE
+                << "Allowed monster dungeon level range: "
+                << "'" << mon_dlvl_range.str() << "'"
+                << std::endl;
+
+        std::vector<std::string> summon_bucket = make_summon_bucket(mon_dlvl_range);
 
         if (summon_bucket.empty()) {
-                // No eligible monsters found, try again but allow monsters from
-                // as early depth as possible.
+                TRACE
+                        << "No eligible monsters found, trying again with monsters allowed "
+                           "from depth 0."
+                        << std::endl;
 
                 mon_dlvl_range.min = 0;
+
+                TRACE
+                        << "Allowed monster dungeon level range: "
+                        << "'" << mon_dlvl_range.str() << "'"
+                        << std::endl;
 
                 summon_bucket = make_summon_bucket(mon_dlvl_range);
         }
 
         if (summon_bucket.empty()) {
-                TRACE
-                        << "No elligible monsters found for spawning"
-                        << std::endl;
+                TRACE << "No elligible monsters found for spawning" << std::endl;
 
                 ASSERT(false);
 
                 return;
         }
 
-#ifndef NDEBUG
-        for (const std::string& id : summon_bucket) {
-                ASSERT(actor::g_data[id].can_be_summoned_by_mon);
-        }
-#endif  // NDEBUG
-
         const auto id = rnd::element(summon_bucket);
 
         summon(id, caster);
 }
 
-Range SpellSummonMon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
+Range SpellSummon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
 {
         Range dlvl_range;
 
@@ -4668,6 +4707,7 @@ Range SpellSummonMon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
                 break;
         }
 
+        // Cap min and max to current dungeon level + 2
         const int dlvl = map::g_dlvl + 2;
 
         dlvl_range.min = std::min(dlvl_range.min, dlvl);
@@ -4676,7 +4716,7 @@ Range SpellSummonMon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
         return dlvl_range;
 }
 
-std::vector<std::string> SpellSummonMon::make_summon_bucket(
+std::vector<std::string> SpellSummon::make_summon_bucket(
         const Range& dlvl_range) const
 {
         std::vector<std::string> summon_bucket;
@@ -4688,31 +4728,39 @@ std::vector<std::string> SpellSummonMon::make_summon_bucket(
                         continue;
                 }
 
-                // NOTE: The "min" dungeon level in the monster data is used
-                // here as a general "strength" of the monster. The "max"
-                // dungeon level is not considered.
+                // NOTE: The "min" dungeon level in the monster data is used here as a general
+                // "strength" of the monster. The "max" dungeon level is not considered.
                 const int mon_dlvl = data.spawn_min_dlvl;
 
-                if (!dlvl_range.is_in_range(mon_dlvl)) {
+                if ((mon_dlvl != -1) && !dlvl_range.is_in_range(mon_dlvl)) {
                         continue;
                 }
 
                 summon_bucket.push_back(data.id);
         }
 
+        TRACE
+                << "Number of monsters allowed before specific filtering: "
+                << "'" << summon_bucket.size() << "'"
+                << std::endl;
+
+        summon_bucket = m_impl->filter_allowed_ids(summon_bucket);
+
+        TRACE
+                << "Number of monsters allowed after specific filtering: "
+                << "'" << summon_bucket.size() << "'"
+                << std::endl;
+
         return summon_bucket;
 }
 
-void SpellSummonMon::summon(const std::string& id, actor::Actor* caster) const
+void SpellSummon::summon(const std::string& id, actor::Actor* caster) const
 {
-        auto* const caster_leader = caster->m_leader;
+        actor::Actor* const caster_leader = caster->m_leader;
 
-        auto* const leader =
-                caster_leader
-                ? caster_leader
-                : caster;
+        actor::Actor* const leader = caster_leader ? caster_leader : caster;
 
-        const auto summoned =
+        const actor::MonSpawnResult summoned =
                 actor::spawn(
                         caster->m_pos,
                         {id},
@@ -4739,97 +4787,26 @@ void SpellSummonMon::summon(const std::string& id, actor::Actor* caster) const
                 return;
         }
 
-        auto* const mon = summoned.monsters[0];
+        actor::Actor* const mon = summoned.monsters[0];
 
         if (actor::can_player_see_actor(*mon)) {
-                msg_log::add(
-                        text_format::first_to_upper(actor::name_a(*mon)) +
-                        " appears!");
+                std::string appear_msg = m_impl->appear_msg_override();
+
+                if (appear_msg.empty()) {
+                        const std::string mon_name_a =
+                                text_format::first_to_upper(
+                                        actor::name_a(*mon));
+
+                        appear_msg = mon_name_a + " appears!";
+                }
+
+                msg_log::add(appear_msg);
 
                 actor::make_player_aware_mon(*mon);
         }
 }
 
-bool SpellSummonMon::allow_mon_cast_now(
-        const actor::Actor& mon,
-        const std::vector<actor::Actor*>& seen_targets) const
-{
-        // Always allow casting with a visible target.
-        if (!seen_targets.empty()) {
-                return true;
-        }
-
-        // Sometimes allow casting if monster has an unseen target.
-        if (mon.m_ai_state.target && rnd::one_in(30)) {
-                return true;
-        }
-
-        return false;
-}
-
-// -----------------------------------------------------------------------------
-// Summon tentacles
-// -----------------------------------------------------------------------------
-void SpellSummonTentacles::run_effect(
-        actor::Actor* const caster,
-        const SpellSkill skill,
-        const std::vector<actor::Actor*>& seen_targets) const
-{
-        (void)skill;
-        (void)seen_targets;
-
-        actor::Actor* leader = nullptr;
-
-        if (actor::is_player(caster)) {
-                leader = caster;
-        }
-        else {
-                // Caster is monster
-                actor::Actor* const caster_leader = caster->m_leader;
-
-                leader =
-                        caster_leader
-                        ? caster_leader
-                        : caster;
-        }
-
-        const auto summoned =
-                actor::spawn(
-                        caster->m_pos,
-                        {"MON_TENTACLE_CLUSTER"},
-                        map::rect())
-                        .make_aware_of_player()
-                        .set_leader(leader);
-
-        std::for_each(
-                std::begin(summoned.monsters),
-                std::end(summoned.monsters),
-                [](auto* const mon) {
-                        mon->m_properties.apply(
-                                prop::make(prop::Id::summoned));
-
-                        auto* prop_waiting =
-                                prop::make(prop::Id::waiting);
-
-                        prop_waiting->set_duration(2);
-
-                        mon->m_properties.apply(prop_waiting);
-                });
-
-        if (summoned.monsters.empty()) {
-                return;
-        }
-
-        auto* const mon = summoned.monsters[0];
-
-        if (actor::can_player_see_actor(*mon)) {
-                msg_log::add("Monstrous tentacles rise up from the ground!");
-
-                actor::make_player_aware_mon(*mon);
-        }
-}
-
-bool SpellSummonTentacles::allow_mon_cast_now(
+bool SpellSummon::allow_mon_cast_now(
         const actor::Actor& mon,
         const std::vector<actor::Actor*>& seen_targets) const
 {

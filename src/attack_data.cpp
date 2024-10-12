@@ -280,8 +280,6 @@ MeleeAttData::MeleeAttData(
         if (config::is_gj_mode() && attacker && actor::is_player(defender)) {
                 dmg_range = dmg_range.scaled_pct(200);
         }
-
-        TRACE << "########### " << hit_chance_tot << std::endl;
 }
 
 RangedAttData::RangedAttData(

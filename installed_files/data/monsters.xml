@@ -1462,7 +1462,7 @@
             <spell skill="SPELLSKILL_EXPERT">SPELL_TELEPORT</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL_OTHERS</spell>
-            <spell skill="SPELLSKILL_EXPERT">SPELL_SUMMON</spell>
+            <spell skill="SPELLSKILL_EXPERT">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_DARKBOLT</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SPELL_SHIELD</spell>
@@ -1959,7 +1959,7 @@
             <spell skill="SPELLSKILL_BASIC" percent_chance="75">SPELL_SLOW</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="75">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_TELEPORT</spell>
-            <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_SUMMON</spell>
+            <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_AZA_GAZE</spell>
         </spells>
@@ -2060,7 +2060,7 @@
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SLOW</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_TELEPORT</spell>
-            <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SUMMON</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_AZA_GAZE</spell>
         </spells>
@@ -2161,7 +2161,7 @@
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_SLOW</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_TELEPORT</spell>
-            <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_SUMMON</spell>
+            <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_AZA_GAZE</spell>
         </spells>
@@ -3304,6 +3304,7 @@
             <property>PROP_R_POISON</property>
             <property>PROP_R_DISEASE</property>
             <property>PROP_DARKVISION</property>
+            <property>PROP_WATER_CREATURE</property>
         </properties>
 
         <ai>
@@ -8132,6 +8133,120 @@
     </monster>
 
     <!--************************************************************-->
+    <!-- MON_LEVIATHAN -->
+    <!--************************************************************-->
+    <monster id="MON_LEVIATHAN">
+        <text>
+            <name_a>Leviathan</name_a>
+            <name_the>Leviathan</name_the>
+            <corpse_name_a>the corpse of Leviathan</corpse_name_a>
+            <corpse_name_the>the corpse of Leviathan</corpse_name_the>
+            <description>The embodiment of chaos and terror. Its colossal body drags sickly through the vast hollows of the earth, corrupting the air with a hateful stench. By its breath it conjures the crushing waters of the deepest oceans and the wrathful thunder of the blackest storms.</description>
+            <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
+            <allow_speed_description>true</allow_speed_description>
+            <wary_message>seems disturbed.</wary_message>
+            <smell_message>The air is heavy with a fetid, viscous odor.</smell_message>
+            <aware_message_seen></aware_message_seen>
+            <aware_message_hidden></aware_message_hidden>
+            <spell_message>makes a roaring noise</spell_message>
+        </text>
+
+        <graphics>
+            <tile>TILE_CHTHONIAN</tile>
+            <character>W</character>
+            <color>COLOR_LIGHT_BLUE</color>
+        </graphics>
+
+        <audio>
+            <aware_sfx_seen></aware_sfx_seen>
+            <aware_sfx_hidden></aware_sfx_hidden>
+        </audio>
+
+        <attributes>
+            <hit_points>500</hit_points>
+            <spirit>80</spirit>
+            <speed>MONSPEED_SLOW</speed>
+            <shock_level>MONSHOCK_MIND_SHATTERING</shock_level>
+            <melee>80</melee>
+            <ranged>120</ranged>
+            <dodging>0</dodging>
+            <stealth>0</stealth>
+            <searching>0</searching>
+            <can_open_doors>false</can_open_doors>
+            <can_bash_doors>true</can_bash_doors>
+            <size>MONSIZE_GIANT</size>
+            <always_prevent_knockback>true</always_prevent_knockback>
+            <can_bleed>true</can_bleed>
+            <can_leave_corpse>true</can_leave_corpse>
+            <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
+        </attributes>
+
+        <attacks>
+            <attack id="ITEMINTR_WATER_BREATH">
+                <damage>16</damage>
+                <property_applied duration="30">PROP_CONFUSED</property_applied>
+            </attack>
+            <attack id="ITEMINTR_LIGHTNING_BREATH">
+                <damage>13</damage>
+                <property_applied duration="2">PROP_PARALYZED</property_applied>
+            </attack>
+            <attack id="ITEMINTR_BITE">
+                <damage>30</damage>
+            </attack>
+        </attacks>
+
+        <spells>
+            <spell skill="SPELLSKILL_MASTER">SPELL_CURSE</spell>
+            <spell skill="SPELLSKILL_MASTER">SPELL_MI_GO_HYPNO</spell>
+            <spell skill="SPELLSKILL_MASTER">SPELL_SUMMON_WATER_CREATURE</spell>
+        </spells>
+
+        <properties>
+            <property>PROP_R_CONF</property>
+            <property>PROP_R_FIRE</property>
+            <property>PROP_R_POISON</property>
+            <property>PROP_R_ELEC</property>
+            <property>PROP_R_FEAR</property>
+            <property>PROP_R_DISEASE</property>
+            <property>PROP_R_PARA</property>
+            <property>PROP_R_FEAR</property>
+            <property>PROP_DARKVISION</property>
+            <property>PROP_WATER_CREATURE</property>
+        </properties>
+
+        <ai>
+            <erratic_move_percent>15</erratic_move_percent>
+            <turns_aware>15</turns_aware>
+            <ranged_cooldown_turns>1</ranged_cooldown_turns>
+            <is_pausing_on_player_seen>false</is_pausing_on_player_seen>
+            <looks>true</looks>
+            <avoids_blocking_friend>false</avoids_blocking_friend>
+            <attacks>true</attacks>
+            <paths_to_target_when_aware>true</paths_to_target_when_aware>
+            <moves_to_target_when_los>true</moves_to_target_when_los>
+            <moves_to_lair>false</moves_to_lair>
+            <moves_to_leader>false</moves_to_leader>
+            <moves_randomly_when_unaware>true</moves_randomly_when_unaware>
+        </ai>
+
+        <spawning>
+            <min_dungeon_level>26</min_dungeon_level>
+            <max_dungeon_level>-1</max_dungeon_level>
+            <spawn_weight>100</spawn_weight>
+            <auto_spawn>true</auto_spawn>
+            <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
+            <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
+            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <native_room>ROOM_PLAIN</native_room>
+            <native_room>ROOM_CAVE</native_room>
+            <native_room>ROOM_CHASM</native_room>
+            <native_room>ROOM_DAMP</native_room>
+            <native_room>ROOM_POOL</native_room>
+        </spawning>
+    </monster>
+
+    <!--************************************************************-->
     <!-- MON_CHTHONIAN -->
     <!--************************************************************-->
     <monster id="MON_CHTHONIAN">
@@ -9475,7 +9590,7 @@
 
         <spells>
             <spell skill="SPELLSKILL_MASTER">SPELL_DARKBOLT</spell>
-            <spell skill="SPELLSKILL_MASTER">SPELL_SUMMON</spell>
+            <spell skill="SPELLSKILL_MASTER">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_BURN</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_SPELL_SHIELD</spell>

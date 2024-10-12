@@ -85,7 +85,8 @@ enum class SpellId
         disease,
         knockback,
         mi_go_hypno,
-        summon,
+        summon_random,
+        summon_water_creature,
         summon_tentacles,
         heal_others,
 
@@ -690,9 +691,7 @@ class SpellBolt : public Spell
 {
 public:
         SpellBolt(BoltImpl* impl) :
-
-                m_impl(impl)
-        {}
+                m_impl(impl) {}
 
         bool allow_mon_cast_now(
                 const actor::Actor& mon,
@@ -2519,10 +2518,87 @@ private:
         }
 };
 
-class SpellSummonMon : public Spell
+class SummonImpl
 {
 public:
-        SpellSummonMon() = default;
+        virtual ~SummonImpl() = default;
+
+        virtual SpellId id() const = 0;
+
+        // NOTE: The input to this function is any summonable monster within a certain level range
+        // depending on the monsters skill level.
+        virtual std::vector<std::string> filter_allowed_ids(
+                const std::vector<std::string>& summon_bucket) const = 0;
+
+        virtual int mon_cooldown() const
+        {
+                return 8;
+        }
+
+        virtual std::string appear_msg_override() const
+        {
+                return "";
+        }
+};
+
+class SummonRandom : public SummonImpl
+{
+public:
+        SummonRandom() = default;
+
+        SpellId id() const override
+        {
+                return SpellId::summon_random;
+        }
+
+        std::vector<std::string> filter_allowed_ids(
+                const std::vector<std::string>& summon_bucket) const override
+        {
+                // No specific filtering.
+                return summon_bucket;
+        }
+};
+
+class SummonWaterCreature : public SummonImpl
+{
+public:
+        SummonWaterCreature() = default;
+
+        SpellId id() const override
+        {
+                return SpellId::summon_water_creature;
+        }
+
+        std::vector<std::string> filter_allowed_ids(
+                const std::vector<std::string>& summon_bucket) const override;
+};
+
+class SummonTentacles : public SummonImpl
+{
+public:
+        SummonTentacles() = default;
+
+        SpellId id() const override
+        {
+                return SpellId::summon_tentacles;
+        }
+
+        std::vector<std::string> filter_allowed_ids(
+                const std::vector<std::string>& summon_bucket) const override;
+
+        int mon_cooldown() const override
+        {
+                return 3;
+        }
+
+        std::string appear_msg_override() const override;
+};
+
+class SpellSummon : public Spell
+{
+public:
+        SpellSummon(SummonImpl* impl) :
+                m_impl(impl) {}
 
         bool allow_mon_cast_now(
                 const actor::Actor& mon,
@@ -2545,7 +2621,7 @@ public:
 
         SpellId id() const override
         {
-                return SpellId::summon;
+                return m_impl->id();
         }
 
         SpellDomain domain() const override
@@ -2589,83 +2665,16 @@ private:
                 return true;
         }
 
+        // NOTE: There is no way for the summon implementation classes to control the allowed
+        // dungeon level range of the monsters. For spells that should summon a specific monster,
+        // make sure that the monster is in range for the summoners spell skill!
         Range get_allowed_mon_dlvl_range(SpellSkill skill) const;
 
-        std::vector<std::string> make_summon_bucket(
-                const Range& dlvl_range) const;
+        std::vector<std::string> make_summon_bucket(const Range& dlvl_range) const;
 
         void summon(const std::string& id, actor::Actor* caster) const;
-};
 
-class SpellSummonTentacles : public Spell
-{
-public:
-        SpellSummonTentacles() = default;
-
-        bool allow_mon_cast_now(
-                const actor::Actor& mon,
-                const std::vector<actor::Actor*>& seen_targets) const override;
-
-        int mon_cooldown() const override
-        {
-                return 3;
-        }
-
-        bool player_can_learn() const override
-        {
-                return false;
-        }
-
-        std::string name() const override
-        {
-                return "";
-        }
-
-        SpellId id() const override
-        {
-                return SpellId::summon_tentacles;
-        }
-
-        SpellDomain domain() const override
-        {
-                return SpellDomain::END;
-        }
-
-        SpellShock shock_type() const override
-        {
-                return SpellShock::disturbing;
-        }
-
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
-        {
-                (void)skill;
-
-                return {};
-        }
-
-        void run_effect(
-                actor::Actor* caster,
-                SpellSkill skill,
-                const std::vector<actor::Actor*>& seen_targets) const override;
-
-private:
-        int base_max_cost(
-                const SpellSkill skill,
-                const actor::Actor* const caster) const override
-        {
-                (void)skill;
-                (void)caster;
-
-                return 6;
-        }
-
-        bool is_noisy(const SpellSkill skill) const override
-        {
-                (void)skill;
-
-                return false;
-        }
+        std::unique_ptr<SummonImpl> m_impl;
 };
 
 class SpellHeal : public Spell

@@ -208,6 +208,9 @@ Prop* make(const prop::Id id)
         case prop::Id::burrowing:
                 return new Burrowing();
 
+        case prop::Id::water_creature:
+                return new Prop(id);
+
         case prop::Id::radiant_self:
                 return new Prop(id);
 

@@ -1903,21 +1903,20 @@ void Liquid::bump(actor::Actor& actor_bumping)
 {
         const prop::PropHandler& props = actor_bumping.m_properties;
 
-        // HACK: Explicit exception for monster ID MON_WATER_HOUND.
         if (props.has(prop::Id::ethereal) ||
             props.has(prop::Id::flying) ||
             props.has(prop::Id::tiny_flying) ||
-            actor_bumping.m_data->is_amphibian ||
-            (actor::id(actor_bumping) == "MON_WATER_HOUND")) {
+            props.has(prop::Id::water_creature) ||
+            actor_bumping.m_data->is_amphibian) {
                 return;
         }
 
         if (!props.has(prop::Id::crimson_passage)) {
                 actor_bumping.m_properties.apply(prop::make(prop::Id::delayed_by_liquid));
 
-                // Print message if player, unless player is wearing torture
-                // collar (in that case the message is redundant since the
-                // player is delayed on every move they make anyway).
+                // Print message if player, unless player is wearing torture collar (in that case
+                // the message is redundant since the player is delayed on every move they make
+                // anyway).
                 if (actor::is_player(&actor_bumping) &&
                     !map::g_player->m_inv.has_item_in_slot(
                             SlotId::head,

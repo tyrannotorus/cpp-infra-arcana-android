@@ -29,9 +29,9 @@ enum class Id
         r_breath,
         r_disease,
         r_shock,
-        // NOTE: The purpose of this is only to prevent blindness for "eyeless"
-        // monsters (e.g. constructs such as animated weapons), and is only
-        // intended as a natural property - not for e.g. gas masks.
+        // NOTE: The purpose of this is only to prevent blindness for "eyeless" monsters
+        // (e.g. constructs such as animated weapons), and is only intended as a natural property -
+        // not for e.g. gas masks.
         r_blind,
         r_para,  // Mostly intended as a natural property for monsters
         r_spell,
@@ -96,19 +96,19 @@ enum class Id
         frenzies_self,       // E.g. Apes
         frenzies_followers,  // E.g. Pickman
         summons_locusts,     // Khephren ability
-        // Monster with this property terrifies other monsters with this
-        // property on death ("cowardly monsters", e.g. Troglodytes).
+        // Monster with this property terrifies other monsters with this property on death
+        // ("cowardly monsters", e.g. Troglodytes).
         others_terrified_on_death,
 
-        // Properties describing the actors body or method of moving around.
-        // These affect which terrain types the actor can move through, but
-        // may have other effects as well.
+        // Properties describing the actors body or method of moving around.  These affect which
+        // terrain types the actor can move through, but may have other effects as well.
         flying,
         tiny_flying,  // E.g. Locusts
         ethereal,
         ooze,
         small_crawling,
         burrowing,
+        water_creature,  // E.g. Water Hounds, Leviathan
 
         // Properties mostly used for AI control.
         waiting,  // Prevent acting - also used for player
@@ -117,8 +117,7 @@ enum class Id
         disabled_ranged,
         melee_cooldown,  // After a melee attack, cannot attack again for a while.
 
-        // Properties for supporting specific game mechanics (NOT intended to be
-        // used in a general way).
+        // Properties for specific game mechanics (NOT intended to be used in a general way).
         descend,
         zuul_possess_priest,
         possessed_by_zuul,
