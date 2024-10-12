@@ -59,7 +59,7 @@ struct DmgResistData
 {
         bool is_resisted {false};
         std::string msg_resist_player {};
-        // Not including monster name, e.g. " seems unaffected"
+        // Not including monster name, e.g. "seems unaffected"
         std::string msg_resist_mon {};
 };
 

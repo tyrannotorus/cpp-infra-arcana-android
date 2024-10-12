@@ -355,7 +355,7 @@ protected:
 
         void try_start_burning(Verbose verbose);
 
-        virtual DidTriggerTrap trigger_trap(actor::Actor* const actor)
+        virtual DidTriggerTrap trigger_trap(actor::Actor* actor)
         {
                 (void)actor;
 

@@ -338,9 +338,8 @@ bool Trap::try_init_type(const TrapId id)
         else {
                 // Make a specific trap type.
 
-                // NOTE: This may fail, in which case we have no trap
-                // implementation. The trap creator is responsible for handling
-                // this situation.
+                // NOTE: This may fail, in which case we have no trap implementation. The trap
+                // creator is responsible for handling this situation.
                 m_trap_impl = try_make_impl(id, m_pos, this);
         }
 
@@ -390,7 +389,11 @@ void Trap::on_new_turn_hook()
                         << m_nr_turns_until_trigger << std::endl;
 
                 if (m_nr_turns_until_trigger == 0) {
-                        // NOTE: This will reset number of turns until triggered
+                        // NOTE: This will reset number of turns until triggered.
+
+                        // NOTE: Traps do not care about the actor in this function call, they only
+                        // consider the actor standing on the trap.
+
                         trigger_trap(nullptr);
                 }
         }
@@ -400,7 +403,16 @@ void Trap::trigger_start(const actor::Actor* actor)
 {
         TRACE_FUNC_BEGIN;
 
-        ASSERT(m_trap_impl);
+        if (!m_trap_impl) {
+                ASSERT(false);
+
+                return;
+        }
+
+        m_trigger_revealed_status =
+                m_is_hidden
+                ? TriggerRevealedStatus::triggered_hidden
+                : TriggerRevealedStatus::triggered_known;
 
         TRACE
                 << "Start trigger for trap of type "
@@ -410,7 +422,7 @@ void Trap::trigger_start(const actor::Actor* actor)
                 << std::endl;
 
         if (actor::is_player(actor)) {
-                // Reveal trap if triggered by player stepping on it
+                // Reveal trap if triggered by player stepping on it.
                 if (is_hidden()) {
                         reveal(PrintRevealMsg::no);
                 }
@@ -427,13 +439,13 @@ void Trap::trigger_start(const actor::Actor* actor)
                 communicate_mechanical_trap_trigger(*actor, m_pos);
         }
 
-        // Get a randomized value for number of remaining turns
+        // Get a randomized value for number of remaining turns.
         const Range turns_range = m_trap_impl->nr_turns_range_to_trigger();
 
         const int rnd_nr_turns = turns_range.roll();
 
-        // Set number of remaining turns to the randomized value if not set
-        // already, or if the new value will make it trigger sooner
+        // Set number of remaining turns to the randomized value if not set already, or if the new
+        // value will make it trigger sooner.
         if ((m_nr_turns_until_trigger == -1) ||
             (rnd_nr_turns < m_nr_turns_until_trigger)) {
                 m_nr_turns_until_trigger = rnd_nr_turns;
@@ -441,9 +453,12 @@ void Trap::trigger_start(const actor::Actor* actor)
 
         ASSERT(m_nr_turns_until_trigger >= 0);
 
-        // If number of remaining turns is zero, trigger immediately
+        // If number of remaining turns is zero, trigger immediately.
         if (m_nr_turns_until_trigger == 0) {
-                // NOTE: This will reset number of turns until triggered
+                // NOTE: This will reset number of turns until triggered.
+
+                // NOTE: Traps do not care about the actor in this function call, they only consider
+                // the actor standing on the trap.
                 trigger_trap(nullptr);
         }
 
@@ -491,8 +506,8 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
                                 : AllowAction::yes);
         }
         else {
-                // The trap is hidden, or would not be triggered by the player -
-                // delegate the question to the mimicked terrain.
+                // The trap is hidden, or would not be triggered by the player - delegate the
+                // question to the mimicked terrain.
 
                 const AllowAction result =
                         m_mimic_terrain->pre_bump(actor_bumping);
@@ -520,11 +535,10 @@ void Trap::bump(actor::Actor& actor_bumping)
         }
 
         if (!actor::is_player(&actor_bumping)) {
-                // TODO: This seems to prevent the trap from triggering when the
-                // player kicks a monster into the trap in some cases? Perhaps
-                // when the monster has just stepped into sight of the player?
-                // The problem can happen both when the monster is aware or
-                // unaware?
+                // TODO: This seems to prevent the trap from triggering when the player kicks a
+                // monster into the trap in some cases? Perhaps when the monster has just stepped
+                // into sight of the player?  The problem can happen both when the monster is aware
+                // or unaware?
 
                 // Put some extra restrictions on monsters triggering traps.
                 if (!actor_bumping.m_ai_state.is_target_seen ||
@@ -579,7 +593,7 @@ void Trap::destroy()
         }
 }
 
-DidTriggerTrap Trap::trigger_trap(actor::Actor* const actor)
+DidTriggerTrap Trap::trigger_trap(actor::Actor* actor)
 {
         TRACE_FUNC_BEGIN;
 
@@ -647,6 +661,10 @@ void Trap::on_revealed_from_searching()
         if (type() != TrapId::web) {
                 game::incr_player_xp(g_xp_on_reveal_trap);
         }
+
+        // In case the trap was revealed after it had started triggering, set the trigger revealed
+        // status to state that it was triggered in known status.
+        m_trigger_revealed_status = TriggerRevealedStatus::triggered_known;
 }
 
 std::string Trap::name(const Article article) const
@@ -735,9 +753,8 @@ TrapPlacementValid TrapDart::on_place()
 
                         if (!is_passable &&
                             ((i < nr_steps_min) || !is_wall)) {
-                                // We are blocked too early - OR - blocked by a
-                                // terrain other than a wall. Give up on this
-                                // direction.
+                                // We are blocked too early - OR - blocked by a terrain other than a
+                                // wall. Give up on this direction.
                                 break;
                         }
 
@@ -1071,9 +1088,8 @@ void TrapHpSap::trigger()
         auto* const hp_sap = static_cast<prop::HpSap*>(prop::make(prop::Id::hp_sap));
 
         if (!actor::is_player(actor_here)) {
-                // This is a monster triggering the trap - drain half of the
-                // monsters hit points instead, so that this trap will actually
-                // have a tangible effect.
+                // This is a monster triggering the trap - drain half of the monsters hit points
+                // instead, so that this trap will actually have a tangible effect.
                 const int max_hp = actor::max_hp(*actor_here);
 
                 hp_sap->set_nr_drained(max_hp / 2);
@@ -1195,17 +1211,42 @@ void TrapWeb::trigger()
                 return;
         }
 
+        // Machetes cut down spider webs - if the player has a machete and the trap was already
+        // known, do not apply entanglement.
+        if (actor::is_player(actor_here) &&
+            (m_base_trap->trigger_revealed_status() == TriggerRevealedStatus::triggered_known)) {
+                item::Item* item = actor_here->m_inv.item_in_slot(SlotId::wpn);
+
+                if (item && (item->id() == item::Id::machete)) {
+                        msg_log::add(
+                                "I cut myself free with my Machete.",
+                                colors::text(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::no);
+
+                        return;
+                }
+        }
+
         if (actor::is_player(actor_here)) {
+                std::string msg;
                 if (actor_here->m_properties.allow_see()) {
-                        msg_log::add("I am entangled in a spider web!");
+                        msg = "I am entangled in a spider web!";
                 }
                 else {
                         // Cannot see
-                        msg_log::add("I am entangled in a sticky mass of threads!");
+                        msg = "I am entangled in a sticky mass of threads!";
                 }
+
+                msg_log::add(
+                        msg,
+                        colors::text(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::yes);
         }
         else {
                 // Is a monster
+
                 if (actor::can_player_see_actor(*actor_here)) {
                         const std::string actor_name =
                                 text_format::first_to_upper(
@@ -1219,16 +1260,17 @@ void TrapWeb::trigger()
 
         entangled->set_indefinite();
 
-        actor_here->m_properties.apply(
-                entangled,
-                prop::PropSrc::intr,
-                false,
-                Verbose::no);
+        actor_here->m_properties.apply(entangled, prop::PropSrc::intr, false, Verbose::no);
 
-        // Players getting stuck in spider webs alerts all spiders
+        // Players getting stuck in spider webs alerts all spiders.
         if (actor::is_player(actor_here)) {
                 for (actor::Actor* const actor : game_time::g_actors) {
-                        if (!actor::is_player(actor) && actor->m_data->is_spider) {
+                        if (!actor::is_player(actor) &&
+                            actor->m_data->is_spider &&
+                            !map::g_player->is_leader_of(actor)) {
+                                // Monster is a hostile spider.
+
+                                // Double duration.
                                 const int factor = 2;
 
                                 actor->become_aware_player(actor::AwareSource::other, factor);

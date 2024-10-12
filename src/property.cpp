@@ -436,10 +436,6 @@ int Entangled::ability_mod(AbilityId ability) const
 
 void Entangled::on_applied()
 {
-        // TODO: Rather than doing this on the "on_applied" hook (which should
-        // probably be reserved for when the property actually does get applied,
-        // i.e. it shall not be removed), consider checking this elsewhere,
-        // perhaps in a new function such as "is_resisting"
         try_player_end_with_machete();
 }
 
@@ -484,6 +480,11 @@ PropEnded Entangled::affect_move_dir(Dir& dir)
 
 bool Entangled::try_player_end_with_machete()
 {
+        // NOTE: When "triggering" revealed spider webs while wielding a machete, the entangle
+        // property is never applied by the trap. However this function should still exist for the
+        // case where the web was hidden (then the entanglement is applied), and for other sources
+        // of entanglement such as Deep One nets.
+
         if (!actor::is_player(m_owner)) {
                 return false;
         }
@@ -491,11 +492,9 @@ bool Entangled::try_player_end_with_machete()
         item::Item* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         if (item && (item->id() == item::Id::machete)) {
-                msg_log::add(
-                        "I cut myself free with my Machete.",
-                        colors::text(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
+                msg_log::more_prompt();
+
+                msg_log::add("I cut myself free with my Machete.");
 
                 m_owner->m_properties.end_prop(
                         id(),

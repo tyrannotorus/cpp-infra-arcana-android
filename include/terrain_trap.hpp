@@ -74,6 +74,13 @@ enum class TrapPlacementValid
         yes
 };
 
+// Was the trap triggered in revealed or known state?
+enum class TriggerRevealedStatus
+{
+        triggered_hidden,
+        triggered_known,
+};
+
 class Trap : public Terrain
 {
 public:
@@ -109,8 +116,8 @@ public:
 
         bool disarm();
 
-        // Quietly destroys the trap, and either places rubble, or replaces it
-        // with the mimic terrain (depending on trap type)
+        // Quietly destroys the trap, and either places rubble, or replaces it with the mimic
+        // terrain (depending on trap type).
         void destroy();
 
         void on_new_turn_hook() override;
@@ -147,6 +154,11 @@ public:
                 return m_nr_turns_until_trigger > 0;
         }
 
+        TriggerRevealedStatus trigger_revealed_status() const
+        {
+                return m_trigger_revealed_status;
+        }
+
 private:
         Color color_default() const override;
 
@@ -159,6 +171,8 @@ private:
 
         // TODO: Should be a unique pointer
         TrapImpl* m_trap_impl {nullptr};
+
+        TriggerRevealedStatus m_trigger_revealed_status {TriggerRevealedStatus::triggered_hidden};
 };
 
 class TrapImpl
@@ -176,18 +190,17 @@ public:
                 return m_type;
         }
 
-        // Called by the trap terrain after picking a random trap
-        // implementation. This allows the specific implementation initialize
-        // and to modify the map. The implementation may report that the
-        // placement is impossible (e.g. no suitable wall to fire a dart from),
-        // in which case another implementation will be picked at random.
+        // Called by the trap terrain after picking a random trap implementation. This allows the
+        // specific implementation initialize and to modify the map. The implementation may report
+        // that the placement is impossible (e.g. no suitable wall to fire a dart from), in which
+        // case another implementation will be picked at random.
         virtual TrapPlacementValid on_place()
         {
                 return TrapPlacementValid::yes;
         }
 
-        // NOTE: The trigger may happen several turns after the trap activates,
-        // so it's pointless to provide actor triggering as a parameter here.
+        // NOTE: The trigger may happen several turns after the trap activates, so it's pointless to
+        // provide actor triggering as a parameter here.
         virtual void trigger() = 0;
 
         virtual Range nr_turns_range_to_trigger() const = 0;

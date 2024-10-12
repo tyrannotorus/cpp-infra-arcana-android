@@ -82,20 +82,22 @@ void try_apply_attack_property_on_actor(
 
         const bool is_resisting_dmg = actor.m_properties.is_resisting_dmg(dmg_type, Verbose::no);
 
-        if (!is_resisting_dmg) {
-                prop::Prop* const prop_cpy = prop::make(att_prop.prop->id());
-
-                const prop::PropDurationMode duration_mode = att_prop.prop->duration_mode();
-
-                if (duration_mode == prop::PropDurationMode::specific) {
-                        prop_cpy->set_duration(att_prop.prop->nr_turns_left());
-                }
-                else if (duration_mode == prop::PropDurationMode::indefinite) {
-                        prop_cpy->set_indefinite();
-                }
-
-                actor.m_properties.apply(prop_cpy);
+        if (is_resisting_dmg) {
+                return;
         }
+
+        prop::Prop* const prop_cpy = prop::make(att_prop.prop->id());
+
+        const prop::PropDurationMode duration_mode = att_prop.prop->duration_mode();
+
+        if (duration_mode == prop::PropDurationMode::specific) {
+                prop_cpy->set_duration(att_prop.prop->nr_turns_left());
+        }
+        else if (duration_mode == prop::PropDurationMode::indefinite) {
+                prop_cpy->set_indefinite();
+        }
+
+        actor.m_properties.apply(prop_cpy);
 }
 
 BinaryAnswer query_player_attack_mon_with_ranged_wpn(
