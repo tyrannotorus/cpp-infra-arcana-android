@@ -7,6 +7,7 @@
 #ifndef SPELLS_HPP
 #define SPELLS_HPP
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>

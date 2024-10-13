@@ -11,6 +11,8 @@
 #include <iterator>
 #include <memory>
 #include <ostream>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "actor.hpp"
@@ -26,7 +28,9 @@
 #include "explosion.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
+#include "inventory.hpp"
 #include "io.hpp"
+#include "item.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "item_weapon.hpp"

@@ -6,7 +6,6 @@
 
 #include "spells.hpp"
 
-#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <iterator>

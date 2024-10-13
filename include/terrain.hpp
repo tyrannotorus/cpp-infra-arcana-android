@@ -8,6 +8,7 @@
 #define TERRAIN_HPP
 
 #include <algorithm>
+#include <optional>
 #include <string>
 #include <vector>
 

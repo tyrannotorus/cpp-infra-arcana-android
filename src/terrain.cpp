@@ -45,7 +45,6 @@
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "map_travel.hpp"
-#include "minimap.hpp"
 #include "msg_log.hpp"
 #include "pickup.hpp"
 #include "player_bon.hpp"
