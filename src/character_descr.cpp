@@ -283,30 +283,46 @@ void CharacterDescr::draw()
 void CharacterDescr::update()
 {
         const int line_jump = 3;
+
         const int nr_lines_tot = m_lines.size();
 
         const auto input = io::read_input();
+
+        const int panel_h = panels::h(Panel::info_screen_content);
 
         switch (input.key) {
         case SDLK_KP_2:
         case SDLK_DOWN: {
                 m_top_idx += line_jump;
 
-                const int panel_h = panels::h(Panel::info_screen_content);
+                const int top_nr_max = std::max(0, nr_lines_tot - panel_h);
 
-                if (nr_lines_tot <= panel_h) {
-                        m_top_idx = 0;
-                }
-                else {
-                        m_top_idx = std::min(
-                                nr_lines_tot - panel_h,
-                                m_top_idx);
-                }
+                m_top_idx = std::min(top_nr_max, m_top_idx);
         } break;
 
         case SDLK_KP_8:
         case SDLK_UP: {
                 m_top_idx = std::max(0, m_top_idx - line_jump);
+        } break;
+
+        case SDLK_PAGEUP: {
+                m_top_idx = std::max(0, m_top_idx - panel_h / 2);
+        } break;
+
+        case SDLK_PAGEDOWN: {
+                m_top_idx += panel_h / 2;
+
+                const int top_nr_max = std::max(0, nr_lines_tot - panel_h);
+
+                m_top_idx = std::min(top_nr_max, m_top_idx);
+        } break;
+
+        case SDLK_HOME: {
+                m_top_idx = 0;
+        } break;
+
+        case SDLK_END: {
+                m_top_idx = std::max(0, nr_lines_tot - panel_h);
         } break;
 
         case SDLK_SPACE:
