@@ -316,6 +316,23 @@ static void handle_textinput_event()
         }
 }
 
+static void handle_mousebutton_event()
+{
+        const auto clicks = s_sdl_event.button.clicks;
+        const auto button = s_sdl_event.button.button;
+
+        if ((clicks == 2) &&
+            (button == 1)) {
+                TRACE << "Left mouse button double-click" << std::endl;
+
+                config::set_fullscreen(!config::is_fullscreen());
+
+                io::on_user_toggle_fullscreen();
+
+                io::clear_input();
+        }
+}
+
 static void run_handle_event_cycle()
 {
         update_input_mod_key_status();
@@ -359,6 +376,10 @@ static void run_handle_event_cycle()
 
         case SDL_TEXTINPUT: {
                 handle_textinput_event();
+        } break;
+
+        case SDL_MOUSEBUTTONDOWN: {
+                handle_mousebutton_event();
         } break;
 
         default:
