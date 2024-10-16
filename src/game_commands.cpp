@@ -119,15 +119,15 @@ static bool allow_player_fire_mi_go_weapon(const int hp_drained)
         }
         else {
                 // Not enough HP - allow firing the gun if player has the
-                // Prolonged Life trait and enough SP instead.
+                // Prolonged Life trait and enough fervor instead.
                 const bool has_prolonged_life = player_bon::has_trait(Trait::prolonged_life);
 
                 const int hp = map::g_player->m_hp;
-                const int sp = map::g_player->m_sp;
+                const int fervor = actor::player_state::g_exorcist_fervor;
 
-                const bool has_enough_hp_and_sp = ((hp + sp - 1) > hp_drained);
+                const bool has_enough_hp_and_fervor = ((hp + fervor) > hp_drained);
 
-                return (has_prolonged_life && has_enough_hp_and_sp);
+                return (has_prolonged_life && has_enough_hp_and_fervor);
         }
 }
 
