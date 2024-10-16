@@ -28,6 +28,7 @@
 #include "debug.hpp"
 #include "direction.hpp"
 #include "fov.hpp"
+#include "game.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
 #include "hints.hpp"
@@ -306,19 +307,7 @@ void print_player_aware_invis_mon_msg(const Actor& mon)
 
 int player_exorcist_max_fervor()
 {
-        const int k = 10;
-
-        int i = 2;
-
-        if (player_bon::has_trait(Trait::strong_spirit)) {
-                ++i;
-        }
-
-        if (player_bon::has_trait(Trait::mighty_spirit)) {
-                ++i;
-        }
-
-        return k * i;
+        return 8 + game::clvl() * 2;
 }
 
 bool restore_exorcist_fervor(int fervor_restored, Verbose verbose)
