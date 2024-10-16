@@ -333,6 +333,30 @@ static void handle_mousebutton_event()
         }
 }
 
+static void handle_mousewheel_event()
+{
+        auto delta_y = s_sdl_event.wheel.y;
+        const auto direction = s_sdl_event.wheel.direction;
+
+        if (!delta_y) {
+                return;
+        }
+
+        if (direction == SDL_MOUSEWHEEL_FLIPPED) {
+                delta_y = -delta_y;
+        }
+
+        TRACE << "Mouse wheel "
+              << ((delta_y > 0) ? "up" : "down")
+              << std::endl;
+
+        SDL_Event ev = {};
+        ev.type = SDL_KEYDOWN;
+        ev.key.keysym.sym = (delta_y > 0) ? SDLK_UP : SDLK_DOWN;
+
+        SDL_PushEvent(&ev);
+}
+
 static void run_handle_event_cycle()
 {
         update_input_mod_key_status();
@@ -380,6 +404,10 @@ static void run_handle_event_cycle()
 
         case SDL_MOUSEBUTTONDOWN: {
                 handle_mousebutton_event();
+        } break;
+
+        case SDL_MOUSEWHEEL: {
+                handle_mousewheel_event();
         } break;
 
         default:
