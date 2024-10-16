@@ -27,7 +27,7 @@ const std::string g_set_option_hint =
         "[enter, left, right] to set option";
 
 const std::string g_scroll_hint =
-        "[2/8, down/up] to scroll";
+        "[2/8, down/up, pgup/pgdown, home/end] to scroll";
 
 const std::string g_scrollable_info_screen_hint =
         g_scroll_hint +
