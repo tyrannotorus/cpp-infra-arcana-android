@@ -379,39 +379,3 @@ void GameOverSummary::draw()
                 ++y;
         }
 }
-
-void GameOverSummary::update()
-{
-        const int line_jump = 3;
-
-        const int nr_lines = (int)m_lines.size();
-
-        const io::InputData input = io::read_input();
-
-        switch (input.key) {
-        case SDLK_DOWN:
-        case SDLK_KP_2: {
-                m_top_idx += line_jump;
-
-                const int panel_h = panels::h(Panel::info_screen_content);
-
-                if (nr_lines <= panel_h) {
-                        m_top_idx = 0;
-                }
-                else {
-                        m_top_idx = std::min(nr_lines - panel_h, m_top_idx);
-                }
-        } break;
-
-        case SDLK_UP:
-        case SDLK_KP_8: {
-                m_top_idx = std::max(0, m_top_idx - line_jump);
-        } break;
-
-        case SDLK_SPACE:
-        case SDLK_ESCAPE: {
-                // Exit screen
-                states::pop();
-        } break;
-        }
-}

@@ -170,10 +170,16 @@ private:
                 return InfoScreenType::scrolling;
         }
 
-        int m_top_line_nr {0};
+        //int m_top_line_nr {0};
+#define m_top_line_nr m_top_idx
         int m_btm_line_nr {0};
 
         std::vector<Msg> m_history {};
+
+        int get_lines_total() const override
+        {
+                return m_history.size();
+        }
 };
 
 #endif  // MSG_LOG_HPP

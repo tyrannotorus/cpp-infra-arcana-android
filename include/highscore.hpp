@@ -85,8 +85,6 @@ public:
 
         void draw() override;
 
-        void update() override;
-
         StateId id() const override;
 
 private:
@@ -106,7 +104,10 @@ private:
 
         std::vector<std::string> m_lines;
 
-        int m_top_idx;
+        int get_lines_total() const override
+        {
+                return m_lines.size();
+        }
 };
 
 #endif  // HIGHSCORE_HPP

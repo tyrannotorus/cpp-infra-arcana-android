@@ -461,11 +461,9 @@ void BrowseHighscore::update()
 // Browse highscore entry game summary file
 // -----------------------------------------------------------------------------
 BrowseHighscoreEntry::BrowseHighscoreEntry(std::string file_path) :
-
-        m_file_path(std::move(file_path)),
-
-        m_top_idx(0)
-{}
+        m_file_path(std::move(file_path))
+{
+}
 
 StateId BrowseHighscoreEntry::id() const
 {
@@ -503,48 +501,6 @@ void BrowseHighscoreEntry::draw()
                         colors::text());
 
                 ++y;
-        }
-}
-
-void BrowseHighscoreEntry::update()
-{
-        const int line_jump = 3;
-
-        const int nr_lines_tot = m_lines.size();
-
-        const auto input = io::read_input();
-
-        switch (input.key) {
-        case SDLK_KP_2:
-        case SDLK_DOWN: {
-                m_top_idx += line_jump;
-
-                const int panel_h = panels::h(Panel::info_screen_content);
-
-                if (nr_lines_tot <= panel_h) {
-                        m_top_idx = 0;
-                }
-                else {
-                        m_top_idx = std::min(
-                                nr_lines_tot - panel_h,
-                                m_top_idx);
-                }
-        } break;
-
-        case SDLK_KP_8:
-        case SDLK_UP: {
-                m_top_idx = std::max(0, m_top_idx - line_jump);
-        } break;
-
-        case SDLK_SPACE:
-        case SDLK_ESCAPE: {
-                // Exit screen
-                states::pop();
-        } break;
-
-        default:
-        {
-        } break;
         }
 }
 
