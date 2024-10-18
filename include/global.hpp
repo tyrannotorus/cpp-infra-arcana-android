@@ -92,11 +92,11 @@ inline constexpr int g_xp_on_exorcist_destroy_gong = 10;
 inline constexpr int g_xp_on_exorcist_destroy_monolith = 15;
 inline constexpr int g_xp_on_exorcist_destroy_mirror = 2;
 
-inline constexpr int g_exorcist_fervor_destroy_scroll = 7;
-inline constexpr int g_exorcist_fervor_destroy_necronomicon = 30;
-inline constexpr int g_exorcist_fervor_destroy_altar = 10;
-inline constexpr int g_exorcist_fervor_destroy_gong = 10;
-inline constexpr int g_exorcist_fervor_destroy_monolith = 10;
+inline constexpr int g_exorcist_fervor_destroy_scroll = 4;
+inline constexpr int g_exorcist_fervor_destroy_necronomicon = 100;
+inline constexpr int g_exorcist_fervor_destroy_altar = 6;
+inline constexpr int g_exorcist_fervor_destroy_gong = 6;
+inline constexpr int g_exorcist_fervor_destroy_monolith = 8;
 inline constexpr int g_exorcist_fervor_destroy_mirror = 3;
 
 // -----------------------------------------------------------------------------
