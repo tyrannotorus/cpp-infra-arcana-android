@@ -362,6 +362,7 @@ void Actor::save() const
         saving::put_int(player_state::g_nr_turns_until_r_spell);
         saving::put_int(player_state::g_nr_turns_until_meditative_focused);
         saving::put_bool(player_state::g_did_warn_encumbered);
+        saving::put_int(player_state::g_exorcist_fervor);
 
         ASSERT(player_state::g_unarmed_wpn.get());
 
@@ -395,6 +396,7 @@ void Actor::load()
         player_state::g_nr_turns_until_r_spell = saving::get_int();
         player_state::g_nr_turns_until_meditative_focused = saving::get_int();
         player_state::g_did_warn_encumbered = saving::get_bool();
+        player_state::g_exorcist_fervor = saving::get_int();
 
         const auto unarmed_wpn_id = (item::Id)saving::get_int();
 
