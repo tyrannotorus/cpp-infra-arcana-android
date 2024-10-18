@@ -211,6 +211,9 @@ Prop* make(const prop::Id id)
         case prop::Id::water_creature:
                 return new Prop(id);
 
+        case prop::Id::moves_through_earth:
+                return new Prop(id);
+
         case prop::Id::radiant_self:
                 return new Prop(id);
 

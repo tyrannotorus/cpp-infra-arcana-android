@@ -108,7 +108,8 @@ enum class Id
         ooze,
         small_crawling,
         burrowing,
-        water_creature,  // E.g. Water Hounds, Leviathan
+        moves_through_earth,  // Moves through walls/rubble, but does not destroy it.
+        water_creature,       // Not delayed by water, e.g. Water Hounds/Beasts, Leviathan.
 
         // Properties mostly used for AI control.
         waiting,  // Prevent acting - also used for player

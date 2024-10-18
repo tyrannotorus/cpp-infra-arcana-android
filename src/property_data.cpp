@@ -101,6 +101,7 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_VOMITS_OOZE", prop::Id::vomits_ooze},
         {"PROP_VORTEX", prop::Id::vortex},
         {"PROP_WATER_CREATURE", prop::Id::water_creature},
+        {"PROP_MOVES_THROUGH_EARTH", prop::Id::moves_through_earth},
         {"PROP_WEAKENED", prop::Id::weakened},
         {"PROP_ZEALOT_STOP", prop::Id::zealot_stop},
         {"PROP_ZUUL_POSSESS_PRIEST", prop::Id::zuul_possess_priest},
@@ -1185,6 +1186,9 @@ static void init_data_list()
         add(d);
 
         d.id = prop::Id::water_creature;
+        add(d);
+
+        d.id = prop::Id::moves_through_earth;
         add(d);
 
         d.id = prop::Id::waiting;

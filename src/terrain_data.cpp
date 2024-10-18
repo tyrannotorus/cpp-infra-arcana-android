@@ -69,6 +69,7 @@ static void init_data_list()
         d.tile = gfx::TileId::wall_top;
         d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
         d.move_rules.props_allow_move.push_back(prop::Id::burrowing);
+        d.move_rules.props_allow_move.push_back(prop::Id::moves_through_earth);
         d.is_sound_passable = false;
         d.is_projectile_passable = false;
         d.is_los_passable = false;
@@ -171,6 +172,7 @@ static void init_data_list()
         d.tile = gfx::TileId::grate;
         d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
         d.move_rules.props_allow_move.push_back(prop::Id::burrowing);
+        d.move_rules.props_allow_move.push_back(prop::Id::moves_through_earth);
         d.move_rules.props_allow_move.push_back(prop::Id::ooze);
         d.move_rules.props_allow_move.push_back(prop::Id::small_crawling);
         d.move_rules.props_allow_move.push_back(prop::Id::tiny_flying);
@@ -327,6 +329,7 @@ static void init_data_list()
         d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
         d.move_rules.props_allow_move.push_back(prop::Id::ooze);
         d.move_rules.props_allow_move.push_back(prop::Id::burrowing);
+        d.move_rules.props_allow_move.push_back(prop::Id::moves_through_earth);
         d.move_rules.props_allow_move.push_back(prop::Id::small_crawling);
         d.move_rules.props_allow_move.push_back(prop::Id::tiny_flying);
         d.is_projectile_passable = false;
