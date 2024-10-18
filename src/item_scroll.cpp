@@ -323,7 +323,7 @@ ItemPrePickResult Scroll::pre_pickup_hook()
                 actor::AllowRestoreAboveMax::no,
                 Verbose::no);
 
-        actor::restore_exorcist_fervor(7);
+        actor::restore_exorcist_fervor(g_exorcist_fervor_destroy_scroll);
 
         return ItemPrePickResult::destroy_item;
 }

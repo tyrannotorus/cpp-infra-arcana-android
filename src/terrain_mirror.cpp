@@ -109,7 +109,7 @@ void Mirror::hit(
 
                         msg_log::add(msg);
 
-                        game::incr_player_xp(2);
+                        game::incr_player_xp(g_xp_on_exorcist_destroy_mirror);
 
                         actor::restore_sp(
                                 *map::g_player,
@@ -117,7 +117,7 @@ void Mirror::hit(
                                 actor::AllowRestoreAboveMax::no,
                                 Verbose::no);
 
-                        actor::restore_exorcist_fervor(3);
+                        actor::restore_exorcist_fervor(g_exorcist_fervor_destroy_mirror);
                 }
                 break;
 

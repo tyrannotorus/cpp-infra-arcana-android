@@ -85,10 +85,19 @@ inline constexpr int g_xp_on_identify_device = 15;
 inline constexpr int g_xp_on_drink_insight_potion = 5;
 inline constexpr int g_xp_on_drink_from_xp_fountain = 2;
 
-inline constexpr int g_xp_on_exorcist_destroy_altar = 10;
 inline constexpr int g_xp_on_exorcist_destroy_scroll = 5;
+inline constexpr int g_xp_on_exorcist_destroy_necronomicon = 10;
+inline constexpr int g_xp_on_exorcist_destroy_altar = 10;
 inline constexpr int g_xp_on_exorcist_destroy_gong = 10;
 inline constexpr int g_xp_on_exorcist_destroy_monolith = 15;
+inline constexpr int g_xp_on_exorcist_destroy_mirror = 2;
+
+inline constexpr int g_exorcist_fervor_destroy_scroll = 7;
+inline constexpr int g_exorcist_fervor_destroy_necronomicon = 30;
+inline constexpr int g_exorcist_fervor_destroy_altar = 10;
+inline constexpr int g_exorcist_fervor_destroy_gong = 10;
+inline constexpr int g_exorcist_fervor_destroy_monolith = 10;
+inline constexpr int g_exorcist_fervor_destroy_mirror = 3;
 
 // -----------------------------------------------------------------------------
 // Types

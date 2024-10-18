@@ -2277,7 +2277,7 @@ void Altar::hit(
                                 actor::AllowRestoreAboveMax::no,
                                 Verbose::no);
 
-                        actor::restore_exorcist_fervor(10);
+                        actor::restore_exorcist_fervor(g_exorcist_fervor_destroy_altar);
                 }
                 break;
 

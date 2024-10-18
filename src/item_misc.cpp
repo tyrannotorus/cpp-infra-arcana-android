@@ -1076,7 +1076,7 @@ ItemPrePickResult Necronomicon::pre_pickup_hook()
         if (player_bon::is_bg(Bg::exorcist)) {
                 msg_log::add("I destroy the profane text!");
 
-                game::incr_player_xp(10);
+                game::incr_player_xp(g_xp_on_exorcist_destroy_necronomicon);
 
                 actor::restore_sp(
                         *map::g_player,
@@ -1084,7 +1084,7 @@ ItemPrePickResult Necronomicon::pre_pickup_hook()
                         actor::AllowRestoreAboveMax::no,
                         Verbose::no);
 
-                actor::restore_exorcist_fervor(30);
+                actor::restore_exorcist_fervor(g_exorcist_fervor_destroy_necronomicon);
 
                 return ItemPrePickResult::destroy_item;
         }
