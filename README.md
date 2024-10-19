@@ -1,8 +1,5 @@
 # Running a downloaded build of Infra Arcana
 
-## Windows
-On Windows everything that is needed to run the game is bundled in the downloaded zip file. Simply unzip the file and run ia.exe.
-
 ## Unix/Linux/macOS
 You need to install dependencies to SDL2, SDL2-image, and SDL2-mixer to run the game.
 
@@ -19,6 +16,9 @@ On Fedora and other RPM-based systems, try:
 On macOS, using [Homebrew](https://brew.sh/):
 
     brew install sdl2 sdl2_image sdl2_mixer
+
+## Windows
+On Windows everything that is needed to run the game is bundled in the downloaded zip file. Simply unzip the file and run ia.exe.
 
 # Guide for building Infra Arcana
 
