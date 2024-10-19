@@ -420,9 +420,6 @@ static void update_trait_data()
                 "+2 spirit points, increased spirit regeneration rate, it "
                 "takes 75-100 turns to regain spell resistance after a spell "
                 "is blocked";
-        if (player_bon::is_bg(Bg::exorcist)) {
-                d.descr += ", +10 maximum Fervor";
-        }
         d.trait_prereqs = {Trait::stout_spirit};
         set_trait_data(d);
 
@@ -434,9 +431,6 @@ static void update_trait_data()
                 "+2 spirit points, increased spirit regeneration rate, it "
                 "takes 25-50 turns to regain spell resistance after a spell "
                 "is blocked";
-        if (player_bon::is_bg(Bg::exorcist)) {
-                d.descr += ", +10 maximum Fervor";
-        }
         d.trait_prereqs = {Trait::strong_spirit};
         set_trait_data(d);
 
