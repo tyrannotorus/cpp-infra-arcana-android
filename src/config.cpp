@@ -94,6 +94,7 @@ static int s_master_volume_pct_option = 100;
 static int s_master_volume_pct_adjusted = 100;
 static bool s_is_ambient_audio_enabled = false;
 static bool s_is_ambient_audio_preloaded = false;
+static int s_audio_buffer_size = 512;
 static int s_window_px_w = -1;
 static int s_window_px_h = -1;
 static int s_gui_cell_px_w = -1;
@@ -295,6 +296,7 @@ static void set_default_variables()
         s_master_volume_pct_option = s_master_volume_pct_adjusted = 100;
         s_is_ambient_audio_enabled = true;
         s_is_ambient_audio_preloaded = false;
+        s_audio_buffer_size = 512;
         s_renderer_type = RendererType::auto_select;
         s_is_fullscreen = true;
         s_video_scale_factor = calc_default_video_scale_factor(native_res);
@@ -374,6 +376,9 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         remove_line(lines);
 
         s_is_ambient_audio_preloaded = lines.front() == "1";
+        remove_line(lines);
+
+        s_audio_buffer_size = to_int(lines.front());
         remove_line(lines);
 
         s_input_mode = (InputMode)to_int(lines.front());
@@ -502,6 +507,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(std::to_string(s_master_volume_pct_adjusted));
         lines.emplace_back(s_is_ambient_audio_enabled ? "1" : "0");
         lines.emplace_back(s_is_ambient_audio_preloaded ? "1" : "0");
+        lines.push_back(std::to_string(s_audio_buffer_size));
         lines.push_back(std::to_string((int)s_input_mode));
         lines.push_back(std::to_string(s_window_px_w));
         lines.push_back(std::to_string(s_window_px_h));
@@ -596,6 +602,7 @@ void init()
         s_options.emplace_back(std::make_unique<MasterVolumeOption>());
         s_options.emplace_back(std::make_unique<AmbientAudioEnabledOption>());
         s_options.emplace_back(std::make_unique<PreloadAmbientAudioOption>());
+        s_options.emplace_back(std::make_unique<AudioBufferSizeOption>());
 
         // Input
         s_options.emplace_back(std::make_unique<InputModeOption>());
@@ -757,6 +764,11 @@ bool is_ambient_audio_enabled()
 bool is_ambient_audio_preloaded()
 {
         return s_is_ambient_audio_preloaded;
+}
+
+int audio_buffer_size()
+{
+        return s_audio_buffer_size;
 }
 
 bool is_bot_playing()
@@ -1046,6 +1058,58 @@ void PreloadAmbientAudioOption::change(const OptionChangeCommand command) const
         (void)command;
 
         s_is_ambient_audio_preloaded = !s_is_ambient_audio_preloaded;
+}
+
+std::string AudioBufferSizeOption::name() const
+{
+        return "Audio buffer size";
+}
+
+std::string AudioBufferSizeOption::descr() const
+{
+        return (
+                "Lower values decrease latency, but may cause "
+                "sound crackling (audio buffer underruns) "
+                "on devices with slow CPU.\n"
+                "Increase it to get smoother sound, "
+                "but with the cost of increasing sound delay.\n"
+                "Changing this option requires restarting the game.");
+}
+
+std::string AudioBufferSizeOption::value_str() const
+{
+        return std::to_string(s_audio_buffer_size);
+}
+
+OptionSubmenuType AudioBufferSizeOption::submenu_type() const
+{
+        return OptionSubmenuType::audio;
+}
+
+void AudioBufferSizeOption::change(const OptionChangeCommand command) const
+{
+        const Range allowed_range(512, 4096);
+
+        if ((command == OptionChangeCommand::enter) ||
+            (command == OptionChangeCommand::right)) {
+                // Enter or right
+                s_audio_buffer_size <<= 1;
+        }
+        else {
+                // Left
+                s_audio_buffer_size >>= 1;
+        }
+
+        s_audio_buffer_size =
+                std::clamp(
+                        s_audio_buffer_size,
+                        allowed_range.min,
+                        allowed_range.max);
+
+        TRACE
+                << "Audio buffer size: "
+                << s_audio_buffer_size
+                << std::endl;
 }
 
 std::string InputModeOption::name() const
