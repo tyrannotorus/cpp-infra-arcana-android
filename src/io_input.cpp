@@ -346,10 +346,6 @@ static void handle_mousewheel_event()
                 delta_y = -delta_y;
         }
 
-        TRACE << "Mouse wheel "
-              << ((delta_y > 0) ? "up" : "down")
-              << std::endl;
-
         SDL_Event ev = {};
         ev.type = SDL_KEYDOWN;
         ev.key.keysym.sym = (delta_y > 0) ? SDLK_UP : SDLK_DOWN;
