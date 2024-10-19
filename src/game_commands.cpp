@@ -557,6 +557,7 @@ static GameCmd to_cmd_default(const io::InputData& input)
         case '@':
                 return GameCmd::char_descr;
 
+        case SDLK_KP_0:
         case 'm':
                 return GameCmd::minimap;
 
