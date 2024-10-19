@@ -1,3 +1,25 @@
+# Running a downloaded build of Infra Arcana
+
+## Windows
+On Windows everything that is needed to run the game is bundled in the downloaded zip file. Simply unzip the file and run ia.exe.
+
+## Unix/Linux/macOS
+You need to install dependencies to SDL2, SDL2-image, and SDL2-mixer to run the game.
+
+To install dependencies on Debian, Ubuntu and other DEB-based systems, try:
+
+    apt install libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0
+
+(Or whatever versions of the SDL2 libraries are available.)
+
+On Fedora and other RPM-based systems, try:
+
+    dnf install SDL2 SDL2_image SDL2_mixer
+
+On macOS, using [Homebrew](https://brew.sh/):
+
+    brew install sdl2 sdl2_image sdl2_mixer
+
 # Guide for building Infra Arcana
 
 ## Fetching the source code
@@ -20,19 +42,15 @@ You need CMake, build tools (e.g. GNU Make + gcc), SDL2, SDL2-image, and SDL2-mi
 
 To install dependencies on Debian, Ubuntu and other DEB-based systems, try:
 
-    apt install build-essential cmake \
-        libsdl2-2.0-0 libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev
+    apt install build-essential cmake libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev
 
 On Fedora and other RPM-based systems, try:
 
-    dnf install g++ make cmake \
-        SDL2 SDL2-devel \
-        SDL2_image SDL2_image-devel \
-        SDL2_mixer SDL2_mixer-devel
+    dnf install g++ make cmake SDL2-devel SDL2_image-devel SDL2_mixer-devel
 
 On macOS, using [Homebrew](https://brew.sh/):
 
-    brew install cmake SDL2 SDL2_mixer SDL2_image
+    brew install cmake SDL2 SDL2_image SDL2_mixer
 
 Now you can build IA:
 
