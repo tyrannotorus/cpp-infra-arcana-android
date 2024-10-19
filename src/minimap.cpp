@@ -348,6 +348,7 @@ void ViewMinimap::update()
         switch (input.key) {
         case SDLK_SPACE:
         case SDLK_ESCAPE:
+        case SDLK_KP_0:
         case 'm':
                 // Exit screen
                 states::pop();
