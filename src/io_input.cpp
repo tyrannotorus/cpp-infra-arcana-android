@@ -335,6 +335,11 @@ static void handle_mousebutton_event()
 
 static void handle_mousewheel_event()
 {
+        State* curr_st = states::current_state();
+        if (curr_st && curr_st->id() == StateId::game) {
+                return;
+        }
+
         auto delta_y = s_sdl_event.wheel.y;
         const auto direction = s_sdl_event.wheel.direction;
 
