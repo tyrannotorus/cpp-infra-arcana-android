@@ -420,10 +420,10 @@ static void init_data_list()
         add(d);
 
         d.id = prop::Id::poisoned;
-        d.std_rnd_turns = Range(40, 80);
+        d.std_rnd_turns = Range(40, 60);
         d.name = "Poisoned";
         d.name_short = "Poisoned";
-        d.descr = "Takes damage each turn.";
+        d.descr = "Slowly takes damage.";
         d.msg_start_player = "I am poisoned!";
         d.msg_start_mon = "is poisoned.";
         d.msg_end_player = "My body is cleansed from poisoning!";

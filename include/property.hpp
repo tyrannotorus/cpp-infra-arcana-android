@@ -523,6 +523,11 @@ public:
                 Prop(Id::poisoned) {}
 
         PropEnded on_actor_turn() override;
+
+private:
+        // This counter must be able to go below zero, so -1 cannot be used for uninitialized
+        // values.
+        std::optional<int> m_actor_turns_left_at_next_dmg = {};
 };
 
 class Aiming : public Prop

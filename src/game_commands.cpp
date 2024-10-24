@@ -35,6 +35,7 @@
 #include "debug.hpp"
 #include "direction.hpp"
 #include "disarm.hpp"
+#include "explosion.hpp"
 #include "game.hpp"
 #include "game_summary_data.hpp"
 #include "game_time.hpp"
@@ -1191,11 +1192,21 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_shift_f5: {
-                knockback::run(
-                        *map::g_player,
-                        map::g_player->m_pos.with_y_offset(1),
-                        knockback::KnockbackSource::other,
-                        Verbose::no);
+                // knockback::run(
+                //         *map::g_player,
+                //         map::g_player->m_pos.with_y_offset(1),
+                //         knockback::KnockbackSource::other,
+                //         Verbose::no);
+
+                explosion::run(
+                        map::g_player->m_pos,
+                        ExplType::apply_prop,
+                        EmitExplSnd::no,
+                        0,
+                        ExplExclCenter::yes,
+                        {prop::make(prop::Id::poisoned)},
+                        colors::light_green(),
+                        ExplIsGas::yes);
         } break;
 
         case GameCmd::debug_shift_f6: {

@@ -947,33 +947,35 @@ PropEnded Poisoned::on_actor_turn()
                 return PropEnded::no;
         }
 
-        // NOTE: Monsters have a shorter, more intense poisoning
-
-        if (!actor::is_player(m_owner) && (m_nr_turns_left > 1)) {
-                --m_nr_turns_left;
+        if (!m_actor_turns_left_at_next_dmg) {
+                // Counter to next damge tick not yet initialized.
+                m_actor_turns_left_at_next_dmg = m_nr_turns_left;
         }
 
-        const auto owner_hp = m_owner->m_hp;
-
-        int dmg = 0;
-        int pct_chance = 0;
-
-        if (actor::is_player(m_owner)) {
-                dmg = 1;
-                pct_chance = (int)std::pow((double)owner_hp, 1.5);
-        }
-        else {
-                dmg = 2;
-                pct_chance = (int)std::pow((double)owner_hp, 2.0);
-        }
-
-        if (owner_hp <= dmg) {
+        if (m_nr_turns_left > m_actor_turns_left_at_next_dmg) {
+                // Still waiting for next damage tick.
                 return PropEnded::no;
         }
 
-        if (!rnd::percent(pct_chance)) {
-                return PropEnded::no;
-        }
+        // Time to apply damage again.
+
+        // NOTE: The damage rate is carefully balanced so that with the standard duration range of
+        // poisoning, this effect will never by itself kill a level 1 character (they have to be
+        // damaged from other sources, or diseased, etc).
+
+#ifndef NDEBUG
+        // If the standard duration changes, the property implementation must be re-balanced!
+        const PropData& d = g_data[(size_t)id()];
+
+        ASSERT(d.std_rnd_turns.min == 40);
+        ASSERT(d.std_rnd_turns.max == 60);
+#endif  // NDEBUG
+
+        // Roll when next damage tick occurs.
+        m_actor_turns_left_at_next_dmg = m_actor_turns_left_at_next_dmg.value() - rnd::range(6, 8);
+
+        // NOTE: Poison does double damage to monsters.
+        const int dmg = actor::is_player(m_owner) ? 1 : 2;
 
         if (actor::is_player(m_owner)) {
                 msg_log::add(

@@ -2905,7 +2905,7 @@
         <attacks>
             <attack id="ITEMINTR_BITE">
                 <damage>1</damage>
-                <property_applied duration="16">PROP_POISONED</property_applied>
+                <property_applied duration="25">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 
@@ -3000,7 +3000,7 @@
         <attacks>
             <attack id="ITEMINTR_BITE">
                 <damage>1</damage>
-                <property_applied duration="16">PROP_POISONED</property_applied>
+                <property_applied duration="25">PROP_POISONED</property_applied>
             </attack>
             <attack id="ITEMINTR_SNAKE_VENOM_SPIT">
                 <damage>0</damage>
@@ -3098,7 +3098,7 @@
         <attacks>
             <attack id="ITEMINTR_BITE">
                 <damage>1</damage>
-                <property_applied duration="16">PROP_POISONED</property_applied>
+                <property_applied duration="25">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 
@@ -4094,7 +4094,7 @@
         <attacks>
             <attack id="ITEMINTR_STING">
                 <damage>5</damage>
-                <property_applied duration="8">PROP_POISONED</property_applied>
+                <property_applied duration="25">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 
@@ -4200,7 +4200,7 @@
         <attacks>
             <attack id="ITEMINTR_STING">
                 <damage>8</damage>
-                <property_applied duration="8">PROP_POISONED</property_applied>
+                <property_applied duration="25">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 
@@ -4408,7 +4408,7 @@
         <attacks>
             <attack id="ITEMINTR_STING">
                 <damage>12</damage>
-                <property_applied duration="8">PROP_POISONED</property_applied>
+                <property_applied duration="60">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 
@@ -9293,8 +9293,8 @@
 
         <attacks>
             <attack id="ITEMINTR_SPORES">
-                <damage>1</damage>
-                <property_applied duration="12">PROP_POISONED</property_applied>
+                <damage>0</damage>
+                <property_applied duration="20">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 
@@ -9394,8 +9394,8 @@
 
         <attacks>
             <attack id="ITEMINTR_SPORES">
-                <damage>1</damage>
-                <property_applied duration="8">PROP_POISONED</property_applied>
+                <damage>0</damage>
+                <property_applied duration="15">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 
@@ -9496,7 +9496,7 @@
 
         <attacks>
             <attack id="ITEMINTR_SPORES">
-                <damage>1</damage>
+                <damage>0</damage>
                 <property_applied duration="40">PROP_HALLUCINATING</property_applied>
             </attack>
         </attacks>
@@ -9543,6 +9543,10 @@
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CHASM</native_room>
         </spawning>
+
+        <starting_allies>
+            <monster id="MON_MOLD"/>
+        </starting_allies>
     </monster>
 
     <!--************************************************************-->
