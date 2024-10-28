@@ -151,7 +151,8 @@ public:
         R m_r {};
         const RoomType m_type {(RoomType)0};
         bool m_is_sub_room {false};
-        bool m_is_split {false};
+        bool m_is_split_top_room {false};  // Has been split into smaller rooms?
+        bool m_is_split_sub_room {false};  // Is smaller room split from another room?
         std::vector<Room*> m_rooms_con_to {};
         std::vector<Room*> m_sub_rooms {};
 

@@ -378,14 +378,18 @@ std::vector<P> Room::positions_in_room() const
 
 void Room::on_pre_connect(Array2<bool>& door_proposals)
 {
-        on_pre_connect_hook(door_proposals);
+        if (!m_is_split_top_room) {
+                on_pre_connect_hook(door_proposals);
+        }
 }
 
 void Room::on_post_connect(Array2<bool>& door_proposals)
 {
-        place_auto_terrains(*this);
+        if (!m_is_split_top_room) {
+                place_auto_terrains(*this);
 
-        on_post_connect_hook(door_proposals);
+                on_post_connect_hook(door_proposals);
+        }
 
         // Make the room dark?
 
@@ -427,20 +431,9 @@ void Room::on_post_connect(Array2<bool>& door_proposals)
 
 void Room::affect_surroundings()
 {
-        // If this room has been split (BSP splitting), do not run the affect
-        // surroundings hook. This is because for split rooms it can sometimes
-        // happen that there is only a single position left of the room - a
-        // passage in the wall between the two rooms it has been split into.
-        //
-        // This room should obviously not do things like spreading blood if it's
-        // a ritual room. The player will not even be aware that there is such a
-        // "room" there.
-        //
-        if (m_is_split) {
-                return;
+        if (!m_is_split_top_room) {
+                affect_surroundings_hook();
         }
-
-        affect_surroundings_hook();
 }
 
 void Room::make_dark() const
@@ -1320,7 +1313,9 @@ std::vector<RoomAutoTerrainRule> CaveRoom::auto_terrains_allowed() const
                 {terrain::Id::urn, rnd::one_in(7) ? rnd::range(1, 4) : 0},
         };
 
-        if ((map::g_dlvl >= g_dlvl_first_late_game) && m_is_sub_room) {
+        if ((map::g_dlvl >= g_dlvl_first_late_game) &&
+            m_is_sub_room &&
+            !m_is_split_sub_room) {
                 result.emplace_back(terrain::Id::chest, rnd::range(1, 3));
                 result.emplace_back(terrain::Id::tomb, rnd::coin_toss() ? rnd::range(1, 2) : 0);
                 result.emplace_back(terrain::Id::altar, rnd::one_in(6) ? 1 : 0);

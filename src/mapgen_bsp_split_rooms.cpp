@@ -105,13 +105,16 @@ static std::vector<room::Room*> try_bsp_split_room(room::Room& room)
         for (const R& child_rect : child_rects) {
                 room::Room* const sub_room = mapgen::make_room(child_rect, IsSubRoom::yes);
 
+                // Mark the new room as being split from another bigger room.
+                sub_room->m_is_split_sub_room = true;
+
                 new_rooms.push_back(sub_room);
 
                 room.m_sub_rooms.push_back(sub_room);
         }
 
-        // Mark the "top" room as split.
-        room.m_is_split = true;
+        // Mark the first room as a top room that has been split into smaller rooms.
+        room.m_is_split_top_room = true;
 
         ASSERT(new_rooms.size() == 2);
 
@@ -122,8 +125,8 @@ static std::vector<P> find_edge(
         const room::Room& room_1,
         const room::Room& room_2)
 {
-        const auto r1 = room_1.m_r;
-        const auto r2 = room_2.m_r;
+        const R r1 = room_1.m_r;
+        const R r2 = room_2.m_r;
 
         R edge_rect;
 
@@ -164,7 +167,7 @@ static std::vector<P> find_edge(
 
         std::vector<P> edge_positions;
 
-        for (const auto& pos : edge_rect.positions()) {
+        for (const P& pos : edge_rect.positions()) {
                 ASSERT(map::g_room_map.at(pos) != &room_1);
                 ASSERT(map::g_room_map.at(pos) != &room_2);
                 ASSERT(map::g_room_map.at(pos) != nullptr);
@@ -177,7 +180,7 @@ static std::vector<P> find_edge(
         return edge_positions;
 }
 
-static auto split_original_rooms(
+static std::vector<std::vector<P>> split_original_rooms(
         const size_t nr_original_rooms,
         const Fraction& chance_to_split_room)
 {
@@ -220,7 +223,7 @@ static auto split_original_rooms(
         return edges;
 }
 
-static auto split_new_rooms(
+static std::vector<std::vector<P>> split_new_rooms(
         const size_t nr_original_rooms,
         const Fraction& chance_to_split_room)
 {
@@ -233,7 +236,7 @@ static auto split_new_rooms(
 
                 room::Room& room = *map::g_room_list[i];
 
-                const auto new_rooms = try_bsp_split_room(room);
+                const std::vector<room::Room*> new_rooms = try_bsp_split_room(room);
 
                 if (new_rooms.size() != 2) {
                         ASSERT(new_rooms.empty());
@@ -257,7 +260,7 @@ static bool is_valid_entrance(const P& pos)
                 for (int y = 0; y < 3; ++y) {
                         const P map_p = pos.with_offsets(x - 1, y - 1);
 
-                        const auto t_id = map::g_terrain.at(map_p)->id();
+                        const terrain::Id t_id = map::g_terrain.at(map_p)->id();
 
                         const bool is_wall =
                                 (t_id == terrain::Id::wall) ||
@@ -284,7 +287,7 @@ static std::vector<P> valid_entrances(const std::vector<P>& edge)
 
         // Do not use the first and last position of the edge (looks ugly)
         for (size_t i = 1; i < (edge.size() - 1); ++i) {
-                const auto pos = edge[i];
+                const P pos = edge[i];
 
                 if (is_valid_entrance(pos)) {
                         entrances.push_back(pos);
@@ -296,8 +299,8 @@ static std::vector<P> valid_entrances(const std::vector<P>& edge)
 
 static void make_entrances(const std::vector<std::vector<P>>& edges)
 {
-        for (const auto& edge : edges) {
-                const auto entrance_bucket = valid_entrances(edge);
+        for (const std::vector<P>& edge : edges) {
+                const std::vector<P> entrance_bucket = valid_entrances(edge);
 
                 if (entrance_bucket.empty()) {
                         // No entrance could be found on this edge - the map
@@ -350,17 +353,42 @@ static void make_grates(const std::vector<std::vector<P>>& edges)
 
         const Fraction chance_to_make_grates_for_edge(1, 2);
 
-        for (const auto& edge : edges) {
+        for (const std::vector<P>& edge : edges) {
                 if (!chance_to_make_grates_for_edge.roll()) {
                         continue;
                 }
 
-                for (const auto& p : edge) {
+                for (const P& p : edge) {
                         if (!mapgen::allow_make_grate_at(p, blocked)) {
                                 continue;
                         }
 
                         map::set_terrain(terrain::make(terrain::Id::grate, p));
+                }
+        }
+}
+
+static void make_ruined(const std::vector<std::vector<P>>& edges)
+{
+        const Fraction chance_to_make_ruined(3, 4);
+
+        for (const std::vector<P>& edge : edges) {
+                for (const P& p : edge) {
+                        if (chance_to_make_ruined.roll()) {
+                                const terrain::Id id =
+                                        rnd::one_in(3)
+                                        ? terrain::Id::rubble_low
+                                        : terrain::Id::floor;
+
+                                terrain::Terrain* const terrain = terrain::make(id, p);
+
+                                if (terrain->id() == terrain::Id::floor) {
+                                        static_cast<terrain::Floor*>(terrain)->m_type =
+                                                terrain::FloorType::cave;
+                                }
+
+                                map::set_terrain(terrain);
+                        }
                 }
         }
 }
@@ -409,6 +437,10 @@ void bsp_split_rooms()
         make_entrances(edges);
 
         make_grates(edges);
+
+        if (map::g_dlvl >= g_dlvl_first_late_game) {
+                make_ruined(edges);
+        }
 
         TRACE_FUNC_END;
 }
