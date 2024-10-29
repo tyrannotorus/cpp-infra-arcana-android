@@ -122,6 +122,7 @@ enum class Id
         // Armor
         armor_asb_suit,
         armor_flak_jacket,
+        armor_heavy_coat,
         armor_iron_suit,
         armor_leather_jacket,
         armor_mi_go,

@@ -110,6 +110,7 @@ static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
         case item::Id::armor_flak_jacket:
         case item::Id::armor_iron_suit:
         case item::Id::armor_leather_jacket:
+        case item::Id::armor_heavy_coat:
         case item::Id::armor_mi_go:
         case item::Id::astral_opium:
         case item::Id::bone_charm:
@@ -304,6 +305,7 @@ static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
         case item::Id::armor_flak_jacket:
         case item::Id::armor_iron_suit:
         case item::Id::armor_leather_jacket:
+        case item::Id::armor_heavy_coat:
         case item::Id::armor_mi_go:
         case item::Id::astral_opium:
         case item::Id::bone_charm:

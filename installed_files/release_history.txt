@@ -23,6 +23,7 @@
 - When using the Medical Bag, a menu is now shown where you can select the treatment to perform. Also added an option to automatically choose treatment like before.
 - Added an additional Medical Bag action called "quick patch-up", which restores some hit points.
 - The Exorcist Holy Symbol can now raise spirit above max limit (instead of just restoring spirit).
+- Added a "Heavy Coat" armor, with 2 armor points and -5% stealth/dodging (actually this existed a long time ago, but was a very different item).
 
 # Spells
 - Increased duration of the See Invisible spell.

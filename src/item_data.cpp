@@ -1447,14 +1447,31 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::armor);
+        d.id = Id::armor_heavy_coat;
+        d.base_name = {"Heavy Coat", "", "a Heavy Coat"};
+        d.base_descr = {
+                "It offers decent protection, at the cost of making movement "
+                "slightly more difficult (-5% stealth, -5% dodging)."};
+        d.ability_mods_while_equipped[(size_t)AbilityId::stealth] = -5;
+        d.ability_mods_while_equipped[(size_t)AbilityId::dodging] = -5;
+        d.weight = Weight::medium;
+        d.color = colors::gray();
+        d.spawn_std_range.min = 1;
+        d.armor.armor_points = 2;
+        d.armor.dmg_to_durability_factor = 1.0;
+        d.land_on_hard_snd_msg = "";
+        d.native_containers.push_back(terrain::Id::cabinet);
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::armor);
         d.id = Id::armor_iron_suit;
         d.base_name = {"Iron Suit", "", "an Iron Suit"};
         d.base_descr = {
                 "A crude armour constructed from metal plates, bolts, and "
                 "leather straps.",
 
-                "It can absorb a high amount of damage, but it makes sneaking "
-                "and dodging more difficult (-20% stealth, -20% dodging)."};
+                "It can absorb a high amount of damage, but it makes movement "
+                "a lot more difficult (-20% stealth, -20% dodging)."};
         d.ability_mods_while_equipped[(size_t)AbilityId::stealth] = -20;
         d.ability_mods_while_equipped[(size_t)AbilityId::dodging] = -20;
         d.weight = Weight::heavy;
@@ -1470,11 +1487,10 @@ void init()
         d.id = Id::armor_flak_jacket;
         d.base_name = {"Flak Jacket", "", "a Flak Jacket"};
         d.base_descr = {
-                "An armour consisting of steel plates sewn into a waistcoat. "
-                "It offers very good protection for its weight. ",
+                "An armour consisting of steel plates sewn into a waistcoat.",
 
-                "It is somewhat bulky, so sneaking and dodging is more "
-                "difficult (-10% stealth, -10% dodging)."};
+                "It offers very good protection for its weight, but is "
+                "somewhat bulky to wear (-10% stealth, -10% dodging)."};
         d.ability_mods_while_equipped[(size_t)AbilityId::stealth] = -10;
         d.ability_mods_while_equipped[(size_t)AbilityId::dodging] = -10;
         d.weight = Weight::medium;
@@ -1491,12 +1507,12 @@ void init()
         d.base_name = {"Asbestos Suit", "", "an Asbestos Suit"};
         d.base_descr = {
                 "A one piece overall of asbestos fabric, including a hood, "
-                "furnace mask, gloves and shoes. It protects the wearer "
-                "against fire, acid and electricity, and also against smoke, "
-                "fumes and gas. ",
+                "furnace mask, gloves and shoes.",
 
-                "It is a bit bulky, so sneaking and dodging is slightly more "
-                "difficult (-10% stealth, -10% dodging)."};
+                "It protects the wearer against fire, acid and electricity, "
+                "and also against smoke, fumes and gas.",
+
+                "It is somewhat bulky to wear (-10% stealth, -10% dodging)."};
         d.ability_mods_while_equipped[(size_t)AbilityId::stealth] = -10;
         d.ability_mods_while_equipped[(size_t)AbilityId::dodging] = -10;
         d.weight = Weight::medium;

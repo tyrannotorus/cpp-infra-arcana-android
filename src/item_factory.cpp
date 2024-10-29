@@ -278,8 +278,9 @@ Item* make(const Id item_id, const int nr_items)
                 break;
 
         case Id::armor_flak_jacket:
-        case Id::armor_leather_jacket:
+        case Id::armor_heavy_coat:
         case Id::armor_iron_suit:
+        case Id::armor_leather_jacket:
                 r = new Armor(d);
                 break;
 
