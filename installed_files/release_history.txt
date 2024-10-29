@@ -54,6 +54,7 @@
 # Design
 - Added a flashing animation when bashing stuff (doors, corpses, ...).
 - The screen fades to red when the player dies.
+- Braziers have a subtle flicker effect, similar to the player when using the Electric Lantern.
 
 # Convenience / quality of life features
 - Added a legend for the minimap screen that explains what the different colors represent.

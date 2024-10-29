@@ -563,30 +563,33 @@ void Terrain::cycle_graphics(const io::GraphicsCycle cycle)
                         rnd::range(40, 255),
                         rnd::range(40, 255));
         }
+
+        cycle_graphics_hook(cycle);
 }
 
 Color Terrain::color() const
 {
         if (m_burn_state == BurnState::burning) {
+                // Burning
                 return colors::orange();
         }
-        else {
-                // Not burning
-                if (is_corrupted_color()) {
-                        return m_corrupt_color;
-                }
-                else if (m_is_bloody) {
-                        return colors::light_red();
-                }
-                else {
-                        if (m_burn_state == BurnState::not_burned) {
-                                return color_default();
-                        }
-                        else {
-                                return colors::dark_gray();
-                        }
-                }
+
+        if (is_corrupted_color()) {
+                // Corrupted color
+                return m_corrupt_color;
         }
+
+        if (m_is_bloody) {
+                // Bloody
+                return colors::light_red();
+        }
+
+        if (m_burn_state == BurnState::has_burned) {
+                // Has burned
+                return colors::dark_gray();
+        }
+
+        return color_default();
 }
 
 Color Terrain::color_bg() const
@@ -3014,9 +3017,20 @@ void Brazier::add_light_hook(Array2<bool>& light) const
         }
 }
 
-Color Brazier::color_default() const
+Color Brazier::color() const
 {
-        return colors::yellow();
+        return m_flicker_color;
+}
+
+void Brazier::cycle_graphics_hook(const io::GraphicsCycle cycle)
+{
+        if (cycle == io::GraphicsCycle::fast) {
+                // NOTE: The color is also affected for lit terrains when the map is drawn.
+                m_flicker_color =
+                        rnd::coin_toss()
+                        ? colors::yellow().shaded(rnd::range(45, 60))
+                        : colors::yellow();
+        }
 }
 
 std::optional<map::MinimapAppearance> Brazier::minimap_appearance() const

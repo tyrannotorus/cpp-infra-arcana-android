@@ -377,6 +377,11 @@ protected:
         P m_pos {};
 
 private:
+        virtual void cycle_graphics_hook(io::GraphicsCycle cycle)
+        {
+                (void)cycle;
+        }
+
         // Corrupted by a Strange Color monster
         int m_nr_turns_color_corrupted {-1};
 
@@ -550,7 +555,7 @@ public:
 
         std::string name(Article article) const override;
 
-        Color color_default() const override;
+        Color color() const override;
 
         std::optional<map::MinimapAppearance> minimap_appearance() const override;
 
@@ -567,9 +572,13 @@ public:
         void on_new_turn() override;
 
 private:
+        void cycle_graphics_hook(io::GraphicsCycle cycle) override;
+
         void add_light_hook(Array2<bool>& light) const override;
 
         void topple(Dir direction, actor::Actor& actor);
+
+        Color m_flicker_color {colors::yellow()};
 };
 
 enum class WallType
