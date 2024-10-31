@@ -505,6 +505,24 @@ void init_sdl()
                 PANIC;
         }
 
+        TRACE_FUNC_END;
+}
+
+void cleanup_sdl()
+{
+        if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
+                return;
+        }
+
+        IMG_Quit();
+
+        SDL_Quit();
+}
+
+void init_sdl_audio()
+{
+        cleanup_sdl_audio();
+
         const int audio_freq = 44100;
         const Uint16 audio_format = MIX_DEFAULT_FORMAT;
         const int audio_channels = MIX_DEFAULT_CHANNELS;
@@ -528,23 +546,13 @@ void init_sdl()
         }
 
         Mix_AllocateChannels(audio::g_allocated_channels);
-
-        TRACE_FUNC_END;
 }
 
-void cleanup_sdl()
+void cleanup_sdl_audio()
 {
-        if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
-                return;
-        }
-
-        IMG_Quit();
-
         Mix_AllocateChannels(0);
 
         Mix_CloseAudio();
-
-        SDL_Quit();
 }
 
 void init_other()

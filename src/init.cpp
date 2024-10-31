@@ -69,6 +69,7 @@ void init_io()
         TRACE_FUNC_BEGIN;
 
         io::init_sdl();
+        io::init_sdl_audio();
 
         log_user_data_dir();
 
@@ -100,6 +101,7 @@ void cleanup_io()
         audio::cleanup();
         query::cleanup();
         io::cleanup_other();
+        io::cleanup_sdl_audio();
         io::cleanup_sdl();
 
         TRACE_FUNC_END;

@@ -1136,8 +1136,7 @@ void AudioBufferSizeOption::change(const OptionChangeCommand command) const
                 << s_audio_buffer_size
                 << std::endl;
 
-        io::init_sdl();
-        io::init_other();
+        io::init_sdl_audio();
 }
 
 std::string InputModeOption::name() const

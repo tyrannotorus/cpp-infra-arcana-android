@@ -93,6 +93,10 @@ struct InputData
 
 void init_sdl();
 void cleanup_sdl();
+
+void init_sdl_audio();
+void cleanup_sdl_audio();
+
 void init_other();
 void cleanup_other();
 
