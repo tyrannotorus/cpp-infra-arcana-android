@@ -115,6 +115,11 @@ public:
         OptionSubmenuType submenu_type() const override;
 
         void change(OptionChangeCommand command) const override;
+
+        bool allow_browser_selection_audio() const override
+        {
+                return false;
+        }
 };
 
 class InputModeOption : public Option
