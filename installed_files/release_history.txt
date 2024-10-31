@@ -69,6 +69,11 @@
 - The Talisman of Resurrection first restored all hit points and then healed all wounds, which could leave the player with lower than full health - fixed by reversing the order.
 - For Exorcist spell traits, available spirit info is no longer printed in the character info screen, only when picking a trait (also the character info screen could show wrong numbers).
 
+##############################
+# Modability
+##############################
+- Available font images are no longer hard coded in the game, instead the gfx/fonts/ directory is searched for any .png file that starts with <width>x<height> (e.g. "7x13_uushi.png"). So new .png fonts can be added just by dropping them in the fonts directory.
+
 ============================================================
 = v22.1.0 (September 24, 2023)
 ============================================================

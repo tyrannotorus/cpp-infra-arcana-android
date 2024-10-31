@@ -8,9 +8,11 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <memory>
+#include <regex>
 #include <string>
 #include <utility>
 #include <vector>
@@ -46,19 +48,9 @@ static std::vector<std::unique_ptr<config::Option>> s_options {};
 // Options shown in the current submenu.
 static std::vector<config::Option*> s_current_options {};
 
-static config::OptionSubmenuType s_current_submenu =
-        config::OptionSubmenuType::END;
+static config::OptionSubmenuType s_current_submenu = config::OptionSubmenuType::END;
 
-// NOTE: Order is important, sort from smallest to largest!
-static const std::vector<std::string> s_font_image_names = {
-        "7x13_uushi.png",
-        "8x17_terminus.png",
-        "10x24_dejavu.png",
-        "12x22_monospace.png",
-        "12x24_dejavu.png",
-        "13x24_dejavu.png",
-        "13x24_typewriter.png",
-};
+static std::vector<std::string> s_font_image_names;
 
 static const int s_video_scale_factor_max = 4;
 
@@ -162,60 +154,83 @@ static void filter_current_options(config::OptionSubmenuType submenu_type)
         }
 }
 
-static P parse_dims_from_font_name(std::string font_name)
+static P parse_dims_from_font_name(const std::string& font_name)
+{
+        std::regex pattern(R"(^(\d+)x(\d+))");
+
+        std::smatch match;
+
+        const bool is_name_ok = std::regex_search(font_name, match, pattern);
+
+        if (!is_name_ok) {
+                TRACE << "Invalid font name: '" << font_name << "'" << std::endl;
+
+                return {-1, -1};
+        }
+
+        int w = std::stoi(match[1].str());
+        int h = std::stoi(match[2].str());
+
+        return {w, h};
+}
+
+static void find_fonts_from_filesystem()
 {
         TRACE_FUNC_BEGIN;
 
-        TRACE << "font_name: " << font_name << std::endl;
+        TRACE << "Finding font images at '" << paths::fonts_dir() << "'" << std::endl;
 
-        char ch = font_name.front();
+        for (const auto& entry : std::filesystem::directory_iterator(paths::fonts_dir())) {
+                if (!entry.is_regular_file()) {
+                        continue;
+                }
 
-        while (ch < '0' || ch > '9') {
-                font_name.erase(std::begin(font_name));
+                // TODO: Should more formats be supported?
+                if (entry.path().extension() != ".png") {
+                        continue;
+                }
 
-                ch = font_name.front();
+                const std::string filename = entry.path().filename().string();
+
+                const P dims = parse_dims_from_font_name(filename);
+
+                if (dims.x == -1) {
+                        continue;
+                }
+
+                s_font_image_names.push_back(filename);
         }
 
-        TRACE << "font_name, stripped beginning: " << font_name << std::endl;
+        std::sort(
+                std::begin(s_font_image_names),
+                std::end(s_font_image_names),
+                [](const std::string& s1, const std::string& s2) {
+                        const P dims_1 = parse_dims_from_font_name(s1);
+                        const P dims_2 = parse_dims_from_font_name(s2);
 
-        std::string w_str;
+                        // Primarily sort by width, secondarily be height.
+                        if (dims_1.x == dims_2.x) {
+                                // Same width, sort by height.
+                                return dims_1.y < dims_2.y;
+                        }
+                        else {
+                                // Different width, sort by width.
+                                return dims_1.x < dims_2.x;
+                        }
+                });
 
-        while (ch != 'x') {
-                font_name.erase(std::begin(font_name));
+#ifndef NDEBUG
+        for (const std::string& font_name : s_font_image_names) {
+                const P dims = parse_dims_from_font_name(font_name);
 
-                w_str += ch;
-
-                ch = font_name.front();
+                TRACE
+                        << "Found valid font '" << font_name << "'"
+                        << " widh dimensions '" << dims.x << "x" << dims.y << "'"
+                        << std::endl;
         }
-
-        TRACE << "w_str: " << w_str << std::endl;
-
-        font_name.erase(std::begin(font_name));
-
-        ch = font_name.front();
-
-        std::string h_str;
-
-        while (ch != '_' && ch != '.') {
-                font_name.erase(std::begin(font_name));
-
-                h_str += ch;
-
-                ch = font_name.front();
-        }
-
-        TRACE << "h_str: " << h_str << std::endl;
-
-        TRACE
-                << "Parsed font image name, found dims: "
-                << w_str << "x" << h_str << std::endl;
-
-        const int w = to_int(w_str);
-        const int h = to_int(h_str);
+#endif  // NDEBUG
 
         TRACE_FUNC_END;
-
-        return {w, h};
 }
 
 static void update_render_dims()
@@ -237,13 +252,9 @@ static void update_render_dims()
                 s_gui_cell_px_h = s_map_cell_px_h = font_dims.y;
         }
 
-        TRACE << "GUI cell size: "
-              << s_gui_cell_px_w << "x" << s_gui_cell_px_h
-              << std::endl;
+        TRACE << "GUI cell size: " << s_gui_cell_px_w << "x" << s_gui_cell_px_h << std::endl;
 
-        TRACE << "Tile size: "
-              << s_map_cell_px_w << "x" << s_map_cell_px_h
-              << std::endl;
+        TRACE << "Tile size: " << s_map_cell_px_w << "x" << s_map_cell_px_h << std::endl;
 
         TRACE_FUNC_END;
 }
@@ -397,6 +408,19 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         remove_line(lines);
 
         s_font_name = lines.front();
+        if (
+                std::find(
+                        std::cbegin(s_font_image_names),
+                        std::cend(s_font_image_names),
+                        s_font_name) == std::cend(s_font_image_names)) {
+                TRACE
+                        << "Font name in config file not found in available fonts "
+                           "(removed from disk?), reverting to smallest font"
+                        << std::endl;
+
+                s_font_name = s_font_image_names[0];
+        }
+
         remove_line(lines);
 
         update_render_dims();
@@ -616,8 +640,7 @@ void init()
         s_options.emplace_back(std::make_unique<SkipIntroLevelOption>());
         s_options.emplace_back(std::make_unique<SkipIntroPopupOption>());
         s_options.emplace_back(std::make_unique<DisplayHintsOption>());
-        s_options.emplace_back(
-                std::make_unique<UseTrapColorWhenObscuredOption>());
+        s_options.emplace_back(std::make_unique<UseTrapColorWhenObscuredOption>());
         s_options.emplace_back(std::make_unique<AlwaysWarnMonsterOption>());
         s_options.emplace_back(std::make_unique<WarnThrowValuableOption>());
         s_options.emplace_back(std::make_unique<WarnLightExplosivesOption>());
@@ -625,6 +648,9 @@ void init()
         s_options.emplace_back(std::make_unique<WarnRangedWeaponMeleeOption>());
         s_options.emplace_back(std::make_unique<ProjectileDelayOption>());
         s_options.emplace_back(std::make_unique<ExplosionDelayOption>());
+
+        // Find available fonts
+        find_fonts_from_filesystem();
 
         // Reset to defaults
         //
