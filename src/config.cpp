@@ -1072,8 +1072,7 @@ std::string AudioBufferSizeOption::descr() const
                 "sound crackling (audio buffer underruns) "
                 "on devices with slow CPU.\n"
                 "Increase it to get smoother sound, "
-                "but with the cost of increasing sound delay.\n"
-                "Changing this option requires restarting the game.");
+                "but with the cost of increasing sound delay.");
 }
 
 std::string AudioBufferSizeOption::value_str() const
@@ -1110,6 +1109,9 @@ void AudioBufferSizeOption::change(const OptionChangeCommand command) const
                 << "Audio buffer size: "
                 << s_audio_buffer_size
                 << std::endl;
+
+        io::init_sdl();
+        io::init_other();
 }
 
 std::string InputModeOption::name() const
