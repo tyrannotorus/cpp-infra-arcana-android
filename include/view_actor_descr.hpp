@@ -43,7 +43,8 @@ private:
 
         int get_lines_total() const override
         {
-                return 1;  // this will never be used
+                // Doesn't matter, the descriptions are expected to always fit on a single page.
+                return 0;
         }
 };
 
