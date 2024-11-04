@@ -635,11 +635,11 @@ void MsgHistoryState::init_top_btm_line_numbers()
 
         const auto panel_h = panels::h(Panel::info_screen_content);
 
-        m_top_line_nr = history_size - panel_h;
-        m_top_line_nr = std::max(0, m_top_line_nr);
+        m_top_idx = history_size - panel_h;
+        m_top_idx = std::max(0, m_top_idx);
 
-        m_btm_line_nr = m_top_line_nr + panel_h;
-        m_btm_line_nr = std::min(history_size - 1, m_btm_line_nr);
+        m_btm_idx = m_top_idx + panel_h;
+        m_btm_idx = std::min(history_size - 1, m_btm_idx);
 }
 
 void MsgHistoryState::on_start()
@@ -663,11 +663,8 @@ std::string MsgHistoryState::title() const
         }
         else {
                 // History has content
-                const std::string msg_nr_str_first =
-                        std::to_string(m_top_line_nr + 1);
-
-                const std::string msg_nr_str_last =
-                        std::to_string(m_btm_line_nr + 1);
+                const std::string msg_nr_str_first = std::to_string(m_top_idx + 1);
+                const std::string msg_nr_str_last = std::to_string(m_btm_idx + 1);
 
                 title =
                         "Messages " +
@@ -685,8 +682,8 @@ void MsgHistoryState::draw()
 
         int y = 0;
 
-        for (int i = m_top_line_nr; i <= m_btm_line_nr; ++i) {
-                const auto& msg = m_history[i];
+        for (int i = m_top_idx; i <= m_btm_idx; ++i) {
+                const Msg& msg = m_history[i];
 
                 io::draw_text(
                         msg.text_with_repeats(),
@@ -707,7 +704,7 @@ void MsgHistoryState::update()
 
         const int panel_h = panels::h(Panel::info_screen_content);
 
-        m_btm_line_nr = std::min(
-                m_top_line_nr + panel_h - 1,
+        m_btm_idx = std::min(
+                m_top_idx + panel_h - 1,
                 history_size - 1);
 }

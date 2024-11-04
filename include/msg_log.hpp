@@ -170,9 +170,8 @@ private:
                 return InfoScreenType::scrolling;
         }
 
-        //int m_top_line_nr {0};
-#define m_top_line_nr m_top_idx
-        int m_btm_line_nr {0};
+        // NOTE: m_top_idx is in InfoScreenState.
+        int m_btm_idx {0};
 
         std::vector<Msg> m_history {};
 
