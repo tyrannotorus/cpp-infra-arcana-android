@@ -48,14 +48,9 @@ class BrowseManualPage : public InfoScreenState
 {
 public:
         BrowseManualPage(const ManualPage& page) :
-
-                m_page(page),
-                m_top_idx(0)
-        {}
+                m_page(page) {}
 
         void draw() override;
-
-        void update() override;
 
         StateId id() const override;
 
@@ -69,7 +64,10 @@ private:
 
         const ManualPage& m_page;
 
-        int m_top_idx;
+        int get_lines_total() const override
+        {
+                return m_page.lines.size();
+        }
 };
 
 #endif  // MANUAL_HPP

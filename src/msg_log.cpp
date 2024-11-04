@@ -701,39 +701,11 @@ void MsgHistoryState::draw()
 
 void MsgHistoryState::update()
 {
-        const int line_jump = 3;
+        InfoScreenState::update();
 
         const int history_size = (int)m_history.size();
 
-        const auto input = io::read_input();
-
         const int panel_h = panels::h(Panel::info_screen_content);
-
-        switch (input.key) {
-        case SDLK_DOWN:
-        case SDLK_KP_2: {
-                m_top_line_nr += line_jump;
-
-                const int top_nr_max = std::max(0, history_size - panel_h);
-
-                m_top_line_nr = std::min(top_nr_max, m_top_line_nr);
-        } break;
-
-        case SDLK_UP:
-        case SDLK_KP_8: {
-                m_top_line_nr = std::max(0, m_top_line_nr - line_jump);
-        } break;
-
-        case SDLK_SPACE:
-        case SDLK_ESCAPE: {
-                states::pop();
-
-                return;
-        } break;
-
-        default:
-                break;
-        }
 
         m_btm_line_nr = std::min(
                 m_top_line_nr + panel_h - 1,

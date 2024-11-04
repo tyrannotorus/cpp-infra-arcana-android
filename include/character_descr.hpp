@@ -22,15 +22,12 @@ struct GameSummaryData;
 class CharacterDescr : public InfoScreenState
 {
 public:
-        CharacterDescr() :
-                m_top_idx(0) {}
+        CharacterDescr() = default;
 
         // NOTE: This must be called before the state runs.
         void setup(const game_summary_data::GameSummaryData& data);
 
         void draw() override;
-
-        void update() override;
 
         StateId id() const override;
 
@@ -47,7 +44,10 @@ private:
 
         std::vector<ColoredString> m_lines;
 
-        int m_top_idx;
+        int get_lines_total() const override
+        {
+                return m_lines.size();
+        }
 };
 
 #endif  // CHARACTER_DESCR_HPP

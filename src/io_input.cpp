@@ -316,6 +316,48 @@ static void handle_textinput_event()
         }
 }
 
+static void handle_mousebutton_event()
+{
+        const auto clicks = s_sdl_event.button.clicks;
+        const auto button = s_sdl_event.button.button;
+
+        if ((clicks == 2) &&
+            (button == 1)) {
+                TRACE << "Left mouse button double-click" << std::endl;
+
+                config::set_fullscreen(!config::is_fullscreen());
+
+                io::on_user_toggle_fullscreen();
+
+                io::clear_input();
+        }
+}
+
+static void handle_mousewheel_event()
+{
+        State* curr_st = states::current_state();
+        if (curr_st && curr_st->id() == StateId::game) {
+                return;
+        }
+
+        auto delta_y = s_sdl_event.wheel.y;
+        const auto direction = s_sdl_event.wheel.direction;
+
+        if (!delta_y) {
+                return;
+        }
+
+        if (direction == SDL_MOUSEWHEEL_FLIPPED) {
+                delta_y = -delta_y;
+        }
+
+        SDL_Event ev = {};
+        ev.type = SDL_KEYDOWN;
+        ev.key.keysym.sym = (delta_y > 0) ? SDLK_UP : SDLK_DOWN;
+
+        SDL_PushEvent(&ev);
+}
+
 static void run_handle_event_cycle()
 {
         update_input_mod_key_status();
@@ -359,6 +401,14 @@ static void run_handle_event_cycle()
 
         case SDL_TEXTINPUT: {
                 handle_textinput_event();
+        } break;
+
+        case SDL_MOUSEBUTTONDOWN: {
+                handle_mousebutton_event();
+        } break;
+
+        case SDL_MOUSEWHEEL: {
+                handle_mousewheel_event();
         } break;
 
         default:

@@ -40,6 +40,11 @@ private:
         }
 
         actor::Actor& m_actor;
+
+        int get_lines_total() const override
+        {
+                return 1;  // this will never be used
+        }
 };
 
 #endif  // VIEW_ACTOR_DESCR_HPP
