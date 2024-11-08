@@ -358,6 +358,19 @@ static void handle_mousewheel_event()
         SDL_PushEvent(&ev);
 }
 
+static Uint32 hide_cursor_callback(Uint32, void*)
+{
+        return SDL_ShowCursor(SDL_FALSE);
+}
+
+static void handle_mousemotion_event()
+{
+        SDL_ShowCursor(SDL_TRUE);
+        static SDL_TimerID timer = 0;
+        SDL_RemoveTimer(timer);
+        timer = SDL_AddTimer(1000, hide_cursor_callback, nullptr);
+}
+
 static void run_handle_event_cycle()
 {
         update_input_mod_key_status();
@@ -409,6 +422,10 @@ static void run_handle_event_cycle()
 
         case SDL_MOUSEWHEEL: {
                 handle_mousewheel_event();
+        } break;
+
+        case SDL_MOUSEMOTION: {
+                handle_mousemotion_event();
         } break;
 
         default:

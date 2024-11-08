@@ -493,6 +493,8 @@ void init_sdl()
                 PANIC;
         }
 
+        SDL_ShowCursor(SDL_FALSE);
+
         const uint32_t sdl_img_flags = IMG_INIT_PNG;
 
         if (IMG_Init(sdl_img_flags) == -1) {
