@@ -353,15 +353,13 @@ Color Color::with_brightness(int pct) const
 {
         pct = std::max(0, pct);
 
-        const double f = (double)pct / 100.0;
-
         const uint8_t current_r = m_sdl_color.r;
         const uint8_t current_g = m_sdl_color.g;
         const uint8_t current_b = m_sdl_color.b;
 
-        const auto new_r = (uint8_t)std::clamp((int)((double)current_r * f), 0, 255);
-        const auto new_g = (uint8_t)std::clamp((int)((double)current_g * f), 0, 255);
-        const auto new_b = (uint8_t)std::clamp((int)((double)current_b * f), 0, 255);
+        const uint8_t new_r = std::min(255, std::max(0, current_r * pct / 100));
+        const uint8_t new_g = std::min(255, std::max(0, current_g * pct / 100));
+        const uint8_t new_b = std::min(255, std::max(0, current_b * pct / 100));
 
         return {new_r, new_g, new_b};
 }
