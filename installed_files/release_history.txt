@@ -59,8 +59,15 @@
 # Convenience / quality of life features
 - Added a legend for the minimap screen that explains what the different colors represent.
 - More types of things are now marked on the minimap (e.g. Tombs, Braziers, ...).
+- Numpad 0 can also be used for opening and closing the minimap.
 - Tab now also disarms adjacent traps (melee attacking is prioritized).
 - Added "b" as a shortcut command for using the Medical Bag.
+- In most of the menus and screens, the mousewheel can be used for scrolling up and down.
+- Double clicking anywhere toggles fullscreen.
+- A bunch of screens now also support pgup/pgdown/home/end for scrolling.
+
+# Other user interface changes
+- The game now hides the mouse cursor.
 
 ##############################
 # Fixes

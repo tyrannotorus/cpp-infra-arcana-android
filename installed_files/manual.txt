@@ -13,7 +13,7 @@ Gameplay commands:
    h (M)     MESSAGE history
    i         INVENTORY (wield, equip, remove, consume, or activate items)
    k (w)     KICK or strike objects, or DESTROY CORPSES
-   m         Show MAP
+   m         Show MAP (or close map)
    n (o)     Make NOISE
    p         DISARM trap
    r         RELOAD
@@ -33,7 +33,8 @@ Optional convenience commands and shortcuts:
    s         WAIT five turns, or until something happens
    Shift     Hold while pressing a move key to move until interrupted
    Tab       MELEE ATTACK adjacent monster (or further away if wielding a
-             melee weapon with long reach), DISARM adjacent trap
+             melee weapon with long reach), or DISARM adjacent trap
+   Numpad 0 Open/close MAP
 
 General menu and window commands:
    Esc       In-game menu, or cancel/proceed
