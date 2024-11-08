@@ -133,7 +133,7 @@ static void update_estimated_total_avail_xp()
         // MONSTERS
         //
 
-        auto has_estimated_for_mon = [](const std::string id) {
+        auto has_estimated_for_mon = [](const std::string& id) {
                 return s_mon_ids_estimated_xp_for.find(id) != s_mon_ids_estimated_xp_for.end();
         };
 

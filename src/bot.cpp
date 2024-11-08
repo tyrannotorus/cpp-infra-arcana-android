@@ -514,7 +514,7 @@ static void stress_test_act()
                 game_commands::handle(GameCmd::left);
         }
 
-        if (stress_test_step == 2000) {
+        if (stress_test_step == 1000) {
                 states::pop_all();
         }
         else {

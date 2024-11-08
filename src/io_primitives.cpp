@@ -47,11 +47,13 @@ void draw_rectangle(R px_rect, const Color& color)
                 rect.w = px_rect.w();
                 rect.h = px_rect.h();
 
+                const Color color_adapted = color.with_brightness(config::brightness_pct());
+
                 SDL_SetRenderDrawColor(
                         g_sdl_renderer,
-                        color.r(),
-                        color.g(),
-                        color.b(),
+                        color_adapted.r(),
+                        color_adapted.g(),
+                        color_adapted.b(),
                         0xFFU);
 
                 SDL_RenderDrawRect(g_sdl_renderer, &rect);
@@ -76,11 +78,13 @@ void draw_rectangle_filled(
                 px_rect.w(),
                 px_rect.h()};
 
+        const Color color_adapted = color.with_brightness(config::brightness_pct());
+
         SDL_SetRenderDrawColor(
                 g_sdl_renderer,
-                color.r(),
-                color.g(),
-                color.b(),
+                color_adapted.r(),
+                color_adapted.g(),
+                color_adapted.b(),
                 alpha);
 
         SDL_RenderFillRect(g_sdl_renderer, &rect);

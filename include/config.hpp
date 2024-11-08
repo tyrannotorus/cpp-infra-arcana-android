@@ -54,6 +54,7 @@ bool is_tiles_mode();
 void set_fullscreen(bool value);
 bool is_fullscreen();
 int video_scale_factor();
+int brightness_pct();
 
 // Actual window size (i.e. not logical size)
 void set_window_px_w(int w);

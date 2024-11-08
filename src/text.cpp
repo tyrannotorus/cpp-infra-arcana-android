@@ -206,15 +206,12 @@ TextAction TextCompiler::token_to_action(const std::string& token) const
                         return action;
                 }
 
-                const auto color = colors::name_to_color(content);
+                const Color color = colors::name_to_color(content);
 
-                if (color.has_value()) {
-                        // This is a valid color
-                        action.id = TextActionId::change_color;
-                        action.color = color.value();
+                action.id = TextActionId::change_color;
+                action.color = color;
 
-                        return action;
-                }
+                return action;
         }
 
         return action;

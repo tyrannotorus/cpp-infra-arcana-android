@@ -22,7 +22,6 @@
     <color name="COLOR_DARK_GREEN" rgb_hex="005700"/>
 
     <!-- YELLOW -->
-    <!-- TODO: Rename to yellow and dark yellow -->
     <!-- Color 3 -->
     <color name="COLOR_DARK_YELLOW" rgb_hex="cdcd00"/>
     <!-- Color 11 -->
@@ -59,7 +58,6 @@
     <color name="COLOR_GRAY_BROWN" rgb_hex="534c42"/>
     <color name="COLOR_DARK_GRAY_BROWN" rgb_hex="2b2820"/>
 
-    <!-- TODO: Rename to violet / light_violet -->
     <color name="COLOR_DARK_VIOLET" rgb_hex="400080"/>
     <color name="COLOR_VIOLET" rgb_hex="8000ff"/>
 

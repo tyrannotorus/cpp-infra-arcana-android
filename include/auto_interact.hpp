@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
 
-#ifndef AUTO_MELEE_HPP
-#define AUTO_MELEE_HPP
+#ifndef AUTO_INTERACT_HPP
+#define AUTO_INTERACT_HPP
 
 namespace auto_interact
 {
 void run();
 }  // namespace auto_interact
 
-#endif  // AUTO_MELEE_HPP
+#endif  // AUTO_INTERACT_HPP

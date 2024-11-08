@@ -11,6 +11,7 @@
 #include <ostream>
 #include <vector>
 
+#include "config.hpp"
 #include "debug.hpp"
 #include "paths.hpp"
 #include "random.hpp"
@@ -154,78 +155,107 @@ static SDL_Color rgb_hex_str_to_sdl_color(const std::string& str)
         return sdl_color;
 }
 
-static void load_color(
-        xml::Element* colors_e,
-        const std::string& name,
-        SDL_Color& target_color)
+static SDL_Color load_color_from_xml(
+        xml::Element* const colors_e,
+        const std::string& id)
 {
-        for (auto* e = xml::first_child(colors_e);
-             e;
-             e = xml::next_sibling(e)) {
-                const std::string current_name =
-                        xml::get_attribute_str(e, "name");
+        for (auto* e = xml::first_child(colors_e); e; e = xml::next_sibling(e)) {
+                const std::string found_id = xml::get_attribute_str(e, "name");
 
-                if (current_name != name) {
+                if (found_id != id) {
                         continue;
                 }
 
-                const std::string rgb_hex_str =
-                        xml::get_attribute_str(e, "rgb_hex");
+                const std::string rgb_hex_str = xml::get_attribute_str(e, "rgb_hex");
 
-                const SDL_Color sdl_color =
-                        rgb_hex_str_to_sdl_color(rgb_hex_str);
+                const SDL_Color sdl_color = rgb_hex_str_to_sdl_color(rgb_hex_str);
 
-                TRACE << "Loaded color - "
-                      << "name: \"" << name << "\""
-                      << ", hexadecimal RGB string: \"" << rgb_hex_str << "\""
-                      << ", decimal RGB values: "
-                      << (int)sdl_color.r << ", "
-                      << (int)sdl_color.g << ", "
-                      << (int)sdl_color.b
-                      << std::endl;
+                TRACE
+                        << "Loaded color - "
+                        << "ID: \"" << id << "\""
+                        << ", hexadecimal RGB string: \"" << rgb_hex_str << "\""
+                        << ", decimal RGB values: "
+                        << (int)sdl_color.r << ", "
+                        << (int)sdl_color.g << ", "
+                        << (int)sdl_color.b
+                        << std::endl;
 
-                target_color = sdl_color;
-
-                s_str_color_pairs.emplace_back(name, Color(sdl_color));
-
-                break;
+                return sdl_color;
         }
+
+        TRACE_ERROR_RELEASE
+                << "Expected color with ID "
+                << "'" << id << "' "
+                << "to be defined, but it was not found" << std::endl;
+
+        PANIC;
+
+        return {};
 }
 
-static void load_gui_color(
-        xml::Element* gui_e,
-        const std::string& type,
-        SDL_Color& target_color)
+static SDL_Color load_gui_color_from_xml(
+        xml::Element* const gui_e,
+        const std::string& id)
 {
-        for (auto* e = xml::first_child(gui_e);
-             e;
-             e = xml::next_sibling(e)) {
-                const std::string current_type =
-                        xml::get_attribute_str(e, "type");
+        for (auto* e = xml::first_child(gui_e); e; e = xml::next_sibling(e)) {
+                const std::string found_id = xml::get_attribute_str(e, "type");
 
-                if (current_type != type) {
+                if (found_id != id) {
                         continue;
                 }
 
-                const std::string name =
-                        xml::get_attribute_str(e, "color");
+                const std::string color_id = xml::get_attribute_str(e, "color");
 
-                TRACE << "Loaded gui color - "
-                      << "type: \"" << type << "\", "
-                      << "name: \"" << name << "\""
-                      << std::endl;
+                TRACE
+                        << "Loaded gui color - "
+                        << "ID: \"" << id << "\", "
+                        << "Color ID: \"" << color_id << "\""
+                        << std::endl;
 
-                const auto color = colors::name_to_color(name).value();
+                const auto color = colors::name_to_color(color_id);
 
-                target_color = color.sdl_color();
-
-                s_str_color_pairs.emplace_back(name, color);
-
-                break;
+                return color.sdl_color();
         }
+
+        TRACE_ERROR_RELEASE
+                << "Expected GUI color with ID "
+                << "'" << id << "' "
+                << "to be defined, but it was not found" << std::endl;
+
+        PANIC;
+
+        return {};
 }
 
-static void load_colors()
+static void init_color(
+        xml::Element* const colors_e,
+        const std::string& id,
+        SDL_Color& sdl_color,
+        Color& color)
+{
+        sdl_color = load_color_from_xml(colors_e, id);
+
+        color = Color(sdl_color);
+
+        sdl_color = color.sdl_color();
+
+        s_str_color_pairs.emplace_back(id, color);
+}
+
+static void init_gui_color(
+        xml::Element* const gui_e,
+        const std::string& id,
+        SDL_Color& sdl_color,
+        Color& color)
+{
+        sdl_color = load_gui_color_from_xml(gui_e, id);
+
+        color = Color(sdl_color);
+
+        s_str_color_pairs.emplace_back(id, color);
+}
+
+static void init_colors()
 {
         tinyxml2::XMLDocument doc;
 
@@ -233,78 +263,43 @@ static void load_colors()
 
         auto* colors_e = xml::first_child(doc);
 
-        load_color(colors_e, "COLOR_BLACK", s_sdl_black);
-        load_color(colors_e, "COLOR_EXTRA_DARK_GRAY", s_sdl_extra_dark_gray);
-        load_color(colors_e, "COLOR_DARK_GRAY", s_sdl_dark_gray);
-        load_color(colors_e, "COLOR_GRAY", s_sdl_gray);
-        load_color(colors_e, "COLOR_WHITE", s_sdl_white);
-        load_color(colors_e, "COLOR_LIGHT_WHITE", s_sdl_light_white);
-        load_color(colors_e, "COLOR_RED", s_sdl_red);
-        load_color(colors_e, "COLOR_LIGHT_RED", s_sdl_light_red);
-        load_color(colors_e, "COLOR_DARK_GREEN", s_sdl_dark_green);
-        load_color(colors_e, "COLOR_GREEN", s_sdl_green);
-        load_color(colors_e, "COLOR_LIGHT_GREEN", s_sdl_light_green);
-        load_color(colors_e, "COLOR_DARK_YELLOW", s_sdl_dark_yellow);
-        load_color(colors_e, "COLOR_YELLOW", s_sdl_yellow);
-        load_color(colors_e, "COLOR_BLUE", s_sdl_blue);
-        load_color(colors_e, "COLOR_LIGHT_BLUE", s_sdl_light_blue);
-        load_color(colors_e, "COLOR_DARK_BLUE", s_sdl_dark_blue);
-        load_color(colors_e, "COLOR_MAGENTA", s_sdl_magenta);
-        load_color(colors_e, "COLOR_LIGHT_MAGENTA", s_sdl_light_magenta);
-        load_color(colors_e, "COLOR_CYAN", s_sdl_cyan);
-        load_color(colors_e, "COLOR_LIGHT_CYAN", s_sdl_light_cyan);
-        load_color(colors_e, "COLOR_BROWN", s_sdl_brown);
-        load_color(colors_e, "COLOR_DARK_BROWN", s_sdl_dark_brown);
-        load_color(colors_e, "COLOR_GRAY_BROWN", s_sdl_gray_brown);
-        load_color(colors_e, "COLOR_DARK_GRAY_BROWN", s_sdl_dark_gray_brown);
-        load_color(colors_e, "COLOR_VIOLET", s_sdl_violet);
-        load_color(colors_e, "COLOR_DARK_VIOLET", s_sdl_dark_violet);
-        load_color(colors_e, "COLOR_ORANGE", s_sdl_orange);
-        load_color(colors_e, "COLOR_GOLD", s_sdl_gold);
-        load_color(colors_e, "COLOR_SEPIA", s_sdl_sepia);
-        load_color(colors_e, "COLOR_LIGHT_SEPIA", s_sdl_light_sepia);
-        load_color(colors_e, "COLOR_DARK_SEPIA", s_sdl_dark_sepia);
-        load_color(colors_e, "COLOR_TEAL", s_sdl_teal);
-        load_color(colors_e, "COLOR_LIGHT_TEAL", s_sdl_light_teal);
-        load_color(colors_e, "COLOR_DARK_TEAL", s_sdl_dark_teal);
-
-        s_black = Color(s_sdl_black);
-        s_extra_dark_gray = Color(s_sdl_extra_dark_gray);
-        s_dark_gray = Color(s_sdl_dark_gray);
-        s_gray = Color(s_sdl_gray);
-        s_white = Color(s_sdl_white);
-        s_light_white = Color(s_sdl_light_white);
-        s_red = Color(s_sdl_red);
-        s_light_red = Color(s_sdl_light_red);
-        s_dark_green = Color(s_sdl_dark_green);
-        s_green = Color(s_sdl_green);
-        s_light_green = Color(s_sdl_light_green);
-        s_dark_yellow = Color(s_sdl_dark_yellow);
-        s_yellow = Color(s_sdl_yellow);
-        s_blue = Color(s_sdl_blue);
-        s_light_blue = Color(s_sdl_light_blue);
-        s_dark_blue = Color(s_sdl_dark_blue);
-        s_magenta = Color(s_sdl_magenta);
-        s_light_magenta = Color(s_sdl_light_magenta);
-        s_cyan = Color(s_sdl_cyan);
-        s_light_cyan = Color(s_sdl_light_cyan);
-        s_brown = Color(s_sdl_brown);
-        s_dark_brown = Color(s_sdl_dark_brown);
-        s_gray_brown = Color(s_sdl_gray_brown);
-        s_dark_gray_brown = Color(s_sdl_dark_gray_brown);
-        s_violet = Color(s_sdl_violet);
-        s_dark_violet = Color(s_sdl_dark_violet);
-        s_orange = Color(s_sdl_orange);
-        s_gold = Color(s_sdl_gold);
-        s_sepia = Color(s_sdl_sepia);
-        s_light_sepia = Color(s_sdl_light_sepia);
-        s_dark_sepia = Color(s_sdl_dark_sepia);
-        s_teal = Color(s_sdl_teal);
-        s_light_teal = Color(s_sdl_light_teal);
-        s_dark_teal = Color(s_sdl_dark_teal);
+        init_color(colors_e, "COLOR_BLACK", s_sdl_black, s_black);
+        init_color(colors_e, "COLOR_EXTRA_DARK_GRAY", s_sdl_extra_dark_gray, s_extra_dark_gray);
+        init_color(colors_e, "COLOR_DARK_GRAY", s_sdl_dark_gray, s_dark_gray);
+        init_color(colors_e, "COLOR_GRAY", s_sdl_gray, s_gray);
+        init_color(colors_e, "COLOR_WHITE", s_sdl_white, s_white);
+        init_color(colors_e, "COLOR_LIGHT_WHITE", s_sdl_light_white, s_light_white);
+        init_color(colors_e, "COLOR_RED", s_sdl_red, s_red);
+        init_color(colors_e, "COLOR_LIGHT_RED", s_sdl_light_red, s_light_red);
+        init_color(colors_e, "COLOR_DARK_GREEN", s_sdl_dark_green, s_dark_green);
+        init_color(colors_e, "COLOR_GREEN", s_sdl_green, s_green);
+        init_color(colors_e, "COLOR_LIGHT_GREEN", s_sdl_light_green, s_light_green);
+        init_color(colors_e, "COLOR_DARK_YELLOW", s_sdl_dark_yellow, s_dark_yellow);
+        init_color(colors_e, "COLOR_YELLOW", s_sdl_yellow, s_yellow);
+        init_color(colors_e, "COLOR_BLUE", s_sdl_blue, s_blue);
+        init_color(colors_e, "COLOR_LIGHT_BLUE", s_sdl_light_blue, s_light_blue);
+        init_color(colors_e, "COLOR_DARK_BLUE", s_sdl_dark_blue, s_dark_blue);
+        init_color(colors_e, "COLOR_MAGENTA", s_sdl_magenta, s_magenta);
+        init_color(colors_e, "COLOR_LIGHT_MAGENTA", s_sdl_light_magenta, s_light_magenta);
+        init_color(colors_e, "COLOR_CYAN", s_sdl_cyan, s_cyan);
+        init_color(colors_e, "COLOR_LIGHT_CYAN", s_sdl_light_cyan, s_light_cyan);
+        init_color(colors_e, "COLOR_BROWN", s_sdl_brown, s_brown);
+        init_color(colors_e, "COLOR_DARK_BROWN", s_sdl_dark_brown, s_dark_brown);
+        init_color(colors_e, "COLOR_GRAY_BROWN", s_sdl_gray_brown, s_gray_brown);
+        init_color(colors_e, "COLOR_DARK_GRAY_BROWN", s_sdl_dark_gray_brown, s_dark_gray_brown);
+        init_color(colors_e, "COLOR_VIOLET", s_sdl_violet, s_violet);
+        init_color(colors_e, "COLOR_DARK_VIOLET", s_sdl_dark_violet, s_dark_violet);
+        init_color(colors_e, "COLOR_ORANGE", s_sdl_orange, s_orange);
+        init_color(colors_e, "COLOR_GOLD", s_sdl_gold, s_gold);
+        init_color(colors_e, "COLOR_SEPIA", s_sdl_sepia, s_sepia);
+        init_color(colors_e, "COLOR_LIGHT_SEPIA", s_sdl_light_sepia, s_light_sepia);
+        init_color(colors_e, "COLOR_DARK_SEPIA", s_sdl_dark_sepia, s_dark_sepia);
+        init_color(colors_e, "COLOR_TEAL", s_sdl_teal, s_teal);
+        init_color(colors_e, "COLOR_LIGHT_TEAL", s_sdl_light_teal, s_light_teal);
+        init_color(colors_e, "COLOR_DARK_TEAL", s_sdl_dark_teal, s_dark_teal);
 }
 
-static void load_gui_colors()
+static void init_gui_colors()
 {
         tinyxml2::XMLDocument doc;
 
@@ -312,35 +307,28 @@ static void load_gui_colors()
 
         auto* gui_e = xml::first_child(doc);
 
-        load_gui_color(gui_e, "GUICOLOR_TEXT", s_sdl_text);
-        load_gui_color(gui_e, "GUICOLOR_PASSIVE_TEXT", s_sdl_passive_text);
-        load_gui_color(gui_e, "GUICOLOR_MENU_HIGHLIGHT", s_sdl_menu_highlight);
-        load_gui_color(gui_e, "GUICOLOR_MENU_DARK", s_sdl_menu_dark);
-        load_gui_color(gui_e, "GUICOLOR_MENU_KEY_HIGHLIGHT", s_sdl_menu_key_highlight);
-        load_gui_color(gui_e, "GUICOLOR_MENU_KEY_DARK", s_sdl_menu_key_dark);
-        load_gui_color(gui_e, "GUICOLOR_TITLE", s_sdl_title);
-        load_gui_color(gui_e, "GUICOLOR_MESSAGE_GOOD", s_sdl_msg_good);
-        load_gui_color(gui_e, "GUICOLOR_MESSAGE_BAD", s_sdl_msg_bad);
-        load_gui_color(gui_e, "GUICOLOR_MESSAGE_NOTE", s_sdl_msg_note);
-        load_gui_color(gui_e, "GUICOLOR_MESSAGE_MORE", s_sdl_msg_more);
-        load_gui_color(gui_e, "GUICOLOR_MONSTER_UNAWARE", s_sdl_mon_unaware);
-        load_gui_color(gui_e, "GUICOLOR_MONSTER_ALLIED", s_sdl_mon_allied);
-        load_gui_color(gui_e, "GUICOLOR_MONSTER_TEMP_PROPERTY", s_sdl_mon_temp_property);
-
-        s_text = Color(s_sdl_text);
-        s_passive_text = Color(s_sdl_passive_text);
-        s_menu_highlight = Color(s_sdl_menu_highlight);
-        s_menu_dark = Color(s_sdl_menu_dark);
-        s_menu_key_highlight = Color(s_sdl_menu_key_highlight);
-        s_menu_key_dark = Color(s_sdl_menu_key_dark);
-        s_title = Color(s_sdl_title);
-        s_msg_good = Color(s_sdl_msg_good);
-        s_msg_bad = Color(s_sdl_msg_bad);
-        s_msg_note = Color(s_sdl_msg_note);
-        s_msg_more = Color(s_sdl_msg_more);
-        s_mon_unaware = Color(s_sdl_mon_unaware);
-        s_mon_allied = Color(s_sdl_mon_allied);
-        s_mon_temp_property = Color(s_sdl_mon_temp_property);
+        init_gui_color(gui_e, "GUICOLOR_TEXT", s_sdl_text, s_text);
+        init_gui_color(gui_e, "GUICOLOR_PASSIVE_TEXT", s_sdl_passive_text, s_passive_text);
+        init_gui_color(gui_e, "GUICOLOR_MENU_HIGHLIGHT", s_sdl_menu_highlight, s_menu_highlight);
+        init_gui_color(gui_e, "GUICOLOR_MENU_DARK", s_sdl_menu_dark, s_menu_dark);
+        init_gui_color(
+                gui_e,
+                "GUICOLOR_MENU_KEY_HIGHLIGHT",
+                s_sdl_menu_key_highlight,
+                s_menu_key_highlight);
+        init_gui_color(gui_e, "GUICOLOR_MENU_KEY_DARK", s_sdl_menu_key_dark, s_menu_key_dark);
+        init_gui_color(gui_e, "GUICOLOR_TITLE", s_sdl_title, s_title);
+        init_gui_color(gui_e, "GUICOLOR_MESSAGE_GOOD", s_sdl_msg_good, s_msg_good);
+        init_gui_color(gui_e, "GUICOLOR_MESSAGE_BAD", s_sdl_msg_bad, s_msg_bad);
+        init_gui_color(gui_e, "GUICOLOR_MESSAGE_NOTE", s_sdl_msg_note, s_msg_note);
+        init_gui_color(gui_e, "GUICOLOR_MESSAGE_MORE", s_sdl_msg_more, s_msg_more);
+        init_gui_color(gui_e, "GUICOLOR_MONSTER_UNAWARE", s_sdl_mon_unaware, s_mon_unaware);
+        init_gui_color(gui_e, "GUICOLOR_MONSTER_ALLIED", s_sdl_mon_allied, s_mon_allied);
+        init_gui_color(
+                gui_e,
+                "GUICOLOR_MONSTER_TEMP_PROPERTY",
+                s_sdl_mon_temp_property,
+                s_mon_temp_property);
 }
 
 //-----------------------------------------------------------------------------
@@ -361,6 +349,23 @@ Color::Color(const SDL_Color& sdl_color) :
 {
 }
 
+Color Color::with_brightness(int pct) const
+{
+        pct = std::max(0, pct);
+
+        const double f = (double)pct / 100.0;
+
+        const uint8_t current_r = m_sdl_color.r;
+        const uint8_t current_g = m_sdl_color.g;
+        const uint8_t current_b = m_sdl_color.b;
+
+        const auto new_r = (uint8_t)std::clamp((int)((double)current_r * f), 0, 255);
+        const auto new_g = (uint8_t)std::clamp((int)((double)current_g * f), 0, 255);
+        const auto new_b = (uint8_t)std::clamp((int)((double)current_b * f), 0, 255);
+
+        return {new_r, new_g, new_b};
+}
+
 Color Color::shaded(int pct) const
 {
         pct = std::clamp(pct, 0, 100);
@@ -379,9 +384,9 @@ Color Color::tinted(int pct) const
 
         const double f = (double)pct / 100.0;
 
-        const auto current_r = m_sdl_color.r;
-        const auto current_g = m_sdl_color.g;
-        const auto current_b = m_sdl_color.b;
+        const uint8_t current_r = m_sdl_color.r;
+        const uint8_t current_g = m_sdl_color.g;
+        const uint8_t current_b = m_sdl_color.b;
 
         const auto new_r = (uint8_t)((double)current_r + ((double)(255 - current_r) * f));
         const auto new_g = (uint8_t)((double)current_g + ((double)(255 - current_g) * f));
@@ -428,14 +433,14 @@ void init()
 
         s_str_color_pairs.clear();
 
-        load_colors();
+        init_colors();
 
-        load_gui_colors();
+        init_gui_colors();
 
         TRACE_FUNC_END;
 }
 
-std::optional<Color> name_to_color(const std::string& name)
+Color name_to_color(const std::string& name)
 {
         auto search = std::find_if(
                 std::begin(s_str_color_pairs),

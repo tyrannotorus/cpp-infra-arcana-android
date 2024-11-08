@@ -128,8 +128,7 @@ void init()
                 d.base_name_un_id.names[(size_t)ItemNameType::plural] =
                         look.name_plain + " Potions";
 
-                d.base_name_un_id.names[(size_t)ItemNameType::a] =
-                        look.name_a + " Potion";
+                d.base_name_un_id.names[(size_t)ItemNameType::a] = look.name_a + " Potion";
 
                 d.color = look.color;
 
@@ -144,23 +143,13 @@ void init()
 
                 delete potion;
 
-                const std::string real_name =
-                        "Potion of " + real_type_name;
+                const std::string real_name = "Potion of " + real_type_name;
+                const std::string real_name_plural = "Potions of " + real_type_name;
+                const std::string real_name_a = "a Potion of " + real_type_name;
 
-                const std::string real_name_plural =
-                        "Potions of " + real_type_name;
-
-                const std::string real_name_a =
-                        "a Potion of " + real_type_name;
-
-                d.base_name.names[(size_t)ItemNameType::plain] =
-                        real_name;
-
-                d.base_name.names[(size_t)ItemNameType::plural] =
-                        real_name_plural;
-
-                d.base_name.names[(size_t)ItemNameType::a] =
-                        real_name_a;
+                d.base_name.names[(size_t)ItemNameType::plain] = real_name;
+                d.base_name.names[(size_t)ItemNameType::plural] = real_name_plural;
+                d.base_name.names[(size_t)ItemNameType::a] = real_name_a;
         }
 
         TRACE_FUNC_END;
@@ -178,7 +167,6 @@ void save()
                 saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::plain]);
                 saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::plural]);
                 saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::a]);
-
                 saving::put_str(colors::color_to_name(d.color));
         }
 }
@@ -195,7 +183,7 @@ void load()
                 d.base_name_un_id.names[(size_t)ItemNameType::plain] = saving::get_str();
                 d.base_name_un_id.names[(size_t)ItemNameType::plural] = saving::get_str();
                 d.base_name_un_id.names[(size_t)ItemNameType::a] = saving::get_str();
-                d.color = colors::name_to_color(saving::get_str()).value();
+                d.color = colors::name_to_color(saving::get_str());
         }
 }
 

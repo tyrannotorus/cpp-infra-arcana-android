@@ -189,18 +189,10 @@ void load()
                 auto& d = item::g_data[i];
 
                 if (d.type == ItemType::rod) {
-                        d.base_name_un_id.names[(size_t)ItemNameType::plain] =
-                                saving::get_str();
-
-                        d.base_name_un_id.names[(size_t)ItemNameType::plural] =
-                                saving::get_str();
-
-                        d.base_name_un_id.names[(size_t)ItemNameType::a] =
-                                saving::get_str();
-
-                        d.color =
-                                colors::name_to_color(saving::get_str())
-                                        .value();
+                        d.base_name_un_id.names[(size_t)ItemNameType::plain] = saving::get_str();
+                        d.base_name_un_id.names[(size_t)ItemNameType::plural] = saving::get_str();
+                        d.base_name_un_id.names[(size_t)ItemNameType::a] = saving::get_str();
+                        d.color = colors::name_to_color(saving::get_str());
                 }
         }
 }

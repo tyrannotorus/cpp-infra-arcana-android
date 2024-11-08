@@ -196,8 +196,7 @@ static void dump_gfx(xml::Element* gfx_e, actor::ActorData& data)
         data.color =
                 colors::name_to_color(
                         xml::get_text_str(
-                                xml::first_child(gfx_e, "color")))
-                        .value();
+                                xml::first_child(gfx_e, "color")));
 }
 
 static void dump_audio(xml::Element* audio_e, actor::ActorData& data)

@@ -57,6 +57,8 @@ public:
                         m_sdl_color.b != other.m_sdl_color.b);
         }
 
+        Color with_brightness(int pct) const;
+
         Color shaded(int pct) const;
 
         Color tinted(int pct) const;
@@ -98,7 +100,7 @@ namespace colors
 {
 void init();
 
-std::optional<Color> name_to_color(const std::string& name);
+Color name_to_color(const std::string& name);
 
 std::string color_to_name(const Color& color);
 

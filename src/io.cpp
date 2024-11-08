@@ -709,7 +709,13 @@ void draw_character_at_px(
                 texture = g_font_texture_with_contours;
         }
 
-        SDL_SetTextureColorMod(texture, color.r(), color.g(), color.b());
+        const Color color_adapted = color.with_brightness(config::brightness_pct());
+
+        SDL_SetTextureColorMod(
+                texture,
+                color_adapted.r(),
+                color_adapted.g(),
+                color_adapted.b());
 
         SDL_RenderCopy(g_sdl_renderer, texture, &clip_rect, &render_rect);
 }
@@ -773,17 +779,11 @@ void draw_tile(const TileDrawObj& obj)
                 texture = g_tile_textures_with_contours[(size_t)obj.tile];
         }
 
-        SDL_SetTextureColorMod(
-                texture,
-                obj.color.r(),
-                obj.color.g(),
-                obj.color.b());
+        const Color color = obj.color.with_brightness(config::brightness_pct());
 
-        SDL_RenderCopy(
-                g_sdl_renderer,
-                texture,
-                nullptr,  // No clipping needed, drawing whole texture
-                &render_rect);
+        SDL_SetTextureColorMod(texture, color.r(), color.g(), color.b());
+
+        SDL_RenderCopy(g_sdl_renderer, texture, nullptr, &render_rect);
 }
 
 void cover_panel(const Panel panel, const Color& color)
@@ -859,11 +859,11 @@ void draw_logo()
         render_rect.w = img_px_dims.x;
         render_rect.h = img_px_dims.y;
 
-        SDL_RenderCopy(
-                g_sdl_renderer,
-                g_logo_texture,
-                nullptr,  // No clipping needed, drawing whole texture
-                &render_rect);
+        const int mod_value = std::min(255, (config::brightness_pct() * 255) / 100);
+
+        SDL_SetTextureColorMod(g_logo_texture, mod_value, mod_value, mod_value);
+
+        SDL_RenderCopy(g_sdl_renderer, g_logo_texture, nullptr, &render_rect);
 }
 
 std::string sdl_pref_dir()

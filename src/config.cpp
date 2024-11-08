@@ -61,6 +61,7 @@ static bool s_is_tiles_mode = false;
 static RendererType s_renderer_type = RendererType::auto_select;
 static bool s_is_fullscreen = false;
 static int s_video_scale_factor = 1;
+static int s_brightness_pct = 100;
 static bool s_text_mode_filled_walls = true;
 static bool s_use_trap_color_when_obscured = true;
 static bool s_warn_on_throw_valuable = false;
@@ -311,6 +312,7 @@ static void set_default_variables()
         s_renderer_type = RendererType::auto_select;
         s_is_fullscreen = true;
         s_video_scale_factor = calc_default_video_scale_factor(native_res);
+        s_brightness_pct = 100;
         s_text_mode_filled_walls = true;
         s_use_trap_color_when_obscured = false;
         s_is_intro_lvl_skipped = false;
@@ -434,6 +436,9 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_video_scale_factor = to_int(lines.front());
         remove_line(lines);
 
+        s_brightness_pct = to_int(lines.front());
+        remove_line(lines);
+
         s_text_mode_filled_walls = lines.front() == "1";
         remove_line(lines);
 
@@ -541,6 +546,7 @@ static std::vector<std::string> lines_from_variables()
         lines.push_back(std::to_string((int)s_renderer_type));
         lines.emplace_back(s_is_fullscreen ? "1" : "0");
         lines.emplace_back(std::to_string(s_video_scale_factor));
+        lines.emplace_back(std::to_string(s_brightness_pct));
         lines.emplace_back(s_text_mode_filled_walls ? "1" : "0");
         lines.emplace_back(s_use_trap_color_when_obscured ? "1" : "0");
         lines.emplace_back(s_is_intro_lvl_skipped ? "1" : "0");
@@ -620,6 +626,7 @@ void init()
         s_options.emplace_back(std::make_unique<RendererTypeOption>());
         s_options.emplace_back(std::make_unique<FullscreenOption>());
         s_options.emplace_back(std::make_unique<VideoScaleOption>());
+        s_options.emplace_back(std::make_unique<BrightnessOption>());
         s_options.emplace_back(std::make_unique<TextModeFilledWallsOption>());
 
         // Audio
@@ -717,6 +724,11 @@ bool is_fullscreen()
 int video_scale_factor()
 {
         return s_video_scale_factor;
+}
+
+int brightness_pct()
+{
+        return s_brightness_pct;
 }
 
 void set_window_px_w(const int w)
@@ -994,21 +1006,13 @@ void MasterVolumeOption::change(const OptionChangeCommand command) const
                 s_master_volume_pct_option -= step;
         }
 
-        s_master_volume_pct_option =
-                std::clamp(
-                        s_master_volume_pct_option,
-                        0,
-                        100);
+        s_master_volume_pct_option = std::clamp(s_master_volume_pct_option, 0, 100);
 
         const auto f = ((double)s_master_volume_pct_option) / 100.0;
 
         s_master_volume_pct_adjusted = (int)((f * f) * 100.0);
 
-        s_master_volume_pct_adjusted =
-                std::clamp(
-                        s_master_volume_pct_adjusted,
-                        0,
-                        100);
+        s_master_volume_pct_adjusted = std::clamp(s_master_volume_pct_adjusted, 0, 100);
 
         TRACE
                 << "Volume option: "
@@ -1473,6 +1477,51 @@ void VideoScaleOption::change(OptionChangeCommand command) const
         if (s_video_scale_factor != scale_factor_before) {
                 io::on_user_toggle_scaling();
         }
+}
+
+std::string BrightnessOption::name() const
+{
+        return "Brightness";
+}
+
+std::string BrightnessOption::descr() const
+{
+        return ("Change brightness of colors.");
+}
+
+std::string BrightnessOption::value_str() const
+{
+        std::string str(11, '-');
+
+        str[(s_brightness_pct - 20) / 20] = '|';
+
+        str += " " + std::to_string(s_brightness_pct) + "%";
+
+        return str;
+}
+
+OptionSubmenuType BrightnessOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
+}
+
+void BrightnessOption::change(const OptionChangeCommand command) const
+{
+        const int step = 20;
+
+        if ((command == OptionChangeCommand::enter) ||
+            (command == OptionChangeCommand::right)) {
+                // Enter or right
+                s_brightness_pct += step;
+        }
+        else {
+                // Left
+                s_brightness_pct -= step;
+        }
+
+        s_brightness_pct = std::clamp(s_brightness_pct, 20, 220);
+
+        colors::init();
 }
 
 std::string TextModeFilledWallsOption::name() const

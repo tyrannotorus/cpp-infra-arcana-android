@@ -67,6 +67,7 @@
 - A bunch of screens now also support pgup/pgdown/home/end for scrolling.
 
 # Other user interface changes
+- Added a brightness setting.
 - The game now hides the mouse cursor.
 
 ##############################
