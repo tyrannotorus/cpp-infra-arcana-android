@@ -28,11 +28,16 @@
 #include "terrain_data.hpp"
 #include "terrain_factory.hpp"
 
+// Counter to ckeck for mob spawning. It is reset at the start of each level.
+static int s_spawn_counter = 0;
+
 // -----------------------------------------------------------------------------
 // Map controllers
 // -----------------------------------------------------------------------------
 void MapControllerStd::on_enter()
 {
+        s_spawn_counter = 0;
+
         if (!map::g_player->m_properties.has(prop::Id::deaf)) {
                 audio::try_play_ambient(1);
         }
@@ -64,6 +69,8 @@ void MapControllerStd::on_enter()
 
 void MapControllerStd::on_std_turn()
 {
+        ++s_spawn_counter;
+
         const bool has_necronomicon =
                 map::g_player->m_inv.has_item_in_backpack(
                         item::Id::necronomicon);
@@ -73,8 +80,9 @@ void MapControllerStd::on_std_turn()
                 ? 200
                 : 300;
 
-        if (game_time::turn_nr() % spawn_n_turns == 0) {
+        if (s_spawn_counter > spawn_n_turns) {
                 populate_mon::spawn_for_repopulate_over_time();
+                s_spawn_counter = 0;
         }
 }
 
