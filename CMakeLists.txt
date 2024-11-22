@@ -1,9 +1,11 @@
- # ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Project
 # ------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.0)
 
 project(ia)
+
+enable_testing()
 
 SET(CMAKE_COLOR_MAKEFILE OFF)
 
@@ -365,9 +367,10 @@ endif()
 # Target definitions
 # ------------------------------------------------------------------------------
 add_executable(ia ${SRC} ${RC_FILE})
-set_target_properties(ia PROPERTIES OUTPUT_NAME ia)
-
 add_executable(ia-debug ${SRC} ${RC_FILE})
+add_executable(ia-test ${TEST_SRC})
+
+set_target_properties(ia PROPERTIES OUTPUT_NAME ia)
 
 if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER_EQUAL 3.20)
         message(STATUS "cmake version >= 3.20, setting EXPORT_COMPILE_COMMANDS" for target ia-debug)
@@ -379,344 +382,79 @@ else()
         set_target_properties(ia-debug PROPERTIES OUTPUT_NAME ia-debug)
 endif()
 
-enable_testing()
-
-add_executable(ia-test ${TEST_SRC})
 set_target_properties(ia-test PROPERTIES OUTPUT_NAME ia-test)
-add_test(IA-test ia-test)
-
-# GNU gcc and Clang specific compiler flags
-if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-
-        set(COMMON_COMPILE_FLAGS
-                -std=c++17
-                -Wpedantic
-                # Disabled for the same reason as -Werror, see comment below.
-                # -pedantic-errors
-                -Wall
-                -Wextra
-                # NOTE: While warnings should not be accepted, -Werror can cause
-                # problems when building the game with different compilers or
-                # compiler versions than it was developed on.
-                # -Werror
-                -Wmissing-declarations
-                -Wunused
-                -Wuninitialized
-                -Wshadow
-                )
-
-        set(DEBUG_COMPILE_FLAGS
-                -Wnull-dereference
-                -g
-                # NOTE: For some reason, -O0 breaks the "ar" command when building
-                # with mingw (the command seems to freeze forever), but -Og works.
-                # -Og seems to be the preferable setting overall anyway.
-                -Og
-                # Uncomment to generate gmon.out for gprof (must also be done for linker
-                # flags, see below)
-                # -pg
-                )
-        
-        if(DEBUG_SANITIZE)
-                list(APPEND DEBUG_COMPILE_FLAGS
-                        -fsanitize=address
-                        -fsanitize-address-use-after-scope
-                        -fsanitize=alignment
-                        -fsanitize=bool
-                        -fsanitize=bounds
-                        -fsanitize=enum
-                        -fsanitize=integer-divide-by-zero
-                        -fsanitize=null
-                        -fsanitize=return
-                        -fsanitize=signed-integer-overflow
-                        -fsanitize=undefined
-                        -fsanitize=unreachable
-                        -fsanitize=vptr
-                        -fno-sanitize-recover
-                        # Needed for full stack trace when running gcc sanitizers
-                        -fno-omit-frame-pointer
-                        )
-        endif()
-
-        set(RELEASE_COMPILE_FLAGS
-                -O2
-                -Wno-unused-value
-                )
-endif()
-
-# GNU gcc specific compiler flags
-if(CMAKE_COMPILER_IS_GNUCXX)
-
-        list(APPEND COMMON_COMPILE_FLAGS
-                -Wuninitialized
-                )
-endif()
-
-set(RELEASE_COMPILE_FLAGS
-        ${RELEASE_COMPILE_FLAGS}
-        -DNDEBUG
-        )
-
-set(TEST_COMPILE_FLAGS
-        ${DEBUG_COMPILE_FLAGS}
-        # -fno-sanitize=all
-        # -fsanitize=undefined
-        -DTRACE_LVL=0
-        )
- 
-target_compile_options(ia PUBLIC
-        ${COMMON_COMPILE_FLAGS}
-        ${RELEASE_COMPILE_FLAGS}
-        )
-
-target_compile_options(ia-debug PUBLIC
-        ${COMMON_COMPILE_FLAGS}
-        ${DEBUG_COMPILE_FLAGS}
-        )
-
-target_compile_options(ia-test PUBLIC
-        ${COMMON_COMPILE_FLAGS}
-        ${TEST_COMPILE_FLAGS}
-        )
-
-set(COMMON_INCLUDE_DIRS
-        include
-        xml/tinyxml2
-        )
-
-target_include_directories(ia PUBLIC
-        ${COMMON_INCLUDE_DIRS}
-        )
-
-target_include_directories(ia-debug PUBLIC
-        ${COMMON_INCLUDE_DIRS}
-        )
-
-target_include_directories(ia-test PUBLIC
-        ${COMMON_INCLUDE_DIRS}
-        test/include
-        test/Catch2-v2.13.9/include
-        )
-
-# On Windows releases, remove the console window
-if(WIN32)
-        # TODO: This solution only works with gcc/clang - not with MSVC
-        if(CMAKE_COMPILER_IS_GNUCXX OR(CMAKE_C_COMPILER_ID MATCHES "Clang") OR(CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-                target_link_libraries(ia -mwindows)
-        endif()
-
-        if(CMAKE_COMPILER_IS_GNUCXX)
-                target_link_libraries(ia -static-libgcc -static-libstdc++)
-                target_link_libraries(ia-debug -static-libgcc -static-libstdc++)
-        endif()
-endif()
 
 # Copy installed files to the build directory.
 file(GLOB INSTALLED_FILES "installed_files/*")
 file(COPY ${INSTALLED_FILES} DESTINATION .)
 
 # ------------------------------------------------------------------------------
-# Dependencies
+# Cmake tests
 # ------------------------------------------------------------------------------
-find_package(Git)
+add_test(IA-test ia-test)
 
+# ------------------------------------------------------------------------------
+# Compile flags
+# ------------------------------------------------------------------------------
+include(cmake/compile_flags.cmake)
+
+# ------------------------------------------------------------------------------
+# SDL
+# ------------------------------------------------------------------------------
 if(WIN32)
-
-        if (NOT DEFINED ARCH)
-
-                if("${CMAKE_SIZEOF_VOID_P}" EQUAL "4")
-                        message(STATUS "Assuming 32 bit architecture")
-                        set(ARCH 32bit)
-                elseif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-                        message(STATUS "Assuming 64 bit architecture")
-                        set(ARCH 64bit)
-                endif()
-
-        endif()
-
-        if (NOT DEFINED ARCH OR ((NOT "${ARCH}" EQUAL "32bit") AND (NOT "${ARCH}" EQUAL "64bit")))
-                message(FATAL_ERROR "Unknown architecture")
-        endif()
-
-        set(SDL_BASE_DIR ${CMAKE_SOURCE_DIR}/SDL)
-
-        if(MSVC)
-
-                if("${ARCH}" EQUAL "32bit")
-                        set(SDL_ARCH_DIR x86)
-                else()
-                        set(SDL_ARCH_DIR x64)
-                endif()
-
-                set(SDL2_PATH       ${SDL_BASE_DIR}/msvc/SDL2-2.0.9)
-                set(SDL2_IMAGE_PATH ${SDL_BASE_DIR}/msvc/SDL2_image-2.0.5)
-                set(SDL2_MIXER_PATH ${SDL_BASE_DIR}/msvc/SDL2_mixer-2.0.4)
-
-                set(SDL_INCLUDE_DIRS
-                        ${SDL2_PATH}/include
-                        ${SDL2_IMAGE_PATH}/include
-                        ${SDL2_MIXER_PATH}/include
-                        )
-
-                set(SDL2_LIBS_PATH          ${SDL2_PATH}/lib/${SDL_ARCH_DIR})
-                set(SDL2_IMAGE_LIBS_PATH    ${SDL2_IMAGE_PATH}/lib/${SDL_ARCH_DIR})
-                set(SDL2_MIXER_LIBS_PATH    ${SDL2_MIXER_PATH}/lib/${SDL_ARCH_DIR})
-
-                set(SDL2_BINS_PATH          ${SDL2_PATH}/lib/${SDL_ARCH_DIR})
-                set(SDL2_IMAGE_BINS_PATH    ${SDL2_IMAGE_PATH}/lib/${SDL_ARCH_DIR})
-                set(SDL2_MIXER_BINS_PATH    ${SDL2_MIXER_PATH}/lib/${SDL_ARCH_DIR})
-
-        else()
-
-                # Not MSVC - e.g. gcc
-
-                if("${ARCH}" EQUAL "32bit")
-                        set(SDL_ARCH_DIR i686-w64-mingw32)
-                else()
-                        set(SDL_ARCH_DIR x86_64-w64-mingw32)
-                endif()
-
-                set(SDL2_PATH       ${SDL_BASE_DIR}/mingw/SDL2-2.0.9/${SDL_ARCH_DIR})
-                set(SDL2_IMAGE_PATH ${SDL_BASE_DIR}/mingw/SDL2_image-2.0.5/${SDL_ARCH_DIR})
-                set(SDL2_MIXER_PATH ${SDL_BASE_DIR}/mingw/SDL2_mixer-2.0.4/${SDL_ARCH_DIR})
-
-                set(SDL_INCLUDE_DIRS
-                        ${SDL2_PATH}/include/SDL2
-                        ${SDL2_IMAGE_PATH}/include/SDL2
-                        ${SDL2_MIXER_PATH}/include/SDL2
-                        )
-
-                set(SDL2_LIBS_PATH          ${SDL2_PATH}/lib)
-                set(SDL2_IMAGE_LIBS_PATH    ${SDL2_IMAGE_PATH}/lib)
-                set(SDL2_MIXER_LIBS_PATH    ${SDL2_MIXER_PATH}/lib)
-
-                set(SDL2_BINS_PATH          ${SDL2_PATH}/bin)
-                set(SDL2_IMAGE_BINS_PATH    ${SDL2_IMAGE_PATH}/bin)
-                set(SDL2_MIXER_BINS_PATH    ${SDL2_MIXER_PATH}/bin)
-
-                target_link_libraries(ia        mingw32)
-                target_link_libraries(ia-debug  mingw32)
-
-        endif()
-
-        message(STATUS "SDL_INCLUDE_DIRS: " ${SDL_INCLUDE_DIRS})
-
-        target_include_directories(ia       PUBLIC ${SDL_INCLUDE_DIRS})
-        target_include_directories(ia-debug PUBLIC ${SDL_INCLUDE_DIRS})
-        target_include_directories(ia-test  PUBLIC ${SDL_INCLUDE_DIRS})
-
-        message(STATUS "SDL2_LIBS_PATH: "        ${SDL2_LIBS_PATH})
-        message(STATUS "SDL2_IMAGE_LIBS_PATH: "  ${SDL2_IMAGE_LIBS_PATH})
-        message(STATUS "SDL2_MIXER_LIBS_PATH: "  ${SDL2_MIXER_LIBS_PATH})
-
-        find_library(SDL2_LIB_PATH          SDL2        PATHS ${SDL2_LIBS_PATH})
-        find_library(SDL2_MAIN_LIB_PATH     SDL2main    PATHS ${SDL2_LIBS_PATH})
-        find_library(SDL2_IMAGE_LIB_PATH    SDL2_image  PATHS ${SDL2_IMAGE_LIBS_PATH})
-        find_library(SDL2_MIXER_LIB_PATH    SDL2_mixer  PATHS ${SDL2_MIXER_LIBS_PATH})
-
-        message(STATUS "SDL2_LIB_PATH: "        ${SDL2_LIB_PATH})
-        message(STATUS "SDL2_MAIN_LIB_PATH: "   ${SDL2_MAIN_LIB_PATH})
-        message(STATUS "SDL2_IMAGE_LIB_PATH: "  ${SDL2_IMAGE_LIB_PATH})
-        message(STATUS "SDL2_MIXER_LIB_PATH: "  ${SDL2_MIXER_LIB_PATH})
-
-        set(SDL_LIBS
-                ${SDL2_LIB_PATH}
-                ${SDL2_MAIN_LIB_PATH}
-                ${SDL2_IMAGE_LIB_PATH}
-                ${SDL2_MIXER_LIB_PATH}
-                )
-
-        target_link_libraries(ia        ${SDL_LIBS})
-        target_link_libraries(ia-debug  ${SDL_LIBS})
-
-        # SDL dll files and licenses
-        set(SDL_DISTR_FILES
-                ${SDL2_BINS_PATH}/SDL2.dll
-                ${SDL2_IMAGE_BINS_PATH}/SDL2_image.dll
-                ${SDL2_IMAGE_BINS_PATH}/zlib1.dll
-                ${SDL2_IMAGE_BINS_PATH}/libpng16-16.dll
-                ${SDL2_IMAGE_BINS_PATH}/LICENSE.zlib.txt
-                ${SDL2_IMAGE_BINS_PATH}/LICENSE.png.txt
-                ${SDL2_MIXER_BINS_PATH}/SDL2_mixer.dll
-                ${SDL2_MIXER_BINS_PATH}/libogg-0.dll
-                ${SDL2_MIXER_BINS_PATH}/libvorbis-0.dll
-                ${SDL2_MIXER_BINS_PATH}/libvorbisfile-3.dll
-                ${SDL2_MIXER_BINS_PATH}/LICENSE.ogg-vorbis.txt
-                )
-
-        file(COPY ${SDL_DISTR_FILES} DESTINATION .)
-
-        install(FILES ${SDL_DISTR_FILES} DESTINATION ia)
-        install(FILES ${SDL_DISTR_FILES} DESTINATION ia-debug)
-
+        include(cmake/sdl_win.cmake)
 else()
-
         # Not windows (e.g. Unix)
+        include(cmake/sdl_linux.cmake)
+endif()
 
-        set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+# ------------------------------------------------------------------------------
+# Optional sanitize link flags
+# ------------------------------------------------------------------------------
+if (DEBUG_SANITIZE)
+        target_link_libraries(ia-debug PUBLIC -lasan -lubsan)
+        target_link_libraries(ia-test PUBLIC -lubsan)
+endif()
 
-        find_package(SDL2       REQUIRED)
-        find_package(SDL2_image REQUIRED)
-        find_package(SDL2_mixer REQUIRED)
+# ------------------------------------------------------------------------------
+# Link options for gprof
+# ------------------------------------------------------------------------------
+# Uncomment to generate gmon.out for gprof (must also be done for compile flags)
+# NOTE: "-no-pie" is needed due to "a bug in gcc", see:
+# https://stackoverflow.com/questions/42620074
+# https://stackoverflow.com/questions/39827412
+# target_link_libraries(ia-debug PUBLIC -pg -no-pie)
 
-        set(SDL_INCLUDE_DIRS
-                ${SDL2_INCLUDE_DIR}
-                ${SDL2_IMAGE_INCLUDE_DIR}
-                ${SDL2_MIXER_INCLUDE_DIR}
-                )
-
-        target_include_directories(ia       PUBLIC ${SDL_INCLUDE_DIRS})
-        target_include_directories(ia-debug PUBLIC ${SDL_INCLUDE_DIRS})
-        target_include_directories(ia-test  PUBLIC ${SDL_INCLUDE_DIRS})
-
-        set(SDL_LIBS
-                ${SDL2_LIBRARY}
-                ${SDL2_IMAGE_LIBRARIES}
-                ${SDL2_MIXER_LIBRARIES}
-                )
-
-        if (DEBUG_SANITIZE)
-                target_link_libraries(ia-debug PUBLIC   -lasan -lubsan)
-                target_link_libraries(ia-test PUBLIC    -lubsan)
+# ------------------------------------------------------------------------------
+# On Windows releases, hide console window
+# ------------------------------------------------------------------------------
+if(WIN32)
+        # TODO: This solution only works with gcc/clang - not with MSVC
+        if(
+                        CMAKE_COMPILER_IS_GNUCXX
+                        OR(CMAKE_C_COMPILER_ID MATCHES "Clang")
+                        OR(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                        )
+                target_link_libraries(ia -mwindows)
         endif()
+endif()
 
-        target_link_libraries(ia PUBLIC         ${SDL_LIBS})
-        target_link_libraries(ia-debug PUBLIC   ${SDL_LIBS})
-
-        # Uncomment to generate gmon.out for gprof (must also be done for compile
-        # flags, see above)
-        # NOTE: "-no-pie" is needed due to "a bug in gcc", see:
-        # https://stackoverflow.com/questions/42620074
-        # https://stackoverflow.com/questions/39827412
-        # target_link_libraries(ia-debug PUBLIC -pg -no-pie)
-
+# ------------------------------------------------------------------------------
+# On Windows, statically link libgcc and libstdc++
+# ------------------------------------------------------------------------------
+if(WIN32)
+        if(CMAKE_COMPILER_IS_GNUCXX)
+                target_link_libraries(ia -static-libgcc -static-libstdc++)
+                target_link_libraries(ia-debug -static-libgcc -static-libstdc++)
+        endif()
 endif()
 
 # ------------------------------------------------------------------------------
 # Retrieve abbreviated git commit
 # ------------------------------------------------------------------------------
-set(GENERATED_GIT_SHA1_PATH ${CMAKE_BINARY_DIR}/data/git-sha1.txt)
+find_package(Git)
 
-if(GIT_FOUND)
-        message("Running revision command with Git executable: '${GIT_EXECUTABLE}'")
-
-        message("Revision output path: '${GENERATED_GIT_SHA1_PATH}'")
-
-        execute_process(
-                COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-                OUTPUT_FILE ${GENERATED_GIT_SHA1_PATH}
-                RESULT_VARIABLE REVISION_COMMAND_RESULT
-                ERROR_VARIABLE REVISION_COMMAND_ERRORS
-                )
-
-        message("Revision command result: '${REVISION_COMMAND_RESULT}'")
-
-        message("Revision command errors: '${REVISION_COMMAND_ERRORS}'")
-else()
-        message("Could not find Git - will not write revision")
-endif()
+include(cmake/git_revision.cmake)
 
 # ------------------------------------------------------------------------------
 # Packaging
