@@ -86,6 +86,7 @@
 # Other
 ##############################
 - SDL is now linked statically into the game binary (and the source code is included in the Git repo), i.e. there is no need to install these dependencies to play the game (or when building the game).
+- libgcc and libstdc++ is linked statically on all systems, to avoid incompatibility with libraries installed on the system where the game is running.
 
 ============================================================
 = v22.1.0 (September 24, 2023)
