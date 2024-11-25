@@ -1,10 +1,34 @@
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
+# TODO: Disable as many unneeded features as possible.
+
+set(SDL2IMAGE_AVIF OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_BMP OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_GIF OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_JPG OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_JXL OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_LBM OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_PCX OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_PNG ON CACHE BOOL "" FORCE)
+set(SDL2IMAGE_PNM OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_QOI OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_SVG OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_TGA OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_TIF OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_WEBP OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_XCF OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_XPM OFF CACHE BOOL "" FORCE)
+set(SDL2IMAGE_XV OFF CACHE BOOL "" FORCE)
+
 add_subdirectory(SDL/src/SDL2-2.30.9)
 add_subdirectory(SDL/src/SDL2_image-2.8.2)
 add_subdirectory(SDL/src/SDL2_mixer-2.8.0)
 
-set(SDL_LIBRARIES SDL2::SDL2-static SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static)
+set(SDL_LIBRARIES
+        SDL2::SDL2-static
+        SDL2_image::SDL2_image-static
+        SDL2_mixer::SDL2_mixer-static
+        )
 
 target_link_libraries(ia        ${SDL_LIBRARIES})
 target_link_libraries(ia-debug  ${SDL_LIBRARIES})
