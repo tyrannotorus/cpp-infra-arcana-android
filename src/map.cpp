@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <cstring>
 
 #include "actor.hpp"
 #include "actor_data.hpp"

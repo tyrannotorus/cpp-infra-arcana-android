@@ -582,7 +582,7 @@ bool Actor::is_ranged_attack_blocked(const P& target_pos) const
                         is_blocking_at));
 }
 
-AiAvailAttacksData Actor::avail_attacks(Actor& defender) const
+AiAvailAttacksData Actor::avail_attacks(const Actor& defender) const
 {
         AiAvailAttacksData result;
 

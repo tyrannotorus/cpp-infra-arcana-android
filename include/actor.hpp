@@ -264,7 +264,7 @@ public:
         // TODO: These should be free functions instead, refactor.
         // ==================================================
         bool is_sneaking() const;
-        AiAvailAttacksData avail_attacks(Actor& defender) const;
+        AiAvailAttacksData avail_attacks(const Actor& defender) const;
         AiAttData choose_attack(const AiAvailAttacksData& avail_attacks) const;
         DidAction try_attack(Actor& defender);
         int nr_turns_to_be_aware(int factor = 1) const;

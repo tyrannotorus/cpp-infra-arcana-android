@@ -401,12 +401,7 @@ include(cmake/compile_flags.cmake)
 # ------------------------------------------------------------------------------
 # SDL
 # ------------------------------------------------------------------------------
-if(WIN32)
-        include(cmake/sdl_win.cmake)
-else()
-        # Not windows (e.g. Unix)
-        include(cmake/sdl_linux.cmake)
-endif()
+include(cmake/sdl.cmake)
 
 # ------------------------------------------------------------------------------
 # Optional sanitize link flags
@@ -442,11 +437,21 @@ endif()
 # ------------------------------------------------------------------------------
 # On Windows, statically link libgcc and libstdc++
 # ------------------------------------------------------------------------------
+# TODO: Consider removing "if(WIN32)" here and statically link on Linux as well.
+# "if(CMAKE_COMPILER_IS_GNUCXX)" needs to be kept however.
 if(WIN32)
         if(CMAKE_COMPILER_IS_GNUCXX)
                 target_link_libraries(ia -static-libgcc -static-libstdc++)
                 target_link_libraries(ia-debug -static-libgcc -static-libstdc++)
         endif()
+endif()
+
+# ------------------------------------------------------------------------------
+# On Windows, link mingw32 if using gcc etc
+# ------------------------------------------------------------------------------
+if(WIN32 AND NOT MSVC)
+        target_link_libraries(ia        mingw32)
+        target_link_libraries(ia-debug  mingw32)
 endif()
 
 # ------------------------------------------------------------------------------

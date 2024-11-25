@@ -82,6 +82,11 @@
 ##############################
 - Available font images are no longer hard coded in the game, instead the gfx/fonts/ directory is searched for any .png file that starts with <width>x<height> (e.g. "7x13_uushi.png"). So new .png fonts can be added just by dropping them in the fonts directory.
 
+##############################
+# Other
+##############################
+- SDL is now linked statically into the game binary (and the source code is included in the Git repo), i.e. there is no need to install these dependencies to play the game (or when building the game).
+
 ============================================================
 = v22.1.0 (September 24, 2023)
 ============================================================

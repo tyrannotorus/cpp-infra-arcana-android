@@ -133,7 +133,7 @@ static void hit_corpse_destroy_success(
 }
 
 static void hit_corpse_destroy_fail(
-        actor::Actor& actor,
+        const actor::Actor& actor,
         const DmgType dmg_type)
 {
         if ((dmg_type == DmgType::kicking) ||
