@@ -437,8 +437,6 @@ endif()
 # ------------------------------------------------------------------------------
 # On Windows, statically link libgcc and libstdc++
 # ------------------------------------------------------------------------------
-# TODO: Consider removing "if(WIN32)" here and statically link on Linux as well.
-# "if(CMAKE_COMPILER_IS_GNUCXX)" needs to be kept however.
 if(WIN32)
         if(CMAKE_COMPILER_IS_GNUCXX)
                 target_link_libraries(ia -static-libgcc -static-libstdc++)
