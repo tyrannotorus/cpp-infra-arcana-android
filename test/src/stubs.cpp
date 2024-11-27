@@ -40,6 +40,10 @@ void cleanup_sdl() {}
 
 void cleanup_other() {}
 
+void init_sdl_audio() {}
+
+void cleanup_sdl_audio() {}
+
 void update_screen() {}
 
 void clear_screen() {}

@@ -51,7 +51,7 @@ TEST_CASE("Melee attack data")
 
         mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
-        map::g_player->update_fov();
+        actor::update_player_fov();
 
         mon_1.m_mon_aware_state.aware_counter = 1;
         mon_1.m_mon_aware_state.player_aware_of_me_counter = 1;
@@ -72,13 +72,13 @@ TEST_CASE("Melee attack data")
                 const int player_skill_mod =
                         player_data.ability_values.val(
                                 AbilityId::melee,
-                                true,  // Affected by properties
+                                AbilityAffectedByProperties::yes,
                                 *map::g_player);
 
                 const int mon_dodge_mod =
                         -(mon_data.ability_values.val(
                                 AbilityId::dodging,
-                                true,  // Affected by properties
+                                AbilityAffectedByProperties::yes,
                                 mon_1));
 
                 const int wpn_hit_mod = wpn.data().melee.hit_chance_mod;
@@ -129,7 +129,7 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
         // Zombie
         auto& mon = *actor::make("MON_ZOMBIE", p2);
 
-        map::g_player->update_fov();
+        actor::update_player_fov();
 
         mon.m_mon_aware_state.aware_counter = 1;
         mon.m_mon_aware_state.player_aware_of_me_counter = 1;
@@ -167,7 +167,7 @@ TEST_CASE("Melee attack data has reduced damage against pierce resistance")
         // Worm Mass
         auto& mon = *actor::make("MON_WORM_MASS", p2);
 
-        map::g_player->update_fov();
+        actor::update_player_fov();
 
         mon.m_mon_aware_state.aware_counter = 1;
         mon.m_mon_aware_state.player_aware_of_me_counter = 1;
@@ -216,7 +216,7 @@ TEST_CASE("Ranged attack data")
 
         mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
-        map::g_player->update_fov();
+        actor::update_player_fov();
 
         mon_1.m_mon_aware_state.aware_counter = 1;
         mon_1.m_mon_aware_state.player_aware_of_me_counter = 1;
@@ -235,13 +235,13 @@ TEST_CASE("Ranged attack data")
                 const int player_skill_mod =
                         player_data.ability_values.val(
                                 AbilityId::ranged,
-                                true,  // Affected by properties
+                                AbilityAffectedByProperties::yes,
                                 *map::g_player);
 
                 const int mon_dodge_mod =
                         -(mon_data.ability_values.val(
                                 AbilityId::dodging,
-                                true,  // Affected by properties
+                                AbilityAffectedByProperties::yes,
                                 mon_1));
 
                 const int wpn_hit_mod = wpn.data().ranged.hit_chance_mod;
@@ -268,18 +268,18 @@ TEST_CASE("Ranged attack data")
         auto expected_dmg_range = wpn.data().ranged.dmg;
 
         const RangedAttData att_data_1(
-                map::g_player,  // Attacker
+                map::g_player,         // Attacker
                 map::g_player->m_pos,  // Attacker origin
-                {},  // Aim position, doesn't matter here
-                mon_1.m_pos,  // Current position
-                wpn);  // Weapon
+                {},                    // Aim position, doesn't matter here
+                mon_1.m_pos,           // Current position
+                wpn);                  // Weapon
 
         const RangedAttData att_data_2(
-                map::g_player,  // Attacker
+                map::g_player,         // Attacker
                 map::g_player->m_pos,  // Attacker origin
-                {},  // Aim position, doesn't matter here
-                mon_2.m_pos,  // Current position
-                wpn);  // Weapon
+                {},                    // Aim position, doesn't matter here
+                mon_2.m_pos,           // Current position
+                wpn);                  // Weapon
 
         REQUIRE(att_data_1.hit_chance_tot == expected_hit_chance_vs_mon_1);
         REQUIRE(att_data_1.dmg_range == expected_dmg_range);
@@ -317,7 +317,7 @@ TEST_CASE("Throwing attack data")
 
         mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
-        map::g_player->update_fov();
+        actor::update_player_fov();
 
         mon_1.m_mon_aware_state.aware_counter = 1;
         mon_1.m_mon_aware_state.player_aware_of_me_counter = 1;
@@ -337,13 +337,13 @@ TEST_CASE("Throwing attack data")
                 const int player_skill_mod =
                         player_data.ability_values.val(
                                 AbilityId::ranged,
-                                true,  // Affected by properties
+                                AbilityAffectedByProperties::yes,
                                 *map::g_player);
 
                 const int mon_dodge_mod =
                         -(mon_data.ability_values.val(
                                 AbilityId::dodging,
-                                true,  // Affected by properties
+                                AbilityAffectedByProperties::yes,
                                 mon_1));
 
                 const int wpn_hit_mod = item.data().ranged.throw_hit_chance_mod;
@@ -370,18 +370,18 @@ TEST_CASE("Throwing attack data")
         auto expected_dmg_range = item.data().ranged.dmg;
 
         const ThrowAttData att_data_1(
-                map::g_player,  // Attacker
+                map::g_player,         // Attacker
                 map::g_player->m_pos,  // Attacker origin
-                {},  // Aim position, doesn't matter here
-                mon_1.m_pos,  // Current position
-                item);  // Thrown item
+                {},                    // Aim position, doesn't matter here
+                mon_1.m_pos,           // Current position
+                item);                 // Thrown item
 
         const ThrowAttData att_data_2(
-                map::g_player,  // Attacker
+                map::g_player,         // Attacker
                 map::g_player->m_pos,  // Attacker origin
-                {},  // Aim position, doesn't matter here
-                mon_2.m_pos,  // Current position
-                item);  // Thrown item
+                {},                    // Aim position, doesn't matter here
+                mon_2.m_pos,           // Current position
+                item);                 // Thrown item
 
         REQUIRE(att_data_1.hit_chance_tot == expected_hit_chance_vs_mon_1);
         REQUIRE(att_data_1.dmg_range == expected_dmg_range);

@@ -56,8 +56,7 @@ TEST_CASE("Test player acts twice compared to slow monster")
                         expected_counter = 0;
                 }
 
-                const std::string current_actor_name =
-                        game_time::current_actor()->name_a();
+                const std::string current_actor_name = actor::name_a(*game_time::current_actor());
 
                 REQUIRE(current_actor_name == expected_name);
 
@@ -83,8 +82,7 @@ TEST_CASE("Test standard turn incrementation with player only")
 
                 REQUIRE(game_time::turn_nr() == expected_turn_nr);
 
-                const std::string current_actor_name =
-                        game_time::current_actor()->name_a();
+                const std::string current_actor_name = actor::name_a(*game_time::current_actor());
 
                 REQUIRE(current_actor_name == name_player);
 
@@ -122,8 +120,7 @@ TEST_CASE("Test standard turn incrementation with player and monster")
                         ? name_player
                         : name_mon;
 
-                const std::string current_actor_name =
-                        game_time::current_actor()->name_a();
+                const std::string current_actor_name = actor::name_a(*game_time::current_actor());
 
                 REQUIRE(current_actor_name == expected_name);
 

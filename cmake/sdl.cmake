@@ -26,9 +26,13 @@ set(SDL2MIXER_MOD OFF CACHE BOOL "" FORCE)
 set(SDL2MIXER_MIDI_FLUIDSYNTH OFF CACHE BOOL "" FORCE)
 set(SDL2MIXER_WAVPACK OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(SDL/src/SDL2-2.30.9)
-add_subdirectory(SDL/src/SDL2_image-2.8.2)
-add_subdirectory(SDL/src/SDL2_mixer-2.8.0)
+set(SDL_PATH SDL/src/SDL2-2.30.9)
+set(SDL_IMAGE_PATH SDL/src/SDL2_image-2.8.2)
+set(SDL_MIXER_PATH SDL/src/SDL2_mixer-2.8.0)
+
+add_subdirectory(${SDL_PATH})
+add_subdirectory(${SDL_IMAGE_PATH})
+add_subdirectory(${SDL_MIXER_PATH})
 
 set(SDL_LIBRARIES
         SDL2::SDL2-static
@@ -38,7 +42,14 @@ set(SDL_LIBRARIES
 
 target_link_libraries(ia        ${SDL_LIBRARIES})
 target_link_libraries(ia-debug  ${SDL_LIBRARIES})
-   
+
+target_include_directories(
+        ia-test
+        PUBLIC
+        ${SDL_PATH}/include
+        ${SDL_IMAGE_PATH}/include
+        ${SDL_MIXER_PATH}/include)
+
 # TODO: Copy license files
 # configure_file(${SDL_PATH}/LICENSE.txt          LICENSE-SDL.txt         COPYONLY)
 # configure_file(${SDL_IMAGE_PATH}/LICENSE.txt    LICENSE-SDL_image.txt   COPYONLY)

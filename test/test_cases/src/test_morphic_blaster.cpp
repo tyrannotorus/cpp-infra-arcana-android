@@ -46,13 +46,13 @@ TEST_CASE("Morphic Blaster projectile explodes on hitting creature")
                 static_cast<item::Wpn*>(
                         item::make(item::Id::morphic_blaster));
 
-        REQUIRE(rat_1->is_alive());
-        REQUIRE(rat_2->is_alive());
+        REQUIRE(actor::is_alive(*rat_1));
+        REQUIRE(actor::is_alive(*rat_2));
 
         attack::ranged(map::g_player, map::g_player->m_pos, rat_1->m_pos, *wpn);
 
-        REQUIRE(!rat_1->is_alive());
-        REQUIRE(!rat_2->is_alive());
+        REQUIRE(!actor::is_alive(*rat_1));
+        REQUIRE(!actor::is_alive(*rat_2));
 
         test_utils::cleanup_all();
 }
@@ -89,13 +89,13 @@ TEST_CASE("Morphic Blaster projectile explodes on hitting floor")
                 static_cast<item::Wpn*>(
                         item::make(item::Id::morphic_blaster));
 
-        REQUIRE(rat_1->is_alive());
-        REQUIRE(rat_2->is_alive());
+        REQUIRE(actor::is_alive(*rat_1));
+        REQUIRE(actor::is_alive(*rat_2));
 
         attack::ranged(map::g_player, map::g_player->m_pos, p2, *wpn);
 
-        REQUIRE(!rat_1->is_alive());
-        REQUIRE(!rat_2->is_alive());
+        REQUIRE(!actor::is_alive(*rat_1));
+        REQUIRE(!actor::is_alive(*rat_2));
 
         test_utils::cleanup_all();
 }

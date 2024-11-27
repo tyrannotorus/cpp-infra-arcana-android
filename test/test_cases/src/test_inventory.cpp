@@ -133,7 +133,7 @@ TEST_CASE("Properties from item applied and removed for actor")
 
         // Destroy the asbesthos suit by explosions
         for (int i = 0; i < 10; ++i) {
-                map::g_player->restore_hp(99999, true /* Restoring above max */);
+                actor::restore_hp(*map::g_player, 99999, actor::AllowRestoreAboveMax::yes);
 
                 explosion::run(map::g_player->m_pos, ExplType::expl);
 

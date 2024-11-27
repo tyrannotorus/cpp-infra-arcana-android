@@ -51,7 +51,7 @@ TEST_CASE("Sound alerts monster")
 
         auto* const zombie = actor::make("MON_ZOMBIE", mon_pos);
 
-        REQUIRE(!zombie->is_aware_of_player());
+        REQUIRE(!actor::is_aware_of_player(*zombie));
 
         // First run a sound that does NOT alert monsters
         Snd snd(
@@ -65,14 +65,14 @@ TEST_CASE("Sound alerts monster")
 
         snd.run();
 
-        REQUIRE(!zombie->is_aware_of_player());
+        REQUIRE(!actor::is_aware_of_player(*zombie));
 
         // Now run a sound that does alert monsters
         snd.set_alerts_mon(AlertsMon::yes);
 
         snd.run();
 
-        REQUIRE(zombie->is_aware_of_player());
+        REQUIRE(actor::is_aware_of_player(*zombie));
 
         test_utils::cleanup_all();
 }
@@ -90,19 +90,19 @@ TEST_CASE("Player wading alerts monsters")
 
         auto* const zombie = actor::make("MON_ZOMBIE", {7, 5});
 
-        REQUIRE(!zombie->is_aware_of_player());
+        REQUIRE(!actor::is_aware_of_player(*zombie));
 
         // Move player into floor
         actor::do_move_action(*map::g_player, Dir::right);
 
-        REQUIRE(!zombie->is_aware_of_player());
+        REQUIRE(!actor::is_aware_of_player(*zombie));
 
         game_time::g_allow_tick = true;
 
         // Move player into water (wading)
         actor::do_move_action(*map::g_player, Dir::right);
 
-        REQUIRE(zombie->is_aware_of_player());
+        REQUIRE(actor::is_aware_of_player(*zombie));
 
         test_utils::cleanup_all();
 }
@@ -118,14 +118,14 @@ TEST_CASE("Monster wading does not alert monsters")
         auto* const zombie_1 = actor::make("MON_ZOMBIE", {5, 5});
         auto* const zombie_2 = actor::make("MON_ZOMBIE", {7, 5});
 
-        REQUIRE(!zombie_1->is_aware_of_player());
-        REQUIRE(!zombie_2->is_aware_of_player());
+        REQUIRE(!actor::is_aware_of_player(*zombie_1));
+        REQUIRE(!actor::is_aware_of_player(*zombie_2));
 
         // Move zombie 1 into water (wading)
         actor::do_move_action(*zombie_1, Dir::right);
 
-        REQUIRE(!zombie_1->is_aware_of_player());
-        REQUIRE(!zombie_2->is_aware_of_player());
+        REQUIRE(!actor::is_aware_of_player(*zombie_1));
+        REQUIRE(!actor::is_aware_of_player(*zombie_2));
 
         test_utils::cleanup_all();
 }

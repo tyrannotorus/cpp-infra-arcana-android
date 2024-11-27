@@ -38,7 +38,7 @@ TEST_CASE("Test light map")
 
         map::update_light_map();
 
-        map::g_player->update_fov();
+        actor::update_player_fov();
 
         for (const auto& d : dir_utils::g_dir_list_w_center) {
                 const P p = burn_pos + d;

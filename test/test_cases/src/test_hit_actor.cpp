@@ -6,6 +6,7 @@
 
 #include "actor.hpp"
 #include "actor_hit.hpp"
+#include "actor_player_state.hpp"
 #include "catch.hpp"
 #include "map.hpp"
 #include "player_bon.hpp"
@@ -21,37 +22,43 @@ TEST_CASE("Hit player with Prolonged Life trait")
 
         map::g_player->m_hp = 8;
         map::g_player->m_base_max_hp = 8;
-        map::g_player->m_sp = 4;
-        map::g_player->m_base_max_sp = 4;
+        actor::player_state::g_exorcist_fervor = 4;
 
-        // Hit player so that 1 HP remains, should not affect SP.
+        // Hit player so that 1 HP remains, should not affect fervor.
         actor::hit(*map::g_player, 7, DmgType::blunt, nullptr, AllowWound::no);
 
         REQUIRE(map::g_player->m_hp == 1);
-        REQUIRE(map::g_player->m_sp == 4);
-        REQUIRE(map::g_player->is_alive());
+        REQUIRE(actor::player_state::g_exorcist_fervor == 4);
+        REQUIRE(actor::is_alive(*map::g_player));
 
-        // Hit player with 1 damage, should decrease SP by one.
+        // Hit player with 1 damage, should decrease fervor by one.
         actor::hit(*map::g_player, 1, DmgType::blunt, nullptr, AllowWound::no);
 
         REQUIRE(map::g_player->m_hp == 1);
-        REQUIRE(map::g_player->m_sp == 3);
-        REQUIRE(map::g_player->is_alive());
+        REQUIRE(actor::player_state::g_exorcist_fervor == 3);
+        REQUIRE(actor::is_alive(*map::g_player));
 
-        // Hit player for 2 more damage to reduce player to 1 SP.
+        // Hit player for 2 more damage to reduce player to 1 fervor.
         actor::hit(*map::g_player, 2, DmgType::blunt, nullptr, AllowWound::no);
 
         REQUIRE(map::g_player->m_hp == 1);
-        REQUIRE(map::g_player->m_sp == 1);
-        REQUIRE(map::g_player->is_alive());
+        REQUIRE(actor::player_state::g_exorcist_fervor == 1);
+        REQUIRE(actor::is_alive(*map::g_player));
 
-        // Hit player for 1 damage - no more SP left to soak up damage so HP
-        // should be decreased again.
+        // Hit player for 1 more damage to reduce player to 0 fervor.
+        actor::hit(*map::g_player, 1, DmgType::blunt, nullptr, AllowWound::no);
+
+        REQUIRE(map::g_player->m_hp == 1);
+        REQUIRE(actor::player_state::g_exorcist_fervor == 0);
+        REQUIRE(actor::is_alive(*map::g_player));
+
+        // Hit player for 1 damage - no more fervor left to soak up damage so HP
+        // should be decreased to zero.
         actor::hit(*map::g_player, 1, DmgType::blunt, nullptr, AllowWound::no);
 
         REQUIRE(map::g_player->m_hp == 0);
-        REQUIRE(map::g_player->m_sp == 1);
-        REQUIRE(!map::g_player->is_alive());
+        REQUIRE(actor::player_state::g_exorcist_fervor == 0);
+        REQUIRE(!actor::is_alive(*map::g_player));
 
         test_utils::cleanup_all();
 }

@@ -330,7 +330,7 @@ TEST_CASE("Test spell reflection hits correct creature")
         REQUIRE(mon_1->m_hp == actor::max_hp(*mon_1));
         REQUIRE(mon_2->m_hp < actor::max_hp(*mon_2));
 
-        mon_2->restore_hp(999);
+        actor::restore_hp(*mon_2, 999);
 
         // Cast darkbolt again, now it should hit the player (no spell shield).
         darkbolt->run_effect(mon_2, SpellSkill::basic, {map::g_player});

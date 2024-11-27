@@ -16,6 +16,7 @@
 #include "item_weapon.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
+#include "player_bon.hpp"
 #include "property_factory.hpp"
 #include "terrain.hpp"
 #include "terrain_factory.hpp"
@@ -456,7 +457,7 @@ TEST_CASE("Player killing invisible monster")
                                 std::end(game_time::g_actors),
                                 mon) != std::end(game_time::g_actors);
 
-                if (!exists || !mon->is_alive()) {
+                if (!exists || !actor::is_alive(*mon)) {
                         break;
                 }
         }
@@ -546,8 +547,8 @@ TEST_CASE("Resisting attack damage type also resists paralysis")
 
         map::g_player->m_pos.set(7, 5);
 
-        map::g_player->change_max_hp(100000);
-        map::g_player->restore_hp(100000, false);
+        actor::change_max_hp(*map::g_player, 100000);
+        actor::restore_hp(*map::g_player, 100000, actor::AllowRestoreAboveMax::no);
 
         // Ensure that the spiked mace paralysis always activates.
         item::g_data[(size_t)item::Id::spiked_mace].melee.prop_applied.pct_chance_to_apply = 100;
@@ -567,9 +568,9 @@ TEST_CASE("Resisting attack damage type also resists paralysis")
         while (true) {
                 game_time::g_allow_tick = true;
 
-                REQUIRE(map::g_player->is_alive());
+                REQUIRE(actor::is_alive(*map::g_player));
 
-                map::g_player->restore_hp(100000, false);
+                actor::restore_hp(*map::g_player, 100000, actor::AllowRestoreAboveMax::no);
                 map::g_player->m_properties.end_prop(prop::Id::wound);
                 map::g_player->restore_shock(100, true);
 
@@ -596,7 +597,7 @@ TEST_CASE("Resisting attack damage type also resists paralysis")
         for (int i = 0; i < 10000; ++i) {
                 game_time::g_allow_tick = true;
 
-                REQUIRE(map::g_player->is_alive());
+                REQUIRE(actor::is_alive(*map::g_player));
 
                 map::g_player->restore_shock(100, true);
 
