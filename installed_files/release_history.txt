@@ -86,6 +86,7 @@
 # Other
 ##############################
 - SDL is now linked statically into the game binary (and the source code is included in the Git repo), i.e. there is no need to install these dependencies to play the game (or when building the game).
+- The released version of the game is now built on Debian Bullseye with gcc 10.2.1 - glibc 2.31 or newer is required to play the game on Linux.
 
 ============================================================
 = v22.1.0 (September 24, 2023)
