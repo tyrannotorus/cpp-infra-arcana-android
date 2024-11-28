@@ -1,15 +1,7 @@
-image: gcc:8.3.0
+image: debian:bullseye
 
 before_script:
-        # NOTE: cmake >= 3.16 is required by the currently bundled SDL source code, however the
-        # gcc:8.3.0 image only has 3.13 available.
-        #
-        # Download and install a newer version of cmake:
-        #
-        - apt-get update && apt-get install -y curl
-        - curl -LO https://github.com/Kitware/CMake/releases/download/v3.16.0/cmake-3.16.0-Linux-x86_64.tar.gz
-        - tar -xzvf cmake-3.16.0-Linux-x86_64.tar.gz
-        - export PATH=$(pwd)/cmake-3.16.0-Linux-x86_64/bin:$PATH
+        - apt-get update && apt-get install -y cmake
         - gcc --version
         - ldd --version
         - cmake --version
