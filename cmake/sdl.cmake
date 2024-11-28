@@ -1,3 +1,7 @@
+set(SDL_PATH SDL/src/SDL2-2.30.9)
+set(SDL_IMAGE_PATH SDL/src/SDL2_image-2.8.2)
+set(SDL_MIXER_PATH SDL/src/SDL2_mixer-2.8.0)
+
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 # TODO: Disable as many unneeded features as possible.
@@ -25,10 +29,6 @@ set(SDL2MIXER_MOD_XMP OFF CACHE BOOL "" FORCE)
 set(SDL2MIXER_MOD OFF CACHE BOOL "" FORCE)
 set(SDL2MIXER_MIDI_FLUIDSYNTH OFF CACHE BOOL "" FORCE)
 set(SDL2MIXER_WAVPACK OFF CACHE BOOL "" FORCE)
-
-set(SDL_PATH SDL/src/SDL2-2.30.9)
-set(SDL_IMAGE_PATH SDL/src/SDL2_image-2.8.2)
-set(SDL_MIXER_PATH SDL/src/SDL2_mixer-2.8.0)
 
 add_subdirectory(${SDL_PATH})
 add_subdirectory(${SDL_IMAGE_PATH})
