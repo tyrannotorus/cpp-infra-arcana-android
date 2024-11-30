@@ -325,8 +325,8 @@ set(COMMON_SRC
         src/wpn_dmg.cpp
         src/xml.cpp
 
-        xml/tinyxml2/tinyxml2.h
-        xml/tinyxml2/tinyxml2.cpp
+        third_party/tinyxml2/tinyxml2.h
+        third_party/tinyxml2/tinyxml2.cpp
         )
 
 SET(SRC

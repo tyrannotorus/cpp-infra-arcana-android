@@ -1,6 +1,8 @@
-set(SDL_PATH SDL/src/SDL2-2.30.9)
-set(SDL_IMAGE_PATH SDL/src/SDL2_image-2.8.2)
-set(SDL_MIXER_PATH SDL/src/SDL2_mixer-2.8.0)
+set(SDL_BASE_PATH third_party/SDL/src)
+
+set(SDL_PATH ${SDL_BASE_PATH}/SDL2-2.30.9)
+set(SDL_IMAGE_PATH ${SDL_BASE_PATH}/SDL2_image-2.8.2)
+set(SDL_MIXER_PATH ${SDL_BASE_PATH}/SDL2_mixer-2.8.0)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
@@ -49,11 +51,3 @@ target_include_directories(
         ${SDL_PATH}/include
         ${SDL_IMAGE_PATH}/include
         ${SDL_MIXER_PATH}/include)
-
-# TODO: Copy license files
-# configure_file(${SDL_PATH}/LICENSE.txt          LICENSE-SDL.txt         COPYONLY)
-# configure_file(${SDL_IMAGE_PATH}/LICENSE.txt    LICENSE-SDL_image.txt   COPYONLY)
-# configure_file(${SDL_MIXER_PATH}/LICENSE.txt    LICENSE-SDL_mixer.txt   COPYONLY)
-
-# install(FILES ${SDL_DISTR_FILES} DESTINATION ia)
-# install(FILES ${SDL_DISTR_FILES} DESTINATION ia-debug)
