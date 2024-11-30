@@ -399,9 +399,13 @@ add_test(IA-test ia-test)
 include(cmake/compile_flags.cmake)
 
 # ------------------------------------------------------------------------------
-# SDL
+# Third party
 # ------------------------------------------------------------------------------
+# SDL
 include(cmake/sdl.cmake)
+
+# mINI (.ini file parser)
+include(cmake/mini.cmake)
 
 # ------------------------------------------------------------------------------
 # Optional sanitize link flags
