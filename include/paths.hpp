@@ -7,10 +7,23 @@
 #ifndef PATHS_HPP
 #define PATHS_HPP
 
+#include <queue>
 #include <string>
 
 namespace paths
 {
+void init();
+
+std::queue<std::string>& pending_error_messages();
+
+std::string user_dir();
+
+std::string save_file_path();
+
+std::string config_file_path();
+
+std::string highscores_file_path();
+
 std::string gfx_dir();
 
 std::string fonts_dir();
@@ -24,15 +37,7 @@ std::string audio_dir();
 
 std::string data_dir();
 
-std::string user_dir();
-
 std::string messages_dir();
-
-std::string save_file_path();
-
-std::string config_file_path();
-
-std::string highscores_file_path();
 
 }  // namespace paths
 

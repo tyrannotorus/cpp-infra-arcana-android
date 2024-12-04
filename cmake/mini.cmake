@@ -2,7 +2,7 @@
 
 set(MINI_BASE_PATH third_party/mINI-0.9.17)
 
-set(MINI_SRC_PATH ${MINI_BASE_PATH}/src)
+set(MINI_SRC_PATH ${MINI_BASE_PATH}/src/mini)
 
 target_include_directories(ia PUBLIC ${MINI_SRC_PATH})
 target_include_directories(ia-debug PUBLIC ${MINI_SRC_PATH})

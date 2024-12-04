@@ -44,7 +44,7 @@
 # Special maps
 - Added intro message popups for some special levels.
 
-# Other changes
+# Other gameplay changes
 - Poisoning is lethal again (but the standard duration will never kill any character from full hit points).
 - Reworked and unified how dodging penalties are calculated for melee and ranged attacks. This should not have much effect on how the game plays, but hit chances may be affected in some cases (for example being stuck now also gives a dodging penalty against ranged attacks, and confusion no longer gives a dodging penalty at all).
 
@@ -87,6 +87,8 @@
 ##############################
 - SDL is now linked statically into the game binary (and the source code is included in the Git repo), i.e. there is no need to install these dependencies to play the game (or when building the game).
 - The released version of the game is now built on Debian Bullseye with gcc 10.2.1 - glibc 2.31 or newer is required to play the game on Linux.
+- A user_data.ini file is placed inside the game directory, where it is possible to specify the directory where user data (highscores, options, etc) shall be stored. If left blank, the default locations will be used.
+- On startup, the game tests if several locations are writable (the user_data.ini location, calling SDL_GetPrefPath, and inside the game directory itself), to find a place where it is possible to write user data.
 
 ============================================================
 = v22.1.0 (September 24, 2023)

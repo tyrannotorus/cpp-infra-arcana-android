@@ -36,6 +36,7 @@
 #include "paths.hpp"
 #include "player_bon.hpp"
 #include "player_spells.hpp"
+#include "popup.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "query.hpp"
@@ -47,13 +48,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static void log_user_data_dir()
-{
-        TRACE
-                << "User data directory: "
-                << "'" << paths::user_dir() << "'"
-                << std::endl;
-}
 
 // -----------------------------------------------------------------------------
 // init
@@ -71,7 +65,7 @@ void init_io()
         io::init_sdl();
         io::init_sdl_audio();
 
-        log_user_data_dir();
+        paths::init();
 
         config::init();
         colors::init();
@@ -90,6 +84,22 @@ void init_io()
 
         query::init();
         audio::init();
+
+        std::queue<std::string>& paths_error_messages = paths::pending_error_messages();
+
+        for (; !paths_error_messages.empty(); paths_error_messages.pop()) {
+                const std::string msg = paths_error_messages.front();
+
+                popup::Popup popup(popup::AddToMsgHistory::no);
+
+                popup.set_title("Warning");
+
+                popup.set_msg(msg);
+
+                popup.run();
+
+                io::sleep(250);
+        }
 
         TRACE_FUNC_END;
 }

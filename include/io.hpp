@@ -221,8 +221,6 @@ void draw_flash_animations();
 // Clear all ongoing flash animations (e.g. when viewport changes).
 void clear_all_flash_animations();
 
-std::string sdl_pref_dir();
-
 void sleep(uint32_t duration);
 
 void clear_input();

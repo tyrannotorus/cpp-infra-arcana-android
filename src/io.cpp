@@ -866,41 +866,6 @@ void draw_logo()
         SDL_RenderCopy(g_sdl_renderer, g_logo_texture, nullptr, &render_rect);
 }
 
-std::string sdl_pref_dir()
-{
-        std::string subdir_str = version_info::g_version_str;
-
-        std::replace(
-                std::begin(subdir_str),
-                std::end(subdir_str),
-                '.',
-                '_');
-
-        std::replace(
-                std::begin(subdir_str),
-                std::end(subdir_str),
-                '-',
-                '_');
-
-        const auto sha1_result = version_info::read_git_sha1_str_from_file();
-
-        if (sha1_result) {
-                subdir_str += "_" + sha1_result.value();
-        }
-
-        char* const path_ptr =
-                // NOTE: This is somewhat of a hack, see the function arguments
-                SDL_GetPrefPath(
-                        "infra_arcana",       // "Organization"
-                        subdir_str.c_str());  // "Application"
-
-        std::string path_str = path_ptr;
-
-        SDL_free(path_ptr);
-
-        return path_str;
-}
-
 void sleep(const uint32_t duration)
 {
         if ((duration == 0) || config::is_bot_playing()) {
