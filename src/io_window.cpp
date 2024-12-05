@@ -302,9 +302,29 @@ P sdl_window_gui_dims()
         return io::px_to_gui_coords(logical_px_dims);
 }
 
+#ifndef NDEBUG
+bool g_allow_render = false;
+#endif  // NDEBUG
+
 void update_screen()
 {
+#ifndef NDEBUG
+        const bool is_game_state =
+                !states::is_empty() &&
+                (states::current_state()->id() == StateId::game);
+
+        if (is_game_state) {
+                ASSERT(g_allow_render);
+        }
+#endif  // NDEBUG
+
         SDL_RenderPresent(g_sdl_renderer);
+
+#ifndef NDEBUG
+        if (is_game_state) {
+                g_allow_render = false;
+        }
+#endif  // NDEBUG
 }
 
 void clear_screen()

@@ -929,6 +929,10 @@ void run()
         draw_living_monsters();
 
         draw_player_character();
+
+#ifndef NDEBUG
+        io::g_allow_render = true;
+#endif  // NDEBUG
 }
 
 }  // namespace draw_map

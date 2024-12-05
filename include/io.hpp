@@ -101,6 +101,9 @@ void init_other();
 void cleanup_other();
 
 // Updates the sceen with what is currently drawn
+#ifndef NDEBUG
+extern bool g_allow_render;
+#endif  // NDEBUG
 void update_screen();
 
 void clear_screen();

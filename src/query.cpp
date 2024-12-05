@@ -20,6 +20,7 @@
 #include "popup.hpp"
 #include "pos.hpp"
 #include "random.hpp"
+#include "state.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -44,6 +45,7 @@ void cleanup()
 void wait_for_key_press()
 {
         if (s_is_inited && !config::is_bot_playing()) {
+                states::draw();
                 io::update_screen();
 
                 io::read_input();
@@ -58,6 +60,7 @@ BinaryAnswer yes_or_no(
                 return BinaryAnswer::yes;
         }
 
+        states::draw();
         io::update_screen();
 
         io::InputData input;
@@ -104,6 +107,7 @@ io::InputData letter(const bool accept_enter)
                 return input;
         }
 
+        states::draw();
         io::update_screen();
 
         while (true) {
@@ -151,6 +155,7 @@ void wait_for_msg_more()
                 return;
         }
 
+        states::draw();
         io::update_screen();
 
         // Determine criteria for confirming more prompt (decided by config)
@@ -186,6 +191,7 @@ void wait_for_confirm()
                 return;
         }
 
+        states::draw();
         io::update_screen();
 
         while (true) {
@@ -205,6 +211,7 @@ Dir dir(const AllowCenter allow_center)
                 return Dir::END;
         }
 
+        states::draw();
         io::update_screen();
 
         while (true) {

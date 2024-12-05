@@ -399,8 +399,7 @@ void EventSnakeEmerge::on_new_turn()
 
         if (!seen_tgt_positions.empty()) {
                 msg_log::add(
-                        {"Suddenly, vicious snakes slither up from cracks in "
-                         "the floor!"},
+                        {"Suddenly, vicious snakes slither up from cracks in the floor!"},
                         colors::msg_note(),
                         MsgInterruptPlayer::yes,
                         MorePromptOnMsg::yes);

@@ -37,6 +37,9 @@ void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
         //         return;
         // }
 
+        // TODO: Consider if the "blast" animations should just be removed completely and replaced
+        // with the "flash" animations for everything instead.
+
         states::draw();
 
         for (const P& pos : positions) {
@@ -56,6 +59,8 @@ void draw_blast_at_cells(const std::vector<P>& positions, const Color& color)
         io::update_screen();
 
         io::sleep(config::delay_explosion() / 2);
+
+        states::draw();
 
         for (const P& pos : positions) {
                 if (!viewport::is_in_view(pos)) {

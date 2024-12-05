@@ -141,8 +141,6 @@ static void draw(
         const Array2<bool>& blocked,
         const std::optional<Color>& color_override)
 {
-        states::draw();
-
         const auto color_inner = color_override.value_or(colors::yellow());
         const auto color_outer = color_override.value_or(colors::light_red());
 
@@ -153,6 +151,8 @@ static void draw(
         bool is_any_cell_seen_by_player = false;
 
         for (int i_anim = 0; i_anim < nr_anim_steps; i_anim++) {
+                states::draw();
+
                 const gfx::TileId tile =
                         (i_anim == 0)
                         ? gfx::TileId::blast1

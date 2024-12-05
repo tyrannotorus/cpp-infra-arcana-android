@@ -38,6 +38,7 @@
 #include "property_handler.hpp"
 #include "query.hpp"
 #include "random.hpp"
+#include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "text_format.hpp"
@@ -277,6 +278,7 @@ void run()
 
         if (input_dir == Dir::END) {
                 // Invalid direction
+                states::draw();
                 io::update_screen();
 
                 return;
