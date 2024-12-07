@@ -85,7 +85,7 @@ target_compile_options(ia PUBLIC ${COMMON_COMPILE_FLAGS} ${RELEASE_COMPILE_FLAGS
 target_compile_options(ia-debug PUBLIC ${COMMON_COMPILE_FLAGS} ${DEBUG_COMPILE_FLAGS})
 target_compile_options(ia-test PUBLIC ${COMMON_COMPILE_FLAGS} ${TEST_COMPILE_FLAGS})
 
-set(COMMON_INCLUDE_DIRS include xml/tinyxml2)
+set(COMMON_INCLUDE_DIRS include third_party/tinyxml2)
 
 target_include_directories(ia PUBLIC ${COMMON_INCLUDE_DIRS})
 
