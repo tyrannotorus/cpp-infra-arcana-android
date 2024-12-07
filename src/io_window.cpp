@@ -329,6 +329,18 @@ void update_screen()
 
 void clear_screen()
 {
+#ifndef NDEBUG
+        const bool is_game_state =
+                !states::is_empty() &&
+                (states::current_state()->id() == StateId::game);
+
+        if (is_game_state) {
+                // Do not allow rendering after screen is cleared, we do not want to just show a
+                // black screen. The map should always be shown.
+                g_allow_render = false;
+        }
+#endif  // NDEBUG
+
         SDL_SetRenderDrawColor(g_sdl_renderer, 0U, 0U, 0U, 0xFFU);
 
         SDL_RenderClear(g_sdl_renderer);
