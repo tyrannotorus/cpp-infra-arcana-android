@@ -29,6 +29,8 @@ class Actor;
 // -----------------------------------------------------------------------------
 namespace io
 {
+bool g_allow_render = true;
+
 void init_sdl() {}
 
 void init_other()

@@ -34,22 +34,25 @@ if(
                 # -pg
                 )
 
-        if(DEBUG_SANITIZE)
+        set(TEST_COMPILE_FLAGS
+                -Wnull-dereference
+                -g
+                -Og
+                )
+
+        if(IA_DEBUG_SANITIZE)
                 list(APPEND DEBUG_COMPILE_FLAGS
                         -fsanitize=address
-                        -fsanitize-address-use-after-scope
-                        -fsanitize=alignment
-                        -fsanitize=bool
-                        -fsanitize=bounds
-                        -fsanitize=enum
-                        -fsanitize=integer-divide-by-zero
-                        -fsanitize=null
-                        -fsanitize=return
-                        -fsanitize=signed-integer-overflow
                         -fsanitize=undefined
-                        -fsanitize=unreachable
+                        # -fsanitize=leak
                         -fsanitize=vptr
                         -fno-sanitize-recover
+                        # Needed for full stack trace when running gcc sanitizers
+                        -fno-omit-frame-pointer
+                        )
+
+                list(APPEND TEST_COMPILE_FLAGS
+                        -fsanitize=undefined
                         # Needed for full stack trace when running gcc sanitizers
                         -fno-omit-frame-pointer
                         )
@@ -63,7 +66,6 @@ endif()
 
 # GNU gcc specific compiler flags
 if(CMAKE_COMPILER_IS_GNUCXX)
-
         list(APPEND COMMON_COMPILE_FLAGS
                 -Wuninitialized
                 )
@@ -74,10 +76,7 @@ set(RELEASE_COMPILE_FLAGS
         -DNDEBUG
         )
 
-set(TEST_COMPILE_FLAGS
-        ${DEBUG_COMPILE_FLAGS}
-        # -fno-sanitize=all
-        # -fsanitize=undefined
+list(APPEND TEST_COMPILE_FLAGS
         -DTRACE_LVL=0
         )
 

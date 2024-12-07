@@ -700,6 +700,11 @@ void MsgHistoryState::update()
 {
         InfoScreenState::update();
 
+        if (states::current_state() != this) {
+                // State has been popped.
+                return;
+        }
+
         const int history_size = (int)m_history.size();
 
         const int panel_h = panels::h(Panel::info_screen_content);

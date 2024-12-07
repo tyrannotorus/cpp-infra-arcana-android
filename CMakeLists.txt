@@ -17,6 +17,8 @@ if(IA_USE_SYSTEM_XML AND WIN32)
         message(FATAL_ERROR "Using system installed SDL is not supported on Windows.")
 endif()
 
+option(IA_DEBUG_SANITIZE "Use compiler sanitizers for debug or test builds" ON)
+
 # ------------------------------------------------------------------------------
 # Source files
 # ------------------------------------------------------------------------------
@@ -424,9 +426,9 @@ include(cmake/mini.cmake)
 # ------------------------------------------------------------------------------
 # Optional sanitize link flags
 # ------------------------------------------------------------------------------
-if (DEBUG_SANITIZE)
-        target_link_libraries(ia-debug PUBLIC -lasan -lubsan)
-        target_link_libraries(ia-test PUBLIC -lubsan)
+if (IA_DEBUG_SANITIZE)
+        target_link_libraries(ia-debug -lasan -lubsan)
+        target_link_libraries(ia-test -lubsan)
 endif()
 
 # ------------------------------------------------------------------------------
