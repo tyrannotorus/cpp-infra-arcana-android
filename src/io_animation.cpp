@@ -153,10 +153,6 @@ void init_animation()
                         break;
 
                 case GraphicsCycle::slow:
-                        delay = 500;
-                        break;
-
-                case GraphicsCycle::very_slow:
                         delay = 1400;
                         break;
 

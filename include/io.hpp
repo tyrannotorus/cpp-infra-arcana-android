@@ -33,7 +33,6 @@ enum class GraphicsCycle
 {
         fast,
         slow,
-        very_slow,
 
         END
 };

@@ -219,7 +219,7 @@ StateId InvState::id() const
 
 void InvState::cycle_graphics(const io::GraphicsCycle cycle)
 {
-        if (cycle != io::GraphicsCycle::very_slow) {
+        if (cycle != io::GraphicsCycle::slow) {
                 return;
         }
 
