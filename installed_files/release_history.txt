@@ -53,6 +53,7 @@
 ##############################
 # Design
 - Added a flashing animation when bashing stuff (doors, corpses, ...).
+- Messages fade out instead of immediately being cleared.
 - The screen fades to red when the player dies.
 - Braziers have a subtle flicker effect, similar to the player when using the Electric Lantern.
 

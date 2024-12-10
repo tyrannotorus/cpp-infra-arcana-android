@@ -16,6 +16,11 @@
 #include "info_screen_state.hpp"
 #include "state.hpp"
 
+namespace io
+{
+enum class GraphicsCycle;
+}  // namespace io
+
 enum class MorePromptOnMsg
 {
         no,
@@ -116,6 +121,8 @@ void init();
 
 void draw();
 
+void cycle_graphics(io::GraphicsCycle cycle);
+
 void add(
         const std::string& str,
         Color color = colors::text(),
@@ -123,9 +130,8 @@ void add(
         MorePromptOnMsg add_more_prompt_on_msg = MorePromptOnMsg::no,
         CopyToMsgHistory copy_to_history = CopyToMsgHistory::yes);
 
-// NOTE: This function can safely be called at any time. If there is content in
-// the log, a "more" prompt will be run, and the log is cleared. If the log
-// happens to be empty, nothing is done.
+// NOTE: This function can safely be called at any time. If there is content in the log, a "more"
+// prompt will be run, and the log is cleared. If the log happens to be empty, nothing is done.
 void more_prompt();
 
 void newline();

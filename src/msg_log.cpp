@@ -11,12 +11,11 @@
 #include <string>
 #include <vector>
 
-#include "SDL_keycode.h"
 #include "actor.hpp"
 #include "colors.hpp"
 #include "debug.hpp"
-#include "draw_box.hpp"
 #include "game_time.hpp"
+#include "global.hpp"
 #include "io.hpp"
 #include "map.hpp"
 #include "panel.hpp"
@@ -24,7 +23,6 @@
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
-#include "rect.hpp"
 #include "saving.hpp"
 #include "text_format.hpp"
 
@@ -32,7 +30,6 @@
 // Private
 // -----------------------------------------------------------------------------
 static MsgLine s_lines[msg_log::g_nr_log_lines];
-
 static const size_t s_history_cap = 200;
 
 static size_t s_history_size = 0;
@@ -40,18 +37,32 @@ static size_t s_history_count = 0;
 
 static Msg s_history[s_history_cap];
 
-// We only allow grouping up to 9 identical messages into a repeated message
-// (e.g. "Bla. (x3)"), so that the repeat number is always a single digit (this
-// simplifies calculation of required space for messages).
+// We only allow grouping up to 9 identical messages into a repeated message (e.g. "Bla. (x3)"), so
+// that the repeat number is always a single digit (this simplifies calculation of required space
+// for messages).
 static const int s_max_nr_repeats = 9;
 
 // "(xN)" where N is guaranteed to be a single digit, see above.
 static const int s_repeat_str_len = 4;
 
-static const int s_space_reserved_for_more_prompt =
-        (int)msg_log::g_more_str.size() + 1;
+static const int s_space_reserved_for_more_prompt = (int)msg_log::g_more_str.size() + 1;
 
 static bool s_is_waiting_more_pompt = false;
+
+// When the message log is cleared, the current messages fade out. New messages will interrupt the
+// fading and remove the messages immediately. This tracks the state of the fade mechanism.
+enum class MsgFadeState
+{
+        allow_start_fade,
+        is_fading,
+        done,
+        prevent_fade,
+};
+
+static MsgFadeState s_msg_fade_state = MsgFadeState::allow_start_fade;
+
+// Tracks fade out percent for the current messages.
+static int s_msg_fade_pct = 0;
 
 static size_t find_current_line_nr()
 {
@@ -161,12 +172,12 @@ static bool allow_convert_to_frenzied_str(const std::string& str)
 
 static std::string convert_to_frenzied_str(const std::string& str)
 {
-        // Convert to upper case
+        // Convert to upper case.
         std::string frenzied_str = text_format::to_upper(str);
 
         // Do not put "!" if string contains "..."
         if (frenzied_str.find("...") == std::string::npos) {
-                // Change "." to "!" at the end
+                // Change "." to "!" at the end.
                 if (frenzied_str.back() == '.') {
                         frenzied_str.back() = '!';
                 }
@@ -183,12 +194,17 @@ static void draw_line(
         const Panel panel,
         const P& pos)
 {
+        const int shade_pct =
+                (s_msg_fade_state == MsgFadeState::is_fading)
+                ? (100 - s_msg_fade_pct)
+                : 0;
+
         for (const Msg& msg : line) {
                 io::draw_text(
                         msg.text_with_repeats(),
                         panel,
                         pos.with_x_offset(msg.x_pos()),
-                        msg.color(),
+                        msg.color().shaded(shade_pct),
                         io::DrawBg::no);
         }
 }
@@ -206,13 +222,12 @@ static void draw_more_prompt()
 
                 more_x0 = x_after_msg(&last_msg);
 
-                // If this is not the last line, the "more" prompt text may be
-                // moved to the beginning of the next line if it does not fit on
-                // the current line. For the last line however, the "more" text
-                // MUST fit on the line (handled when adding messages).
+                // If this is not the last line, the "more" prompt text may be moved to the
+                // beginning of the next line if it does not fit on the current line. For the last
+                // line however, the "more" text MUST fit on the line (handled when adding
+                // messages).
                 if (line_nr != (msg_log::g_nr_log_lines - 1)) {
-                        const int more_x1 =
-                                more_x0 + (int)msg_log::g_more_str.size() - 1;
+                        const int more_x1 = more_x0 + (int)msg_log::g_more_str.size() - 1;
 
                         if (more_x1 >= panels::w(Panel::log)) {
                                 more_x0 = 0;
@@ -221,9 +236,7 @@ static void draw_more_prompt()
                 }
         }
 
-        ASSERT(
-                (more_x0 + (int)msg_log::g_more_str.size()) <=
-                (panels::w(Panel::log)));
+        ASSERT((more_x0 + (int)msg_log::g_more_str.size()) <= (panels::w(Panel::log)));
 
         io::draw_text(
                 msg_log::g_more_str,
@@ -245,10 +258,9 @@ static void on_msg_not_fit_on_line(
                 (next_empty_line_nr == (msg_log::g_nr_log_lines - 1));
 
         if (is_next_empty_last_line) {
-                // The next empty line is the last message log line, Run
-                // a more prompt to clear the log before running this
-                // message (it's annoying to have to confirm a more
-                // prompt in the middle of a message).
+                // The next empty line is the last message log line, Run a more prompt to clear the
+                // log before running this message (it's annoying to have to confirm a more prompt
+                // in the middle of a message).
                 msg_log::more_prompt();
 
                 msg_log::add(
@@ -263,12 +275,12 @@ static void on_msg_not_fit_on_line(
 
         int w_avail = msg_area_w_avail_for_text_part();
 
-        // Since we split the message, we do not have to reserve space
-        // for the repeat string (e.g. "x4").
+        // Since we split the message, we do not have to reserve space for the repeat string
+        // (e.g. "x4").
         //
-        // NOTE: In theory, it's actually possible that the last message
-        // will be repeated - this would happen if another message equal
-        // to the last sub-message is added subsequently, e.g.:
+        // NOTE: In theory, it's actually possible that the last message will be repeated - this
+        // would happen if another message equal to the last sub-message is added subsequently,
+        // e.g.:
         //
         // Message 1  : "a long message foo bar", which is split into ->
         // Message 1a : "a long message"
@@ -284,15 +296,15 @@ static void on_msg_not_fit_on_line(
         for (size_t i = 0; i < lines.size(); ++i) {
                 const bool is_last_msg = (i == (lines.size() - 1));
 
-                // If the message is interrupting, only allow this for
-                // the last line of the split message
+                // If the message is interrupting, only allow this for the last line of the split
+                // message.
                 const auto interrupt_actions_current_line =
                         is_last_msg
                         ? interrupt_player
                         : MsgInterruptPlayer::no;
 
-                // If a more prompt was requested through the parameter,
-                // only allow this on the last message
+                // If a more prompt was requested through the parameter, only allow this on the last
+                // message.
                 const auto add_more_prompt_current_line =
                         is_last_msg
                         ? add_more_prompt_on_msg
@@ -322,14 +334,12 @@ void init()
         s_history_size = 0;
         s_history_count = 0;
         s_is_waiting_more_pompt = false;
+        s_msg_fade_state = MsgFadeState::allow_start_fade;
+        s_msg_fade_pct = -1;
 }
 
 void draw()
 {
-        // io::cover_panel(Panel::log_border, colors::extra_dark_gray());
-
-        // draw_box(panels::area(Panel::log_border));
-
         io::cover_panel(Panel::log);
 
         int y = 0;
@@ -349,28 +359,76 @@ void draw()
         }
 }
 
+void cycle_graphics(const io::GraphicsCycle cycle)
+{
+        if ((cycle != io::GraphicsCycle::fast) ||
+            (s_msg_fade_state != MsgFadeState::is_fading)) {
+                return;
+        }
+
+        ASSERT(!s_is_waiting_more_pompt);
+
+        s_msg_fade_pct -= 10;
+
+        if (s_msg_fade_pct == 0) {
+                // Force immediate clearing of the log.
+                s_msg_fade_state = MsgFadeState::done;
+
+                clear();
+        }
+}
+
 void clear()
 {
+        if (s_msg_fade_state == MsgFadeState::is_fading) {
+                // Fade out it ongoing, clearing the log has no effect.
+                return;
+        }
+
+        bool is_any_copied_to_history = false;
+
         for (auto& line : s_lines) {
                 for (auto& msg : line.messages) {
-                        if (msg.should_copy_to_history() ==
-                            CopyToMsgHistory::no) {
-                                continue;
+                        if (msg.should_copy_to_history() == CopyToMsgHistory::yes) {
+                                is_any_copied_to_history = true;
                         }
+                }
+        }
 
-                        // Add cleared line to history
-                        s_history[s_history_count % s_history_cap] = msg;
+        if (
+                !is_empty() &&
+                is_any_copied_to_history &&
+                (s_msg_fade_state == MsgFadeState::allow_start_fade)) {
+                // The message log contains messages, there is a message that is copied to message
+                // history (we do not want to fade out things like "which direction?"), and we are
+                // allowed to start a new fade. Start fading out the messages.
+                s_msg_fade_state = MsgFadeState::is_fading;
 
-                        ++s_history_count;
+                s_msg_fade_pct = 100;
 
-                        if (s_history_size < s_history_cap) {
-                                ++s_history_size;
+                return;
+        }
+
+        for (auto& line : s_lines) {
+                for (auto& msg : line.messages) {
+                        if (msg.should_copy_to_history() == CopyToMsgHistory::yes) {
+                                // Add cleared line to history.
+                                s_history[s_history_count % s_history_cap] = msg;
+
+                                ++s_history_count;
+
+                                if (s_history_size < s_history_cap) {
+                                        ++s_history_size;
+                                }
                         }
                 }
 
                 line.messages.clear();
                 line.has_forced_line_break = false;
         }
+
+        // Now that we have cleared the log, allow starting a fade again.
+        s_msg_fade_state = MsgFadeState::allow_start_fade;
 }
 
 bool is_empty()
@@ -389,8 +447,8 @@ void add(
         ASSERT(!str.empty());
 
         if (saving::is_loading()) {
-                // If we are loading the game, never print messages (this
-                // allows silently running stuff like equip hooks for items)
+                // If we are loading the game, never print messages (this allows silently running
+                // stuff like equip hooks for items).
                 return;
         }
 
@@ -410,9 +468,17 @@ void add(
                 return;
         }
 
+        if (s_msg_fade_state == MsgFadeState::is_fading) {
+                // A fade out of old messages is ongoing while a new message was added. Force
+                // immediate clearing of the log before adding new messages.
+                s_msg_fade_state = MsgFadeState::done;
+
+                clear();
+        }
+
         if ((color == colors::text()) && !game_time::g_is_player_acting) {
-                // This is something happening outside of the player acting,
-                // color the message differently.
+                // This is something happening outside of the player acting, color the message
+                // differently.
                 color = colors::passive_text();
         }
 
@@ -432,10 +498,9 @@ void add(
                 return;
         }
 
-        // If a single message will not fit on the next empty line in the worst
-        // case (i.e. with space reserved for a repetition string, and also for
-        // a "more" prompt if the next empty line is the last line), split the
-        // message into multiple sub-messages through recursive calls.
+        // If a single message will not fit on the next empty line in the worst case (i.e. with
+        // space reserved for a repetition string, and also for a "more" prompt if the next empty
+        // line is the last line), split the message into multiple messages through recursive calls.
         const size_t next_empty_line_nr = find_next_empty_line_nr();
 
         const bool is_msg_fit_on_line =
@@ -472,11 +537,9 @@ void add(
         if ((current_line_nr < (g_nr_log_lines - 1)) &&
             !s_lines[current_line_nr].messages.empty()) {
                 // Does the new message fit?
-                const int worst_case_w =
-                        worst_case_msg_w_for_line_nr((int)current_line_nr, str);
+                const int worst_case_w = worst_case_msg_w_for_line_nr((int)current_line_nr, str);
 
-                const int new_x =
-                        x_after_msg(&s_lines[current_line_nr].messages.back());
+                const int new_x = x_after_msg(&s_lines[current_line_nr].messages.back());
 
                 const int worst_case_x1 = new_x + worst_case_w - 1;
 
@@ -497,8 +560,7 @@ void add(
         if (prev_msg && (add_more_prompt_on_msg == MorePromptOnMsg::no)) {
                 const std::string prev_text = prev_msg->text();
 
-                if ((prev_text == str) &&
-                    (prev_msg->nr_repeats() < s_max_nr_repeats)) {
+                if ((prev_text == str) && (prev_msg->nr_repeats() < s_max_nr_repeats)) {
                         prev_msg->incr_repeats();
 
                         is_repeated = true;
@@ -560,6 +622,13 @@ void more_prompt()
                 return;
         }
 
+        // This will prevent messages from fading out while waiting for the "more" prompt.
+        //
+        // This could otherwise happen in cases where the client code is calling "more_prompt"
+        // directly while we are fading out another message.
+        //
+        s_msg_fade_state = MsgFadeState::prevent_fade;
+
         s_is_waiting_more_pompt = true;
 
         states::draw();
@@ -567,6 +636,9 @@ void more_prompt()
         query::wait_for_msg_more();
 
         s_is_waiting_more_pompt = false;
+
+        // Force immediate clearing of the log.
+        s_msg_fade_state = MsgFadeState::done;
 
         clear();
 }
