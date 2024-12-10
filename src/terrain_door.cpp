@@ -850,11 +850,7 @@ void Door::bash(const DmgType dmg_type, actor::Actor& actor, const int dmg)
             is_player &&
             is_pos_seen &&
             !m_is_hidden) {
-                msg_log::add(
-                        "It seems futile.",
-                        colors::msg_note(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
+                msg_log::add("It seems futile.", colors::msg_note());
 
                 return;
         }

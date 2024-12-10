@@ -620,8 +620,6 @@ void Shriek::shriek(const item::Item& item) const
         snd_emit::run(snd);
 
         map::g_player->incr_shock(2.0, ShockSrc::misc);
-
-        msg_log::more_prompt();
 }
 
 std::string Shriek::descr() const

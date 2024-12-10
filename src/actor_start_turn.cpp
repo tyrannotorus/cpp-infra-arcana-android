@@ -504,8 +504,6 @@ static void player_try_spot_hidden_terrain()
                         t->on_revealed_from_searching();
 
                         map::update_vision();
-
-                        msg_log::more_prompt();
                 }
         }
 }
@@ -536,13 +534,7 @@ static void player_detect_stuck_doors()
                         continue;
                 }
 
-                const bool is_known_stuck_before = door->is_known_stuck();
-
                 door->reveal_stuck_status(terrain::PrintRevealMsg::if_seen);
-
-                if (!is_known_stuck_before) {
-                        msg_log::more_prompt();
-                }
         }
 }
 

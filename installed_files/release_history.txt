@@ -54,6 +54,7 @@
 # Design
 - Added a flashing animation when bashing stuff (doors, corpses, ...).
 - Messages fade out instead of immediately being cleared.
+- Removed many cases where the game "paused" (i.e. "[space]" is shown), for example revealing hidden doors no longer pause the game.
 - The screen fades to red when the player dies.
 - Braziers have a subtle flicker effect, similar to the player when using the Electric Lantern.
 

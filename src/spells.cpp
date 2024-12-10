@@ -1649,11 +1649,7 @@ void SpellBolt::run_effect(
                 // Spell reflection?
                 if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
-                                msg_log::add(
-                                        s_spell_reflect_msg,
-                                        colors::text(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
+                                msg_log::add(s_spell_reflect_msg);
                         }
 
                         // Run effect with the target as caster, and the caster
@@ -1890,11 +1886,7 @@ void SpellAzaGaze::run_effect_on_target(
                 // Spell reflection?
                 if (target.m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(target)) {
-                                msg_log::add(
-                                        s_spell_reflect_msg,
-                                        colors::white(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
+                                msg_log::add(s_spell_reflect_msg);
                         }
 
                         // Run effect with the target as caster, and the caster
@@ -2723,11 +2715,7 @@ void SpellCleansingFire::run_effect(
                         // Spell reflection?
                         if (actor->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*actor)) {
-                                        msg_log::add(
-                                                s_spell_reflect_msg,
-                                                colors::text(),
-                                                MsgInterruptPlayer::no,
-                                                MorePromptOnMsg::yes);
+                                        msg_log::add(s_spell_reflect_msg);
                                 }
 
                                 // Run effect with the target as caster, and the
@@ -3879,11 +3867,7 @@ void SpellKnockBack::run_effect(
                 // Spell reflection?
                 if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
-                                msg_log::add(
-                                        s_spell_reflect_msg,
-                                        colors::text(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
+                                msg_log::add(s_spell_reflect_msg);
                         }
 
                         // Run effect with the target as caster, and the caster
@@ -3989,11 +3973,7 @@ void SpellCurse::run_effect(
                         // Spell reflection?
                         if (target->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*target)) {
-                                        msg_log::add(
-                                                s_spell_reflect_msg,
-                                                colors::text(),
-                                                MsgInterruptPlayer::no,
-                                                MorePromptOnMsg::yes);
+                                        msg_log::add(s_spell_reflect_msg);
                                 }
 
                                 // Run effect with the target as caster, and the
@@ -4201,11 +4181,7 @@ void SpellEnfeeble::run_effect(
                         // Spell reflection?
                         if (target->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*target)) {
-                                        msg_log::add(
-                                                s_spell_reflect_msg,
-                                                colors::text(),
-                                                MsgInterruptPlayer::no,
-                                                MorePromptOnMsg::yes);
+                                        msg_log::add(s_spell_reflect_msg);
                                 }
 
                                 // Run effect with the target as caster, and the
@@ -4333,11 +4309,7 @@ void SpellSlow::run_effect(
                         // Spell reflection?
                         if (target->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*target)) {
-                                        msg_log::add(
-                                                s_spell_reflect_msg,
-                                                colors::text(),
-                                                MsgInterruptPlayer::no,
-                                                MorePromptOnMsg::yes);
+                                        msg_log::add(s_spell_reflect_msg);
                                 }
 
                                 // Run effect with the target as caster, and the
@@ -4473,11 +4445,7 @@ void SpellTerrify::run_effect(
                         // Spell reflection?
                         if (target->m_properties.has(prop::Id::spell_reflect)) {
                                 if (actor::can_player_see_actor(*target)) {
-                                        msg_log::add(
-                                                s_spell_reflect_msg,
-                                                colors::text(),
-                                                MsgInterruptPlayer::no,
-                                                MorePromptOnMsg::yes);
+                                        msg_log::add(s_spell_reflect_msg);
                                 }
 
                                 // Run effect with the target as caster, and the
@@ -4559,11 +4527,7 @@ void SpellDisease::run_effect(
                 // Spell reflection?
                 if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
-                                msg_log::add(
-                                        s_spell_reflect_msg,
-                                        colors::text(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
+                                msg_log::add(s_spell_reflect_msg);
                         }
 
                         // Run effect with the target as caster, and the caster
@@ -4951,11 +4915,7 @@ void SpellMiGoHypno::run_effect(
                 // Spell reflection?
                 if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
-                                msg_log::add(
-                                        s_spell_reflect_msg,
-                                        colors::text(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
+                                msg_log::add(s_spell_reflect_msg);
                         }
 
                         // Run effect with the target as caster, and the caster
@@ -5016,11 +4976,7 @@ void SpellBurn::run_effect(
                 // Spell reflection?
                 if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
-                                msg_log::add(
-                                        s_spell_reflect_msg,
-                                        colors::text(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
+                                msg_log::add(s_spell_reflect_msg);
                         }
 
                         // Run effect with the target as caster, and the caster
@@ -5079,11 +5035,7 @@ void SpellDeafen::run_effect(
                 // Spell reflection?
                 if (target->m_properties.has(prop::Id::spell_reflect)) {
                         if (actor::can_player_see_actor(*target)) {
-                                msg_log::add(
-                                        s_spell_reflect_msg,
-                                        colors::text(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
+                                msg_log::add(s_spell_reflect_msg);
                         }
 
                         // Run effect with the target as caster, and the caster

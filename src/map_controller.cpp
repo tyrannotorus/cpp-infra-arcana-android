@@ -84,11 +84,7 @@ void MapControllerBoss::on_enter()
 
         msg_log::more_prompt();
 
-        msg_log::add(
-                "I feel like my presence here is known!",
-                colors::msg_note(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::yes);
+        msg_log::add("I feel like my presence here is known!", colors::msg_note());
 
         for (auto* const actor : game_time::g_actors) {
                 if (actor::is_player(actor)) {
@@ -120,11 +116,7 @@ void MapControllerBoss::on_std_turn()
 
         // The boss is dead, and stairs have not yet been created
 
-        msg_log::add(
-                "The ground rumbles...",
-                colors::white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::yes);
+        msg_log::add("The ground rumbles...");
 
         map::update_terrain(
                 terrain::make(
@@ -165,9 +157,7 @@ void MapControllerEgypt::on_std_turn()
 
                         msg_log::add(
                                 "I feel like my presence here is known!",
-                                colors::msg_note(),
-                                MsgInterruptPlayer::no,
-                                MorePromptOnMsg::yes);
+                                colors::msg_note());
 
                         for (auto* const actor : game_time::g_actors) {
                                 if (actor::is_player(actor)) {

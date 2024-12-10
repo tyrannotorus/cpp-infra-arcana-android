@@ -602,8 +602,7 @@ void Actor::item_feeling()
         }
 
         if (print_feeling) {
-                const std::string msg =
-                        rnd::element(m_item_feeling_messages);
+                const std::string msg = rnd::element(m_item_feeling_messages);
 
                 msg_log::add(
                         msg,

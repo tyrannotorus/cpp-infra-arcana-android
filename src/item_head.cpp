@@ -25,8 +25,7 @@ void GasMask::decr_turns_left(Inventory& carrier_inv)
         --m_nr_turns_left;
 
         if (m_nr_turns_left <= 0) {
-                const std::string item_name =
-                        name(ItemNameType::plain, ItemNameInfo::none);
+                const std::string item_name = name(ItemNameType::plain, ItemNameInfo::none);
 
                 msg_log::add(
                         "My " + item_name + " expires.",

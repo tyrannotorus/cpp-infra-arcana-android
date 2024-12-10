@@ -1147,8 +1147,6 @@ DidAction CtrlObjOpen::run(
 
                         door.reveal_stuck_status(terrain::PrintRevealMsg::if_seen);
 
-                        msg_log::more_prompt();
-
                         return DidAction::yes;
                 }
         }

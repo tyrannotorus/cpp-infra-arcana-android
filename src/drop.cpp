@@ -100,11 +100,7 @@ void drop_item_from_inv(
 
         // Print message
         if (actor::is_player(&actor)) {
-                msg_log::add(
-                        "I drop " + item_ref + ".",
-                        colors::text(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
+                msg_log::add("I drop " + item_ref + ".");
         }
         else {
                 // Monster is dropping item

@@ -842,11 +842,7 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
 
         pray_msg += "I make a prayer over the " + my_name + "...";
 
-        msg_log::add(
-                pray_msg,
-                colors::text(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::yes);
+        msg_log::add(pray_msg);
 
         // If the item is still charging, roll for success
         if ((m_nr_charge_turns_left > 0) && !rnd::percent(25)) {
@@ -860,6 +856,7 @@ ConsumeItem HolySymbol::activate(actor::Actor* actor)
 
                 m_nr_charge_turns_left = (m_nr_charge_turns_left * duration_pct) / 100;
 
+                msg_log::more_prompt();
                 msg_log::add("This feels useless!");
 
                 map::g_player->incr_shock(4.0, ShockSrc::misc);
@@ -1157,8 +1154,6 @@ ConsumeItem BoneCharm::activate(actor::Actor* actor)
                 if (!trap->is_magical()) {
                         continue;
                 }
-
-                msg_log::more_prompt();
 
                 trap->disarm();
 

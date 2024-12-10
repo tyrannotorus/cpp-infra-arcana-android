@@ -385,12 +385,7 @@ void Item::on_removed_from_inv()
 void Item::discover()
 {
         if ((m_data->xp_on_found > 0) && !m_data->is_found) {
-                const std::string item_name =
-                        name(
-                                ItemNameType::a,
-                                ItemNameInfo::yes);
-
-                msg_log::more_prompt();
+                const std::string item_name = name(ItemNameType::a, ItemNameInfo::yes);
 
                 msg_log::add("I have discovered " + item_name + "!");
 

@@ -3413,8 +3413,6 @@ PropEnded MagicSearching::on_actor_turn()
                                         t->reveal(terrain::PrintRevealMsg::yes);
 
                                         t->on_revealed_from_searching();
-
-                                        msg_log::more_prompt();
                                 }
 
                                 map::memorize_terrain_at(p);

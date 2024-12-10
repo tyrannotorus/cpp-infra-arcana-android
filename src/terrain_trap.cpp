@@ -1242,11 +1242,7 @@ void TrapWeb::trigger()
                         msg = "I am entangled in a sticky mass of threads!";
                 }
 
-                msg_log::add(
-                        msg,
-                        colors::text(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
+                msg_log::add(msg);
         }
         else {
                 // Is a monster

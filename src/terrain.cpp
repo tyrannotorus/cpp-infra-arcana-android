@@ -3244,8 +3244,6 @@ void ItemContainer::on_item_found(
                         item_drop::drop_item_on_map(terrain_pos, *wpn);
                 }
         }
-
-        msg_log::more_prompt();
 }
 
 void ItemContainer::clear()
@@ -3628,11 +3626,7 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
 
                 const std::string msg = "The air suddenly feels colder.";
 
-                msg_log::add(
-                        msg,
-                        colors::white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
+                msg_log::add(msg);
 
                 did_trigger_trap = DidTriggerTrap::yes;
         } break;
@@ -3648,11 +3642,7 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
 
                 const std::string msg = "Something rises from the tomb!";
 
-                msg_log::add(
-                        msg,
-                        colors::white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
+                msg_log::add(msg);
 
                 did_trigger_trap = DidTriggerTrap::yes;
         } break;
@@ -3727,11 +3717,7 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
                         id_to_spawn = rnd::element(mon_bucket);
 
                         if (is_seen) {
-                                msg_log::add(
-                                        "Something repulsive creeps up from the tomb!",
-                                        colors::white(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
+                                msg_log::add("Something repulsive creeps up from the tomb!");
                         }
                 }
 
@@ -4009,11 +3995,7 @@ void Chest::on_player_kick()
         }
 
         if (rnd::one_in(open_one_in_n)) {
-                msg_log::add(
-                        "The lock breaks and the lid flies open!",
-                        colors::text(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
+                msg_log::add("The lock breaks and the lid flies open!");
 
                 m_is_locked = false;
                 m_is_open = true;

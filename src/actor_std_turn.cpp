@@ -137,10 +137,9 @@ static void player_regen_spell_shield()
         auto& player = *map::g_player;
 
         if (player.m_properties.has(prop::Id::r_spell)) {
-                // Player already has spell resistance. Keep resetting the
-                // countdown to "uninitialized" while in this state, and do
-                // nothing else. This will trigger a reroll of the duration when
-                // the countdown can begin again.
+                // Player already has spell resistance. Keep resetting the countdown to
+                // "uninitialized" while in this state, and do nothing else. This will trigger a
+                // reroll of the duration when the countdown can begin again.
                 actor::player_state::g_nr_turns_until_r_spell = -1;
 
                 return;
@@ -164,8 +163,6 @@ static void player_regen_spell_shield()
                         prop->set_indefinite();
 
                         player.m_properties.apply(prop);
-
-                        msg_log::more_prompt();
                 }
 
                 actor::player_state::g_nr_turns_until_r_spell =
@@ -187,10 +184,9 @@ static void player_regen_meditative_focused()
 
         if (player.m_properties.has(prop::Id::meditative_focused) ||
             player.m_properties.has(prop::Id::frenzied)) {
-                // Player is already focused, or is frenzied. Keep resetting the
-                // countdown to "uninitialized" while in this state, and do
-                // nothing else. This will trigger a reroll of the duration when
-                // the countdown can begin again.
+                // Player is already focused, or is frenzied. Keep resetting the countdown to
+                // "uninitialized" while in this state, and do nothing else. This will trigger a
+                // reroll of the duration when the countdown can begin again.
                 actor::player_state::g_nr_turns_until_meditative_focused = -1;
 
                 return;
@@ -216,8 +212,6 @@ static void player_regen_meditative_focused()
                         prop->set_indefinite();
 
                         player.m_properties.apply(prop);
-
-                        msg_log::more_prompt();
                 }
 
                 const auto duration_range =
