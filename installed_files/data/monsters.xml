@@ -10047,7 +10047,7 @@
         </spawning>
 
         <starting_allies>
-            <monster id="MON_SENTRY_DRONE" min="2" max="2"/>
+            <monster id="MON_SENTRY_DRONE"/>
         </starting_allies>
     </monster>
 

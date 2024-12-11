@@ -6,6 +6,9 @@
 '   P  The High Priest, floor
 '   v   Brazier
 '   >   Stairs
+'
+' NOTE: More monsters are spawned on the map at level generation.
+'
 
 ################################################################################
 ################################################################################

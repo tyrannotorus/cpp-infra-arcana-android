@@ -43,6 +43,7 @@
 
 # Special maps
 - Added intro message popups for some special levels.
+- Made several of the special levels tougher.
 
 # Other gameplay changes
 - Poisoning is lethal again (but the standard duration will never kill any character from full hit points).

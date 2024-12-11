@@ -143,6 +143,8 @@ void MapBuilderDeepOneLair::handle_template_pos(const P& p, const char c)
         case '@':
         case '.':
         case 'd':
+        case 'w':
+        case 'W':
         case '%':  // TODO: Just put random blood/gore on the level instead?
         case 'B': {
                 auto* const floor =
@@ -161,6 +163,12 @@ void MapBuilderDeepOneLair::handle_template_pos(const P& p, const char c)
                 }
                 else if (c == 'B') {
                         actor::make("MON_NIDUZA", p);
+                }
+                else if (c == 'w') {
+                        actor::make("MON_WATER_HOUND", p);
+                }
+                else if (c == 'W') {
+                        actor::make("MON_WATER_BEAST", p);
                 }
                 else if (c == '%') {
                         terrain::make_blood(p);
@@ -234,7 +242,8 @@ void MapBuilderDeepOneLair::handle_template_pos(const P& p, const char c)
 
         default:
         {
-                ASSERT(false);
+                TRACE_ERROR_RELEASE << "Unhandled symbol " << c << std::endl;
+                PANIC;
         } break;
         }
 }
@@ -242,6 +251,27 @@ void MapBuilderDeepOneLair::handle_template_pos(const P& p, const char c)
 void MapBuilderDeepOneLair::on_template_built()
 {
         populate_items::make_items_on_floor();
+
+        // Make Niduza leader of all nearby monsters.
+        actor::Actor* niduza = nullptr;
+
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if (actor::id(*actor) == "MON_NIDUZA") {
+                        niduza = actor;
+
+                        break;
+                }
+        }
+
+        const int max_dist = g_fov_radi_int * 2;
+
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if (!actor::is_player(actor) &&
+                    (actor != niduza) &&
+                    (king_dist(actor->m_pos, niduza->m_pos) <= max_dist)) {
+                        actor->m_leader = niduza;
+                }
+        }
 }
 
 std::unique_ptr<MapController> MapBuilderDeepOneLair::map_controller() const
@@ -308,7 +338,8 @@ void MapBuilderMagicPool::handle_template_pos(const P& p, const char c)
 
         default:
         {
-                ASSERT(false);
+                TRACE_ERROR_RELEASE << "Unhandled symbol " << c << std::endl;
+                PANIC;
         } break;
         }
 }
@@ -483,7 +514,8 @@ void MapBuilderIntroForest::handle_template_pos(const P& p, const char c)
 
         default:
         {
-                ASSERT(false);
+                TRACE_ERROR_RELEASE << "Unhandled symbol " << c << std::endl;
+                PANIC;
         } break;
         }
 }
@@ -586,7 +618,8 @@ void MapBuilderMiGoOutpost::handle_template_pos(const P& p, const char c)
 
         default:
         {
-                ASSERT(false);
+                TRACE_ERROR_RELEASE << "Unhandled symbol " << c << std::endl;
+                PANIC;
         } break;
         }
 }
@@ -632,6 +665,7 @@ void MapBuilderEgypt::handle_template_pos(const P& p, const char c)
         case 'P':
         case 'M':
         case 'C':
+        case 'f':
         case '1':
         case '2':
         case '3':
@@ -660,6 +694,10 @@ void MapBuilderEgypt::handle_template_pos(const P& p, const char c)
 
                 case 'C':
                         actor_id = "MON_CROC_HEAD_MUMMY";
+                        break;
+
+                case 'f':
+                        actor_id = "MON_FLOATING_SKULL";
                         break;
 
                 default:
@@ -717,7 +755,8 @@ void MapBuilderEgypt::handle_template_pos(const P& p, const char c)
 
         default:
         {
-                ASSERT(false);
+                TRACE_ERROR_RELEASE << "Unhandled symbol " << c << std::endl;
+                PANIC;
         } break;
         }
 }
@@ -834,7 +873,8 @@ void MapBuilderRatCave::handle_template_pos(const P& p, const char c)
 
         default:
         {
-                ASSERT(false);
+                TRACE_ERROR_RELEASE << "Unhandled symbol " << c << std::endl;
+                PANIC;
         } break;
         }
 }
@@ -895,7 +935,8 @@ void MapBuilderBoss::handle_template_pos(const P& p, const char c)
 
         default:
         {
-                ASSERT(false);
+                TRACE_ERROR_RELEASE << "Unhandled symbol " << c << std::endl;
+                PANIC;
         } break;
         }
 }
@@ -926,6 +967,8 @@ void MapBuilderBoss::on_template_built()
                 "MON_HIGH_PRIEST_GUARD_WAR_VET",
                 "MON_HIGH_PRIEST_GUARD_ROGUE",
                 "MON_HIGH_PRIEST_GUARD_GHOUL",
+                "MON_ELDER_VOID_TRAVELER",
+                "MON_CULTIST_ARCH_WIZARD",
         };
 
         for (size_t i = 0; i < guardian_ids.size(); ++i) {
@@ -1001,7 +1044,8 @@ void MapBuilderTrapez::handle_template_pos(const P& p, const char c)
 
         default:
         {
-                ASSERT(false);
+                TRACE_ERROR_RELEASE << "Unhandled symbol " << c << std::endl;
+                PANIC;
         } break;
         }
 }
