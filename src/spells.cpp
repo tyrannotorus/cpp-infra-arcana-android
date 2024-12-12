@@ -3517,6 +3517,15 @@ std::vector<std::string> SpellPremonition::descr_specific(
         return descr;
 }
 
+bool SpellPremonition::allow_mon_cast_now(
+        const actor::Actor& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        return (
+                !seen_targets.empty() &&
+                !mon.m_properties.has(prop::Id::premonition));
+}
+
 // -----------------------------------------------------------------------------
 // Erudition
 // -----------------------------------------------------------------------------

@@ -489,7 +489,7 @@ static void mon_act(actor::Actor& mon)
         }
 
         // Cast instead of attacking?
-        if (rnd::one_in(5)) {
+        if (rnd::one_in(3)) {
                 const DidAction did_act = ai::action::try_cast_random_spell(mon);
 
                 if (did_act == DidAction::yes) {

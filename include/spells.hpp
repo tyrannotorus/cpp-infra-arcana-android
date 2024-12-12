@@ -48,11 +48,11 @@ enum class SpellId
         spell_shield,
         teleport,
         terrify,
+        premonition,
 
         // Player only
         spectral_weapons,
         bless,
-        premonition,
         erudition,
         identify,
         light,
@@ -1949,6 +1949,10 @@ public:
         void run_effect(
                 actor::Actor* caster,
                 SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+        bool allow_mon_cast_now(
+                const actor::Actor& mon,
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:

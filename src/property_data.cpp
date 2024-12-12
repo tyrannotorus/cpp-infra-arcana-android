@@ -851,7 +851,9 @@ static void init_data_list()
         d.name_short = "Premonition";
         d.descr = "+75% chance to evade attacks.";
         d.msg_start_player = "I feel unassailable.";
+        d.msg_start_mon = "looks unassailable.";
         d.msg_end_player = "I feel more vulnerable.";
+        d.msg_end_mon = "looks like an easier target now.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
         d.alignment = prop::PropAlignment::good;
