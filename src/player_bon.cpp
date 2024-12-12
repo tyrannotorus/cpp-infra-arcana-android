@@ -380,9 +380,6 @@ static void update_trait_data()
                 "+2 spirit points, increased spirit regeneration rate, you "
                 "can defy harmful spells (it takes 125-150 turns to regain "
                 "spell resistance after a spell is blocked)";
-        // NOTE: Exorcists start with Stout Spirit, there is no point in having
-        // it grant extra max Fervor (only the other two Spirit upgrade traits
-        // need to grant this).
         d.on_picked = []() {
                 prop::Prop* prop = prop::make(prop::Id::r_spell);
 
