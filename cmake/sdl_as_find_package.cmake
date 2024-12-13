@@ -20,6 +20,6 @@ set(SDL_LIBS
         ${SDL2_MIXER_LIBRARIES}
         )
 
-target_link_libraries(ia PUBLIC         ${SDL_LIBS})
-target_link_libraries(ia-debug PUBLIC   ${SDL_LIBS})
+target_link_libraries(ia         ${SDL_LIBS})
+target_link_libraries(ia-debug   ${SDL_LIBS})
 
