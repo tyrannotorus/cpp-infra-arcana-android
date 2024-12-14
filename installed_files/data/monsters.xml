@@ -3233,8 +3233,8 @@
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="8" required_dungeon_level="10">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="4" required_dungeon_level="13">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="8" required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="4" required_dungeon_level="16">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_RITUAL</native_room>
@@ -3334,8 +3334,8 @@
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="8" required_dungeon_level="10">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="4" required_dungeon_level="13">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="8" required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="4" required_dungeon_level="16">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_RITUAL</native_room>
@@ -3436,8 +3436,8 @@
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="8" required_dungeon_level="10">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="4" required_dungeon_level="13">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="8" required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="4" required_dungeon_level="16">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_RITUAL</native_room>
@@ -3535,8 +3535,8 @@
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="8" required_dungeon_level="10">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="4" required_dungeon_level="13">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="8" required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="4" required_dungeon_level="16">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_RITUAL</native_room>
