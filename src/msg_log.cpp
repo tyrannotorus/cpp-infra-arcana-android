@@ -63,6 +63,7 @@ static MsgFadeState s_msg_fade_state = MsgFadeState::allow_start_fade;
 
 // Tracks fade out percent for the current messages.
 static int s_msg_fade_pct = 0;
+static int s_msg_fade_turn_count = 0;
 
 static size_t find_current_line_nr()
 {
@@ -335,7 +336,8 @@ void init()
         s_history_count = 0;
         s_is_waiting_more_pompt = false;
         s_msg_fade_state = MsgFadeState::allow_start_fade;
-        s_msg_fade_pct = -1;
+        s_msg_fade_pct = 0;
+        s_msg_fade_turn_count = 0;
 }
 
 void draw()
@@ -359,23 +361,26 @@ void draw()
         }
 }
 
-void cycle_graphics(const io::GraphicsCycle cycle)
+void on_player_turn_start()
 {
-        if ((cycle != io::GraphicsCycle::fast) ||
-            (s_msg_fade_state != MsgFadeState::is_fading)) {
+        if (s_msg_fade_state != MsgFadeState::is_fading) {
                 return;
         }
 
         ASSERT(!s_is_waiting_more_pompt);
 
-        s_msg_fade_pct -= 10;
-
-        if (s_msg_fade_pct == 0) {
+        if (s_msg_fade_turn_count >= 4) {
                 // Force immediate clearing of the log.
                 s_msg_fade_state = MsgFadeState::done;
 
                 clear();
+
+                return;
         }
+
+        s_msg_fade_pct -= 10;
+
+        ++s_msg_fade_turn_count;
 }
 
 void clear()
@@ -405,6 +410,7 @@ void clear()
                 s_msg_fade_state = MsgFadeState::is_fading;
 
                 s_msg_fade_pct = 100;
+                s_msg_fade_turn_count = 0;
 
                 return;
         }

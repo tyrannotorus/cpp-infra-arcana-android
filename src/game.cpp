@@ -514,8 +514,6 @@ void GameState::cycle_graphics(const io::GraphicsCycle cycle)
         for (auto* const a : game_time::g_actors) {
                 actor::cycle_graphics(*a, cycle);
         }
-
-        msg_log::cycle_graphics(cycle);
 }
 
 void GameState::draw()

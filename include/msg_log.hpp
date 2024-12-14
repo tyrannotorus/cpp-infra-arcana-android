@@ -121,7 +121,7 @@ void init();
 
 void draw();
 
-void cycle_graphics(io::GraphicsCycle cycle);
+void on_player_turn_start();
 
 void add(
         const std::string& str,

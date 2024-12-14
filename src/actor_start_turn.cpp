@@ -629,6 +629,8 @@ static void player_start_turn()
 
         actor::player_state::g_seen_mon_to_warn_about = nullptr;
         actor::player_state::g_allow_print_mon_warning = true;
+
+        msg_log::on_player_turn_start();
 }
 
 static void mon_start_turn(actor::Actor& mon)
