@@ -30,7 +30,8 @@
 
 # Monsters
 - Some creatures are now "flammable" (e.g. mold, worm masses). If ignited, these burn permanently and will also ignite any other adjacent flammable creatures.
-- Mold do zero damage (but poisoning is now lethal, and Hallucinogenic Mold always start together with regular mold).
+- Mold do zero direct damage (only poison).
+- Hallucinogenic Mold always start together with regular mold.
 - Misc monster balancing (a lot of balancing of changed stats, group sizes, properties, etc)
 - Added more monsters.
 
@@ -47,7 +48,6 @@
 - Made several of the special levels tougher.
 
 # Other gameplay changes
-- Poisoning is lethal again (but the standard duration will never kill any character from full hit points).
 - Reworked and unified how dodging penalties are calculated for melee and ranged attacks. This should not have much effect on how the game plays, but hit chances may be affected in some cases (for example being stuck now also gives a dodging penalty against ranged attacks, and confusion no longer gives a dodging penalty at all).
 - Monsters spawning over time happens a certain duration after entering a new level, instead of at fixed global intervals - this prevents manipulating the counter for example by waiting at the stairs.
 
