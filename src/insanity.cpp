@@ -670,6 +670,7 @@ void run_sympt()
 
                 // Symptoms are only allowed if not already active
                 if (!active_sympt) {
+                        // TODO: There is a memory leak here. Use smart pointers!
                         InsSympt* const new_sympt = make_sympt(InsSymptId(i));
 
                         const bool is_allowed = new_sympt->is_allowed();

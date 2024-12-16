@@ -340,7 +340,7 @@ static void update_trait_data()
         // --- Rapid Recoverer ---
         d.id = Trait::rapid_recoverer;
         d.title = "Rapid Recoverer";
-        d.descr = "You regenerate 1 hit point every second turn";
+        d.descr = "You regenerate 1 hit point every third turn";
         d.trait_prereqs = {Trait::tough, Trait::healer};
         d.blocked_for_bgs = {Bg::ghoul};
         set_trait_data(d);

@@ -46,7 +46,7 @@ static int calc_player_turns_per_hp_regen_rate()
 
         // Rapid Recoverer trait affects hp regen?
         if (player_bon::has_trait(Trait::rapid_recoverer)) {
-                nr_turns_per_hp = 2;
+                nr_turns_per_hp = 3;
         }
         else {
                 nr_turns_per_hp = 20;
