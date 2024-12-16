@@ -28,6 +28,9 @@
 # Spells
 - Increased duration of the See Invisible spell.
 
+# Status effects
+- Poison now stacks, i.e. the duration of the new poison effect is added to the old (normally the duration is set to the longest duration of the old or new effect).
+
 # Monsters
 - Some creatures are now "flammable" (e.g. mold, worm masses). If ignited, these burn permanently and will also ignite any other adjacent flammable creatures.
 - Mold do zero direct damage (only poison).

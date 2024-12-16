@@ -9314,7 +9314,7 @@
         <attacks>
             <attack id="ITEMINTR_SPORES">
                 <damage>0</damage>
-                <property_applied duration="16">PROP_POISONED</property_applied>
+                <property_applied duration="7">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 
@@ -9415,7 +9415,7 @@
         <attacks>
             <attack id="ITEMINTR_SPORES">
                 <damage>0</damage>
-                <property_applied duration="16">PROP_POISONED</property_applied>
+                <property_applied duration="7">PROP_POISONED</property_applied>
             </attack>
         </attacks>
 

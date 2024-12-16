@@ -157,6 +157,14 @@ enum class PropAlignment
         neutral
 };
 
+// How duration is handled when more of the same property is applied.
+enum class DurationOnMoreBehavior
+{
+        longest,   // Use longest duration of old and new property
+        shortest,  // Use shortest duration
+        stacked,   // Add durations
+};
+
 struct PropData
 {
         Id id {Id::END};
@@ -177,6 +185,7 @@ struct PropData
         bool update_vision_on_toggled {false};
         bool force_interrupt_player_on_start {false};
         bool is_preventable_by_player_trait {false};
+        DurationOnMoreBehavior duration_on_more {DurationOnMoreBehavior::longest};
         bool allow_test_on_bot {false};
         PropAlignment alignment {PropAlignment::neutral};
 };

@@ -110,9 +110,7 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
 static void add(prop::PropData& d)
 {
 #ifndef NDEBUG
-        const std::string worst_case_str =
-                d.name_short +
-                prop::g_property_ending_suffix;
+        const std::string worst_case_str = d.name_short + prop::g_property_ending_suffix;
 
         const size_t worst_case_w = worst_case_str.length();
 
@@ -423,7 +421,7 @@ static void init_data_list()
         d.std_rnd_turns = Range(40, 80);
         d.name = "Poisoned";
         d.name_short = "Poisoned";
-        d.descr = "Slowly takes damage.";
+        d.descr = "Slowly takes damage. Poison duration stacks if more is applied.";
         d.msg_start_player = "I am poisoned!";
         d.msg_start_mon = "is poisoned.";
         d.msg_end_player = "My body is cleansed from poisoning!";
@@ -432,6 +430,7 @@ static void init_data_list()
         d.msg_res_mon = "resists poisoning.";
         d.allow_display_turns = true;
         d.is_preventable_by_player_trait = true;
+        d.duration_on_more = prop::DurationOnMoreBehavior::stacked;
         d.allow_test_on_bot = true;
         d.alignment = prop::PropAlignment::bad;
         add(d);
@@ -724,6 +723,8 @@ static void init_data_list()
         d.msg_end_player = "My infection is cured!";
         d.msg_end_mon = "is no longer infected.";
         d.allow_display_turns = false;
+        // Never increase duration if more infection is applied:
+        d.duration_on_more = prop::DurationOnMoreBehavior::shortest;
         d.allow_test_on_bot = true;
         d.alignment = prop::PropAlignment::bad;
         add(d);

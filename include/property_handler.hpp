@@ -102,8 +102,8 @@ public:
 
         void load();
 
-        // All properties must be added through this function (can also be done
-        // via the other "apply" methods, which will then call "apply")
+        // All properties must be added through this function (can also be done via the other
+        // "apply" methods, which will then call "apply")
         void apply(
                 Prop* prop,
                 PropSrc src = PropSrc::intr,
@@ -165,13 +165,15 @@ public:
         bool allow_eat(Verbose verbose) const;   // Also for drinking
         bool allow_pray(Verbose verbose) const;  // Pray over the Holy Symbol
 
-        // NOTE: The allow_*_absolute methods below answer if some action could
-        // EVER be performed, and the allow_*_chance methods allows the action
-        // with a random chance. For example, blindness never allows the player
-        // to read scrolls, and the game won't let the player try. But burning
-        // will allow the player to try, with a certain percent chance of
-        // success, and the scroll will be wasted on failure. (All plain
-        // allow_* methods above are also considered "absolute".)
+        // NOTE: The allow_*_absolute methods below answer if some action could EVER be performed,
+        // and the allow_*_chance methods allows the action with a random chance.
+        //
+        // For example, blindness never allows the player to read scrolls, and the game won't let
+        // the player try. Burning on the other hand will allow the player to try, with a certain
+        // percent chance of success, and the scroll will be wasted on failure.
+        //
+        // (All plain allow_* methods above are also considered "absolute".)
+        //
         bool allow_read_absolute(Verbose verbose) const;
         bool allow_read_chance(Verbose verbose) const;
         bool allow_cast_intr_spell_absolute(Verbose verbose) const;
@@ -204,12 +206,14 @@ public:
 
         void on_std_turn();
 
-        // Called just before an actor is supposed to do an action (move,
-        // attack,...). This may "take over" the actor and do some special
-        // behavior instead (e.g. a Zombie rising, or a Vortex pulling),
-        // possibly ticking game time - if time is ticked, this method returns
-        // 'DidAction::yes' (each property implementing this callback must
-        // make sure to do this).
+        // Called just before an actor is supposed to do an action (move, attack,...).
+        //
+        // This may "take over" the actor and do some special behavior instead (e.g. a Zombie
+        // rising, or a Vortex pulling), possibly ticking game time.
+        //
+        // If time is ticked, this method returns 'DidAction::yes' (each property implementing this
+        // callback must make sure to do this).
+        //
         DidAction on_act();
 
         void on_melee_attack();
@@ -226,10 +230,11 @@ private:
 
         bool is_resisting_prop(Id id) const;
 
-        // A hook that prints messages, updates FOV, etc, and also calls the
-        // on_end() property hook.
-        // NOTE: It does NOT remove the property from the vector or decrement
-        // the active property info. The caller is responsible for this.
+        // A hook that prints messages, updates FOV, etc, and also calls the on_end() property hook.
+        //
+        // NOTE: It does NOT remove the property from the vector or decrement the active property
+        // info. The caller is responsible for this.
+        //
         void on_prop_end(Prop* prop, const PropEndConfig& end_config);
 
         void incr_prop_count(Id id);
@@ -237,8 +242,8 @@ private:
 
         std::vector<std::shared_ptr<Prop>> m_props;
 
-        // This array is only used as an optimization when requesting which
-        // properties are currently active (see the "has()" method above).
+        // This array is only used as an optimization when requesting which properties are currently
+        // active (see the "has()" method above).
         int m_prop_count_cache[(size_t)Id::END];
 
         actor::Actor* m_owner;

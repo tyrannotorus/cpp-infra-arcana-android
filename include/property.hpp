@@ -100,6 +100,11 @@ public:
                 return m_nr_turns_left;
         }
 
+        int nr_dlvls_left() const
+        {
+                return m_nr_dlvls_left;
+        }
+
         int nr_turns_active() const
         {
                 return m_nr_turns_active;

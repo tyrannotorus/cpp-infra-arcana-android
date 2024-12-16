@@ -83,20 +83,43 @@ static Color get_property_gui_color(const prop::Prop& property)
 
 static std::string get_property_nr_turns_suffix(const prop::Prop& property)
 {
-        // NOTE: Since turns left are decremented at the start of an actor's
-        // turn, and checked when they end the turn - "turns left" practically
-        // represents how many more times that the player can act without ending
-        // the property (i.e. if the property has "N turns left" this means the
-        // player can do N actions without ending the property, and it will only
-        // end after action N + 1).
+        // NOTE: Since turns left are decremented at the start of an actor's turn, and checked when
+        // they end the turn - "turns left" practically represents how many more times that the
+        // player can act without ending the property (i.e. if the property has "N turns left" this
+        // means the player can do N actions without ending the property, and it will only end after
+        // action N + 1).
         //
-        // However this is probably not what is most intuitive for the
-        // player. What may feel more natural is a number that represents how
-        // many actions they have left until the turn ends (i.e. "N turn left"
-        // means after N actions, the property ends). Therefore the value is
+        // However this is probably not what is most intuitive for the player. What may feel more
+        // natural is a number that represents how many actions they have left until the turn ends
+        // (i.e. "N turn left" means after N actions, the property ends). Therefore the value is
         // incremented by one here.
         //
         return ":" + std::to_string(property.nr_turns_left() + 1);
+}
+
+static int longest_duration(const prop::Prop& prop_1, const prop::Prop& prop_2)
+{
+        return std::max(prop_1.nr_turns_left(), prop_2.nr_turns_left());
+}
+
+static int shortest_duration(const prop::Prop& prop_1, const prop::Prop& prop_2)
+{
+        return std::min(prop_1.nr_turns_left(), prop_2.nr_turns_left());
+}
+
+static int sum_durations(const prop::Prop& prop_1, const prop::Prop& prop_2)
+{
+        return prop_1.nr_turns_left() + prop_2.nr_turns_left();
+}
+
+static int longest_dlvl_duration(const prop::Prop& prop_1, const prop::Prop& prop_2)
+{
+        return std::max(prop_1.nr_dlvls_left(), prop_2.nr_dlvls_left());
+}
+
+static int longest_turns_active(const prop::Prop& prop_1, const prop::Prop& prop_2)
+{
+        return std::max(prop_1.nr_turns_active(), prop_2.nr_turns_active());
 }
 
 // -----------------------------------------------------------------------------
@@ -372,82 +395,73 @@ bool PropHandler::try_apply_more_on_existing_intr_prop(
         const Prop& new_prop,
         const Verbose verbose)
 {
-        // NOTE: If an existing property exists which the new property shall be
-        // merged with, we keep the old property object and discard the new one.
+        // NOTE: If an existing property exists which the new property shall be merged with, we keep
+        // the OLD property object and discard the NEW one.
 
-        for (auto& old_prop : m_props) {
-                if ((new_prop.m_id != old_prop->m_id) ||
-                    (old_prop->m_src != PropSrc::intr)) {
-                        continue;
+        Prop* old_prop = nullptr;
+
+        for (auto& prop : m_props) {
+                if ((new_prop.m_id == prop->m_id) && (prop->m_src == PropSrc::intr)) {
+                        old_prop = prop.get();
+
+                        break;
                 }
-
-                // Found another intrinsic property of same type
-
-                // Use longest dungeon level duration
-                old_prop->m_nr_dlvls_left =
-                        std::max(
-                                new_prop.m_nr_dlvls_left,
-                                old_prop->m_nr_dlvls_left);
-
-                const bool old_is_permanent = old_prop->m_nr_turns_left < 0;
-                const bool new_is_permanent = new_prop.m_nr_turns_left < 0;
-
-                if (new_is_permanent) {
-                        old_prop->m_nr_turns_left = -1;
-
-                        old_prop->m_duration_mode =
-                                PropDurationMode::indefinite;
-                }
-                else if (!old_is_permanent) {
-                        // Both the old and new property are temporary
-
-                        // TODO: This is a hack to avoid resetting infection
-                        // countdown when another infection is applied
-                        if (new_prop.id() == Id::infected) {
-                                // Use shortest duration
-                                old_prop->m_nr_turns_left =
-                                        std::min(
-                                                old_prop->m_nr_turns_left,
-                                                new_prop.m_nr_turns_left);
-                        }
-                        else {
-                                // Use longest duration
-                                old_prop->m_nr_turns_left =
-                                        std::max(
-                                                old_prop->m_nr_turns_left,
-                                                new_prop.m_nr_turns_left);
-                        }
-                }
-
-                // Use longest number of turns active
-                old_prop->m_nr_turns_active =
-                        std::max(
-                                new_prop.m_nr_turns_active,
-                                old_prop->m_nr_turns_active);
-
-                if (verbose == Verbose::yes) {
-                        print_start_msg(*old_prop);
-                }
-
-                old_prop->on_more(new_prop);
-
-                if (actor::is_player(m_owner) &&
-                    !old_is_permanent &&
-                    new_is_permanent) {
-                        // The property was temporary and became permanent, log
-                        // a historic event for applying a permanent property
-                        const auto& msg =
-                                old_prop->m_data.historic_msg_start_permanent;
-
-                        if (!msg.empty()) {
-                                game::add_history_event(msg);
-                        }
-                }
-
-                return true;
         }
 
-        return false;
+        if (!old_prop) {
+                return false;
+        }
+
+        // Found another intrinsic property of same type.
+
+        // NOTE: Dungeon level duration is always set to the longest duration, at least currently
+        // there is no need to ever do anything else.
+        old_prop->m_nr_dlvls_left = longest_dlvl_duration(*old_prop, new_prop);
+
+        const bool old_is_permanent = old_prop->m_nr_turns_left < 0;
+        const bool new_is_permanent = new_prop.m_nr_turns_left < 0;
+
+        if (new_is_permanent) {
+                old_prop->m_nr_turns_left = -1;
+                old_prop->m_duration_mode = PropDurationMode::indefinite;
+        }
+        else if (!old_is_permanent) {
+                // Both the old and new property are temporary.
+
+                switch (old_prop->m_data.duration_on_more) {
+                case DurationOnMoreBehavior::longest:
+                        old_prop->m_nr_turns_left = longest_duration(*old_prop, new_prop);
+                        break;
+
+                case DurationOnMoreBehavior::shortest:
+                        old_prop->m_nr_turns_left = shortest_duration(*old_prop, new_prop);
+                        break;
+
+                case DurationOnMoreBehavior::stacked:
+                        old_prop->m_nr_turns_left = sum_durations(*old_prop, new_prop);
+                        break;
+                }
+        }
+
+        old_prop->m_nr_turns_active = longest_turns_active(*old_prop, new_prop);
+
+        if (verbose == Verbose::yes) {
+                print_start_msg(*old_prop);
+        }
+
+        old_prop->on_more(new_prop);
+
+        if (actor::is_player(m_owner) && !old_is_permanent && new_is_permanent) {
+                // The property was temporary and became permanent, log a historic event for
+                // applying a permanent property.
+                const std::string& msg = old_prop->m_data.historic_msg_start_permanent;
+
+                if (!msg.empty()) {
+                        game::add_history_event(msg);
+                }
+        }
+
+        return true;
 }
 
 void PropHandler::add_prop_from_equipped_item(
