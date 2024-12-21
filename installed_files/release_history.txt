@@ -85,6 +85,7 @@
 - Fixed a bug that caused Expert Marksman go give a double upgrade, and Master Marksman to give no upgrade at all (this bug has existed since v20.0).
 - The Talisman of Resurrection first restored all hit points and then healed all wounds, which could leave the player with lower than full health - fixed by reversing the order.
 - For Exorcist spell traits, available spirit info is no longer printed in the character info screen, only when picking a trait (also the character info screen could show wrong numbers).
+- Being stuck in mud had a limited time duration - it now has indefinite duration (the player/creature has to actively pull themselves free).
 
 ##############################
 # Modability

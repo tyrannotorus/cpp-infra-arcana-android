@@ -1949,7 +1949,11 @@ void Liquid::bump(actor::Actor& actor_bumping)
 
                 // The creature might also get stuck.
                 if ((m_type == LiquidType::mud) && rnd::one_in(5)) {
-                        actor_bumping.m_properties.apply(prop::make(prop::Id::stuck));
+                        prop::Prop* stuck = prop::make(prop::Id::stuck);
+
+                        stuck->set_indefinite();
+
+                        actor_bumping.m_properties.apply(stuck);
                 }
         }
 
