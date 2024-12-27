@@ -17,12 +17,14 @@
 #include "audio_data.hpp"
 #include "debug.hpp"
 #include "direction.hpp"
+#include "explosion.hpp"
 #include "game.hpp"
 #include "game_time.hpp"
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "knockback.hpp"
 #include "map.hpp"
+#include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
@@ -36,7 +38,10 @@
 #include "saving.hpp"
 #include "sound.hpp"
 #include "spells.hpp"
+#include "teleport.hpp"
 #include "terrain.hpp"
+#include "terrain_door.hpp"
+#include "terrain_factory.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -56,105 +61,56 @@ void init()
         // Init possible rod colors and fake names
         s_rod_looks.clear();
 
-        s_rod_looks.push_back(
-                {"Iron", "an Iron", colors::gray()});
+        s_rod_looks.push_back({"Iron", "an Iron", colors::gray()});
+        s_rod_looks.push_back({"Zinc", "a Zinc", colors::light_white()});
+        s_rod_looks.push_back({"Chromium", "a Chromium", colors::light_white()});
+        s_rod_looks.push_back({"Tin", "a Tin", colors::light_white()});
+        s_rod_looks.push_back({"Silver", "a Silver", colors::light_white()});
+        s_rod_looks.push_back({"Golden", "a Golden", colors::yellow()});
+        s_rod_looks.push_back({"Nickel", "a Nickel", colors::light_white()});
+        s_rod_looks.push_back({"Copper", "a Copper", colors::brown()});
+        s_rod_looks.push_back({"Lead", "a Lead", colors::gray()});
+        s_rod_looks.push_back({"Tungsten", "a Tungsten", colors::white()});
+        s_rod_looks.push_back({"Platinum", "a Platinum", colors::light_white()});
+        s_rod_looks.push_back({"Lithium", "a Lithium", colors::white()});
+        s_rod_looks.push_back({"Zirconium", "a Zirconium", colors::white()});
+        s_rod_looks.push_back({"Gallium", "a Gallium", colors::light_white()});
+        s_rod_looks.push_back({"Cobalt", "a Cobalt", colors::light_blue()});
+        s_rod_looks.push_back({"Titanium", "a Titanium", colors::light_white()});
+        s_rod_looks.push_back({"Magnesium", "a Magnesium", colors::white()});
 
-        s_rod_looks.push_back(
-                {"Zinc", "a Zinc", colors::light_white()});
-
-        s_rod_looks.push_back(
-                {"Chromium", "a Chromium", colors::light_white()});
-
-        s_rod_looks.push_back(
-                {"Tin", "a Tin", colors::light_white()});
-
-        s_rod_looks.push_back(
-                {"Silver", "a Silver", colors::light_white()});
-
-        s_rod_looks.push_back(
-                {"Golden", "a Golden", colors::yellow()});
-
-        s_rod_looks.push_back(
-                {"Nickel", "a Nickel", colors::light_white()});
-
-        s_rod_looks.push_back(
-                {"Copper", "a Copper", colors::brown()});
-
-        s_rod_looks.push_back(
-                {"Lead", "a Lead", colors::gray()});
-
-        s_rod_looks.push_back(
-                {"Tungsten", "a Tungsten", colors::white()});
-
-        s_rod_looks.push_back(
-                {"Platinum", "a Platinum", colors::light_white()});
-
-        s_rod_looks.push_back(
-                {"Lithium", "a Lithium", colors::white()});
-
-        s_rod_looks.push_back(
-                {"Zirconium", "a Zirconium", colors::white()});
-
-        s_rod_looks.push_back(
-                {"Gallium", "a Gallium", colors::light_white()});
-
-        s_rod_looks.push_back(
-                {"Cobalt", "a Cobalt", colors::light_blue()});
-
-        s_rod_looks.push_back(
-                {"Titanium", "a Titanium", colors::light_white()});
-
-        s_rod_looks.push_back(
-                {"Magnesium", "a Magnesium", colors::white()});
-
-        for (auto& d : item::g_data) {
-                if (d.type == ItemType::rod) {
-                        // Color and false name
-                        const size_t idx =
-                                rnd::range(0, (int)s_rod_looks.size() - 1);
-
-                        RodLook& look = s_rod_looks[idx];
-
-                        d.base_name_un_id.names[(size_t)ItemNameType::plain] =
-                                look.name_plain + " Rod";
-
-                        d.base_name_un_id.names[(size_t)ItemNameType::plural] =
-                                look.name_plain + " Rods";
-
-                        d.base_name_un_id.names[(size_t)ItemNameType::a] =
-                                look.name_a + " Rod";
-
-                        d.color = look.color;
-
-                        s_rod_looks.erase(s_rod_looks.begin() + idx);
-
-                        // True name
-                        const auto* const rod =
-                                static_cast<const Rod*>(
-                                        item::make(d.id, 1));
-
-                        const std::string real_type_name = rod->real_name();
-
-                        delete rod;
-
-                        const std::string real_name =
-                                "Rod of " + real_type_name;
-
-                        const std::string real_name_plural =
-                                "Rods of " + real_type_name;
-
-                        const std::string real_name_a =
-                                "a Rod of " + real_type_name;
-
-                        d.base_name.names[(size_t)ItemNameType::plain] =
-                                real_name;
-
-                        d.base_name.names[(size_t)ItemNameType::plural] =
-                                real_name_plural;
-
-                        d.base_name.names[(size_t)ItemNameType::a] =
-                                real_name_a;
+        for (item::ItemData& d : item::g_data) {
+                if (d.type != ItemType::rod) {
+                        continue;
                 }
+
+                // Color and false name
+                const size_t idx = rnd::range(0, (int)s_rod_looks.size() - 1);
+
+                RodLook& look = s_rod_looks[idx];
+
+                d.base_name_un_id.names[(size_t)ItemNameType::plain] = look.name_plain + " Rod";
+                d.base_name_un_id.names[(size_t)ItemNameType::plural] = look.name_plain + " Rods";
+                d.base_name_un_id.names[(size_t)ItemNameType::a] = look.name_a + " Rod";
+
+                d.color = look.color;
+
+                s_rod_looks.erase(std::begin(s_rod_looks) + (int)idx);
+
+                // True name
+                std::unique_ptr<const Rod> tmp_rod(
+                        static_cast<const Rod*>(
+                                item::make(d.id, 1)));
+
+                const std::string real_type_name = tmp_rod->real_name();
+
+                const std::string real_name = "Rod of " + real_type_name;
+                const std::string real_name_plural = "Rods of " + real_type_name;
+                const std::string real_name_a = "a Rod of " + real_type_name;
+
+                d.base_name.names[(size_t)ItemNameType::plain] = real_name;
+                d.base_name.names[(size_t)ItemNameType::plural] = real_name_plural;
+                d.base_name.names[(size_t)ItemNameType::a] = real_name_a;
         }
 
         TRACE_FUNC_END;
@@ -163,37 +119,32 @@ void init()
 void save()
 {
         for (int i = 0; i < (int)item::Id::END; ++i) {
-                auto& d = item::g_data[i];
+                item::ItemData& d = item::g_data[i];
 
-                if (d.type == ItemType::rod) {
-                        saving::put_str(
-                                d.base_name_un_id
-                                        .names[(size_t)ItemNameType::plain]);
-
-                        saving::put_str(
-                                d.base_name_un_id
-                                        .names[(size_t)ItemNameType::plural]);
-
-                        saving::put_str(
-                                d.base_name_un_id
-                                        .names[(size_t)ItemNameType::a]);
-
-                        saving::put_str(colors::color_to_name(d.color));
+                if (d.type != ItemType::rod) {
+                        continue;
                 }
+
+                saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::plain]);
+                saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::plural]);
+                saving::put_str(d.base_name_un_id.names[(size_t)ItemNameType::a]);
+                saving::put_str(colors::color_to_name(d.color));
         }
 }
 
 void load()
 {
         for (int i = 0; i < (int)item::Id::END; ++i) {
-                auto& d = item::g_data[i];
+                item::ItemData& d = item::g_data[i];
 
-                if (d.type == ItemType::rod) {
-                        d.base_name_un_id.names[(size_t)ItemNameType::plain] = saving::get_str();
-                        d.base_name_un_id.names[(size_t)ItemNameType::plural] = saving::get_str();
-                        d.base_name_un_id.names[(size_t)ItemNameType::a] = saving::get_str();
-                        d.color = colors::name_to_color(saving::get_str());
+                if (d.type != ItemType::rod) {
+                        continue;
                 }
+
+                d.base_name_un_id.names[(size_t)ItemNameType::plain] = saving::get_str();
+                d.base_name_un_id.names[(size_t)ItemNameType::plural] = saving::get_str();
+                d.base_name_un_id.names[(size_t)ItemNameType::a] = saving::get_str();
+                d.color = colors::name_to_color(saving::get_str());
         }
 }
 
@@ -220,13 +171,10 @@ ConsumeItem Rod::activate(actor::Actor* const actor)
 {
         (void)actor;
 
-        // Prevent using it if still charging, and identified (player character
-        // knows that it's useless)
+        // Prevent using it if still charging, and identified (player character knows that it's
+        // useless)
         if ((m_nr_charge_turns_left > 0) && m_data->is_identified) {
-                const std::string rod_name =
-                        name(
-                                ItemNameType::plain,
-                                ItemNameInfo::none);
+                const std::string rod_name = name(ItemNameType::plain, ItemNameInfo::none);
 
                 msg_log::add("The " + rod_name + " is still charging.");
 
@@ -237,10 +185,7 @@ ConsumeItem Rod::activate(actor::Actor* const actor)
 
         // TODO: Sfx
 
-        const std::string rod_name_a =
-                name(
-                        ItemNameType::a,
-                        ItemNameInfo::none);
+        const std::string rod_name_a = name(ItemNameType::a, ItemNameInfo::none);
 
         msg_log::add("I activate " + rod_name_a + "...");
 
@@ -280,12 +225,8 @@ void Rod::on_std_turn_in_inv_hook(const InvType inv_type)
 
         --m_nr_charge_turns_left;
 
-        if ((m_nr_charge_turns_left == 0) &&
-            m_data->is_identified) {
-                const std::string my_name =
-                        name(
-                                ItemNameType::plain,
-                                ItemNameInfo::none);
+        if ((m_nr_charge_turns_left == 0) && m_data->is_identified) {
+                const std::string my_name = name(ItemNameType::plain, ItemNameInfo::none);
 
                 msg_log::add("The " + my_name + " has finished charging.");
         }
@@ -311,10 +252,7 @@ void Rod::identify(const Verbose verbose)
         m_data->is_identified = true;
 
         if (verbose == Verbose::yes) {
-                const std::string name_after =
-                        name(
-                                ItemNameType::a,
-                                ItemNameInfo::none);
+                const std::string name_after = name(ItemNameType::a, ItemNameInfo::none);
 
                 msg_log::add("I have identified " + name_after + ".");
 
@@ -340,48 +278,16 @@ std::string Rod::name_info_str(const ItemNameIdentified id_type) const
         }
 }
 
-void Curing::run_effect()
-{
-        auto& player = *map::g_player;
-
-        std::vector<prop::Id> props_can_heal = {
-                prop::Id::blind,
-                prop::Id::deaf,
-                prop::Id::poisoned,
-                prop::Id::infected,
-                prop::Id::diseased,
-                prop::Id::weakened,
-                prop::Id::hp_sap};
-
-        bool is_something_healed = false;
-
-        for (prop::Id prop_id : props_can_heal) {
-                if (player.m_properties.end_prop(prop_id)) {
-                        is_something_healed = true;
-                }
-        }
-
-        if (actor::restore_hp(player, 3, actor::AllowRestoreAboveMax::no)) {
-                is_something_healed = true;
-        }
-
-        if (!is_something_healed) {
-                msg_log::add("I feel fine.");
-        }
-
-        identify(Verbose::yes);
-}
-
 void Opening::run_effect()
 {
         bool is_any_opened = false;
 
-        for (const auto& p : map::rect().positions()) {
+        for (const P& p : map::rect().positions()) {
                 if (!map::g_seen.at(p)) {
                         continue;
                 }
 
-                const auto did_open =
+                const terrain::DidOpen did_open =
                         spells::run_opening_spell_effect_at(
                                 p,
                                 SpellSkill::master);
@@ -396,24 +302,19 @@ void Opening::run_effect()
         }
 }
 
-void Bless::run_effect()
+std::string Opening::descr_identified() const
 {
-        const int nr_turns = rnd::range(8, 12);
-
-        prop::Prop* prop = prop::make(prop::Id::blessed);
-
-        prop->set_duration(nr_turns);
-
-        map::g_player->m_properties.apply(prop);
-
-        identify(Verbose::yes);
+        return (
+                "When activated, this device opens all locks, lids and "
+                "doors in the surrounding area (except heavy doors "
+                "operated externally by a switch).");
 }
 
 void CloudMinds::run_effect()
 {
         msg_log::add("I vanish from the minds of my enemies.");
 
-        for (auto* actor : game_time::g_actors) {
+        for (actor::Actor* actor : game_time::g_actors) {
                 if (actor::is_player(actor)) {
                         continue;
                 }
@@ -423,6 +324,14 @@ void CloudMinds::run_effect()
         }
 
         identify(Verbose::yes);
+}
+
+std::string CloudMinds::descr_identified() const
+{
+        return (
+                "When activated, this device clouds the memories of "
+                "all creatures in the area, causing them to forget "
+                "the presence of the user.");
 }
 
 void Shockwave::run_effect()
@@ -438,7 +347,7 @@ void Shockwave::run_effect()
                         continue;
                 }
 
-                auto* const terrain = map::g_terrain.at(p);
+                terrain::Terrain* const terrain = map::g_terrain.at(p);
 
                 terrain->hit(DmgType::explosion, nullptr);
         }
@@ -472,7 +381,7 @@ void Shockwave::run_effect()
                         DmgType::explosion,
                         map::g_player);
 
-                // Surived the damage? Knock the monster back
+                // Surived the damage? Knock the monster back.
                 if (actor::is_alive(*actor)) {
                         knockback::run(
                                 *actor,
@@ -494,6 +403,200 @@ void Shockwave::run_effect()
         snd.run();
 
         identify(Verbose::yes);
+}
+
+std::string Shockwave::descr_identified() const
+{
+        return (
+                "When activated, this device generates a shock wave "
+                "which violently pushes away any adjacent creatures "
+                "and destroys structures.");
+}
+
+void Deafening::run_effect()
+{
+        bool is_any_seen = false;
+
+        const int max_dist = rnd::range(g_fov_radi_int * 2, g_fov_radi_int * 3);
+
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if (actor::is_player(actor) ||
+                    !actor::is_alive(*actor) ||
+                    (king_dist(map::g_player->m_pos, actor->m_pos) > max_dist)) {
+                        continue;
+                }
+
+                actor->m_properties.apply(prop::make(prop::Id::deaf));
+
+                if (actor::can_player_see_actor(*actor)) {
+                        is_any_seen = true;
+                }
+        }
+
+        if (is_any_seen) {
+                identify(Verbose::yes);
+        }
+}
+
+std::string Deafening::descr_identified() const
+{
+        return (
+                "When activated, this device causes temporary deafness in "
+                "all creatures in a large area, except for the user.");
+}
+
+void DoorCreation::run_effect()
+{
+        std::vector<P> pos_bucket;
+
+        map_parsers::IsAnyOfTerrains parser(
+                {
+                        terrain::Id::wall,
+                        terrain::Id::rubble_high,
+                });
+
+        for (const P& offset : dir_utils::g_dir_list) {
+                const P pos(map::g_player->m_pos + offset);
+
+                if (map::is_pos_inside_outer_walls(pos) && parser.run(pos)) {
+                        pos_bucket.push_back(pos);
+                }
+        }
+
+        if (pos_bucket.empty()) {
+                return;
+        }
+
+        const P pos = rnd::element(pos_bucket);
+
+        const bool is_seen = map::g_seen.at(pos);
+
+        if (is_seen) {
+                msg_log::add("A door appears!");
+        }
+
+        auto* const door =
+                static_cast<terrain::Door*>(
+                        terrain::make(terrain::Id::door, pos));
+
+        door->init_type_and_state(terrain::DoorType::wood, terrain::DoorSpawnState::closed);
+
+        map::update_terrain(door);
+
+        if (is_seen) {
+                identify(Verbose::yes);
+        }
+}
+
+std::string DoorCreation::descr_identified() const
+{
+        return (
+                "When activated, this device materializes an entryway somewhere "
+                "in an adjacent surface.");
+}
+
+void Unbinding::run_effect()
+{
+        std::vector<prop::Id> props_ended = {
+                prop::Id::slowed,
+                prop::Id::entangled,
+                prop::Id::stuck,
+                prop::Id::nailed,
+        };
+
+        const bool is_identified =
+                std::any_of(
+                        std::cbegin(props_ended),
+                        std::cend(props_ended),
+                        [](const prop::Id id) {
+                                return map::g_player->m_properties.has(id);
+                        });
+
+        std::for_each(
+                std::cbegin(props_ended),
+                std::cend(props_ended),
+                [](const prop::Id id) {
+                        map::g_player->m_properties.end_prop(id);
+                });
+
+        if (is_identified) {
+                identify(Verbose::yes);
+        }
+}
+
+std::string Unbinding::descr_identified() const
+{
+        return (
+                "When activated, this device breaks the user free from any bonds "
+                "(entangled, stuck, nailed), and ends slowing.");
+}
+
+void Mist::run_effect()
+{
+        msg_log::add("A shroud of vapor envelops me.");
+
+        explosion::run_mist_explosion_at(map::g_player->m_pos);
+
+        identify(Verbose::yes);
+}
+
+std::string Mist::descr_identified() const
+{
+        return (
+                "When activated, this device alters the atmosphere in order to "
+                "cover the user in a dense mist. "
+                "The mist is also strangely soothing (-10% temporary shock).");
+}
+
+void MiGoHypno::run_effect()
+{
+        const int max_dist = g_fov_radi_int;
+
+        std::vector<actor::Actor*> target_bucket;
+
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if (actor::is_player(actor) ||
+                    !actor::is_alive(*actor) ||
+                    (king_dist(map::g_player->m_pos, actor->m_pos) > max_dist)) {
+                        continue;
+                }
+
+                target_bucket.push_back(actor);
+        }
+
+        if (target_bucket.empty()) {
+                return;
+        }
+
+        actor::Actor* const target = rnd::element(target_bucket);
+
+        spells::run_mi_go_hypno_effect(*target);
+
+        if (actor::can_player_see_actor(*target)) {
+                identify(Verbose::yes);
+        }
+}
+
+std::string MiGoHypno::descr_identified() const
+{
+        return (
+                "When activated, this device selects a single nearby creature, "
+                "and attempts to hypnotize it, putting them to sleep if susceptible. "
+                "It is unknown how the target selection works.");
+}
+
+void Displacement::run_effect()
+{
+        const int max_dist = g_fov_radi_int - 1;
+
+        teleport(*map::g_player, ShouldCtrlTele::never, max_dist);
+
+        identify(Verbose::yes);
+}
+
+std::string Displacement::descr_identified() const
+{
+        return "When activated, this device moves the user a short distance.";
 }
 
 }  // namespace rod

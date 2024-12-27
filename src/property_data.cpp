@@ -326,8 +326,7 @@ static void init_data_list()
         d.descr = "Unaffected by shocking events.";
         d.msg_start_player = "Nothing can disturb my mind!";
         d.msg_start_mon = "";
-        d.msg_end_player =
-                "I feel susceptible to the horrors of this place again.";
+        d.msg_end_player = "I feel susceptible to the horrors of this place again.";
         d.msg_end_mon = "";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
@@ -369,7 +368,9 @@ static void init_data_list()
         d.name_short = "Deaf";
         d.descr = "Cannot hear sounds.";
         d.msg_start_player = "I am deaf!";
+        d.msg_start_mon = "stops reacting to any noise";
         d.msg_end_player = "I can hear again.";
+        d.msg_end_mon = "is reacting to noise again";
         d.historic_msg_start_permanent = "Became permanently deaf";
         d.historic_msg_end_permanent = "My hearing came back";
         d.allow_display_turns = true;

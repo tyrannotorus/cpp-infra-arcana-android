@@ -116,7 +116,6 @@ static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
         case item::Id::bone_charm:
         case item::Id::clockwork:
         case item::Id::device_blaster:
-        case item::Id::device_deafening:
         case item::Id::device_force_field:
         case item::Id::device_rejuvenator:
         case item::Id::device_sentry_drone:
@@ -187,11 +186,15 @@ static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
         case item::Id::revolver_bullet:
         case item::Id::rifle_bullet:
         case item::Id::rock:
-        case item::Id::rod_bless:
+        case item::Id::rod_displacement:
         case item::Id::rod_cloud_minds:
-        case item::Id::rod_curing:
+        case item::Id::rod_deafening:
+        case item::Id::rod_door_creation:
+        case item::Id::rod_mist:
         case item::Id::rod_opening:
         case item::Id::rod_shockwave:
+        case item::Id::rod_unbinding:
+        case item::Id::rod_mi_go_hypno:
         case item::Id::scroll_aura_of_decay:
         case item::Id::scroll_aza_gaze:
         case item::Id::scroll_bless:
@@ -311,7 +314,6 @@ static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
         case item::Id::bone_charm:
         case item::Id::clockwork:
         case item::Id::device_blaster:
-        case item::Id::device_deafening:
         case item::Id::device_force_field:
         case item::Id::device_rejuvenator:
         case item::Id::device_sentry_drone:
@@ -383,11 +385,15 @@ static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
         case item::Id::revolver_bullet:
         case item::Id::rifle_bullet:
         case item::Id::rock:
-        case item::Id::rod_bless:
+        case item::Id::rod_displacement:
         case item::Id::rod_cloud_minds:
-        case item::Id::rod_curing:
+        case item::Id::rod_deafening:
+        case item::Id::rod_door_creation:
+        case item::Id::rod_mist:
         case item::Id::rod_opening:
         case item::Id::rod_shockwave:
+        case item::Id::rod_unbinding:
+        case item::Id::rod_mi_go_hypno:
         case item::Id::scroll_aura_of_decay:
         case item::Id::scroll_aza_gaze:
         case item::Id::scroll_bless:

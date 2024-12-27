@@ -116,20 +116,6 @@ private:
         ConsumeItem run_effect() override;
 };
 
-class Deafening : public Device
-{
-public:
-        Deafening(item::ItemData* const item_data) :
-                Device(item_data) {}
-
-        ~Deafening() override = default;
-
-private:
-        std::string descr_identified() const override;
-
-        ConsumeItem run_effect() override;
-};
-
 class ForceField : public Device
 {
 public:

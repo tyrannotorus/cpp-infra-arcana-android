@@ -46,12 +46,11 @@ enum class ExplIsGas
 
 namespace explosion
 {
-// TODO: The signature of this function is really ugly! Do something similar to
-// the Sound class instead.
+// TODO: The signature of this function is really ugly! Do something similar to the Sound class
+// instead.
 
-// NOTE: If "emit_expl_sound" is set to "no", this typically means that the
-// caller should emit a custom sound before running the explosion (e.g. molotov
-// explosion sound).
+// NOTE: If "emit_expl_sound" is set to "no", this typically means that the caller should emit a
+// custom sound before running the explosion (e.g. molotov explosion sound).
 void run(
         const P& origin,
         ExplType expl_type,
@@ -63,6 +62,8 @@ void run(
         ExplIsGas is_gas = ExplIsGas::no);
 
 void run_smoke_explosion_at(const P& origin, int radi_change = 0);
+
+void run_mist_explosion_at(const P& origin, int radi_change = 0);
 
 R explosion_area(const P& c, int radi);
 

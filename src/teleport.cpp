@@ -144,11 +144,10 @@ static bool should_player_ctrl_tele(const ShouldCtrlTele ctrl_tele)
 
 static void filter_out_near(const P& origin, std::vector<P>& positions)
 {
-        // Find the distance of the furthest position, so that we know the
-        // highest possible minimum distance
+        // Find the distance of the furthest position - this is the highest minimum distance.
         int furthest_dist = 0;
 
-        for (const auto& p : positions) {
+        for (const P& p : positions) {
                 const int d = king_dist(origin, p);
 
                 furthest_dist = std::max(d, furthest_dist);
@@ -162,7 +161,7 @@ static void filter_out_near(const P& origin, std::vector<P>& positions)
                 min_dist = std::min(desired_min_dist, furthest_dist);
         }
 
-        // Remove all positions close than the minimum distance
+        // Remove all positions close than the minimum distance.
         for (auto it = std::begin(positions); it != std::end(positions);) {
                 const auto p = *it;
 
@@ -185,9 +184,7 @@ void teleport(
         const ShouldCtrlTele ctrl_tele,
         const int max_dist)
 {
-        // First run a floodfill with some terrain unblocked - some terrain
-        // shall block teleporting past them, and some shall be allowed to
-        // teleport past even though they are normally blocking.
+        // First run a floodfill with some terrain unblocked.
         Array2<bool> blocked(map::dims());
 
         map_parsers::BlocksActor(actor, ParseActors::no)
@@ -202,20 +199,20 @@ void teleport(
                 }
         }
 
-        // Allow teleporting past Force Fields, since they are temporary.
-        for (const auto* const mob : game_time::g_mobs) {
+        // Allow teleporting past force fields.
+        for (const terrain::Terrain* const mob : game_time::g_mobs) {
                 if (mob->id() == terrain::Id::force_field) {
                         blocked.at(mob->pos()) = false;
                 }
         }
 
-        // Run the floodfill, mark every position as blocked that is either
-        // unreached or too far away.
+        // Run the floodfill, mark positions that are either unreached or too far away as
+        // blocked. Also mark starting position as blocked.
         const auto flood = floodfill(actor.m_pos, blocked);
 
-        for (const auto p : map::rect().positions()) {
+        for (const P& p : map::rect().positions()) {
                 if (flood.at(p) <= 0) {
-                        // Unreached.
+                        // Unreached, or starting position.
                         blocked.at(p) = true;
                 }
 
@@ -229,16 +226,14 @@ void teleport(
                 }
         }
 
-        // Do not allow teleporting into any cell that blocks this actor
+        // Do not allow teleporting into any position that blocks this actor
         map_parsers::BlocksActor(actor, ParseActors::yes)
                 .run(blocked, blocked.rect(), MapParseMode::append);
 
-        // Do not allow teleporting into any cell that blocks walking (otherwise
-        // for example ethereal monsters could teleport far into the walls).
+        // Do not allow teleporting into any position that blocks walking (otherwise for example
+        // ethereal monsters could teleport far into the walls).
         map_parsers::BlocksWalking(ParseActors::no)
                 .run(blocked, blocked.rect(), MapParseMode::append);
-
-        blocked.at(actor.m_pos) = false;
 
         // Teleport control?
         if (actor::is_player(&actor) && should_player_ctrl_tele(ctrl_tele)) {

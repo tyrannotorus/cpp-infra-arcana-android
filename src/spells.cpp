@@ -1074,6 +1074,15 @@ terrain::DidClose run_close_spell_effect_at(
         return did_close;
 }
 
+void run_mi_go_hypno_effect(actor::Actor& target)
+{
+        prop::Prop* prop_fainted = prop::make(prop::Id::fainted);
+
+        prop_fainted->set_duration(rnd::range(2, 10));
+
+        target.m_properties.apply(prop_fainted);
+}
+
 }  // namespace spells
 
 // -----------------------------------------------------------------------------
@@ -4940,11 +4949,7 @@ void SpellMiGoHypno::run_effect(
         }
 
         if (rnd::coin_toss()) {
-                prop::Prop* prop_fainted = prop::make(prop::Id::fainted);
-
-                prop_fainted->set_duration(rnd::range(2, 10));
-
-                target->m_properties.apply(prop_fainted);
+                spells::run_mi_go_hypno_effect(*target);
         }
         else {
                 if (actor::is_player(target)) {

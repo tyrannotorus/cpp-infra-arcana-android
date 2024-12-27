@@ -41,6 +41,41 @@ public:
 
         void on_new_turn() override;
 
+        void expire()
+        {
+                m_nr_turns_left = 0;
+        }
+
+protected:
+        int m_nr_turns_left {1};
+};
+
+class Mist : public Terrain
+{
+public:
+        Mist(const P& pos, const TerrainData* const data) :
+                Terrain(pos, data) {}
+
+        ~Mist() = default;
+
+        std::string name(Article article) const override;
+
+        Color color() const override;
+
+        void set_nr_turns(const int value)
+        {
+                m_nr_turns_left = value;
+        }
+
+        void on_placed() override;
+
+        void on_new_turn() override;
+
+        void expire()
+        {
+                m_nr_turns_left = 0;
+        }
+
 protected:
         int m_nr_turns_left {1};
 };

@@ -149,13 +149,11 @@ std::string skill_to_str(SpellSkill skill);
 
 ShockSrc spell_domain_to_shock_type(SpellDomain domain);
 
-terrain::DidOpen run_opening_spell_effect_at(
-        const P& pos,
-        SpellSkill skill);
+terrain::DidOpen run_opening_spell_effect_at(const P& pos, SpellSkill skill);
 
-terrain::DidClose run_close_spell_effect_at(
-        const P& pos,
-        SpellSkill skill);
+terrain::DidClose run_close_spell_effect_at(const P& pos, SpellSkill skill);
+
+void run_mi_go_hypno_effect(actor::Actor& target);
 
 }  // namespace spells
 

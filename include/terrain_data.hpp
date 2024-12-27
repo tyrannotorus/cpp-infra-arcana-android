@@ -70,6 +70,7 @@ enum class Id
         lit_flare,
         trap,
         smoke,
+        mist,
         force_field,
         event_wall_crumble,
         event_snake_emerge,

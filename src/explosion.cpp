@@ -85,7 +85,7 @@ static bool is_actor_gas_immune(const actor::Actor& actor)
         return false;
 }
 
-static std::vector<std::vector<P>> cells_reached(
+static std::vector<std::vector<P>> positions_reached(
         const R& area,
         const P& origin,
         const ExplExclCenter exclude_center,
@@ -289,6 +289,81 @@ static void apply_explosion_property_on_pos(
         }
 }
 
+// I.e. smoke/mist.
+//
+// TODO: Could be used for lingering gas effects in the future.
+//
+// TODO: Instead of using a function pointer, all of the explosion stuff should be handled by some
+// class based/composition system instead.
+//
+static void run_explosion_with_lingering_terrain_at(
+        const P& origin,
+        const int radi_change,
+        terrain::Terrain* (*terrain_builder)(const P& pos))
+{
+        const int radi = g_expl_std_radi + radi_change;
+
+        const R area = explosion::explosion_area(origin, radi);
+
+        Array2<bool> blocked(map::dims());
+
+        map_parsers::BlocksProjectiles().run(blocked, area);
+
+        std::vector<std::vector<P>> pos_lists =
+                positions_reached(
+                        area,
+                        origin,
+                        ExplExclCenter::no,
+                        blocked);
+
+        // TODO: Sound message?
+        Snd snd("",
+                audio::SfxId::END,
+                IgnoreMsgIfOriginSeen::yes,
+                origin,
+                nullptr,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd_emit::run(snd);
+
+        for (const std::vector<P>& inner : pos_lists) {
+                for (const P& pos : inner) {
+                        if (blocked.at(pos)) {
+                                continue;
+                        }
+
+                        terrain::Terrain* const terrain = terrain_builder(pos);
+
+                        game_time::add_mob(terrain);
+                }
+        }
+
+        map::update_vision();
+}
+
+static terrain::Terrain* make_smoke(const P& pos)
+{
+        auto* const smoke =
+                static_cast<terrain::Smoke*>(
+                        terrain::make(terrain::Id::smoke, pos));
+
+        smoke->set_nr_turns(rnd::range(25, 30));
+
+        return smoke;
+}
+
+static terrain::Terrain* make_mist(const P& pos)
+{
+        auto* const mist =
+                static_cast<terrain::Mist*>(
+                        terrain::make(terrain::Id::mist, pos));
+
+        mist->set_nr_turns(rnd::range(25, 30));
+
+        return mist;
+}
+
 // -----------------------------------------------------------------------------
 // explosion
 // -----------------------------------------------------------------------------
@@ -313,7 +388,7 @@ void run(
         map_parsers::BlocksProjectiles().run(blocked, area);
 
         auto pos_lists =
-                cells_reached(
+                positions_reached(
                         area,
                         origin,
                         exclude_center,
@@ -395,50 +470,12 @@ void run(
 
 void run_smoke_explosion_at(const P& origin, const int radi_change)
 {
-        const int radi = g_expl_std_radi + radi_change;
+        run_explosion_with_lingering_terrain_at(origin, radi_change, make_smoke);
+}
 
-        const R area = explosion_area(origin, radi);
-
-        Array2<bool> blocked(map::dims());
-
-        map_parsers::BlocksProjectiles()
-                .run(blocked, area);
-
-        std::vector<std::vector<P>> pos_lists =
-                cells_reached(
-                        area,
-                        origin,
-                        ExplExclCenter::no,
-                        blocked);
-
-        // TODO: Sound message?
-        Snd snd("",
-                audio::SfxId::END,
-                IgnoreMsgIfOriginSeen::yes,
-                origin,
-                nullptr,
-                SndVol::low,
-                AlertsMon::yes);
-
-        snd_emit::run(snd);
-
-        for (const std::vector<P>& inner : pos_lists) {
-                for (const P& pos : inner) {
-                        if (blocked.at(pos)) {
-                                continue;
-                        }
-
-                        auto* const smoke =
-                                static_cast<terrain::Smoke*>(
-                                        terrain::make(terrain::Id::smoke, pos));
-
-                        smoke->set_nr_turns(rnd::range(25, 30));
-
-                        game_time::add_mob(smoke);
-                }
-        }
-
-        map::update_vision();
+void run_mist_explosion_at(const P& origin, const int radi_change)
+{
+        run_explosion_with_lingering_terrain_at(origin, radi_change, make_mist);
 }
 
 R explosion_area(const P& c, const int radi)

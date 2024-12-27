@@ -129,8 +129,8 @@ extern std::vector<room::Room*> g_room_list;
 // Helper array, for convenience and optimization
 extern Array2<room::Room*> g_room_map;
 
-// NOTE: This data is only intended to be used for the purpose of map generation
-// (and placing items etc), it is NOT updated while playing the map.
+// NOTE: This data is only intended to be used for the purpose of map generation (and placing items
+// etc), it is NOT updated while playing the map.
 extern std::vector<ChokePointData> g_chokepoint_data;
 
 void init();
@@ -151,13 +151,11 @@ void update_vision();
 
 void update_player_memory();
 
-// Sets a new terrain object and updates map information (e.g. which positions
-// are blocked). This should always be used when changing terrain while a map is
-// played (e.g. on terrain destruction).
+// Sets a new terrain object and updates map information (e.g. which positions are blocked). This
+// should always be used when changing terrain while a map is played (e.g. on terrain destruction).
 void update_terrain(terrain::Terrain* terrain);
 
-// This merely sets a new terrain object. It should mainly be used during map
-// generation.
+// This merely sets a new terrain object. It should mainly be used during map generation.
 void set_terrain(terrain::Terrain* terrain);
 
 void memorize_terrain_at(const P& p);

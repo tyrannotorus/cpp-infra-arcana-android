@@ -291,9 +291,9 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.value = item::Value::major_treasure;
                 d.has_std_activate = true;
                 d.base_descr = {
-                        "A peculiar metallic device of cylindrical shape. The "
-                        "only details are a single button on the side, and a "
-                        "small display."};
+                        "A metallic device of cylindrical shape. "
+                        "It seems to be designed for human hands, "
+                        "for whatever nefarious purpose."};
                 d.weight = item::Weight::light;
                 d.is_identified = false;
                 d.xp_on_found = 15;
@@ -1818,16 +1818,6 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::device);
-        d.id = Id::device_deafening;
-        d.base_name = {
-                "Deafening Device", "Deafening Devices", "a Deafening Device"};
-        d.color = colors::gray();
-        d.native_containers.push_back(terrain::Id::chest);
-        d.native_containers.push_back(terrain::Id::tomb);
-        d.native_containers.push_back(terrain::Id::cocoon);
-        g_data[(size_t)d.id] = d;
-
-        reset_data(d, ItemType::device);
         d.id = Id::device_force_field;
         d.base_name = {
                 "Force Field Device",
@@ -1840,7 +1830,27 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::rod);
-        d.id = Id::rod_curing;
+        d.id = Id::rod_cloud_minds;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::rod);
+        d.id = Id::rod_deafening;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::rod);
+        d.id = Id::rod_displacement;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::rod);
+        d.id = Id::rod_door_creation;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::rod);
+        d.id = Id::rod_mi_go_hypno;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::rod);
+        d.id = Id::rod_mist;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::rod);
@@ -1849,15 +1859,11 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::rod);
-        d.id = Id::rod_bless;
-        g_data[(size_t)d.id] = d;
-
-        reset_data(d, ItemType::rod);
-        d.id = Id::rod_cloud_minds;
-        g_data[(size_t)d.id] = d;
-
-        reset_data(d, ItemType::rod);
         d.id = Id::rod_shockwave;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::rod);
+        d.id = Id::rod_unbinding;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::general);

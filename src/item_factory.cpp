@@ -393,10 +393,6 @@ Item* make(const Id item_id, const int nr_items)
                 r = new device::SentryDrone(d);
                 break;
 
-        case Id::device_deafening:
-                r = new device::Deafening(d);
-                break;
-
         case Id::device_force_field:
                 r = new device::ForceField(d);
                 break;
@@ -405,16 +401,16 @@ Item* make(const Id item_id, const int nr_items)
                 r = new item::Lantern(d);
                 break;
 
-        case Id::rod_curing:
-                r = new rod::Curing(d);
+        case Id::rod_deafening:
+                r = new rod::Deafening(d);
+                break;
+
+        case Id::rod_displacement:
+                r = new rod::Displacement(d);
                 break;
 
         case Id::rod_opening:
                 r = new rod::Opening(d);
-                break;
-
-        case Id::rod_bless:
-                r = new rod::Bless(d);
                 break;
 
         case Id::rod_cloud_minds:
@@ -423,6 +419,22 @@ Item* make(const Id item_id, const int nr_items)
 
         case Id::rod_shockwave:
                 r = new rod::Shockwave(d);
+                break;
+
+        case Id::rod_door_creation:
+                r = new rod::DoorCreation(d);
+                break;
+
+        case Id::rod_mist:
+                r = new rod::Mist(d);
+                break;
+
+        case Id::rod_unbinding:
+                r = new rod::Unbinding(d);
+                break;
+
+        case Id::rod_mi_go_hypno:
+                r = new rod::MiGoHypno(d);
                 break;
 
         case Id::medical_bag:

@@ -552,6 +552,13 @@ static void init_data_list()
         d.is_los_passable = false;
         add_to_list_and_reset(d);
 
+        d.id = terrain::Id::mist;
+        d.character = '*';
+        d.tile = gfx::TileId::smoke;
+        d.move_rules.is_walkable = true;
+        d.is_los_passable = false;
+        add_to_list_and_reset(d);
+
         d.id = terrain::Id::force_field;
         d.character = '#';
         d.tile = gfx::TileId::square_checkered;

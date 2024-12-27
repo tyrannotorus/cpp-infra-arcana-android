@@ -176,7 +176,6 @@ enum class Id
 
         // Strange Devices
         device_blaster,
-        device_deafening,
         device_force_field,
         device_rejuvenator,
         device_sentry_drone,
@@ -185,11 +184,15 @@ enum class Id
         lantern,
 
         // Rods
-        rod_bless,
         rod_cloud_minds,
-        rod_curing,
+        rod_deafening,
+        rod_displacement,
+        rod_door_creation,
+        rod_mi_go_hypno,
+        rod_mist,
         rod_opening,
         rod_shockwave,
+        rod_unbinding,
 
         // Misc
         astral_opium,

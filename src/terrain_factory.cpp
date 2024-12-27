@@ -192,6 +192,10 @@ Terrain* make(const Id id, const P& pos)
                 return new Smoke(pos, d);
                 break;
 
+        case Id::mist:
+                return new Mist(pos, d);
+                break;
+
         case Id::force_field:
                 return new ForceField(pos, d);
                 break;

@@ -797,6 +797,26 @@ double Actor::reduced_tmp_shock_from_light() const
         return reduced_shock;
 }
 
+double Actor::reduced_tmp_shock_from_mist() const
+{
+        const std::vector<terrain::Terrain*> mobs = game_time::mobs_at(map::g_player->m_pos);
+
+        const bool is_standing_in_mist =
+                std::any_of(
+                        std::cbegin(mobs),
+                        std::cend(mobs),
+                        [](const terrain::Terrain* const t) {
+                                return t->id() == terrain::Id::mist;
+                        });
+
+        if (is_standing_in_mist) {
+                return 10.0;
+        }
+        else {
+                return 0.0;
+        }
+}
+
 double Actor::increased_tmp_shock_from_adjacent_terrain() const
 {
         double shock = 0.0;
@@ -846,6 +866,8 @@ void Actor::update_tmp_shock()
 
                 increased_tmp_shock += increased_tmp_shock_from_adjacent_terrain();
         }
+
+        reduced_tmp_shock += reduced_tmp_shock_from_mist();
 
         if (m_properties.has(prop::Id::r_shock)) {
                 // Player is shock resistant, only allow reducing shock.

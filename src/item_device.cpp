@@ -402,32 +402,6 @@ ConsumeItem SentryDrone::run_effect()
 }
 
 // -----------------------------------------------------------------------------
-// Deafening
-// -----------------------------------------------------------------------------
-ConsumeItem Deafening::run_effect()
-{
-        msg_log::add("The device emits a piercing resonance.");
-
-        for (auto* const actor : game_time::g_actors) {
-                if (actor::is_player(actor)) {
-                        continue;
-                }
-
-                actor->m_properties.apply(prop::make(prop::Id::deaf));
-        }
-
-        return ConsumeItem::no;
-}
-
-std::string Deafening::descr_identified() const
-{
-        return (
-                "When activated, this device causes temporary deafness in "
-                "all creatures in a large area (on the whole map), except "
-                "for the user.");
-}
-
-// -----------------------------------------------------------------------------
 // Force Field
 // -----------------------------------------------------------------------------
 ConsumeItem ForceField::run_effect()
