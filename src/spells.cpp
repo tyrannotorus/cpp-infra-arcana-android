@@ -2273,18 +2273,18 @@ Range SpellPestilence::duration_range(const SpellSkill skill) const
 {
         switch (skill) {
         case SpellSkill::basic:
-                return {5, 10};
+                return {5, 7};
 
         case SpellSkill::expert:
-                return {10, 15};
+                return {7, 12};
 
         case SpellSkill::master:
                 // NOTE: On master level, the rats are hasted, meaning the disappear twice as fast
                 // from the perspective of a normal speed player.
-                return {30, 40};
+                return {40, 60};
 
         case SpellSkill::transcendent:
-                return {40, 80};
+                return {40, 60};
         }
 
         ASSERT(false);
@@ -2411,12 +2411,12 @@ std::vector<std::string> SpellPestilence::descr_specific(
 
         const size_t nr_mon = nr_rats_summoned(skill);
 
-        descr.push_back("Summons " + std::to_string(nr_mon) + " rats.");
-
-        descr.push_back(
-                "The rats exist for " +
+        const std::string nr_and_duration_str =
+                "Summons " + std::to_string(nr_mon) + " rats. The rats exist for " +
                 duration_range(skill).str() +
-                " turns (their turns).");
+                " turns (their turns).";
+
+        descr.push_back(nr_and_duration_str);
 
         if (skill == SpellSkill::master) {
                 descr.emplace_back("The rats are Hasted (moves faster).");
