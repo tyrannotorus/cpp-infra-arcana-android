@@ -959,14 +959,8 @@ private:
         int nr_rats_summoned(SpellSkill skill) const;
 
         int base_max_cost(
-                const SpellSkill skill,
-                const actor::Actor* const caster) const override
-        {
-                (void)skill;
-                (void)caster;
-
-                return 7;
-        }
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {
@@ -1018,14 +1012,8 @@ public:
 
 private:
         int base_max_cost(
-                const SpellSkill skill,
-                const actor::Actor* const caster) const override
-        {
-                (void)skill;
-                (void)caster;
-
-                return 6;
-        }
+                SpellSkill skill,
+                const actor::Actor* caster) const override;
 
         bool is_noisy(const SpellSkill skill) const override
         {

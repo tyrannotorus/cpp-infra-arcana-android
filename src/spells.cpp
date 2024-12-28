@@ -2269,6 +2269,16 @@ int SpellPestilence::nr_rats_summoned(SpellSkill skill) const
         }
 }
 
+int SpellPestilence::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
+{
+        (void)skill;
+        (void)caster;
+
+        return 7;
+}
+
 void SpellPestilence::on_rat_summoned(
         actor::Actor* const mon,
         const SpellSkill skill) const
@@ -2435,6 +2445,16 @@ Range SpellSpectralWeapons::duration_range(const SpellSkill skill) const
         ASSERT(false);
 
         return {1, 1};
+}
+
+int SpellSpectralWeapons::base_max_cost(
+        const SpellSkill skill,
+        const actor::Actor* const caster) const
+{
+        (void)skill;
+        (void)caster;
+
+        return 7;
 }
 
 void SpellSpectralWeapons::on_mon_summoned(
