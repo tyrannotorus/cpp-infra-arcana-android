@@ -1660,6 +1660,7 @@
             </attack>
             <attack id="ITEMINTR_WEB_BOLA">
                 <damage>7</damage>
+                <property_applied duration="2">PROP_ENTANGLED</property_applied>
             </attack>
         </attacks>
 
