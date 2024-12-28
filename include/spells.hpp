@@ -969,6 +969,8 @@ private:
                 return true;
         }
 
+        Range duration_range(SpellSkill skill) const;
+
         void on_rat_summoned(actor::Actor* mon, SpellSkill skill) const;
 };
 

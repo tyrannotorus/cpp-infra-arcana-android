@@ -85,14 +85,14 @@ static std::string get_property_nr_turns_suffix(const prop::Prop& property)
 {
         // NOTE: Since turns left are decremented at the start of an actor's turn, and checked when
         // they end the turn - "turns left" practically represents how many more times that the
-        // player can act without ending the property (i.e. if the property has "N turns left" this
+        // player can act WITHOUT ending the property (i.e. if the property has "N turns left" this
         // means the player can do N actions without ending the property, and it will only end after
         // action N + 1).
         //
         // However this is probably not what is most intuitive for the player. What may feel more
-        // natural is a number that represents how many actions they have left until the turn ends
-        // (i.e. "N turn left" means after N actions, the property ends). Therefore the value is
-        // incremented by one here.
+        // natural is a number that represents how many actions they have left until the property
+        // ends (i.e. "N turn left" means after N actions, the property ends). Therefore the value
+        // is incremented by one here.
         //
         return ":" + std::to_string(property.nr_turns_left() + 1);
 }

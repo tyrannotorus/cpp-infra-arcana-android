@@ -29,6 +29,7 @@
 
 # Spells
 - Increased duration of the See Invisible spell.
+- The rats summoned by the Pestilence spell only last for a limited time.
 
 # Status effects
 - Poison now stacks, i.e. the duration of the new poison effect is added to the old (normally the duration is set to the longest duration of the old or new effect).

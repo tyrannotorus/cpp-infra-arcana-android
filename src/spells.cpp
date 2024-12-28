@@ -2269,6 +2269,29 @@ int SpellPestilence::nr_rats_summoned(SpellSkill skill) const
         }
 }
 
+Range SpellPestilence::duration_range(const SpellSkill skill) const
+{
+        switch (skill) {
+        case SpellSkill::basic:
+                return {5, 10};
+
+        case SpellSkill::expert:
+                return {10, 15};
+
+        case SpellSkill::master:
+                // NOTE: On master level, the rats are hasted, meaning the disappear twice as fast
+                // from the perspective of a normal speed player.
+                return {30, 40};
+
+        case SpellSkill::transcendent:
+                return {40, 80};
+        }
+
+        ASSERT(false);
+
+        return {1, 1};
+}
+
 int SpellPestilence::base_max_cost(
         const SpellSkill skill,
         const actor::Actor* const caster) const
@@ -2283,18 +2306,21 @@ void SpellPestilence::on_rat_summoned(
         actor::Actor* const mon,
         const SpellSkill skill) const
 {
-        mon->m_properties.apply(prop::make(prop::Id::summoned));
+        {
+                prop::Prop* prop = prop::make(prop::Id::summoned);
+                const int duration = duration_range(skill).roll();
+                prop->set_duration(duration);
+                mon->m_properties.apply(prop);
+        }
 
         {
-                auto* prop = prop::make(prop::Id::waiting);
-
+                prop::Prop* prop = prop::make(prop::Id::waiting);
                 prop->set_duration(2);
-
                 mon->m_properties.apply(prop);
         }
 
         if (skill == SpellSkill::master) {
-                auto* prop = prop::make(prop::Id::hasted);
+                prop::Prop* prop = prop::make(prop::Id::hasted);
 
                 prop->set_indefinite();
 
@@ -2387,6 +2413,11 @@ std::vector<std::string> SpellPestilence::descr_specific(
 
         descr.push_back("Summons " + std::to_string(nr_mon) + " rats.");
 
+        descr.push_back(
+                "The rats exist for " +
+                duration_range(skill).str() +
+                " turns (their turns).");
+
         if (skill == SpellSkill::master) {
                 descr.emplace_back("The rats are Hasted (moves faster).");
         }
@@ -2467,26 +2498,26 @@ void SpellSpectralWeapons::on_mon_summoned(
         mon->m_inv.put_in_slot(SlotId::wpn, item, Verbose::no);
 
         {
-                auto* prop = prop::make(prop::Id::spectral_wpn);
+                prop::Prop* prop = prop::make(prop::Id::spectral_wpn);
                 prop->set_indefinite();
                 mon->m_properties.apply(prop);
         }
 
         {
-                auto* prop = prop::make(prop::Id::summoned);
+                prop::Prop* prop = prop::make(prop::Id::summoned);
                 const int duration = duration_range(skill).roll();
                 prop->set_duration(duration);
                 mon->m_properties.apply(prop);
         }
 
         {
-                auto* prop = prop::make(prop::Id::waiting);
+                prop::Prop* prop = prop::make(prop::Id::waiting);
                 prop->set_duration(1);
                 mon->m_properties.apply(prop);
         }
 
         if (skill >= SpellSkill::master) {
-                auto* prop = prop::make(prop::Id::see_invis);
+                prop::Prop* prop = prop::make(prop::Id::see_invis);
 
                 prop->set_indefinite();
 
@@ -2498,7 +2529,7 @@ void SpellSpectralWeapons::on_mon_summoned(
         }
 
         if (skill == SpellSkill::transcendent) {
-                auto* prop = prop::make(prop::Id::r_phys);
+                prop::Prop* prop = prop::make(prop::Id::r_phys);
 
                 prop->set_indefinite();
 
