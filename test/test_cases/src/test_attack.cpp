@@ -22,6 +22,12 @@
 #include "terrain_factory.hpp"
 #include "test_utils.hpp"
 
+static void clear_log_immediately_and_send_messages_to_history()
+{
+        // Hack to immediately cler the log without fading.
+        msg_log::more_prompt();
+}
+
 // Puts walls and floor in the following pattern:
 //
 // .#.
@@ -98,8 +104,7 @@ TEST_CASE("Seen hostile monster attacking seen friendly monster")
 
         attack::melee(mon_hostile, mon_hostile->m_pos, mon_allied->m_pos, wpn);
 
-        // Send the current message to history
-        msg_log::clear();
+        clear_log_immediately_and_send_messages_to_history();
 
         const auto& history = msg_log::history();
 
@@ -154,8 +159,7 @@ TEST_CASE("Hostile monster outside FOV attacking friendly monster outside FOV")
 
         attack::melee(mon_hostile, mon_hostile->m_pos, mon_allied->m_pos, wpn);
 
-        // Send the current message to history
-        msg_log::clear();
+        clear_log_immediately_and_send_messages_to_history();
 
         const auto& history = msg_log::history();
 
@@ -211,8 +215,7 @@ TEST_CASE("Invisible hostile monster attacking seen friendly monster")
 
         attack::melee(mon_hostile, mon_hostile->m_pos, mon_allied->m_pos, wpn);
 
-        // Send the current message to history
-        msg_log::clear();
+        clear_log_immediately_and_send_messages_to_history();
 
         const auto& history = msg_log::history();
 
@@ -282,8 +285,7 @@ TEST_CASE("Invisible hostile monster attacking invisible friendly monster")
 
         attack::melee(mon_hostile, mon_hostile->m_pos, mon_allied->m_pos, wpn);
 
-        // Send the current message to history
-        msg_log::clear();
+        clear_log_immediately_and_send_messages_to_history();
 
         const auto& history = msg_log::history();
 
@@ -340,8 +342,7 @@ TEST_CASE("Visible friendly monster attacking invisible hostile monster")
 
         attack::melee(mon_allied, mon_allied->m_pos, mon_hostile->m_pos, wpn);
 
-        // Send the current message to history
-        msg_log::clear();
+        clear_log_immediately_and_send_messages_to_history();
 
         const auto& history = msg_log::history();
 
@@ -388,8 +389,7 @@ TEST_CASE("Player kicking invisible monster")
 
         map::g_player->kick_mon(*mon);
 
-        // Send the current message to history
-        msg_log::clear();
+        clear_log_immediately_and_send_messages_to_history();
 
         const auto& history = msg_log::history();
 

@@ -34,6 +34,12 @@ static bool starts_with_any_of(
                         pred));
 }
 
+static void clear_log_immediately_and_send_messages_to_history()
+{
+        // Hack to immediately cler the log without fading.
+        msg_log::more_prompt();
+}
+
 TEST_CASE("Infection triggers disease")
 {
         test_utils::init_all();
@@ -188,8 +194,7 @@ TEST_CASE("Frenzy allows attacking adjacent unseen known monster")
         // a seen monster to the right - this SHOULD be allowed.
         actor::do_move_action(*map::g_player, Dir::down);
 
-        // Send the current message to history
-        msg_log::clear();
+        clear_log_immediately_and_send_messages_to_history();
 
         const auto& history = msg_log::history();
 

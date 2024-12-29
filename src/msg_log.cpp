@@ -404,9 +404,15 @@ void clear()
                 !is_empty() &&
                 is_any_copied_to_history &&
                 (s_msg_fade_state == MsgFadeState::allow_start_fade)) {
-                // The message log contains messages, there is a message that is copied to message
-                // history (we do not want to fade out things like "which direction?"), and we are
-                // allowed to start a new fade. Start fading out the messages.
+                // The following is fulfilled:
+                //
+                // * The message log contains messages,
+                // * There is a message that is allowed to be copied to message history (we do not
+                //   want to fade out things like "which direction?"),
+                // * We are allowed to start a new fade.
+                //
+                // Start fading out the messages.
+                //
                 s_msg_fade_state = MsgFadeState::is_fading;
 
                 s_msg_fade_pct = 100;

@@ -92,7 +92,7 @@ TEST_CASE("Test opening spell effect")
         REQUIRE(did_open_warded_door == terrain::DidOpen::yes);
 
         REQUIRE(wood_door->is_open());
-        REQUIRE(warded_door->is_open());
+        REQUIRE(map::g_terrain.at(warded_door_pos)->id() != terrain::Id::door);
         REQUIRE(!crystal_1->is_active());
         REQUIRE(!crystal_2->is_active());
 }
