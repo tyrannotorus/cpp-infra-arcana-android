@@ -50,6 +50,17 @@ static int random_out_of_depth()
         return nr_levels;
 }
 
+static Range std_lvl_nr_groups_to_spawn_range()
+{
+        if (map::g_dlvl < g_dlvl_last_mid_game) {
+                return {5, 7};
+        }
+        else {
+                // Spawn slightly more monsters late game to compensate for larger levels.
+                return {6, 8};
+        }
+}
+
 static WeightedItems<std::string> valid_auto_spawn_monsters(
         const int nr_lvls_out_of_depth,
         const AllowSpawnUniqueMon allow_spawn_unique)
@@ -173,7 +184,7 @@ static bool make_random_group_for_room(
         }
         else {
                 // Found valid monster IDs
-                const auto id = rnd::weighted_choice(id_bucket);
+                const std::string id = rnd::weighted_choice(id_bucket);
 
                 populate_mon::make_group_at(
                         id,
@@ -194,7 +205,7 @@ static void make_random_group_at(
         const MonRoamingAllowed is_roaming_allowed,
         const AllowSpawnUniqueMon allow_spawn_unique)
 {
-        const auto id_bucket =
+        const WeightedItems<std::string> id_bucket =
                 valid_auto_spawn_monsters(
                         nr_lvls_out_of_depth_allowed,
                         allow_spawn_unique);
@@ -203,7 +214,7 @@ static void make_random_group_at(
                 return;
         }
 
-        const auto id = rnd::weighted_choice(id_bucket);
+        const std::string id = rnd::weighted_choice(id_bucket);
 
         populate_mon::make_group_at(
                 id,
@@ -229,7 +240,7 @@ void make_group_at(
 
         std::vector<actor::MonGroupSpawnRule> group_sizes;
 
-        for (const auto& group_size : d.group_sizes) {
+        for (const actor::MonGroupSpawnRule& group_size : d.group_sizes) {
                 if (map::g_dlvl >= group_size.required_dlvl) {
                         group_sizes.push_back(group_size);
                 }
@@ -239,13 +250,13 @@ void make_group_at(
         std::vector<int> weights;
         weights.reserve(group_sizes.size());
 
-        for (const auto& rule : group_sizes) {
+        for (const actor::MonGroupSpawnRule& rule : group_sizes) {
                 weights.push_back(rule.weight);
         }
 
-        const auto rnd_choice = rnd::weighted_choice(weights);
+        const int rnd_choice = rnd::weighted_choice(weights);
 
-        const auto group_size = group_sizes[rnd_choice].group_size;
+        const actor::MonGroupSize group_size = group_sizes[rnd_choice].group_size;
 
         // Determine the number of monsters to spawn based on the group type
         switch (group_size) {
@@ -269,8 +280,7 @@ void make_group_at(
 
         const auto nr_free_cells = (int)sorted_free_cells.size();
 
-        const auto nr_can_be_spawned =
-                std::min(nr_free_cells, max_nr_in_group);
+        const int nr_can_be_spawned = std::min(nr_free_cells, max_nr_in_group);
 
         for (int i = 0; i < nr_can_be_spawned; ++i) {
                 const P& p = sorted_free_cells[i];
@@ -279,7 +289,7 @@ void make_group_at(
                         ASSERT(!blocked_out->at(p));
                 }
 
-                auto* const actor = actor::make(id, p);
+                actor::Actor* const actor = actor::make(id, p);
 
                 actor->m_ai_state.is_roaming_allowed = is_roaming_allowed;
 
@@ -353,7 +363,7 @@ Array2<bool> forbidden_spawn_positions()
                 map_parsers::BlocksProjectiles()
                         .run(blocks_projectiles, blocks_projectiles.rect());
 
-                const auto flood = floodfill(player_p, blocks_projectiles);
+                const Array2<int> flood = floodfill(player_p, blocks_projectiles);
 
                 const size_t nr_positions = map::nr_positions();
                 for (size_t i = 0; i < nr_positions; ++i) {
@@ -423,7 +433,7 @@ void spawn_for_repopulate_over_time()
                 return;
         }
 
-        const auto origin = rnd::element(free_cells_vector);
+        const P origin = rnd::element(free_cells_vector);
 
         free_cells_vector = make_sorted_free_cells(origin, blocked);
 
@@ -455,7 +465,7 @@ void populate_std_lvl()
 
         TRACE_FUNC_BEGIN;
 
-        int nr_groups_to_spawn = rnd::range(5, 7);
+        int nr_groups_to_spawn = std_lvl_nr_groups_to_spawn_range().roll();
 
         if (map::g_player->m_inv.has_item_in_backpack(item::Id::necronomicon)) {
                 nr_groups_to_spawn += 3;
@@ -463,7 +473,7 @@ void populate_std_lvl()
 
         int nr_groups_spawned = 0;
 
-        auto blocked = forbidden_spawn_positions();
+        Array2<bool> blocked = forbidden_spawn_positions();
 
         // First, attempt to populate all non-plain standard rooms
         for (room::Room* const room : map::g_room_list) {
@@ -521,7 +531,7 @@ void populate_std_lvl()
                         if (nr_origin_candidates > 0) {
                                 const P origin = rnd::element(origin_bucket);
 
-                                const auto sorted_free_cells =
+                                const std::vector<P> sorted_free_cells =
                                         make_sorted_free_cells(origin, blocked);
 
                                 const bool did_make_group =
@@ -575,7 +585,7 @@ void populate_std_lvl()
                 while (nr_groups_spawned < nr_groups_to_spawn) {
                         const P origin = rnd::element(origin_bucket);
 
-                        const auto sorted_free_cells =
+                        const std::vector<P> sorted_free_cells =
                                 make_sorted_free_cells(origin, blocked);
 
                         const bool did_make_group =
@@ -603,7 +613,7 @@ void populate_lvl_as_room_types(const std::vector<room::RoomType>& room_types)
                 return;
         }
 
-        auto blocked = forbidden_spawn_positions();
+        Array2<bool> blocked = forbidden_spawn_positions();
 
         std::vector<P> origin_bucket;
 
@@ -631,12 +641,12 @@ void populate_lvl_as_room_types(const std::vector<room::RoomType>& room_types)
         int nr_failed = 0;
 
         while (nr_groups_spawned < nr_groups_to_spawn) {
-                const auto origin = rnd::element(origin_bucket);
+                const P origin = rnd::element(origin_bucket);
 
-                const auto sorted_free_cells =
+                const std::vector<P> sorted_free_cells =
                         make_sorted_free_cells(origin, blocked);
 
-                const auto room_type = rnd::element(room_types);
+                const room::RoomType room_type = rnd::element(room_types);
 
                 const bool did_make_group =
                         make_random_group_for_room(
