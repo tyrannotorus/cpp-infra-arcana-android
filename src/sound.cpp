@@ -29,19 +29,28 @@
 // -----------------------------------------------------------------------------
 static int get_max_dist(const Snd& snd)
 {
+        int max_dist = 0;
+
         switch (snd.volume()) {
         case SndVol::low:
-                return g_fov_radi_int;
+                max_dist = g_fov_radi_int;
+                break;
 
         case SndVol::high:
-                return g_fov_radi_int * 2;
+                max_dist = g_fov_radi_int * 2;
+                break;
 
         case SndVol::global:
-                return 999;
+                max_dist = 999;
+                break;
         }
 
-        ASSERT(false);
-        return g_fov_radi_int;
+        if ((map::g_dlvl >= g_dlvl_longer_snd_dist) && (map::g_dlvl <= g_dlvl_last)) {
+                // Sound travels further in the late game caves (only until the boss level).
+                max_dist = max_dist + (max_dist / 2);
+        }
+
+        return max_dist;
 }
 
 static bool is_snd_heard_at_range(const int range, const Snd& snd)

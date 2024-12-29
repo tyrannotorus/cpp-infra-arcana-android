@@ -23,8 +23,14 @@ inline constexpr int g_dlvl_last_early_game = 9;
 inline constexpr int g_dlvl_first_mid_game = g_dlvl_last_early_game + 1;
 inline constexpr int g_dlvl_last_mid_game = 19;
 inline constexpr int g_dlvl_first_late_game = g_dlvl_last_mid_game + 1;
+//
+// Magic pool level + 1
+//
+// TODO: Also see related comment in map_travel.cpp. All settings here (early/mid/late game
+// definitions, longer sound distance, etc) should also be handled by external data.
+//
+inline constexpr int g_dlvl_longer_snd_dist = g_dlvl_first_late_game + 2;
 inline constexpr int g_dlvl_last = 30;
-
 inline constexpr int g_dlvl_harder_traps = 6;
 
 inline constexpr uint32_t g_ms_delay_player_unable_act = 7;

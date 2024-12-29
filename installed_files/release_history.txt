@@ -57,6 +57,7 @@
 # Other gameplay changes
 - Reworked and unified how dodging penalties are calculated for melee and ranged attacks. This should not have much effect on how the game plays, but hit chances may be affected in some cases (for example being stuck now also gives a dodging penalty against ranged attacks, and confusion no longer gives a dodging penalty at all).
 - Monsters spawning over time happens a certain duration after entering a new level, instead of at fixed global intervals - this prevents manipulating the counter for example by waiting at the stairs.
+- In the late game cave levels, sound travels 50% further.
 
 ##############################
 # User interface

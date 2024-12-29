@@ -65,6 +65,16 @@ void MapControllerStd::on_enter()
                         .set_msg(msg)
                         .run();
         }
+        else if (map::g_dlvl == g_dlvl_longer_snd_dist) {
+                const std::string msg =
+                        "I hear faint echoes in the distance. "
+                        "Every sound here seems to carry further - "
+                        "I'll need to tread carefully.";
+
+                popup::Popup(popup::AddToMsgHistory::yes)
+                        .set_msg(msg)
+                        .run();
+        }
 }
 
 void MapControllerStd::on_std_turn()

@@ -227,6 +227,9 @@ void init()
         s_mon_ids_estimated_xp_for.clear();
 #endif  // NDEBUG
 
+        // TODO: All this should be handled by external data. Also see related comment in
+        // global.hpp.
+
         // Forest + dungeon + boss + trapezohedron
         const size_t nr_lvl_tot = g_dlvl_last + 3;
 
