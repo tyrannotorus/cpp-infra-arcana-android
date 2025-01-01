@@ -38,6 +38,82 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static bool mon_ai_allows_adopting_leader(const actor::Actor& mon)
+{
+        // Only allow adopting a leader if:
+        // * the monster follows leaders, and
+        // * does not stay in their lair
+        //
+        // (They should actually follow their new leader around).
+        //
+        return (
+                mon.m_data->ai[(size_t)actor::AiId::moves_to_leader] &&
+                !mon.m_data->ai[(size_t)actor::AiId::moves_to_lair]);
+}
+
+static void try_make_mon_join_other_mon(actor::Actor& mon)
+{
+        if (!mon_ai_allows_adopting_leader(mon)) {
+                return;
+        }
+
+        if (!actor::is_alive(mon)) {
+                return;
+        }
+
+        // Unique/named monsters should not follow common monsters.
+        if (mon.m_data->is_unique) {
+                return;
+        }
+
+        // Roll to try adopting a leader.
+        if (!rnd::percent(25)) {
+                return;
+        }
+
+        // Don't allow adopting a leader if monster is already in a group (i.e. has leader or has
+        // followers).
+        if (!actor::other_actors_in_same_group(&mon).empty()) {
+                return;
+        }
+
+        std::vector<actor::Actor*> leader_bucket;
+
+        for (actor::Actor* const actor : game_time::g_actors) {
+                if ((actor == &mon) ||
+                    !actor::is_alive(*actor) ||
+                    // The potential leader must not have their own leader:
+                    actor->m_leader ||
+                    // The potential leader must also have the required AI behavior:
+                    !mon_ai_allows_adopting_leader(*actor) ||
+                    // Do not follow monsters that teleport all over the map:
+                    actor->m_properties.has(prop::Id::teleports)) {
+                        continue;
+                }
+
+                if (!mon.m_pos.is_adjacent(actor->m_pos)) {
+                        continue;
+                }
+
+                leader_bucket.push_back(actor);
+        }
+
+        if (leader_bucket.empty()) {
+                return;
+        }
+
+        actor::Actor* const leader = rnd::element(leader_bucket);
+
+        mon.m_leader = leader;
+
+        TRACE
+                << "Monster '" << actor::name_a(mon)
+                << "' (" << &mon << ")"
+                << " adopted monster '" << actor::name_a(*leader)
+                << "' (" << leader << ") as leader"
+                << std::endl;
+}
+
 static int calc_player_turns_per_hp_regen_rate()
 {
         auto& player = *map::g_player;
@@ -261,6 +337,8 @@ static void player_std_turn()
 
 static void mon_std_turn(actor::Actor& mon)
 {
+        try_make_mon_join_other_mon(mon);
+
         smell::put_smell_for_mon(mon);
 
         // Countdown all spell cooldowns

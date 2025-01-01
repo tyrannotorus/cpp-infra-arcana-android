@@ -691,7 +691,7 @@ bool is_in_same_group(const Actor* actor_1, const Actor* actor_2)
         // the leader of the other, or they have the same leader.
         return (
                 actor_1->is_leader_of(actor_2) ||
-                actor_2->is_leader_of(actor_2) ||
+                actor_2->is_leader_of(actor_1) ||
                 actor_1->is_actor_my_leader(actor_2->m_leader));
 }
 
