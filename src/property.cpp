@@ -445,6 +445,22 @@ PropEnded Entangled::affect_move_dir(Dir& dir)
                 return PropEnded::no;
         }
 
+        // Allow the player to melee attack adjacent known monsters
+        //
+        // NOTE: This should come before trying to end entanglement with a machete, otherwise the
+        // player will cut themselves free and attack on the same turn. If attacking an adjacent
+        // known monster, that should be the only action.
+        //
+        if (actor::is_player(m_owner)) {
+                const auto intended_target =
+                        m_owner->m_pos +
+                        dir_utils::offset(dir);
+
+                if (is_player_aware_of_hostile_mon_at(intended_target)) {
+                        return PropEnded::no;
+                }
+        }
+
         bool did_end_with_matchete = try_player_end_with_machete();
 
         if (did_end_with_matchete) {
@@ -482,8 +498,9 @@ bool Entangled::try_player_end_with_machete()
 {
         // NOTE: When "triggering" revealed spider webs while wielding a machete, the entangle
         // property is never applied by the trap. However this function should still exist for the
-        // case where the web was hidden (then the entanglement is applied), and for other sources
-        // of entanglement such as Deep One nets.
+        // case where the web was hidden (then the entanglement is applied), or if the player
+        // switched to a machete while entangled - and for other sources of entanglement such as
+        // Deep One nets.
 
         if (!actor::is_player(m_owner)) {
                 return false;
@@ -492,8 +509,6 @@ bool Entangled::try_player_end_with_machete()
         item::Item* item = m_owner->m_inv.item_in_slot(SlotId::wpn);
 
         if (item && (item->id() == item::Id::machete)) {
-                msg_log::more_prompt();
-
                 msg_log::add("I cut myself free with my Machete.");
 
                 m_owner->m_properties.end_prop(
@@ -524,6 +539,17 @@ PropEnded Stuck::affect_move_dir(Dir& dir)
 {
         if (dir == Dir::center) {
                 return PropEnded::no;
+        }
+
+        // Allow the player to melee attack adjacent known monsters
+        if (actor::is_player(m_owner)) {
+                const auto intended_target =
+                        m_owner->m_pos +
+                        dir_utils::offset(dir);
+
+                if (is_player_aware_of_hostile_mon_at(intended_target)) {
+                        return PropEnded::no;
+                }
         }
 
         dir = Dir::center;

@@ -33,6 +33,7 @@
 
 # Status effects
 - Poison now stacks, i.e. the duration of the new poison effect is added to the old (normally the duration is set to the longest duration of the old or new effect).
+- While being entangled or stuck, it is now possible to melee attack adjacent monsters with the move direction keys (this is consistent with the nailed status, where it was already possible).
 
 # Monsters
 - Some creatures are now "flammable" (e.g. mold, worm masses). If ignited, these burn permanently and will also ignite any other adjacent flammable creatures.
