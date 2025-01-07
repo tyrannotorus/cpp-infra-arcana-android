@@ -8,6 +8,7 @@ root_dir=${PWD}
 
 cd build
 
-ctest --verbose
+# ctest --verbose
+./ia-test --use-colour=no -D 3 --abort $*
 
 cd ${root_dir}
