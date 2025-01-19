@@ -9320,7 +9320,7 @@
         </attacks>
 
         <properties>
-            <property>PROP_BREEDS</property>
+            <property>PROP_BREEDS_SCATTERED</property>
             <property>PROP_R_POISON</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_FEAR</property>
@@ -9422,7 +9422,7 @@
 
         <properties>
             <property>PROP_INVIS</property>
-            <property>PROP_BREEDS</property>
+            <property>PROP_BREEDS_SCATTERED</property>
             <property>PROP_R_POISON</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_FEAR</property>
@@ -9523,7 +9523,7 @@
         </attacks>
 
         <properties>
-            <property>PROP_BREEDS</property>
+            <property>PROP_BREEDS_SCATTERED</property>
             <property>PROP_R_POISON</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_FEAR</property>

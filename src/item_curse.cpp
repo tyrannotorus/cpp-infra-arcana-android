@@ -691,10 +691,7 @@ void Summon::summon(const item::Item& item) const
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::yes);
 
-        actor::spawn(
-                map::g_player->m_pos,
-                {1, "MON_GREATER_POLYP"},
-                map::rect())
+        actor::spawn(map::g_player->m_pos, {"MON_GREATER_POLYP"})
                 .make_aware_of_player();
 }
 

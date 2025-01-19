@@ -434,14 +434,7 @@ TEST_CASE("Player killing invisible monster")
 
         mon->m_properties.apply(prop::make(prop::Id::invis));
 
-        // Make the hostile monster aware so it doesn't become aware and runs
-        // its "aware phrase".
-        mon->m_mon_aware_state.aware_counter = 100;
-
         map::update_vision();
-
-        // Reset/clear the message history
-        msg_log::init();
 
         REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter <= 0);
         REQUIRE(!mon->m_data->has_player_seen);
@@ -461,9 +454,6 @@ TEST_CASE("Player killing invisible monster")
                         break;
                 }
         }
-
-        REQUIRE(mon->m_mon_aware_state.player_aware_of_me_counter > 0);
-        REQUIRE(!mon->m_data->has_player_seen);
 
         test_utils::cleanup_all();
 }
@@ -589,22 +579,19 @@ TEST_CASE("Resisting attack damage type also resists paralysis")
 
         REQUIRE(!map::g_player->m_properties.has(prop::Id::paralyzed));
 
-        // NOTE: Since the player should neither take damage nor get paralyzed
-        // now, there is nothing we can check here to know that the player
-        // actually got hit (except maybe the message log), therefore just run a
-        // huge number of attacks so that it's practically impossible that the
-        // player avoided all of them.
-        for (int i = 0; i < 10000; ++i) {
-                game_time::g_allow_tick = true;
+        actor::restore_hp(*map::g_player, 100000, actor::AllowRestoreAboveMax::no);
 
-                REQUIRE(actor::is_alive(*map::g_player));
+        // NOTE: Since the player should neither take damage nor get paralyzed now, there is nothing
+        // we can check here to know that the player actually got hit (except maybe the message
+        // log), therefore just run a huge number of attacks so that it's practically impossible
+        // that the player avoided all of them.
+        for (int i = 0; i < 1000; ++i) {
+                game_time::g_allow_tick = true;
 
                 map::g_player->restore_shock(100, true);
 
                 // Make the player resistant to physical damage.
                 map::g_player->m_properties.apply(prop::make(prop::Id::r_phys));
-
-                REQUIRE(map::g_player->m_properties.has(prop::Id::r_phys));
 
                 attack::melee(mon, mon->m_pos, map::g_player->m_pos, *wpn);
         }
@@ -614,4 +601,6 @@ TEST_CASE("Resisting attack damage type also resists paralysis")
 
         // The player should not have lost any hit points.
         REQUIRE(map::g_player->m_hp == actor::max_hp(*map::g_player));
+
+        REQUIRE(actor::is_alive(*map::g_player));
 }

@@ -29,7 +29,7 @@
 
 # Spells
 - Increased duration of the See Invisible spell.
-- The rats summoned by the Pestilence spell only last for a limited time.
+- The rats summoned by the Pestilence appear scattered throughout an area (instead of grouped around the caster), and the spell only last for a limited time.
 
 # Status effects
 - Poison now stacks, i.e. the duration of the new poison effect is added to the old (normally the duration is set to the longest duration of the old or new effect).
@@ -39,6 +39,7 @@
 - Some creatures are now "flammable" (e.g. mold, worm masses). If ignited, these burn permanently and will also ignite any other adjacent flammable creatures.
 - Mold do zero direct damage (only poison).
 - Hallucinogenic Mold always start together with regular mold.
+- Mold now appear in a more scattered pattern when they "breed".
 - Leng Spider web bolas now also entangle for a few turns.
 - Misc monster balancing (a lot of balancing of changed stats, group sizes, properties, etc)
 - Added more monsters.

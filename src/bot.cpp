@@ -279,7 +279,7 @@ static void bot_act()
 
         if (!has_allied_mon) {
                 actor::spawn(
-                        map::g_player->m_pos, {"MON_MI_GO"}, map::rect())
+                        map::g_player->m_pos, {"MON_MI_GO"})
                         .set_leader(map::g_player)
                         .make_aware_of_player();
         }
@@ -470,10 +470,7 @@ static void stress_test_act()
                         ? nullptr
                         : map::g_player;
 
-                actor::spawn(
-                        map::g_player->m_pos,
-                        {100, "MON_RAT"},
-                        map::rect())
+                actor::spawn(map::g_player->m_pos, {100, "MON_RAT"})
                         .set_leader(leader);
         }
 
@@ -483,10 +480,7 @@ static void stress_test_act()
                         ? nullptr
                         : map::g_player;
 
-                actor::spawn(
-                        map::g_player->m_pos,
-                        {10, "MON_ZOMBIE"},
-                        map::rect())
+                actor::spawn(map::g_player->m_pos, {10, "MON_ZOMBIE"})
                         .set_leader(leader);
         }
 

@@ -24,6 +24,20 @@ enum class MakeMonAware
         yes
 };
 
+// Spawn somewhere in a "nearby area" around the chosen position (using a floodfill), instead of as
+// close to it as possible?
+enum class SpawnScattered
+{
+        no,
+        yes,
+};
+
+enum class AllowSpawnAdjToCurrentActors
+{
+        no,
+        yes,
+};
+
 struct MonSpawnResult
 {
 public:
@@ -40,14 +54,14 @@ void delete_all_mon();
 
 Actor* make(const std::string& id, const P& pos);
 
+// NOTE: If spawning scattered, it is important to set the max distance, otherwise the monsters will
+// spawn at a random position potentially anywhere on the whole map.
 MonSpawnResult spawn(
         const P& origin,
         const std::vector<std::string>& monster_ids,
-        const R& area_allowed);
-
-MonSpawnResult spawn_random_position(
-        const std::vector<std::string>& monster_ids,
-        const R& area_allowed);
+        int max_dist = -1,
+        SpawnScattered spawn_scattered = SpawnScattered::no,
+        AllowSpawnAdjToCurrentActors allow_adj_to_actors = AllowSpawnAdjToCurrentActors::yes);
 
 void spawn_starting_allies(actor::Actor& main_actor);
 

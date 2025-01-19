@@ -3740,7 +3740,7 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
 
         if (!id_to_spawn.empty()) {
                 const actor::MonSpawnResult summoned =
-                        actor::spawn(m_pos, {id_to_spawn}, map::rect())
+                        actor::spawn(m_pos, {id_to_spawn})
                                 .make_aware_of_player();
 
                 std::for_each(
@@ -5225,19 +5225,13 @@ DidTriggerTrap Cocoon::trigger_trap(actor::Actor* const actor)
 
                         msg_log::add("There are spiders inside!");
 
-                        const auto nr_spiders =
-                                (size_t)rnd::range(2, 5);
+                        const auto nr_spiders = (size_t)rnd::range(2, 5);
 
-                        const auto idx =
-                                rnd::range(0, nr_candidates - 1);
+                        const auto idx = rnd::range(0, nr_candidates - 1);
 
-                        const auto actor_id_to_summon =
-                                spawn_bucket[idx];
+                        const auto actor_id_to_summon = spawn_bucket[idx];
 
-                        actor::spawn(
-                                m_pos,
-                                {nr_spiders, actor_id_to_summon},
-                                map::rect())
+                        actor::spawn(m_pos, {nr_spiders, actor_id_to_summon})
                                 .make_aware_of_player();
 
                         m_is_trapped = false;

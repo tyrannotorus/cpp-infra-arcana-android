@@ -74,7 +74,7 @@ static Array2<int> calc_snd_flood(const Snd& snd, const int snd_max_dist)
 
         Array2<int> flood = floodfill(origin, blocks_sound, snd_max_dist, {-1, -1}, true);
 
-        flood.at(origin.x, origin.y) = 0;
+        flood.at(origin) = 0;
 
         return flood;
 }

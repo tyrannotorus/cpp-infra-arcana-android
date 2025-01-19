@@ -770,10 +770,7 @@ void PossessedByZuul::on_death()
         // Zuul is now free, allow it to spawn infinitely
         actor::g_data["MON_ZUUL"].nr_left_allowed_to_spawn = -1;
 
-        actor::spawn(
-                pos,
-                {"MON_ZUUL"},
-                map::rect())
+        actor::spawn(pos, {"MON_ZUUL"})
                 .make_aware_of_player();
 
         map::update_vision();
@@ -811,11 +808,7 @@ void Shapeshifts::on_death()
 {
         m_owner->m_state = ActorState::destroyed;
 
-        const auto spawned =
-                actor::spawn(
-                        m_owner->m_pos,
-                        {"MON_SHAPESHIFTER"},
-                        map::rect());
+        const actor::MonSpawnResult spawned = actor::spawn(m_owner->m_pos, {"MON_SHAPESHIFTER"});
 
         map::update_vision();
 
@@ -889,11 +882,7 @@ void Shapeshifts::shapeshift(const Verbose verbose) const
 
         m_owner->m_state = ActorState::destroyed;
 
-        const auto spawned =
-                actor::spawn(
-                        m_owner->m_pos,
-                        {rnd::element(mon_id_bucket)},
-                        map::rect());
+        const auto spawned = actor::spawn(m_owner->m_pos, {rnd::element(mon_id_bucket)});
 
         if (spawned.monsters.size() != 1) {
                 ASSERT(false);
@@ -2536,8 +2525,8 @@ void SplitsOnDeath::on_death()
 
         actor::Actor* const leader = m_owner->m_leader;
 
-        const auto spawned =
-                actor::spawn(pos, {2, actor::id(*m_owner)}, map::rect())
+        const actor::MonSpawnResult spawned =
+                actor::spawn(pos, {2, actor::id(*m_owner)})
                         .make_aware_of_player()
                         .set_leader(leader);
 
@@ -2881,11 +2870,8 @@ void SpawnsZombiePartsOnDestroyed::try_spawn_zombie_parts() const
 
         ASSERT(!id_to_spawn.empty());
 
-        const auto spawned =
-                actor::spawn(
-                        pos,
-                        {id_to_spawn},
-                        map::rect())
+        const actor::MonSpawnResult spawned =
+                actor::spawn(pos, {id_to_spawn})
                         .make_aware_of_player();
 
         std::for_each(
@@ -2924,18 +2910,34 @@ bool SpawnsZombiePartsOnDestroyed::is_allowed_to_spawn_parts_here() const
         return (t_id != terrain::Id::chasm);
 }
 
-void Breeds::on_std_turn()
+void BreedsBase::on_std_turn()
 {
         const int spawn_new_one_in_n = 50;
         const int group_limit = 40;
 
-        if (actor::is_player(m_owner) ||
-            !actor::is_alive(*m_owner) ||
-            m_owner->m_properties.has(prop::Id::burning) ||
-            m_owner->m_properties.has(prop::Id::paralyzed) ||
-            (game_time::g_actors.size() >= g_max_nr_actors_on_map) ||
-            !rnd::one_in(spawn_new_one_in_n) ||
-            ((actor::nr_other_actors_in_same_group(m_owner) + 1) >= group_limit)) {
+        if (actor::is_player(m_owner) || !actor::is_alive(*m_owner)) {
+                // Only living monsters allowed.
+                return;
+        }
+
+        if (m_owner->m_properties.has(prop::Id::burning) ||
+            m_owner->m_properties.has(prop::Id::paralyzed)) {
+                // Actor impaired.
+                return;
+        }
+
+        if (game_time::g_actors.size() >= g_max_nr_actors_on_map) {
+                // Map is overcrowded.
+                return;
+        }
+
+        if (!rnd::one_in(spawn_new_one_in_n)) {
+                // Spawn chance failed.
+                return;
+        }
+
+        if ((actor::nr_other_actors_in_same_group(m_owner) + 1) >= group_limit) {
+                // Group limit reached.
                 return;
         }
 
@@ -2944,12 +2946,13 @@ void Breeds::on_std_turn()
                 ? m_owner->m_leader
                 : m_owner;
 
-        const R area_allowed(m_owner->m_pos - 1, m_owner->m_pos + 1);
-
         actor::MonSpawnResult spawned =
-                actor::spawn_random_position(
+                actor::spawn(
+                        m_owner->m_pos,
                         {actor::id(*m_owner)},
-                        area_allowed)
+                        max_dist(),
+                        spawn_scattered(),
+                        allow_adj_to_actors())
                         .set_leader(leader_of_spawned_mon);
 
         std::for_each(
@@ -2976,6 +2979,40 @@ void Breeds::on_std_turn()
         }
 }
 
+actor::SpawnScattered Breeds::spawn_scattered() const
+{
+        return actor::SpawnScattered::yes;
+}
+
+actor::AllowSpawnAdjToCurrentActors Breeds::allow_adj_to_actors() const
+{
+        return actor::AllowSpawnAdjToCurrentActors::yes;
+}
+
+int Breeds::max_dist() const
+{
+        return 1;
+}
+
+actor::SpawnScattered BreedsScattered::spawn_scattered() const
+{
+        return actor::SpawnScattered::yes;
+}
+
+actor::AllowSpawnAdjToCurrentActors BreedsScattered::allow_adj_to_actors() const
+{
+        // Only allow spawning next to existing actors occasionally.
+        return (
+                rnd::one_in(30)
+                        ? actor::AllowSpawnAdjToCurrentActors::yes
+                        : actor::AllowSpawnAdjToCurrentActors::no);
+}
+
+int BreedsScattered::max_dist() const
+{
+        return 4;
+}
+
 void VomitsOoze::on_std_turn()
 {
         const int spawn_new_one_in_n = m_has_triggered_before ? 15 : 5;
@@ -2989,8 +3026,6 @@ void VomitsOoze::on_std_turn()
             !rnd::one_in(spawn_new_one_in_n)) {
                 return;
         }
-
-        const auto area_allowed = R(m_owner->m_pos - 1, m_owner->m_pos + 1);
 
         std::string ooze_ids[] = {
                 "MON_OOZE_PUTRID",
@@ -3028,9 +3063,7 @@ void VomitsOoze::on_std_turn()
                 : m_owner;
 
         actor::MonSpawnResult spawned =
-                actor::spawn_random_position(
-                        {id_to_spawn},
-                        area_allowed)
+                actor::spawn(m_owner->m_pos, {id_to_spawn})
                         .set_leader(leader);
 
         std::for_each(
@@ -3272,7 +3305,7 @@ PropActResult MajorClaphamSummon::on_act()
         }
 
         const actor::MonSpawnResult spawned =
-                actor::spawn(m_owner->m_pos, ids_to_summon, map::rect())
+                actor::spawn(m_owner->m_pos, ids_to_summon)
                         .make_aware_of_player()
                         .set_leader(m_owner);
 
@@ -3626,8 +3659,7 @@ PropActResult SummonsLocusts::on_act()
         actor::MonSpawnResult summoned =
                 actor::spawn(
                         m_owner->m_pos,
-                        {nr_of_spawns, "MON_LOCUST"},
-                        map::rect());
+                        {nr_of_spawns, "MON_LOCUST"});
 
         summoned.set_leader(leader_of_spawned_mon);
         summoned.make_aware_of_player();

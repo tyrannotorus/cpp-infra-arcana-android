@@ -283,6 +283,9 @@ Prop* make(const prop::Id id)
         case prop::Id::breeds:
                 return new Breeds();
 
+        case prop::Id::breeds_scattered:
+                return new BreedsScattered();
+
         case prop::Id::frenzies_self:
                 return new FrenziesSelf();
 

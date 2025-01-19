@@ -443,10 +443,7 @@ void EventSpawnMonstersDelayed::on_new_turn()
         }
 
         const actor::MonSpawnResult mon_summoned =
-                actor::spawn(
-                        m_pos,
-                        {m_nr_mon, m_id},
-                        map::rect())
+                actor::spawn(m_pos, {m_nr_mon, m_id})
                         .make_aware_of_player();
 
         std::for_each(

@@ -86,6 +86,7 @@ enum class Id
         corpse_rises,
         spawns_zombie_parts_on_destroyed,
         breeds,
+        breeds_scattered,       // Mold
         vomits_ooze,            // Gla'Suu
         confuses_adjacent,      // "Strange color" confusing player when seen
         frenzy_player_on_seen,  // Ghastly Light

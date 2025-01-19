@@ -173,17 +173,13 @@ void PlayerGhoulClaw::on_melee_kill(actor::Actor& actor_killed)
 
         const auto& d = *actor_killed.m_data;
 
-        const bool is_ethereal =
-                actor_killed.m_properties.has(prop::Id::ethereal);
+        const bool is_ethereal = actor_killed.m_properties.has(prop::Id::ethereal);
 
         if (player_bon::has_trait(Trait::foul) &&
             !is_ethereal &&
             d.can_leave_corpse &&
             rnd::one_in(3)) {
-                actor::spawn(
-                        actor_killed.m_pos,
-                        {1, "MON_WORM_MASS"},
-                        map::rect())
+                actor::spawn(actor_killed.m_pos, {"MON_WORM_MASS"})
                         .make_aware_of_player()
                         .set_leader(map::g_player);
         }

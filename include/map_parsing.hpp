@@ -67,7 +67,7 @@ public:
 
         void run(
                 Array2<bool>& out,
-                const R& area_to_parse_cells,
+                const R& area_to_parse_positions,
                 MapParseMode write_rule = MapParseMode::overwrite);
 
         bool run(const P& pos) const;
@@ -373,11 +373,12 @@ private:
 // -----------------------------------------------------------------------------
 // Various utility algorithms
 // -----------------------------------------------------------------------------
-// Given a map array of booleans, this will fill a second map array of boolens
-// where the cells are set to true if they are within the specified distance
-// interval of the first array.
-// This can be used for example to find all cells up to N steps from a wall.
-Array2<bool> cells_within_dist_of_others(
+// Given a map array of booleans, this will fill a second map array of boolens where the positions
+// are set to true if they are within the specified distance interval of the first array.
+//
+// This can be used for example to find all positions up to N steps from a wall.
+//
+Array2<bool> positions_within_dist_of_others(
         const Array2<bool>& in,
         const Range& dist_interval);
 

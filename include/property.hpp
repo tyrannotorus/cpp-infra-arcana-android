@@ -23,6 +23,11 @@
 namespace actor
 {
 class Actor;
+
+enum class SpawnScattered;
+
+enum class AllowSpawnAdjToCurrentActors;
+
 }  // namespace actor
 
 enum class Dir;
@@ -1514,13 +1519,48 @@ private:
         bool is_allowed_to_spawn_parts_here() const;
 };
 
-class Breeds : public Prop
+class BreedsBase : public Prop
+{
+public:
+        BreedsBase(const Id id) :
+                Prop(id) {}
+
+        void on_std_turn() override;
+
+protected:
+        virtual actor::SpawnScattered spawn_scattered() const = 0;
+
+        virtual actor::AllowSpawnAdjToCurrentActors allow_adj_to_actors() const = 0;
+
+        virtual int max_dist() const = 0;
+};
+
+class Breeds : public BreedsBase
 {
 public:
         Breeds() :
-                Prop(Id::breeds) {}
+                BreedsBase(Id::breeds) {}
 
-        void on_std_turn() override;
+protected:
+        actor::SpawnScattered spawn_scattered() const override;
+
+        actor::AllowSpawnAdjToCurrentActors allow_adj_to_actors() const override;
+
+        int max_dist() const override;
+};
+
+class BreedsScattered : public BreedsBase
+{
+public:
+        BreedsScattered() :
+                BreedsBase(Id::breeds_scattered) {}
+
+protected:
+        actor::SpawnScattered spawn_scattered() const override;
+
+        actor::AllowSpawnAdjToCurrentActors allow_adj_to_actors() const override;
+
+        int max_dist() const override;
 };
 
 class VomitsOoze : public Prop

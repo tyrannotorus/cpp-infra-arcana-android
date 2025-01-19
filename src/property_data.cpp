@@ -24,6 +24,7 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_BLESSED", prop::Id::blessed},
         {"PROP_BLIND", prop::Id::blind},
         {"PROP_BREEDS", prop::Id::breeds},
+        {"PROP_BREEDS_SCATTERED", prop::Id::breeds_scattered},
         {"PROP_BURNING", prop::Id::burning},
         {"PROP_BURROWING", prop::Id::burrowing},
         {"PROP_CLOAKED", prop::Id::cloaked},
@@ -1103,6 +1104,9 @@ static void init_data_list()
         add(d);
 
         d.id = prop::Id::breeds;
+        add(d);
+
+        d.id = prop::Id::breeds_scattered;
         add(d);
 
         d.id = prop::Id::frenzies_self;

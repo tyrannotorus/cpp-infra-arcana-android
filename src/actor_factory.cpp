@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <map>
 #include <ostream>
 #include <unordered_map>
 #include <utility>
@@ -17,6 +18,7 @@
 #include "actor_data.hpp"
 #include "array2.hpp"
 #include "debug.hpp"
+#include "flood.hpp"
 #include "game_time.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -32,20 +34,76 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::vector<P> free_spawn_positions(const R& area)
+static void set_all_adj_positions_to_blocking(const P& pos, Array2<bool>& blocked)
 {
-        // NOTE: Here we only allow spawning on positions that do not block
-        // walking. This is a simple, but somewhat strict rule; all creatures
-        // may exist on such positions, but some creatures could potentially be
-        // spawned elsewhere (such as a flying creature over a chasm). The
-        // current method should be good enough however.
+        for (int x = -1; x <= 1; ++x) {
+                for (int y = -1; y <= 1; ++y) {
+                        const P p_adj = pos.with_offsets(x, y);
+
+                        blocked.at(p_adj) = true;
+                }
+        }
+}
+
+// Returns a vector of pairs of positions and the travel distance to each position.
+static std::vector<std::pair<P, int>> free_spawn_positions(
+        const P& origin,
+        const int max_dist,
+        const actor::AllowSpawnAdjToCurrentActors allow_adj_to_actors)
+{
+        // NOTE: Here we only allow spawning on positions that do not block walking. This is a
+        // simple, but somewhat strict rule; all creatures may exist on such positions, but some
+        // creatures could potentially be spawned elsewhere (such as a flying creature over a
+        // chasm). The current method should be good enough however.
 
         Array2<bool> blocked(map::dims());
 
-        map_parsers::BlocksWalking(ParseActors::yes)
-                .run(blocked, area, MapParseMode::overwrite);
+        // Get a blocking map for running a floodfill, where actors and doors are free.
+        map_parsers::BlocksWalking(ParseActors::no)
+                .run(blocked, map::rect(), MapParseMode::overwrite);
 
-        return to_vec(blocked, false, area);
+        // NOTE: Doors are blocking or not depending on their open/closed status. This is because
+        // closed doors should contain breeding monsters.
+
+        Array2<int> flood = floodfill(origin, blocked, max_dist);
+
+        // Now mark actors as blocking.
+        for (const actor::Actor* const actor : game_time::g_actors) {
+                if (!actor::is_alive(*actor)) {
+                        continue;
+                }
+
+                if (allow_adj_to_actors == actor::AllowSpawnAdjToCurrentActors::yes) {
+                        blocked.at(actor->m_pos) = true;
+                }
+                else {
+                        set_all_adj_positions_to_blocking(actor->m_pos, blocked);
+                }
+        }
+
+        // Now mark ALL doors as blocking (regardless of open/closed status). We don't want
+        // stationary monsters like Mold to spawn ON open doors.
+        for (const terrain::Terrain* const terrain : map::g_terrain) {
+                if (terrain->id() == terrain::Id::door) {
+                        blocked.at(terrain->pos()) = true;
+                }
+        }
+
+        std::vector<std::pair<P, int>> free_positions;
+
+        free_positions.reserve(map::nr_positions());
+
+        for (const P& p : map::positions()) {
+                if (!blocked.at(p)) {
+                        const int flood_value = flood.at(p);
+
+                        if ((flood_value > 0) || (p == origin)) {
+                                free_positions.emplace_back(p, flood_value);
+                        }
+                }
+        }
+
+        return free_positions;
 }
 
 static actor::Actor* spawn_at(const P& pos, const std::string& id)
@@ -55,8 +113,55 @@ static actor::Actor* spawn_at(const P& pos, const std::string& id)
         return actor::make(id, pos);
 }
 
-static actor::MonSpawnResult spawn_at_positions(
-        const std::vector<P>& positions,
+static actor::MonSpawnResult spawn_at_positions_close(
+        const std::vector<std::pair<P, int>>& positions,
+        const std::vector<std::string>& ids)
+{
+        actor::MonSpawnResult result;
+
+        const size_t nr_to_spawn = std::min(positions.size(), ids.size());
+
+        // Calculate distances from the origin and group positions by distance.
+        std::map<int, std::vector<P>> distance_groups;
+
+        for (const auto& [pos, distance] : positions) {
+                distance_groups[distance].push_back(pos);
+        }
+
+        size_t id_idx = 0;
+
+        // Iterate through distances in ascending order.
+        for (auto& [distance, distance_group] : distance_groups) {
+                while (!distance_group.empty() && (id_idx < nr_to_spawn)) {
+                        const P pos = rnd::element(distance_group);
+
+                        // Remove the selected position from the group.
+                        distance_group.erase(
+                                std::remove(
+                                        std::begin(distance_group),
+                                        std::end(distance_group),
+                                        pos),
+                                std::end(distance_group));
+
+                        actor::Actor* const mon = spawn_at(pos, ids[id_idx]);
+
+                        if (mon) {
+                                result.monsters.push_back(mon);
+                        }
+
+                        ++id_idx;
+                }
+
+                if (id_idx >= nr_to_spawn) {
+                        break;
+                }
+        }
+
+        return result;
+}
+
+static actor::MonSpawnResult spawn_at_positions_scattered(
+        std::vector<std::pair<P, int>>& positions,
         const std::vector<std::string>& ids)
 {
         actor::MonSpawnResult result;
@@ -64,17 +169,37 @@ static actor::MonSpawnResult spawn_at_positions(
         const size_t nr_to_spawn = std::min(positions.size(), ids.size());
 
         for (size_t i = 0; i < nr_to_spawn; ++i) {
-                const auto& pos = positions[i];
+                const size_t pos_idx = rnd::idx(positions);
+
+                const P pos = positions[pos_idx].first;
+
+                // Remove this position.
+                std::swap(positions[pos_idx], positions.back());
+                positions.pop_back();
+
                 const std::string& id = ids[i];
 
-                actor::Actor* const new_mon = spawn_at(pos, id);
+                actor::Actor* const mon = spawn_at(pos, id);
 
-                if (new_mon) {
-                        result.monsters.push_back(new_mon);
+                if (mon) {
+                        result.monsters.push_back(mon);
                 }
         }
 
         return result;
+}
+
+static actor::MonSpawnResult spawn_at_positions(
+        std::vector<std::pair<P, int>>& positions,
+        const std::vector<std::string>& ids,
+        const actor::SpawnScattered spawn_scattered)
+{
+        if (spawn_scattered == actor::SpawnScattered::no) {
+                return spawn_at_positions_close(positions, ids);
+        }
+        else {
+                return spawn_at_positions_scattered(positions, ids);
+        }
 }
 
 static std::vector<std::string> ids_for_starting_allies(
@@ -89,9 +214,8 @@ static void disable_player_feeling_msg(
         std::for_each(
                 std::begin(actors),
                 std::end(actors),
-                [](auto* mon) {
-                        mon->m_mon_aware_state
-                                .is_player_feeling_msg_allowed = false;
+                [](actor::Actor* mon) {
+                        mon->m_mon_aware_state.is_player_feeling_msg_allowed = false;
                 });
 }
 
@@ -115,7 +239,7 @@ MonSpawnResult& MonSpawnResult::set_leader(Actor* const leader)
         std::for_each(
                 std::begin(monsters),
                 std::end(monsters),
-                [leader](auto mon) {
+                [leader](Actor* const mon) {
                         mon->m_leader = leader;
                 });
 
@@ -127,7 +251,7 @@ MonSpawnResult& MonSpawnResult::make_aware_of_player()
         std::for_each(
                 std::begin(monsters),
                 std::end(monsters),
-                [](auto mon) {
+                [](Actor* const mon) {
                         mon->m_mon_aware_state.aware_counter = mon->nr_turns_to_be_aware();
                 });
 
@@ -198,35 +322,18 @@ void delete_all_mon()
 MonSpawnResult spawn(
         const P& origin,
         const std::vector<std::string>& monster_ids,
-        const R& area_allowed)
+        const int max_dist,
+        const SpawnScattered spawn_scattered,
+        const AllowSpawnAdjToCurrentActors allow_adj_to_actors)
 {
-        auto free_positions = free_spawn_positions(area_allowed);
+        std::vector<std::pair<P, int>> free_positions =
+                free_spawn_positions(origin, max_dist, allow_adj_to_actors);
 
         if (free_positions.empty()) {
                 return {};
         }
 
-        std::sort(
-                std::begin(free_positions),
-                std::end(free_positions),
-                IsCloserToPos(origin));
-
-        return spawn_at_positions(free_positions, monster_ids);
-}
-
-MonSpawnResult spawn_random_position(
-        const std::vector<std::string>& monster_ids,
-        const R& area_allowed)
-{
-        auto free_positions = free_spawn_positions(area_allowed);
-
-        if (free_positions.empty()) {
-                return {};
-        }
-
-        rnd::shuffle(free_positions);
-
-        return spawn_at_positions(free_positions, monster_ids);
+        return spawn_at_positions(free_positions, monster_ids, spawn_scattered);
 }
 
 void spawn_starting_allies(actor::Actor& main_actor)
@@ -240,10 +347,7 @@ void spawn_starting_allies(actor::Actor& main_actor)
                 actor::Actor* const top_leader = find_top_leader(main_actor);
 
                 const actor::MonSpawnResult summoned =
-                        spawn(
-                                main_actor.m_pos,
-                                ids,
-                                map::rect())
+                        spawn(main_actor.m_pos, ids)
                                 .set_leader(top_leader);
 
                 disable_player_feeling_msg(summoned.monsters);

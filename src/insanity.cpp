@@ -453,19 +453,12 @@ void InsShadows::on_start_hook()
 
         const int nr_shadows_min = 2;
 
-        const int nr_shadows_max =
-                std::clamp(
-                        map::g_dlvl - 2,
-                        nr_shadows_min,
-                        8);
+        const int nr_shadows_max = std::clamp(map::g_dlvl - 2, nr_shadows_min, 8);
 
         const size_t nr = rnd::range(nr_shadows_min, nr_shadows_max);
 
         auto summoned =
-                actor::spawn(
-                        map::g_player->m_pos,
-                        {nr, "MON_SHADOW"},
-                        map::rect())
+                actor::spawn(map::g_player->m_pos, {nr, "MON_SHADOW"})
                         .make_aware_of_player();
 
         std::for_each(
@@ -500,10 +493,7 @@ void InsParanoia::on_start_hook()
         const P& pos = map::g_player->m_pos;
 
         auto summoned =
-                actor::spawn(
-                        pos,
-                        {"MON_INVIS_STALKER"},
-                        map::rect())
+                actor::spawn(pos, {"MON_INVIS_STALKER"})
                         .make_aware_of_player();
 
         std::for_each(

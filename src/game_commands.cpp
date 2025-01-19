@@ -1260,10 +1260,9 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_f9: {
-                // TODO: It would be more convenient to query for a string
-                // instead, so that the monster ID string could be entered
-                // directly, instead of an index number (perhaps with partial
-                // matches allowed).
+                // TODO: It would be more convenient to query for a string instead, so that the
+                // monster ID string could be entered directly, instead of an index number (perhaps
+                // with partial matches allowed).
 
                 std::string msg = "Listing all monsters (IDX    ID):";
 
@@ -1330,8 +1329,7 @@ void handle(const GameCmd cmd)
                 actor::MonSpawnResult spawned =
                         actor::spawn(
                                 map::g_player->m_pos.with_x_offset(2),
-                                {(size_t)nr_to_spawn, mon_id},
-                                map::rect());
+                                {(size_t)nr_to_spawn, mon_id});
 
                 for (actor::Actor* const actor : spawned.monsters) {
                         actor::spawn_starting_allies(*actor);

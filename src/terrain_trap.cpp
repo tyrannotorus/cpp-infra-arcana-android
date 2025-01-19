@@ -1041,7 +1041,7 @@ void TrapSummonMon::trigger()
                 TRACE << "Actor id: " << id_to_summon << std::endl;
 
                 const actor::MonSpawnResult summoned =
-                        actor::spawn(m_pos, {id_to_summon}, map::rect())
+                        actor::spawn(m_pos, {id_to_summon})
                                 .make_aware_of_player();
 
                 std::for_each(

@@ -158,7 +158,7 @@ static void side_effect_spawn_monsters(const Context& context)
 
         const std::string id = "MON_TENTACLE_CLUSTER";
 
-        auto spawned = actor::spawn(p, {id}, map::rect());
+        actor::MonSpawnResult spawned = actor::spawn(p, {id});
 
         bool printed_msg = false;
 
@@ -408,10 +408,7 @@ static void side_effect_flay_human(const Context& context)
                 AllowGore::yes,
                 AllowDropItems::yes);
 
-        actor::spawn(
-                target_actor->m_pos,
-                {"MON_CRAWLING_INTESTINES"},
-                map::rect());
+        actor::spawn(target_actor->m_pos, {"MON_CRAWLING_INTESTINES"});
 
         TRACE_FUNC_END;
 }
@@ -2361,11 +2358,12 @@ void SpellPestilence::run_effect(
                 ? "MON_TRANSCENDENT_RAT"
                 : "MON_RAT";
 
-        const auto mon_summoned =
+        const actor::MonSpawnResult mon_summoned =
                 actor::spawn(
                         caster->m_pos,
                         {nr_mon, id},
-                        map::rect())
+                        g_fov_radi_int,
+                        actor::SpawnScattered::yes)
                         .make_aware_of_player()
                         .set_leader(leader);
 
@@ -2594,11 +2592,8 @@ void SpellSpectralWeapons::run_effect(
 
                 new_item->set_base_melee_dmg(item->base_melee_dmg());
 
-                const auto summoned =
-                        actor::spawn(
-                                caster->m_pos,
-                                {"MON_SPECTRAL_WPN"},
-                                map::rect())
+                const actor::MonSpawnResult summoned =
+                        actor::spawn(caster->m_pos, {"MON_SPECTRAL_WPN"})
                                 .set_leader(caster);
 
                 std::for_each(
@@ -4793,10 +4788,7 @@ void SpellSummon::summon(const std::string& id, actor::Actor* caster) const
         actor::Actor* const leader = caster_leader ? caster_leader : caster;
 
         const actor::MonSpawnResult summoned =
-                actor::spawn(
-                        caster->m_pos,
-                        {id},
-                        map::rect())
+                actor::spawn(caster->m_pos, {id})
                         .make_aware_of_player()
                         .set_leader(leader);
 

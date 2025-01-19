@@ -30,22 +30,21 @@ namespace map_parsers
 // -----------------------------------------------------------------------------
 void MapParser::run(
         Array2<bool>& out,
-        const R& area_to_parse_cells,
+        const R& area_to_parse_positions,
         const MapParseMode write_rule)
 {
         ASSERT(m_parse_terrain == ParseTerrain::yes ||
                m_parse_mobs == ParseMobs::yes ||
                m_parse_actors == ParseActors::yes);
 
-        const bool allow_write_false =
-                write_rule == MapParseMode::overwrite;
+        const bool allow_write_false = (write_rule == MapParseMode::overwrite);
 
         if (m_parse_terrain == ParseTerrain::yes) {
-                for (int x = area_to_parse_cells.p0.x;
-                     x <= area_to_parse_cells.p1.x;
+                for (int x = area_to_parse_positions.p0.x;
+                     x <= area_to_parse_positions.p1.x;
                      ++x) {
-                        for (int y = area_to_parse_cells.p0.y;
-                             y <= area_to_parse_cells.p1.y;
+                        for (int y = area_to_parse_positions.p0.y;
+                             y <= area_to_parse_positions.p1.y;
                              ++y) {
                                 const auto& t = *map::g_terrain.at(x, y);
 
@@ -62,7 +61,7 @@ void MapParser::run(
                 for (auto* mob : game_time::g_mobs) {
                         const P& p = mob->pos();
 
-                        if (!area_to_parse_cells.is_pos_inside(p)) {
+                        if (!area_to_parse_positions.is_pos_inside(p)) {
                                 continue;
                         }
 
@@ -84,7 +83,7 @@ void MapParser::run(
                 for (auto* actor : game_time::g_actors) {
                         const P& p = actor->m_pos;
 
-                        if (!area_to_parse_cells.is_pos_inside(p)) {
+                        if (!area_to_parse_positions.is_pos_inside(p)) {
                                 continue;
                         }
 
@@ -158,7 +157,7 @@ bool MapParser::run(const P& pos) const
 
         return r;
 
-}  // cell
+}  // position
 
 // -----------------------------------------------------------------------------
 // Map parsers
@@ -437,7 +436,7 @@ bool AllAdjIsNoneOfTerrains::parse_terrain(
 // -----------------------------------------------------------------------------
 // Various utility algorithms
 // -----------------------------------------------------------------------------
-Array2<bool> cells_within_dist_of_others(
+Array2<bool> positions_within_dist_of_others(
         const Array2<bool>& in,
         const Range& dist_interval)
 {
@@ -483,7 +482,7 @@ Array2<bool> cells_within_dist_of_others(
 
         return result;
 
-}  // cells_within_dist_of_others
+}  // positions_within_dist_of_others
 
 void append(Array2<bool>& base, const Array2<bool>& append)
 {
@@ -501,41 +500,26 @@ Array2<bool> expand(const Array2<bool>& in, const R& area_allowed_to_modify)
 
         Array2<bool> result(dims);
 
-        const int x0 = std::max(
-                0,
-                area_allowed_to_modify.p0.x);
-
-        const int y0 = std::max(
-                0,
-                area_allowed_to_modify.p0.y);
-
-        const int x1 = std::min(
-                dims.x - 1,
-                area_allowed_to_modify.p1.x);
-
-        const int y1 = std::min(
-                dims.y - 1,
-                area_allowed_to_modify.p1.y);
+        const int x0 = std::max(0, area_allowed_to_modify.p0.x);
+        const int y0 = std::max(0, area_allowed_to_modify.p0.y);
+        const int x1 = std::min(dims.x - 1, area_allowed_to_modify.p1.x);
+        const int y1 = std::min(dims.y - 1, area_allowed_to_modify.p1.y);
 
         for (int x = x0; x <= x1; ++x) {
                 for (int y = y0; y <= y1; ++y) {
                         result.at(x, y) = false;
 
-                        // Search all cells adjacent to the current position for
-                        // any cell which is "true" in the input arry.
+                        // Search all positions adjacent to the current position for any position
+                        // which is "true" in the input arry.
                         const int cmp_x0 = std::max(x - 1, 0);
                         const int cmp_y0 = std::max(y - 1, 0);
                         const int cmp_x1 = std::min(x + 1, dims.x - 1);
                         const int cmp_y1 = std::min(y + 1, dims.y - 1);
 
-                        for (int cmp_x = cmp_x0;
-                             cmp_x <= cmp_x1;
-                             ++cmp_x) {
+                        for (int cmp_x = cmp_x0; cmp_x <= cmp_x1; ++cmp_x) {
                                 bool is_found = false;
 
-                                for (int cmp_y = cmp_y0;
-                                     cmp_y <= cmp_y1;
-                                     ++cmp_y) {
+                                for (int cmp_y = cmp_y0; cmp_y <= cmp_y1; ++cmp_y) {
                                         if (in.at(cmp_x, cmp_y)) {
                                                 result.at(x, y) = true;
 
@@ -548,9 +532,9 @@ Array2<bool> expand(const Array2<bool>& in, const R& area_allowed_to_modify)
                                 if (is_found) {
                                         break;
                                 }
-                        }  // Compare x loop
-                }          // y loop
-        }                  // x loop
+                        }
+                }
+        }
 
         return result;
 
@@ -576,14 +560,10 @@ Array2<bool> expand(const Array2<bool>& in, const int dist)
                         const int cmp_x1 = x1 > dims.x - 1 ? dims.x - 1 : x1;
                         const int cmp_y1 = y1 > dims.y - 1 ? dims.y - 1 : y1;
 
-                        for (int cmp_y = cmp_y0;
-                             cmp_y <= cmp_y1;
-                             ++cmp_y) {
+                        for (int cmp_y = cmp_y0; cmp_y <= cmp_y1; ++cmp_y) {
                                 bool is_found = false;
 
-                                for (int cmp_x = cmp_x0;
-                                     cmp_x <= cmp_x1;
-                                     ++cmp_x) {
+                                for (int cmp_x = cmp_x0; cmp_x <= cmp_x1; ++cmp_x) {
                                         if (!in.at(cmp_x, cmp_y)) {
                                                 continue;
                                         }
