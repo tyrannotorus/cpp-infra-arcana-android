@@ -10,12 +10,9 @@ enable_testing()
 SET(CMAKE_COLOR_MAKEFILE OFF)
 
 option(
-        IA_USE_SYSTEM_SDL
-        "Use system-installed SDL2 (via find_package) instead of building and statically linking the bundled source code"
+        IA_BUILD_STATIC_SDL
+        "Build and link SDL statically (otherwise use system-installed SDL2 (via find_package) on Linux, or use the bundled prebuilt version on Windows"
         OFF)
-if(IA_USE_SYSTEM_XML AND WIN32)
-        message(FATAL_ERROR "Using system installed SDL is not supported on Windows.")
-endif()
 
 option(IA_DEBUG_SANITIZE "Use compiler sanitizers for debug or test builds" ON)
 
@@ -412,12 +409,19 @@ include(cmake/compile_flags.cmake)
 # Third party
 # ------------------------------------------------------------------------------
 # SDL
-if (IA_USE_SYSTEM_SDL)
-        message(STATUS "Using system version of SDL via find_package.")
-        include(cmake/sdl_as_find_package.cmake)
+if (IA_BUILD_STATIC_SDL)
+        message(STATUS "Building SDL from source code and linking statically.")
+        include(cmake/sdl_build_static.cmake)
 else()
-        message(STATUS "Building the bundled SDL source code and linking statically.")
-        include(cmake/sdl.cmake)
+        if(WIN32)
+                # Windows
+                message(STATUS "Using bundled prebuilt Windows version of SDL.")
+                include(cmake/sdl_windows_prebuilt.cmake)
+        else()
+                # Not windows (e.g. Linux)
+                message(STATUS "Finding installed system version of SDL.")
+                include(cmake/sdl_linux_from_system.cmake)
+        endif()
 endif()
 
 # mINI (.ini file parser)

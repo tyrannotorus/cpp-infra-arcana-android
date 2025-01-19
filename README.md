@@ -15,30 +15,45 @@ Clone the IA repository on GitLab:
 
 Infra Arcana is built with [CMake](https://cmake.org/), which is a build system generator. CMake can generate GNU Makefiles, Code::Blocks projects, Visual Studio solutions, etc for many different platforms. Look for an online tutorial on how to use CMake (some pointers are given below).
 
-The source code of SDL2, SDL2_image and SDL2_mixer are included in the Infra Arcana Git repo. It is built automatically together with the IA build process, and then linked statically with the game - i.e. it is built into the game binary, so there is no need to install any SDL dependencies to play the game.
+This game uses SDL2, SDL2_image, and SDL_mixer. There are two ways to include these dependencies:
+* Use the system installation of SDL on Linux, or use the bundled prebuilt version in Windows
+* Build the bundled SDL source code and link it statically into the game binary.
+
+The first method is the default behavior, it will be used if nothing else is specified. Buiding SDL from source and linking it statically is enabled via the CMake option "IA_BUILD_STATIC_SDL" (use -DIA_BUILD_STATIC_SDL=ON when running cmake to configure this mode). The "official" releases of the game are built with SDL statically linked, so there is no need to install any SDL dependencies to play those releases.
 
 ### Unix/Linux/macOS
-You need CMake and build tools (e.g. GNU Make + gcc).
+You need CMake and build tools (e.g. GNU Make + gcc). Also you need dependencies to SDL2, SDL2-image, and SDL2-mixer (unless you want to use the option to build the bundled SDL source code).
 
 To install dependencies on Debian, Ubuntu and other DEB-based systems, try:
 
     apt install build-essential cmake
+    
+    # Also, if using system installation of SDL (default method):
+    apt install libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0
+
+(Or whatever versions of the SDL2 libraries are available.)
 
 On Fedora and other RPM-based systems, try:
 
     dnf install g++ make cmake
+    
+    # Also, if using system installation of SDL (default method):
+    dnf install SDL2 SDL2_image SDL2_mixer
 
 On macOS, using [Homebrew](https://brew.sh/):
 
     brew install cmake
+    
+    # Also, if using system installation of SDL (default method):
+    brew install sdl2 sdl2_image sdl2_mixer
 
-Now you can build IA:
+Now you can build IA (stand in the root of the IA repo and run these commands):
 
-    cd <ia directory>
-    mkdir build
-    cd build
-    cmake ../
-    make ia
+    mkdir -p build && cd build && cmake .. && make ia
+
+Alternatively, you can build the bundled SDL source code and link it statically:
+
+    mkdir build && cd build && cmake -DIA_BUILD_STATIC_SDL=ON .. && make ia
 
 ### Windows
 You need CMake, and some IDE or build tools of your choice (such as [Code::Blocks](http://www.codeblocks.org), or [Visual Studio](https://www.visualstudio.com/)).
