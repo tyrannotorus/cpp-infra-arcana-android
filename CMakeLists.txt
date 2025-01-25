@@ -406,6 +406,14 @@ add_test(IA-test ia-test)
 include(cmake/compile_flags.cmake)
 
 # ------------------------------------------------------------------------------
+# Optional sanitize link flags
+# ------------------------------------------------------------------------------
+if (IA_DEBUG_SANITIZE)
+        target_link_libraries(ia-debug -lasan -lubsan)
+        target_link_libraries(ia-test -lubsan)
+endif()
+
+# ------------------------------------------------------------------------------
 # Third party
 # ------------------------------------------------------------------------------
 # SDL
@@ -426,14 +434,6 @@ endif()
 
 # mINI (.ini file parser)
 include(cmake/mini.cmake)
-
-# ------------------------------------------------------------------------------
-# Optional sanitize link flags
-# ------------------------------------------------------------------------------
-if (IA_DEBUG_SANITIZE)
-        target_link_libraries(ia-debug -lasan -lubsan)
-        target_link_libraries(ia-test -lubsan)
-endif()
 
 # ------------------------------------------------------------------------------
 # Link options for gprof
