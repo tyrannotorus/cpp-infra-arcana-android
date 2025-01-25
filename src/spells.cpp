@@ -2270,13 +2270,13 @@ Range SpellPestilence::duration_range(const SpellSkill skill) const
 {
         switch (skill) {
         case SpellSkill::basic:
-                return {5, 7};
+                return {8, 12};
 
         case SpellSkill::expert:
-                return {7, 12};
+                return {12, 16};
 
         case SpellSkill::master:
-                // NOTE: On master level, the rats are hasted, meaning the disappear twice as fast
+                // NOTE: On master level, the rats are hasted, meaning they disappear twice as fast
                 // from the perspective of a normal speed player.
                 return {40, 60};
 
