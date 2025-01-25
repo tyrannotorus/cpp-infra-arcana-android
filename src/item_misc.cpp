@@ -234,8 +234,9 @@ MedBagAction MedicalBag::choose_action_manual() const
         const std::vector<std::string> choices = {
                 ("(q) Quick patch-up, restores " +
                  std::to_string(m_hp_restored_by_quick_patch_up) +
-                 " hit points " + cost_info_hint(MedBagAction::quick_patch_up)),
-                "(i) Sanitize infection " + cost_info_hint(MedBagAction::sanitize_infection),
+                 " hit points " +
+                 cost_info_hint(MedBagAction::quick_patch_up)),
+                "(s) Sanitize infection " + cost_info_hint(MedBagAction::sanitize_infection),
                 "(w) Treat wound " + cost_info_hint(MedBagAction::treat_wound),
         };
 
@@ -248,7 +249,7 @@ MedBagAction MedicalBag::choose_action_manual() const
                 .set_msg("Available supplies: " + std::to_string(m_nr_supplies))
                 .setup_menu_mode(
                         choices,
-                        {'q', 'i', 'w'},
+                        {'q', 's', 'w'},
                         popup::MenuModeShowCancelHint::yes,
                         &choice)
                 .run();
