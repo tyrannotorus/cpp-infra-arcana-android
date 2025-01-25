@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright 2011-2020 Martin Törnqvist <m.tornq@gmail.com>
+// Copyright Martin Törnqvist <m.tornq@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
