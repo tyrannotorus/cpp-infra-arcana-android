@@ -91,6 +91,9 @@ static std::vector<const terrain::Door*> adj_known_closed_doors(const P& p)
 
 static void player_act()
 {
+        // This is used for controlling log messages. Messages are colored differently depending on
+        // whether things happen during the player acting (presumably as a direct consequence of
+        // their actions), or outside of the player acting only due to time passing.
         game_time::g_is_player_acting = true;
 
         actor::Actor& player = *map::g_player;
@@ -309,9 +312,13 @@ static void player_act()
         }
         else {
                 // Not bot playing
-                const auto input = io::read_input();
 
-                const auto game_cmd = game_commands::to_cmd(input);
+                // Clear all previous input to avoid queueing up commands.
+                io::clear_input();
+
+                const io::InputData input = io::read_input();
+
+                const GameCmd game_cmd = game_commands::to_cmd(input);
 
                 game_commands::handle(game_cmd);
         }

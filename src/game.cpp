@@ -558,9 +558,9 @@ void GameState::draw()
 
 void GameState::update()
 {
-        // To avoid redrawing the map for each actor, we instead run acting
-        // inside a loop here. We exit the loop if the next actor is the player.
-        // Then another state cycle will be executed, and rendering performed.
+        // To avoid redrawing the map for each actor, we run acting inside a loop here. We exit the
+        // loop if the next actor is the player - then another state cycle will be executed, and
+        // rendering performed.
         while (true) {
                 // Let the current actor act
                 actor::Actor* const actor = game_time::current_actor();
@@ -570,17 +570,15 @@ void GameState::update()
                 const bool is_gibbed = actor->m_state == ActorState::destroyed;
 
 #ifndef NDEBUG
-                // Allow the "tick" function in game_time to be called, to
-                // advance time. Otherwise calling the tick function is an
-                // error. This helps catching cases where time is ticked
-                // multiple times during the same actor's action.
+                // Allow the "tick" function in game_time to be called, to advance time. Otherwise
+                // calling the tick function is an error. This helps catching cases where time is
+                // ticked multiple times during the same actor's action.
                 game_time::g_allow_tick = true;
 #endif  // NDEBUG
 
                 if (allow_act && !is_gibbed) {
-                        // Tell actor to "do something". If this is the player,
-                        // input is read from either the player or the bot. If
-                        // it's a monster, the AI handles it.
+                        // Tell actor to "do something". If this is the player, input is read from
+                        // either the player or the bot. If it's a monster, the AI handles it.
                         actor::act(*actor);
                 }
                 else {
@@ -593,7 +591,7 @@ void GameState::update()
                         game_time::tick();
                 }
 
-                // NOTE: This state may have been popped at this point
+                // NOTE: This state may have been popped at this point.
 
                 // We have quit the current game, or the player is dead?
                 if (!map::g_player ||
