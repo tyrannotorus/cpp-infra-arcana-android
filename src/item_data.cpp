@@ -1455,7 +1455,7 @@ void init()
         d.ability_mods_while_equipped[(size_t)AbilityId::stealth] = -5;
         d.ability_mods_while_equipped[(size_t)AbilityId::dodging] = -5;
         d.weight = Weight::medium;
-        d.color = colors::gray();
+        d.color = colors::light_blue();
         d.spawn_std_range.min = 1;
         d.armor.armor_points = 2;
         d.armor.dmg_to_durability_factor = 1.0;
