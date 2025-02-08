@@ -32,8 +32,8 @@ void try_pick()
 {
         msg_log::clear();
 
-        const auto& pos = map::g_player->m_pos;
-        auto* const item = map::g_items.at(pos);
+        const P& pos = map::g_player->m_pos;
+        item::Item* const item = map::g_items.at(pos);
 
         if (!item) {
                 msg_log::add("I see nothing to pick up here.");
@@ -41,7 +41,7 @@ void try_pick()
                 return;
         }
 
-        const auto pre_pickup_result = item->pre_pickup_hook();
+        const ItemPrePickResult pre_pickup_result = item->pre_pickup_hook();
 
         switch (pre_pickup_result) {
         case ItemPrePickResult::do_pickup: {
@@ -66,8 +66,8 @@ void try_pick()
         } break;
         }
 
-        // NOTE: The player might have won the game by picking up the
-        // Trapezohedron, if so do not tick time
+        // NOTE: The player might have won the game by picking up the Trapezohedron, if so do not
+        // tick time.
         if (states::contains_state(StateId::game)) {
                 game_time::tick();
         }
@@ -83,11 +83,11 @@ item::Item* unload_ranged_wpn(item::Wpn& wpn)
                 return nullptr;
         }
 
-        const auto ammo_id = wpn.data().ranged.ammo_item_id;
+        const item::Id ammo_id = wpn.data().ranged.ammo_item_id;
 
-        auto& ammo_data = item::g_data[(size_t)ammo_id];
+        item::ItemData& ammo_data = item::g_data[(size_t)ammo_id];
 
-        auto* spawned_ammo = item::make(ammo_id);
+        item::Item* spawned_ammo = item::make(ammo_id);
 
         if (ammo_data.type == ItemType::ammo_mag) {
                 // Unload a mag
@@ -106,7 +106,7 @@ item::Item* unload_ranged_wpn(item::Wpn& wpn)
 
 void try_unload_or_pick()
 {
-        auto* item = map::g_items.at(map::g_player->m_pos);
+        item::Item* item = map::g_items.at(map::g_player->m_pos);
 
         if (item &&
             item->data().ranged.is_ranged_wpn &&

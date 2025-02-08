@@ -313,9 +313,11 @@ ItemPrePickResult Scroll::pre_pickup_hook()
 
         // Is exorcist
 
-        msg_log::add("I destroy the profane text!");
+        const std::string noun = (m_nr_items == 1) ? "text" : "texts";
 
-        game::incr_player_xp(g_xp_on_exorcist_destroy_scroll);
+        msg_log::add("I destroy the profane " + noun + "!");
+
+        game::incr_player_xp(g_xp_on_exorcist_destroy_scroll * m_nr_items);
 
         actor::restore_sp(
                 *map::g_player,
@@ -323,7 +325,7 @@ ItemPrePickResult Scroll::pre_pickup_hook()
                 actor::AllowRestoreAboveMax::no,
                 Verbose::no);
 
-        actor::restore_exorcist_fervor(g_exorcist_fervor_destroy_scroll);
+        actor::restore_exorcist_fervor(g_exorcist_fervor_destroy_scroll * m_nr_items);
 
         return ItemPrePickResult::destroy_item;
 }
