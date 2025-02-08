@@ -88,6 +88,8 @@ GameCmd to_cmd(const io::InputData& input);
 
 void handle(GameCmd cmd);
 
+char throw_key();
+
 }  // namespace game_commands
 
 #endif  // GAME_COMMANDS_HPP

@@ -6,6 +6,7 @@
 
 #include "inventory_handling.hpp"
 
+#include <algorithm>
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -24,6 +25,7 @@
 #include "debug.hpp"
 #include "draw_box.hpp"
 #include "drop.hpp"
+#include "game_commands.hpp"
 #include "game_time.hpp"
 #include "io.hpp"
 #include "item.hpp"
@@ -33,6 +35,7 @@
 #include "marker.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
+#include "player_bon.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
@@ -207,6 +210,56 @@ static void on_equipable_backpack_item_selected(const size_t backpack_idx)
         }
 
         game_time::tick();
+}
+
+static void reserve_key_for_filtered_inventory_index(
+        const char key,
+        const int filtered_inventory_index,
+        std::vector<FilteredInvEntry>& filtered_inventory,
+        MenuBrowser& browser)
+{
+        // This function ensures that the given key is used for the item at the given index of the
+        // filtered inventory index. This menu option is moved to the top of the list.
+        //
+        // An index value of -1 means that the item to reserve the key for does not exist in the
+        // player inventory. In that case, the key is only removed from the browser keys, so that is
+        // is not used for anything else (it should only ever be used for the thing it's reserved
+        // for).
+        //
+        // Some use cases are for example reserving a key for the Medical Bag or the last thrown
+        // item.
+        //
+        // This function can be called multiple times to reserve several keys, if so the order is
+        // important (the menu options will appear in reversed order, so call the option that shall
+        // appear at the top last).
+        //
+
+        // NOTE: Modifying the browser keys only ever affects the keys on the first page. See also
+        // note in browser.hpp.
+
+        // The reserved key shall never used for any other item. Remove this key regardless of
+        // whether we assign it later or not.
+        browser.remove_key(key);
+
+        if (filtered_inventory_index == -1) {
+                // Item does not exist.
+                return;
+        }
+
+        // The item exists.
+
+        // Move this filtered inventory entry to the top of the list.
+        std::rotate(
+                std::begin(filtered_inventory),
+                std::begin(filtered_inventory) + filtered_inventory_index,
+                std::begin(filtered_inventory) + filtered_inventory_index + 1);
+
+        // Insert the reserved key at the beginning of the key list.
+        std::vector<char> custom_keys = browser.menu_keys();
+
+        custom_keys.insert(std::begin(custom_keys), key);
+
+        browser.set_custom_menu_keys(custom_keys);
 }
 
 // -----------------------------------------------------------------------------
@@ -761,14 +814,17 @@ void BrowseInv::on_start()
                 (int)SlotId::END +
                 (int)map::g_player->m_inv.m_backpack.size();
 
-        m_browser.reset(
-                list_size,
-                panels::h(Panel::inventory_menu));
+        m_browser.reset(list_size, panels::h(Panel::inventory_menu));
 
         m_browser.set_selection_audio_enabled(false);
 
-        // Remove the "browse inventory" key, to avoid player key press
-        // misstakes, and to allow using this key for closing the menu
+        // Remove the "browse inventory" key, to avoid player key press misstakes, and to allow
+        // using this key for closing the menu.
+        //
+        // NOTE: This will only ever affect the first screen (it will not affect screens further
+        // down if the player scrolls down past the first screen), but this should be good enough -
+        // the goal is to prevent double pressing "i".
+        //
         m_browser.remove_key('i');
 
         map::g_player->m_inv.sort_backpack();
@@ -983,7 +1039,11 @@ void Apply::on_start()
                 const item::ItemData& d = item->data();
 
                 if (d.has_std_activate) {
-                        m_filtered_backpack_indexes.push_back(i);
+                        FilteredInvEntry entry;
+                        entry.relative_idx = i;
+                        entry.is_slot = false;
+
+                        m_filtered_backpack_indexes.push_back(entry);
                 }
         }
 
@@ -1002,13 +1062,19 @@ void Apply::on_start()
 
         m_browser.set_selection_audio_enabled(false);
 
+        // NOTE: These must be called in reverse order, because the key will be moved to the top.
+        if (player_bon::is_bg(Bg::exorcist)) {
+                reserve_key_for_item_id(item::Id::holy_symbol, 's');
+        }
+        reserve_key_for_item_id(item::Id::medical_bag, 'b');
+        reserve_key_for_item_id(item::Id::lantern, 'a');
+
         audio::play(audio::SfxId::backpack);
 }
 
 void Apply::draw()
 {
-        // Only draw this state if it's the current state, so that messages
-        // can be drawn on the map
+        // Only draw this state if it's the current state, so that messages can be drawn on the map.
         if (!states::is_current_state(this)) {
                 return;
         }
@@ -1038,7 +1104,8 @@ void Apply::draw()
 
                 const bool is_marked = browser_y == i;
 
-                const size_t backpack_idx = m_filtered_backpack_indexes[i];
+                // TODO: Update this if "applying" from slots should be supported.
+                const size_t backpack_idx = m_filtered_backpack_indexes[i].relative_idx;
 
                 draw_backpack_item(
                         backpack_idx,
@@ -1078,8 +1145,9 @@ void Apply::update()
         switch (action) {
         case MenuAction::selected: {
                 if (!m_filtered_backpack_indexes.empty()) {
+                        // TODO: Update this if "applying" from slots should be supported.
                         const size_t backpack_idx =
-                                m_filtered_backpack_indexes[m_browser.y()];
+                                m_filtered_backpack_indexes[m_browser.y()].relative_idx;
 
                         // Exit screen
                         states::pop();
@@ -1102,6 +1170,31 @@ void Apply::update()
         }
 }
 
+void Apply::reserve_key_for_item_id(const item::Id id, const char key)
+{
+        Inventory& inventory = map::g_player->m_inv;
+
+        int filtered_inv_idx_with_item = -1;
+
+        for (size_t i = 0; i < m_filtered_backpack_indexes.size(); ++i) {
+                FilteredInvEntry& entry = m_filtered_backpack_indexes[i];
+
+                const item::Item* const item = inventory.m_backpack[entry.relative_idx];
+
+                if (item->id() == id) {
+                        filtered_inv_idx_with_item = (int)i;
+
+                        break;
+                }
+        }
+
+        reserve_key_for_filtered_inventory_index(
+                key,
+                filtered_inv_idx_with_item,
+                m_filtered_backpack_indexes,
+                m_browser);
+}
+
 // -----------------------------------------------------------------------------
 // Drop item state
 // -----------------------------------------------------------------------------
@@ -1119,8 +1212,8 @@ void Drop::on_start()
 
         m_browser.set_selection_audio_enabled(false);
 
-        // The 'i' key is removed in the inventory menu, so we remove it in this
-        // menu as well for consistency.
+        // The 'i' key is removed in the inventory menu, so we remove it in this menu as well for
+        // consistency.
         m_browser.remove_key('i');
 
         audio::play(audio::SfxId::backpack);
@@ -1313,30 +1406,34 @@ void Equip::on_start()
                 const item::Item* const item = backpack[i];
                 const item::ItemData& data = item->data();
 
+                FilteredInvEntry entry;
+                entry.relative_idx = i;
+                entry.is_slot = false;
+
                 switch (m_slot_to_equip.id) {
                 case SlotId::wpn:
                         if ((data.melee.is_melee_wpn) ||
                             (data.ranged.is_ranged_wpn)) {
-                                m_filtered_backpack_indexes.push_back(i);
+                                m_filtered_backpack_indexes.push_back(entry);
                         }
                         break;
 
                 case SlotId::wpn_alt:
                         if ((data.melee.is_melee_wpn) ||
                             (data.ranged.is_ranged_wpn)) {
-                                m_filtered_backpack_indexes.push_back(i);
+                                m_filtered_backpack_indexes.push_back(entry);
                         }
                         break;
 
                 case SlotId::body:
                         if (data.type == ItemType::armor) {
-                                m_filtered_backpack_indexes.push_back(i);
+                                m_filtered_backpack_indexes.push_back(entry);
                         }
                         break;
 
                 case SlotId::head:
                         if (data.type == ItemType::head_wear) {
-                                m_filtered_backpack_indexes.push_back(i);
+                                m_filtered_backpack_indexes.push_back(entry);
                         }
                         break;
 
@@ -1428,7 +1525,7 @@ void Equip::draw()
         for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
                 const char key = m_browser.menu_keys()[y];
                 const bool is_marked = browser_y == i;
-                const size_t backpack_idx = m_filtered_backpack_indexes[i];
+                const size_t backpack_idx = m_filtered_backpack_indexes[i].relative_idx;
                 item::Item* const item = map::g_player->m_inv.m_backpack[backpack_idx];
                 const item::ItemData& d = item->data();
                 ItemNameAttackInfo att_inf = ItemNameAttackInfo::none;
@@ -1488,7 +1585,7 @@ void Equip::update()
 
         switch (action) {
         case MenuAction::selected: {
-                const size_t idx = m_filtered_backpack_indexes[m_browser.y()];
+                const size_t idx = m_filtered_backpack_indexes[m_browser.y()].relative_idx;
 
                 const SlotId slot_id = m_slot_to_equip.id;
 
@@ -1528,10 +1625,12 @@ void Equip::update()
 // -----------------------------------------------------------------------------
 void SelectThrow::on_start()
 {
-        map::g_player->m_inv.sort_backpack();
+        Inventory& inventory = map::g_player->m_inv;
+
+        inventory.sort_backpack();
 
         // Filter slots
-        for (InvSlot& slot : map::g_player->m_inv.m_slots) {
+        for (InvSlot& slot : inventory.m_slots) {
                 const item::Item* const item = slot.item;
 
                 if (item) {
@@ -1548,10 +1647,8 @@ void SelectThrow::on_start()
         }
 
         // Filter backpack
-        const std::vector<item::Item*>& backpack = map::g_player->m_inv.m_backpack;
-
-        for (size_t i = 0; i < backpack.size(); ++i) {
-                const item::Item* const item = backpack[i];
+        for (size_t i = 0; i < inventory.m_backpack.size(); ++i) {
+                const item::Item* const item = inventory.m_backpack[i];
 
                 const item::ItemData& d = item->data();
 
@@ -1560,16 +1657,7 @@ void SelectThrow::on_start()
                         entry.relative_idx = i;
                         entry.is_slot = false;
 
-                        if (item == actor::player_state::g_last_thrown_item) {
-                                // Last thrown item - show it at the top
-                                m_filtered_inv.insert(
-                                        std::begin(m_filtered_inv),
-                                        entry);
-                        }
-                        else {
-                                // Not the last thrown item - append to bottom
-                                m_filtered_inv.push_back(entry);
-                        }
+                        m_filtered_inv.push_back(entry);
                 }
         }
 
@@ -1584,27 +1672,11 @@ void SelectThrow::on_start()
                 return;
         }
 
-        m_browser.reset(
-                (int)list_size,
-                panels::h(Panel::inventory_menu));
+        m_browser.reset((int)list_size, panels::h(Panel::inventory_menu));
 
         m_browser.set_selection_audio_enabled(false);
 
-        // Set up custom menu keys - the throwing key is always reserved for the
-        // last thrown item (if any), and never used for throwing any other item
-        const char throw_key = 't';
-
-        m_browser.remove_key(throw_key);
-
-        if (actor::player_state::g_last_thrown_item) {
-                // A "last thrown item" exists, re-insert the throw key at the
-                // beginning of the key list (so that it's currently selected)
-                std::vector<char> custom_keys = m_browser.menu_keys();
-
-                custom_keys.insert(std::begin(custom_keys), throw_key);
-
-                m_browser.set_custom_menu_keys(custom_keys);
-        }
+        reserve_keys();
 
         audio::play(audio::SfxId::backpack);
 }
@@ -1685,11 +1757,9 @@ void SelectThrow::update()
 {
         const io::InputData input = io::read_input();
 
-        const MenuAction action =
-                m_browser.read(input, MenuInputMode::scrolling_and_letters);
+        const MenuAction action = m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
-        const FilteredInvEntry& inv_entry_marked =
-                m_filtered_inv[m_browser.y()];
+        const FilteredInvEntry& inv_entry_marked = m_filtered_inv[m_browser.y()];
 
         const Inventory& inv = map::g_player->m_inv;
 
@@ -1751,10 +1821,7 @@ void SelectThrow::update()
                         }
                 }
 
-                states::push(
-                        std::make_unique<Throwing>(
-                                map::g_player->m_pos,
-                                *item));
+                states::push(std::make_unique<Throwing>(map::g_player->m_pos, *item));
 
                 return;
         } break;
@@ -1770,6 +1837,34 @@ void SelectThrow::update()
         default:
                 break;
         }
+}
+
+void SelectThrow::reserve_keys()
+{
+        Inventory& inventory = map::g_player->m_inv;
+
+        int filtered_inv_idx_with_last_thrown_item = -1;
+
+        for (size_t i = 0; i < m_filtered_inv.size(); ++i) {
+                FilteredInvEntry& entry = m_filtered_inv[i];
+
+                const item::Item* const item =
+                        entry.is_slot
+                        ? inventory.m_slots[entry.relative_idx].item
+                        : inventory.m_backpack[entry.relative_idx];
+
+                if (item == actor::player_state::g_last_thrown_item) {
+                        filtered_inv_idx_with_last_thrown_item = (int)i;
+
+                        break;
+                }
+        }
+
+        reserve_key_for_filtered_inventory_index(
+                game_commands::throw_key(),
+                filtered_inv_idx_with_last_thrown_item,
+                m_filtered_inv,
+                m_browser);
 }
 
 // -----------------------------------------------------------------------------

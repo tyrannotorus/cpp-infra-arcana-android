@@ -39,17 +39,70 @@ static bool is_printable_ascii_char(const int key)
 // -----------------------------------------------------------------------------
 // MenuBrowser
 // -----------------------------------------------------------------------------
+const std::vector<char> std_menu_keys = {
+        'a',
+        'b',
+        'c',
+        'd',
+        'e',
+        'f',
+        'g',
+        'h',
+        'i',
+        // NOTE: j k l is used for browsing and selecting in menus in vi mode
+        'm',
+        'n',
+        'o',
+        'p',
+        'q',
+        'r',
+        's',
+        't',
+        'u',
+        'v',
+        'w',
+        'x',
+        'y',
+        'z',
+
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
+        'J',
+        'K',
+        'L',
+        'M',
+        'N',
+        'O',
+        'P',
+        'Q',
+        'R',
+        'S',
+        'T',
+        'U',
+        'V',
+        'W',
+        'X',
+        'Y',
+        'Z',
+};
+
 MenuAction MenuBrowser::read(
         const io::InputData& input,
         const MenuInputMode mode,
         const ForceAutoSelect force_auto_select)
 {
-        // NOTE: j k l are reserved for browsing with vi keys (not included in
-        // the standard menu key letters)
+        // NOTE: j k l are reserved for browsing with vi keys (they are excluded from the standard
+        // menu keys).
 
-        // Using both shortcut keys and left/right keys is not allowed; It is
-        // enough that j k l are reserved from being used as a shortcut keys,
-        // 'h' should not also be reserved.
+        // Using both shortcut keys and left/right keys is not allowed; It is enough that j k l are
+        // reserved from being used as a shortcut keys, 'h' should not also be reserved.
         ASSERT(!(
                 (mode == MenuInputMode::scrolling_and_letters) &&
                 m_use_left_right_keys));
@@ -134,13 +187,11 @@ MenuAction MenuBrowser::read(
             is_printable_ascii_char(input.key)) {
                 const auto c = (char)input.key;
 
-                const auto find_result =
-                        std::find(
-                                std::cbegin(m_menu_keys),
-                                std::cend(m_menu_keys),
-                                c);
+                const std::vector<char>& keys = menu_keys();
 
-                if (find_result == std::cend(m_menu_keys)) {
+                const auto find_result = std::find(std::cbegin(keys), std::cend(keys), c);
+
+                if (find_result == std::cend(keys)) {
                         // Not a valid menu key, ever.
                         return MenuAction::none;
                 }
@@ -154,7 +205,7 @@ MenuAction MenuBrowser::read(
 
                 const auto relative_idx =
                         (int)std::distance(
-                                std::cbegin(m_menu_keys),
+                                std::cbegin(keys),
                                 find_result);
 
                 if (relative_idx >= nr_items_shown()) {
@@ -281,16 +332,6 @@ void MenuBrowser::update_range_shown()
         }
 }
 
-void MenuBrowser::set_y_nearest_valid()
-{
-        if (m_nr_items >= 1) {
-                m_y = std::clamp(m_y, 0, m_nr_items - 1);
-        }
-        else {
-                m_y = 0;
-        }
-}
-
 int MenuBrowser::nr_items_shown() const
 {
         if (m_list_h >= 0) {
@@ -357,15 +398,29 @@ void MenuBrowser::reset(const int nr_items, const int list_h)
 {
         m_nr_items = nr_items;
 
-        // The size of the list viewable on screen is capped to the global
-        // number of menu selection keys available (note that the client asks
-        // the browser how many items should actually be drawn, so this capping
-        // should be reflected for all clients).
-        m_list_h = std::min(list_h, nr_menu_keys_avail(m_menu_keys));
+        const std::vector<char>& keys = m_menu_keys;
 
-        set_y_nearest_valid();
+        // The size of the list viewable on screen is capped to the global number of menu selection
+        // keys available (note that the client code asks the browser how many items should actually
+        // be drawn, so this capping should be reflected in all cases).
+        m_list_h = std::min(list_h, nr_menu_keys_avail(keys));
+
+        m_y = 0;
 
         update_range_shown();
+}
+
+const std::vector<char>& MenuBrowser::menu_keys() const
+{
+        // If on the top page, use the possibly customized keys, otherwise always use the standard
+        // keys. See comment for set_custom_menu_keys in the header file.
+
+        if (is_on_top_page()) {
+                return m_menu_keys;
+        }
+        else {
+                return std_menu_keys;
+        }
 }
 
 void MenuBrowser::remove_key(const char key)
@@ -378,5 +433,15 @@ void MenuBrowser::remove_key(const char key)
 
         if (it != std::cend(m_menu_keys)) {
                 m_menu_keys.erase(it);
+        }
+}
+
+void MenuBrowser::set_y_nearest_valid()
+{
+        if (m_nr_items >= 1) {
+                m_y = std::clamp(m_y, 0, m_nr_items - 1);
+        }
+        else {
+                m_y = 0;
         }
 }

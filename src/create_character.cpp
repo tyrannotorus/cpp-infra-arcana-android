@@ -424,11 +424,10 @@ void PickTraitState::init_browsers()
         m_browser_traits_avail.reset((int)m_traits_avail.size(), choices_h);
         m_browser_traits_unavail.reset((int)m_traits_unavail.size(), choices_h);
 
-        // The "i" key is used for showing player information, do not use it as
-        // a menu key.
+        // The "i" key is used for showing player information, do not use it as a menu key.
         //
-        // NOTE: The "i" key is not available at character creation, but this
-        // menu key is removed in that case as well for consistency.
+        // NOTE: The "i" key is not available at character creation, but this menu key is removed in
+        // that case as well for consistency.
         //
         m_browser_traits_avail.remove_key('i');
         m_browser_traits_unavail.remove_key('i');
@@ -812,8 +811,7 @@ void RemoveTraitState::init_browser()
                 (int)m_traits_can_be_removed.size(),
                 choices_h);
 
-        // The "i" key is used for showing player information, do not use it as
-        // a menu key.
+        // The "i" key is used for showing player information, do not use it as a menu key.
         m_browser.remove_key('i');
 
         m_browser.set_y(0);

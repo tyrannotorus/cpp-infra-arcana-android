@@ -125,7 +125,9 @@ public:
         void update() override;
 
 private:
-        std::vector<size_t> m_filtered_backpack_indexes {};
+        void reserve_key_for_item_id(const item::Id id, const char key);
+
+        std::vector<FilteredInvEntry> m_filtered_backpack_indexes {};
 };
 
 class Drop : public InvState
@@ -158,7 +160,7 @@ public:
         void update() override;
 
 private:
-        std::vector<size_t> m_filtered_backpack_indexes {};
+        std::vector<FilteredInvEntry> m_filtered_backpack_indexes {};
 
         InvSlot& m_slot_to_equip;
 };
@@ -175,6 +177,8 @@ public:
         void update() override;
 
 private:
+        void reserve_keys();
+
         std::vector<FilteredInvEntry> m_filtered_inv {};
 };
 

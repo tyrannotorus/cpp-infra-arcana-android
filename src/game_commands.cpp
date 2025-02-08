@@ -1348,4 +1348,9 @@ void handle(const GameCmd cmd)
 
 }  // handle
 
+char throw_key()
+{
+        return 't';
+}
+
 }  // namespace game_commands

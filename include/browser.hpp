@@ -41,61 +41,7 @@ enum class ForceAutoSelect
         yes
 };
 
-// TODO: Define in cpp file instead
-const std::vector<char> std_menu_keys = {
-        // NOTE: j k l is used for browsing and selecting in menus in vi mode
-        'a',
-        'b',
-        'c',
-        'd',
-        'e',
-        'f',
-        'g',
-        'h',
-        'i',
-        // 'j', 'k', 'l'
-        'm',
-        'n',
-        'o',
-        'p',
-        'q',
-        'r',
-        's',
-        't',
-        'u',
-        'v',
-        'w',
-        'x',
-        'y',
-        'z',
-
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'N',
-        'O',
-        'P',
-        'Q',
-        'R',
-        'S',
-        'T',
-        'U',
-        'V',
-        'W',
-        'X',
-        'Y',
-        'Z',
-};
+extern const std::vector<char> std_menu_keys;
 
 // TODO: There's probably some public methods here that could be private/removed
 class MenuBrowser
@@ -150,16 +96,27 @@ public:
 
         void reset(int nr_items, int list_h = -1);
 
-        const std::vector<char>& menu_keys() const
-        {
-                return m_menu_keys;
-        }
+        const std::vector<char>& menu_keys() const;
 
+        // NOTE: This ONLY ever affects the keys on the first screen, if scrolling down to screens
+        // further down, the default keys will always be used.
+        //
+        // Rationale: There should be two reasons for setting custom keys:
+        //
+        // 1) Menus like inventory screens where certain keys shall be reserved for a certain item
+        //    type, like the medical bag, and appear at the top of the list.
+        // 2) Small menus with completely custom keys that will only ever have one page.
+        //
+        // For case 1, the key should only be reserved and moved to the top on the first screen. If
+        // scrolling to screens further down, the item will not exist on that screen, and there
+        // should not be any specially handled reserved keys. For case 2, it doesn't matter.
+        //
         void set_custom_menu_keys(const std::vector<char>& keys)
         {
                 m_menu_keys = keys;
         }
 
+        // Only affects the first screen, see note above.
         void remove_key(char key);
 
         void set_selection_audio_enabled(const bool value)
