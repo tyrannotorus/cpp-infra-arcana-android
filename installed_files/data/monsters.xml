@@ -1480,8 +1480,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SLOW</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_AZA_GAZE</spell>
-            <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_BASIC">SPELL_HASTE</spell>
+            <spell skill="SPELLSKILL_EXPERT">SPELL_BLIND</spell>
         </spells>
 
         <ai>
