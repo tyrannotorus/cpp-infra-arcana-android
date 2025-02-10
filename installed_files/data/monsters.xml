@@ -991,6 +991,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <properties>
             <property>PROP_SMALL_CRAWLING</property>
             <property>PROP_DARKVISION</property>
+            <property>PROP_R_BLIND</property>
         </properties>
 
         <ai>
@@ -1088,6 +1089,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <properties>
             <property>PROP_DARKVISION</property>
             <property>PROP_FLYING</property>
+            <property>PROP_R_BLIND</property>
         </properties>
 
         <ai>
@@ -1192,6 +1194,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_BASIC" percent_chance="5">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="5">SPELL_KNOCKBACK</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="5">SPELL_AZA_GAZE</spell>
+            <spell skill="SPELLSKILL_BASIC" percent_chance="5">SPELL_BLIND</spell>
         </spells>
 
         <ai>
@@ -1477,6 +1480,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SLOW</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_AZA_GAZE</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_BASIC">SPELL_HASTE</spell>
         </spells>
 
@@ -1970,6 +1974,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_AZA_GAZE</spell>
+            <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_BLIND</spell>
         </spells>
 
         <ai>
@@ -2071,6 +2076,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_AZA_GAZE</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_BLIND</spell>
         </spells>
 
         <ai>
@@ -2172,6 +2178,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_AZA_GAZE</spell>
+            <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_BLIND</spell>
         </spells>
 
         <ai>
@@ -2544,6 +2551,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
         <properties>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_R_BLIND</property>
             <property>PROP_LIGHT_SENSITIVE</property>
             <property>PROP_DARKVISION</property>
         </properties>
@@ -5019,6 +5027,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
         <properties>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_R_BLIND</property>
             <property>PROP_LIGHT_SENSITIVE</property>
             <property>PROP_DARKVISION</property>
         </properties>
@@ -5390,6 +5399,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_FEAR</property>
             <property>PROP_R_CONF</property>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_R_BLIND</property>
             <property>PROP_INVIS</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_ETHEREAL</property>
@@ -5491,6 +5501,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_FEAR</property>
             <property>PROP_R_CONF</property>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_R_BLIND</property>
             <property>PROP_INVIS</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_ETHEREAL</property>
@@ -6536,6 +6547,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT">SPELL_DISEASE</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_ENFEEBLE</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SUMMON_RANDOM</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_change="50">SPELL_BLIND</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_change="50">SPELL_TERRIFY</spell>
         </spells>
 
         <properties>
@@ -6748,6 +6761,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT">SPELL_ENFEEBLE</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SPELL_SHIELD</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SUMMON_RANDOM</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_change="50">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_TERRIFY</spell>
         </spells>
 
@@ -6859,6 +6873,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT">SPELL_ENFEEBLE</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SPELL_SHIELD</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SUMMON_RANDOM</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_change="50">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_TERRIFY</spell>
         </spells>
 
@@ -8641,6 +8656,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_DISEASE</property>
             <property>PROP_R_PARA</property>
             <property>PROP_R_FEAR</property>
+            <property>PROP_R_BLIND</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_WATER_CREATURE</property>
         </properties>
@@ -8734,6 +8750,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
         <properties>
             <property>PROP_R_FEAR</property>
+            <property>PROP_R_BLIND</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_BURROWING</property>
         </properties>
@@ -9830,6 +9847,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_MASTER">SPELL_AURA_OF_DECAY</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_BURN</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_DARKBOLT</spell>
+            <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_BLIND</spell>
         </spells>
 
         <properties>
@@ -10036,6 +10054,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_MASTER">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_HASTE</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_AZA_GAZE</spell>
+            <spell skill="SPELLSKILL_MASTER">SPELL_BLIND</spell>
         </spells>
 
         <properties>

@@ -30,6 +30,7 @@
 # Spells
 - Increased duration of the See Invisible spell.
 - The rats summoned by the Pestilence appear scattered throughout an area (instead of grouped around the caster), and the spell only last for a limited time.
+- Added blindness as a spell available to some monsters (this also existed in the game a very long time ago).
 
 # Status effects
 - Poison now stacks, i.e. the duration of the new poison effect is added to the old (normally the duration is set to the longest duration of the old or new effect).

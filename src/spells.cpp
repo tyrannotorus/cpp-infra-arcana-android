@@ -6,6 +6,7 @@
 
 #include "spells.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <iterator>
@@ -76,6 +77,7 @@ static const std::unordered_map<std::string, SpellId> s_str_to_spell_id_map = {
         {"SPELL_AURA_OF_DECAY", SpellId::aura_of_decay},
         {"SPELL_AZA_GAZE", SpellId::aza_gaze},
         {"SPELL_BLESS", SpellId::bless},
+        {"SPELL_BLIND", SpellId::blind},
         {"SPELL_BURN", SpellId::burn},
         {"SPELL_CATACLYSM", SpellId::cataclysm},
         {"SPELL_CLEANSING_FIRE", SpellId::cleansing_fire},
@@ -907,6 +909,9 @@ Spell* make(const SpellId spell_id)
         case SpellId::burn:
                 return new SpellBurn();
 
+        case SpellId::blind:
+                return new SpellBlind();
+
         case SpellId::deafen:
                 return new SpellDeafen();
 
@@ -1658,8 +1663,7 @@ void SpellBolt::run_effect(
                                 msg_log::add(s_spell_reflect_msg);
                         }
 
-                        // Run effect with the target as caster, and the caster
-                        // as seen target instead.
+                        // Run effect with the target as caster, and the caster as seen target.
                         run_effect(target, skill, {caster});
                 }
 
@@ -1895,8 +1899,7 @@ void SpellAzaGaze::run_effect_on_target(
                                 msg_log::add(s_spell_reflect_msg);
                         }
 
-                        // Run effect with the target as caster, and the caster
-                        // as seen target instead.
+                        // Run effect with the target as caster, and the caster as seen target.
                         run_effect(&target, skill, {caster});
                 }
 
@@ -3920,9 +3923,13 @@ void SpellKnockBack::run_effect(
 {
         (void)skill;
 
-        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
+        actor::Actor* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
-        ASSERT(target);
+        if (!target) {
+                ASSERT(false);
+
+                return;
+        }
 
         // Spell resistance?
         if (target->m_properties.has(prop::Id::r_spell)) {
@@ -3934,8 +3941,7 @@ void SpellKnockBack::run_effect(
                                 msg_log::add(s_spell_reflect_msg);
                         }
 
-                        // Run effect with the target as caster, and the caster
-                        // as seen target instead.
+                        // Run effect with the target as caster, and the caster as seen target.
                         run_effect(target, skill, {caster});
                 }
 
@@ -4578,11 +4584,13 @@ void SpellDisease::run_effect(
         const SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
 {
-        (void)skill;
+        actor::Actor* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
-        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
+        if (!target) {
+                ASSERT(false);
 
-        ASSERT(target);
+                return;
+        }
 
         // Spell resistance?
         if (target->m_properties.has(prop::Id::r_spell)) {
@@ -4594,8 +4602,7 @@ void SpellDisease::run_effect(
                                 msg_log::add(s_spell_reflect_msg);
                         }
 
-                        // Run effect with the target as caster, and the caster
-                        // as seen target instead.
+                        // Run effect with the target as caster, and the caster as seen target.
                         run_effect(target, skill, {caster});
                 }
 
@@ -4630,6 +4637,98 @@ bool SpellDisease::allow_mon_cast_now(
         (void)mon;
 
         return !seen_targets.empty();
+}
+
+// -----------------------------------------------------------------------------
+// Blind
+// -----------------------------------------------------------------------------
+int SpellBlind::mon_cooldown() const
+{
+        return 20;
+}
+
+void SpellBlind::run_effect(
+        actor::Actor* const caster,
+        const SpellSkill skill,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        const std::vector<actor::Actor*> seen_targets_not_blind_resistant =
+                find_actors_not_blind_resistant(seen_targets);
+
+        actor::Actor* target =
+                map::random_closest_actor(
+                        caster->m_pos,
+                        seen_targets_not_blind_resistant);
+
+        if (!target) {
+                // NOTE: This is a legitimate case (e.g. player with spell reflection redirects the
+                // spell to a monster with blind resistance).
+
+                return;
+        }
+
+        // Spell resistance?
+        if (target->m_properties.has(prop::Id::r_spell)) {
+                on_resist(*target);
+
+                // Spell reflection?
+                if (target->m_properties.has(prop::Id::spell_reflect)) {
+                        if (actor::can_player_see_actor(*target)) {
+                                msg_log::add(s_spell_reflect_msg);
+                        }
+
+                        // Run effect with the target as caster, and the caster as seen target.
+                        run_effect(target, skill, {caster});
+                }
+
+                return;
+        }
+
+        if (actor::is_player(target)) {
+                msg_log::add("Scales grow over my eyes!");
+        }
+        else if (actor::can_player_see_actor(*target)) {
+                const std::string actor_name = actor::name_the(*target);
+
+                msg_log::add("Scales grow over the eyes of " + actor_name + ".");
+        }
+
+        prop::Prop* prop = prop::make(prop::Id::blind);
+
+        prop->set_duration(3 + (int)skill);
+
+        target->m_properties.apply(prop);
+
+        if (!actor::is_player(target)) {
+                target->become_aware_player(actor::AwareSource::spell_victim);
+        }
+}
+
+bool SpellBlind::allow_mon_cast_now(
+        const actor::Actor& mon,
+        const std::vector<actor::Actor*>& seen_targets) const
+{
+        (void)mon;
+
+        return !find_actors_not_blind_resistant(seen_targets).empty();
+}
+
+std::vector<actor::Actor*> SpellBlind::find_actors_not_blind_resistant(
+        const std::vector<actor::Actor*>& actors) const
+{
+        std::vector<actor::Actor*> result;
+
+        result.reserve(actors.size());
+
+        std::copy_if(
+                std::begin(actors),
+                std::end(actors),
+                std::back_inserter(result),
+                [](const actor::Actor* const actor) {
+                        return !actor->m_properties.has(prop::Id::blind);
+                });
+
+        return result;
 }
 
 // -----------------------------------------------------------------------------
@@ -4979,8 +5078,7 @@ void SpellMiGoHypno::run_effect(
                                 msg_log::add(s_spell_reflect_msg);
                         }
 
-                        // Run effect with the target as caster, and the caster
-                        // as seen target instead.
+                        // Run effect with the target as caster, and the caster as seen target.
                         run_effect(target, skill, {caster});
                 }
 
@@ -5022,9 +5120,13 @@ void SpellBurn::run_effect(
         const SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
 {
-        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
+        actor::Actor* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
-        ASSERT(target);
+        if (!target) {
+                ASSERT(false);
+
+                return;
+        }
 
         // Spell resistance?
         if (target->m_properties.has(prop::Id::r_spell)) {
@@ -5036,8 +5138,7 @@ void SpellBurn::run_effect(
                                 msg_log::add(s_spell_reflect_msg);
                         }
 
-                        // Run effect with the target as caster, and the caster
-                        // as seen target instead.
+                        // Run effect with the target as caster, and the caster as seen target.
                         run_effect(target, skill, {caster});
                 }
 
@@ -5053,7 +5154,7 @@ void SpellBurn::run_effect(
                 msg_log::add("Flames are rising around " + actor_name + "!");
         }
 
-        auto* prop = prop::make(prop::Id::burning);
+        prop::Prop* prop = prop::make(prop::Id::burning);
 
         prop->set_duration(2 + (int)skill);
 
@@ -5081,9 +5182,13 @@ void SpellDeafen::run_effect(
         const SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
 {
-        auto* target = map::random_closest_actor(caster->m_pos, seen_targets);
+        actor::Actor* target = map::random_closest_actor(caster->m_pos, seen_targets);
 
-        ASSERT(target);
+        if (!target) {
+                ASSERT(false);
+
+                return;
+        }
 
         // Spell resistance?
         if (target->m_properties.has(prop::Id::r_spell)) {
@@ -5095,8 +5200,7 @@ void SpellDeafen::run_effect(
                                 msg_log::add(s_spell_reflect_msg);
                         }
 
-                        // Run effect with the target as caster, and the caster
-                        // as seen target instead.
+                        // Run effect with the target as caster, and the caster as seen target.
                         run_effect(target, skill, {caster});
                 }
 

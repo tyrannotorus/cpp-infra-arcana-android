@@ -84,6 +84,7 @@ enum class SpellId
         burn,
         deafen,
         disease,
+        blind,
         knockback,
         mi_go_hypno,
         summon_random,
@@ -2493,6 +2494,77 @@ public:
                 const std::vector<actor::Actor*>& seen_targets) const override;
 
 private:
+        int base_max_cost(
+                const SpellSkill skill,
+                const actor::Actor* const caster) const override
+        {
+                (void)skill;
+                (void)caster;
+
+                return 7;
+        }
+
+        bool is_noisy(const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return true;
+        }
+};
+
+class SpellBlind : public Spell
+{
+public:
+        SpellBlind() = default;
+
+        bool allow_mon_cast_now(
+                const actor::Actor& mon,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+        int mon_cooldown() const override;
+
+        bool player_can_learn() const override
+        {
+                return false;
+        }
+
+        std::string name() const override
+        {
+                return "Blind";
+        }
+
+        SpellId id() const override
+        {
+                return SpellId::blind;
+        }
+
+        SpellDomain domain() const override
+        {
+                return SpellDomain::END;
+        }
+
+        SpellShock shock_type() const override
+        {
+                return SpellShock::disturbing;
+        }
+
+        std::vector<std::string> descr_specific(
+                const SpellSkill skill) const override
+        {
+                (void)skill;
+
+                return {};
+        }
+
+        void run_effect(
+                actor::Actor* caster,
+                SpellSkill skill,
+                const std::vector<actor::Actor*>& seen_targets) const override;
+
+private:
+        std::vector<actor::Actor*> find_actors_not_blind_resistant(
+                const std::vector<actor::Actor*>& actors) const;
+
         int base_max_cost(
                 const SpellSkill skill,
                 const actor::Actor* const caster) const override
