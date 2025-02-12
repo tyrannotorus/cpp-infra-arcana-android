@@ -2388,18 +2388,7 @@ void SpellPestilence::run_effect(
         }
 
         if (actor::is_player(caster) || is_any_seen_by_player) {
-                std::string caster_str = "me";
-
-                if (!actor::is_player(caster)) {
-                        if (actor::can_player_see_actor(*caster)) {
-                                caster_str = actor::name_the(*caster);
-                        }
-                        else {
-                                caster_str = "it";
-                        }
-                }
-
-                msg_log::add("Rats appear around " + caster_str + "!");
+                msg_log::add("Rats appear!");
         }
 }
 
