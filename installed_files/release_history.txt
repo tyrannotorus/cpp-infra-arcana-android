@@ -95,6 +95,7 @@
 - Exorcists picking a stack of Manuscripts destroyed the whole stack, but only gave bonuses for one Manuscript.
 - For Exorcist spell traits, available spirit info is no longer printed in the character info screen, only when picking a trait (also the character info screen could show wrong numbers).
 - Being stuck in mud had a limited time duration - it now has indefinite duration (the player/creature has to actively pull themselves free).
+- "Throwing a Stick of Dynamite" is no longer added to the message history.
 
 ##############################
 # Modability

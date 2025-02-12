@@ -1348,9 +1348,19 @@ void handle(const GameCmd cmd)
 
 }  // handle
 
+char fire_key()
+{
+        return 'f';
+}
+
 char throw_key()
 {
         return 't';
+}
+
+char view_key()
+{
+        return 'v';
 }
 
 }  // namespace game_commands

@@ -428,25 +428,9 @@ void Viewing::on_moved()
         if (actor &&
             !actor::is_player(actor) &&
             actor::can_player_see_actor(*actor)) {
-                // TODO: This should not be specified here
-                const char view_key = 'v';
-
-                // In debug mode, confirm that this is actually the correct key,
-                // however see TODO above
-#ifndef NDEBUG
-                {
-                        io::InputData dummy_input;
-                        dummy_input.key = view_key;
-
-                        const GameCmd game_cmd = game_commands::to_cmd(dummy_input);
-
-                        ASSERT(game_cmd == GameCmd::look);
-                }
-#endif  // NDEBUG
-
                 const std::string msg =
                         std::string("[") +
-                        view_key +
+                        game_commands::view_key() +
                         std::string("] for description");
 
                 msg_log::add(
@@ -541,25 +525,9 @@ void Aiming::on_moved()
                 }
         }
 
-        // TODO: This should not be specified here
-        const char fire_key = 'f';
-
-        // In debug mode, confirm that this is actually the correct key,
-        // however see TODO above
-#ifndef NDEBUG
-        {
-                io::InputData dummy_input;
-                dummy_input.key = fire_key;
-
-                const auto game_cmd = game_commands::to_cmd(dummy_input);
-
-                ASSERT(game_cmd == GameCmd::fire);
-        }
-#endif  // NDEBUG
-
         const std::string msg =
                 std::string("[") +
-                fire_key +
+                game_commands::fire_key() +
                 std::string("] to fire ") +
                 common_text::g_cancel_hint;
 
@@ -658,25 +626,9 @@ void AimingMeleeWpn::on_moved()
                 }
         }
 
-        // TODO: This should not be specified here
-        const char fire_key = 'f';
-
-        // In debug mode, confirm that this is actually the correct key,
-        // however see TODO above
-#ifndef NDEBUG
-        {
-                io::InputData dummy_input;
-                dummy_input.key = fire_key;
-
-                const GameCmd game_cmd = game_commands::to_cmd(dummy_input);
-
-                ASSERT(game_cmd == GameCmd::fire);
-        }
-#endif  // NDEBUG
-
         const std::string msg =
                 std::string("[") +
-                fire_key +
+                game_commands::fire_key() +
                 std::string("] to attack ") +
                 common_text::g_cancel_hint;
 
@@ -805,25 +757,9 @@ void Throwing::on_moved()
                 }
         }
 
-        // TODO: This should not be specified here
-        const auto throw_key = 't';
-
-        // In debug mode, confirm that this is actually the correct key,
-        // however see TODO above
-#ifndef NDEBUG
-        {
-                io::InputData dummy_input;
-                dummy_input.key = throw_key;
-
-                const auto game_cmd = game_commands::to_cmd(dummy_input);
-
-                ASSERT(game_cmd == GameCmd::throw_item);
-        }
-#endif  // NDEBUG
-
         const std::string msg =
                 std::string("[") +
-                throw_key +
+                game_commands::throw_key() +
                 std::string("] to throw ") +
                 common_text::g_cancel_hint;
 
@@ -936,29 +872,18 @@ void ThrowingExplosive::on_moved()
 {
         const std::string name = m_explosive.name(ItemNameType::a, ItemNameInfo::none);
 
-        msg_log::add("Throwing " + name + ".");
+        msg_log::add(
+                "Throwing " + name + ".",
+                colors::text(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
 
         view::print_location_info_msgs(m_pos);
 
-        // TODO: This should not be specified here
-        const char throw_key = 't';
-
-        // In debug mode, confirm that this is actually the correct key,
-        // however see TODO above
-#ifndef NDEBUG
-        {
-                io::InputData dummy_input;
-                dummy_input.key = throw_key;
-
-                const GameCmd game_cmd = game_commands::to_cmd(dummy_input);
-
-                ASSERT(game_cmd == GameCmd::throw_item);
-        }
-#endif  // NDEBUG
-
         const std::string msg =
                 std::string("[") +
-                throw_key +
+                game_commands::throw_key() +
                 std::string("] to throw ") +
                 common_text::g_cancel_hint;
 

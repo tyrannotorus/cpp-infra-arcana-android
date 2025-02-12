@@ -88,7 +88,9 @@ GameCmd to_cmd(const io::InputData& input);
 
 void handle(GameCmd cmd);
 
+char fire_key();
 char throw_key();
+char view_key();
 
 }  // namespace game_commands
 
