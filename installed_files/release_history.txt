@@ -42,7 +42,8 @@
 - Hallucinogenic Mold always start together with regular mold.
 - Mold now appear in a more scattered pattern when they "breed".
 - Leng Spider web bolas now also entangle for a few turns.
-- Misc monster balancing (a lot of balancing of changed stats, group sizes, properties, etc)
+- Void Travelers intercepting player teleportation now also ends invisibility and cloaking.
+- Misc monster balancing (a lot of balancing of stats, group sizes, properties, etc)
 - Added more monsters.
 
 # Map generation

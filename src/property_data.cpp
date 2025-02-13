@@ -949,7 +949,7 @@ static void init_data_list()
         d.descr = "Cannot be detected by normal sight.";
         d.msg_start_player = "I am out of sight!";
         d.msg_start_mon = "is out of sight!";
-        d.msg_end_player = "I am visible.";
+        d.msg_end_player = "I am no longer invisible.";
         d.msg_end_mon = "";
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;
@@ -964,9 +964,9 @@ static void init_data_list()
         d.descr =
                 "Cannot be detected by normal sight, ends if attacking or "
                 "casting spells.";
-        d.msg_start_player = "I am out of sight!";
-        d.msg_start_mon = "is out of sight!";
-        d.msg_end_player = "I am visible.";
+        d.msg_start_player = "I am cloaked!";
+        d.msg_start_mon = "is cloaked!";
+        d.msg_end_player = "My cloak fades.";
         d.msg_end_mon = "";
         d.allow_display_turns = true;
         d.update_vision_on_toggled = true;

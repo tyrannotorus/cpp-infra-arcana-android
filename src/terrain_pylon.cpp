@@ -263,11 +263,9 @@ void PylonInvis::on_new_turn()
                         continue;
                 }
 
-                const bool can_player_see_actor_before =
-                        actor::can_player_see_actor(*actor);
+                const bool can_player_see_actor_before = actor::can_player_see_actor(*actor);
 
-                actor->m_properties.apply(
-                        prop::make(prop::Id::cloaked));
+                actor->m_properties.apply(prop::make(prop::Id::cloaked));
 
                 if (can_player_see_actor_before) {
                         reveal();

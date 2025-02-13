@@ -48,8 +48,7 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static bool is_void_traveler_affecting_player_teleport(
-        const actor::Actor& actor)
+static bool is_void_traveler_affecting_player_teleport(const actor::Actor& actor)
 {
         const std::string actor_id = actor::id(actor);
 
@@ -82,11 +81,65 @@ static std::vector<P> get_free_positions_around_pos(
         return free_positions;
 }
 
+static bool handle_void_traveler_affecting_player_teleport(
+        actor::Actor& actor_teleporting,
+        P& target_pos,
+        const Array2<bool>& blocked)
+{
+        if (!actor::is_player(&actor_teleporting)) {
+                return false;
+        }
+
+        for (actor::Actor* const other_actor : game_time::g_actors) {
+                if (!is_void_traveler_affecting_player_teleport(*other_actor)) {
+                        continue;
+                }
+
+                const std::vector<P> p_bucket =
+                        get_free_positions_around_pos(
+                                other_actor->m_pos,
+                                blocked);
+
+                if (p_bucket.empty()) {
+                        continue;
+                }
+
+                // Set new teleport destination
+                target_pos = rnd::element(p_bucket);
+
+                const std::string actor_name_a =
+                        text_format::first_to_upper(
+                                actor::name_a(*other_actor));
+
+                msg_log::add(actor_name_a + " intercepts my teleportation!");
+
+                const std::vector<prop::Id> props_ended = {
+                        prop::Id::invis,
+                        prop::Id::cloaked,
+                };
+
+                const prop::PropEndConfig cfg(
+                        prop::PropEndAllowCallEndHook::no,
+                        prop::PropEndAllowMsg::yes,
+                        prop::PropEndAllowHistoricMsg::yes);
+
+                for (prop::Id id : props_ended) {
+                        actor_teleporting.m_properties.end_prop(id, cfg);
+                }
+
+                other_actor->become_aware_player(actor::AwareSource::other);
+
+                return true;
+        }
+
+        return false;
+}
+
 static void make_all_mon_not_seeing_player_unaware()
 {
         Array2<bool> blocks_los(map::dims());
 
-        const auto r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
+        const R r = fov::fov_rect(map::g_player->m_pos, blocks_los.dims());
 
         map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
 
@@ -108,7 +161,7 @@ static void confuse_player()
 {
         msg_log::add("I suddenly find myself in a different location!");
 
-        auto* prop = prop::make(prop::Id::confused);
+        prop::Prop* prop = prop::make(prop::Id::confused);
 
         prop->set_duration(8);
 
@@ -163,7 +216,7 @@ static void filter_out_near(const P& origin, std::vector<P>& positions)
 
         // Remove all positions close than the minimum distance.
         for (auto it = std::begin(positions); it != std::end(positions);) {
-                const auto p = *it;
+                const P p = *it;
 
                 const int d = king_dist(origin, p);
 
@@ -208,7 +261,7 @@ void teleport(
 
         // Run the floodfill, mark positions that are either unreached or too far away as
         // blocked. Also mark starting position as blocked.
-        const auto flood = floodfill(actor.m_pos, blocked);
+        const Array2<int> flood = floodfill(actor.m_pos, blocked);
 
         for (const P& p : map::rect().positions()) {
                 if (flood.at(p) <= 0) {
@@ -256,7 +309,7 @@ void teleport(
                 return;
         }
 
-        const auto tgt_pos = rnd::element(pos_bucket);
+        const P tgt_pos = rnd::element(pos_bucket);
 
         teleport(actor, tgt_pos, blocked);
 }
@@ -275,65 +328,30 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                 prop::Id::stuck,
                 prop::Id::nailed};
 
-        for (const auto id : props_ended) {
-                const prop::PropEndConfig cfg(
-                        prop::PropEndAllowCallEndHook::no,
-                        prop::PropEndAllowMsg::no,
-                        prop::PropEndAllowHistoricMsg::yes);
+        const prop::PropEndConfig cfg(
+                prop::PropEndAllowCallEndHook::no,
+                prop::PropEndAllowMsg::no,
+                prop::PropEndAllowHistoricMsg::yes);
 
+        for (const prop::Id id : props_ended) {
                 actor.m_properties.end_prop(id, cfg);
         }
 
-        // Hostile void travelers "intercepts" players teleporting, and calls
-        // the player to them
-        bool is_affected_by_void_traveler = false;
+        // Hostile void travelers "intercepts" players teleporting, and calls the player to them.
+        const bool is_affected_by_void_traveler =
+                handle_void_traveler_affecting_player_teleport(
+                        actor,
+                        p,
+                        blocked);
 
-        if (actor::is_player(&actor)) {
-                for (auto* const other_actor : game_time::g_actors) {
-                        if (!is_void_traveler_affecting_player_teleport(*other_actor)) {
-                                continue;
-                        }
-
-                        const std::vector<P> p_bucket =
-                                get_free_positions_around_pos(
-                                        other_actor->m_pos,
-                                        blocked);
-
-                        if (p_bucket.empty()) {
-                                continue;
-                        }
-
-                        // Set new teleport destination
-                        p = rnd::element(p_bucket);
-
-                        const std::string actor_name_a =
-                                text_format::first_to_upper(
-                                        actor::name_a(*other_actor));
-
-                        msg_log::add(
-                                actor_name_a +
-                                " intercepts my teleportation!");
-
-                        other_actor
-                                ->become_aware_player(
-                                        actor::AwareSource::other);
-
-                        is_affected_by_void_traveler = true;
-
-                        break;
-                }
-        }
-
-        // Leave current cell
+        // Leave current position.
         map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
         // Update actor position to new position
         actor.m_pos = p;
 
         if (actor::is_player(&actor)) {
-                viewport::show(
-                        map::g_player->m_pos,
-                        viewport::ForceCentering::yes);
+                viewport::show(map::g_player->m_pos, viewport::ForceCentering::yes);
         }
 
         map::update_vision();
@@ -344,18 +362,16 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
                 make_all_mon_not_seeing_player_unaware();
         }
         else if (player_can_see_actor_before) {
-                const bool player_can_see_actor =
-                        actor::can_player_see_actor(actor);
+                const bool player_can_see_actor = actor::can_player_see_actor(actor);
 
                 if (!player_can_see_actor) {
                         actor.m_mon_aware_state.player_aware_of_me_counter = 0;
                 }
 
                 const std::string actor_name_the =
-                        text_format::first_to_upper(
-                                actor::name_the(actor));
+                        text_format::first_to_upper(actor::name_the(actor));
 
-                const auto msg_ending =
+                const std::string msg_ending =
                         player_can_see_actor
                         ? common_text::g_mon_disappear_reappear
                         : common_text::g_mon_disappear;

@@ -712,14 +712,6 @@ static void end_properties_for_casting_spell(
         const SpellId spell_id)
 {
         // End cloaking (unless invisibility was cast now).
-        //
-        // NOTE: This could be slightly weird, as the player could for example
-        // have cloaking with a very long duration applied, and then cast
-        // invisibility, applying actual invisibility instead of cloaking - then
-        // the long cloaking effect will still be kept. But this seems like a
-        // very minor issue or perhaps not an issue at all. It just means that
-        // the invisibility spell is an exception from spells breaking cloaking.
-        //
         if (spell_id != SpellId::invis) {
                 caster.m_properties.end_prop(prop::Id::cloaked);
         }
