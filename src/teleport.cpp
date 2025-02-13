@@ -237,9 +237,8 @@ void teleport(
 
         // Teleport control?
         if (actor::is_player(&actor) && should_player_ctrl_tele(ctrl_tele)) {
-                auto tele_ctrl_state = std::make_unique<CtrlTele>(actor.m_pos, blocked, max_dist);
-
-                states::push(std::move(tele_ctrl_state));
+                states::run_until_state_done(
+                        std::make_unique<CtrlTele>(actor.m_pos, blocked, max_dist));
 
                 return;
         }
