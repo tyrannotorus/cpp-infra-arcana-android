@@ -346,34 +346,6 @@ private:
         }
 };
 
-class RFire : public Potion
-{
-public:
-        RFire(item::ItemData* const item_data) :
-                Potion(item_data) {}
-        ~RFire() = default;
-
-        void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Fire Resistance";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return "Protects the consumer from fire.";
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
-        void collide_hook(const P& pos, actor::Actor* actor) override;
-};
-
 class Curing : public Potion
 {
 public:
@@ -405,24 +377,24 @@ private:
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
-class RElec : public Potion
+class Resistance : public Potion
 {
 public:
-        RElec(item::ItemData* const item_data) :
+        Resistance(item::ItemData* const item_data) :
                 Potion(item_data) {}
-        ~RElec() = default;
+        ~Resistance() = default;
 
         void quaff_impl(actor::Actor& actor) override;
 
         std::string real_name() const override
         {
-                return "Insulation";
+                return "Resistance";
         }
 
 private:
         std::string descr_identified() const override
         {
-                return "Protects the consumer from electricity.";
+                return "Protects the consumer from electricity, fire, and poison.";
         }
 
         PotionAlignment alignment() const override

@@ -68,6 +68,8 @@ void init()
 
         // Randomize scroll fake names
         s_fake_names.clear();
+
+        // Fixed fake names:
         s_fake_names.emplace_back("Cruensseasrjit");
         s_fake_names.emplace_back("Rudsceleratus");
         s_fake_names.emplace_back("Rudminuox");
@@ -92,56 +94,60 @@ void init()
         s_fake_names.emplace_back("Maravita");
         s_fake_names.emplace_back("Infirmux");
 
-        std::vector<std::string> cmb;
-        cmb.clear();
-        cmb.emplace_back("Cruo");
-        cmb.emplace_back("Cruonit");
-        cmb.emplace_back("Cruentu");
-        cmb.emplace_back("Marana");
-        cmb.emplace_back("Domus");
-        cmb.emplace_back("Malax");
-        cmb.emplace_back("Caecux");
-        cmb.emplace_back("Eximha");
-        cmb.emplace_back("Vorox");
-        cmb.emplace_back("Bibox");
-        cmb.emplace_back("Pallex");
-        cmb.emplace_back("Profanx");
-        cmb.emplace_back("Invisuu");
-        cmb.emplace_back("Invisux");
-        cmb.emplace_back("Odiosuu");
-        cmb.emplace_back("Odiosux");
-        cmb.emplace_back("Vigra");
-        cmb.emplace_back("Crudux");
-        cmb.emplace_back("Desco");
-        cmb.emplace_back("Esco");
-        cmb.emplace_back("Gero");
-        cmb.emplace_back("Klaatu");
-        cmb.emplace_back("Barada");
-        cmb.emplace_back("Nikto");
+        // Words that can be combined into names:
+        std::vector<std::string> combinable_names;
+        combinable_names.clear();
+        combinable_names.emplace_back("Cruo");
+        combinable_names.emplace_back("Cruonit");
+        combinable_names.emplace_back("Cruentu");
+        combinable_names.emplace_back("Marana");
+        combinable_names.emplace_back("Domus");
+        combinable_names.emplace_back("Malax");
+        combinable_names.emplace_back("Caecux");
+        combinable_names.emplace_back("Eximha");
+        combinable_names.emplace_back("Vorox");
+        combinable_names.emplace_back("Bibox");
+        combinable_names.emplace_back("Pallex");
+        combinable_names.emplace_back("Profanx");
+        combinable_names.emplace_back("Invisuu");
+        combinable_names.emplace_back("Invisux");
+        combinable_names.emplace_back("Odiosuu");
+        combinable_names.emplace_back("Odiosux");
+        combinable_names.emplace_back("Vigra");
+        combinable_names.emplace_back("Crudux");
+        combinable_names.emplace_back("Desco");
+        combinable_names.emplace_back("Esco");
+        combinable_names.emplace_back("Gero");
+        combinable_names.emplace_back("Klaatu");
+        combinable_names.emplace_back("Barada");
+        combinable_names.emplace_back("Nikto");
 
-        const size_t nr_cmb_parts = cmb.size();
+        const size_t nr_combinable_names = combinable_names.size();
 
-        for (size_t i = 0; i < nr_cmb_parts; ++i) {
-                for (size_t ii = 0; ii < nr_cmb_parts; ii++) {
+        for (size_t i = 0; i < nr_combinable_names; ++i) {
+                for (size_t ii = 0; ii < nr_combinable_names; ii++) {
                         if (i != ii) {
-                                s_fake_names.push_back(cmb[i] + " " + cmb[ii]);
+                                s_fake_names.push_back(
+                                        combinable_names[i] +
+                                        " " +
+                                        combinable_names[ii]);
                         }
                 }
         }
 
         std::vector<item::ItemData*> scroll_data;
 
-        for (auto& d : item::g_data) {
+        for (item::ItemData& d : item::g_data) {
                 if (d.type == ItemType::scroll) {
                         scroll_data.push_back(&d);
                 }
         }
 
-        for (auto& d : scroll_data) {
+        for (item::ItemData* d : scroll_data) {
                 // False name
                 const size_t idx = rnd::idx(s_fake_names);
 
-                const auto& title = s_fake_names[idx];
+                const std::string& title = s_fake_names[idx];
 
                 d->base_name_un_id.names[(size_t)ItemNameType::plain] =
                         "Manuscript titled " + title;
@@ -159,25 +165,20 @@ void init()
                         static_cast<const Scroll*>(
                                 item::make(d->id, 1)));
 
-                const auto real_type_name = scroll->real_name();
+                const std::string real_type_name = scroll->real_name();
 
-                const auto real_name =
+                const std::string real_name =
                         "Manuscript of " + real_type_name;
 
-                const auto real_name_plural =
+                const std::string real_name_plural =
                         "Manuscripts of " + real_type_name;
 
-                const auto real_name_a =
+                const std::string real_name_a =
                         "a Manuscript of " + real_type_name;
 
-                d->base_name.names[(size_t)ItemNameType::plain] =
-                        real_name;
-
-                d->base_name.names[(size_t)ItemNameType::plural] =
-                        real_name_plural;
-
-                d->base_name.names[(size_t)ItemNameType::a] =
-                        real_name_a;
+                d->base_name.names[(size_t)ItemNameType::plain] = real_name;
+                d->base_name.names[(size_t)ItemNameType::plural] = real_name_plural;
+                d->base_name.names[(size_t)ItemNameType::a] = real_name_a;
         }
 
         // Randomize scroll spawning chances - some scrolls have a "high"

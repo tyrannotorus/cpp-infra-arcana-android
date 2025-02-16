@@ -58,7 +58,6 @@ enum class SpellId
         light,
         cataclysm,
         control_object,
-        resistance,
         invis,
         see_invis,
         transmut,
@@ -2065,74 +2064,6 @@ private:
                 (void)skill;
 
                 return false;
-        }
-};
-
-class SpellResistance : public Spell
-{
-public:
-        SpellResistance() = default;
-
-        bool allow_mon_cast_now(
-                const actor::Actor& mon,
-                const std::vector<actor::Actor*>& seen_targets) const override;
-
-        int mon_cooldown() const override
-        {
-                return 20;
-        }
-
-        bool player_can_learn() const override
-        {
-                return true;
-        }
-
-        std::string name() const override
-        {
-                return "Resistance";
-        }
-
-        SpellId id() const override
-        {
-                return SpellId::resistance;
-        }
-
-        SpellDomain domain() const override
-        {
-                return SpellDomain::enchantment;
-        }
-
-        SpellShock shock_type() const override
-        {
-                return SpellShock::mild;
-        }
-
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
-
-        void run_effect(
-                actor::Actor* caster,
-                SpellSkill skill,
-                const std::vector<actor::Actor*>& seen_targets) const override;
-
-private:
-        Range duration_range(SpellSkill skill) const;
-
-        int base_max_cost(
-                const SpellSkill skill,
-                const actor::Actor* const caster) const override
-        {
-                (void)skill;
-                (void)caster;
-
-                return 7;
-        }
-
-        bool is_noisy(const SpellSkill skill) const override
-        {
-                (void)skill;
-
-                return true;
         }
 };
 

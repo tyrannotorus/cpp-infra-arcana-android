@@ -100,7 +100,6 @@ static const std::unordered_map<std::string, SpellId> s_str_to_spell_id_map = {
         {"SPELL_PESTILENCE", SpellId::pestilence},
         {"SPELL_PREMONITION", SpellId::premonition},
         {"SPELL_PURGE", SpellId::purge},
-        {"SPELL_RES", SpellId::resistance},
         {"SPELL_SANCTUARY", SpellId::sanctuary},
         {"SPELL_SEE_INVIS", SpellId::see_invis},
         {"SPELL_SLOW", SpellId::slow},
@@ -906,9 +905,6 @@ Spell* make(const SpellId spell_id)
 
         case SpellId::deafen:
                 return new SpellDeafen();
-
-        case SpellId::resistance:
-                return new SpellResistance();
 
         case SpellId::light:
                 return new SpellLight();
@@ -3821,73 +3817,6 @@ std::vector<std::string> SpellTeleport::descr_specific(
         }
 
         return descr;
-}
-
-// -----------------------------------------------------------------------------
-// Resistance
-// -----------------------------------------------------------------------------
-Range SpellResistance::duration_range(SpellSkill skill) const
-{
-        switch (skill) {
-        case SpellSkill::basic:
-                return {10, 20};
-
-        case SpellSkill::expert:
-                return {30, 60};
-
-        case SpellSkill::master:
-                return {80, 160};
-
-        case SpellSkill::transcendent:
-                return {300, 600};
-        }
-
-        ASSERT(false);
-
-        return {1, 1};
-}
-
-void SpellResistance::run_effect(
-        actor::Actor* const caster,
-        const SpellSkill skill,
-        const std::vector<actor::Actor*>& seen_targets) const
-{
-        (void)seen_targets;
-
-        int nr_turns = duration_range(skill).roll();
-
-        prop::Prop* prop_r_fire = prop::make(prop::Id::r_fire);
-        prop::Prop* prop_r_elec = prop::make(prop::Id::r_elec);
-
-        prop_r_fire->set_duration(nr_turns);
-        prop_r_elec->set_duration(nr_turns);
-
-        caster->m_properties.apply(prop_r_fire);
-        caster->m_properties.apply(prop_r_elec);
-}
-
-std::vector<std::string> SpellResistance::descr_specific(
-        const SpellSkill skill) const
-{
-        std::vector<std::string> descr;
-
-        descr.emplace_back("The caster is completely shielded from fire and electricity.");
-
-        descr.push_back("The spell lasts " + duration_range(skill).str() + " turns.");
-
-        return descr;
-}
-
-bool SpellResistance::allow_mon_cast_now(
-        const actor::Actor& mon,
-        const std::vector<actor::Actor*>& seen_targets) const
-{
-        (void)seen_targets;
-
-        const bool has_r_fire = mon.m_properties.has(prop::Id::r_fire);
-        const bool has_r_elec = mon.m_properties.has(prop::Id::r_elec);
-
-        return ((!has_r_fire || !has_r_elec) && mon.m_ai_state.target);
 }
 
 // -----------------------------------------------------------------------------

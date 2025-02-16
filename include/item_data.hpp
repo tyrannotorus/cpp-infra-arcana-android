@@ -149,7 +149,6 @@ enum class Id
         scroll_light,
         scroll_pestilence,
         scroll_premonition,
-        scroll_resistance,
         scroll_sacrifice_life,
         scroll_see_invis,
         scroll_slow,
@@ -163,13 +162,12 @@ enum class Id
         // Potions
         // Benign
         potion_curing,
-        potion_descent,
-        potion_fortitude,
-        potion_insight,
-        potion_r_elec,
-        potion_r_fire,
-        potion_spirit,
         potion_vitality,
+        potion_spirit,
+        potion_fortitude,
+        potion_resistance,
+        potion_insight,
+        potion_descent,
         // Malign
         potion_blindness,
         potion_conf,

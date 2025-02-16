@@ -1231,16 +1231,16 @@ std::string occultist_domain_descr(const OccultistDomain domain)
 {
         switch (domain) {
         case OccultistDomain::clairvoyant:
-                return "Specializes in detection and learning. "
-                       "Has an intrinsic ability to detect doors, traps, "
-                       "stairs, and other locations of interest in the "
-                       "surrounding area. At character level 4, this ability "
-                       "also reveals items, and at level 8 it reveals "
-                       "creatures";
+                return (
+                        "Specializes in detection and learning. "
+                        "Has an intrinsic ability to detect doors, traps, "
+                        "stairs, and other locations of interest in the "
+                        "surrounding area. At character level 4, this ability "
+                        "also reveals items, and at level 8 it reveals "
+                        "creatures");
 
         case OccultistDomain::enchanter:
-                return "Specializes in aiding, debilitating, entrancing, and "
-                       "beguiling";
+                return "Specializes in aiding, debilitating, entrancing, and beguiling";
 
         case OccultistDomain::invoker:
                 return "Specializes in channeling destructive powers";

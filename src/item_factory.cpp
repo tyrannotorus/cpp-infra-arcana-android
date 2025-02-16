@@ -314,7 +314,6 @@ Item* make(const Id item_id, const int nr_items)
         case Id::scroll_darkbolt:
         case Id::scroll_aza_gaze:
         case Id::scroll_control_object:
-        case Id::scroll_resistance:
         case Id::scroll_light:
         case Id::scroll_spectral_wpns:
         case Id::scroll_transmut:
@@ -352,8 +351,8 @@ Item* make(const Id item_id, const int nr_items)
                 r = new potion::Paral(d);
                 break;
 
-        case Id::potion_r_elec:
-                r = new potion::RElec(d);
+        case Id::potion_resistance:
+                r = new potion::Resistance(d);
                 break;
 
         case Id::potion_conf:
@@ -366,10 +365,6 @@ Item* make(const Id item_id, const int nr_items)
 
         case Id::potion_insight:
                 r = new potion::Insight(d);
-                break;
-
-        case Id::potion_r_fire:
-                r = new potion::RFire(d);
                 break;
 
         case Id::potion_curing:

@@ -78,6 +78,33 @@ static std::vector<actor::Actor*> actors_reached_by_onyx_drop()
         return actors;
 }
 
+static void apply_properties_with_equal_duration(
+        const std::vector<prop::Id> ids,
+        actor::Actor& actor)
+{
+        std::vector<prop::Prop*> props_applied;
+
+        for (prop::Id id : ids) {
+                props_applied.push_back(prop::make(id));
+        }
+
+        int duration = -1;
+
+        // The duration of all properties is decided by the randomized duration of the first.
+        for (prop::Prop* const prop : props_applied) {
+                if (duration == -1) {
+                        duration = prop->nr_turns_left();
+                }
+                else {
+                        prop->set_duration(duration);
+                }
+        }
+
+        for (prop::Prop* const prop : props_applied) {
+                actor.m_properties.apply(prop);
+        }
+}
+
 // -----------------------------------------------------------------------------
 // potion
 // -----------------------------------------------------------------------------
@@ -522,31 +549,21 @@ void Conf::collide_hook(const P& pos, actor::Actor* const actor)
 
 void Fortitude::quaff_impl(actor::Actor& actor)
 {
-        auto* prop_r_fear = prop::make(prop::Id::r_fear);
-        auto* prop_r_conf = prop::make(prop::Id::r_conf);
-        auto* prop_r_sleep = prop::make(prop::Id::r_sleep);
-
-        // The duration of the last two properties is decided by the randomized
-        // duration of the first property
-        const int duration = prop_r_fear->nr_turns_left();
-
-        prop_r_conf->set_duration(duration);
-        prop_r_sleep->set_duration(duration);
-
-        actor.m_properties.apply(prop_r_fear);
-        actor.m_properties.apply(prop_r_conf);
-        actor.m_properties.apply(prop_r_sleep);
+        apply_properties_with_equal_duration(
+                {prop::Id::r_fear,
+                 prop::Id::r_conf,
+                 prop::Id::r_sleep},
+                actor);
 
         actor.m_properties.end_prop(prop::Id::frenzied);
         actor.m_properties.end_prop(prop::Id::hallucinating);
         actor.m_properties.end_prop(prop::Id::mind_sap);
 
         if (actor::is_player(&actor)) {
-                const std::vector<const InsSympt*> sympts =
-                        insanity::active_sympts();
+                const std::vector<const InsSympt*> sympts = insanity::active_sympts();
 
                 if (!sympts.empty()) {
-                        const auto id = rnd::element(sympts)->id();
+                        const InsSymptId id = rnd::element(sympts)->id();
 
                         insanity::end_sympt(id);
                 }
@@ -580,24 +597,6 @@ void Poison::quaff_impl(actor::Actor& actor)
 }
 
 void Poison::collide_hook(const P& pos, actor::Actor* const actor)
-{
-        (void)pos;
-
-        if (actor) {
-                quaff_impl(*actor);
-        }
-}
-
-void RFire::quaff_impl(actor::Actor& actor)
-{
-        actor.m_properties.apply(prop::make(prop::Id::r_fire));
-
-        if (actor::can_player_see_actor(actor)) {
-                identify(Verbose::yes);
-        }
-}
-
-void RFire::collide_hook(const P& pos, actor::Actor* const actor)
 {
         (void)pos;
 
@@ -656,16 +655,20 @@ void Curing::collide_hook(const P& pos, actor::Actor* const actor)
         }
 }
 
-void RElec::quaff_impl(actor::Actor& actor)
+void Resistance::quaff_impl(actor::Actor& actor)
 {
-        actor.m_properties.apply(prop::make(prop::Id::r_elec));
+        apply_properties_with_equal_duration(
+                {prop::Id::r_elec,
+                 prop::Id::r_fire,
+                 prop::Id::r_poison},
+                actor);
 
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
         }
 }
 
-void RElec::collide_hook(const P& pos, actor::Actor* const actor)
+void Resistance::collide_hook(const P& pos, actor::Actor* const actor)
 {
         (void)pos;
 

@@ -1645,11 +1645,6 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::scroll);
-        d.id = Id::scroll_resistance;
-        d.spell_cast_from_scroll = SpellId::resistance;
-        g_data[(size_t)d.id] = d;
-
-        reset_data(d, ItemType::scroll);
         d.id = Id::scroll_light;
         d.spell_cast_from_scroll = SpellId::light;
         g_data[(size_t)d.id] = d;
@@ -1740,10 +1735,6 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::potion);
-        d.id = Id::potion_r_elec;
-        g_data[(size_t)d.id] = d;
-
-        reset_data(d, ItemType::potion);
         d.id = Id::potion_conf;
         g_data[(size_t)d.id] = d;
 
@@ -1759,7 +1750,7 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::potion);
-        d.id = Id::potion_r_fire;
+        d.id = Id::potion_resistance;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::potion);

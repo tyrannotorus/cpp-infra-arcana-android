@@ -177,8 +177,7 @@ static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
         case item::Id::potion_insight:
         case item::Id::potion_paralyze:
         case item::Id::potion_poison:
-        case item::Id::potion_r_elec:
-        case item::Id::potion_r_fire:
+        case item::Id::potion_resistance:
         case item::Id::potion_spirit:
         case item::Id::potion_vitality:
         case item::Id::refl_talisman:
@@ -211,7 +210,6 @@ static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
         case item::Id::scroll_light:
         case item::Id::scroll_pestilence:
         case item::Id::scroll_premonition:
-        case item::Id::scroll_resistance:
         case item::Id::scroll_sacrifice_life:
         case item::Id::scroll_see_invis:
         case item::Id::scroll_slow:
@@ -376,8 +374,7 @@ static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
         case item::Id::potion_insight:
         case item::Id::potion_paralyze:
         case item::Id::potion_poison:
-        case item::Id::potion_r_elec:
-        case item::Id::potion_r_fire:
+        case item::Id::potion_resistance:
         case item::Id::potion_spirit:
         case item::Id::potion_vitality:
         case item::Id::refl_talisman:
@@ -410,7 +407,6 @@ static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
         case item::Id::scroll_light:
         case item::Id::scroll_pestilence:
         case item::Id::scroll_premonition:
-        case item::Id::scroll_resistance:
         case item::Id::scroll_sacrifice_life:
         case item::Id::scroll_see_invis:
         case item::Id::scroll_slow:
