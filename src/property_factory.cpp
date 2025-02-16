@@ -133,9 +133,6 @@ Prop* make(const prop::Id id)
         case prop::Id::stuck:
                 return new Stuck();
 
-        case prop::Id::r_acid:
-                return new RAcid();
-
         case prop::Id::r_conf:
                 return new RConf();
 

@@ -25,8 +25,6 @@
 using StrToIdMap = std::unordered_map<std::string, item::Id>;
 
 static const StrToIdMap s_str_to_intr_item_id_map = {
-        {"ITEMINTR_ACID_SPIT", item::Id::intr_acid_spit},
-        {"ITEMINTR_ACID_TOUCH", item::Id::intr_acid_touch},
         {"ITEMINTR_BITE", item::Id::intr_bite},
         {"ITEMINTR_CLAW", item::Id::intr_claw},
         {"ITEMINTR_DUST_ENGULF", item::Id::intr_dust_engulf},
@@ -44,11 +42,13 @@ static const StrToIdMap s_str_to_intr_item_id_map = {
         {"ITEMINTR_PUNCH", item::Id::intr_punch},
         {"ITEMINTR_PUNCH_KNOCKBACK", item::Id::intr_punch_knockback},
         {"ITEMINTR_PUS_SPEW", item::Id::intr_pus_spew},
+        {"ITEMINTR_PUTRID_SPIT", item::Id::intr_putrid_spit},
         {"ITEMINTR_RAVEN_PECK", item::Id::intr_raven_peck},
         {"ITEMINTR_SNAKE_VENOM_SPIT", item::Id::intr_snake_venom_spit},
         {"ITEMINTR_SPEAR_THRUST", item::Id::intr_spear_thrust},
         {"ITEMINTR_SPORES", item::Id::intr_spores},
         {"ITEMINTR_STING", item::Id::intr_sting},
+        {"ITEMINTR_STRANGE_COLOR_TOUCH", item::Id::intr_strange_color_touch},
         {"ITEMINTR_STRANGLE", item::Id::intr_strangle},
         {"ITEMINTR_STRIKE", item::Id::intr_strike},
         {"ITEMINTR_VAMPIRIC_BITE", item::Id::intr_vampiric_bite},
@@ -1262,11 +1262,11 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::ranged_wpn_intr);
-        d.id = Id::intr_acid_spit;
-        d.ranged.attack_msgs = {"", "spits acid pus"};
+        d.id = Id::intr_putrid_spit;
+        d.ranged.attack_msgs = {"", "spits pus"};
         d.ranged.snd_msg = "I hear spitting.";
         d.ranged.projectile_color = colors::light_green();
-        d.ranged.dmg_type = DmgType::acid;
+        d.ranged.dmg_type = DmgType::blunt;
         d.ranged.projectile_character = '*';
         g_data[(size_t)d.id] = d;
 
@@ -1392,9 +1392,9 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn_intr);
-        d.id = Id::intr_acid_touch;
+        d.id = Id::intr_strange_color_touch;
         d.melee.attack_msgs = {"", "touches"};
-        d.melee.dmg_type = DmgType::acid;
+        d.melee.dmg_type = DmgType::pure;
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::melee_wpn_intr);
@@ -1509,7 +1509,7 @@ void init()
                 "A one piece overall of asbestos fabric, including a hood, "
                 "furnace mask, gloves and shoes.",
 
-                "It protects the wearer against fire, acid and electricity, "
+                "It protects the wearer against fire and electricity, "
                 "and also against smoke, fumes and gas.",
 
                 "It is somewhat bulky to wear (-10% stealth, -10% dodging)."};

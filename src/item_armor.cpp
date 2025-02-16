@@ -85,15 +85,12 @@ void ArmorAsbSuit::on_equip_hook(const Verbose verbose)
         (void)verbose;
 
         prop::Prop* prop_r_fire = prop::make(prop::Id::r_fire);
-        prop::Prop* prop_r_acid = prop::make(prop::Id::r_acid);
         prop::Prop* prop_r_elec = prop::make(prop::Id::r_elec);
 
         prop_r_fire->set_indefinite();
-        prop_r_acid->set_indefinite();
         prop_r_elec->set_indefinite();
 
         add_carrier_prop(prop_r_fire, Verbose::no);
-        add_carrier_prop(prop_r_acid, Verbose::no);
         add_carrier_prop(prop_r_elec, Verbose::no);
 }
 

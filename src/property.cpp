@@ -2129,19 +2129,6 @@ void RShock::on_applied()
         }
 }
 
-DmgResistData RAcid::is_resisting_dmg(const DmgType dmg_type) const
-{
-        DmgResistData d;
-
-        d.is_resisted = (dmg_type == DmgType::acid);
-
-        d.msg_resist_player = "I feel a faint burning sensation.";
-
-        d.msg_resist_mon = "seems unaffected.";
-
-        return d;
-}
-
 DmgResistData RElec::is_resisting_dmg(const DmgType dmg_type) const
 {
         DmgResistData d;

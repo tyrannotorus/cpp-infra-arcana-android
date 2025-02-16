@@ -139,6 +139,15 @@ public:
         void on_ranged_hit(actor::Actor& actor_hit) override;
 };
 
+class PutridSpit : public Wpn
+{
+public:
+        PutridSpit(ItemData* const item_data) :
+                Wpn(item_data) {}
+
+        void on_ranged_hit(actor::Actor& actor_hit) override;
+};
+
 class WaterBreath : public Wpn
 {
 public:

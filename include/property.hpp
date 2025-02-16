@@ -1212,15 +1212,6 @@ public:
         void on_applied() override;
 };
 
-class RAcid : public Prop
-{
-public:
-        RAcid() :
-                Prop(Id::r_acid) {}
-
-        DmgResistData is_resisting_dmg(DmgType dmg_type) const override;
-};
-
 class RConf : public Prop
 {
 public:

@@ -21,7 +21,6 @@ enum class Id
         r_fire,
         r_poison,
         r_elec,
-        r_acid,
         r_sleep,
         r_fear,
         r_slow,

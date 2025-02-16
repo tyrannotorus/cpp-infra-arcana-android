@@ -89,8 +89,6 @@ enum class Id
         // NOTE: There is a string -> id map for these entries, see
         // item_data.cpp.
         //
-        intr_acid_spit,
-        intr_acid_touch,
         intr_bite,
         intr_claw,
         intr_dust_engulf,
@@ -108,11 +106,13 @@ enum class Id
         intr_punch,
         intr_punch_knockback,
         intr_pus_spew,
+        intr_putrid_spit,
         intr_raven_peck,
         intr_snake_venom_spit,
         intr_spear_thrust,
         intr_spores,
         intr_sting,
+        intr_strange_color_touch,
         intr_strangle,
         intr_strike,
         intr_vampiric_bite,
@@ -161,18 +161,20 @@ enum class Id
         scroll_transmut,
 
         // Potions
-        potion_blindness,
-        potion_conf,
+        // Benign
         potion_curing,
         potion_descent,
         potion_fortitude,
         potion_insight,
-        potion_paralyze,
-        potion_poison,
         potion_r_elec,
         potion_r_fire,
         potion_spirit,
         potion_vitality,
+        // Malign
+        potion_blindness,
+        potion_conf,
+        potion_paralyze,
+        potion_poison,
 
         // Strange Devices
         device_blaster,

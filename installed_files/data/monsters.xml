@@ -127,6 +127,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <properties>
             <property>PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED</property>
             <property>PROP_DARKVISION</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -224,6 +225,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_CORPSE_RISES</property>
             <property>PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED</property>
             <property>PROP_DARKVISION</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -323,6 +325,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_FLYING</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -366,7 +369,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <name_the>the Bloated Corpse</name_the>
             <corpse_name_a>a huge gruesome corpse</corpse_name_a>
             <corpse_name_the>the huge gruesome corpse</corpse_name_the>
-            <description>A walking cadaver of towering proportions, it seems to have had the skin of countless other bodies poorly sewn over that of its own. Festering wounds on its hulk continually disgorge an acidic liquid which has bleached it beyond belief.</description>
+            <description>A walking cadaver of towering proportions, it seems to have had the skin of countless other bodies poorly sewn over that of its own. Festering wounds on its hulk continually disgorge a putrid liquid.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>looks wary.</wary_message>
@@ -393,7 +396,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <speed>MONSPEED_SLOW</speed>
             <shock_level>MONSHOCK_FRIGHTENING</shock_level>
             <melee>60</melee>
-            <ranged>50</ranged>
+            <ranged>60</ranged>
             <dodging>0</dodging>
             <stealth>0</stealth>
             <searching>0</searching>
@@ -412,8 +415,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <attack id="ITEMINTR_PUNCH_KNOCKBACK">
                 <damage>9</damage>
             </attack>
-            <attack id="ITEMINTR_ACID_SPIT">
-                <damage>3</damage>
+            <attack id="ITEMINTR_PUTRID_SPIT">
+                <damage>0</damage>
             </attack>
         </attacks>
 
@@ -421,7 +424,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_CORPSE_RISES</property>
             <property>PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED</property>
             <property>PROP_DARKVISION</property>
-            <property>PROP_R_ACID</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -492,7 +495,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <speed>MONSPEED_SLOW</speed>
             <shock_level>MONSHOCK_FRIGHTENING</shock_level>
             <melee>60</melee>
-            <ranged>50</ranged>
+            <ranged>60</ranged>
             <dodging>-50</dodging>
             <stealth>0</stealth>
             <searching>0</searching>
@@ -511,15 +514,15 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <attack id="ITEMINTR_PUNCH_KNOCKBACK">
                 <damage>11</damage>
             </attack>
-            <attack id="ITEMINTR_ACID_SPIT">
-                <damage>5</damage>
+            <attack id="ITEMINTR_PUTRID_SPIT">
+                <damage>0</damage>
             </attack>
         </attacks>
 
         <properties>
             <property>PROP_DARKVISION</property>
-            <property>PROP_R_ACID</property>
             <property>PROP_FLAMMABLE</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -616,6 +619,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_CORPSE_RISES</property>
             <property>PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED</property>
             <property>PROP_DARKVISION</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -711,6 +715,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_CORPSE_RISES</property>
             <property>PROP_SPAWNS_ZOMBIE_PARTS_ON_DESTROYED</property>
             <property>PROP_DARKVISION</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -805,6 +810,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_DARKVISION</property>
             <property>PROP_R_BLIND</property>
             <property>PROP_SHORT_HEARING_RANGE</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -896,6 +902,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_SMALL_CRAWLING</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_R_BLIND</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -992,6 +999,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_SMALL_CRAWLING</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_R_BLIND</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -1090,6 +1098,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_DARKVISION</property>
             <property>PROP_FLYING</property>
             <property>PROP_R_BLIND</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -4530,7 +4539,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_PHYS</property>
             <property>PROP_R_FIRE</property>
             <property>PROP_R_POISON</property>
-            <property>PROP_R_ACID</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_CONF</property>
@@ -4631,7 +4639,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_PHYS</property>
             <property>PROP_R_FIRE</property>
             <property>PROP_R_POISON</property>
-            <property>PROP_R_ACID</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_CONF</property>
@@ -5400,6 +5407,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_CONF</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_BLIND</property>
+            <property>PROP_R_DISEASE</property>
             <property>PROP_INVIS</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_ETHEREAL</property>
@@ -5502,6 +5510,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_CONF</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_BLIND</property>
+            <property>PROP_R_DISEASE</property>
             <property>PROP_INVIS</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_ETHEREAL</property>
@@ -6554,6 +6563,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <properties>
             <property>PROP_DARKVISION</property>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -6646,6 +6656,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <properties>
             <property>PROP_DARKVISION</property>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -6750,6 +6761,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_SUMMONS_LOCUSTS</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <spells>
@@ -6862,6 +6874,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <properties>
             <property>PROP_DARKVISION</property>
             <property>PROP_R_SLEEP</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <spells>
@@ -8422,7 +8435,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         </attributes>
 
         <attacks>
-            <attack id="ITEMINTR_ACID_TOUCH">
+            <attack id="ITEMINTR_STRANGE_COLOR_TOUCH">
                 <damage>10</damage>
             </attack>
         </attacks>
@@ -8946,7 +8959,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_SPELL</property>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_POISON</property>
-            <property>PROP_R_ACID</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_CONF</property>
@@ -9055,7 +9067,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_SPELL</property>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_POISON</property>
-            <property>PROP_R_ACID</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_CONF</property>
@@ -10062,6 +10073,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_FEAR</property>
             <property>PROP_R_CONF</property>
             <property>PROP_R_BREATH</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -10154,6 +10166,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <properties>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_BREATH</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>
@@ -10242,6 +10255,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <properties>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_BREATH</property>
+            <property>PROP_R_DISEASE</property>
         </properties>
 
         <ai>

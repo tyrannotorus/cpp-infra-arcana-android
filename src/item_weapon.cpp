@@ -423,6 +423,24 @@ void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
         actor_hit.m_properties.apply(prop);
 }
 
+void PutridSpit::on_ranged_hit(actor::Actor& actor_hit)
+{
+        if (!actor::is_alive(actor_hit)) {
+                return;
+        }
+
+        // The asbestos suit protects against the spit.
+        Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
+
+        if (body_item && body_item->id() == Id::armor_asb_suit) {
+                return;
+        }
+
+        prop::Prop* const prop = prop::make(prop::Id::infected);
+
+        actor_hit.m_properties.apply(prop);
+}
+
 WaterBreath::WaterBreath(ItemData* const item_data) :
         Wpn(item_data) {}
 

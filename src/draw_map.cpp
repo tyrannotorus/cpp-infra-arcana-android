@@ -128,8 +128,8 @@ static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
         case item::Id::holy_symbol:
         case item::Id::horn_of_banishment:
         case item::Id::horn_of_malice:
-        case item::Id::intr_acid_spit:
-        case item::Id::intr_acid_touch:
+        case item::Id::intr_putrid_spit:
+        case item::Id::intr_strange_color_touch:
         case item::Id::intr_bite:
         case item::Id::intr_claw:
         case item::Id::intr_dust_engulf:
@@ -327,8 +327,8 @@ static gfx::TileId get_ghoul_tile_for_wpn_id(const item::Id item_id)
         case item::Id::holy_symbol:
         case item::Id::horn_of_banishment:
         case item::Id::horn_of_malice:
-        case item::Id::intr_acid_spit:
-        case item::Id::intr_acid_touch:
+        case item::Id::intr_putrid_spit:
+        case item::Id::intr_strange_color_touch:
         case item::Id::intr_bite:
         case item::Id::intr_claw:
         case item::Id::intr_dust_engulf:

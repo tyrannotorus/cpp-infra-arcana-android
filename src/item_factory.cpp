@@ -156,8 +156,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::player_kick:
         case Id::player_stomp:
         case Id::player_punch:
-        case Id::intr_acid_spit:
-        case Id::intr_acid_touch:
+        case Id::intr_strange_color_touch:
         case Id::intr_bite:
         case Id::intr_claw:
         case Id::intr_earth_breath:
@@ -275,6 +274,10 @@ Item* make(const Id item_id, const int nr_items)
 
         case Id::intr_snake_venom_spit:
                 r = new SnakeVenomSpit(d);
+                break;
+
+        case Id::intr_putrid_spit:
+                r = new PutridSpit(d);
                 break;
 
         case Id::armor_flak_jacket:

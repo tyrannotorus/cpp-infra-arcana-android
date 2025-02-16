@@ -36,9 +36,6 @@
 // -----------------------------------------------------------------------------
 // NOTE: This is the order that the properties will show up in the description.
 
-// NOTE: r_acid could possibly also go here, but it's not really relevant
-// information for the player...
-
 static const std::string s_cannot_be_harmed_by_start =
         "They cannot be harmed by";
 

@@ -248,7 +248,6 @@ enum class DmgType
         explosion,
         shotgun,
         fire,
-        acid,
         electric,
         spirit,
         light,
@@ -285,9 +284,6 @@ constexpr bool is_physical_dmg_type(const DmgType type)
                 return true;
 
         case DmgType::fire:
-                return false;
-
-        case DmgType::acid:
                 return false;
 
         case DmgType::electric:

@@ -3856,8 +3856,8 @@ void SpellResistance::run_effect(
 
         int nr_turns = duration_range(skill).roll();
 
-        auto* prop_r_fire = prop::make(prop::Id::r_fire);
-        auto* prop_r_elec = prop::make(prop::Id::r_elec);
+        prop::Prop* prop_r_fire = prop::make(prop::Id::r_fire);
+        prop::Prop* prop_r_elec = prop::make(prop::Id::r_elec);
 
         prop_r_fire->set_duration(nr_turns);
         prop_r_elec->set_duration(nr_turns);
@@ -3871,13 +3871,9 @@ std::vector<std::string> SpellResistance::descr_specific(
 {
         std::vector<std::string> descr;
 
-        descr.emplace_back(
-                "The caster is completely shielded from fire and electricity.");
+        descr.emplace_back("The caster is completely shielded from fire and electricity.");
 
-        descr.push_back(
-                "The spell lasts " +
-                duration_range(skill).str() +
-                " turns.");
+        descr.push_back("The spell lasts " + duration_range(skill).str() + " turns.");
 
         return descr;
 }

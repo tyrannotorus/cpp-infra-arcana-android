@@ -68,7 +68,6 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_RECLOAKS", prop::Id::recloaks},
         {"PROP_REDUCED_PIERCE_DMG", prop::Id::reduced_pierce_dmg},
         {"PROP_REGENERATING", prop::Id::regenerating},
-        {"PROP_R_ACID", prop::Id::r_acid},
         {"PROP_R_BLIND", prop::Id::r_blind},
         {"PROP_R_BREATH", prop::Id::r_breath},
         {"PROP_R_CONF", prop::Id::r_conf},
@@ -193,20 +192,6 @@ static void init_data_list()
         d.msg_start_mon = "is resistant to electricity.";
         d.msg_end_player = "I feel vulnerable to electricity.";
         d.msg_end_mon = "is vulnerable to electricity.";
-        d.allow_display_turns = true;
-        d.allow_test_on_bot = true;
-        d.alignment = prop::PropAlignment::good;
-        add(d);
-
-        d.id = prop::Id::r_acid;
-        d.std_rnd_turns = Range(50, 100);
-        d.name = "Acid Resistance";
-        d.name_short = "Acid Res";
-        d.descr = "Cannot be harmed by acid.";
-        d.msg_start_player = "I feel resistant to acid.";
-        d.msg_start_mon = "is resistant to acid.";
-        d.msg_end_player = "I feel vulnerable to acid.";
-        d.msg_end_mon = "is vulnerable to acid.";
         d.allow_display_turns = true;
         d.allow_test_on_bot = true;
         d.alignment = prop::PropAlignment::good;
