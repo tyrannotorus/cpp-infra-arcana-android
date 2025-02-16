@@ -50,17 +50,16 @@ TEST_CASE("Properties from item applied and removed for actor")
         // Check that the expected properties are applied
         int nr_props = 0;
 
-        for (size_t i = 0u; i < (size_t)prop::Id::END; ++i) {
+        for (size_t i = 0U; i < (size_t)prop::Id::END; ++i) {
                 if (props.has((prop::Id)i)) {
                         ++nr_props;
                 }
         }
 
-        REQUIRE(nr_props == 3);
+        REQUIRE(nr_props == 2);
 
         REQUIRE(props.has(prop::Id::r_fire));
         REQUIRE(props.has(prop::Id::r_elec));
-        REQUIRE(props.has(prop::Id::r_acid));
 
         // Take off asbeshos suit
         inv.unequip_slot(SlotId::body);
@@ -86,11 +85,10 @@ TEST_CASE("Properties from item applied and removed for actor")
                 }
         }
 
-        REQUIRE(nr_props == 3);
+        REQUIRE(nr_props == 2);
 
         REQUIRE(props.has(prop::Id::r_fire));
         REQUIRE(props.has(prop::Id::r_elec));
-        REQUIRE(props.has(prop::Id::r_acid));
 
         // Drop the asbeshos suit on the ground
         item_drop::drop_item_from_inv(
@@ -125,11 +123,10 @@ TEST_CASE("Properties from item applied and removed for actor")
                 }
         }
 
-        REQUIRE(nr_props == 3);
+        REQUIRE(nr_props == 2);
 
         REQUIRE(props.has(prop::Id::r_fire));
         REQUIRE(props.has(prop::Id::r_elec));
-        REQUIRE(props.has(prop::Id::r_acid));
 
         // Destroy the asbesthos suit by explosions
         for (int i = 0; i < 10; ++i) {

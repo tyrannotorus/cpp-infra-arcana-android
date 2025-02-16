@@ -439,7 +439,7 @@ TEST_CASE("Saving and loading the game")
 
                 // Properties from worn item
                 {
-                        const auto* const prop = props.prop(prop::Id::r_acid);
+                        const auto* const prop = props.prop(prop::Id::r_elec);
 
                         REQUIRE(prop);
                         REQUIRE(prop->nr_turns_left() == -1);
