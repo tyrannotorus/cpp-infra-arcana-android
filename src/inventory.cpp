@@ -217,8 +217,6 @@ void Inventory::put_in_backpack(item::Item* item)
 
 void Inventory::drop_all_non_intrinsic(const P& pos)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         // Drop from slots
         for (InvSlot& slot : m_slots) {
                 auto* const item = remove_item_in_slot(slot.id, false);
@@ -234,8 +232,6 @@ void Inventory::drop_all_non_intrinsic(const P& pos)
 
                 item_drop::drop_item_on_map(pos, *item);
         }
-
-        TRACE_FUNC_END_VERBOSE;
 }
 
 bool Inventory::has_ammo_for_firearm_in_inventory() const

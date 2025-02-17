@@ -11,7 +11,7 @@
 
 #include "pos.hpp"
 
-#include <iostream>
+#include <iosfwd>
 
 struct R
 {

@@ -80,8 +80,6 @@ static std::vector<std::pair<P, P>> get_entries_pairs_with_shortest_dist(
 // to floors in other rooms.
 static void valid_corridor_entries(const room::Room& room, std::vector<P>& out)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         // Find all positions around the room, that meets ALL of the following criteria:
         //  (1) Is a wall position
         //  (2) Is a position not belonging to any room
@@ -158,8 +156,6 @@ static void valid_corridor_entries(const room::Room& room, std::vector<P>& out)
                         }
                 }
         }
-
-        TRACE_FUNC_END_VERBOSE;
 }
 
 static bool is_adjacent_to_blocked_position_not_in_rooms(

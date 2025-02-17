@@ -190,8 +190,6 @@ void make_aux_rooms(Array2<Region>& regions)
                                                                         con_p);
 
                                                         if (did_place_room) {
-                                                                TRACE_VERBOSE << "Aux room placed right"
-                                                                              << std::endl;
                                                                 break;
                                                         }
                                                 }
@@ -216,8 +214,6 @@ void make_aux_rooms(Array2<Region>& regions)
                                                                 try_make_aux_room(aux_p, aux_d, floor_cells, con_p);
 
                                                         if (did_place_room) {
-                                                                TRACE_VERBOSE << "Aux room placed up"
-                                                                              << std::endl;
                                                                 break;
                                                         }
                                                 }
@@ -242,8 +238,6 @@ void make_aux_rooms(Array2<Region>& regions)
                                                                 try_make_aux_room(aux_p, aux_d, floor_cells, con_p);
 
                                                         if (did_place_room) {
-                                                                TRACE_VERBOSE << "Aux room placed left"
-                                                                              << std::endl;
                                                                 break;
                                                         }
                                                 }
@@ -268,8 +262,6 @@ void make_aux_rooms(Array2<Region>& regions)
                                                                 try_make_aux_room(aux_p, aux_d, floor_cells, con_p);
 
                                                         if (did_place_room) {
-                                                                TRACE_VERBOSE << "Aux room placed down"
-                                                                              << std::endl;
                                                                 break;
                                                         }
                                                 }

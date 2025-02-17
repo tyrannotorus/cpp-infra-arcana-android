@@ -118,8 +118,6 @@ void drop_item_from_inv(
 
 item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         ASSERT(map::is_pos_inside_outer_walls(intended_pos));
 
         // If target cell is bottomless, just destroy the item
@@ -127,8 +125,6 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
 
         if (tgt_f->id() == terrain::Id::chasm) {
                 delete &item;
-
-                TRACE_FUNC_END_VERBOSE;
 
                 return nullptr;
         }
@@ -153,7 +149,6 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
                 // No cells found were items could be placed - too bad!
                 delete &item;
 
-                TRACE_FUNC_END_VERBOSE;
                 return nullptr;
         }
 
@@ -204,12 +199,7 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
 
                                 if (item_on_floor &&
                                     item_on_floor->data().id == item.data().id) {
-                                        TRACE_VERBOSE
-                                                << "Stacking item on floor"
-                                                << std::endl;
-
-                                        item.m_nr_items +=
-                                                item_on_floor->m_nr_items;
+                                        item.m_nr_items += item_on_floor->m_nr_items;
 
                                         delete item_on_floor;
 
@@ -219,7 +209,6 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
                                                 item.discover();
                                         }
 
-                                        TRACE_FUNC_END_VERBOSE;
                                         return &item;
                                 }
                         }  // Stack position loop
@@ -245,7 +234,6 @@ item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)
         // Too bad - goodbye item!
         delete &item;
 
-        TRACE_FUNC_END_VERBOSE;
         return nullptr;
 }
 

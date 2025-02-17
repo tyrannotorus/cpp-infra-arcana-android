@@ -287,8 +287,6 @@ Room* make(const RoomType type, const R& r)
 
 Room* make_random_room(const R& r, const IsSubRoom is_subroom)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         auto room_bucket = std::begin(s_room_bucket);
 
         Room* room = nullptr;
@@ -314,10 +312,6 @@ Room* make_random_room(const R& r, const IsSubRoom is_subroom)
                         if (room->is_allowed()) {
                                 s_room_bucket.erase(room_bucket);
 
-                                TRACE_FUNC_END_VERBOSE
-                                        << "Made room type: "
-                                        << (int)room_type
-                                        << std::endl;
                                 break;
                         }
                         else {
@@ -329,8 +323,6 @@ Room* make_random_room(const R& r, const IsSubRoom is_subroom)
                         }
                 }
         }
-
-        TRACE_FUNC_END_VERBOSE;
 
         return room;
 }

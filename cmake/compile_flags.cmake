@@ -38,6 +38,7 @@ if(
                 -Wnull-dereference
                 -g
                 -Og
+                -Wno-unused-value
                 )
 
         if(IA_DEBUG_SANITIZE)
@@ -71,13 +72,12 @@ if(CMAKE_COMPILER_IS_GNUCXX)
                 )
 endif()
 
-set(RELEASE_COMPILE_FLAGS
-        ${RELEASE_COMPILE_FLAGS}
+set(APPEND RELEASE_COMPILE_FLAGS
         -DNDEBUG
         )
 
 list(APPEND TEST_COMPILE_FLAGS
-        -DTRACE_LVL=0
+        -DIA_TEST
         )
 
 target_compile_options(ia PUBLIC ${COMMON_COMPILE_FLAGS} ${RELEASE_COMPILE_FLAGS})

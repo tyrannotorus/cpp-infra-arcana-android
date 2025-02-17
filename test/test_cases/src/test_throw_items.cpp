@@ -89,7 +89,7 @@ TEST_CASE("Throw potion at monster")
                 throwing::throw_item(
                         *map::g_player,
                         {6, 7},
-                        *item::make(item::Id::potion_r_fire));
+                        *item::make(item::Id::potion_resistance));
 
                 if (is_dead) {
                         REQUIRE(!mon->m_properties.has(prop::Id::r_fire));

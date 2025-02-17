@@ -132,8 +132,6 @@ static bool make_random_group_for_room(
         const std::vector<P>& sorted_free_cells,
         Array2<bool>& blocked_out)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         const int nr_lvls_out_of_depth_allowed = random_out_of_depth();
 
         WeightedItems<std::string> id_bucket =
@@ -173,13 +171,6 @@ static bool make_random_group_for_room(
         }
 
         if (id_bucket.items.empty()) {
-                TRACE_VERBOSE
-                        << "Found no valid monsters to spawn at room type ("
-                        << std::to_string(int(room_type)) + ")"
-                        << std::endl;
-
-                TRACE_FUNC_END_VERBOSE;
-
                 return false;
         }
         else {
@@ -191,8 +182,6 @@ static bool make_random_group_for_room(
                         sorted_free_cells,
                         &blocked_out,
                         MonRoamingAllowed::yes);
-
-                TRACE_FUNC_END_VERBOSE;
 
                 return true;
         }

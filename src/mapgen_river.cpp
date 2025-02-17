@@ -104,18 +104,7 @@ void reserve_river(Array2<Region>& regions)
 
         map::g_room_list.push_back(room);
 
-        auto make = [&](
-                            const int x0,
-                            const int x1,
-                            const int y0,
-                            const int y1) {
-                TRACE_VERBOSE << "Reserving river space with floor cells "
-                              << "x0: " << x0
-                              << " x1: " << x1
-                              << " y0: " << y0
-                              << " y1: " << y1
-                              << std::endl;
-
+        auto make = [&](const int x0, const int x1, const int y0, const int y1) {
                 for (int x = x0; x <= x1; ++x) {
                         for (int y = y0; y <= y1; ++y) {
                                 // Just put floor for now, river terrain will be

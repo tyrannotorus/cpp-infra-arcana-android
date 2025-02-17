@@ -314,8 +314,6 @@ RangedAttData::RangedAttData(
                 return;
         }
 
-        TRACE_VERBOSE << "Defender found" << std::endl;
-
         const int skill_mod = get_attacker_ranged_skill(attacker);
         const int wpn_mod = wpn.data().ranged.hit_chance_mod;
 
@@ -462,8 +460,6 @@ ThrowAttData::ThrowAttData(
         if (!defender || (defender == attacker)) {
                 return;
         }
-
-        TRACE_VERBOSE << "Defender found" << std::endl;
 
         const int skill_mod = get_attacker_ranged_skill(attacker);
         const int wpn_mod = item.data().ranged.throw_hit_chance_mod;

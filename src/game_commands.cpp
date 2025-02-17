@@ -1020,10 +1020,9 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_shift_f2: {
-                // TODO: It would be more convenient to query for a string
-                // instead, so that the monster ID string could be entered
-                // directly, instead of an index number (perhaps with partial
-                // matches allowed).
+                // TODO: It would be more convenient to query for a string instead, so that the
+                // monster ID string could be entered directly, instead of an index number (perhaps
+                // with partial matches allowed).
 
                 std::string msg = "Listing all properties (IDX    NAME):";
 
@@ -1050,9 +1049,11 @@ void handle(const GameCmd cmd)
                         return;
                 }
 
-                map::g_player->m_properties.apply(
-                        prop::make(
-                                (prop::Id)id_to_apply));
+                prop::Prop* const prop = prop::make((prop::Id)id_to_apply);
+
+                prop->set_duration(std::max(10, prop->nr_turns_left()));
+
+                map::g_player->m_properties.apply(prop);
 
         } break;
 

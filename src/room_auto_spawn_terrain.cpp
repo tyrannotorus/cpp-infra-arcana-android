@@ -118,8 +118,6 @@ static void get_positions_in_room_relative_to_walls(
         std::vector<P>& adj_to_walls,
         std::vector<P>& away_from_walls)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         adj_to_walls.clear();
         away_from_walls.clear();
 
@@ -158,8 +156,6 @@ static void get_positions_in_room_relative_to_walls(
                         continue;
                 }
         }
-
-        TRACE_FUNC_END_VERBOSE;
 }
 
 // -----------------------------------------------------------------------------
@@ -169,8 +165,6 @@ namespace room
 {
 void place_auto_terrains(const Room& room)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         // Make a terrain bucket
         std::vector<terrain::Id> terrain_bucket;
 
@@ -218,8 +212,6 @@ void place_auto_terrains(const Room& room)
 
                         const auto& d = terrain::data(id);
 
-                        TRACE_VERBOSE << "Placing terrain" << std::endl;
-
                         ASSERT(map::is_pos_inside_outer_walls(p));
 
                         terrain::Terrain* terrain {nullptr};
@@ -259,8 +251,6 @@ void place_auto_terrains(const Room& room)
                                 std::end(away_from_walls_bucket));
                 }
         }
-
-        TRACE_FUNC_END_VERBOSE;
 }
 
 P find_auto_terrain_placement(
@@ -268,15 +258,11 @@ P find_auto_terrain_placement(
         const std::vector<P>& away_from_walls,
         const terrain::Id id)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         const bool is_adj_to_walls_avail = !adj_to_walls.empty();
         const bool is_away_from_walls_avail = !away_from_walls.empty();
 
         if (!is_adj_to_walls_avail &&
             !is_away_from_walls_avail) {
-                TRACE_FUNC_END_VERBOSE << "No eligible positions found" << std::endl;
-
                 return {-1, -1};
         }
 
@@ -289,34 +275,29 @@ P find_auto_terrain_placement(
 
                 if (is_adj_to_walls_avail &&
                     (d.auto_spawn_placement == terrain::TerrainPlacement::adj_to_walls)) {
-                        TRACE_FUNC_END_VERBOSE;
                         return rnd::element(adj_to_walls);
                 }
 
                 if (is_away_from_walls_avail &&
                     (d.auto_spawn_placement == terrain::TerrainPlacement::away_from_walls)) {
-                        TRACE_FUNC_END_VERBOSE;
                         return rnd::element(away_from_walls);
                 }
 
                 if (d.auto_spawn_placement == terrain::TerrainPlacement::either) {
                         if (rnd::coin_toss()) {
                                 if (is_adj_to_walls_avail) {
-                                        TRACE_FUNC_END_VERBOSE;
                                         return rnd::element(adj_to_walls);
                                 }
                         }
                         else {
                                 // Coint toss
                                 if (is_away_from_walls_avail) {
-                                        TRACE_FUNC_END_VERBOSE;
                                         return rnd::element(away_from_walls);
                                 }
                         }
                 }
         }
 
-        TRACE_FUNC_END_VERBOSE;
         return {-1, -1};
 }
 

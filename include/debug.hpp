@@ -10,31 +10,34 @@
 #include <cstdlib>
 #include <iostream>
 
-//------------------------------------------------------------------------------
-// Trace level (use -D build flag to override)
-//------------------------------------------------------------------------------
-// Lvl of TRACE output in debug mode
-// 0 : Disabled
-// 1 : Standard
-// 2 : Verbose
-#ifndef TRACE_LVL
-
-#define TRACE_LVL 1
-
-#endif  // TRACE_LVL
-
-//------------------------------------------------------------------------------
-// Custom trace output and assert functionality
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// Relase mode
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// ASSERT macro
+// -----------------------------------------------------------------------------
 #ifdef NDEBUG
+
+// Release mode
 
 #define ASSERT(check)
 
-// For release mode, the TRACE functionality never do anything. The if/else here
+#else
+
+// Debug mode
+
+#define ASSERT(check) assert_impl(check, #check, __FILE__, __LINE__, __func__)
+
+#endif
+
+// -----------------------------------------------------------------------------
+// TRACE macros
+// -----------------------------------------------------------------------------
+// Print an error, for both debug and release builds.
+#define TRACE_ERROR_RELEASE std::cerr << "ERROR: "
+
+#if defined(NDEBUG) || defined(IA_TEST)
+
+// Release mode or test mode - do not output anything.
+
+// NOTE: For release mode or test mode, the TRACE functionality never do anything. The if/else here
 // is a trick to support writing e.g.:
 //
 // TRACE << "foo" << std::endl;
@@ -61,87 +64,38 @@
         else \
                 std::cerr
 
-#define TRACE_VERBOSE \
-        if (1) \
-                ; \
-        else \
-                std::cerr
-
-#define TRACE_FUNC_BEGIN_VERBOSE \
-        if (1) \
-                ; \
-        else \
-                std::cerr
-
-#define TRACE_FUNC_END_VERBOSE \
-        if (1) \
-                ; \
-        else \
-                std::cerr
-
 #define PANIC exit(EXIT_FAILURE)
 
-//------------------------------------------------------------------------------
-// Debug mode
-//------------------------------------------------------------------------------
-#else  // NDEBUG
+#else
 
-#define ASSERT(check) assert_impl(check, #check, __FILE__, __LINE__, __func__)
+// Debug mode
 
 #define TRACE \
-        if (TRACE_LVL < 1) \
-                ; \
-        else \
-                std::cerr \
-                        << "DEBUG: " \
-                        << __FILE__ << ", " \
-                        << __LINE__ << ", " \
-                        << __func__ << "(): "
+        std::cerr \
+                << "DEBUG: " \
+                << __FILE__ << ", " \
+                << __LINE__ << ", " \
+                << __func__ << "(): "
 
 #define TRACE_FUNC_BEGIN \
-        if (TRACE_LVL < 1) \
-                ; \
-        else \
-                std::cerr \
-                        << "DEBUG: " \
-                        << __FILE__ << ", " \
-                        << __LINE__ << ", " \
-                        << __func__ << "() [BEGIN]" \
-                        << std::endl
+        std::cerr \
+                << "DEBUG: " \
+                << __FILE__ << ", " \
+                << __LINE__ << ", " \
+                << __func__ << "() [BEGIN]" \
+                << std::endl
 
 #define TRACE_FUNC_END \
-        if (TRACE_LVL < 1) \
-                ; \
-        else \
-                std::cerr \
-                        << "DEBUG: " \
-                        << __FILE__ << ", " \
-                        << __LINE__ << ", " \
-                        << __func__ << "() [END]" \
-                        << std::endl
-
-#define TRACE_VERBOSE \
-        if (TRACE_LVL < 2) \
-                ; \
-        else \
-                TRACE
-#define TRACE_FUNC_BEGIN_VERBOSE \
-        if (TRACE_LVL < 2) \
-                ; \
-        else \
-                TRACE_FUNC_BEGIN
-#define TRACE_FUNC_END_VERBOSE \
-        if (TRACE_LVL < 2) \
-                ; \
-        else \
-                TRACE_FUNC_END
+        std::cerr \
+                << "DEBUG: " \
+                << __FILE__ << ", " \
+                << __LINE__ << ", " \
+                << __func__ << "() [END]" \
+                << std::endl
 
 #define PANIC ASSERT(false)
 
-#endif  // NDEBUG
-
-// Print an error, for both debug and release builds
-#define TRACE_ERROR_RELEASE std::cerr << "ERROR: "
+#endif
 
 //------------------------------------------------------------------------------
 // Custom assert

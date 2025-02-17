@@ -64,8 +64,6 @@ static void damage_armor(actor::Actor& actor, int dmg)
                 return;
         }
 
-        TRACE_VERBOSE << "Has armor, damaging armor" << std::endl;
-
         auto* const armor = static_cast<item::Armor*>(item);
 
         armor->hit(dmg);

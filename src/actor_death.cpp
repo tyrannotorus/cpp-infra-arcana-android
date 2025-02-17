@@ -130,8 +130,6 @@ void kill(
         const AllowGore allow_gore,
         const AllowDropItems allow_drop_items)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         // Save player with Talisman of Resurrection?
         const bool did_use_talisman = try_use_talisman_of_resurrection(actor);
 
@@ -198,8 +196,6 @@ void kill(
 
                 actor.m_leader = nullptr;
         }
-
-        TRACE_FUNC_END_VERBOSE;
 }
 
 void print_mon_death_msg(const actor::Actor& actor)

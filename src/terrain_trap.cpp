@@ -522,8 +522,6 @@ AllowAction Trap::pre_bump(actor::Actor& actor_bumping)
 
 void Trap::bump(actor::Actor& actor_bumping)
 {
-        TRACE_FUNC_BEGIN_VERBOSE;
-
         const actor::ActorData& d = *actor_bumping.m_data;
 
         const prop::PropHandler& props = actor_bumping.m_properties;
@@ -533,8 +531,6 @@ void Trap::bump(actor::Actor& actor_bumping)
             props.has(prop::Id::tiny_flying) ||
             props.has(prop::Id::small_crawling) ||
             d.is_spider) {
-                TRACE_FUNC_END_VERBOSE;
-
                 return;
         }
 
@@ -548,15 +544,11 @@ void Trap::bump(actor::Actor& actor_bumping)
                 if (!actor_bumping.m_ai_state.is_target_seen ||
                     !actor::is_aware_of_player(actor_bumping) ||
                     is_hidden()) {
-                        TRACE_FUNC_END_VERBOSE;
-
                         return;
                 }
         }
 
         trigger_start(&actor_bumping);
-
-        TRACE_FUNC_END_VERBOSE;
 }
 
 bool Trap::disarm()
@@ -603,14 +595,7 @@ DidTriggerTrap Trap::trigger_trap(actor::Actor* actor)
 
         (void)actor;
 
-        TRACE_VERBOSE
-                << "Name of trap triggering: "
-                << m_trap_impl->name(Article::a)
-                << std::endl;
-
         m_nr_turns_until_trigger = -1;
-
-        TRACE_VERBOSE << "Calling trap implementation trigger" << std::endl;
 
         m_trap_impl->trigger();
 
