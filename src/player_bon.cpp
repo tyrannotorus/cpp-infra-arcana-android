@@ -483,8 +483,9 @@ static void update_trait_data()
         d.id = Trait::tough;
         d.title = "Tough";
         d.descr =
-                "+6 hit points, +10% chance to resist paralysis, burning, and "
-                "poison, less likely to sprain when kicking, more likely to "
+                "+6 hit points, "
+                "+10% chance to resist burning, poisoning and paralysis, "
+                "less likely to sprain when kicking, more likely to "
                 "succeed with object interactions requiring strength (e.g. "
                 "bashing things open)";
         d.on_picked = []() {
@@ -537,7 +538,7 @@ static void update_trait_data()
         d.id = Trait::resistant;
         d.title = "Resistant";
         d.descr =
-                "+25% chance to resist paralysis, burning, and poison - "
+                "+25% chance to resist burning, poisoning and paralysis - "
                 "and the duration of those effects is halved";
         d.trait_prereqs = {Trait::tough};
         set_trait_data(d);

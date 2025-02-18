@@ -394,7 +394,9 @@ public:
 private:
         std::string descr_identified() const override
         {
-                return "Protects the consumer from electricity, fire, and poison.";
+                return (
+                        "Completely protects the consumer from electricity, fire and poison - "
+                        "and also prevents paralysis.");
         }
 
         PotionAlignment alignment() const override

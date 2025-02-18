@@ -660,7 +660,8 @@ void Resistance::quaff_impl(actor::Actor& actor)
         apply_properties_with_equal_duration(
                 {prop::Id::r_elec,
                  prop::Id::r_fire,
-                 prop::Id::r_poison},
+                 prop::Id::r_poison,
+                 prop::Id::r_para},
                 actor);
 
         if (actor::can_player_see_actor(actor)) {

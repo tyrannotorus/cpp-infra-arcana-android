@@ -278,6 +278,10 @@ static void init_data_list()
         d.name = "Paralysis Resistance";
         d.name_short = "Paralys Res";
         d.descr = "Cannot be paralyzed.";
+        d.msg_start_player = "I feel more steady.";
+        d.msg_start_mon = "looks more steady.";
+        d.msg_end_player = "I feel less steady.";
+        d.msg_end_mon = "looks less steady.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
         d.alignment = prop::PropAlignment::good;

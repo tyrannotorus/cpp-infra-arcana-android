@@ -26,7 +26,7 @@
 - The Exorcist Holy Symbol can now raise spirit above max limit (instead of just restoring spirit).
 - Added a "Heavy Coat" armor, with 2 armor points and -5% stealth/dodging (actually this existed a long time ago, but was a very different item).
 - Removed some Rod types and added new ones. Also the Deafening Device is now a Rod instead.
-- Merged "Potion of Fire Resistance" and "Insulation" into "Potion of Resistance", that also gives poison resistance. The "Resistance" spell has been removed since it is now a potion instead.
+- Merged "Potion of Fire Resistance" and "Insulation" into "Potion of Resistance", that also gives poison resistance and prevent paralysis. The "Resistance" spell has been removed.
 
 # Spells
 - Removed the Resistance spell (this is now a potion instead, see above).

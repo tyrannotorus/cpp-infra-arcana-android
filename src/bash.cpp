@@ -293,8 +293,7 @@ void run()
 
 void try_sprain_player()
 {
-        const bool is_frenzied =
-                map::g_player->m_properties.has(prop::Id::frenzied);
+        const bool is_frenzied = map::g_player->m_properties.has(prop::Id::frenzied);
 
         const bool is_player_ghoul = player_bon::bg() == Bg::ghoul;
 
