@@ -275,6 +275,7 @@ static void init_data_list()
         add(d);
 
         d.id = prop::Id::r_para;
+        d.std_rnd_turns = Range(50, 100);
         d.name = "Paralysis Resistance";
         d.name_short = "Paralys Res";
         d.descr = "Cannot be paralyzed.";
