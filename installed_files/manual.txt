@@ -83,7 +83,7 @@ Many things in the game can be interacted with by moving into them (i.e. by "bum
    * Move into fountains to drink from them
 
 --------------------------------------------------------------------------------
-The interface
+Information on the game screen
 --------------------------------------------------------------------------------
 On the right hand side of the screen, information is listed about your character and your carried equipment. The following is an example of what these lines can look like:
 
@@ -134,11 +134,16 @@ On the right hand side of the screen, information is listed about your character
                          From 100% you move at half speed, and from 125% you
                          cannot move at all
 
+   Turn            123 : Current standard turn number
+                         Note that the player can sometimes act more or less
+                         often than these turns are ticking (e.g. if they have
+                         the "hasted" or "slowed" effects applied)
+
    Blind               : You are currently blind
 
    Diseased            : You are currently diseased
 
-The properties at the bottom can be temporary properties (e.g. from spells), permanent intrinsic properties (printed in capital letters, e.g. "CURSED"), or properties granted by wearing or wielding items.
+The properties at the bottom can be temporary properties (e.g. from spells), PERMANENT intrinsic properties (printed in capital letters, e.g. "CURSED"), or properties granted by wearing or wielding items.
 
 --------------------------------------------------------------------------------
 Inventory handling
