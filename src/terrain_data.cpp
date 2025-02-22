@@ -171,7 +171,6 @@ static void init_data_list()
         d.character = ':';  // NOTE: '#' may be automatically used instead.
         d.tile = gfx::TileId::grate;
         d.move_rules.props_allow_move.push_back(prop::Id::ethereal);
-        d.move_rules.props_allow_move.push_back(prop::Id::burrowing);
         d.move_rules.props_allow_move.push_back(prop::Id::moves_through_earth);
         d.move_rules.props_allow_move.push_back(prop::Id::ooze);
         d.move_rules.props_allow_move.push_back(prop::Id::small_crawling);

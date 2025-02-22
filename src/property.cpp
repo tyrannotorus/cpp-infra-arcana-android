@@ -412,6 +412,23 @@ int Doomed::ability_mod(const AbilityId ability) const
         return 0;
 }
 
+int ExtraSkill::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::melee:
+        case AbilityId::ranged:
+        case AbilityId::dodging:
+        case AbilityId::stealth:
+        case AbilityId::searching:
+                return 10;
+
+        case AbilityId::END:
+                break;
+        }
+
+        return 0;
+}
+
 int Premonition::ability_mod(const AbilityId ability) const
 {
         switch (ability) {
@@ -1317,6 +1334,11 @@ int Moribund::armor_points() const
         }
 
         return armor_bonus;
+}
+
+int MagicCarapace::armor_points() const
+{
+        return 3;
 }
 
 HpSap::HpSap() :
@@ -2347,6 +2369,18 @@ PropEnded Burrowing::on_actor_turn()
         map::g_terrain.at(p)->hit(DmgType::pure, nullptr);
 
         return PropEnded::no;
+}
+
+void Burrowing::on_applied()
+{
+        // Burrowing and crimson passage must never be active at the same time (even if it worked
+        // properly it would be super unbalanced).
+        m_owner->m_properties.end_prop(
+                Id::crimson_passage,
+                PropEndConfig(
+                        PropEndAllowCallEndHook::no,
+                        PropEndAllowMsg::no,
+                        PropEndAllowHistoricMsg::yes));
 }
 
 void LgtSens::raise_extra_damage_to(const int dmg)
@@ -3973,6 +4007,18 @@ PropEnded CrimsonPassage::on_moved_non_center_dir()
         }
 
         return PropEnded::no;
+}
+
+void CrimsonPassage::on_applied()
+{
+        // Burrowing and crimson passage must never be active at the same time (even if it worked
+        // properly it would be super unbalanced).
+        m_owner->m_properties.end_prop(
+                Id::burrowing,
+                PropEndConfig(
+                        PropEndAllowCallEndHook::no,
+                        PropEndAllowMsg::no,
+                        PropEndAllowHistoricMsg::yes));
 }
 
 }  // namespace prop

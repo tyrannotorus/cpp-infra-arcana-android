@@ -26,7 +26,9 @@ void teleport(
 
 void teleport(
         actor::Actor& actor,
-        P p,
-        const Array2<bool>& blocked);
+        P pos,
+        const Array2<bool>& blocked,
+        // Only used to decide if the actor should be confused.
+        bool has_tele_ctrl);
 
 #endif  // TELEPORT_HPP

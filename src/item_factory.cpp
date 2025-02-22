@@ -331,6 +331,22 @@ Item* make(const Id item_id, const int nr_items)
                 r = new scroll::Scroll(d);
                 break;
 
+        case Id::potion_skill:
+                r = new potion::Skill(d);
+                break;
+
+        case Id::potion_carapace:
+                r = new potion::Carapace(d);
+                break;
+
+        case Id::potion_blinking:
+                r = new potion::Blinking(d);
+                break;
+
+        case Id::potion_burrowing:
+                r = new potion::Burrowing(d);
+                break;
+
         case Id::potion_vitality:
                 r = new potion::Vitality(d);
                 break;

@@ -474,6 +474,8 @@ public:
                 Prop(Id::burrowing) {}
 
         PropEnded on_actor_turn() override;
+
+        void on_applied() override;
 };
 
 class ZuulPossessPriest : public Prop
@@ -630,6 +632,15 @@ public:
         void on_applied() override;
 
         void on_more(const Prop& new_prop) override;
+};
+
+class ExtraSkill : public Prop
+{
+public:
+        ExtraSkill() :
+                Prop(Id::extra_skill) {}
+
+        int ability_mod(AbilityId ability) const override;
 };
 
 class Premonition : public Prop
@@ -897,6 +908,15 @@ public:
                 Prop(Id::moribund) {}
 
         int ability_mod(AbilityId ability) const override;
+
+        int armor_points() const override;
+};
+
+class MagicCarapace : public Prop
+{
+public:
+        MagicCarapace() :
+                Prop(Id::magic_carapace) {}
 
         int armor_points() const override;
 };
@@ -1799,6 +1819,8 @@ public:
         std::string name_short() const override;
 
         PropEnded on_moved_non_center_dir() override;
+
+        void on_applied() override;
 
         void set_nr_steps_allowed(const int nr_steps)
         {

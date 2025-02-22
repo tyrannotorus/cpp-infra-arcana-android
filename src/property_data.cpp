@@ -42,6 +42,7 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_ERUDITION", prop::Id::erudition},
         {"PROP_ETHEREAL", prop::Id::ethereal},
         {"PROP_EXPLODES_ON_DEATH", prop::Id::explodes_on_death},
+        {"PROP_EXTRA_SKILL", prop::Id::extra_skill},
         {"PROP_FAINTED", prop::Id::fainted},
         {"PROP_FLAMMABLE", prop::Id::flammable},
         {"PROP_FLYING", prop::Id::flying},
@@ -54,9 +55,11 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_INFECTED", prop::Id::infected},
         {"PROP_INVIS", prop::Id::invis},
         {"PROP_LIGHT_SENSITIVE", prop::Id::light_sensitive},
+        {"PROP_MAGIC_CARAPACE", prop::Id::magic_carapace},
         {"PROP_MAGIC_SEARCHING", prop::Id::magic_searching},
         {"PROP_MAJOR_CLAPHAM_SUMMON", prop::Id::major_clapham_summon},
         {"PROP_MELEE_COOLDOWN", prop::Id::melee_cooldown},
+        {"PROP_MOVES_THROUGH_EARTH", prop::Id::moves_through_earth},
         {"PROP_OOZE", prop::Id::ooze},
         {"PROP_OTHERS_TERRIFIED_ON_DEATH", prop::Id::others_terrified_on_death},
         {"PROP_PARALYZED", prop::Id::paralyzed},
@@ -101,7 +104,6 @@ static const std::unordered_map<std::string, prop::Id> s_str_to_prop_id_map = {
         {"PROP_VOMITS_OOZE", prop::Id::vomits_ooze},
         {"PROP_VORTEX", prop::Id::vortex},
         {"PROP_WATER_CREATURE", prop::Id::water_creature},
-        {"PROP_MOVES_THROUGH_EARTH", prop::Id::moves_through_earth},
         {"PROP_WEAKENED", prop::Id::weakened},
         {"PROP_ZEALOT_STOP", prop::Id::zealot_stop},
         {"PROP_ZUUL_POSSESS_PRIEST", prop::Id::zuul_possess_priest},
@@ -404,7 +406,6 @@ static void init_data_list()
         d.allow_display_turns = true;
         d.force_interrupt_player_on_start = true;
         d.update_vision_on_toggled = true;
-        d.is_preventable_by_player_trait = true;
         d.allow_test_on_bot = true;
         d.alignment = prop::PropAlignment::bad;
         add(d);
@@ -421,7 +422,6 @@ static void init_data_list()
         d.msg_res_player = "I resist poisoning.";
         d.msg_res_mon = "resists poisoning.";
         d.allow_display_turns = true;
-        d.is_preventable_by_player_trait = true;
         d.duration_on_more = prop::DurationOnMoreBehavior::stacked;
         d.allow_test_on_bot = true;
         d.alignment = prop::PropAlignment::bad;
@@ -440,7 +440,6 @@ static void init_data_list()
         d.msg_res_mon = "resists paralyzation.";
         d.allow_display_turns = true;
         d.force_interrupt_player_on_start = true;
-        d.is_preventable_by_player_trait = true;
         d.allow_test_on_bot = true;
         d.alignment = prop::PropAlignment::bad;
         add(d);
@@ -838,6 +837,34 @@ static void init_data_list()
         d.alignment = prop::PropAlignment::bad;
         add(d);
 
+        d.id = prop::Id::extra_skill;
+        d.std_rnd_turns = Range(200, 300);
+        d.name = "Extra Skill";
+        d.name_short = "Skill";
+        d.descr = "+10% to hit chance, evasion, stealth, and searching.";
+        d.msg_start_player = "I feel more skillful.";
+        d.msg_start_mon = "looks more skillful.";
+        d.msg_end_player = "I feel less skillful.";
+        d.msg_end_player = "looks less skillful.";
+        d.allow_display_turns = true;
+        d.allow_test_on_bot = true;
+        d.alignment = prop::PropAlignment::good;
+        add(d);
+
+        d.id = prop::Id::magic_carapace;
+        d.std_rnd_turns = Range(25, 50);
+        d.name = "Carapace";
+        d.name_short = "Carapace";
+        d.descr = "+3 armor points, +25% chance to resist burning.";
+        d.msg_start_player = "A protective carapace forms around me.";
+        d.msg_start_mon = "is enveloped by a protective carapace.";
+        d.msg_end_player = "My carapace cracks and crumbles away.";
+        d.msg_end_player = "sheds a carapace.";
+        d.allow_display_turns = true;
+        d.allow_test_on_bot = true;
+        d.alignment = prop::PropAlignment::good;
+        add(d);
+
         d.id = prop::Id::premonition;
         d.std_rnd_turns = Range(5, 9);
         d.name = "Premonition";
@@ -1159,9 +1186,7 @@ static void init_data_list()
         d.id = prop::Id::ethereal;
         d.name = "Ethereal";
         d.name_short = "Ethereal";
-        d.descr =
-                "Can pass through solid objects, "
-                "+50% chance to evade attacks.";
+        d.descr = "Can pass through solid objects, +50% chance to evade attacks.";
         d.allow_display_turns = false;
         d.allow_test_on_bot = false;
         d.alignment = prop::PropAlignment::neutral;
@@ -1178,9 +1203,17 @@ static void init_data_list()
         add(d);
 
         d.id = prop::Id::burrowing;
-        d.allow_display_turns = false;
-        d.allow_test_on_bot = false;
-        d.alignment = prop::PropAlignment::neutral;
+        d.std_rnd_turns = Range(4, 8);
+        d.name = "Burrowing";
+        d.name_short = "Burrowing";
+        d.descr = "Can burrow through walls and rubble.";
+        d.msg_start_player = "Earth and stone crumble away before me.";
+        d.msg_start_mon = "can move through earth.";
+        d.msg_end_player = "The earth is solid once more.";
+        d.msg_end_mon = "can no longer move through earth.";
+        d.allow_display_turns = true;
+        d.allow_test_on_bot = true;
+        d.alignment = prop::PropAlignment::good;
         add(d);
 
         d.id = prop::Id::water_creature;

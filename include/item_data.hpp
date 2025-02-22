@@ -161,6 +161,10 @@ enum class Id
 
         // Potions
         // Benign
+        potion_skill,
+        potion_carapace,
+        potion_blinking,
+        potion_burrowing,
         potion_curing,
         potion_vitality,
         potion_spirit,

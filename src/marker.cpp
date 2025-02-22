@@ -947,7 +947,7 @@ int CtrlTele::chance_of_success_pct() const
 void CtrlTele::on_start_hook()
 {
         msg_log::add(
-                "I have the power to control teleportation.",
+                "I can control where I teleport.",
                 colors::white(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::yes,
@@ -1003,7 +1003,7 @@ void CtrlTele::handle_input(const io::InputData& input)
 
         if (is_success) {
                 // Teleport to this exact destination.
-                teleport(*map::g_player, tgt_p, blocked);
+                teleport(*map::g_player, tgt_p, blocked, true);
         }
         else {
                 // Failed to teleport (blocked or roll failed)

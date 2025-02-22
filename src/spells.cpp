@@ -3052,8 +3052,8 @@ std::vector<std::string> SpellBless::descr_specific(
         std::vector<std::string> descr;
 
         descr.emplace_back(
-                "The caster becomes more lucky (+10% to hit chance, "
-                "evasion, stealth, and searching).");
+                "The caster becomes more lucky "
+                "(+10% to hit chance, evasion, stealth, and searching).");
 
         if (skill == SpellSkill::transcendent) {
                 descr.emplace_back("The spell lasts indefinitely.");

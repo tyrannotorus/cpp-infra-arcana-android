@@ -1715,6 +1715,22 @@ void init()
         g_data[(size_t)d.id] = d;
 
         reset_data(d, ItemType::potion);
+        d.id = Id::potion_skill;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::potion);
+        d.id = Id::potion_carapace;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::potion);
+        d.id = Id::potion_blinking;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::potion);
+        d.id = Id::potion_burrowing;
+        g_data[(size_t)d.id] = d;
+
+        reset_data(d, ItemType::potion);
         d.id = Id::potion_vitality;
         g_data[(size_t)d.id] = d;
 

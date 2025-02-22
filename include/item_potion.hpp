@@ -330,8 +330,7 @@ private:
         std::string descr_identified() const override
         {
                 return (
-                        "This strange concoction causes a sudden flash of "
-                        "intuition.");
+                        "This strange concoction causes a sudden flash of intuition.");
         }
 
         PotionAlignment alignment() const override
@@ -429,7 +428,6 @@ private:
                         "dematerialize and sink through the ground.");
         }
 
-        // TODO: Not sure about the alignment for this one...
         PotionAlignment alignment() const override
         {
                 return PotionAlignment::good;
@@ -440,6 +438,135 @@ private:
                 (void)pos;
                 (void)actor;
         }
+};
+
+class Skill : public Potion
+{
+public:
+        Skill(item::ItemData* const item_data) :
+                Potion(item_data) {}
+
+        ~Skill() = default;
+
+        void quaff_impl(actor::Actor& actor) override;
+
+        std::string real_name() const override
+        {
+                return "Skill";
+        }
+
+private:
+        std::string descr_identified() const override
+        {
+                return (
+                        "The consumer becomes more skillful "
+                        "(+10% to hit chance, evasion, stealth, and searching).");
+        }
+
+        PotionAlignment alignment() const override
+        {
+                return PotionAlignment::good;
+        }
+
+        void collide_hook(const P& pos, actor::Actor* actor) override;
+};
+
+class Carapace : public Potion
+{
+public:
+        Carapace(item::ItemData* const item_data) :
+                Potion(item_data) {}
+
+        ~Carapace() = default;
+
+        void quaff_impl(actor::Actor& actor) override;
+
+        std::string real_name() const override
+        {
+                return "Carapace";
+        }
+
+private:
+        std::string descr_identified() const override
+        {
+                return (
+                        "Causes a tough carapace to grow over the consumer's skin "
+                        "providing protection against physical attacks "
+                        "(+3 armor points), "
+                        "as well as some resistance against burning "
+                        "(+25% chance to resist burning).");
+        }
+
+        PotionAlignment alignment() const override
+        {
+                return PotionAlignment::good;
+        }
+
+        void collide_hook(const P& pos, actor::Actor* actor) override;
+};
+
+class Blinking : public Potion
+{
+public:
+        Blinking(item::ItemData* const item_data) :
+                Potion(item_data) {}
+
+        ~Blinking() = default;
+
+        void quaff_impl(actor::Actor& actor) override;
+
+        std::string real_name() const override
+        {
+                return "Blinking";
+        }
+
+private:
+        std::string descr_identified() const override
+        {
+                return (
+                        "Causes the consumer to rapidly fade away from existence, "
+                        "and reappear again at a nearby position "
+                        "of their choosing.");
+        }
+
+        PotionAlignment alignment() const override
+        {
+                return PotionAlignment::good;
+        }
+
+        void collide_hook(const P& pos, actor::Actor* actor) override;
+};
+
+class Burrowing : public Potion
+{
+public:
+        Burrowing(item::ItemData* const item_data) :
+                Potion(item_data) {}
+
+        ~Burrowing() = default;
+
+        void quaff_impl(actor::Actor& actor) override;
+
+        std::string real_name() const override
+        {
+                return "Burrowing";
+        }
+
+private:
+        std::string descr_identified() const override
+        {
+                return (
+                        "Infused with the alchemically treated blood of Chthonians, "
+                        "it grants the consumer the ability to burrow through earth and rock "
+                        "(can burrow through walls and rubble).");
+        }
+
+        PotionAlignment alignment() const override
+        {
+                return PotionAlignment::good;
+        }
+
+        void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
 }  // namespace potion

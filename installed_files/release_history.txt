@@ -27,12 +27,13 @@
 - Added a "Heavy Coat" armor, with 2 armor points and -5% stealth/dodging (actually this existed a long time ago, but was a very different item).
 - Removed some Rod types and added new ones. Also the Deafening Device is now a Rod instead.
 - Merged "Potion of Fire Resistance" and "Insulation" into "Potion of Resistance", that also gives poison resistance and prevent paralysis. The "Resistance" spell has been removed.
+- Added more potions.
 
 # Spells
-- Removed the Resistance spell (this is now a potion instead, see above).
 - Increased duration of the See Invisible spell.
-- The rats summoned by the Pestilence appear scattered throughout an area (instead of grouped around the caster), and the spell only last for a limited time.
+- The rats summoned by the Pestilence spell appear scattered throughout an area (instead of grouped around the caster), and the spell only last for a limited time.
 - Added blindness as a spell available to some monsters (this also existed in the game a very long time ago).
+- Removed the Resistance spell (this is now a potion instead, see above).
 
 # Status effects
 - Poison now stacks, i.e. the duration of the new poison effect is added to the old (normally the duration is set to the longest duration of the old or new effect).

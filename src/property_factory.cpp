@@ -28,6 +28,12 @@ Prop* make(const prop::Id id)
         case prop::Id::moribund:
                 return new Moribund();
 
+        case prop::Id::extra_skill:
+                return new ExtraSkill();
+
+        case prop::Id::magic_carapace:
+                return new MagicCarapace();
+
         case prop::Id::blind:
                 return new Blind();
 

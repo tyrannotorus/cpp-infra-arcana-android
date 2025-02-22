@@ -53,6 +53,29 @@ static int calc_resist_chance_from_player_traits()
         return resist_chance;
 }
 
+static int resist_chance_from_magic_carapace(const actor::Actor& actor)
+{
+        return actor.m_properties.has(prop::Id::magic_carapace) ? 25 : 0;
+}
+
+static bool is_player_resistance_traits_applicable(const prop::Id id)
+{
+        switch (id) {
+        case prop::Id::burning:
+        case prop::Id::poisoned:
+        case prop::Id::paralyzed:
+                return true;
+
+        default:
+                return false;
+        }
+}
+
+static bool is_magic_carapace_applicable(const prop::Id id)
+{
+        return (id == prop::Id::burning);
+}
+
 static Color get_property_gui_color(const prop::Prop& property)
 {
         const prop::PropAlignment alignment = property.alignment();
@@ -235,7 +258,7 @@ void PropHandler::apply(
 
         if (actor::is_player(m_owner) &&
             player_bon::has_trait(Trait::resistant) &&
-            prop->m_data.is_preventable_by_player_trait &&
+            is_player_resistance_traits_applicable(prop->id()) &&
             (prop->m_duration_mode != PropDurationMode::indefinite) &&
             (prop->m_nr_turns_left >= 4)) {
                 prop->m_nr_turns_left /= 2;
@@ -245,14 +268,25 @@ void PropHandler::apply(
 
         // Check if property is resisted
         if (!force_effect) {
+                // Resisting due to another property?
                 bool is_resisting = is_resisting_prop(prop->m_id);
 
-                if (!is_resisting &&
-                    actor::is_player(m_owner) &&
-                    prop->m_data.is_preventable_by_player_trait) {
-                        const int resist_chance = calc_resist_chance_from_player_traits();
+                if (!is_resisting) {
+                        // Percent based resist chance.
+                        int resist_chance_pct = 0;
 
-                        is_resisting = rnd::percent(resist_chance);
+                        if (actor::is_player(m_owner) &&
+                            is_player_resistance_traits_applicable(prop->id())) {
+                                resist_chance_pct += calc_resist_chance_from_player_traits();
+                        }
+
+                        if (is_magic_carapace_applicable(prop->id())) {
+                                resist_chance_pct += resist_chance_from_magic_carapace(*m_owner);
+                        }
+
+                        TRACE << "##### " << resist_chance_pct << std::endl;
+
+                        is_resisting = rnd::percent(resist_chance_pct);
                 }
 
                 if (is_resisting) {

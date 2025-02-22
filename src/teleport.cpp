@@ -180,11 +180,8 @@ static bool should_player_ctrl_tele(const ShouldCtrlTele ctrl_tele)
         }
 
         case ShouldCtrlTele::if_tele_ctrl_prop: {
-                const bool has_tele_ctrl =
-                        map::g_player->m_properties.has(prop::Id::tele_ctrl);
-
-                const bool is_confused =
-                        map::g_player->m_properties.has(prop::Id::confused);
+                const bool has_tele_ctrl = map::g_player->m_properties.has(prop::Id::tele_ctrl);
+                const bool is_confused = map::g_player->m_properties.has(prop::Id::confused);
 
                 return has_tele_ctrl && !is_confused;
         }
@@ -291,7 +288,10 @@ void teleport(
         // Teleport control?
         if (actor::is_player(&actor) && should_player_ctrl_tele(ctrl_tele)) {
                 states::run_until_state_done(
-                        std::make_unique<CtrlTele>(actor.m_pos, blocked, max_dist));
+                        std::make_unique<CtrlTele>(
+                                actor.m_pos,
+                                blocked,
+                                max_dist));
 
                 return;
         }
@@ -311,13 +311,16 @@ void teleport(
 
         const P tgt_pos = rnd::element(pos_bucket);
 
-        teleport(actor, tgt_pos, blocked);
+        teleport(actor, tgt_pos, blocked, false);
 }
 
-void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
+void teleport(
+        actor::Actor& actor,
+        P pos,
+        const Array2<bool>& blocked,
+        const bool has_tele_ctrl)
 {
-        const bool player_can_see_actor_before =
-                actor::can_player_see_actor(actor);
+        const bool player_can_see_actor_before = actor::can_player_see_actor(actor);
 
         if (!actor::is_player(&actor)) {
                 actor.m_mon_aware_state.player_aware_of_me_counter = 0;
@@ -341,14 +344,14 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         const bool is_affected_by_void_traveler =
                 handle_void_traveler_affecting_player_teleport(
                         actor,
-                        p,
+                        pos,
                         blocked);
 
         // Leave current position.
         map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
         // Update actor position to new position
-        actor.m_pos = p;
+        actor.m_pos = pos;
 
         if (actor::is_player(&actor)) {
                 viewport::show(map::g_player->m_pos, viewport::ForceCentering::yes);
@@ -381,8 +384,6 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
 
         actor::make_player_aware_seen_monsters();
 
-        const bool has_tele_ctrl = actor.m_properties.has(prop::Id::tele_ctrl);
-
         const bool is_confused = actor.m_properties.has(prop::Id::confused);
 
         if (actor::is_player(&actor) &&
@@ -393,5 +394,5 @@ void teleport(actor::Actor& actor, P p, const Array2<bool>& blocked)
         }
 
         // Bump the target terrain.
-        map::g_terrain.at(p)->bump(actor);
+        map::g_terrain.at(pos)->bump(actor);
 }

@@ -39,6 +39,7 @@
 #include "random.hpp"
 #include "saving.hpp"
 #include "state.hpp"
+#include "teleport.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "text_format.hpp"
@@ -715,6 +716,84 @@ void Descent::quaff_impl(actor::Actor& actor)
         }
 
         identify(Verbose::yes);
+}
+
+void Skill::quaff_impl(actor::Actor& actor)
+{
+        actor.m_properties.apply(prop::make(prop::Id::extra_skill));
+
+        if (actor::can_player_see_actor(actor)) {
+                identify(Verbose::yes);
+        }
+}
+
+void Skill::collide_hook(const P& pos, actor::Actor* actor)
+{
+        (void)pos;
+
+        if (actor) {
+                quaff_impl(*actor);
+        }
+}
+
+void Carapace::quaff_impl(actor::Actor& actor)
+{
+        actor.m_properties.apply(prop::make(prop::Id::magic_carapace));
+
+        if (actor::can_player_see_actor(actor)) {
+                identify(Verbose::yes);
+        }
+}
+
+void Carapace::collide_hook(const P& pos, actor::Actor* actor)
+{
+        (void)pos;
+
+        if (actor) {
+                quaff_impl(*actor);
+        }
+}
+
+void Blinking::quaff_impl(actor::Actor& actor)
+{
+        if (actor::is_player(&actor)) {
+                msg_log::add("I fade out of existence and reappear.");
+        }
+
+        const int max_dist = 4;
+
+        teleport(actor, ShouldCtrlTele::always, max_dist);
+
+        if (actor::can_player_see_actor(actor)) {
+                identify(Verbose::yes);
+        }
+}
+
+void Blinking::collide_hook(const P& pos, actor::Actor* actor)
+{
+        (void)pos;
+
+        if (actor) {
+                quaff_impl(*actor);
+        }
+}
+
+void Burrowing::quaff_impl(actor::Actor& actor)
+{
+        actor.m_properties.apply(prop::make(prop::Id::burrowing));
+
+        if (actor::can_player_see_actor(actor)) {
+                identify(Verbose::yes);
+        }
+}
+
+void Burrowing::collide_hook(const P& pos, actor::Actor* actor)
+{
+        (void)pos;
+
+        if (actor) {
+                quaff_impl(*actor);
+        }
 }
 
 }  // namespace potion

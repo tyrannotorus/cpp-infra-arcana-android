@@ -75,12 +75,22 @@ static void damage_armor(actor::Actor& actor, int dmg)
 
 static int hit_armor_and_calc_new_damage(actor::Actor& actor, int dmg)
 {
-        // NOTE: We retrieve armor points BEFORE damaging the armor, since the
-        // armor should reduce damage taken by the current (pre-hit) armor value
-        // even if it gets damaged or destroyed.
+        // NOTE: We retrieve armor points BEFORE damaging the armor, since the armor should reduce
+        // damage taken by the current (pre-hit) armor value even if it gets damaged or destroyed.
         const int armor_points = actor::armor_points(actor);
 
-        // Danage worn armor.
+        // NOTE: The player having extra armor points from properties or non-destructible worn items
+        // (e.g. flagellant torture collar) does NOT help with protecting the durability of the worn
+        // body armor item, it only helps with reducing the final damage taken. This makes some
+        // sense in a way - why would the player being thick skinned make their leather jacket last
+        // longer?
+        //
+        // If there ever is for example a destructible head item (e.g. soldier's helmet), then
+        // perhaps randomize if the body armor or head armor should take the durability damage - or
+        // distribute it among them.
+        //
+
+        // Damage worn armor.
         if (actor.m_data->is_humanoid) {
                 damage_armor(actor, dmg);
         }

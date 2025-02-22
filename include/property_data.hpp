@@ -61,6 +61,8 @@ enum class Id
         diseased,
         weakened,
         frenzied,
+        magic_carapace,  // Potion of Carapace
+        extra_skill,     // Potion of Skill
         blessed,
         cursed,
         doomed,
@@ -184,7 +186,6 @@ struct PropData
         bool allow_display_turns {true};
         bool update_vision_on_toggled {false};
         bool force_interrupt_player_on_start {false};
-        bool is_preventable_by_player_trait {false};
         DurationOnMoreBehavior duration_on_more {DurationOnMoreBehavior::longest};
         bool allow_test_on_bot {false};
         PropAlignment alignment {PropAlignment::neutral};

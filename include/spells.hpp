@@ -211,8 +211,7 @@ public:
 
         std::string domain_descr() const;
 
-        virtual std::vector<std::string> descr_specific(
-                SpellSkill skill) const = 0;
+        virtual std::vector<std::string> descr_specific(SpellSkill skill) const = 0;
 
         Range cost_range(
                 SpellSkill skill,
@@ -567,8 +566,7 @@ public:
 
         virtual SpellId id() const = 0;
 
-        virtual std::vector<std::string> descr_specific(
-                SpellSkill skill) const = 0;
+        virtual std::vector<std::string> descr_specific(SpellSkill skill) const = 0;
 
         virtual int base_max_cost(
                 SpellSkill skill,
@@ -1371,8 +1369,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
