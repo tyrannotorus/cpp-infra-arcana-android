@@ -284,8 +284,6 @@ void PropHandler::apply(
                                 resist_chance_pct += resist_chance_from_magic_carapace(*m_owner);
                         }
 
-                        TRACE << "##### " << resist_chance_pct << std::endl;
-
                         is_resisting = rnd::percent(resist_chance_pct);
                 }
 
