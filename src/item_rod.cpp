@@ -554,7 +554,9 @@ void MiGoHypno::run_effect()
 
         std::vector<actor::Actor*> target_bucket;
 
-        for (actor::Actor* const actor : game_time::g_actors) {
+        std::vector<actor::Actor*> seen_foes = actor::seen_foes(*map::g_player);
+
+        for (actor::Actor* const actor : seen_foes) {
                 if (actor::is_player(actor) ||
                     !actor::is_alive(*actor) ||
                     (king_dist(map::g_player->m_pos, actor->m_pos) > max_dist)) {
@@ -580,7 +582,7 @@ void MiGoHypno::run_effect()
 std::string MiGoHypno::descr_identified() const
 {
         return (
-                "When activated, this device selects a single nearby creature, "
+                "When activated, this device selects a single nearby seen creature, "
                 "and attempts to hypnotize it, putting them to sleep if susceptible. "
                 "It is unknown how the target selection works.");
 }
