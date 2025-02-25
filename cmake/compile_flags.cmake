@@ -72,7 +72,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
                 )
 endif()
 
-set(APPEND RELEASE_COMPILE_FLAGS
+list(APPEND RELEASE_COMPILE_FLAGS
         -DNDEBUG
         )
 
