@@ -11,7 +11,7 @@ SET(CMAKE_COLOR_MAKEFILE OFF)
 
 option(
         IA_BUILD_STATIC_SDL
-        "Build and link SDL statically (otherwise use system-installed SDL2 (via find_package) on Linux, or use the bundled prebuilt version on Windows"
+        "Build and link SDL statically. Otherwise use system-installed SDL2 (via find_package) on Linux, or use the bundled prebuilt version on Windows."
         OFF)
 
 option(IA_DEBUG_SANITIZE "Use compiler sanitizers for debug or test builds" ON)
