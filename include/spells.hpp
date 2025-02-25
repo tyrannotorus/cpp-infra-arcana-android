@@ -279,8 +279,7 @@ public:
                 return false;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override
+        std::vector<std::string> descr_specific(SpellSkill skill) const override
         {
                 (void)skill;
                 return {};
@@ -340,8 +339,7 @@ public:
                 return true;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -399,8 +397,7 @@ public:
                 return true;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -458,8 +455,7 @@ public:
                 return true;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -517,8 +513,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -617,8 +612,7 @@ public:
                 return SpellId::force_bolt;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         int base_max_cost(
                 const SpellSkill skill,
@@ -670,8 +664,7 @@ public:
                 return SpellId::darkbolt;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         int base_max_cost(
                 const SpellSkill skill,
@@ -724,8 +717,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
+        std::vector<std::string> descr_specific(const SpellSkill skill) const override
         {
                 return m_impl->descr_specific(skill);
         }
@@ -798,8 +790,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -879,8 +870,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -945,8 +935,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1002,8 +991,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1062,8 +1050,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1115,8 +1102,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1179,8 +1165,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1243,8 +1228,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1309,8 +1293,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1426,8 +1409,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1490,8 +1472,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1562,8 +1543,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
+        std::vector<std::string> descr_specific(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -1633,8 +1613,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1699,8 +1678,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1756,8 +1734,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1818,8 +1795,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1875,8 +1851,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1928,8 +1903,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -1985,8 +1959,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -2043,8 +2016,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -2104,8 +2076,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -2162,8 +2133,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -2224,8 +2194,7 @@ public:
 
         SpellShock shock_type() const override;
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -2277,8 +2246,7 @@ public:
                 return SpellShock::severe;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -2336,8 +2304,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -2408,8 +2375,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
+        std::vector<std::string> descr_specific(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2476,8 +2442,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
+        std::vector<std::string> descr_specific(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2627,8 +2592,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
+        std::vector<std::string> descr_specific(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2709,8 +2673,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override;
+        std::vector<std::string> descr_specific(SpellSkill skill) const override;
 
         void run_effect(
                 actor::Actor* caster,
@@ -2773,8 +2736,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
+        std::vector<std::string> descr_specific(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2844,8 +2806,7 @@ public:
                 return SpellShock::disturbing;
         }
 
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
+        std::vector<std::string> descr_specific(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2915,8 +2876,7 @@ public:
                 return SpellShock::mild;
         }
 
-        std::vector<std::string> descr_specific(
-                const SpellSkill skill) const override
+        std::vector<std::string> descr_specific(const SpellSkill skill) const override
         {
                 (void)skill;
 
@@ -2983,8 +2943,7 @@ public:
                 return false;
         }
 
-        std::vector<std::string> descr_specific(
-                SpellSkill skill) const override
+        std::vector<std::string> descr_specific(SpellSkill skill) const override
         {
                 (void)skill;
                 return {};
