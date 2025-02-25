@@ -4631,7 +4631,7 @@ std::vector<actor::Actor*> SpellBlind::find_actors_not_blind_resistant(
                 std::end(actors),
                 std::back_inserter(result),
                 [](const actor::Actor* const actor) {
-                        return !actor->m_properties.has(prop::Id::blind);
+                        return !actor->m_properties.has(prop::Id::r_blind);
                 });
 
         return result;
