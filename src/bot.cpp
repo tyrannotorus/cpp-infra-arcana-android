@@ -75,10 +75,12 @@ static void show_map_and_freeze(const std::string& msg)
         }
 
         while (true) {
+                states::draw();
+
                 io::draw_text(
                         "[" + msg + "]",
                         Panel::screen,
-                        P(0, 0),
+                        {0, 0},
                         colors::light_red());
 
                 io::update_screen();

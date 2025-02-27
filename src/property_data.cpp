@@ -1212,7 +1212,7 @@ static void init_data_list()
         d.msg_end_player = "The earth is solid once more.";
         d.msg_end_mon = "can no longer move through earth.";
         d.allow_display_turns = true;
-        d.allow_test_on_bot = true;
+        d.allow_test_on_bot = false;
         d.alignment = prop::PropAlignment::good;
         add(d);
 

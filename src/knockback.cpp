@@ -35,12 +35,107 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static const std::vector<prop::Id> s_props_cannot_knock_back = {
+static const std::vector<prop::Id> s_prop_ids_cannot_knock_back = {
         prop::Id::entangled,
         prop::Id::stuck,
         prop::Id::ethereal,
         prop::Id::ooze,
 };
+
+static const std::vector<terrain::Id> s_terrain_ids_deep = {
+        terrain::Id::chasm,
+};
+
+static bool can_creature_be_knocked_back(const actor::Actor& actor)
+{
+        // TODO: Previously knockback was for some reason prevented against the player if the bot
+        // was playing ("config::is_bot_playing()"). Consider if that is necessary.
+
+        if (
+                actor.m_data->prevent_knockback ||
+                (actor.m_data->actor_size >= actor::Size::giant)) {
+                return false;
+        }
+
+        const bool prop_prevents_knockback =
+                std::any_of(
+                        std::cbegin(s_prop_ids_cannot_knock_back),
+                        std::cend(s_prop_ids_cannot_knock_back),
+                        [&actor](const auto id) {
+                                return actor.m_properties.has(id);
+                        });
+
+        if (prop_prevents_knockback) {
+                return false;
+        }
+
+        return true;
+}
+
+static void nail_actor(actor::Actor& actor)
+{
+        prop::Prop* prop = prop::make(prop::Id::nailed);
+
+        prop->set_indefinite();
+
+        actor.m_properties.apply(prop);
+}
+
+static void paralyze_actor(actor::Actor& actor, const int paralyze_extra_turns)
+{
+        prop::Prop* prop = prop::make(prop::Id::paralyzed);
+
+        prop->set_duration(1 + paralyze_extra_turns);
+
+        actor.m_properties.apply(prop);
+}
+
+static std::string mon_shown_name(const actor::Actor& actor)
+{
+        const bool is_seen = actor::can_player_see_actor(actor);
+
+        return (
+                is_seen
+                        ? text_format::first_to_upper(actor::name_the(actor))
+                        : "It");
+}
+
+static bool is_mon_noticed_by_player(const actor::Actor& actor)
+{
+        // The monster is noticed by the player if it is seen, or if the player is aware of the
+        // monster and can see their position.
+        return (
+                actor::can_player_see_actor(actor) ||
+                (actor::is_player_aware_of_me(actor) && map::g_seen.at(actor.m_pos)));
+}
+
+static void print_msg_actor_knocked_back(const actor::Actor& actor)
+{
+        if (is_mon_noticed_by_player(actor)) {
+                if (actor::is_player(&actor)) {
+                        msg_log::add("I am knocked back!");
+                }
+                else {
+                        const std::string name = mon_shown_name(actor);
+
+                        msg_log::add(name + " is knocked back!");
+                }
+        }
+}
+
+static void print_msg_fall_into_chasm(const actor::Actor& actor)
+{
+        if (is_mon_noticed_by_player(actor)) {
+                if (actor::is_player(&actor)) {
+                        msg_log::add("I perish in the depths!", colors::msg_bad());
+                }
+                else {
+                        const std::string name = mon_shown_name(actor);
+
+                        msg_log::add(name + " perishes in the depths.", colors::msg_good());
+                }
+        }
+}
 
 // -----------------------------------------------------------------------------
 // knockback
@@ -60,23 +155,7 @@ void run(
 
         const bool is_player = actor::is_player(&actor);
 
-        if (actor.m_data->prevent_knockback ||
-            (actor.m_data->actor_size >= actor::Size::giant) ||
-            (is_player && config::is_bot_playing())) {
-                TRACE_FUNC_END;
-
-                return;
-        }
-
-        const bool prop_prevents_knockback =
-                std::any_of(
-                        std::cbegin(s_props_cannot_knock_back),
-                        std::cend(s_props_cannot_knock_back),
-                        [&actor](const auto id) {
-                                return actor.m_properties.has(id);
-                        });
-
-        if (prop_prevents_knockback) {
+        if (!can_creature_be_knocked_back(actor)) {
                 TRACE_FUNC_END;
 
                 return;
@@ -98,9 +177,9 @@ void run(
                 !map_parsers::BlocksActor(actor, ParseActors::no)
                          .run(new_pos);
 
-        const std::vector<terrain::Id> deep_terrains = {terrain::Id::chasm};
-
-        const bool is_tgt_pos_deep = map_parsers::IsAnyOfTerrains(deep_terrains).run(new_pos);
+        const bool is_tgt_pos_deep =
+                map_parsers::IsAnyOfTerrains(s_terrain_ids_deep)
+                        .run(new_pos);
 
         const terrain::Terrain* const tgt_terrain = map::g_terrain.at(new_pos);
 
@@ -109,11 +188,7 @@ void run(
                 if ((source == KnockbackSource::spike_gun) &&
                     !tgt_terrain->is_projectile_passable() &&
                     !actor.m_properties.has(prop::Id::r_phys)) {
-                        prop::Prop* prop = prop::make(prop::Id::nailed);
-
-                        prop->set_indefinite();
-
-                        actor.m_properties.apply(prop);
+                        nail_actor(actor);
                 }
 
                 TRACE_FUNC_END;
@@ -121,59 +196,36 @@ void run(
                 return;
         }
 
-        const bool player_can_see_actor =
+        const bool can_player_see_actor = actor::can_player_see_actor(actor);
+
+        const bool is_player_aware_of_actor =
                 is_player
                 ? true
-                : actor::can_player_see_actor(actor);
+                : actor::is_player_aware_of_me(actor);
 
-        bool player_is_aware_of_actor = true;
-
-        if (!is_player) {
-                player_is_aware_of_actor = actor::is_player_aware_of_me(actor);
+        if (verbose == Verbose::yes) {
+                print_msg_actor_knocked_back(actor);
         }
 
-        std::string actor_name =
-                player_can_see_actor
-                ? text_format::first_to_upper(actor::name_the(actor))
-                : "It";
-
-        if ((verbose == Verbose::yes) && player_is_aware_of_actor) {
-                if (is_player) {
-                        msg_log::add("I am knocked back!");
-                }
-                else {
-                        msg_log::add(actor_name + " is knocked back!");
-                }
-        }
+        const P previous_pos = actor.m_pos;
 
         // Leave current position.
         map::g_terrain.at(actor.m_pos)->on_leave(actor);
 
         actor.m_pos = new_pos;
 
-        if (!is_player && player_can_see_actor) {
+        // Bump player awareness of the monster if the monster was seen, or if the player was aware
+        // of the monster and the previous position was seen.
+        if (!is_player &&
+            (can_player_see_actor ||
+             (is_player_aware_of_actor && map::g_seen.at(previous_pos)))) {
                 actor::make_player_aware_mon(actor);
         }
 
         if (!actor_can_move_into_tgt_pos && is_tgt_pos_deep) {
-                if (is_player) {
-                        msg_log::add(
-                                "I perish in the depths!",
-                                colors::msg_bad());
-                }
-                else if (
-                        player_is_aware_of_actor &&
-                        map::g_seen.at(new_pos)) {
-                        msg_log::add(
-                                actor_name + " perishes in the depths.",
-                                colors::msg_good());
-                }
+                print_msg_fall_into_chasm(actor);
 
-                actor::kill(
-                        actor,
-                        IsDestroyed::yes,
-                        AllowGore::no,
-                        AllowDropItems::no);
+                actor::kill(actor, IsDestroyed::yes, AllowGore::no, AllowDropItems::no);
 
                 TRACE_FUNC_END;
 
@@ -182,13 +234,9 @@ void run(
 
         map::update_vision();
 
-        prop::Prop* prop = prop::make(prop::Id::paralyzed);
+        paralyze_actor(actor, paralyze_extra_turns);
 
-        prop->set_duration(1 + paralyze_extra_turns);
-
-        actor.m_properties.apply(prop);
-
-        // Bump target cell
+        // Bump target position.
         const std::vector<terrain::Terrain*> mobs = game_time::mobs_at(actor.m_pos);
 
         for (terrain::Terrain* const mob : mobs) {

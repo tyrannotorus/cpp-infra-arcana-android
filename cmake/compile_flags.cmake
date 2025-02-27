@@ -32,6 +32,8 @@ if(
                 # Uncomment to generate gmon.out for gprof (must also be done for linker
                 # flags, see below)
                 # -pg
+                -fno-eliminate-unused-debug-symbols
+                -fno-eliminate-unused-debug-types
                 )
 
         set(TEST_COMPILE_FLAGS

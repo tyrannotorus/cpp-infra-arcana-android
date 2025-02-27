@@ -1161,6 +1161,7 @@ void handle(const GameCmd cmd)
                         terrain::Id::pillar,
                         terrain::Id::urn,
                         terrain::Id::petroglyph,
+                        terrain::Id::pylon,
                 };
 
                 int dx = 1;
@@ -1194,21 +1195,15 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::debug_shift_f5: {
-                // knockback::run(
-                //         *map::g_player,
-                //         map::g_player->m_pos.with_y_offset(1),
-                //         knockback::KnockbackSource::other,
-                //         Verbose::no);
-
-                explosion::run(
-                        map::g_player->m_pos,
-                        ExplType::apply_prop,
-                        EmitExplSnd::no,
-                        0,
-                        ExplExclCenter::yes,
-                        {prop::make(prop::Id::poisoned)},
-                        colors::light_green(),
-                        ExplIsGas::yes);
+                for (actor::Actor* const actor : game_time::g_actors) {
+                        if (!actor::is_player(actor) && actor::is_alive(*actor)) {
+                                knockback::run(
+                                        *actor,
+                                        actor->m_pos.with_x_offset(-1),
+                                        knockback::KnockbackSource::other,
+                                        Verbose::yes);
+                        }
+                }
         } break;
 
         case GameCmd::debug_shift_f6: {

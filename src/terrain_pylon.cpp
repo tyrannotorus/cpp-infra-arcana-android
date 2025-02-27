@@ -385,8 +385,19 @@ void PylonKnockback::on_new_turn()
         const std::vector<actor::Actor*> actors = living_actors_reached();
 
         for (actor::Actor* actor : actors) {
-                const bool can_player_see_actor_before =
-                        actor::can_player_see_actor(*actor);
+                // NOTE: Creatures being knocked down into chasms is ignored here. There are
+                // situations where the player could see the pylon, and see the monster fall into a
+                // chasm, but not see the origin position of the monster, but that should be an
+                // extremely obscure/unlikely situation.
+
+                // NOTE: For normal knockbacks (not into chasms), the message is printed when the
+                // monster is in their original position.
+
+                const bool is_mon_noticed =
+                        actor::can_player_see_actor(*actor) ||
+                        (actor::is_player_aware_of_me(*actor) && map::g_seen.at(actor->m_pos));
+
+                const P pos_before = actor->m_pos;
 
                 knockback::run(
                         *actor,
@@ -395,7 +406,11 @@ void PylonKnockback::on_new_turn()
                         Verbose::yes,
                         2);  // Extra paralyze turns
 
-                if (can_player_see_actor_before) {
+                const bool is_pos_updated = (actor->m_pos != pos_before);
+
+                const bool is_pylon_seen = map::g_seen.at(m_pos);
+
+                if (is_mon_noticed && is_pos_updated && is_pylon_seen) {
                         reveal();
                 }
         }

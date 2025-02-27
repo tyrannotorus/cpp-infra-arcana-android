@@ -214,9 +214,7 @@ std::string get_cultist_phrase()
 
 std::string get_cultist_aware_msg_seen(const Actor& actor)
 {
-        const std::string name_the =
-                text_format::first_to_upper(
-                        actor::name_the(actor));
+        const std::string name_the = text_format::first_to_upper(actor::name_the(actor));
 
         return name_the + ": " + get_cultist_phrase();
 }
