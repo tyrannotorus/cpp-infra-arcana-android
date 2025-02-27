@@ -231,4 +231,17 @@ void append_as_comma_list(
         base_str += addition;
 }
 
+std::string trim_leading_and_trailing_spaces(const std::string& str)
+{
+        auto start = std::find_if_not(std::begin(str), std::end(str), ::isspace);
+        auto end = std::find_if_not(std::rbegin(str), std::rend(str), ::isspace).base();
+
+        if (start >= end) {
+                // The string contains only spaces - return an empty string.
+                return "";
+        }
+
+        return {start, end};
+}
+
 }  // namespace text_format

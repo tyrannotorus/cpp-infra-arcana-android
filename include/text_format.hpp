@@ -50,6 +50,8 @@ void append_as_comma_list(
         std::string& base_str,
         const std::string& addition);
 
+std::string trim_leading_and_trailing_spaces(const std::string& str);
+
 }  // namespace text_format
 
 #endif  // TEXT_FORMAT_HPP

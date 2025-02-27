@@ -1033,7 +1033,11 @@ void EnterNameState::update()
 
                 auto& d = *map::g_player->m_data;
 
+                m_current_str = text_format::trim_leading_and_trailing_spaces(m_current_str);
+
                 d.name_a = d.name_the = m_current_str;
+
+                TRACE << "Player name: '" << d.name_a << "'" << std::endl;
 
                 states::pop();
 
