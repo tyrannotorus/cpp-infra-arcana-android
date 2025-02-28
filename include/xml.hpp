@@ -35,20 +35,11 @@ std::string get_attribute_str(const Element* e, const std::string& name);
 
 int get_attribute_int(const Element* e, const std::string& name);
 
-bool try_get_attribute_str(
-        const Element* e,
-        const std::string& name,
-        std::string& result);
+bool try_get_attribute_str(const Element* e, const std::string& name, std::string& result);
 
-bool try_get_attribute_int(
-        const Element* e,
-        const std::string& name,
-        int& result);
+bool try_get_attribute_int(const Element* e, const std::string& name, int& result);
 
-bool try_get_attribute_bool(
-        const Element* e,
-        const std::string& name,
-        bool& result);
+bool try_get_attribute_bool(const Element* e, const std::string& name, bool& result);
 
 }  // namespace xml
 

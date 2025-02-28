@@ -167,6 +167,16 @@ void Rod::set_max_charge_turns_left()
         }
 }
 
+Color Rod::interface_color() const
+{
+        return colors::violet();
+}
+
+int Rod::nr_turns_to_recharge() const
+{
+        return 250;
+}
+
 ConsumeItem Rod::activate(actor::Actor* const actor)
 {
         (void)actor;
@@ -278,6 +288,19 @@ std::string Rod::name_info_str(const ItemNameIdentified id_type) const
         }
 }
 
+std::string Opening::real_name() const
+{
+        return "Opening";
+}
+
+std::string Opening::descr_identified() const
+{
+        return (
+                "When activated, this device opens all locks, lids and "
+                "doors in the surrounding area (except heavy doors "
+                "operated externally by a switch).");
+}
+
 void Opening::run_effect()
 {
         bool is_any_opened = false;
@@ -302,12 +325,22 @@ void Opening::run_effect()
         }
 }
 
-std::string Opening::descr_identified() const
+std::string CloudMinds::real_name() const
+{
+        return "Cloud Minds";
+}
+
+std::string CloudMinds::descr_identified() const
 {
         return (
-                "When activated, this device opens all locks, lids and "
-                "doors in the surrounding area (except heavy doors "
-                "operated externally by a switch).");
+                "When activated, this device clouds the memories of "
+                "all creatures in the area, causing them to forget "
+                "the presence of the user.");
+}
+
+int CloudMinds::nr_turns_to_recharge() const
+{
+        return 90;
 }
 
 void CloudMinds::run_effect()
@@ -326,12 +359,17 @@ void CloudMinds::run_effect()
         identify(Verbose::yes);
 }
 
-std::string CloudMinds::descr_identified() const
+std::string Shockwave::real_name() const
+{
+        return "Shockwave";
+}
+
+std::string Shockwave::descr_identified() const
 {
         return (
-                "When activated, this device clouds the memories of "
-                "all creatures in the area, causing them to forget "
-                "the presence of the user.");
+                "When activated, this device generates a shock wave "
+                "which violently pushes away any adjacent creatures "
+                "and destroys structures.");
 }
 
 void Shockwave::run_effect()
@@ -405,12 +443,16 @@ void Shockwave::run_effect()
         identify(Verbose::yes);
 }
 
-std::string Shockwave::descr_identified() const
+std::string Deafening::real_name() const
+{
+        return "Deafening";
+}
+
+std::string Deafening::descr_identified() const
 {
         return (
-                "When activated, this device generates a shock wave "
-                "which violently pushes away any adjacent creatures "
-                "and destroys structures.");
+                "When activated, this device causes temporary deafness in "
+                "all creatures in a large area, except for the user.");
 }
 
 void Deafening::run_effect()
@@ -438,11 +480,16 @@ void Deafening::run_effect()
         }
 }
 
-std::string Deafening::descr_identified() const
+std::string DoorCreation::real_name() const
+{
+        return "Gateways";
+}
+
+std::string DoorCreation::descr_identified() const
 {
         return (
-                "When activated, this device causes temporary deafness in "
-                "all creatures in a large area, except for the user.");
+                "When activated, this device materializes an entryway somewhere "
+                "in an adjacent surface.");
 }
 
 void DoorCreation::run_effect()
@@ -488,11 +535,16 @@ void DoorCreation::run_effect()
         }
 }
 
-std::string DoorCreation::descr_identified() const
+std::string Unbinding::real_name() const
+{
+        return "Unbinding";
+}
+
+std::string Unbinding::descr_identified() const
 {
         return (
-                "When activated, this device materializes an entryway somewhere "
-                "in an adjacent surface.");
+                "When activated, this device breaks the user free from any bonds "
+                "(entangled, stuck, nailed), and ends slowing.");
 }
 
 void Unbinding::run_effect()
@@ -524,11 +576,17 @@ void Unbinding::run_effect()
         }
 }
 
-std::string Unbinding::descr_identified() const
+std::string Mist::real_name() const
+{
+        return "Mist";
+}
+
+std::string Mist::descr_identified() const
 {
         return (
-                "When activated, this device breaks the user free from any bonds "
-                "(entangled, stuck, nailed), and ends slowing.");
+                "When activated, this device alters the atmosphere in order to "
+                "cover the user in a dense mist. "
+                "The mist is also strangely soothing (-10% temporary shock).");
 }
 
 void Mist::run_effect()
@@ -540,12 +598,17 @@ void Mist::run_effect()
         identify(Verbose::yes);
 }
 
-std::string Mist::descr_identified() const
+std::string MiGoHypno::real_name() const
+{
+        return "Sleep";
+}
+
+std::string MiGoHypno::descr_identified() const
 {
         return (
-                "When activated, this device alters the atmosphere in order to "
-                "cover the user in a dense mist. "
-                "The mist is also strangely soothing (-10% temporary shock).");
+                "When activated, this device selects a single nearby seen creature, "
+                "and attempts to hypnotize it, putting them to sleep if susceptible. "
+                "It is unknown how the target selection works.");
 }
 
 void MiGoHypno::run_effect()
@@ -579,12 +642,14 @@ void MiGoHypno::run_effect()
         }
 }
 
-std::string MiGoHypno::descr_identified() const
+std::string Displacement::real_name() const
 {
-        return (
-                "When activated, this device selects a single nearby seen creature, "
-                "and attempts to hypnotize it, putting them to sleep if susceptible. "
-                "It is unknown how the target selection works.");
+        return "Displacement";
+}
+
+std::string Displacement::descr_identified() const
+{
+        return "When activated, this device moves the user a short distance.";
 }
 
 void Displacement::run_effect()
@@ -594,11 +659,6 @@ void Displacement::run_effect()
         teleport(*map::g_player, ShouldCtrlTele::never, max_dist);
 
         identify(Verbose::yes);
-}
-
-std::string Displacement::descr_identified() const
-{
-        return "When activated, this device moves the user a short distance.";
 }
 
 }  // namespace rod

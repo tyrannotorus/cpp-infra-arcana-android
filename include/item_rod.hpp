@@ -52,10 +52,7 @@ public:
 
         ConsumeItem activate(actor::Actor* actor) final;
 
-        Color interface_color() const final
-        {
-                return colors::violet();
-        }
+        Color interface_color() const final;
 
         std::string name_info_str(ItemNameIdentified id_type) const final;
 
@@ -72,10 +69,7 @@ protected:
 
         virtual void run_effect() = 0;
 
-        virtual int nr_turns_to_recharge() const
-        {
-                return 250;
-        }
+        virtual int nr_turns_to_recharge() const;
 
         void set_max_charge_turns_left();
 
@@ -91,10 +85,7 @@ public:
 
         ~Opening() = default;
 
-        std::string real_name() const override
-        {
-                return "Opening";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;
@@ -110,18 +101,12 @@ public:
 
         ~CloudMinds() = default;
 
-        std::string real_name() const override
-        {
-                return "Cloud Minds";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;
 
-        int nr_turns_to_recharge() const override
-        {
-                return 90;
-        }
+        int nr_turns_to_recharge() const override;
 
         void run_effect() override;
 };
@@ -134,10 +119,7 @@ public:
 
         ~Shockwave() = default;
 
-        std::string real_name() const override
-        {
-                return "Shockwave";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;
@@ -153,10 +135,7 @@ public:
 
         ~Deafening() = default;
 
-        std::string real_name() const override
-        {
-                return "Deafening";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;
@@ -172,10 +151,7 @@ public:
 
         ~DoorCreation() = default;
 
-        std::string real_name() const override
-        {
-                return "Gateways";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;
@@ -191,10 +167,7 @@ public:
 
         ~Unbinding() = default;
 
-        std::string real_name() const override
-        {
-                return "Unbinding";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;
@@ -210,10 +183,7 @@ public:
 
         ~Mist() = default;
 
-        std::string real_name() const override
-        {
-                return "Mist";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;
@@ -229,10 +199,7 @@ public:
 
         ~MiGoHypno() = default;
 
-        std::string real_name() const override
-        {
-                return "Sleep";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;
@@ -248,10 +215,7 @@ public:
 
         ~Displacement() = default;
 
-        std::string real_name() const override
-        {
-                return "Displacement";
-        }
+        std::string real_name() const override;
 
 protected:
         std::string descr_identified() const override;

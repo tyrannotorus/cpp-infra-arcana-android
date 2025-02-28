@@ -250,11 +250,7 @@ void throw_item(
                                         actor::name_the(
                                                 actor_throwing));
 
-                        msg_log::add(
-                                name_the +
-                                " throws " +
-                                item_name_a +
-                                ".");
+                        msg_log::add(name_the + " throws " + item_name_a + ".");
                 }
         }
 
@@ -271,8 +267,7 @@ void throw_item(
 
                 // Have we gone out of range?
                 {
-                        const int max_range =
-                                item_thrown.data().ranged.max_range;
+                        const int max_range = item_thrown.data().ranged.max_range;
 
                         const P current_pos = path[path_idx];
 
@@ -299,19 +294,14 @@ void throw_item(
                                         pos,
                                         item_thrown);
 
-                        const auto att_result =
-                                ability_roll::roll(att_data.hit_chance_tot);
+                        const auto att_result = ability_roll::roll(att_data.hit_chance_tot);
 
-                        const int dmg =
-                                att_data.dmg_range.total_range().roll();
+                        const int dmg = att_data.dmg_range.total_range().roll();
 
                         if (att_result >= ActionResult::success) {
-                                const bool is_potion =
-                                        item_thrown_data.type ==
-                                        ItemType::potion;
+                                const bool is_potion = (item_thrown_data.type == ItemType::potion);
 
-                                const bool player_see_cell =
-                                        map::g_seen.at(pos);
+                                const bool player_see_cell = map::g_seen.at(pos);
 
                                 if (player_see_cell) {
                                         const Color hit_color =
@@ -319,9 +309,7 @@ void throw_item(
                                                 ? item_color
                                                 : colors::light_red();
 
-                                        draw_blast_at_cells(
-                                                {pos},
-                                                hit_color);
+                                        draw_blast_at_cells({pos}, hit_color);
                                 }
 
                                 actor_here->make_player_aware_of_me();
@@ -358,10 +346,9 @@ void throw_item(
 
                                 is_actor_hit = true;
 
-                                // TODO: Couldn't the potion handle this itself
-                                // via "on_ranged_hit" called above? It would be
-                                // good to make the throwing code more generic,
-                                // it should not know about potions!
+                                // TODO: Couldn't the potion handle this itself via "on_ranged_hit"
+                                // called above? It would be good to make the throwing code more
+                                // generic, it should not know about potions!
                                 if (is_potion) {
                                         if (actor::is_alive(*actor_here)) {
                                                 apply_potion_on_actor(item_thrown, *actor_here);

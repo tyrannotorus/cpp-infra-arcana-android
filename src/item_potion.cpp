@@ -423,6 +423,32 @@ std::string Potion::name_info_str(const ItemNameIdentified id_type) const
         return str;
 }
 
+Color Potion::interface_color() const
+{
+        return colors::light_blue();
+}
+
+std::string Vitality::real_name() const
+{
+        return "Vitality";
+}
+
+std::string Vitality::descr_identified() const
+{
+        return (
+                "This elixir fully restores all hit points, heals all "
+                "wounds, and cures blindness, deafness, poisoning, "
+                "infections, disease, weakening, and life sapping. "
+                "Also, for some duration after consuming the potion, "
+                "+1 extra hit point is healed per turn, and there is "
+                "10% chance per turn to heal one wound.");
+}
+
+PotionAlignment Vitality::alignment() const
+{
+        return PotionAlignment::good;
+}
+
 void Vitality::quaff_impl(actor::Actor& actor)
 {
         std::vector<prop::Id> props_can_heal = {
@@ -457,6 +483,21 @@ void Vitality::collide_hook(const P& pos, actor::Actor* const actor)
         }
 }
 
+std::string Spirit::real_name() const
+{
+        return "Spirit";
+}
+
+std::string Spirit::descr_identified() const
+{
+        return "Restores the spirit, and cures spirit sapping.";
+}
+
+PotionAlignment Spirit::alignment() const
+{
+        return PotionAlignment::good;
+}
+
 void Spirit::quaff_impl(actor::Actor& actor)
 {
         actor.m_properties.end_prop(prop::Id::spi_sap);
@@ -485,6 +526,21 @@ void Spirit::collide_hook(const P& pos, actor::Actor* const actor)
         }
 }
 
+std::string Blindness::real_name() const
+{
+        return "Blindness";
+}
+
+std::string Blindness::descr_identified() const
+{
+        return "Causes temporary loss of vision.";
+}
+
+PotionAlignment Blindness::alignment() const
+{
+        return PotionAlignment::bad;
+}
+
 void Blindness::quaff_impl(actor::Actor& actor)
 {
         actor.m_properties.apply(prop::make(prop::Id::blind));
@@ -501,6 +557,21 @@ void Blindness::collide_hook(const P& pos, actor::Actor* const actor)
         if (actor) {
                 quaff_impl(*actor);
         }
+}
+
+std::string Paral::real_name() const
+{
+        return "Paralyzation";
+}
+
+std::string Paral::descr_identified() const
+{
+        return "Causes paralysis.";
+}
+
+PotionAlignment Paral::alignment() const
+{
+        return PotionAlignment::bad;
 }
 
 void Paral::quaff_impl(actor::Actor& actor)
@@ -521,6 +592,21 @@ void Paral::collide_hook(const P& pos, actor::Actor* const actor)
         }
 }
 
+std::string Disease::real_name() const
+{
+        return "Disease";
+}
+
+std::string Disease::descr_identified() const
+{
+        return "Causes disease.";
+}
+
+PotionAlignment Disease::alignment() const
+{
+        return PotionAlignment::bad;
+}
+
 void Disease::quaff_impl(actor::Actor& actor)
 {
         actor.m_properties.apply(prop::make(prop::Id::diseased));
@@ -528,6 +614,30 @@ void Disease::quaff_impl(actor::Actor& actor)
         if (actor::can_player_see_actor(actor)) {
                 identify(Verbose::yes);
         }
+}
+
+void Disease::collide_hook(const P& pos, actor::Actor* const actor)
+{
+        (void)pos;
+
+        if (actor) {
+                quaff_impl(*actor);
+        }
+}
+
+std::string Conf::real_name() const
+{
+        return "Confusion";
+}
+
+std::string Conf::descr_identified() const
+{
+        return "Causes confusion.";
+}
+
+PotionAlignment Conf::alignment() const
+{
+        return PotionAlignment::bad;
 }
 
 void Conf::quaff_impl(actor::Actor& actor)
@@ -546,6 +656,23 @@ void Conf::collide_hook(const P& pos, actor::Actor* const actor)
         if (actor) {
                 quaff_impl(*actor);
         }
+}
+
+std::string Fortitude::real_name() const
+{
+        return "Fortitude";
+}
+
+std::string Fortitude::descr_identified() const
+{
+        return (
+                "Gives the consumer complete peace and clarity of "
+                "mind, and cures mind sapping.");
+}
+
+PotionAlignment Fortitude::alignment() const
+{
+        return PotionAlignment::good;
 }
 
 void Fortitude::quaff_impl(actor::Actor& actor)
@@ -588,6 +715,21 @@ void Fortitude::collide_hook(const P& pos, actor::Actor* const actor)
         }
 }
 
+std::string Poison::real_name() const
+{
+        return "Poison";
+}
+
+std::string Poison::descr_identified() const
+{
+        return "A deadly brew.";
+}
+
+PotionAlignment Poison::alignment() const
+{
+        return PotionAlignment::bad;
+}
+
 void Poison::quaff_impl(actor::Actor& actor)
 {
         actor.m_properties.apply(prop::make(prop::Id::poisoned));
@@ -604,6 +746,68 @@ void Poison::collide_hook(const P& pos, actor::Actor* const actor)
         if (actor) {
                 quaff_impl(*actor);
         }
+}
+
+std::string Insight::real_name() const
+{
+        return "Insight";
+}
+
+std::string Insight::descr_identified() const
+{
+        return (
+                "This strange concoction causes a sudden flash of intuition.");
+}
+
+PotionAlignment Insight::alignment() const
+{
+        return PotionAlignment::good;
+}
+
+void Insight::quaff_impl(actor::Actor& actor)
+{
+        (void)actor;
+
+        identify(Verbose::yes);
+
+        // Run identify selection menu
+
+        // NOTE: We push this state BEFORE giving any XP (directly or via
+        // identifying stuff), because if the player gains a new level in the
+        // process, the trait selection should occur first
+        states::push(std::make_unique<SelectIdentify>());
+
+        // Insight gives some extra XP, to avoid making the potion worthless if
+        // the player identifies all items)
+        msg_log::add("I feel insightful.");
+
+        game::incr_player_xp(g_xp_on_drink_insight_potion);
+
+        msg_log::more_prompt();
+}
+
+void Insight::collide_hook(const P& pos, actor::Actor* const actor)
+{
+        (void)pos;
+        (void)actor;
+}
+
+std::string Curing::real_name() const
+{
+        return "Curing";
+}
+
+std::string Curing::descr_identified() const
+{
+        return (
+                "Restores 3 hit points, and cures blindness, deafness, "
+                "poisoning, infections, disease, weakening, and "
+                "life sapping.");
+}
+
+PotionAlignment Curing::alignment() const
+{
+        return PotionAlignment::good;
 }
 
 void Curing::quaff_impl(actor::Actor& actor)
@@ -647,13 +851,30 @@ void Curing::quaff_impl(actor::Actor& actor)
         }
 }
 
-void Curing::collide_hook(const P& pos, actor::Actor* const actor)
+void Curing::collide_hook(const P& pos, actor::Actor* actor)
 {
         (void)pos;
 
         if (actor) {
                 quaff_impl(*actor);
         }
+}
+
+std::string Resistance::real_name() const
+{
+        return "Resistance";
+}
+
+std::string Resistance::descr_identified() const
+{
+        return (
+                "Completely protects the consumer from electricity, fire and poison - "
+                "and also prevents paralysis.");
+}
+
+PotionAlignment Resistance::alignment() const
+{
+        return PotionAlignment::good;
 }
 
 void Resistance::quaff_impl(actor::Actor& actor)
@@ -670,7 +891,7 @@ void Resistance::quaff_impl(actor::Actor& actor)
         }
 }
 
-void Resistance::collide_hook(const P& pos, actor::Actor* const actor)
+void Resistance::collide_hook(const P& pos, actor::Actor* actor)
 {
         (void)pos;
 
@@ -679,26 +900,21 @@ void Resistance::collide_hook(const P& pos, actor::Actor* const actor)
         }
 }
 
-void Insight::quaff_impl(actor::Actor& actor)
+std::string Descent::real_name() const
 {
-        (void)actor;
+        return "Descent";
+}
 
-        identify(Verbose::yes);
+std::string Descent::descr_identified() const
+{
+        return (
+                "A bizarre liquid that causes the consumer to "
+                "dematerialize and sink through the ground.");
+}
 
-        // Run identify selection menu
-
-        // NOTE: We push this state BEFORE giving any XP (directly or via
-        // identifying stuff), because if the player gains a new level in the
-        // process, the trait selection should occur first
-        states::push(std::make_unique<SelectIdentify>());
-
-        // Insight gives some extra XP, to avoid making the potion worthless if
-        // the player identifies all items)
-        msg_log::add("I feel insightful.");
-
-        game::incr_player_xp(g_xp_on_drink_insight_potion);
-
-        msg_log::more_prompt();
+PotionAlignment Descent::alignment() const
+{
+        return PotionAlignment::good;
 }
 
 void Descent::quaff_impl(actor::Actor& actor)
@@ -716,6 +932,29 @@ void Descent::quaff_impl(actor::Actor& actor)
         }
 
         identify(Verbose::yes);
+}
+
+void Descent::collide_hook(const P& pos, actor::Actor* const actor)
+{
+        (void)pos;
+        (void)actor;
+}
+
+std::string Skill::real_name() const
+{
+        return "Skill";
+}
+
+std::string Skill::descr_identified() const
+{
+        return (
+                "The consumer becomes more skillful "
+                "(+10% to hit chance, evasion, stealth, and searching).");
+}
+
+PotionAlignment Skill::alignment() const
+{
+        return PotionAlignment::good;
 }
 
 void Skill::quaff_impl(actor::Actor& actor)
@@ -736,6 +975,26 @@ void Skill::collide_hook(const P& pos, actor::Actor* actor)
         }
 }
 
+std::string Carapace::real_name() const
+{
+        return "Carapace";
+}
+
+std::string Carapace::descr_identified() const
+{
+        return (
+                "Causes a tough carapace to grow over the consumer's skin "
+                "providing protection against physical attacks "
+                "(+3 armor points), "
+                "as well as some resistance against burning "
+                "(+25% chance to resist burning).");
+}
+
+PotionAlignment Carapace::alignment() const
+{
+        return PotionAlignment::good;
+}
+
 void Carapace::quaff_impl(actor::Actor& actor)
 {
         actor.m_properties.apply(prop::make(prop::Id::magic_carapace));
@@ -752,6 +1011,24 @@ void Carapace::collide_hook(const P& pos, actor::Actor* actor)
         if (actor) {
                 quaff_impl(*actor);
         }
+}
+
+std::string Blinking::real_name() const
+{
+        return "Blinking";
+}
+
+std::string Blinking::descr_identified() const
+{
+        return (
+                "Causes the consumer to rapidly fade away from existence, "
+                "and reappear again at a nearby position "
+                "of their choosing.");
+}
+
+PotionAlignment Blinking::alignment() const
+{
+        return PotionAlignment::good;
 }
 
 void Blinking::quaff_impl(actor::Actor& actor)
@@ -776,6 +1053,24 @@ void Blinking::collide_hook(const P& pos, actor::Actor* actor)
         if (actor) {
                 quaff_impl(*actor);
         }
+}
+
+std::string Burrowing::real_name() const
+{
+        return "Burrowing";
+}
+
+std::string Burrowing::descr_identified() const
+{
+        return (
+                "Infused with the alchemically treated blood of Chthonians, "
+                "it grants the consumer the ability to burrow through earth and rock "
+                "(can burrow through walls and rubble).");
+}
+
+PotionAlignment Burrowing::alignment() const
+{
+        return PotionAlignment::good;
 }
 
 void Burrowing::quaff_impl(actor::Actor& actor)

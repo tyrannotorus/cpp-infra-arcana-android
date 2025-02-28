@@ -44,10 +44,7 @@ public:
 
         virtual ~Potion() = default;
 
-        Color interface_color() const final
-        {
-                return colors::light_blue();
-        }
+        Color interface_color() const final;
 
         std::string name_info_str(ItemNameIdentified id_type) const final;
 
@@ -84,29 +81,9 @@ public:
         ~Vitality() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Vitality";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "This elixir fully restores all hit points, heals all "
-                        "wounds, and cures blindness, deafness, poisoning, "
-                        "infections, disease, weakening, and life sapping. "
-                        "Also, for some duration after consuming the potion, "
-                        "+1 extra hit point is healed per turn, and there is "
-                        "10% chance per turn to heal one wound.");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -118,23 +95,9 @@ public:
         ~Spirit() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Spirit";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return "Restores the spirit, and cures spirit sapping.";
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -146,23 +109,9 @@ public:
         ~Blindness() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Blindness";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return "Causes temporary loss of vision.";
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::bad;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -174,23 +123,9 @@ public:
         ~Paral() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Paralyzation";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return "Causes paralysis.";
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::bad;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -202,28 +137,10 @@ public:
         ~Disease() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Disease";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return "This foul liquid causes a horrible disease.";
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::bad;
-        }
-
-        void collide_hook(const P& pos, actor::Actor* const actor) override
-        {
-                (void)pos;
-                (void)actor;
-        }
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
+        void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
 class Conf : public Potion
@@ -232,24 +149,11 @@ public:
         Conf(item::ItemData* const item_data) :
                 Potion(item_data) {}
         ~Conf() = default;
+
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Confusion";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return "Causes confusion.";
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::bad;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -258,29 +162,12 @@ class Fortitude : public Potion
 public:
         Fortitude(item::ItemData* const item_data) :
                 Potion(item_data) {}
-
         ~Fortitude() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Fortitude";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "Gives the consumer complete peace and clarity of "
-                        "mind, and cures mind sapping.");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -292,23 +179,9 @@ public:
         ~Poison() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Poison";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return "A deadly brew.";
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::bad;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -320,29 +193,10 @@ public:
         ~Insight() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Insight";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "This strange concoction causes a sudden flash of intuition.");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
-        void collide_hook(const P& pos, actor::Actor* const actor) override
-        {
-                (void)pos;
-                (void)actor;
-        }
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
+        void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
 class Curing : public Potion
@@ -353,26 +207,9 @@ public:
         ~Curing() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Curing";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "Restores 3 hit points, and cures blindness, deafness, "
-                        "poisoning, infections, disease, weakening, and "
-                        "life sapping.");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -384,25 +221,9 @@ public:
         ~Resistance() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Resistance";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "Completely protects the consumer from electricity, fire and poison - "
-                        "and also prevents paralysis.");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -414,30 +235,10 @@ public:
         ~Descent() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Descent";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "A bizarre liquid that causes the consumer to "
-                        "dematerialize and sink through the ground.");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
-        void collide_hook(const P& pos, actor::Actor* const actor) override
-        {
-                (void)pos;
-                (void)actor;
-        }
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
+        void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
 class Skill : public Potion
@@ -445,29 +246,12 @@ class Skill : public Potion
 public:
         Skill(item::ItemData* const item_data) :
                 Potion(item_data) {}
-
         ~Skill() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Skill";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "The consumer becomes more skillful "
-                        "(+10% to hit chance, evasion, stealth, and searching).");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -476,32 +260,12 @@ class Carapace : public Potion
 public:
         Carapace(item::ItemData* const item_data) :
                 Potion(item_data) {}
-
         ~Carapace() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Carapace";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "Causes a tough carapace to grow over the consumer's skin "
-                        "providing protection against physical attacks "
-                        "(+3 armor points), "
-                        "as well as some resistance against burning "
-                        "(+25% chance to resist burning).");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -510,30 +274,12 @@ class Blinking : public Potion
 public:
         Blinking(item::ItemData* const item_data) :
                 Potion(item_data) {}
-
         ~Blinking() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Blinking";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "Causes the consumer to rapidly fade away from existence, "
-                        "and reappear again at a nearby position "
-                        "of their choosing.");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 
@@ -542,30 +288,12 @@ class Burrowing : public Potion
 public:
         Burrowing(item::ItemData* const item_data) :
                 Potion(item_data) {}
-
         ~Burrowing() = default;
 
         void quaff_impl(actor::Actor& actor) override;
-
-        std::string real_name() const override
-        {
-                return "Burrowing";
-        }
-
-private:
-        std::string descr_identified() const override
-        {
-                return (
-                        "Infused with the alchemically treated blood of Chthonians, "
-                        "it grants the consumer the ability to burrow through earth and rock "
-                        "(can burrow through walls and rubble).");
-        }
-
-        PotionAlignment alignment() const override
-        {
-                return PotionAlignment::good;
-        }
-
+        std::string real_name() const override;
+        std::string descr_identified() const override;
+        PotionAlignment alignment() const override;
         void collide_hook(const P& pos, actor::Actor* actor) override;
 };
 

@@ -418,11 +418,8 @@ public:
                 Prop(Id::terrified) {}
 
         int ability_mod(AbilityId ability) const override;
-
         bool allow_attack_melee(Verbose verbose) const override;
-
         bool allow_attack_ranged(Verbose verbose) const override;
-
         void on_applied() override;
 };
 
@@ -438,7 +435,6 @@ public:
         }
 
         PropEnded on_actor_turn() override;
-
         void on_applied() override;
 
 private:
@@ -452,9 +448,7 @@ public:
                 Prop(Id::diseased) {}
 
         int affect_max_hp(int hp_max) const override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
-
         void on_applied() override;
 };
 
@@ -474,7 +468,6 @@ public:
                 Prop(Id::burrowing) {}
 
         PropEnded on_actor_turn() override;
-
         void on_applied() override;
 };
 
@@ -508,9 +501,7 @@ public:
                 Prop(Id::shapeshifts) {}
 
         void on_placed() override;
-
         void on_std_turn() override;
-
         void on_death() override;
 
 private:
@@ -544,11 +535,7 @@ public:
                 Prop(Id::aiming) {}
 
         int ability_mod(AbilityId ability) const override;
-
-        PropEnded on_hit(
-                int dmg,
-                DmgType dmg_type,
-                actor::Actor* attacker) override;
+        PropEnded on_hit(int dmg, DmgType dmg_type, actor::Actor* attacker) override;
 };
 
 class Blind : public Prop
@@ -558,7 +545,6 @@ public:
                 Prop(Id::blind) {}
 
         bool should_update_vision_on_toggled() const override;
-
         bool allow_read_absolute(Verbose verbose) const override;
 
         bool allow_see() const override
@@ -585,7 +571,6 @@ public:
                 Prop(Id::see_invis) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
 };
 
@@ -596,9 +581,7 @@ public:
                 Prop(Id::blessed) {}
 
         void on_applied() override;
-
         void on_more(const Prop& new_prop) override;
-
         int ability_mod(AbilityId ability) const override;
 };
 
@@ -609,9 +592,7 @@ public:
                 Prop(Id::cursed) {}
 
         int ability_mod(AbilityId ability) const override;
-
         void on_applied() override;
-
         void on_more(const Prop& new_prop) override;
 };
 
@@ -621,16 +602,10 @@ public:
         Doomed() :
                 Prop(Id::doomed) {}
 
-        bool allow_read_chance(
-                Verbose verbose) const override;
-
-        bool allow_cast_intr_spell_chance(
-                Verbose verbose) const override;
-
+        bool allow_read_chance(Verbose verbose) const override;
+        bool allow_cast_intr_spell_chance(Verbose verbose) const override;
         int ability_mod(AbilityId ability) const override;
-
         void on_applied() override;
-
         void on_more(const Prop& new_prop) override;
 };
 
@@ -659,9 +634,7 @@ public:
                 Prop(Id::magic_searching) {}
 
         void save() const override;
-
         void load() override;
-
         PropEnded on_actor_turn() override;
 
         void set_range(const int range)
@@ -692,9 +665,7 @@ public:
                 Prop(Id::entangled) {}
 
         void on_applied() override;
-
         int ability_mod(AbilityId ability) const override;
-
         PropEnded affect_move_dir(Dir& dir) override;
 
 private:
@@ -708,7 +679,6 @@ public:
                 Prop(Id::stuck) {}
 
         int ability_mod(AbilityId ability) const override;
-
         PropEnded affect_move_dir(Dir& dir) override;
 };
 
@@ -719,21 +689,12 @@ public:
                 Prop(Id::burning) {}
 
         void on_applied() override;
-
         PropEnded on_actor_turn() override;
-
-        bool allow_read_chance(
-                Verbose verbose) const override;
-
-        bool allow_cast_intr_spell_chance(
-                Verbose verbose) const override;
-
+        bool allow_read_chance(Verbose verbose) const override;
+        bool allow_cast_intr_spell_chance(Verbose verbose) const override;
         bool allow_pray(Verbose verbose) const override;
-
         bool allow_attack_ranged(Verbose verbose) const override;
-
         int ability_mod(AbilityId ability) const override;
-
         std::optional<Color> override_actor_color() const override;
 };
 
@@ -753,7 +714,6 @@ public:
                 Prop(Id::confused) {}
 
         PropEnded affect_move_dir(Dir& dir) override;
-
         bool allow_attack_melee(Verbose verbose) const override;
         bool allow_attack_ranged(Verbose verbose) const override;
         bool allow_read_absolute(Verbose verbose) const override;
@@ -768,20 +728,14 @@ public:
                 Prop(Id::hallucinating) {}
 
         void on_applied() override;
-
         void on_std_turn() override;
-
         void on_end() override;
 
 private:
         void apply_fake_actor_data() const;
-
         void clear_fake_actor_data() const;
-
         void create_fake_stairs() const;
-
         void clear_all_fake_stairs() const;
-
         std::vector<const actor::ActorData*> get_allowed_fake_mon_data() const;
 };
 
@@ -792,24 +746,16 @@ public:
                 Prop(Id::astral_opium_addiction) {}
 
         void save() const override;
-
         void load() override;
-
         std::string name_short() const override;
-
         void on_applied() override;
-
         void on_std_turn() override;
-
         void on_new_dlvl() override;
-
         void on_more(const Prop& new_prop) override;
-
         int player_extra_min_shock() const override;
 
 private:
         bool is_active() const;
-
         void reset_penalty_countdown();
 
         int m_shock_lvl {0};
@@ -855,15 +801,10 @@ public:
                 Prop(Id::wound) {}
 
         void save() const override;
-
         void load() override;
-
         std::string msg_end_player() const override;
-
         std::string name_short() const override;
-
         int ability_mod(AbilityId ability) const override;
-
         void on_more(const Prop& new_prop) override;
 
         bool is_finished() const override
@@ -882,7 +823,6 @@ public:
 
 private:
         void print_one_wound_healed_msg() const;
-
         std::string get_one_wound_heal_str() const;
         std::string get_all_wounds_heal_str() const;
 
@@ -908,7 +848,6 @@ public:
                 Prop(Id::moribund) {}
 
         int ability_mod(AbilityId ability) const override;
-
         int armor_points() const override;
 };
 
@@ -927,7 +866,6 @@ public:
         HpSap();
 
         void save() const override;
-
         void load() override;
 
         std::string name_short() const override
@@ -936,9 +874,7 @@ public:
         }
 
         void on_more(const Prop& new_prop) override;
-
         int affect_max_hp(int hp_max) const override;
-
         void set_nr_drained(int value);
 
 private:
@@ -951,7 +887,6 @@ public:
         SpiSap();
 
         void save() const override;
-
         void load() override;
 
         std::string name_short() const override
@@ -960,7 +895,6 @@ public:
         }
 
         void on_more(const Prop& new_prop) override;
-
         int affect_max_spi(int spi_max) const override;
 
 private:
@@ -973,7 +907,6 @@ public:
         MindSap();
 
         void save() const override;
-
         void load() override;
 
         std::string name_short() const override
@@ -982,7 +915,6 @@ public:
         }
 
         void on_more(const Prop& new_prop) override;
-
         int player_extra_min_shock() const override;
 
 private:
@@ -1108,7 +1040,6 @@ public:
                 Prop(Id::paralyzed) {}
 
         void on_applied() override;
-
         int ability_mod(AbilityId ability) const override;
 
         bool allow_act() const override
@@ -1136,7 +1067,6 @@ public:
                 Prop(Id::fainted) {}
 
         bool should_update_vision_on_toggled() const override;
-
         int ability_mod(AbilityId ability) const override;
 
         bool allow_act() const override
@@ -1211,15 +1141,11 @@ public:
 
         void on_applied() override;
         void on_end() override;
-
         bool allow_move_dir(Dir dir) override;
-
         bool allow_read_absolute(Verbose verbose) const override;
         bool allow_cast_intr_spell_absolute(Verbose verbose) const override;
         bool allow_pray(Verbose verbose) const override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
-
         int ability_mod(AbilityId ability) const override;
 };
 
@@ -1239,7 +1165,6 @@ public:
                 Prop(Id::r_conf) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
 };
 
@@ -1270,7 +1195,6 @@ public:
                 Prop(Id::r_slow) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
 };
 
@@ -1281,9 +1205,7 @@ public:
                 Prop(Id::r_phys) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
-
         DmgResistData is_resisting_dmg(DmgType dmg_type) const override;
 };
 
@@ -1294,9 +1216,7 @@ public:
                 Prop(Id::r_fire) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
-
         DmgResistData is_resisting_dmg(DmgType dmg_type) const override;
 };
 
@@ -1307,7 +1227,6 @@ public:
                 Prop(Id::r_poison) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
 };
 
@@ -1318,7 +1237,6 @@ public:
                 Prop(Id::r_sleep) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
 };
 
@@ -1329,7 +1247,6 @@ public:
                 Prop(Id::r_disease) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
 };
 
@@ -1340,7 +1257,6 @@ public:
                 Prop(Id::r_blind) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
 };
 
@@ -1351,7 +1267,6 @@ public:
                 Prop(Id::r_para) {}
 
         void on_applied() override;
-
         bool is_resisting_other_prop(Id prop_id) const override;
 };
 
@@ -1524,9 +1439,7 @@ public:
 
 private:
         void try_spawn_zombie_parts() const;
-
         void try_spawn_zombie_dust() const;
-
         bool is_allowed_to_spawn_parts_here() const;
 };
 
@@ -1540,9 +1453,7 @@ public:
 
 protected:
         virtual actor::SpawnScattered spawn_scattered() const = 0;
-
         virtual actor::AllowSpawnAdjToCurrentActors allow_adj_to_actors() const = 0;
-
         virtual int max_dist() const = 0;
 };
 
@@ -1554,9 +1465,7 @@ public:
 
 protected:
         actor::SpawnScattered spawn_scattered() const override;
-
         actor::AllowSpawnAdjToCurrentActors allow_adj_to_actors() const override;
-
         int max_dist() const override;
 };
 
@@ -1568,9 +1477,7 @@ public:
 
 protected:
         actor::SpawnScattered spawn_scattered() const override;
-
         actor::AllowSpawnAdjToCurrentActors allow_adj_to_actors() const override;
-
         int max_dist() const override;
 };
 
@@ -1611,9 +1518,7 @@ public:
                 Prop(Id::aura_of_decay) {}
 
         void save() const override;
-
         void load() override;
-
         void on_std_turn() override;
 
         void set_dmg_range(const Range& range)
@@ -1628,13 +1533,9 @@ public:
 
 private:
         int range() const;
-
         void run_effect_on_actors() const;
-
         void run_effect_on_env() const;
-
         void run_effect_on_env_at(const P& p) const;
-
         void print_msg_actor_hit(const actor::Actor& actor) const;
 
         Range m_dmg_range {1, 1};
@@ -1752,20 +1653,14 @@ public:
         SpectralWpn();
 
         void on_death() override;
-
         std::optional<std::string> override_actor_name_the() const override;
-
         std::optional<std::string> override_actor_name_a() const override;
-
         std::optional<gfx::TileId> override_actor_tile() const override;
-
         std::optional<char> override_actor_character() const override;
-
         std::optional<std::string> override_actor_descr() const override;
 
 private:
         std::unique_ptr<item::Item> m_discarded_item {};
-
         std::string get_weapon_name() const;
 };
 
@@ -1790,7 +1685,6 @@ public:
 
 private:
         void hit_actor(actor::Actor& target);
-
         void print_msg_player_retaliate_mon(const actor::Actor& target) const;
         void print_msg_mon_retaliate_player() const;
         void print_msg_mon_retaliate_mon(const actor::Actor& target) const;
@@ -1815,11 +1709,8 @@ public:
 
         void save() const override;
         void load() override;
-
         std::string name_short() const override;
-
         PropEnded on_moved_non_center_dir() override;
-
         void on_applied() override;
 
         void set_nr_steps_allowed(const int nr_steps)
