@@ -102,6 +102,7 @@
 - Being stuck in mud had a limited time duration - it now has indefinite duration (the player/creature has to actively pull themselves free).
 - "Throwing a Stick of Dynamite" is no longer added to the message history.
 - Fixed a timing issue when the player controls teleportation (e.g. when casting teleport, game time would pass between casting the spell and getting to control the teleport location). Now the control happens instantly.
+- And more bug fixes...
 
 ##############################
 # Modability

@@ -6,6 +6,7 @@
 
 #include "actor.hpp"
 
+#include "game_time.hpp"
 #include "item.hpp"
 
 // -----------------------------------------------------------------------------
@@ -36,6 +37,20 @@ Actor::~Actor()
         // Free monster spells.
         for (auto& spell : m_mon_spells) {
                 delete spell.spell;
+        }
+}
+
+void Actor::set_my_leader(Actor* const leader)
+{
+        m_leader = leader;
+
+        m_leader->m_leader = nullptr;
+
+        // Redirect everyone who followed me to the new leader instead.
+        for (Actor* const actor : game_time::g_actors) {
+                if (actor->m_leader == this) {
+                        actor->m_leader = leader;
+                }
         }
 }
 

@@ -163,10 +163,9 @@ std::string death_msg(const actor::Actor& actor);
 
 int armor_points(const actor::Actor& actor);
 
-// NOTE: If the actors are the same actor, they are considered to be in the same
-// group (the actor is in the same group as itself).
+// NOTE: If the actors are the same actor, they are considered to be in the same group (the actor is
+// in the same group as itself).
 bool is_in_same_group(const Actor* actor_1, const Actor* actor_2);
-
 std::vector<Actor*> other_actors_in_same_group(const actor::Actor* actor);
 int nr_other_actors_in_same_group(const actor::Actor* actor);
 
@@ -205,16 +204,7 @@ class Actor
 public:
         virtual ~Actor();
 
-        // NOTE: These functions should be member functions, since otherwise the
-        // parameters would be very confusing and there would be a high risk of
-        // mistakes. I.e. it would look something like this:
-        //
-        //     bool is_leader(const Actor& follower, const Actor* const leader)
-        //
-        // And the call would look like this:
-        //
-        //     is_leader(actor, other_actor)
-        //
+        void set_my_leader(Actor* leader);
         bool is_leader_of(const Actor* actor) const;
         bool is_actor_my_leader(const Actor* actor) const;
 

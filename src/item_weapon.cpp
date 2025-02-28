@@ -523,12 +523,10 @@ void PharaohStaff::on_mon_see_player_carrying(actor::Actor& mon) const
         const int convert_pct_chance = 10;
 
         if (rnd::percent(convert_pct_chance)) {
-                mon.m_leader = map::g_player;
+                mon.set_my_leader(map::g_player);
 
                 if (actor::can_player_see_actor(mon)) {
-                        const auto name_the =
-                                text_format::first_to_upper(
-                                        actor::name_the(mon));
+                        const auto name_the = text_format::first_to_upper(actor::name_the(mon));
 
                         msg_log::add(name_the + " bows before me.");
                 }
