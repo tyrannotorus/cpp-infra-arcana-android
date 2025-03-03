@@ -1476,6 +1476,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         </items>
 
         <spells>
+            <spell skill="SPELLSKILL_BASIC">SPELL_HASTE</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_TELEPORT</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_HEAL_OTHERS</spell>
@@ -1483,14 +1484,13 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_DARKBOLT</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SPELL_SHIELD</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_CURSE</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_DEAFEN</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_ENFEEBLE</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SLOW</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_AZA_GAZE</spell>
-            <spell skill="SPELLSKILL_BASIC">SPELL_HASTE</spell>
-            <spell skill="SPELLSKILL_EXPERT">SPELL_BLIND</spell>
         </spells>
 
         <ai>
@@ -1976,6 +1976,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_BASIC">SPELL_DARKBOLT</spell>
             <spell skill="SPELLSKILL_BASIC">SPELL_KNOCKBACK</spell>
             <spell skill="SPELLSKILL_BASIC">SPELL_SPELL_SHIELD</spell>
+            <spell skill="SPELLSKILL_BASIC" percent_chance="15">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="75">SPELL_ENFEEBLE</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="75">SPELL_SLOW</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="75">SPELL_TERRIFY</spell>
@@ -1983,7 +1984,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_AZA_GAZE</spell>
-            <spell skill="SPELLSKILL_BASIC" percent_chance="50">SPELL_BLIND</spell>
         </spells>
 
         <ai>
@@ -2077,6 +2077,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT">SPELL_DARKBOLT</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_KNOCKBACK</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_SPELL_SHIELD</spell>
+            <spell skill="SPELLSKILL_EXPERT" percent_chance="15">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_CURSE</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_ENFEEBLE</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SLOW</spell>
@@ -2085,7 +2086,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_AZA_GAZE</spell>
-            <spell skill="SPELLSKILL_EXPERT" percent_chance="50">SPELL_BLIND</spell>
         </spells>
 
         <ai>
@@ -2179,6 +2179,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_MASTER">SPELL_DARKBOLT</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_KNOCKBACK</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_SPELL_SHIELD</spell>
+            <spell skill="SPELLSKILL_MASTER" percent_chance="15">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_CURSE</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_ENFEEBLE</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_SLOW</spell>
@@ -2187,7 +2188,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_SUMMON_RANDOM</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_PESTILENCE</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_AZA_GAZE</spell>
-            <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_BLIND</spell>
         </spells>
 
         <ai>
@@ -9851,14 +9851,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         </attacks>
 
         <spells>
-            <spell skill="SPELLSKILL_MASTER" percent_chance="75">SPELL_ENFEEBLE</spell>
-            <spell skill="SPELLSKILL_MASTER" percent_chance="75">SPELL_TERRIFY</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_DISEASE</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_SPELL_SHIELD</spell>
             <spell skill="SPELLSKILL_MASTER">SPELL_AURA_OF_DECAY</spell>
             <spell skill="SPELLSKILL_EXPERT">SPELL_BURN</spell>
+            <spell skill="SPELLSKILL_MASTER" percent_chance="25">SPELL_BLIND</spell>
             <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_DARKBOLT</spell>
-            <spell skill="SPELLSKILL_MASTER" percent_chance="50">SPELL_BLIND</spell>
+            <spell skill="SPELLSKILL_MASTER" percent_chance="75">SPELL_ENFEEBLE</spell>
+            <spell skill="SPELLSKILL_MASTER" percent_chance="75">SPELL_TERRIFY</spell>
         </spells>
 
         <properties>
