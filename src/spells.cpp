@@ -3013,18 +3013,9 @@ int SpellBless::base_max_cost(
         const actor::Actor* const caster) const
 {
         (void)skill;
+        (void)caster;
 
-        // This spell is cheaper for Exorcists. For other characters it should
-        // be an expensive spell that is difficult to keep enabled all the time,
-        // but for Exorcists it should be more available, since it fits their
-        // theme very well.
-
-        if (actor::is_player(caster) && player_bon::is_bg(Bg::exorcist)) {
-                return 4;
-        }
-        else {
-                return 8;
-        }
+        return 6;
 }
 
 void SpellBless::run_effect(
