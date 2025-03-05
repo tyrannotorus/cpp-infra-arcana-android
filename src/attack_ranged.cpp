@@ -189,13 +189,6 @@ static size_t nr_projectiles_for_ranged_weapon(const item::Wpn& wpn)
         return nr_projectiles;
 }
 
-static attack::HitSize relative_hit_size_ranged(const int dmg, const AttData& att_data)
-{
-        const int max_dmg = att_data.dmg_range.total_range().max;
-
-        return attack::relative_hit_size(dmg, max_dmg);
-}
-
 static void print_player_fire_ranged_msg(const item::Wpn& wpn)
 {
         const std::string attack_verb = wpn.data().ranged.attack_msgs.player;
@@ -265,9 +258,8 @@ static void print_projectile_hit_player_msg(const Projectile& projectile)
 {
         const std::string dmg_punct =
                 hit_size_punctuation_str(
-                        relative_hit_size_ranged(
-                                projectile.dmg,
-                                *projectile.att_data));
+                        attack::relative_hit_size(
+                                projectile.dmg));
 
         // NOTE: Interruption is not needed here since the player will be
         // interrupted by getting hit.
@@ -281,16 +273,13 @@ static void print_projectile_hit_mon_msg(const Projectile& projectile)
         const actor::Actor& defender = *projectile.att_data->defender;
 
         if (can_player_see_actor(defender)) {
-                other_name =
-                        text_format::first_to_upper(
-                                actor::name_the(defender));
+                other_name = text_format::first_to_upper(actor::name_the(defender));
         }
 
         const std::string dmg_punct =
                 hit_size_punctuation_str(
-                        relative_hit_size_ranged(
-                                projectile.dmg,
-                                *projectile.att_data));
+                        attack::relative_hit_size(
+                                projectile.dmg));
 
         msg_log::add(other_name + " is hit" + dmg_punct, colors::msg_good());
 }

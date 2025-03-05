@@ -27,12 +27,12 @@ namespace attack
 {
 enum class HitSize
 {
-        small,
+        minor,
         medium,
-        hard
+        major
 };
 
-HitSize relative_hit_size(int dmg, int wpn_max_dmg);
+HitSize relative_hit_size(int dmg);
 
 std::string hit_size_punctuation_str(HitSize hit_size);
 

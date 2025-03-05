@@ -34,37 +34,32 @@
 // -----------------------------------------------------------------------------
 namespace attack
 {
-// TODO: It would be better to use absolute numbers, rather than relative to
-// the weapon's max damage (if a weapon does 100 maximum damage, it would still
-// be pretty catastrophic if it did 50 damage - but currently this would only
-// count as a "small" hit). Perhaps use values relative to 'g_min_dmg_to_wound'
-// (in global.hpp) as thresholds instead.
-HitSize relative_hit_size(const int dmg, const int wpn_max_dmg)
+HitSize relative_hit_size(const int dmg)
 {
-        HitSize result = HitSize::small;
+        const int threshold_medium = g_min_dmg_to_wound;
+        const int threshold_major = g_min_dmg_to_wound + 3;
 
-        if (wpn_max_dmg >= 4) {
-                if (dmg > ((wpn_max_dmg * 5) / 6)) {
-                        result = HitSize::hard;
-                }
-                else if (dmg > (wpn_max_dmg / 2)) {
-                        result = HitSize::medium;
-                }
+        if (dmg >= threshold_major) {
+                return HitSize::major;
         }
 
-        return result;
+        if (dmg >= threshold_medium) {
+                return HitSize::medium;
+        }
+
+        return HitSize::minor;
 }
 
 std::string hit_size_punctuation_str(const HitSize hit_size)
 {
         switch (hit_size) {
-        case HitSize::small:
+        case HitSize::minor:
                 return ".";
 
         case HitSize::medium:
                 return "!";
 
-        case HitSize::hard:
+        case HitSize::major:
                 return "!!!";
         }
 

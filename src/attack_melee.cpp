@@ -48,13 +48,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static attack::HitSize relative_hit_size_melee(const int dmg, const AttData& att_data)
-{
-        const int max_dmg = att_data.dmg_range.total_range().max;
-
-        return attack::relative_hit_size(dmg, max_dmg);
-}
-
 static void print_player_melee_miss_actor_msg()
 {
         msg_log::add("I miss.");
@@ -142,11 +135,7 @@ static void print_player_melee_hit_actor_msg(
                 other_name = "it";
         }
 
-        const std::string dmg_punct =
-                hit_size_punctuation_str(
-                        relative_hit_size_melee(
-                                dmg,
-                                att_data));
+        const std::string dmg_punct = hit_size_punctuation_str(attack::relative_hit_size(dmg));
 
         if (att_data.is_intrinsic_att) {
                 const std::string att_mod_str =
@@ -254,9 +243,7 @@ static void print_mon_melee_hit_actor_msg(const int dmg, const MeleeAttData& att
                 }
         }
 
-        const std::string dmg_punct =
-                hit_size_punctuation_str(
-                        relative_hit_size_melee(dmg, att_data));
+        const std::string dmg_punct = hit_size_punctuation_str(attack::relative_hit_size(dmg));
 
         std::string used_wpn_str;
 
@@ -291,15 +278,9 @@ static void print_mon_melee_hit_actor_msg(const int dmg, const MeleeAttData& att
         msg_log::add(msg, color);
 }
 
-static void print_no_attacker_hit_player_melee_msg(
-        const int dmg,
-        const MeleeAttData& att_data)
+static void print_no_attacker_hit_player_melee_msg(const int dmg)
 {
-        const std::string dmg_punct =
-                hit_size_punctuation_str(
-                        relative_hit_size_melee(
-                                dmg,
-                                att_data));
+        const std::string dmg_punct = hit_size_punctuation_str(attack::relative_hit_size(dmg));
 
         // NOTE: Interruption is not needed here since the player will be
         // interrupted by getting hit.
@@ -323,11 +304,7 @@ static void print_no_attacker_hit_mon_melee_msg(
                 msg_color = colors::white();
         }
 
-        const std::string dmg_punct =
-                hit_size_punctuation_str(
-                        relative_hit_size_melee(
-                                dmg,
-                                att_data));
+        const std::string dmg_punct = hit_size_punctuation_str(attack::relative_hit_size(dmg));
 
         msg_log::add(
                 other_name + " is hit" + dmg_punct,
@@ -373,7 +350,7 @@ static void print_melee_hit_actor_msg(const int dmg, const MeleeAttData& att_dat
         else {
                 // No attacker (e.g. trap attack)
                 if (actor::is_player(att_data.defender)) {
-                        print_no_attacker_hit_player_melee_msg(dmg, att_data);
+                        print_no_attacker_hit_player_melee_msg(dmg);
                 }
                 else if (can_player_see_actor(*att_data.defender)) {
                         print_no_attacker_hit_mon_melee_msg(dmg, att_data);
@@ -383,16 +360,16 @@ static void print_melee_hit_actor_msg(const int dmg, const MeleeAttData& att_dat
 
 static audio::SfxId melee_hit_sfx(const int dmg, const MeleeAttData& att_data)
 {
-        const attack::HitSize hit_size = relative_hit_size_melee(dmg, att_data);
+        const attack::HitSize hit_size = attack::relative_hit_size(dmg);
 
         switch (hit_size) {
-        case attack::HitSize::small:
+        case attack::HitSize::minor:
                 return att_data.att_item->data().melee.hit_small_sfx;
 
         case attack::HitSize::medium:
                 return att_data.att_item->data().melee.hit_medium_sfx;
 
-        case attack::HitSize::hard:
+        case attack::HitSize::major:
                 return att_data.att_item->data().melee.hit_hard_sfx;
         }
 
