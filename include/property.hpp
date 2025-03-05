@@ -241,6 +241,11 @@ public:
 
         virtual void on_destroyed_corpse() {}
 
+        virtual int melee_dmg_penalty_pct() const
+        {
+                return 0;
+        }
+
         virtual int affect_max_hp(const int hp_max) const
         {
                 return hp_max;
@@ -519,12 +524,23 @@ public:
         PropEnded affect_move_dir(Dir& dir) override;
 };
 
+class Weakened : public Prop
+{
+public:
+        Weakened() :
+                Prop(Id::weakened) {}
+
+        int melee_dmg_penalty_pct() const override;
+};
+
 class Poisoned : public Prop
 {
 public:
         Poisoned() :
                 Prop(Id::poisoned) {}
 
+        int melee_dmg_penalty_pct() const override;
+        int ability_mod(AbilityId ability) const override;
         PropEnded on_actor_turn() override;
 };
 

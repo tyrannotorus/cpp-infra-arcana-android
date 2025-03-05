@@ -414,7 +414,11 @@ static void init_data_list()
         d.std_rnd_turns = Range(40, 80);
         d.name = "Poisoned";
         d.name_short = "Poisoned";
-        d.descr = "Slowly takes damage. Poison duration stacks if more is applied.";
+        d.descr =
+                "Slowly takes damage while health is above 50% of maximum hit points, "
+                "hit points do not regenerate naturally, "
+                "-25% melee damage, -10% melee hit chance, -10% evasion. "
+                "Poison duration stacks if more is applied.";
         d.msg_start_player = "I am poisoned!";
         d.msg_start_mon = "is poisoned.";
         d.msg_end_player = "My body is cleansed from poisoning!";
@@ -754,8 +758,9 @@ static void init_data_list()
         d.name = "Weakened";
         d.name_short = "Weakened";
         d.descr =
-                "Halved melee damage, cannot bash doors or chests open, knock "
-                "heavy objects over, etc.";
+                "-50% melee damage, cannot do backstab attacks, "
+                "cannot bash doors or chests open, "
+                "knock heavy objects over, etc.";
         d.msg_start_player = "I feel weaker.";
         d.msg_start_mon = "looks weaker.";
         d.msg_end_player = "I feel stronger!";

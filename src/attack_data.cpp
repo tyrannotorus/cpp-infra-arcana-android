@@ -7,6 +7,7 @@
 #include "attack_data.hpp"
 
 #include <algorithm>
+#include <numeric>
 #include <ostream>
 
 #include "ability_values.hpp"
@@ -111,9 +112,7 @@ static actor::Size calc_aim_lvl_at(const P& aim_pos)
         }
 }
 
-static int calc_ranged_dist_hit_mod(
-        const int dist,
-        const Range& effective_range)
+static int calc_ranged_dist_hit_mod(const int dist, const Range& effective_range)
 {
         if (dist >= effective_range.min) {
                 // Normal distance modifier
@@ -135,9 +134,7 @@ static bool is_player_undead_bane_bon(
                 defender_data.is_undead);
 }
 
-static bool is_reduced_pierce_dmg(
-        const DmgType dmg_type,
-        const actor::Actor& defender)
+static bool is_reduced_pierce_dmg(const DmgType dmg_type, const actor::Actor& defender)
 {
         return (
                 defender.m_properties.has(prop::Id::reduced_pierce_dmg) &&
@@ -150,6 +147,11 @@ static bool is_player_handling_equipment()
                 (actor::player_state::g_equip_armor_countdown > 0) ||
                 (actor::player_state::g_remove_armor_countdown) ||
                 (actor::player_state::g_active_medical_bag));
+}
+
+static int get_meele_dmg_penalty_pct(const actor::Actor& actor)
+{
+        return actor.m_properties.melee_dmg_penalty_pct();
 }
 
 // -----------------------------------------------------------------------------
@@ -238,14 +240,14 @@ MeleeAttData::MeleeAttData(
                 dmg_range.set_plus(dmg_range.plus() + 2);
         }
 
-        if (attacker && attacker->m_properties.has(prop::Id::weakened)) {
-                // Weak attack (halved damage)
-                dmg_range = dmg_range.scaled_pct(50);
+        if (attacker) {
+                const int dmg_penalty_pct = get_meele_dmg_penalty_pct(*attacker);
 
-                is_weak_attack = true;
+                dmg_range = dmg_range.scaled_pct(100 - dmg_penalty_pct);
         }
-        // Attacker not weakened, or not an actor attacking (e.g. a trap)
-        else if (attacker && !is_defender_aware) {
+
+        // Apply backstab if non-weakened attacker, and defender is not aware.
+        if (attacker && !attacker->m_properties.has(prop::Id::weakened) && !is_defender_aware) {
                 // The attack is a backstab
                 int dmg_pct = 150;
 

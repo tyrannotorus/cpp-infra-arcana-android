@@ -355,10 +355,7 @@ bool Doomed::allow_read_chance(const Verbose verbose) const
                                         text_format::first_to_upper(
                                                 actor::name_the(*m_owner));
 
-                                msg_log::add(
-                                        name +
-                                        " " +
-                                        common_text::g_miscast_mon);
+                                msg_log::add(name + " " + common_text::g_miscast_mon);
                         }
                 }
 
@@ -381,10 +378,7 @@ bool Doomed::allow_cast_intr_spell_chance(const Verbose verbose) const
                                         text_format::first_to_upper(
                                                 actor::name_the(*m_owner));
 
-                                msg_log::add(
-                                        name +
-                                        " " +
-                                        common_text::g_miscast_mon);
+                                msg_log::add(name + " " + common_text::g_miscast_mon);
                         }
                 }
 
@@ -973,33 +967,49 @@ PropEnded ZealotStop::affect_move_dir(Dir& dir)
         return PropEnded::no;
 }
 
+int Weakened::melee_dmg_penalty_pct() const
+{
+        return 50;
+}
+
+int Poisoned::melee_dmg_penalty_pct() const
+{
+        return 25;
+}
+
+int Poisoned::ability_mod(const AbilityId ability) const
+{
+        switch (ability) {
+        case AbilityId::melee:
+        case AbilityId::dodging:
+                return -10;
+
+        default:
+                return 0;
+        }
+}
+
 PropEnded Poisoned::on_actor_turn()
 {
         if (!actor::is_alive(*m_owner)) {
                 return PropEnded::no;
         }
 
-        // NOTE: Monsters have a shorter, more intense poisoning
+        int pct_chance = 10;
+        int dmg = rnd::range(1, 4);
 
-        if (!actor::is_player(m_owner) && (m_nr_turns_left > 1)) {
-                --m_nr_turns_left;
+        const int hp = m_owner->m_hp;
+        const int max_hp = actor::max_hp(*m_owner);
+        const int hp_threshold = (max_hp / 2);
+
+        if (max_hp == 1) {
+                return PropEnded::no;
         }
 
-        const auto owner_hp = m_owner->m_hp;
+        // Poison never damages the creature so that HP is reduced below the treshold.
+        dmg = std::min(dmg, hp - hp_threshold);
 
-        int dmg = 0;
-        int pct_chance = 0;
-
-        if (actor::is_player(m_owner)) {
-                dmg = 1;
-                pct_chance = (int)std::pow((double)owner_hp, 1.5);
-        }
-        else {
-                dmg = 2;
-                pct_chance = (int)std::pow((double)owner_hp, 2.0);
-        }
-
-        if (owner_hp <= dmg) {
+        if (dmg <= 0) {
                 return PropEnded::no;
         }
 
@@ -1019,9 +1029,7 @@ PropEnded Poisoned::on_actor_turn()
                         text_format::first_to_upper(
                                 actor::name_the(*m_owner));
 
-                msg_log::add(
-                        actor_name_the +
-                        " suffers from poisoning!");
+                msg_log::add(actor_name_the + " suffers from poisoning!");
         }
 
         actor::hit(*m_owner, dmg, DmgType::pure, nullptr);

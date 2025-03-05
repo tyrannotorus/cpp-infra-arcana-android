@@ -15,6 +15,9 @@ Prop* make(const prop::Id id)
 {
         ASSERT(id != prop::Id::END);
 
+        // TODO: Why isn't the id passed into all constructors? Then the property classes doesn't
+        // have to specify their own ids.
+
         switch (id) {
         case prop::Id::nailed:
                 return new Nailed();
@@ -53,7 +56,7 @@ Prop* make(const prop::Id id)
                 return new Terrified();
 
         case prop::Id::weakened:
-                return new Prop(id);
+                return new Weakened();
 
         case prop::Id::confused:
                 return new Confused();

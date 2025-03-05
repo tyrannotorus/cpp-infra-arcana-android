@@ -210,3 +210,56 @@ TEST_CASE("Frenzy allows attacking adjacent unseen known monster")
 
         test_utils::cleanup_all();
 }
+
+TEST_CASE("Poison damage")
+{
+        test_utils::init_all();
+
+        auto& properties = map::g_player->m_properties;
+
+        prop::Prop* const poison = prop::make(prop::Id::poisoned);
+        poison->set_duration(10000);
+        properties.apply(poison);
+
+        map::g_player->m_hp = 11;
+        map::g_player->m_base_max_hp = 11;
+
+        for (int i = 0; i < 10000; ++i) {
+                properties.on_turn_begin();
+        }
+
+        REQUIRE(map::g_player->m_hp == 5);
+        REQUIRE(actor::is_alive(*map::g_player));
+
+        map::g_player->m_hp = 10;
+        map::g_player->m_base_max_hp = 10;
+
+        for (int i = 0; i < 10000; ++i) {
+                properties.on_turn_begin();
+        }
+
+        REQUIRE(map::g_player->m_hp == 5);
+        REQUIRE(actor::is_alive(*map::g_player));
+
+        map::g_player->m_hp = 2;
+        map::g_player->m_base_max_hp = 2;
+
+        for (int i = 0; i < 10000; ++i) {
+                properties.on_turn_begin();
+        }
+
+        REQUIRE(map::g_player->m_hp == 1);
+        REQUIRE(actor::is_alive(*map::g_player));
+
+        map::g_player->m_hp = 1;
+        map::g_player->m_base_max_hp = 1;
+
+        for (int i = 0; i < 10000; ++i) {
+                properties.on_turn_begin();
+        }
+
+        REQUIRE(map::g_player->m_hp == 1);
+        REQUIRE(actor::is_alive(*map::g_player));
+
+        test_utils::cleanup_all();
+}

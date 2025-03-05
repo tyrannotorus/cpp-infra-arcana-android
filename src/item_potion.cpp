@@ -722,7 +722,7 @@ std::string Poison::real_name() const
 
 std::string Poison::descr_identified() const
 {
-        return "A deadly brew.";
+        return "A sinister brew.";
 }
 
 PotionAlignment Poison::alignment() const

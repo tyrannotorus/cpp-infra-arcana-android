@@ -68,8 +68,13 @@ public:
                 m_plus = v;
         }
 
-        WpnDmg scaled_pct(const int pct) const
+        WpnDmg scaled_pct(int pct) const
         {
+                // TODO: This is not a good method. Damage will often be scaled down more than
+                // descriptions imply, since "plus" damage will be reduced and rounded down
+                // individually. So for example with "-50% damage", 4-10 damage (3-9 +1) becomes 1-4
+                // damage (1-4 +0).
+
                 int new_min = m_min;
 
                 if (m_min > 0) {

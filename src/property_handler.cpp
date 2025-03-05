@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <numeric>
 #include <optional>
 #include <ostream>
 #include <utility>
@@ -958,6 +959,18 @@ bool PropHandler::allow_see() const
         }
 
         return true;
+}
+
+int PropHandler::melee_dmg_penalty_pct() const
+{
+        return (
+                std::accumulate(
+                        std::begin(m_props),
+                        std::end(m_props),
+                        0,
+                        [](const int acc, const auto& prop) {
+                                return acc + prop->melee_dmg_penalty_pct();
+                        }));
 }
 
 int PropHandler::affect_max_hp(const int hp_max) const

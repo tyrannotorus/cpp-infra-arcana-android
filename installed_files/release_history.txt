@@ -36,6 +36,8 @@
 
 # Status effects
 - Poison now stacks, i.e. the duration of the new poison effect is added to the old (normally the duration is set to the longest duration of the old or new effect).
+- Poison can only damage creatures down to 50% hit points, but it also reduces melee damage by 25%, and melee and dodge skill by 10%.
+- The damage from poison happens less frequently, but in larger bursts.
 - While being entangled or stuck, it is now possible to melee attack adjacent monsters with the move direction keys (this is consistent with the nailed status, where it was already possible).
 
 # Monsters

@@ -148,6 +148,8 @@ public:
 
         void on_moved_non_center_dir() const;
 
+        int melee_dmg_penalty_pct() const;
+
         int affect_max_hp(int hp_max) const;
         int affect_max_spi(int spi_max) const;
 
