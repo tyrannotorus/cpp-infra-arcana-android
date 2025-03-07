@@ -168,34 +168,34 @@ std::vector<std::string> Item::descr_hook() const
 
 WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
 {
-        auto range = m_base_melee_dmg;
+        WpnDmg wpn_dmg = m_base_melee_dmg;
 
-        if (range.total_range().max == 0) {
-                return range;
+        if (wpn_dmg.is_zero_max_damage()) {
+                return wpn_dmg;
         }
 
         if (actor::is_player(attacker)) {
                 // Bonus damage from melee traits.
                 if (player_bon::has_trait(Trait::adept_melee)) {
-                        range.set_plus(range.plus() + 1);
+                        wpn_dmg.set_plus(wpn_dmg.plus() + 1);
                 }
 
                 if (player_bon::has_trait(Trait::expert_melee)) {
-                        range.set_plus(range.plus() + 1);
+                        wpn_dmg.set_plus(wpn_dmg.plus() + 1);
                 }
 
                 if (player_bon::has_trait(Trait::master_melee)) {
-                        range.set_plus(range.plus() + 1);
+                        wpn_dmg.set_plus(wpn_dmg.plus() + 1);
                 }
 
                 // TODO: This should be handled via the 'specific_dmg_mod' hook
                 if (id() == Id::player_ghoul_claw) {
                         if (player_bon::has_trait(Trait::foul)) {
-                                range.set_plus(range.plus() + 1);
+                                wpn_dmg.set_plus(wpn_dmg.plus() + 1);
                         }
 
                         if (player_bon::has_trait(Trait::toxic)) {
-                                range.set_plus(range.plus() + 1);
+                                wpn_dmg.set_plus(wpn_dmg.plus() + 1);
                         }
                 }
 
@@ -207,48 +207,47 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
                                 moribund_bon *= 2;
                         }
 
-                        range.set_plus(range.plus() + moribund_bon);
+                        wpn_dmg.set_plus(wpn_dmg.plus() + moribund_bon);
                 }
         }
 
         // Bonus damage from being frenzied?
         if (attacker && attacker->m_properties.has(prop::Id::frenzied)) {
-                range.set_plus(range.plus() + 1);
+                wpn_dmg.set_plus(wpn_dmg.plus() + 1);
         }
 
-        specific_dmg_mod(range, attacker);
+        specific_dmg_mod(wpn_dmg, attacker);
 
-        return range;
+        return wpn_dmg;
 }
 
 WpnDmg Item::ranged_dmg(const actor::Actor* const attacker) const
 {
-        auto range = m_base_ranged_dmg;
+        WpnDmg wpn_dmg = m_base_ranged_dmg;
 
-        specific_dmg_mod(range, attacker);
+        specific_dmg_mod(wpn_dmg, attacker);
 
-        return range;
+        return wpn_dmg;
 }
 
 WpnDmg Item::thrown_dmg(const actor::Actor* const attacker) const
 {
         // Melee weapons do throw damage based on their melee damage
-        auto range =
+        WpnDmg wpn_dmg =
                 (m_data->type == ItemType::melee_wpn)
                 ? m_base_melee_dmg
                 : m_base_ranged_dmg;
 
-        if (range.total_range().max == 0) {
-                return range;
+        if (wpn_dmg.is_zero_max_damage()) {
+                return wpn_dmg;
         }
 
-        specific_dmg_mod(range, attacker);
+        specific_dmg_mod(wpn_dmg, attacker);
 
-        return range;
+        return wpn_dmg;
 }
 
-ItemAttackProp& Item::prop_applied_on_melee(
-        const actor::Actor* const attacker) const
+ItemAttackProp& Item::prop_applied_on_melee(const actor::Actor* const attacker) const
 {
         auto* const intr = prop_applied_intr_attack(attacker);
 
@@ -553,10 +552,10 @@ std::string Item::dmg_str(
 
         switch (att_inf_used) {
         case ItemNameAttackInfo::melee: {
-                if (m_base_melee_dmg.total_range().max > 0) {
-                        const auto dmg_range = melee_dmg(map::g_player);
+                if (!m_base_melee_dmg.is_zero_max_damage()) {
+                        const WpnDmg wpn_dmg = melee_dmg(map::g_player);
 
-                        const auto str_avg = dmg_range.total_range().str_avg();
+                        const std::string str_avg = wpn_dmg.str_avg();
 
                         switch (dmg_value) {
                         case ItemNameDmg::average: {
@@ -564,56 +563,55 @@ std::string Item::dmg_str(
                         } break;
 
                         case ItemNameDmg::range: {
-                                dmg_str = dmg_range.total_range().str();
+                                dmg_str = wpn_dmg.str_total_range();
                         } break;
                         }
                 }
         } break;
 
         case ItemNameAttackInfo::ranged: {
-                if (m_base_ranged_dmg.total_range().max > 0) {
-                        auto dmg_range = ranged_dmg(map::g_player);
+                if (!m_base_ranged_dmg.is_zero_max_damage()) {
+                        WpnDmg wpn_dmg = ranged_dmg(map::g_player);
 
                         if (m_data->ranged.is_machine_gun) {
                                 const int n = g_nr_mg_projectiles;
 
-                                const int min = n * dmg_range.base_min();
-                                const int max = n * dmg_range.base_max();
-                                const int plus = n * dmg_range.plus();
+                                const int min = n * wpn_dmg.base_min();
+                                const int max = n * wpn_dmg.base_max();
+                                const int plus = n * wpn_dmg.plus();
 
-                                dmg_range = WpnDmg(min, max, plus);
+                                wpn_dmg = WpnDmg(min, max, plus);
                         }
 
-                        if (dmg_value == ItemNameDmg::average) {
-                                dmg_str = dmg_range.total_range().str_avg();
+                        switch (dmg_value) {
+                        case ItemNameDmg::average: {
+                                dmg_str = wpn_dmg.str_avg();
+                        } break;
+
+                        case ItemNameDmg::range: {
                         }
-                        else {
-                                dmg_str = dmg_range.total_range().str();
+                                dmg_str = wpn_dmg.str_total_range();
                         }
                 }
         } break;
 
         case ItemNameAttackInfo::thrown: {
-                // Print damage if non-zero throwing damage, or melee weapon
-                // with non zero melee damage (melee weapons use melee damage
-                // when thrown)
-                if ((m_data->ranged.dmg.total_range().max > 0) ||
+                // Print damage if non-zero throwing damage, or melee weapon with non zero melee
+                // damage (melee weapons use melee damage when thrown).
+                if (!m_data->ranged.dmg.is_zero_max_damage() ||
                     ((m_data->main_attack_mode == AttackMode::melee) &&
-                     (m_base_melee_dmg.total_range().max > 0))) {
-                        // NOTE: "thrown_dmg" will return melee damage if this
-                        // is primarily a melee weapon
-                        const auto dmg_range = thrown_dmg(map::g_player);
-
-                        const std::string str_avg =
-                                dmg_range.total_range().str_avg();
+                     (!m_base_melee_dmg.is_zero_max_damage()))) {
+                        // NOTE: "thrown_dmg" will return melee damage if this item is primarily a
+                        // melee weapon.
+                        const WpnDmg wpn_dmg = thrown_dmg(map::g_player);
 
                         switch (dmg_value) {
                         case ItemNameDmg::average: {
-                                dmg_str = dmg_range.total_range().str_avg();
+                                dmg_str = wpn_dmg.str_avg();
                         } break;
 
                         case ItemNameDmg::range: {
-                                dmg_str = dmg_range.total_range().str();
+                                dmg_str = wpn_dmg.str_total_range();
                         } break;
                         }
                 }
@@ -648,7 +646,7 @@ std::string Item::plus_str(const ItemNameAttackInfo attack_info) const
 
         switch (att_inf_used) {
         case ItemNameAttackInfo::melee: {
-                if (m_base_melee_dmg.total_range().max > 0) {
+                if (!m_base_melee_dmg.is_zero_max_damage()) {
                         return m_base_melee_dmg.str_plus();
                 }
         } break;

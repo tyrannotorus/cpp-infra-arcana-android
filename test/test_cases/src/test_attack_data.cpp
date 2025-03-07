@@ -17,6 +17,7 @@
 #include "item_data.hpp"
 #include "item_factory.hpp"
 #include "map.hpp"
+#include "misc.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
@@ -44,10 +45,10 @@ TEST_CASE("Melee attack data")
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 = *actor::make("MON_ZOMBIE", p2);
+        actor::Actor& mon_1 = *actor::make("MON_ZOMBIE", p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
+        actor::Actor& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
         mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
@@ -60,14 +61,15 @@ TEST_CASE("Melee attack data")
 
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::axe));
 
-        wpn.set_melee_plus(2);
+        // 10-10 +2 (min and max is the same, for determinism).
+        wpn.set_base_melee_dmg({10, 10, 2});
 
         int expected_hit_chance_vs_mon_1 = 0;
         int expected_hit_chance_vs_mon_2 = 0;
 
         {
-                const auto& player_data = actor::g_data["MON_PLAYER"];
-                const auto& mon_data = actor::g_data["MON_ZOMBIE"];
+                const actor::ActorData& player_data = actor::g_data["MON_PLAYER"];
+                const actor::ActorData& mon_data = actor::g_data["MON_ZOMBIE"];
 
                 const int player_skill_mod =
                         player_data.ability_values.val(
@@ -93,19 +95,17 @@ TEST_CASE("Melee attack data")
                         g_hit_chance_pen_vs_unseen;
         }
 
-        auto expected_dmg_range = wpn.data().melee.dmg;
-
-        // +1 from melee trait and +2 from weapon
-        expected_dmg_range.set_plus(3);
+        // 10-10 +2, and +1 from melee trait.
+        const int expected_dmg = 13;
 
         const MeleeAttData att_data_1(map::g_player, mon_1, wpn);
         const MeleeAttData att_data_2(map::g_player, mon_2, wpn);
 
         REQUIRE(att_data_1.hit_chance_tot == expected_hit_chance_vs_mon_1);
-        REQUIRE(att_data_1.dmg_range == expected_dmg_range);
+        REQUIRE(att_data_1.dmg == expected_dmg);
 
         REQUIRE(att_data_2.hit_chance_tot == expected_hit_chance_vs_mon_2);
-        REQUIRE(att_data_2.dmg_range == expected_dmg_range);
+        REQUIRE(att_data_2.dmg == expected_dmg);
 
         test_utils::cleanup_all();
 }
@@ -127,7 +127,7 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
         map::g_player->m_properties.apply(prop::make(prop::Id::weakened));
 
         // Zombie
-        auto& mon = *actor::make("MON_ZOMBIE", p2);
+        actor::Actor& mon = *actor::make("MON_ZOMBIE", p2);
 
         actor::update_player_fov();
 
@@ -136,16 +136,55 @@ TEST_CASE("Melee attack data has reduced damage with weakened player")
 
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::axe));
 
-        wpn.set_base_melee_dmg({20, 60});
-        wpn.set_melee_plus(2);
+        // 10-10 +2 (min and max is the same, for determinism).
+        wpn.set_base_melee_dmg({10, 10, 2});
 
-        // Halved damage range due to Weakened property
-        // Plus before weakening is +1 from melee trait and +2 from weapon
-        const auto expected_dmg_range = WpnDmg(10, 30, 1);
+        // 10-10 +2, and +1 from melee trait - then halved for weakness.
+        const int expected_dmg = 6;
 
         const MeleeAttData att_data(map::g_player, mon, wpn);
 
-        REQUIRE(att_data.dmg_range == expected_dmg_range);
+        REQUIRE(att_data.dmg == expected_dmg);
+
+        test_utils::cleanup_all();
+}
+
+TEST_CASE("Melee attack data has reduced damage with weakened and poisoned player")
+{
+        test_utils::init_all();
+
+        player_bon::pick_bg(Bg::war_vet);
+
+        const P p1(20, 10);
+        const P p2(21, 10);
+
+        map::update_terrain(terrain::make(terrain::Id::floor, p1));
+        map::update_terrain(terrain::make(terrain::Id::floor, p2));
+
+        map::g_player->m_pos = p1;
+
+        map::g_player->m_properties.apply(prop::make(prop::Id::weakened));
+        map::g_player->m_properties.apply(prop::make(prop::Id::poisoned));
+
+        // Zombie
+        actor::Actor& mon = *actor::make("MON_ZOMBIE", p2);
+
+        actor::update_player_fov();
+
+        mon.m_mon_aware_state.aware_counter = 1;
+        mon.m_mon_aware_state.player_aware_of_me_counter = 1;
+
+        auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::axe));
+
+        // 10-10 +2 (min and max is the same, for determinism).
+        wpn.set_base_melee_dmg({10, 10, 2});
+
+        // 10-10 +2, and +1 from melee trait - then reduced to 25% for weakness + poison.
+        const int expected_dmg = 3;
+
+        const MeleeAttData att_data(map::g_player, mon, wpn);
+
+        REQUIRE(att_data.dmg == expected_dmg);
 
         test_utils::cleanup_all();
 }
@@ -165,7 +204,7 @@ TEST_CASE("Melee attack data has reduced damage against pierce resistance")
         map::g_player->m_pos = p1;
 
         // Worm Mass
-        auto& mon = *actor::make("MON_WORM_MASS", p2);
+        actor::Actor& mon = *actor::make("MON_WORM_MASS", p2);
 
         actor::update_player_fov();
 
@@ -175,16 +214,15 @@ TEST_CASE("Melee attack data has reduced damage against pierce resistance")
         // Use pointy weapon
         auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::dagger));
 
-        wpn.set_base_melee_dmg({20, 60});
-        wpn.set_melee_plus(8);
+        // 10-10 +2 (min and max is the same, for determinism).
+        wpn.set_base_melee_dmg({10, 10, 2});
 
-        // Halved damage range due to Weakened property
-        // Plus before weakening is +1 from melee trait and +8 from weapon
-        const auto expected_dmg_range = WpnDmg(5, 15, 2);
+        // 10-10+2, +1 from melee trait - then halved for pierce resistance.
+        const int expected_dmg = 3;
 
         const MeleeAttData att_data(map::g_player, mon, wpn);
 
-        REQUIRE(att_data.dmg_range == expected_dmg_range);
+        REQUIRE(att_data.dmg == expected_dmg);
 
         test_utils::cleanup_all();
 }
@@ -195,10 +233,6 @@ TEST_CASE("Ranged attack data")
 
         player_bon::pick_bg(Bg::war_vet);
 
-        const P p1(20, 10);
-        const P p2(22, 11);  // Distance 2
-        const P p3(21, 13);  // Distance 3
-
         for (int x = 1; x < map::w() - 1; ++x) {
                 for (int y = 1; y < map::h() - 1; ++y) {
                         map::update_terrain(
@@ -206,13 +240,21 @@ TEST_CASE("Ranged attack data")
                 }
         }
 
+        auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::pistol));
+
+        const int effective_range_max = wpn.data().ranged.effective_range.max;
+
+        const P p1(20, 10);
+        const P p2(p1.x + effective_range_max, 10);      // Within effective range
+        const P p3(p1.x + effective_range_max + 1, 10);  // Outside effective range
+
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 = *actor::make("MON_ZOMBIE", p2);
+        actor::Actor& mon_1 = *actor::make("MON_ZOMBIE", p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
+        actor::Actor& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
         mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
@@ -223,14 +265,15 @@ TEST_CASE("Ranged attack data")
         mon_2.m_mon_aware_state.aware_counter = 1;
         mon_2.m_mon_aware_state.player_aware_of_me_counter = 1;
 
-        auto& wpn = static_cast<item::Wpn&>(*item::make(item::Id::pistol));
+        // 10-10 +2 (min and max is the same, for determinism).
+        wpn.set_base_ranged_dmg({10, 10, 2});
 
         int expected_hit_chance_vs_mon_1 = 0;
         int expected_hit_chance_vs_mon_2 = 0;
 
         {
-                const auto& player_data = actor::g_data["MON_PLAYER"];
-                const auto& mon_data = actor::g_data["MON_ZOMBIE"];
+                const actor::ActorData& player_data = actor::g_data["MON_PLAYER"];
+                const actor::ActorData& mon_data = actor::g_data["MON_ZOMBIE"];
 
                 const int player_skill_mod =
                         player_data.ability_values.val(
@@ -247,8 +290,10 @@ TEST_CASE("Ranged attack data")
                 const int wpn_hit_mod = wpn.data().ranged.hit_chance_mod;
 
                 // Using the same calculation as in the ranged attack data
-                constexpr int dist_mod_mon_1 = 15 - (5 * 2);
-                constexpr int dist_mod_mon_2 = 15 - (5 * 3);
+                const int dist_1 = king_dist(p1, p2);
+                const int dist_2 = king_dist(p1, p3);
+                const int dist_mod_mon_1 = 15 - (5 * dist_1);
+                const int dist_mod_mon_2 = 15 - (5 * dist_2);
 
                 const int common_hit_chance =
                         player_skill_mod +
@@ -265,7 +310,11 @@ TEST_CASE("Ranged attack data")
                         g_hit_chance_pen_vs_unseen;
         }
 
-        auto expected_dmg_range = wpn.data().ranged.dmg;
+        // Monster 1 is within effective range: 10-10 +2
+        const int expected_dmg_1 = 12;
+
+        // Monster 2 is outside effective range: Halved damage.
+        const int expected_dmg_2 = 6;
 
         const RangedAttData att_data_1(
                 map::g_player,         // Attacker
@@ -282,23 +331,19 @@ TEST_CASE("Ranged attack data")
                 wpn);                  // Weapon
 
         REQUIRE(att_data_1.hit_chance_tot == expected_hit_chance_vs_mon_1);
-        REQUIRE(att_data_1.dmg_range == expected_dmg_range);
+        REQUIRE(att_data_1.dmg == expected_dmg_1);
 
         REQUIRE(att_data_2.hit_chance_tot == expected_hit_chance_vs_mon_2);
-        REQUIRE(att_data_2.dmg_range == expected_dmg_range);
+        REQUIRE(att_data_2.dmg == expected_dmg_2);
 
         test_utils::cleanup_all();
 }
 
-TEST_CASE("Throwing attack data")
+TEST_CASE("Throwing attack data using throwing weapon")
 {
         test_utils::init_all();
 
         player_bon::pick_bg(Bg::war_vet);
-
-        const P p1(20, 10);
-        const P p2(22, 11);  // Distance 2
-        const P p3(21, 13);  // Distance 3
 
         for (int x = 1; x < map::w() - 1; ++x) {
                 for (int y = 1; y < map::h() - 1; ++y) {
@@ -307,13 +352,21 @@ TEST_CASE("Throwing attack data")
                 }
         }
 
+        item::Item& item = *item::make(item::Id::thr_knife);
+
+        const int effective_range_max = item.data().ranged.effective_range.max;
+
+        const P p1(20, 10);
+        const P p2(p1.x + effective_range_max, 10);      // Within effective range
+        const P p3(p1.x + effective_range_max + 1, 10);  // Outside effective range
+
         map::g_player->m_pos = p1;
 
         // Zombie
-        auto& mon_1 = *actor::make("MON_ZOMBIE", p2);
+        actor::Actor& mon_1 = *actor::make("MON_ZOMBIE", p2);
 
         // Zombie with invisible property applied
-        auto& mon_2 = *actor::make("MON_ZOMBIE", p3);
+        actor::Actor& mon_2 = *actor::make("MON_ZOMBIE", p3);
 
         mon_2.m_properties.apply(prop::make(prop::Id::invis));
 
@@ -324,15 +377,22 @@ TEST_CASE("Throwing attack data")
         mon_2.m_mon_aware_state.aware_counter = 1;
         mon_2.m_mon_aware_state.player_aware_of_me_counter = 1;
 
-        auto& item = *item::make(item::Id::thr_knife);
+        // Setup melee and ranged damage of the item - the ranged damage should be used for a weapon
+        // that is primarily a throwing weapon.
+
+        // 50-50 +15 (min and max is the same, for determinism).
+        item.set_base_melee_dmg({50, 50, 15});
+
+        // 10-10 +2 (min and max is the same, for determinism).
+        item.set_base_ranged_dmg({10, 10, 2});
 
         int expected_hit_chance_vs_mon_1 = 0;
         int expected_hit_chance_vs_mon_2 = 0;
 
         {
-                const auto& player_data = actor::g_data["MON_PLAYER"];
+                const actor::ActorData& player_data = actor::g_data["MON_PLAYER"];
 
-                const auto& mon_data = actor::g_data["MON_ZOMBIE"];
+                const actor::ActorData& mon_data = actor::g_data["MON_ZOMBIE"];
 
                 const int player_skill_mod =
                         player_data.ability_values.val(
@@ -349,8 +409,10 @@ TEST_CASE("Throwing attack data")
                 const int wpn_hit_mod = item.data().ranged.throw_hit_chance_mod;
 
                 // Using the same calculation as in the ranged attack data
-                constexpr int dist_mod_mon_1 = 15 - (5 * 2);
-                constexpr int dist_mod_mon_2 = 15 - (5 * 3);
+                const int dist_1 = king_dist(p1, p2);
+                const int dist_2 = king_dist(p1, p3);
+                const int dist_mod_mon_1 = 15 - (5 * dist_1);
+                const int dist_mod_mon_2 = 15 - (5 * dist_2);
 
                 const int common_hit_chance =
                         player_skill_mod +
@@ -367,7 +429,11 @@ TEST_CASE("Throwing attack data")
                         g_hit_chance_pen_vs_unseen;
         }
 
-        auto expected_dmg_range = item.data().ranged.dmg;
+        // Monster 1 is within effective range: 10-10 +2
+        const int expected_dmg_1 = 12;
+
+        // Monster 2 is outside effective range: Halved damage.
+        const int expected_dmg_2 = 6;
 
         const ThrowAttData att_data_1(
                 map::g_player,         // Attacker
@@ -384,10 +450,98 @@ TEST_CASE("Throwing attack data")
                 item);                 // Thrown item
 
         REQUIRE(att_data_1.hit_chance_tot == expected_hit_chance_vs_mon_1);
-        REQUIRE(att_data_1.dmg_range == expected_dmg_range);
+        REQUIRE(att_data_1.dmg == expected_dmg_1);
 
         REQUIRE(att_data_2.hit_chance_tot == expected_hit_chance_vs_mon_2);
-        REQUIRE(att_data_2.dmg_range == expected_dmg_range);
+        REQUIRE(att_data_2.dmg == expected_dmg_2);
+
+        test_utils::cleanup_all();
+}
+
+TEST_CASE("Throwing attack data using melee weapon")
+{
+        test_utils::init_all();
+
+        player_bon::pick_bg(Bg::war_vet);
+
+        for (int x = 1; x < map::w() - 1; ++x) {
+                for (int y = 1; y < map::h() - 1; ++y) {
+                        map::update_terrain(
+                                terrain::make(terrain::Id::floor, {x, y}));
+                }
+        }
+
+        item::Item& item = *item::make(item::Id::axe);
+
+        const P p1(20, 10);
+        const P p2(20, 12);
+
+        map::g_player->m_pos = p1;
+
+        // Zombie
+        actor::Actor& mon = *actor::make("MON_ZOMBIE", p2);
+
+        actor::update_player_fov();
+
+        mon.m_mon_aware_state.aware_counter = 1;
+        mon.m_mon_aware_state.player_aware_of_me_counter = 1;
+
+        // Setup melee and ranged damage of the item - the melee damage should be used for a weapon
+        // that is primarily a melee weapon.
+
+        // 50-50 +15 (min and max is the same, for determinism).
+        item.set_base_melee_dmg({50, 50, 15});
+
+        // 10-10 +2 (min and max is the same, for determinism).
+        item.set_base_ranged_dmg({10, 10, 2});
+
+        int expected_hit_chance_vs_mon = 0;
+
+        {
+                const actor::ActorData& player_data = actor::g_data["MON_PLAYER"];
+
+                const actor::ActorData& mon_data = actor::g_data["MON_ZOMBIE"];
+
+                const int player_skill_mod =
+                        player_data.ability_values.val(
+                                AbilityId::ranged,
+                                AbilityAffectedByProperties::yes,
+                                *map::g_player);
+
+                const int mon_dodge_mod =
+                        -(mon_data.ability_values.val(
+                                AbilityId::dodging,
+                                AbilityAffectedByProperties::yes,
+                                mon));
+
+                const int wpn_hit_mod = item.data().ranged.throw_hit_chance_mod;
+
+                // Using the same calculation as in the ranged attack data
+                const int dist = king_dist(p1, p2);
+                const int dist_mod_mon = 15 - (5 * dist);
+
+                const int common_hit_chance =
+                        player_skill_mod +
+                        mon_dodge_mod +
+                        wpn_hit_mod;
+
+                expected_hit_chance_vs_mon =
+                        common_hit_chance +
+                        dist_mod_mon;
+        }
+
+        // Melee damage is 50-50 +15, this should be used (not the ranged damage).
+        const int expected_dmg = 65;
+
+        const ThrowAttData att_data(
+                map::g_player,         // Attacker
+                map::g_player->m_pos,  // Attacker origin
+                {},                    // Aim position, doesn't matter here
+                mon.m_pos,             // Current position
+                item);                 // Thrown item
+
+        REQUIRE(att_data.hit_chance_tot == expected_hit_chance_vs_mon);
+        REQUIRE(att_data.dmg == expected_dmg);
 
         test_utils::cleanup_all();
 }

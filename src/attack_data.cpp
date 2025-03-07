@@ -7,8 +7,8 @@
 #include "attack_data.hpp"
 
 #include <algorithm>
-#include <numeric>
 #include <ostream>
+#include <string>
 
 #include "ability_values.hpp"
 #include "actor.hpp"
@@ -20,7 +20,6 @@
 #include "debug.hpp"
 #include "fov.hpp"
 #include "global.hpp"
-#include "inventory.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
 #include "map.hpp"
@@ -30,6 +29,7 @@
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
+#include "rect.hpp"
 #include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
@@ -149,11 +149,6 @@ static bool is_player_handling_equipment()
                 (actor::player_state::g_active_medical_bag));
 }
 
-static int get_meele_dmg_penalty_pct(const actor::Actor& actor)
-{
-        return actor.m_properties.melee_dmg_penalty_pct();
-}
-
 // -----------------------------------------------------------------------------
 // Attack data
 // -----------------------------------------------------------------------------
@@ -234,22 +229,23 @@ MeleeAttData::MeleeAttData(
 
         hit_chance_tot = std::clamp(hit_chance_tot, 5, 99);
 
-        dmg_range = wpn.melee_dmg(attacker);
+        WpnDmg wpn_dmg = wpn.melee_dmg(attacker);
 
         if (apply_undead_bane_bon) {
-                dmg_range.set_plus(dmg_range.plus() + 2);
+                wpn_dmg.set_plus(wpn_dmg.plus() + 2);
         }
 
-        if (attacker) {
-                const int dmg_penalty_pct = get_meele_dmg_penalty_pct(*attacker);
+        int dmg_pct = 100;
 
-                dmg_range = dmg_range.scaled_pct(100 - dmg_penalty_pct);
+        if (attacker) {
+                // Damage percent penalty from properties.
+                dmg_pct -= attacker->m_properties.melee_dmg_penalty_pct();
         }
 
         // Apply backstab if non-weakened attacker, and defender is not aware.
         if (attacker && !attacker->m_properties.has(prop::Id::weakened) && !is_defender_aware) {
-                // The attack is a backstab
-                int dmg_pct = 150;
+                // The attack is a backstab.
+                dmg_pct += 50;
 
                 // Extra backstab damage from traits?
                 if (actor::is_player(attacker)) {
@@ -262,7 +258,7 @@ MeleeAttData::MeleeAttData(
                         }
                 }
 
-                // +200% damage if attacking with a dagger
+                // +200% damage if attacking with a dagger.
                 const item::Id id = wpn.data().id;
 
                 if ((id == item::Id::dagger) ||
@@ -270,18 +266,18 @@ MeleeAttData::MeleeAttData(
                         dmg_pct += 200;
                 }
 
-                dmg_range = dmg_range.scaled_pct(dmg_pct);
-
                 is_backstab = true;
         }
 
         if (is_reduced_pierce_dmg(wpn.data().melee.dmg_type, *defender)) {
-                dmg_range = dmg_range.scaled_pct(25);
+                dmg_pct -= 75;
         }
 
         if (config::is_gj_mode() && attacker && actor::is_player(defender)) {
-                dmg_range = dmg_range.scaled_pct(200);
+                dmg_pct += 100;
         }
+
+        dmg = wpn_dmg.roll_scaled(dmg_pct);
 }
 
 RangedAttData::RangedAttData(
@@ -349,8 +345,7 @@ RangedAttData::RangedAttData(
 
         int state_mod = 0;
 
-        // Lower hit chance if attacker cannot see target (e.g.
-        // attacking invisible creature)
+        // Lower hit chance if attacker cannot see target (e.g.  attacking invisible creature).
         if (attacker) {
                 bool can_attacker_see_tgt = true;
 
@@ -414,10 +409,10 @@ RangedAttData::RangedAttData(
 
         hit_chance_tot = std::clamp(hit_chance_tot, 5, 99);
 
-        dmg_range = wpn.ranged_dmg(attacker);
+        WpnDmg wpn_dmg = wpn.ranged_dmg(attacker);
 
         if (apply_undead_bane_bon) {
-                dmg_range.set_plus(dmg_range.plus() + 2);
+                wpn_dmg.set_plus(wpn_dmg.plus() + 2);
         }
 
         const bool is_player_with_aiming_prop =
@@ -425,20 +420,24 @@ RangedAttData::RangedAttData(
                 attacker->m_properties.has(prop::Id::aiming);
 
         if (is_player_with_aiming_prop) {
-                dmg_range.set_base_min(dmg_range.base_max());
+                wpn_dmg.set_base_min(wpn_dmg.base_max());
         }
 
+        int dmg_pct = 100;
+
         if (!effective_range.is_in_range(dist)) {
-                dmg_range = dmg_range.scaled_pct(50);
+                dmg_pct -= 50;
         }
 
         if (is_reduced_pierce_dmg(wpn.data().ranged.dmg_type, *defender)) {
-                dmg_range = dmg_range.scaled_pct(25);
+                dmg_pct -= 75;
         }
 
         if (config::is_gj_mode() && attacker && actor::is_player(defender)) {
-                dmg_range = dmg_range.scaled_pct(200);
+                dmg_pct += 100;
         }
+
+        dmg = wpn_dmg.roll_scaled(dmg_pct);
 }
 
 ThrowAttData::ThrowAttData(
@@ -527,10 +526,10 @@ ThrowAttData::ThrowAttData(
 
         hit_chance_tot = std::clamp(hit_chance_tot, 5, 99);
 
-        dmg_range = item.thrown_dmg(attacker);
+        WpnDmg wpn_dmg = item.thrown_dmg(attacker);
 
         if (apply_undead_bane_bon) {
-                dmg_range.set_plus(dmg_range.plus() + 2);
+                wpn_dmg.set_plus(wpn_dmg.plus() + 2);
         }
 
         const bool is_player_with_aiming_prop =
@@ -538,18 +537,22 @@ ThrowAttData::ThrowAttData(
                 attacker->m_properties.has(prop::Id::aiming);
 
         if (is_player_with_aiming_prop) {
-                dmg_range.set_base_min(dmg_range.base_max());
+                wpn_dmg.set_base_min(wpn_dmg.base_max());
         }
 
+        int dmg_pct = 100;
+
         if (!effective_range.is_in_range(dist)) {
-                dmg_range = dmg_range.scaled_pct(50);
+                dmg_pct -= 50;
         }
 
         if (is_reduced_pierce_dmg(item.data().ranged.dmg_type, *defender)) {
-                dmg_range = dmg_range.scaled_pct(25);
+                dmg_pct -= 75;
         }
 
         if (config::is_gj_mode() && attacker && actor::is_player(defender)) {
-                dmg_range = dmg_range.scaled_pct(200);
+                dmg_pct += 100;
         }
+
+        dmg = wpn_dmg.roll_scaled(dmg_pct);
 }

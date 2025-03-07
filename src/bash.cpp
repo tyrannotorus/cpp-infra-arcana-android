@@ -338,8 +338,9 @@ void attack_terrain(const P& att_pos, const item::Item& wpn)
                 return;
         }
 
-        const WpnDmg dmg_range = wpn.melee_dmg(map::g_player);
-        const int dmg = dmg_range.total_range().roll();
+        const WpnDmg wpn_dmg = wpn.melee_dmg(map::g_player);
+
+        const int dmg = wpn_dmg.roll_scaled(100);
 
         terrain->hit(
                 wpn.data().melee.dmg_type,
@@ -374,9 +375,9 @@ void attack_corpse(actor::Actor& mon, const item::Item& wpn)
 
         msg_log::add(msg);
 
-        const WpnDmg dmg_range = wpn.melee_dmg(map::g_player);
+        const WpnDmg wpn_dmg = wpn.melee_dmg(map::g_player);
 
-        const int dmg = dmg_range.total_range().roll();
+        const int dmg = wpn_dmg.roll_scaled(100);
 
         actor::hit(mon, dmg, wpn.data().melee.dmg_type, map::g_player);
 

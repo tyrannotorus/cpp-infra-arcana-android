@@ -7,6 +7,7 @@
 #include "throwing.hpp"
 
 #include <cstddef>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -32,22 +33,20 @@
 #include "item_data.hpp"
 #include "item_explosive.hpp"
 #include "item_potion.hpp"
-#include "item_weapon.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
-#include "panel.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "sound.hpp"
+#include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
-#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -296,8 +295,6 @@ void throw_item(
 
                         const auto att_result = ability_roll::roll(att_data.hit_chance_tot);
 
-                        const int dmg = att_data.dmg_range.total_range().roll();
-
                         if (att_result >= ActionResult::success) {
                                 const bool is_potion = (item_thrown_data.type == ItemType::potion);
 
@@ -329,10 +326,10 @@ void throw_item(
                                         print_creature_hit_msg(*actor_here);
                                 }
 
-                                if (dmg > 0) {
+                                if (att_data.dmg > 0) {
                                         actor::hit(
                                                 *actor_here,
-                                                dmg,
+                                                att_data.dmg,
                                                 item_thrown_data.ranged.dmg_type,
                                                 &actor_throwing,
                                                 AllowWound::yes);

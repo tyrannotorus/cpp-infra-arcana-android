@@ -43,14 +43,12 @@
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
-#include "random.hpp"
 #include "sound.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "text_format.hpp"
 #include "viewport.hpp"
-#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -60,7 +58,6 @@ static const int s_nr_cell_jumps_mg_projectiles = 2;
 struct Projectile
 {
         P pos {0, 0};
-        int dmg {0};
         int path_idx {0};
         bool is_dead {false};
         int obstructed_in_path_idx {-1};
@@ -259,10 +256,9 @@ static void print_projectile_hit_player_msg(const Projectile& projectile)
         const std::string dmg_punct =
                 hit_size_punctuation_str(
                         attack::relative_hit_size(
-                                projectile.dmg));
+                                projectile.att_data->dmg));
 
-        // NOTE: Interruption is not needed here since the player will be
-        // interrupted by getting hit.
+        // NOTE: Interruption is not needed here, the player will be interrupted by the hit.
         msg_log::add("I am hit" + dmg_punct, colors::msg_bad());
 }
 
@@ -279,7 +275,7 @@ static void print_projectile_hit_mon_msg(const Projectile& projectile)
         const std::string dmg_punct =
                 hit_size_punctuation_str(
                         attack::relative_hit_size(
-                                projectile.dmg));
+                                projectile.att_data->dmg));
 
         msg_log::add(other_name + " is hit" + dmg_punct, colors::msg_good());
 }
@@ -447,10 +443,10 @@ static void hit_actor_with_projectile(
                 att_data.defender->make_player_aware_of_me();
         }
 
-        if (projectile.dmg > 0) {
+        if (projectile.att_data->dmg > 0) {
                 actor::hit(
                         *projectile.actor_hit,
-                        projectile.dmg,
+                        projectile.att_data->dmg,
                         wpn.data().ranged.dmg_type,
                         projectile.att_data->attacker,
                         AllowWound::yes);
@@ -767,9 +763,8 @@ static void update_projectile_states(ProjectileFireData& fire_data)
                 }
 
                 const ActionResult att_result =
-                        ability_roll::roll(projectile.att_data->hit_chance_tot);
-
-                projectile.dmg = projectile.att_data->dmg_range.total_range().roll();
+                        ability_roll::roll(
+                                projectile.att_data->hit_chance_tot);
 
                 projectile.is_seen_by_player = map::g_seen.at(projectile_pos);
 

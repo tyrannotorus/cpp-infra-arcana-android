@@ -7,7 +7,6 @@
 #ifndef WPN_DMG_HPP
 #define WPN_DMG_HPP
 
-#include <algorithm>
 #include <string>
 
 #include "random.hpp"
@@ -33,9 +32,17 @@ public:
                 return min_eq && max_eq && plus_eq;
         }
 
-        Range total_range() const
+        // NOTE: This shall be used when performing an actual attack.
+        int roll_scaled(int scale_pct) const;
+
+        std::string str_total_range() const;
+        std::string str_avg() const;
+        std::string str_plus() const;
+
+        // Is the total max damage non-zero?
+        bool is_zero_max_damage() const
         {
-                return {m_min + m_plus, m_max + m_plus};
+                return (total_range().max == 0);
         }
 
         int base_min() const
@@ -68,36 +75,9 @@ public:
                 m_plus = v;
         }
 
-        WpnDmg scaled_pct(int pct) const
-        {
-                // TODO: This is not a good method. Damage will often be scaled down more than
-                // descriptions imply, since "plus" damage will be reduced and rounded down
-                // individually. So for example with "-50% damage", 4-10 damage (3-9 +1) becomes 1-4
-                // damage (1-4 +0).
-
-                int new_min = m_min;
-
-                if (m_min > 0) {
-                        new_min = (m_min * pct) / 100;
-                        new_min = std::max(new_min, 1);
-                }
-
-                int new_max = m_max;
-
-                if (m_max > 0) {
-                        new_max = (m_max * pct) / 100;
-
-                        new_max = std::max(new_max, 1);
-                }
-
-                int new_plus = (m_plus * pct) / 100;
-
-                return {new_min, new_max, new_plus};
-        }
-
-        std::string str_plus() const;
-
 private:
+        Range total_range() const;
+
         int m_min {0};
         int m_max {0};
         int m_plus {0};

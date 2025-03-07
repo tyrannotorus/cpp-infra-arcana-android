@@ -8,12 +8,14 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ability_values.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_hit.hpp"
 #include "actor_see.hpp"
+#include "array2.hpp"
 #include "attack_data.hpp"
 #include "attack_internal.hpp"
 #include "audio_data.hpp"
@@ -22,7 +24,6 @@
 #include "debug.hpp"
 #include "game_time.hpp"
 #include "global.hpp"
-#include "inventory.hpp"
 #include "io.hpp"
 #include "item.hpp"
 #include "item_att_property.hpp"
@@ -31,7 +32,6 @@
 #include "knockback.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
-#include "misc.hpp"
 #include "msg_log.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
@@ -43,7 +43,6 @@
 #include "sound.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
-#include "wpn_dmg.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -700,18 +699,17 @@ static void attack_actor(
 {
         const MeleeAttData att_data(attacker, defender, wpn);
         const ActionResult att_result = ability_roll::roll(att_data.hit_chance_tot);
-        const int dmg = att_data.dmg_range.total_range().roll();
 
-        print_melee_attack_actor_msg(att_result, dmg, att_data);
+        print_melee_attack_actor_msg(att_result, att_data.dmg, att_data);
 
-        emit_melee_snd(att_result, dmg, att_data);
+        emit_melee_snd(att_result, att_data.dmg, att_data);
 
         if (att_result >= ActionResult::success) {
                 if (actor::can_player_see_actor(defender)) {
                         io::flash_at_actor(defender, colors::light_red());
                 }
 
-                melee_hit_actor(dmg, defender, attacker, origin, wpn);
+                melee_hit_actor(att_data.dmg, defender, attacker, origin, wpn);
         }
 
         if (attacker) {
