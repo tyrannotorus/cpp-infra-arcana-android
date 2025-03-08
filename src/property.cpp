@@ -1588,10 +1588,12 @@ std::vector<const actor::ActorData*> Hallucinating::get_allowed_fake_mon_data() 
         for (const auto& it : actor::g_data) {
                 const actor::ActorData& d = it.second;
 
+                // HACK: Handle via actor data instead.
                 if ((d.id == "MON_PLAYER") ||
                     (d.id == "MON_SPECTRAL_WPN") ||
                     (d.id == "MON_STRANGE_COLOR") ||
-                    (d.id == "MON_CULTIST")) {
+                    (d.id == "MON_CULTIST") ||
+                    (d.id == "MON_TRANSCENDENT_RAT")) {
                         continue;
                 }
 
