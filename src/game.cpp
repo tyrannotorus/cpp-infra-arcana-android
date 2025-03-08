@@ -47,6 +47,7 @@
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "rect.hpp"
 #include "saving.hpp"
 #include "terrain.hpp"
 #include "text_format.hpp"
@@ -536,7 +537,9 @@ void GameState::draw()
         // graphics - otherwise the life bars will flash as well.
         io::draw_flash_animations();
 
-        draw_health_bars();
+        if (config::display_health_bars()) {
+                draw_health_bars();
+        }
 
         // If the player is dead, fade to red.
         if (!actor::is_alive(*map::g_player)) {

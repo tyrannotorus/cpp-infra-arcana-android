@@ -11,6 +11,9 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "ability_values.hpp"
 #include "actor.hpp"
@@ -23,6 +26,7 @@
 #include "inventory.hpp"
 #include "io.hpp"
 #include "item.hpp"
+#include "item_weapon.hpp"
 #include "map.hpp"
 #include "panel.hpp"
 #include "property.hpp"
@@ -222,9 +226,7 @@ static std::string get_mon_shock_descr(
         const actor::ActorData& actor_data,
         const actor::Actor& actor)
 {
-        const auto shock_strings =
-                mon_shock_lvl_to_strings(
-                        actor_data.mon_shock_lvl);
+        const MonShockStrings shock_strings = mon_shock_lvl_to_strings(actor_data.mon_shock_lvl);
 
         if (shock_strings.shock_str.empty()) {
                 return "";
@@ -248,7 +250,7 @@ static std::string get_mon_wielded_wpn_str(
         const actor::ActorData& actor_data,
         const actor::Actor& actor)
 {
-        const auto* const wpn = actor.m_inv.item_in_slot(SlotId::wpn);
+        const item::Item* const wpn = actor.m_inv.item_in_slot(SlotId::wpn);
 
         if (!wpn) {
                 return "";
@@ -266,6 +268,20 @@ static std::string get_mon_wielded_wpn_str(
                         ItemNameAttackInfo::none);
 
         return pronoun_str + " is wielding " + wpn_name_a + ".";
+}
+
+static std::string get_mon_current_health_descr(const actor::Actor& actor)
+{
+        int hp_pct = ((actor.m_hp * 100) / actor::max_hp(actor));
+
+        hp_pct = std::max(1, hp_pct);
+
+        std::string str =
+                (hp_pct >= 100)
+                ? "They are at full health."
+                : ("They are at " + std::to_string(hp_pct) + "% health.");
+
+        return str;
 }
 
 static std::string get_melee_hit_chance_descr(actor::Actor& actor)
@@ -359,7 +375,7 @@ static void add_or_list_to_sentence(
         std::string& base_str,
         const std::vector<std::string>& names)
 {
-        const auto nr_names = names.size();
+        const size_t nr_names = names.size();
 
         for (size_t i = 0; i < nr_names; ++i) {
                 if ((nr_names > 2) && (i > 0)) {
@@ -470,7 +486,7 @@ static std::string get_mon_natural_properties_descr(
                 descr += ".";
         }
 
-        for (const auto& entry : custom_entries) {
+        for (const std::string& entry : custom_entries) {
                 if (!descr.empty()) {
                         descr += " ";
                 }
@@ -485,7 +501,7 @@ static std::string auto_description_str(actor::Actor& actor)
 {
         std::string str;
 
-        const auto& actor_data =
+        const actor::ActorData& actor_data =
                 actor.m_mimic_data
                 ? *actor.m_mimic_data
                 : *actor.m_data;
@@ -496,8 +512,8 @@ static std::string auto_description_str(actor::Actor& actor)
                         get_melee_hit_chance_descr(actor));
         }
 
-        const auto& ai = actor_data.ai;
-        const auto looks = ai[(size_t)actor::AiId::looks];
+        const bool* ai = actor_data.ai;
+        const bool looks = ai[(size_t)actor::AiId::looks];
 
         if (!actor::is_aware_of_player(actor) &&
             !actor.is_actor_my_leader(map::g_player) &&
@@ -524,7 +540,7 @@ static std::string auto_description_str(actor::Actor& actor)
                         str,
                         "They cannot visually detect other creatures");
 
-                const auto pursues =
+                const bool pursues =
                         ai[(size_t)actor::AiId::moves_to_target_when_los] ||
                         ai[(size_t)actor::AiId::paths_to_target_when_aware];
 
@@ -553,8 +569,11 @@ static std::string auto_description_str(actor::Actor& actor)
                         get_mon_wielded_wpn_str(actor_data, actor));
         }
 
-        const auto natural_properties_descr =
-                get_mon_natural_properties_descr(actor_data);
+        text_format::append_with_space(
+                str,
+                get_mon_current_health_descr(actor));
+
+        const std::string natural_properties_descr = get_mon_natural_properties_descr(actor_data);
 
         if (!natural_properties_descr.empty()) {
                 if (!str.empty()) {
@@ -589,7 +608,7 @@ static std::vector<prop::PropListEntry> temporary_properties_to_show(const actor
         std::vector<prop::PropListEntry> prop_list = actor.m_properties.property_names_and_descr();
 
         for (auto it = std::begin(prop_list); it != std::end(prop_list);) {
-                const auto* const prop = it->prop;
+                const prop::Prop* const prop = it->prop;
 
                 if (should_show_property(actor, *prop)) {
                         ++it;
@@ -609,14 +628,13 @@ static std::string temporary_properties_str(actor::Actor& actor)
         // Properties
         std::vector<prop::PropListEntry> prop_list = temporary_properties_to_show(actor);
 
-        for (const auto& entry : prop_list) {
+        for (const prop::PropListEntry& entry : prop_list) {
                 if (!str.empty()) {
                         str += "\n";
                 }
 
-                // HACK: This assumes the good/bad/text colors, which is defined
-                // in a data file. However the text formatter does not recognize
-                // those IDs.
+                // HACK: This assumes the good/bad/text colors, which is defined in a data
+                // file. However the text formatter does not recognize those IDs.
                 if (entry.title.color == colors::msg_good()) {
                         str += "{COLOR_LIGHT_GREEN}";
                 }
@@ -666,8 +684,7 @@ void ViewActorDescr::draw()
 
         // Auto description
         {
-                const std::string auto_descr_str =
-                        auto_description_str(m_actor);
+                const std::string auto_descr_str = auto_description_str(m_actor);
 
                 if (!auto_descr_str.empty()) {
                         ++y;
@@ -700,7 +717,7 @@ void ViewActorDescr::draw()
 
 void ViewActorDescr::update()
 {
-        const auto input = io::read_input();
+        const io::InputData input = io::read_input();
 
         switch (input.key) {
         case SDLK_SPACE:

@@ -77,6 +77,7 @@
 - Removed many cases where the game "paused" (i.e. "[space]" is shown), for example revealing hidden doors no longer pause the game.
 - The screen fades to red when the player dies.
 - Braziers have a subtle flicker effect, similar to the player when using the Electric Lantern.
+- When viewing monster descriptions, current health percentage is shown. Added an option to disable health bars.
 
 # Convenience / quality of life features
 - Tab now also disarms adjacent traps (melee attacking is prioritized).

@@ -14,7 +14,6 @@
 #include <memory>
 #include <regex>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "audio.hpp"
@@ -63,6 +62,7 @@ static bool s_is_fullscreen = false;
 static int s_video_scale_factor = 1;
 static int s_brightness_pct = 100;
 static bool s_text_mode_filled_walls = true;
+static bool s_display_health_bars = true;
 static bool s_use_trap_color_when_obscured = true;
 static bool s_warn_on_throw_valuable = false;
 static bool s_warn_on_light_explosive = false;
@@ -314,6 +314,7 @@ static void set_default_variables()
         s_video_scale_factor = calc_default_video_scale_factor(native_res);
         s_brightness_pct = 100;
         s_text_mode_filled_walls = true;
+        s_display_health_bars = true;
         s_use_trap_color_when_obscured = false;
         s_is_intro_lvl_skipped = false;
         s_is_intro_popup_skipped = false;
@@ -442,6 +443,9 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
         s_text_mode_filled_walls = lines.front() == "1";
         remove_line(lines);
 
+        s_display_health_bars = lines.front() == "1";
+        remove_line(lines);
+
         s_use_trap_color_when_obscured = lines.front() == "1";
         remove_line(lines);
 
@@ -548,6 +552,7 @@ static std::vector<std::string> lines_from_variables()
         lines.emplace_back(std::to_string(s_video_scale_factor));
         lines.emplace_back(std::to_string(s_brightness_pct));
         lines.emplace_back(s_text_mode_filled_walls ? "1" : "0");
+        lines.emplace_back(s_display_health_bars ? "1" : "0");
         lines.emplace_back(s_use_trap_color_when_obscured ? "1" : "0");
         lines.emplace_back(s_is_intro_lvl_skipped ? "1" : "0");
         lines.emplace_back(s_is_intro_popup_skipped ? "1" : "0");
@@ -648,6 +653,7 @@ void init()
         s_options.emplace_back(std::make_unique<SkipIntroPopupOption>());
         s_options.emplace_back(std::make_unique<DisplayHintsOption>());
         s_options.emplace_back(std::make_unique<UseTrapColorWhenObscuredOption>());
+        s_options.emplace_back(std::make_unique<DisplayHealthBarsOption>());
         s_options.emplace_back(std::make_unique<AlwaysWarnMonsterOption>());
         s_options.emplace_back(std::make_unique<WarnThrowValuableOption>());
         s_options.emplace_back(std::make_unique<WarnLightExplosivesOption>());
@@ -782,6 +788,11 @@ int map_cell_px_h()
 bool text_mode_filled_walls()
 {
         return s_text_mode_filled_walls;
+}
+
+bool display_health_bars()
+{
+        return s_display_health_bars;
 }
 
 bool use_trap_color_when_obscured()
@@ -1554,6 +1565,33 @@ void TextModeFilledWallsOption::change(OptionChangeCommand command) const
 
         // Redefine the terrain data list.
         terrain::init();
+}
+
+std::string DisplayHealthBarsOption::name() const
+{
+        return "Display health bars";
+}
+
+std::string DisplayHealthBarsOption::descr() const
+{
+        return "Show health bars under creatures when not at full health.";
+}
+
+std::string DisplayHealthBarsOption::value_str() const
+{
+        return s_display_health_bars ? "Yes" : "No";
+}
+
+OptionSubmenuType DisplayHealthBarsOption::submenu_type() const
+{
+        return OptionSubmenuType::gameplay;
+}
+
+void DisplayHealthBarsOption::change(OptionChangeCommand command) const
+{
+        (void)command;
+
+        s_display_health_bars = !s_display_health_bars;
 }
 
 std::string UseTrapColorWhenObscuredOption::name() const
