@@ -2374,11 +2374,23 @@ void SeeInvis::on_applied()
 
 PropEnded Burrowing::on_actor_turn()
 {
+        destroy_terrain();
+
+        return PropEnded::no;
+}
+
+void Burrowing::on_end()
+{
+        // Also destroy terrain when the effect ends, so that the creature doesn't end up on top of
+        // a wall.
+        destroy_terrain();
+}
+
+void Burrowing::destroy_terrain() const
+{
         const auto& p = m_owner->m_pos;
 
         map::g_terrain.at(p)->hit(DmgType::pure, nullptr);
-
-        return PropEnded::no;
 }
 
 void Burrowing::on_applied()

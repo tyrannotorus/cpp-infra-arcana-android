@@ -473,7 +473,11 @@ public:
                 Prop(Id::burrowing) {}
 
         PropEnded on_actor_turn() override;
+        void on_end() override;
         void on_applied() override;
+
+private:
+        void destroy_terrain() const;
 };
 
 class ZuulPossessPriest : public Prop
