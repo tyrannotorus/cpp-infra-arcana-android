@@ -108,8 +108,14 @@ static Color color_monster(const actor::Actor& actor)
                 return actor.m_data->color;
         }
 
-        // TODO: Make this a property:
-        if ((actor::id(actor) == "MON_OOZE_LURKING") && !actor.m_mimic_data) {
+        // Use the wall color if this is either:
+        // * A Lurking Ooze, and the player isn't hallucinating it as something else, or
+        // * The player is hallucinating another monster as a Lurking Ooze.
+        // HACK: Handle via actor data instead:
+        const std::string lurking_ooze_id = "MON_OOZE_LURKING";
+        if (
+                (!actor.m_mimic_data && (actor::id(actor) == lurking_ooze_id)) ||
+                (actor.m_mimic_data && (actor.m_mimic_data->id == lurking_ooze_id))) {
                 return map::g_wall_color;
         }
 
