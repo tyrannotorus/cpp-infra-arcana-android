@@ -341,6 +341,15 @@ static void move_player_non_center_direction(const P& target)
 {
         actor::Actor& player = *map::g_player;
 
+        if (!map::is_pos_inside_outer_walls(target) &&
+            player.m_properties.has(prop::Id::burrowing)) {
+                // The player attempted to move into the outer walls of the map with the burrowing
+                // status effect, print some message.
+                msg_log::add("An unknown barrier blocks me. Perhaps it's for the best.");
+
+                return;
+        }
+
         const bool is_terrain_blocking_move =
                 map_parsers::BlocksActor(player, ParseActors::no)
                         .run(target);
@@ -372,9 +381,9 @@ static void move_player_non_center_direction(const P& target)
 
         if (!is_terrain_blocking_move) {
                 if (should_player_be_immobile()) {
-                        // TODO: Currently you can attempt to attack hidden
-                        // adjacent monsters "for free" while you are too
-                        // encumbered to move (very minor issue, but it's weird)
+                        // TODO: Currently you can attempt to attack hidden adjacent monsters "for
+                        // free" while you are too encumbered to move (very minor issue, but it's
+                        // weird)
                         msg_log::add("I am too encumbered to move!");
 
                         return;
@@ -432,8 +441,7 @@ static void do_move_action_player(Dir dir)
 
                 is_crimson_passage_move = player.m_properties.has(prop::Id::crimson_passage);
 
-                // NOTE: The player might bump the stairs here and go to a new
-                // dungeon level:
+                // NOTE: The player might bump the stairs here and go to a new dungeon level:
                 move_player_non_center_direction(target);
 
                 if (map::g_dlvl != dlvl_before) {
