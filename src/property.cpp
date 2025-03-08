@@ -2388,9 +2388,13 @@ void Burrowing::on_end()
 
 void Burrowing::destroy_terrain() const
 {
-        const auto& p = m_owner->m_pos;
+        const P& p = m_owner->m_pos;
 
-        map::g_terrain.at(p)->hit(DmgType::pure, nullptr);
+        terrain::Terrain* const terrain = map::g_terrain.at(p);
+
+        if (!terrain->is_walkable()) {
+                terrain->hit(DmgType::pure, nullptr);
+        }
 }
 
 void Burrowing::on_applied()
