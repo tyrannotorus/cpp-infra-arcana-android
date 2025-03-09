@@ -246,14 +246,25 @@ public:
                 return 0;
         }
 
-        virtual int affect_max_hp(const int hp_max) const
+        // Affect HP/SP by absolute value or a percentage value.
+        virtual int max_hp_mod() const
         {
-                return hp_max;
+                return 0;
         }
 
-        virtual int affect_max_spi(const int spi_max) const
+        virtual int max_hp_pct_mod() const
         {
-                return spi_max;
+                return 0;
+        }
+
+        virtual int max_sp_mod() const
+        {
+                return 0;
+        }
+
+        virtual int max_sp_pct_mod() const
+        {
+                return 0;
         }
 
         virtual int player_temporary_shock_change() const
@@ -452,7 +463,7 @@ public:
         Diseased() :
                 Prop(Id::diseased) {}
 
-        int affect_max_hp(int hp_max) const override;
+        int max_hp_pct_mod() const override;
         bool is_resisting_other_prop(Id prop_id) const override;
         void on_applied() override;
 };
@@ -497,9 +508,9 @@ public:
 
         void on_death() override;
 
-        int affect_max_hp(const int hp_max) const override
+        int max_hp_pct_mod() const override
         {
-                return hp_max * 2;
+                return 100;
         }
 };
 
@@ -832,7 +843,7 @@ public:
                 return m_nr_wounds <= 0;
         }
 
-        int affect_max_hp(int hp_max) const override;
+        int max_hp_pct_mod() const override;
 
         int nr_wounds() const
         {
@@ -894,7 +905,7 @@ public:
         }
 
         void on_more(const Prop& new_prop) override;
-        int affect_max_hp(int hp_max) const override;
+        int max_hp_mod() const override;
         void set_nr_drained(int value);
 
 private:
@@ -915,7 +926,7 @@ public:
         }
 
         void on_more(const Prop& new_prop) override;
-        int affect_max_spi(int spi_max) const override;
+        int max_sp_mod() const override;
 
 private:
         int m_nr_drained;

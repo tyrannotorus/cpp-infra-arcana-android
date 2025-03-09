@@ -406,7 +406,15 @@ int max_hp(const Actor& actor)
 {
         int result = actor.m_base_max_hp;
 
-        result = actor.m_properties.affect_max_hp(result);
+        // First apply a percentage based change, then change by absolute value.
+
+        const int pct_mod = actor.m_properties.max_hp_pct_mod();
+
+        const int absolute_mod = actor.m_properties.max_hp_mod();
+
+        result = (result * (100 + pct_mod)) / 100;
+
+        result += absolute_mod;
 
         return std::max(1, result);
 }
@@ -415,7 +423,15 @@ int max_sp(const Actor& actor)
 {
         int result = actor.m_base_max_sp;
 
-        result = actor.m_properties.affect_max_spi(result);
+        // First apply a percentage based change, then change by absolute value.
+
+        const int pct_mod = actor.m_properties.max_sp_pct_mod();
+
+        const int absolute_mod = actor.m_properties.max_sp_mod();
+
+        result = (result * (100 + pct_mod)) / 100;
+
+        result += absolute_mod;
 
         return std::max(1, result);
 }

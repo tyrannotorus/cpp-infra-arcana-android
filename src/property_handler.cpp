@@ -973,26 +973,48 @@ int PropHandler::melee_dmg_penalty_pct() const
                         }));
 }
 
-int PropHandler::affect_max_hp(const int hp_max) const
+int PropHandler::max_hp_mod() const
 {
-        int new_hp_max = hp_max;
+        int mod = 0;
 
         for (const auto& prop : m_props) {
-                new_hp_max = prop->affect_max_hp(new_hp_max);
+                mod += prop->max_hp_mod();
         }
 
-        return new_hp_max;
+        return mod;
 }
 
-int PropHandler::affect_max_spi(const int spi_max) const
+int PropHandler::max_hp_pct_mod() const
 {
-        int new_spi_max = spi_max;
+        int mod = 0;
 
         for (const auto& prop : m_props) {
-                new_spi_max = prop->affect_max_spi(new_spi_max);
+                mod += prop->max_hp_pct_mod();
         }
 
-        return new_spi_max;
+        return mod;
+}
+
+int PropHandler::max_sp_mod() const
+{
+        int mod = 0;
+
+        for (const auto& prop : m_props) {
+                mod += prop->max_sp_mod();
+        }
+
+        return mod;
+}
+
+int PropHandler::max_sp_pct_mod() const
+{
+        int mod = 0;
+
+        for (const auto& prop : m_props) {
+                mod += prop->max_sp_pct_mod();
+        }
+
+        return mod;
 }
 
 int PropHandler::player_extra_min_shock() const

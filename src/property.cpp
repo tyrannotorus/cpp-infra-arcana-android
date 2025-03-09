@@ -7,7 +7,6 @@
 #include "property.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
@@ -690,9 +689,9 @@ void Infected::on_applied()
         }
 }
 
-int Diseased::affect_max_hp(const int hp_max) const
+int Diseased::max_hp_pct_mod() const
 {
-        return hp_max / 2;
+        return -50;
 }
 
 void Diseased::on_applied()
@@ -1214,7 +1213,7 @@ int Wound::ability_mod(const AbilityId ability) const
         return 0;
 }
 
-int Wound::affect_max_hp(const int hp_max) const
+int Wound::max_hp_pct_mod() const
 {
         int nr_wounds_used = m_nr_wounds;
 
@@ -1222,14 +1221,14 @@ int Wound::affect_max_hp(const int hp_max) const
                 nr_wounds_used /= 2;
         }
 
-        const int pen_pct_per_wound = 10;
+        const int pct_per_wound = 10;
 
-        int hp_pen_pct = nr_wounds_used * pen_pct_per_wound;
+        int hp_pen_pct = nr_wounds_used * pct_per_wound;
 
-        // Cap the penalty percentage
+        // Cap the penalty percentage.
         hp_pen_pct = std::min(70, hp_pen_pct);
 
-        return (hp_max * (100 - hp_pen_pct)) / 100;
+        return -hp_pen_pct;
 }
 
 std::string Wound::get_one_wound_heal_str() const
@@ -1363,9 +1362,9 @@ void HpSap::load()
         m_nr_drained = saving::get_int();
 }
 
-int HpSap::affect_max_hp(const int hp_max) const
+int HpSap::max_hp_mod() const
 {
-        return (hp_max - m_nr_drained);
+        return -m_nr_drained;
 }
 
 void HpSap::on_more(const Prop& new_prop)
@@ -1392,9 +1391,9 @@ void SpiSap::load()
         m_nr_drained = saving::get_int();
 }
 
-int SpiSap::affect_max_spi(const int spi_max) const
+int SpiSap::max_sp_mod() const
 {
-        return (spi_max - m_nr_drained);
+        return -m_nr_drained;
 }
 
 void SpiSap::on_more(const Prop& new_prop)

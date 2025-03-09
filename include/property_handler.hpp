@@ -16,6 +16,7 @@
 #include "ability_values.hpp"
 #include "colors.hpp"
 #include "direction.hpp"
+#include "gfx.hpp"
 #include "global.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
@@ -34,8 +35,6 @@ namespace actor
 {
 class Actor;
 }  // namespace actor
-
-struct P;
 
 namespace prop
 {
@@ -150,8 +149,11 @@ public:
 
         int melee_dmg_penalty_pct() const;
 
-        int affect_max_hp(int hp_max) const;
-        int affect_max_spi(int spi_max) const;
+        // Affect HP/SP by absolute value or a percentage value.
+        int max_hp_mod() const;
+        int max_hp_pct_mod() const;
+        int max_sp_mod() const;
+        int max_sp_pct_mod() const;
 
         int player_extra_min_shock() const;
 
