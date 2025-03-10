@@ -6,20 +6,14 @@
 
 #include "query.hpp"
 
-#include <algorithm>
 #include <memory>
 #include <string>
-#include <utility>
 
 #include "SDL_keycode.h"
-#include "colors.hpp"
 #include "config.hpp"
 #include "game_commands.hpp"
 #include "io.hpp"
-#include "panel.hpp"
 #include "popup.hpp"
-#include "pos.hpp"
-#include "random.hpp"
 #include "state.hpp"
 
 // -----------------------------------------------------------------------------

@@ -153,6 +153,9 @@ private:
 
         void on_start_specific() override;
 
+        std::string calc_input_str_number_only() const;
+
+        // Updates the displayed input string, including blinking underscore.
         void update_input_str();
 
         int calc_max_nr_digits() const;
@@ -162,6 +165,7 @@ private:
         int* m_number_result {nullptr};
         std::string m_input_str {};
         bool m_has_player_entered_value {false};
+        bool m_is_empty_nr {false};
 };
 
 }  // namespace popup

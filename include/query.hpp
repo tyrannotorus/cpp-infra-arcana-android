@@ -8,12 +8,10 @@
 #define QUERY_HPP
 
 #include <optional>
+#include <string>
 
-#include "colors.hpp"
 #include "direction.hpp"
-#include "pos.hpp"
 #include "random.hpp"
-#include "state.hpp"
 
 namespace io
 {

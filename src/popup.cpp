@@ -631,16 +631,20 @@ void NumberQueryPopupState::on_start_specific()
                         m_config.default_value,
                         m_config.allowed_range.min,
                         m_config.allowed_range.max);
+}
 
-        update_input_str();
+std::string NumberQueryPopupState::calc_input_str_number_only() const
+{
+        return (*m_number_result >= 0) ? std::to_string(*m_number_result) : "";
 }
 
 void NumberQueryPopupState::update_input_str()
 {
-        m_input_str =
-                (*m_number_result >= 0)
-                ? std::to_string(*m_number_result)
-                : "";
+        m_input_str.clear();
+
+        if (!m_is_empty_nr) {
+                m_input_str = calc_input_str_number_only();
+        }
 
         if (m_has_player_entered_value &&
             ((io::graphics_cycle_nr(io::GraphicsCycle::fast) % 2) == 0)) {
@@ -831,6 +835,7 @@ void NumberQueryPopupState::update()
 
         if (input.key == SDLK_RETURN) {
                 // Confirm entered.
+
                 *m_number_result =
                         std::clamp(
                                 *m_number_result,
@@ -844,6 +849,7 @@ void NumberQueryPopupState::update()
 
         if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE)) {
                 // Cancel entered.
+
                 *m_number_result =
                         m_config.cancel_returns_default
                         ? m_config.default_value
@@ -856,9 +862,19 @@ void NumberQueryPopupState::update()
 
         if (input.key == SDLK_BACKSPACE) {
                 // Backspace entered.
+
                 m_has_player_entered_value = true;
 
-                *m_number_result = *m_number_result / 10;
+                if (calc_input_str_number_only().length() == 1) {
+                        // Single digit erased.
+                        m_is_empty_nr = true;
+
+                        *m_number_result = 0;
+                }
+                else {
+                        // Erased a digit in a series of digits.
+                        *m_number_result = *m_number_result / 10;
+                }
 
                 return;
         }
@@ -867,35 +883,40 @@ void NumberQueryPopupState::update()
                 // Number entered.
 
                 if (!m_has_player_entered_value) {
-                        // Player has not yet modified the default value, clear
-                        // the current value.
+                        // Player has not yet modified the default value, clear the current value.
                         *m_number_result = 0;
                 }
 
-                update_input_str();
-
-                // Adjust for the underscore.
-                const int current_num_digits = (int)m_input_str.size() - 1;
+                const int current_num_digits =
+                        m_is_empty_nr
+                        ? 0
+                        : (int)calc_input_str_number_only().length();
 
                 const int max_nr_digits = calc_max_nr_digits();
 
-                if (current_num_digits >= max_nr_digits) {
+                if (m_has_player_entered_value && (current_num_digits >= max_nr_digits)) {
                         // Not possible to add more digits.
                         return;
                 }
 
-                // Add another digit and clamp the result.
-                m_has_player_entered_value = true;
+                // Add a digit and clamp the result.
 
                 int current_digit = input.key - '0';
 
-                *m_number_result = (*m_number_result * 10) + current_digit;
+                if (!m_is_empty_nr) {
+                        *m_number_result *= 10;
+                }
+
+                *m_number_result += current_digit;
 
                 *m_number_result =
                         std::clamp(
                                 *m_number_result,
                                 m_config.allowed_range.min,
                                 m_config.allowed_range.max);
+
+                m_has_player_entered_value = true;
+                m_is_empty_nr = false;
         }
 }
 
