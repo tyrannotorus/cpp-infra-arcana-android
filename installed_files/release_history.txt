@@ -18,6 +18,7 @@
 - Added trait "Sage" - This is an upgrade of the "Meditative" trait, spells are also cast at a higher skill level when "Focused", and the duration to regain the focused state is reduced.
 - Added trait "Elusive" - A unique trait for Rogues, that makes creatures only remember you for half the normal duration.
 - Rapid Recoverer regenerates 1 hit point every third turn instead of every second turn.
+- The Marksman traits also increase minimum damage (but cannot increase maximum damage).
 
 # Items
 - When using the Medical Bag, a menu is now shown where you can select the treatment to perform. Also added an option to automatically choose treatment like before.

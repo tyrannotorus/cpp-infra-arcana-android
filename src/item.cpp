@@ -174,18 +174,22 @@ WpnDmg Item::melee_dmg(const actor::Actor* const attacker) const
                 return wpn_dmg;
         }
 
+        auto incr_plus = [&](WpnDmg& w) {
+                w.set_plus(wpn_dmg.plus() + 1);
+        };
+
         if (actor::is_player(attacker)) {
                 // Bonus damage from melee traits.
                 if (player_bon::has_trait(Trait::adept_melee)) {
-                        wpn_dmg.set_plus(wpn_dmg.plus() + 1);
+                        incr_plus(wpn_dmg);
                 }
 
                 if (player_bon::has_trait(Trait::expert_melee)) {
-                        wpn_dmg.set_plus(wpn_dmg.plus() + 1);
+                        incr_plus(wpn_dmg);
                 }
 
                 if (player_bon::has_trait(Trait::master_melee)) {
-                        wpn_dmg.set_plus(wpn_dmg.plus() + 1);
+                        incr_plus(wpn_dmg);
                 }
 
                 // TODO: This should be handled via the 'specific_dmg_mod' hook
@@ -225,6 +229,29 @@ WpnDmg Item::ranged_dmg(const actor::Actor* const attacker) const
 {
         WpnDmg wpn_dmg = m_base_ranged_dmg;
 
+        if (wpn_dmg.is_zero_max_damage()) {
+                return wpn_dmg;
+        }
+
+        auto incr_min_dmg = [](WpnDmg& w) {
+                w.set_base_min(std::min(w.base_max(), w.base_min() + 1));
+        };
+
+        if (actor::is_player(attacker)) {
+                // Bonus damage from ranged traits.
+                if (player_bon::has_trait(Trait::adept_marksman)) {
+                        incr_min_dmg(wpn_dmg);
+                }
+
+                if (player_bon::has_trait(Trait::expert_marksman)) {
+                        incr_min_dmg(wpn_dmg);
+                }
+
+                if (player_bon::has_trait(Trait::master_marksman)) {
+                        incr_min_dmg(wpn_dmg);
+                }
+        }
+
         specific_dmg_mod(wpn_dmg, attacker);
 
         return wpn_dmg;
@@ -240,6 +267,25 @@ WpnDmg Item::thrown_dmg(const actor::Actor* const attacker) const
 
         if (wpn_dmg.is_zero_max_damage()) {
                 return wpn_dmg;
+        }
+
+        auto incr_min_dmg = [](WpnDmg& w) {
+                w.set_base_min(std::min(w.base_max(), w.base_min() + 1));
+        };
+
+        if (actor::is_player(attacker)) {
+                // Bonus damage from ranged traits.
+                if (player_bon::has_trait(Trait::adept_marksman)) {
+                        incr_min_dmg(wpn_dmg);
+                }
+
+                if (player_bon::has_trait(Trait::expert_marksman)) {
+                        incr_min_dmg(wpn_dmg);
+                }
+
+                if (player_bon::has_trait(Trait::master_marksman)) {
+                        incr_min_dmg(wpn_dmg);
+                }
         }
 
         specific_dmg_mod(wpn_dmg, attacker);

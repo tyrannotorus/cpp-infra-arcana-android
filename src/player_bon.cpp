@@ -177,7 +177,9 @@ static void update_trait_data()
         // --- Adept Marksman ---
         d.id = Trait::adept_marksman;
         d.title = "Adept Marksman";
-        d.descr = "+10% hit chance with firearms and thrown weapons";
+        d.descr = (
+                "+10% hit chance and +1 minimum damage with firearms and thrown weapons "
+                "(cannot raise maximum damage)");
         d.blocked_for_bgs = {Bg::ghoul};
         set_trait_data(d);
 
