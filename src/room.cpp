@@ -792,7 +792,7 @@ void SpiderRoom::affect_surroundings_hook()
 
         const int travel_limit = rnd::range_binom(3, 12, 0.4);
 
-        const Fraction chance_to_place(1, 6);
+        const Fraction chance_to_place(1, 8);
 
         const Array2<int> flood = floodfill(origin, blocks_walking, travel_limit);
 
