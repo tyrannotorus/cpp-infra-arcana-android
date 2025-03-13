@@ -150,6 +150,14 @@ public:
                 (void)pos;
         }
 
+        // Special reasons for not taking damage or getting a status effect applied.
+        virtual bool is_resisting_weapon_special(actor::Actor& actor_hit) const
+        {
+                (void)actor_hit;
+
+                return false;
+        }
+
         virtual void on_melee_hit(actor::Actor& actor_hit, const int dmg)
         {
                 (void)actor_hit;

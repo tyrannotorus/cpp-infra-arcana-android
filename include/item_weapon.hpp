@@ -100,7 +100,7 @@ public:
         RavenPeck(ItemData* const item_data) :
                 Wpn(item_data) {}
 
-        void on_melee_hit(actor::Actor& actor_hit, int dmg) override;
+        bool is_resisting_weapon_special(actor::Actor& actor_hit) const override;
 };
 
 class VampiricBite : public Wpn
@@ -127,7 +127,25 @@ public:
         DustEngulf(ItemData* const item_data) :
                 Wpn(item_data) {}
 
-        void on_melee_hit(actor::Actor& actor_hit, int dmg) override;
+        bool is_resisting_weapon_special(actor::Actor& actor_hit) const override;
+};
+
+class Spores : public Wpn
+{
+public:
+        Spores(ItemData* const item_data) :
+                Wpn(item_data) {}
+
+        bool is_resisting_weapon_special(actor::Actor& actor_hit) const override;
+};
+
+class PusSpew : public Wpn
+{
+public:
+        PusSpew(ItemData* const item_data) :
+                Wpn(item_data) {}
+
+        bool is_resisting_weapon_special(actor::Actor& actor_hit) const override;
 };
 
 class SnakeVenomSpit : public Wpn
@@ -136,7 +154,7 @@ public:
         SnakeVenomSpit(ItemData* const item_data) :
                 Wpn(item_data) {}
 
-        void on_ranged_hit(actor::Actor& actor_hit) override;
+        bool is_resisting_weapon_special(actor::Actor& actor_hit) const override;
 };
 
 class PutridSpit : public Wpn
@@ -145,7 +163,7 @@ public:
         PutridSpit(ItemData* const item_data) :
                 Wpn(item_data) {}
 
-        void on_ranged_hit(actor::Actor& actor_hit) override;
+        bool is_resisting_weapon_special(actor::Actor& actor_hit) const override;
 };
 
 class WaterBreath : public Wpn

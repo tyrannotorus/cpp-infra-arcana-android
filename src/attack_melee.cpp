@@ -549,6 +549,10 @@ static void melee_hit_actor(
         const P& attacker_origin,
         item::Wpn& wpn)
 {
+        if (wpn.is_resisting_weapon_special(defender)) {
+                return;
+        }
+
         const bool is_ranged_wpn = wpn.data().type == ItemType::ranged_wpn;
 
         const auto allow_wound = is_ranged_wpn ? AllowWound::no : AllowWound::yes;

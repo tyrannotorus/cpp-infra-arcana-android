@@ -417,6 +417,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             </attack>
             <attack id="ITEMINTR_PUTRID_SPIT">
                 <damage>0</damage>
+                <property_applied>PROP_INFECTED</property_applied>
             </attack>
         </attacks>
 
@@ -3029,6 +3030,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             </attack>
             <attack id="ITEMINTR_SNAKE_VENOM_SPIT">
                 <damage>0</damage>
+                <property_applied duration="7">PROP_BLIND</property_applied>
             </attack>
         </attacks>
 
@@ -5800,6 +5802,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <attacks>
             <attack id="ITEMINTR_RAVEN_PECK">
                 <damage>1</damage>
+                <property_applied percent_chance="50" duration="2">PROP_BLIND</property_applied>
             </attack>
         </attacks>
 
@@ -7738,6 +7741,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <attacks>
             <attack id="ITEMINTR_DUST_ENGULF">
                 <damage>4</damage>
+                <property_applied>PROP_BLIND</property_applied>
             </attack>
         </attacks>
 

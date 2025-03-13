@@ -273,34 +273,21 @@ void MorphicBlaster::on_projectile_blocked(const P& pos)
                 colors::light_blue());
 }
 
-void RavenPeck::on_melee_hit(actor::Actor& actor_hit, const int dmg)
+bool RavenPeck::is_resisting_weapon_special(actor::Actor& actor_hit) const
 {
-        (void)dmg;
-
-        if (!actor::is_alive(actor_hit)) {
-                return;
-        }
-
         if (actor_hit.m_properties.has(prop::Id::r_phys)) {
-                return;
+                return true;
         }
 
-        // Gas mask and Asbestos suit protects against blindness.
         Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
         if ((head_item && head_item->id() == Id::gas_mask) ||
             (body_item && body_item->id() == Id::armor_asb_suit)) {
-                return;
+                return true;
         }
 
-        if (rnd::coin_toss()) {
-                prop::Prop* const prop = prop::make(prop::Id::blind);
-
-                prop->set_duration(2);
-
-                actor_hit.m_properties.apply(prop);
-        }
+        return false;
 }
 
 void VampiricBite::on_melee_hit(actor::Actor& actor_hit, const int dmg)
@@ -371,74 +358,83 @@ void MindLeechSting::on_melee_hit(actor::Actor& actor_hit, const int dmg)
         }
 }
 
-void DustEngulf::on_melee_hit(actor::Actor& actor_hit, const int dmg)
+bool DustEngulf::is_resisting_weapon_special(actor::Actor& actor_hit) const
 {
-        (void)dmg;
-
-        if (!actor::is_alive(actor_hit)) {
-                return;
-        }
-
         if (actor_hit.m_properties.has(prop::Id::r_phys)) {
-                return;
+                return true;
         }
 
-        // Gas mask and Asbestos suit protects against blindness.
         Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
         if ((head_item && head_item->id() == Id::gas_mask) ||
             (body_item && body_item->id() == Id::armor_asb_suit)) {
-                return;
+                return true;
         }
 
-        prop::Prop* const prop = prop::make(prop::Id::blind);
-
-        actor_hit.m_properties.apply(prop);
+        return false;
 }
 
-void SnakeVenomSpit::on_ranged_hit(actor::Actor& actor_hit)
+bool Spores::is_resisting_weapon_special(actor::Actor& actor_hit) const
 {
-        if (!actor::is_alive(actor_hit)) {
-                return;
-        }
-
         if (actor_hit.m_properties.has(prop::Id::r_phys)) {
-                return;
+                return true;
         }
 
-        // Gas mask and Asbestos suit protects against blindness.
-        Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
-        Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
-
-        if ((head_item && head_item->id() == Id::gas_mask) ||
-            (body_item && body_item->id() == Id::armor_asb_suit)) {
-                return;
-        }
-
-        prop::Prop* const prop = prop::make(prop::Id::blind);
-
-        prop->set_duration(7);
-
-        actor_hit.m_properties.apply(prop);
-}
-
-void PutridSpit::on_ranged_hit(actor::Actor& actor_hit)
-{
-        if (!actor::is_alive(actor_hit)) {
-                return;
-        }
-
-        // The asbestos suit protects against the spit.
         Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
 
         if (body_item && body_item->id() == Id::armor_asb_suit) {
-                return;
+                return true;
         }
 
-        prop::Prop* const prop = prop::make(prop::Id::infected);
+        return false;
+}
 
-        actor_hit.m_properties.apply(prop);
+bool PusSpew::is_resisting_weapon_special(actor::Actor& actor_hit) const
+{
+        if (actor_hit.m_properties.has(prop::Id::r_phys)) {
+                return true;
+        }
+
+        Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
+
+        if (body_item && body_item->id() == Id::armor_asb_suit) {
+                return true;
+        }
+
+        return false;
+}
+
+bool SnakeVenomSpit::is_resisting_weapon_special(actor::Actor& actor_hit) const
+{
+        if (actor_hit.m_properties.has(prop::Id::r_phys)) {
+                return true;
+        }
+
+        Item* const head_item = actor_hit.m_inv.item_in_slot(SlotId::head);
+        Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
+
+        if ((head_item && head_item->id() == Id::gas_mask) ||
+            (body_item && body_item->id() == Id::armor_asb_suit)) {
+                return true;
+        }
+
+        return false;
+}
+
+bool PutridSpit::is_resisting_weapon_special(actor::Actor& actor_hit) const
+{
+        if (actor_hit.m_properties.has(prop::Id::r_phys)) {
+                return true;
+        }
+
+        Item* const body_item = actor_hit.m_inv.item_in_slot(SlotId::body);
+
+        if (body_item && body_item->id() == Id::armor_asb_suit) {
+                return true;
+        }
+
+        return false;
 }
 
 WaterBreath::WaterBreath(ItemData* const item_data) :

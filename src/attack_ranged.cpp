@@ -443,35 +443,39 @@ static void hit_actor_with_projectile(
                 att_data.defender->make_player_aware_of_me();
         }
 
-        if (projectile.att_data->dmg > 0) {
+        const bool is_resisting_special = wpn.is_resisting_weapon_special(*att_data.defender);
+
+        if (!is_resisting_special && (att_data.dmg > 0)) {
                 actor::hit(
-                        *projectile.actor_hit,
-                        projectile.att_data->dmg,
+                        *att_data.defender,
+                        att_data.dmg,
                         wpn.data().ranged.dmg_type,
-                        projectile.att_data->attacker,
+                        att_data.attacker,
                         AllowWound::yes);
         }
 
         // NOTE: This is run regardless of whether the defender died or not.
-        wpn.on_ranged_hit(*projectile.actor_hit);
+        wpn.on_ranged_hit(*att_data.defender);
 
         wpn.on_projectile_blocked(projectile.pos);
 
-        if (actor::is_alive(*projectile.actor_hit)) {
-                apply_ranged_attack_props(projectile, wpn);
+        if (actor::is_alive(*att_data.defender)) {
+                if (!is_resisting_special) {
+                        apply_ranged_attack_props(projectile, wpn);
 
-                // Knock-back?
-                if (wpn.data().ranged.knocks_back &&
-                    att_data.attacker) {
-                        const auto knockback_source =
-                                (wpn.data().id == item::Id::spike_gun)
-                                ? knockback::KnockbackSource::spike_gun
-                                : knockback::KnockbackSource::other;
+                        // Knock-back?
+                        if (wpn.data().ranged.knocks_back &&
+                            att_data.attacker) {
+                                const auto knockback_source =
+                                        (wpn.data().id == item::Id::spike_gun)
+                                        ? knockback::KnockbackSource::spike_gun
+                                        : knockback::KnockbackSource::other;
 
-                        knockback::run(
-                                *(att_data.defender),
-                                att_data.attacker->m_pos,
-                                knockback_source);
+                                knockback::run(
+                                        *(att_data.defender),
+                                        att_data.attacker->m_pos,
+                                        knockback_source);
+                        }
                 }
         }
 }

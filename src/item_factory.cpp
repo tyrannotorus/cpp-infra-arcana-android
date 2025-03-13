@@ -171,9 +171,7 @@ Item* make(const Id item_id, const int nr_items)
         case Id::intr_net_throw:
         case Id::intr_punch:
         case Id::intr_punch_knockback:
-        case Id::intr_pus_spew:
         case Id::intr_spear_thrust:
-        case Id::intr_spores:
         case Id::intr_sting:
         case Id::intr_strangle:
         case Id::intr_strike:
@@ -270,6 +268,14 @@ Item* make(const Id item_id, const int nr_items)
 
         case Id::intr_dust_engulf:
                 r = new DustEngulf(d);
+                break;
+
+        case Id::intr_spores:
+                r = new Spores(d);
+                break;
+
+        case Id::intr_pus_spew:
+                r = new PusSpew(d);
                 break;
 
         case Id::intr_snake_venom_spit:
