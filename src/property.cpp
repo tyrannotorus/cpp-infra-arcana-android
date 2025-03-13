@@ -462,9 +462,7 @@ PropEnded Entangled::affect_move_dir(Dir& dir)
         // known monster, that should be the only action.
         //
         if (actor::is_player(m_owner)) {
-                const auto intended_target =
-                        m_owner->m_pos +
-                        dir_utils::offset(dir);
+                const auto intended_target = m_owner->m_pos + dir_utils::offset(dir);
 
                 if (is_player_aware_of_hostile_mon_at(intended_target)) {
                         return PropEnded::no;
@@ -495,7 +493,7 @@ PropEnded Entangled::affect_move_dir(Dir& dir)
                 }
         }
 
-        if (rnd::one_in(6)) {
+        if (rnd::one_in(4)) {
                 m_owner->m_properties.end_prop(id());
 
                 return PropEnded::yes;
@@ -553,9 +551,7 @@ PropEnded Stuck::affect_move_dir(Dir& dir)
 
         // Allow the player to melee attack adjacent known monsters
         if (actor::is_player(m_owner)) {
-                const auto intended_target =
-                        m_owner->m_pos +
-                        dir_utils::offset(dir);
+                const auto intended_target = m_owner->m_pos + dir_utils::offset(dir);
 
                 if (is_player_aware_of_hostile_mon_at(intended_target)) {
                         return PropEnded::no;
@@ -580,7 +576,7 @@ PropEnded Stuck::affect_move_dir(Dir& dir)
                 }
         }
 
-        if (rnd::one_in(6)) {
+        if (rnd::one_in(4)) {
                 m_owner->m_properties.end_prop(id());
 
                 return PropEnded::yes;
