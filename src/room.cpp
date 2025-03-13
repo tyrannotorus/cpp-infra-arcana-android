@@ -184,7 +184,7 @@ void init_room_bucket()
                 add_to_room_bucket(RoomType::human, 3);
                 add_to_room_bucket(RoomType::jail, rnd::range(1, 2));
                 add_to_room_bucket(RoomType::ritual, 2);
-                add_to_room_bucket(RoomType::spider, rnd::range(1, 3));
+                add_to_room_bucket(RoomType::spider, rnd::range(1, 2));
                 add_to_room_bucket(RoomType::crawling_pit, 1);
                 add_to_room_bucket(RoomType::crypt, 4);
                 add_to_room_bucket(RoomType::monster, 2);
