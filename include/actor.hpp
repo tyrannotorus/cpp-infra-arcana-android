@@ -93,7 +93,8 @@ struct AiAvailAttacksData
 enum class AwareSource
 {
         seeing,
-        heard_sound,
+        heard_player_sound,
+        heard_non_player_sound,
         attacked,
         spell_victim,
         other,

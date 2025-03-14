@@ -40,6 +40,10 @@ inline constexpr int g_fov_radi_int = 6;
 inline constexpr int g_fov_w_int = (g_fov_radi_int * 2) + 1;
 inline constexpr double g_fov_radi_db = (double)g_fov_radi_int;
 
+inline constexpr int g_sound_dist_low = g_fov_radi_int;
+inline constexpr int g_sound_dist_high = g_fov_radi_int * 2;
+inline constexpr int g_sound_dist_global = 999;
+
 inline constexpr int g_dynamite_fuse_turns = 5;
 inline constexpr int g_expl_std_radi = 2;
 

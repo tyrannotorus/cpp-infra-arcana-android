@@ -66,7 +66,11 @@ static bool should_do_reaction_time_for_aware_source(
                 return true;
                 break;
 
-        case actor::AwareSource::heard_sound:
+        case actor::AwareSource::heard_player_sound:
+                return true;
+                break;
+
+        case actor::AwareSource::heard_non_player_sound:
                 return true;
                 break;
 
@@ -80,7 +84,9 @@ static bool should_do_reaction_time_for_aware_source(
         return false;
 }
 
-static bool allow_speak_phrase_for_aware_source(const actor::AwareSource source)
+static bool allow_speak_phrase_for_aware_source(
+        const actor::AwareSource source,
+        const bool is_seeing_player)
 {
         switch (source) {
         case actor::AwareSource::attacked:
@@ -95,7 +101,22 @@ static bool allow_speak_phrase_for_aware_source(const actor::AwareSource source)
                 return true;
                 break;
 
-        case actor::AwareSource::heard_sound:
+        case actor::AwareSource::heard_player_sound:
+                // Monsters hearing a sound made by the player is allowed to alert other monsters
+                // via sound if they see the player.
+                //
+                // Rationale: If a monster is within FOV, making noise should have the same
+                // consequences as a monster detecting the player by sight (i.e. it alerts other
+                // monsters), otherwise it creates a weird behavior where making noise can be
+                // preferable to letting the monster see you. However the game should still allow
+                // some tactics like throwing stuff to lure a single monster around a corner.
+                //
+                return is_seeing_player;
+                break;
+
+        case actor::AwareSource::heard_non_player_sound:
+                // Monsters hearing non-player sounds (e.g. another monster alerting monsters) are
+                // NEVER allowed to alert other monsters via sound.
                 return false;
                 break;
 
@@ -109,7 +130,7 @@ static bool allow_speak_phrase_for_aware_source(const actor::AwareSource source)
         return false;
 }
 
-static void apply_mon_reaction_time_on_aware(actor::Actor& actor)
+static void apply_mon_reaction_time_on_aware(actor::Actor& actor, const bool is_seeing_player)
 {
         prop::Prop* const prop = prop::make(prop::Id::waiting);
 
@@ -122,13 +143,7 @@ static void apply_mon_reaction_time_on_aware(actor::Actor& actor)
         // waiting (the monster is already waiting due to the reaction time on
         // becoming aware, applied above).
         if (actor.m_data->is_pausing_on_player_seen) {
-                Array2<bool> blocks_los(map::dims());
-
-                const R r = fov::fov_rect(actor.m_pos, blocks_los.dims());
-
-                map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
-
-                if (can_mon_see_actor(actor, *map::g_player, blocks_los)) {
+                if (is_seeing_player) {
                         actor.m_ai_state.do_wait_on_player_seen_aware = false;
                 }
         }
@@ -371,20 +386,17 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
         m_mon_aware_state.wary_counter = m_mon_aware_state.aware_counter;
 
         const bool do_reaction_time = should_do_reaction_time_for_aware_source(source);
-        const bool allow_speak_phrase = allow_speak_phrase_for_aware_source(source);
 
         if (!do_reaction_time) {
-                // No reaction time - clear any waiting status. The monster may
-                // for example have become aware through an attack sound before
-                // the actual attack is executed, which would apply a waiting
-                // status (as becoming aware by hearing sounds do), but if the
+                // No reaction time - clear any waiting status. The monster may for example have
+                // become aware through an attack sound before the actual attack is executed, which
+                // would apply a waiting status (as becoming aware by hearing sounds do), but if the
                 // monster is attacked we want it to act immediately.
                 m_properties.end_prop(prop::Id::waiting);
 
-                // Also for sources of awareness that instantly alerts the
-                // monster (e.g. getting attacked), never wait due to seeing the
-                // player (some monster types skip a turn when coming into sight
-                // of the player, to avoid unfair deahts).
+                // Also for sources of awareness that instantly alerts the monster (e.g. getting
+                // attacked), never wait due to seeing the player (some monster types skip a turn
+                // when coming into sight of the player, to avoid unfair deahts).
                 m_ai_state.do_wait_on_player_seen_aware = false;
         }
 
@@ -395,12 +407,25 @@ void Actor::become_aware_player(const AwareSource source, const int factor)
                         print_player_see_mon_become_aware_msg();
                 }
 
+                Array2<bool> blocks_los(map::dims());
+
+                const R r = fov::fov_rect(m_pos, blocks_los.dims());
+
+                map_parsers::BlocksLos().run(blocks_los, r, MapParseMode::overwrite);
+
+                const bool is_seeing_player = can_mon_see_actor(*this, *map::g_player, blocks_los);
+
+                const bool allow_speak_phrase =
+                        allow_speak_phrase_for_aware_source(
+                                source,
+                                is_seeing_player);
+
                 if (allow_speak_phrase && rnd::coin_toss()) {
                         speak_phrase(AlertsMon::yes);
                 }
 
                 if (do_reaction_time && !is_actor_my_leader(map::g_player)) {
-                        apply_mon_reaction_time_on_aware(*this);
+                        apply_mon_reaction_time_on_aware(*this, is_seeing_player);
                 }
         }
 }

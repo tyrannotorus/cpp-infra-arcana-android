@@ -33,15 +33,15 @@ static int get_max_dist(const Snd& snd)
 
         switch (snd.volume()) {
         case SndVol::low:
-                max_dist = g_fov_radi_int;
+                max_dist = g_sound_dist_low;
                 break;
 
         case SndVol::high:
-                max_dist = g_fov_radi_int * 2;
+                max_dist = g_sound_dist_high;
                 break;
 
         case SndVol::global:
-                max_dist = 999;
+                max_dist = g_sound_dist_global;
                 break;
         }
 
