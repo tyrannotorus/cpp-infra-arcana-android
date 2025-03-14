@@ -517,6 +517,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             </attack>
             <attack id="ITEMINTR_PUTRID_SPIT">
                 <damage>0</damage>
+                <property_applied>PROP_INFECTED</property_applied>
             </attack>
         </attacks>
 
