@@ -2,13 +2,8 @@
 
 set -xue
 
-root_dir=${PWD}
-
-mkdir -p build && cd build
-
 # NOTE: "$*" allows adding extra arguments.
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 $* ..
 
-cmake --build . --target ia-debug -- -j$(nproc)
+cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=1 $*
 
-cd ${root_dir}
+cmake --build build --target ia-debug -- -j$(nproc)

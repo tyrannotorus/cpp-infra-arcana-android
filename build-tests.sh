@@ -2,12 +2,6 @@
 
 set -xue
 
-root_dir=${PWD}
+cmake -B build
 
-mkdir -p build && cd build
-
-cmake ..
-
-cmake --build . --target ia-test -- -j$(nproc)
-
-cd ${root_dir}
+cmake --build build --target ia-test -- -j$(nproc)

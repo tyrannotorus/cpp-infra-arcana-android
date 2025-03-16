@@ -2,10 +2,6 @@
 
 set -xue
 
-root_dir=${PWD}
+cmake -B build -DIA_BUILD_STATIC_SDL=ON
 
-mkdir -p build && cd build
-cmake -DIA_BUILD_STATIC_SDL=ON ..
-VERBOSE=1 cmake --build . --target install -- -j$(nproc)
-
-cd ${root_dir}
+VERBOSE=1 cmake --build build --target install -- -j$(nproc)
