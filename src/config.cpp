@@ -25,6 +25,7 @@
 #include "debug.hpp"
 #include "draw_box.hpp"
 #include "hints.hpp"
+#include "ini.h"
 #include "io.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
@@ -339,78 +340,38 @@ static void set_default_variables()
         TRACE_FUNC_END;
 }
 
-static void read_file(std::vector<std::string>& lines)
-{
-        std::ifstream file;
-        file.open(paths::config_file_path());
-
-        if (file.is_open()) {
-                std::string line;
-
-                while (getline(file, line)) {
-                        lines.push_back(line);
-                }
-
-                file.close();
-        }
-}
-
-static void remove_line(std::vector<std::string>& lines)
-{
-        if ((int)lines.size() == 0) {
-                TRACE_ERROR_RELEASE
-                        << "Invalid config file at "
-                        << "'" << paths::config_file_path() << "'"
-                        << " (end of file reached unexpectedly)!"
-                        << std::endl;
-
-                PANIC;
-        }
-
-        TRACE
-                << "Read config file line "
-                << "'" << lines[0] << "', "
-                << (int)(lines.size()) - 1 << " lines remaining"
-                << std::endl;
-
-        lines.erase(std::begin(lines));
-}
-
-static void set_variables_from_lines(std::vector<std::string>& lines)
+static bool read_config_file()
 {
         TRACE_FUNC_BEGIN;
 
-        s_master_volume_pct_option = to_int(lines.front());
-        remove_line(lines);
+        mINI::INIFile file(paths::config_file_path() + ".ini");
+        mINI::INIStructure ini;
 
-        s_master_volume_pct_adjusted = to_int(lines.front());
-        remove_line(lines);
+        if (!file.read(ini)) {
+                return false;
+        }
 
-        s_is_ambient_audio_enabled = lines.front() == "1";
-        remove_line(lines);
+        s_master_volume_pct_option = to_int(ini["config"]["master_volume_pct_option"]);
+        s_master_volume_pct_adjusted = to_int(ini["config"]["master_volume_pct_adjusted"]);
+        s_is_ambient_audio_enabled = ini["config"]["is_ambient_audio_enabled"] == "1";
+        s_is_ambient_audio_preloaded = ini["config"]["is_ambient_audio_preloaded"] == "1";
+        s_audio_buffer_size = to_int(ini["config"]["audio_buffer_size"]);
+        s_input_mode = (InputMode)to_int(ini["config"]["input_mode"]);
+        s_window_px_w = to_int(ini["config"]["window_px_w"]);
+        s_window_px_h = to_int(ini["config"]["window_px_h"]);
+        s_is_fullscreen = ini["config"]["is_fullscreen"] == "1";
+        s_video_scale_factor = to_int(ini["config"]["video_scale_factor"]);
 
-        s_is_ambient_audio_preloaded = lines.front() == "1";
-        remove_line(lines);
+        std::string video_scale_str = ini["config"]["video_scale_factor"];
+        TRACE << "Read video_scale_factor: '" << video_scale_str << "'" << std::endl;
 
-        s_audio_buffer_size = to_int(lines.front());
-        remove_line(lines);
+        s_brightness_pct = to_int(ini["config"]["brightness_pct"]);
+        s_renderer_type = (RendererType)to_int(ini["config"]["renderer_type"]);
 
-        s_input_mode = (InputMode)to_int(lines.front());
-        remove_line(lines);
+        s_always_center_view_on_player = ini["config"]["always_center_view_on_player"] == "1";
+        s_is_tiles_mode = ini["config"]["is_tiles_mode"] == "1";
+        s_font_name = ini["config"]["font_name"];
 
-        s_window_px_w = to_int(lines.front());
-        remove_line(lines);
-
-        s_window_px_h = to_int(lines.front());
-        remove_line(lines);
-
-        s_always_center_view_on_player = lines.front() == "1";
-        remove_line(lines);
-
-        s_is_tiles_mode = lines.front() == "1";
-        remove_line(lines);
-
-        s_font_name = lines.front();
         if (
                 std::find(
                         std::cbegin(s_font_image_names),
@@ -424,175 +385,101 @@ static void set_variables_from_lines(std::vector<std::string>& lines)
                 s_font_name = s_font_image_names[0];
         }
 
-        remove_line(lines);
-
         update_render_dims();
 
-        s_renderer_type = (RendererType)to_int(lines.front());
-        remove_line(lines);
-
-        s_is_fullscreen = lines.front() == "1";
-        remove_line(lines);
-
-        s_video_scale_factor = to_int(lines.front());
-        remove_line(lines);
-
-        s_brightness_pct = to_int(lines.front());
-        remove_line(lines);
-
-        s_text_mode_filled_walls = lines.front() == "1";
-        remove_line(lines);
-
-        s_display_health_bars = lines.front() == "1";
-        remove_line(lines);
-
-        s_use_trap_color_when_obscured = lines.front() == "1";
-        remove_line(lines);
-
-        s_is_intro_lvl_skipped = lines.front() == "1";
-        remove_line(lines);
-
-        s_is_intro_popup_skipped = lines.front() == "1";
-        remove_line(lines);
-
-        s_is_any_key_confirm_more = lines.front() == "1";
-        remove_line(lines);
-
-        s_auto_select_menu = lines.front() == "1";
-        remove_line(lines);
-
-        s_hints_mode = (HintsMode)to_int(lines.front());
-        remove_line(lines);
-
-        s_always_warn_new_mon = lines.front() == "1";
-        remove_line(lines);
-
-        s_warn_on_throw_valuable = lines.front() == "1";
-        remove_line(lines);
-
-        s_warn_on_light_explosive = lines.front() == "1";
-        remove_line(lines);
-
-        s_warn_on_drink_malign_potion = lines.front() == "1";
-        remove_line(lines);
-
-        s_warn_on_ranged_wpn_melee = lines.front() == "1";
-        remove_line(lines);
-
-        s_is_medical_bag_auto_choice = lines.front() == "1";
-        remove_line(lines);
-
-        s_is_ranged_wpn_auto_reload = lines.front() == "1";
-        remove_line(lines);
-
-        s_delay_projectile_draw = to_int(lines.front());
-        remove_line(lines);
-
-        s_delay_explosion = to_int(lines.front());
-        remove_line(lines);
+        s_text_mode_filled_walls = ini["config"]["text_mode_filled_walls"] == "1";
+        s_display_health_bars = ini["config"]["display_health_bars"] == "1";
+        s_use_trap_color_when_obscured = ini["config"]["use_trap_color_when_obscured"] == "1";
+        s_is_intro_lvl_skipped = ini["config"]["is_intro_lvl_skipped"] == "1";
+        s_is_intro_popup_skipped = ini["config"]["is_intro_popup_skipped"] == "1";
+        s_is_any_key_confirm_more = ini["config"]["is_any_key_confirm_more"] == "1";
+        s_auto_select_menu = ini["config"]["auto_select_menu"] == "1";
+        s_hints_mode = (HintsMode)to_int(ini["config"]["hints_mode"]);
+        s_always_warn_new_mon = ini["config"]["always_warn_new_mon"] == "1";
+        s_warn_on_throw_valuable = ini["config"]["warn_on_throw_valuable"] == "1";
+        s_warn_on_light_explosive = ini["config"]["warn_on_light_explosive"] == "1";
+        s_warn_on_drink_malign_potion = ini["config"]["warn_on_drink_malign_potion"] == "1";
+        s_warn_on_ranged_wpn_melee = ini["config"]["warn_on_ranged_wpn_melee"] == "1";
+        s_is_medical_bag_auto_choice = ini["config"]["is_medical_bag_auto_choice"] == "1";
+        s_is_ranged_wpn_auto_reload = ini["config"]["is_ranged_wpn_auto_reload"] == "1";
+        s_delay_projectile_draw = to_int(ini["config"]["delay_projectile_draw"]);
+        s_delay_explosion = to_int(ini["config"]["delay_explosion"]);
 
         s_default_player_name = "";
 
-        const bool has_default_name = lines.front() == "1";
-
-        remove_line(lines);
-
-        if (has_default_name) {
-                s_default_player_name = lines.front();
-
-                remove_line(lines);
+        if (ini["config"]["default_player_name_set"] == "1") {
+                s_default_player_name = ini["config"]["default_player_name"];
         }
 
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
-                s_has_seen_hint_global[i] = lines.front() == "1";
-
-                remove_line(lines);
+                s_has_seen_hint_global[i] =
+                        ini["config"]["has_seen_hint_" + std::to_string(i)] == "1";
         }
-
-        ASSERT(lines.empty());
 
         TRACE_FUNC_END;
+
+        return true;
 }
 
-static void write_lines_to_file(const std::vector<std::string>& lines)
-{
-        std::ofstream file;
-        file.open(paths::config_file_path(), std::ios::trunc);
-
-        for (size_t i = 0; i < lines.size(); ++i) {
-                file << lines[i];
-
-                if (i != (lines.size() - 1)) {
-                        file << std::endl;
-                }
-        }
-
-        file.close();
-}
-
-static std::vector<std::string> lines_from_variables()
+static void write_config_file()
 {
         TRACE_FUNC_BEGIN;
 
-        std::vector<std::string> lines;
+        mINI::INIFile ini_file(paths::config_file_path() + ".ini");
+        mINI::INIStructure ini;
 
-        lines.emplace_back(std::to_string(s_master_volume_pct_option));
-        lines.emplace_back(std::to_string(s_master_volume_pct_adjusted));
-        lines.emplace_back(s_is_ambient_audio_enabled ? "1" : "0");
-        lines.emplace_back(s_is_ambient_audio_preloaded ? "1" : "0");
-        lines.push_back(std::to_string(s_audio_buffer_size));
-        lines.push_back(std::to_string((int)s_input_mode));
-        lines.push_back(std::to_string(s_window_px_w));
-        lines.push_back(std::to_string(s_window_px_h));
-        lines.emplace_back(s_always_center_view_on_player ? "1" : "0");
-        lines.emplace_back(s_is_tiles_mode ? "1" : "0");
-        lines.push_back(s_font_name);
-        lines.push_back(std::to_string((int)s_renderer_type));
-        lines.emplace_back(s_is_fullscreen ? "1" : "0");
-        lines.emplace_back(std::to_string(s_video_scale_factor));
-        lines.emplace_back(std::to_string(s_brightness_pct));
-        lines.emplace_back(s_text_mode_filled_walls ? "1" : "0");
-        lines.emplace_back(s_display_health_bars ? "1" : "0");
-        lines.emplace_back(s_use_trap_color_when_obscured ? "1" : "0");
-        lines.emplace_back(s_is_intro_lvl_skipped ? "1" : "0");
-        lines.emplace_back(s_is_intro_popup_skipped ? "1" : "0");
-        lines.emplace_back(s_is_any_key_confirm_more ? "1" : "0");
-        lines.emplace_back(s_auto_select_menu ? "1" : "0");
-        lines.emplace_back(std::to_string((int)s_hints_mode));
-        lines.emplace_back(s_always_warn_new_mon ? "1" : "0");
-        lines.emplace_back(s_warn_on_throw_valuable ? "1" : "0");
-        lines.emplace_back(s_warn_on_light_explosive ? "1" : "0");
-        lines.emplace_back(s_warn_on_drink_malign_potion ? "1" : "0");
-        lines.emplace_back(s_warn_on_ranged_wpn_melee ? "1" : "0");
-        lines.emplace_back(s_is_medical_bag_auto_choice ? "1" : "0");
-        lines.emplace_back(s_is_ranged_wpn_auto_reload ? "1" : "0");
-        lines.push_back(std::to_string(s_delay_projectile_draw));
-        lines.push_back(std::to_string(s_delay_explosion));
+        ini["config"]["master_volume_pct_option"] = std::to_string(s_master_volume_pct_option);
+        ini["config"]["master_volume_pct_adjusted"] = std::to_string(s_master_volume_pct_adjusted);
+        ini["config"]["is_ambient_audio_enabled"] = s_is_ambient_audio_enabled ? "1" : "0";
+        ini["config"]["is_ambient_audio_preloaded"] = s_is_ambient_audio_preloaded ? "1" : "0";
+        ini["config"]["audio_buffer_size"] = std::to_string(s_audio_buffer_size);
+        ini["config"]["input_mode"] = std::to_string((int)s_input_mode);
+        ini["config"]["window_px_w"] = std::to_string(s_window_px_w);
+        ini["config"]["window_px_h"] = std::to_string(s_window_px_h);
+        ini["config"]["is_fullscreen"] = s_is_fullscreen ? "1" : "0";
+        ini["config"]["video_scale_factor"] = std::to_string(s_video_scale_factor);
+        ini["config"]["brightness_pct"] = std::to_string(s_brightness_pct);
+        ini["config"]["renderer_type"] = std::to_string((int)s_renderer_type);
+        ini["config"]["always_center_view_on_player"] = s_always_center_view_on_player ? "1" : "0";
+        ini["config"]["is_tiles_mode"] = s_is_tiles_mode ? "1" : "0";
+        ini["config"]["font_name"] = s_font_name;
+        ini["config"]["text_mode_filled_walls"] = s_text_mode_filled_walls ? "1" : "0";
+        ini["config"]["display_health_bars"] = s_display_health_bars ? "1" : "0";
+        ini["config"]["use_trap_color_when_obscured"] = s_use_trap_color_when_obscured ? "1" : "0";
+        ini["config"]["is_intro_lvl_skipped"] = s_is_intro_lvl_skipped ? "1" : "0";
+        ini["config"]["is_intro_popup_skipped"] = s_is_intro_popup_skipped ? "1" : "0";
+        ini["config"]["is_any_key_confirm_more"] = s_is_any_key_confirm_more ? "1" : "0";
+        ini["config"]["auto_select_menu"] = s_auto_select_menu ? "1" : "0";
+        ini["config"]["hints_mode"] = std::to_string((int)s_hints_mode);
+        ini["config"]["always_warn_new_mon"] = s_always_warn_new_mon ? "1" : "0";
+        ini["config"]["warn_on_throw_valuable"] = s_warn_on_throw_valuable ? "1" : "0";
+        ini["config"]["warn_on_light_explosive"] = s_warn_on_light_explosive ? "1" : "0";
+        ini["config"]["warn_on_drink_malign_potion"] = s_warn_on_drink_malign_potion ? "1" : "0";
+        ini["config"]["warn_on_ranged_wpn_melee"] = s_warn_on_ranged_wpn_melee ? "1" : "0";
+        ini["config"]["is_medical_bag_auto_choice"] = s_is_medical_bag_auto_choice ? "1" : "0";
+        ini["config"]["is_ranged_wpn_auto_reload"] = s_is_ranged_wpn_auto_reload ? "1" : "0";
+        ini["config"]["delay_projectile_draw"] = std::to_string(s_delay_projectile_draw);
+        ini["config"]["delay_explosion"] = std::to_string(s_delay_explosion);
 
-        if (s_default_player_name.empty()) {
-                lines.emplace_back("0");
-        }
-        else {
-                // Default player name has been set
-                lines.emplace_back("1");
+        ini["config"]["default_player_name_set"] = s_default_player_name.empty() ? "0" : "1";
 
-                lines.push_back(s_default_player_name);
+        if (!s_default_player_name.empty()) {
+                ini["config"]["default_player_name"] = s_default_player_name;
         }
 
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
-                lines.emplace_back(s_has_seen_hint_global[i] ? "1" : "0");
+                ini["config"]["has_seen_hint_" + std::to_string(i)] =
+                        s_has_seen_hint_global[i] ? "1" : "0";
         }
 
-        TRACE_FUNC_END;
+        ini_file.generate(ini);
 
-        return lines;
+        TRACE_FUNC_END;
 }
 
 static std::vector<std::string> make_user_data_info_lines()
 {
-        std::string str =
-                "User data location: " +
-                paths::user_dir();
+        std::string str = "User data location: " + paths::user_dir();
 
         return text_format::split(str, panels::w(Panel::screen) - 1);
 }
@@ -678,20 +565,12 @@ void init()
 
         set_default_variables();
 
-        std::vector<std::string> lines;
-
         // Load config file, if it exists
-        read_file(lines);
+        const bool did_read_config_file = read_config_file();
 
-        if (lines.empty()) {
+        if (!did_read_config_file) {
                 // No previous config file exists, create one.
-                lines = lines_from_variables();
-
-                write_lines_to_file(lines);
-        }
-        else {
-                // A config file exists, set values from parsed config lines
-                set_variables_from_lines(lines);
+                write_config_file();
         }
 
         update_render_dims();
@@ -741,18 +620,14 @@ void set_window_px_w(const int w)
 {
         s_window_px_w = w;
 
-        const auto lines = lines_from_variables();
-
-        write_lines_to_file(lines);
+        write_config_file();
 }
 
 void set_window_px_h(const int h)
 {
         s_window_px_h = h;
 
-        const auto lines = lines_from_variables();
-
-        write_lines_to_file(lines);
+        write_config_file();
 }
 
 int window_px_w()
@@ -929,8 +804,7 @@ void set_hint_seen_global(const hints::Id id)
 
         s_has_seen_hint_global[(size_t)id] = true;
 
-        const auto lines = lines_from_variables();
-        write_lines_to_file(lines);
+        write_config_file();
 }
 
 bool always_warn_new_mon()
@@ -952,9 +826,7 @@ void set_default_player_name(const std::string& name)
 {
         s_default_player_name = name;
 
-        const auto lines = lines_from_variables();
-
-        write_lines_to_file(lines);
+        write_config_file();
 }
 
 std::string default_player_name()
@@ -966,9 +838,7 @@ void set_fullscreen(const bool value)
 {
         s_is_fullscreen = value;
 
-        const auto lines = lines_from_variables();
-
-        write_lines_to_file(lines);
+        write_config_file();
 }
 
 // -----------------------------------------------------------------------------
@@ -1192,6 +1062,7 @@ OptionSubmenuType InputModeOption::submenu_type() const
 void InputModeOption::change(const OptionChangeCommand command) const
 {
         auto input_mode_nr = (int)s_input_mode;
+
         const auto nr_input_modes = (int)InputMode::END;
 
         if ((command == OptionChangeCommand::enter) ||
@@ -2289,8 +2160,7 @@ void OptionsSubmenuState::update()
 
         const io::InputData input = io::read_input();
 
-        const MenuAction action =
-                m_browser.read(input, MenuInputMode::scrolling);
+        const MenuAction action = m_browser.read(input, MenuInputMode::scrolling);
 
         const config::Option* const option = s_current_options[m_browser.y()];
 
@@ -2323,9 +2193,7 @@ void OptionsSubmenuState::update()
         }
 
         if (did_set_option) {
-                const auto lines = lines_from_variables();
-
-                write_lines_to_file(lines);
+                write_config_file();
 
                 io::clear_input();
         }
