@@ -10164,6 +10164,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <prioritize_destroying_corpse>false</prioritize_destroying_corpse>
         </attributes>
 
+        <attacks>
+            <attack id="ITEMINTR_KICK">
+                <damage>2</damage>
+            </attack>
+        </attacks>
+
         <items>
             <item_set>ITEMSET_HIGH_PRIEST_GUARD_WAR_VET</item_set>
         </items>
