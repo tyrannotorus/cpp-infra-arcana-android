@@ -99,7 +99,7 @@ static void update_flash_with_actor(io::FlashData& flash)
         }
 }
 
-static void erase_finished_flahes()
+static void erase_finished_flashes()
 {
         for (auto it = std::begin(s_flashes); it != std::end(s_flashes);) {
                 if (it->alpha_pct <= 0) {
@@ -111,7 +111,7 @@ static void erase_finished_flahes()
         }
 }
 
-static void erase_flahes_at(const P& pos)
+static void erase_flashes_at(const P& pos)
 {
         for (auto it = std::begin(s_flashes); it != std::end(s_flashes);) {
                 if (it->pos == pos) {
@@ -123,7 +123,7 @@ static void erase_flahes_at(const P& pos)
         }
 }
 
-static void erase_flahes_with_actor(const actor::Actor* const actor)
+static void erase_flashes_with_actor(const actor::Actor* const actor)
 {
         for (auto it = std::begin(s_flashes); it != std::end(s_flashes);) {
                 if (it->actor_flashed_at == actor) {
@@ -206,7 +206,7 @@ int graphics_cycle_nr(const GraphicsCycle cycle_type)
 
 void flash_at(const P& pos, const Color& color, const int speed_pct)
 {
-        erase_flahes_at(pos);
+        erase_flashes_at(pos);
 
         FlashData flash;
 
@@ -221,7 +221,7 @@ void flash_at(const P& pos, const Color& color, const int speed_pct)
 
 void flash_at_actor(const actor::Actor& actor, const Color& color, const int speed_pct)
 {
-        erase_flahes_with_actor(&actor);
+        erase_flashes_with_actor(&actor);
 
         FlashData flash;
 
@@ -256,7 +256,7 @@ bool step_flash_animations()
                 update_flash_with_actor(flash);
         }
 
-        erase_finished_flahes();
+        erase_finished_flashes();
 
         return should_redraw;
 }

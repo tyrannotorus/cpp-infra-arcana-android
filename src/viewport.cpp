@@ -80,6 +80,9 @@ void show(const P& map_pos, const ForceCentering force_centering)
                 }
         }
 
+        // TODO: Instead of clearing all flash animations, it would be better to update their
+        // positions. This prevents showing an attack flash animation the player if they are knocked
+        // back (typically changes the viewport).
         if (s_p0 != p0_before) {
                 io::clear_all_flash_animations();
         }

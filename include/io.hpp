@@ -222,7 +222,7 @@ void flash_at_actor(const actor::Actor& actor, const Color& color, int speed_pct
 // Draw all currently active flash animations.
 void draw_flash_animations();
 
-// Clear all ongoing flash animations (e.g. when viewport changes).
+// Clear all ongoing flash animations.
 void clear_all_flash_animations();
 
 void sleep(uint32_t duration);
