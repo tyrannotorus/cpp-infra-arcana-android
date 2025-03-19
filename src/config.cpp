@@ -329,8 +329,8 @@ static void set_default_variables()
         s_warn_on_ranged_wpn_melee = true;
         s_is_medical_bag_auto_choice = false;
         s_is_ranged_wpn_auto_reload = false;
-        s_delay_projectile_draw = 50;
-        s_delay_explosion = 300;
+        s_delay_projectile_draw = 25;
+        s_delay_explosion = 250;
         s_default_player_name = "";
 
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
