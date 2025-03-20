@@ -1852,7 +1852,7 @@ void SpellAzaGaze::apply_properties_on_target(
         }
 
         {
-                auto* prop = prop::make(prop::Id::fainted);
+                prop::Prop* prop = prop::make(prop::Id::fainted);
 
                 const int duration = faint_duration_range(skill).roll();
 
@@ -1862,7 +1862,7 @@ void SpellAzaGaze::apply_properties_on_target(
         }
 
         if (skill >= SpellSkill::transcendent) {
-                auto* prop = prop::make(prop::Id::conflict);
+                prop::Prop* prop = prop::make(prop::Id::conflict);
 
                 const int duration = conflict_duration_range(skill).roll();
 
@@ -1894,19 +1894,6 @@ void SpellAzaGaze::run_effect_on_target(
                 return;
         }
 
-        if (actor::is_player(&target)) {
-                Snd snd(
-                        "I am assailed by a torrent of chaos!",
-                        audio::SfxId::aza_gaze,
-                        IgnoreMsgIfOriginSeen::yes,
-                        map::g_player->m_pos,
-                        nullptr,
-                        SndVol::high,
-                        AlertsMon::no);
-
-                snd.run();
-        }
-
         do_damage_on_target(target, skill, caster);
 
         if (!actor::is_player(&target)) {
@@ -1932,28 +1919,20 @@ void SpellAzaGaze::run_effect(
         const SpellSkill skill,
         const std::vector<actor::Actor*>& seen_targets) const
 {
-        if (actor::is_player(caster)) {
-                std::string msg;
+        Snd snd(
+                "An insane cacophony resounds through the air!",
+                audio::SfxId::aza_gaze,
+                IgnoreMsgIfOriginSeen::no,
+                caster->m_pos,
+                caster,
+                SndVol::high,
+                AlertsMon::no);
 
-                if (seen_targets.empty()) {
-                        msg = "An insane cacophony resounds through the air!";
-                }
-
-                Snd snd(
-                        msg,
-                        audio::SfxId::aza_gaze,
-                        IgnoreMsgIfOriginSeen::no,
-                        map::g_player->m_pos,
-                        nullptr,
-                        SndVol::high,
-                        AlertsMon::no);
-
-                snd.run();
-        }
+        snd.run();
 
         draw_blast_at_seen_actors(seen_targets, colors::light_red());
 
-        for (auto* const target : seen_targets) {
+        for (actor::Actor* const target : seen_targets) {
                 run_effect_on_target(caster, *target, skill);
         }
 }
