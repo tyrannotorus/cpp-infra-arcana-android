@@ -3535,6 +3535,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_ELEC</property>
             <property>PROP_R_DISEASE</property>
             <property>PROP_DARKVISION</property>
+            <property>PROP_RADIANT_SELF</property>
         </properties>
 
         <ai>
@@ -3935,6 +3936,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_DISEASE</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_VORTEX</property>
+            <property>PROP_RADIANT_SELF</property>
         </properties>
 
         <ai>
