@@ -120,6 +120,9 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.melee.hit_medium_sfx = audio::SfxId::hit_medium;
                 d.melee.hit_hard_sfx = audio::SfxId::hit_hard;
                 d.ranged.is_throwable_wpn = true;
+                d.ranged.throw_hit_chance_mod = -5;
+                d.ranged.effective_range = {0, 3};
+                d.ranged.max_range = d.ranged.effective_range.max + 3;
                 d.land_on_hard_snd_msg = "I hear a clanking sound.";
                 d.land_on_hard_sfx = audio::SfxId::metal_clank;
                 break;
@@ -886,9 +889,7 @@ void init()
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
         d.melee.hit_hard_sfx = audio::SfxId::hit_sharp;
         d.melee.miss_sfx = audio::SfxId::miss_light;
-        d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
+        d.ranged.dmg_type = DmgType::piercing;
         d.native_containers.push_back(terrain::Id::chest);
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::tomb);
@@ -942,9 +943,6 @@ void init()
         d.melee.dmg_type = DmgType::blunt;
         d.melee.is_noisy = false;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
-        d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::blunt;
         d.land_on_hard_snd_msg = "I hear a thudding sound.";
         d.land_on_hard_sfx = audio::SfxId::END;
@@ -967,9 +965,6 @@ void init()
         d.melee.dmg_type = DmgType::blunt;
         d.melee.is_noisy = true;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
-        d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::blunt;
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::cocoon);
@@ -994,9 +989,6 @@ void init()
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         d.melee.is_noisy = true;
-        d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::slashing;
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::cocoon);
@@ -1021,10 +1013,7 @@ void init()
         d.melee.dmg_type = DmgType::slashing;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         d.melee.is_noisy = true;
-        d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.effective_range = {0, 3};
         d.ranged.dmg_type = DmgType::slashing;
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::tomb);
         d.native_containers.push_back(terrain::Id::cocoon);
@@ -1058,9 +1047,6 @@ void init()
                 d.melee.prop_applied.prop.reset(prop);
                 d.melee.prop_applied.pct_chance_to_apply = 25;
         }
-        d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::piercing;
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::tomb);
@@ -1089,8 +1075,6 @@ void init()
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
         d.ranged.throw_hit_chance_mod = -10;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::piercing;
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::cocoon);
@@ -1114,9 +1098,6 @@ void init()
         d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
-        d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::piercing;
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::cocoon);
@@ -1139,8 +1120,6 @@ void init()
         d.melee.dmg_type = DmgType::blunt;
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
         d.ranged.throw_hit_chance_mod = -10;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::blunt;
         d.native_containers.push_back(terrain::Id::cabinet);
         g_data[(size_t)d.id] = d;
@@ -1937,8 +1916,6 @@ void init()
         d.melee.dmg_type = DmgType::blunt;
         d.melee.reach = 2;
         d.ranged.throw_hit_chance_mod = -10;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::blunt;
         d.is_unique = true;
         d.xp_on_found = 20;
@@ -2202,9 +2179,7 @@ void init()
         d.melee.hit_hard_sfx = audio::SfxId::hit_sharp;
         d.melee.miss_sfx = audio::SfxId::miss_light;
         d.melee.dmg_type = DmgType::piercing;
-        d.ranged.throw_hit_chance_mod = -5;
-        d.ranged.effective_range = {0, 3};
-        d.ranged.max_range = d.ranged.effective_range.max + 3;
+        d.ranged.dmg_type = DmgType::piercing;
         d.is_unique = true;
         d.xp_on_found = 20;
         d.value = Value::supreme_treasure;
