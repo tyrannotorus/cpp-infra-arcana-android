@@ -14,7 +14,15 @@ option(
         "Build and link SDL statically. Otherwise use system-installed SDL2 (via find_package) on Linux, or use the bundled prebuilt version on Windows."
         OFF)
 
-option(IA_DEBUG_SANITIZE "Use compiler sanitizers for debug or test builds" ON)
+option(
+        IA_DEBUG_SANITIZE
+        "Use compiler sanitizers for debug or test builds"
+        OFF)
+
+option(
+        IA_GPROF
+        "Build the game for gprof (add -pg)"
+        OFF)
 
 # ------------------------------------------------------------------------------
 # Source files
@@ -408,7 +416,7 @@ include(cmake/compile_flags.cmake)
 # ------------------------------------------------------------------------------
 # Optional sanitize link flags
 # ------------------------------------------------------------------------------
-if (IA_DEBUG_SANITIZE)
+if(IA_DEBUG_SANITIZE)
         target_link_libraries(ia-debug -lasan -lubsan)
         target_link_libraries(ia-test -lubsan)
 endif()
@@ -417,7 +425,7 @@ endif()
 # Third party
 # ------------------------------------------------------------------------------
 # SDL
-if (IA_BUILD_STATIC_SDL)
+if(IA_BUILD_STATIC_SDL)
         message(STATUS "Building SDL from source code and linking statically.")
         include(cmake/sdl_build_static.cmake)
 else()
@@ -438,11 +446,12 @@ include(cmake/mini.cmake)
 # ------------------------------------------------------------------------------
 # Link options for gprof
 # ------------------------------------------------------------------------------
-# Uncomment to generate gmon.out for gprof (must also be done for compile flags)
-# NOTE: "-no-pie" is needed due to "a bug in gcc", see:
-# https://stackoverflow.com/questions/42620074
-# https://stackoverflow.com/questions/39827412
-# target_link_libraries(ia-debug PUBLIC -pg -no-pie)
+if(IA_GPROF)
+        # NOTE: "-no-pie" is needed due to "a bug in gcc", see:
+        # https://stackoverflow.com/questions/42620074
+        # https://stackoverflow.com/questions/39827412
+        target_link_libraries(ia-debug PUBLIC -pg -no-pie)
+endif()
 
 # ------------------------------------------------------------------------------
 # On Windows releases, hide console window

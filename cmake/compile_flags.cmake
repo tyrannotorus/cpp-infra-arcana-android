@@ -12,9 +12,9 @@ if(
                 # -pedantic-errors
                 -Wall
                 -Wextra
-                # NOTE: While warnings should not be accepted, -Werror can cause
-                # problems when building the game with different compilers or
-                # compiler versions than it was developed on.
+                # NOTE: While warnings should not be accepted, -Werror can cause problems when
+                # building the game with different compilers or compiler versions than it was
+                # developed on.
                 # -Werror
                 -Wmissing-declarations
                 -Wunused
@@ -25,16 +25,19 @@ if(
         set(DEBUG_COMPILE_FLAGS
                 -Wnull-dereference
                 -g
-                # NOTE: For some reason, -O0 breaks the "ar" command when building
-                # with mingw (the command seems to freeze forever), but -Og works.
-                # -Og seems to be the preferable setting overall anyway.
+                # NOTE: For some reason, -O0 breaks the "ar" command when building with mingw
+                # (the command seems to freeze forever), but -Og works. -Og seems to be the
+                # preferable setting overall anyway.
                 -Og
-                # Uncomment to generate gmon.out for gprof (must also be done for linker
-                # flags, see below)
-                # -pg
                 -fno-eliminate-unused-debug-symbols
                 -fno-eliminate-unused-debug-types
                 )
+
+        if(IA_GPROF)
+                list(APPEND DEBUG_COMPILE_FLAGS
+                        -pg
+                        )
+        endif()
 
         set(TEST_COMPILE_FLAGS
                 -Wnull-dereference
