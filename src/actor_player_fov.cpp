@@ -28,63 +28,71 @@
 // -----------------------------------------------------------------------------
 static void fov_hack()
 {
-        Array2<bool> blocked_los(map::dims());
+        const P map_dims = map::dims();
 
-        map_parsers::BlocksLos()
-                .run(blocked_los, blocked_los.rect());
+        const R fov_lmt = fov::fov_rect(map::g_player->m_pos, map_dims);
 
-        Array2<bool> blocked(map::dims());
+        const R fov_lmt_expanded = {
+                {
+                        std::max(0, fov_lmt.p0.x - 1),
+                        std::max(0, fov_lmt.p0.y - 1),
+                },
+                {
+                        std::min(map_dims.x - 1, fov_lmt.p1.x + 1),
+                        std::min(map_dims.y - 1, fov_lmt.p1.y + 1),
+                },
+        };
 
-        map_parsers::BlocksWalking(ParseActors::no)
-                .run(blocked, blocked.rect());
+        Array2<bool> blocked_los(map_dims);
+
+        map_parsers::BlocksLos().run(blocked_los, fov_lmt_expanded);
+
+        Array2<bool> blocked(map_dims);
+
+        map_parsers::BlocksWalking(ParseActors::no).run(blocked, fov_lmt_expanded);
 
         const std::vector<terrain::Id> free_terrains = {
-                terrain::Id::chasm};
+                terrain::Id::chasm,
+        };
 
-        for (int x = 0; x < blocked.w(); ++x) {
-                for (int y = 0; y < blocked.h(); ++y) {
-                        const P p(x, y);
+        const std::vector<P> fov_lmt_positions = fov_lmt.positions();
 
-                        if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
-                                blocked.at(p) = false;
-                        }
+        for (const P& p : fov_lmt_positions) {
+                if (map_parsers::IsAnyOfTerrains(free_terrains).run(p)) {
+                        blocked.at(p) = false;
                 }
         }
 
         const bool has_darkvision = map::g_player->m_properties.has(prop::Id::darkvision);
 
-        for (int x = 0; x < map::w(); ++x) {
-                for (int y = 0; y < map::h(); ++y) {
-                        if (!blocked_los.at(x, y) || !blocked.at(x, y)) {
+        for (const P& p : fov_lmt_positions) {
+                if (!blocked_los.at(p) || !blocked.at(p)) {
+                        continue;
+                }
+
+                for (const P& d : dir_utils::g_dir_list) {
+                        const P p_adj(p + d);
+
+                        if (!map::is_pos_inside_map(p_adj) ||
+                            !map::g_seen.at(p_adj)) {
                                 continue;
                         }
 
-                        const P p(x, y);
+                        const bool allow_see =
+                                (!map::g_dark.at(p_adj) ||
+                                 map::g_light.at(p_adj) ||
+                                 has_darkvision) &&
+                                !blocked.at(p_adj);
 
-                        for (const auto& d : dir_utils::g_dir_list) {
-                                const auto p_adj = p + d;
-
-                                if (!map::is_pos_inside_map(p_adj) ||
-                                    !map::g_seen.at(p_adj)) {
-                                        continue;
-                                }
-
-                                const bool allow_explore =
-                                        (!map::g_dark.at(p_adj) ||
-                                         map::g_light.at(p_adj) ||
-                                         has_darkvision) &&
-                                        !blocked.at(p_adj);
-
-                                if (!allow_explore) {
-                                        continue;
-                                }
-
-                                map::g_seen.at(x, y) = true;
-
-                                map::g_los.at(x, y).is_blocked_hard = false;
-
-                                break;
+                        if (!allow_see) {
+                                continue;
                         }
+
+                        map::g_seen.at(p) = true;
+
+                        map::g_los.at(p).is_blocked_hard = false;
+
+                        break;
                 }
         }
 }
@@ -144,12 +152,9 @@ void update_player_fov()
         if (map::g_player->m_properties.allow_see()) {
                 Array2<bool> hard_blocked(map::dims());
 
-                const auto fov_lmt = fov::fov_rect(map::g_player->m_pos, map::dims());
+                const R fov_lmt = fov::fov_rect(map::g_player->m_pos, map::dims());
 
-                map_parsers::BlocksLos()
-                        .run(hard_blocked,
-                             fov_lmt,
-                             MapParseMode::overwrite);
+                map_parsers::BlocksLos().run(hard_blocked, fov_lmt);
 
                 FovMap fov_map;
                 fov_map.hard_blocked = &hard_blocked;
@@ -158,36 +163,33 @@ void update_player_fov()
 
                 const Array2<LosResult> fov_result = fov::run(map::g_player->m_pos, fov_map);
 
-                for (int x = fov_lmt.p0.x; x <= fov_lmt.p1.x; ++x) {
-                        for (int y = fov_lmt.p0.y; y <= fov_lmt.p1.y; ++y) {
-                                const LosResult& los_result =
-                                        fov_result.at(x, y);
+                const std::vector<P> fov_lmt_positions = fov_lmt.positions();
 
-                                LosResult& los_to_update = map::g_los.at(x, y);
+                for (const P& p : fov_lmt_positions) {
+                        const LosResult& los_result = fov_result.at(p);
 
-                                map::g_seen.at(x, y) =
-                                        !los_result.is_blocked_hard &&
-                                        (!los_result.is_blocked_by_dark ||
-                                         has_darkvision);
+                        LosResult& los_to_update = map::g_los.at(p);
 
-                                los_to_update = los_result;
+                        map::g_seen.at(p) =
+                                !los_result.is_blocked_hard &&
+                                (!los_result.is_blocked_by_dark ||
+                                 has_darkvision);
+
+                        los_to_update = los_result;
 
 #ifndef NDEBUG
-                                // Sanity check - if the cell is ONLY blocked by
-                                // darkness (i.e. not by a wall or other
-                                // blocking terrain), it should NOT be lit
-                                if (!los_result.is_blocked_hard &&
-                                    los_result.is_blocked_by_dark) {
-                                        ASSERT(!map::g_light.at(x, y));
-                                }
-#endif  // NDEBUG
+                        // Sanity check - if the cell is ONLY blocked by darkness (i.e. not by a
+                        // wall or other blocking terrain), it should NOT be lit.
+                        if (!los_result.is_blocked_hard && los_result.is_blocked_by_dark) {
+                                ASSERT(!map::g_light.at(p));
                         }
+#endif  // NDEBUG
                 }
 
                 fov_hack();
         }
 
-        // The player's current cell is always seen.
+        // The player's current position is always seen.
         map::g_seen.at(map::g_player->m_pos) = true;
 
         // Cheat vision
