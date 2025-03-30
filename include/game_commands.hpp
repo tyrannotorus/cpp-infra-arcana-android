@@ -78,6 +78,7 @@ enum class GameCmd
         debug_shift_f4,
         debug_shift_f5,
         debug_shift_f6,
+        debug_shift_f7,
 #endif  // NDEBUG
 };
 

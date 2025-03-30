@@ -24,6 +24,7 @@
 #include "actor_player_state.hpp"
 #include "actor_see.hpp"
 #include "array2.hpp"
+#include "attack.hpp"
 #include "audio_data.hpp"
 #include "auto_interact.hpp"
 #include "bash.hpp"
@@ -80,6 +81,7 @@
 #include "terrain_door.hpp"
 #include "terrain_factory.hpp"
 #include "terrain_trap.hpp"
+#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -621,7 +623,12 @@ static GameCmd to_cmd_default(const io::InputData& input)
                 }
 
         case SDLK_F7:
-                return GameCmd::debug_f7;
+                if (input.is_shift_held) {
+                        return GameCmd::debug_shift_f7;
+                }
+                else {
+                        return GameCmd::debug_f7;
+                }
 
         case SDLK_F8:
                 return GameCmd::debug_f8;
@@ -1206,10 +1213,6 @@ void handle(const GameCmd cmd)
                 }
         } break;
 
-        case GameCmd::debug_shift_f6: {
-                mapgen::put_inscribed_terrain();
-        } break;
-
         case GameCmd::debug_f6: {
                 for (size_t i = 0; i < (size_t)item::Id::END; ++i) {
                         const item::ItemData& item_data = item::g_data[i];
@@ -1220,10 +1223,128 @@ void handle(const GameCmd cmd)
                 }
         } break;
 
+        case GameCmd::debug_shift_f6: {
+                mapgen::put_inscribed_terrain();
+        } break;
+
         case GameCmd::debug_f7: {
                 map::g_player->m_properties.apply(prop::make(prop::Id::r_conf));
 
                 teleport(*map::g_player);
+        } break;
+
+        case GameCmd::debug_shift_f7: {
+                // Collect melee weapon stats.
+
+                const int nr_iterations = 800;
+
+                int tot_dmg_per_item[(size_t)item::Id::END] {};
+
+                // Perform attacks.
+
+                for (size_t idx = 0; idx < (size_t)item::Id::END; ++idx) {
+                        const item::ItemData& d = item::g_data[idx];
+
+                        if (!d.melee.is_melee_wpn || d.is_intr || !d.allow_spawn) {
+                                continue;
+                        }
+
+                        map::g_player->m_inv.remove_item_in_slot(SlotId::wpn, true);
+
+                        item::Item* wpn = item::make((item::Id)idx);
+
+                        wpn->set_melee_plus(2);
+
+                        map::g_player->m_inv.put_in_slot(SlotId::wpn, wpn, Verbose::no);
+
+                        for (int iteration = 0; iteration < nr_iterations; ++iteration) {
+                                const P& player_pos = map::g_player->m_pos;
+                                const P mon_pos = player_pos.with_x_offset(1);
+
+                                actor::Actor* const actor =
+                                        actor::make(
+                                                "MON_GREEN_SPIDER",
+                                                mon_pos);
+
+                                actor->become_aware_player(actor::AwareSource::other);
+
+                                actor::restore_hp(
+                                        *actor,
+                                        9999,
+                                        actor::AllowRestoreAboveMax::yes,
+                                        Verbose::no);
+
+                                game_time::g_allow_tick = true;
+
+                                const int hp_before = actor->m_hp;
+
+                                attack::melee(
+                                        map::g_player,
+                                        player_pos,
+                                        mon_pos,
+                                        *static_cast<item::Wpn*>(wpn));
+
+                                tot_dmg_per_item[idx] += hp_before - actor->m_hp;
+
+                                actor->m_state = ActorState::destroyed;
+
+                                msg_log::clear();
+
+                                io::sleep(1U);
+                        }
+
+                        game_time::erase_all_destroyed_actors();
+
+                        map::g_player->m_inv.remove_item_in_slot(SlotId::wpn, true);
+                }
+
+                // Collect and present data.
+
+                std::vector<std::tuple<std::string, double, double>> result;
+
+                for (size_t idx = 0; idx < (size_t)item::Id::END; ++idx) {
+                        const int dmg = tot_dmg_per_item[idx];
+
+                        if (dmg > 0) {
+                                const item::ItemData& d = item::g_data[idx];
+
+                                const std::string name =
+                                        text_format::pad_after(
+                                                d.base_name.names[0],
+                                                30);
+
+                                const double avg_dmg = (double)dmg / (double)nr_iterations;
+
+                                const double avg_dmg_per_weight_unit = avg_dmg / (double)d.weight;
+
+                                result.push_back({name, avg_dmg, avg_dmg_per_weight_unit});
+                        }
+                }
+
+                std::sort(
+                        std::begin(result),
+                        std::end(result),
+                        [](const auto& v1, const auto& v2) {
+                                // Sort by average damage.
+                                return std::get<1>(v1) > std::get<1>(v2);
+                        });
+
+                std::string str = "\nAverage damage done per item id (per weight unit):";
+
+                for (const auto& r : result) {
+                        const auto [name, avg_dmg, avg_dmg_per_weight] = r;
+
+                        str +=
+                                "\n" +
+                                name +
+                                ": " +
+                                std::to_string(avg_dmg) +
+                                " (" +
+                                std::to_string(avg_dmg_per_weight) +
+                                ")";
+                }
+
+                TRACE << str << std::endl;
         } break;
 
         case GameCmd::debug_f8: {

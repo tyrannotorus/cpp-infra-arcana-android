@@ -177,40 +177,30 @@ static void run_std_turn_events()
 
         ++s_turn_nr;
 
-        // NOTE: Iteration must be done by index, since new monsters may be
-        // spawned inside the loop when the standard turn hook is called (e.g.
-        // from the 'breeding' property)
-        for (size_t i = 0; i < game_time::g_actors.size(); /* No increment */) {
-                auto* const actor = game_time::g_actors[i];
+        game_time::erase_all_destroyed_actors();
 
-                // Delete destroyed actors
-                if (actor->m_state == ActorState::destroyed) {
-                        erase_destroyed_actor(actor, i);
-                }
-                else {
-                        // Actor not destroyed
-                        if (!actor::is_player(actor)) {
-                                // Count down player awareness of the monster
-                                if (actor::is_player_aware_of_me(*actor) &&
-                                    !actor::can_player_see_actor(*actor)) {
-                                        --actor->m_mon_aware_state
-                                                  .player_aware_of_me_counter;
-                                }
+        // NOTE: Iteration must be done by index, since new monsters may be spawned inside the loop
+        // when the property standard turn hook is called (e.g.  from the 'breeding' property).
+        for (size_t i = 0; i < game_time::g_actors.size(); ++i) {
+                actor::Actor* const actor = game_time::g_actors[i];
+
+                if (!actor::is_player(actor)) {
+                        // Count down player awareness of the monster
+                        if (actor::is_player_aware_of_me(*actor) &&
+                            !actor::can_player_see_actor(*actor)) {
+                                --actor->m_mon_aware_state.player_aware_of_me_counter;
                         }
-
-                        actor::std_turn(*actor);
-
-                        // NOTE: This may spawn new monsters, see NOTE above.
-                        actor->m_properties.on_std_turn();
-
-                        ++i;
                 }
+
+                actor::std_turn(*actor);
+
+                // NOTE: This may spawn new monsters, see NOTE above.
+                actor->m_properties.on_std_turn();
 
                 if (!map::g_player || !actor::is_alive(*map::g_player)) {
                         return;
                 }
-
-        }  // Actor loop
+        }
 
         // Allow already burning terrains to damage stuff, spread fire, etc.
         for (auto* const terrain : map::g_terrain) {
@@ -352,6 +342,20 @@ void load()
 int turn_nr()
 {
         return s_turn_nr;
+}
+
+void erase_all_destroyed_actors()
+{
+        for (size_t i = 0; i < g_actors.size(); /* No increment */) {
+                actor::Actor* const actor = game_time::g_actors[i];
+
+                if (actor->m_state == ActorState::destroyed) {
+                        erase_destroyed_actor(actor, i);
+                }
+                else {
+                        ++i;
+                }
+        }
 }
 
 std::vector<terrain::Terrain*> mobs_at(const P& p)

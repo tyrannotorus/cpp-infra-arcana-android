@@ -49,6 +49,8 @@ int turn_nr();
 
 actor::Actor* current_actor();
 
+void erase_all_destroyed_actors();
+
 std::vector<terrain::Terrain*> mobs_at(const P& p);
 
 void add_mob(terrain::Terrain* terrain);
