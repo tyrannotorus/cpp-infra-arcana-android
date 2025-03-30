@@ -611,8 +611,6 @@ void add(
                                 copy_to_history);
         }
 
-        states::draw();
-
         if (add_more_prompt_on_msg == MorePromptOnMsg::yes) {
                 more_prompt();
         }
