@@ -1,3 +1,13 @@
 #!/usr/bin/env sh
 
-./run-debug.sh --bot
+set -xue
+
+root_dir=${PWD}
+
+./build-debug.sh $*
+
+cd build
+
+./ia-debug --bot
+
+cd ${root_dir}

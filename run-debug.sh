@@ -4,7 +4,7 @@ set -xue
 
 root_dir=${PWD}
 
-./build-debug.sh
+./build-debug.sh $*
 
 cd build
 
