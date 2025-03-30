@@ -253,10 +253,13 @@ enum class Value
 enum Weight
 {
         none = 0,
-        extra_light = 1,  // E.g. ammo
-        light = 10,       // E.g. dynamite, daggers
-        medium = 50,      // E.g. most firearms
-        heavy = 100,      // E.g. heavy armor, heavy weapons
+        extra_light = 1,        // Bullets, shotgun shells, throwing knives, rocks, ...
+        light = 10,             // Magazines/drums, dynamite, daggers, potions, ...
+        moderately_light = 30,  // Pistols
+        medium = 50,            // Some melee weapons and firearms
+        moderately_heavy = 62,  // Some melee weapons and firearms
+        heavy = 75,             // Sledgehammers
+        extra_heavy = 100,      // Iron Suit
 };
 
 struct ItemName

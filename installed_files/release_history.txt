@@ -29,6 +29,7 @@
 - Merged "Potion of Fire Resistance" and "Insulation" into "Potion of Resistance", that also gives poison resistance and prevent paralysis. The "Resistance" spell has been removed.
 - Added more potions.
 - The Asbestos Suite now protects against some more attacks where it makes sense (e.g. mold spores).
+- Various weapon rebalancing, especially to make medium/heavy weapons more relevant compared to daggers.
 
 # Spells
 - Increased duration of the See Invisible spell.

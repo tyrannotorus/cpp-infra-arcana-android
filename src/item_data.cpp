@@ -114,13 +114,14 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
                 d.character = ')';
                 d.color = colors::white();
                 d.main_attack_mode = AttackMode::melee;
+                d.melee.hit_chance_mod = 0;
                 d.melee.is_melee_wpn = true;
                 d.melee.miss_sfx = audio::SfxId::miss_medium;
                 d.melee.hit_small_sfx = audio::SfxId::hit_small;
                 d.melee.hit_medium_sfx = audio::SfxId::hit_medium;
                 d.melee.hit_hard_sfx = audio::SfxId::hit_hard;
                 d.ranged.is_throwable_wpn = true;
-                d.ranged.throw_hit_chance_mod = -5;
+                d.ranged.throw_hit_chance_mod = -25;
                 d.ranged.effective_range = {0, 3};
                 d.ranged.max_range = d.ranged.effective_range.max + 3;
                 d.land_on_hard_snd_msg = "I hear a clanking sound.";
@@ -313,7 +314,6 @@ static void reset_data(item::ItemData& d, ItemType const item_type)
         case ItemType::armor:
                 reset_data(d, ItemType::general);
                 d.type = ItemType::armor;
-                d.weight = item::Weight::heavy;
                 d.character = '[';
                 d.tile = gfx::TileId::armor;
                 d.is_stackable = false;
@@ -463,7 +463,7 @@ void init()
                         "passive hit point regeneration is disabled for " +
                         s_morphic_blaster_hp_disable_range_str +
                         " turns, unable to act for the next turn)."};
-        d.weight = (Weight::medium + Weight::heavy) / 2;
+        d.weight = Weight::moderately_heavy;
         d.tile = gfx::TileId::morphic_blaster;
         d.is_unique = true;
         d.allow_spawn = false;
@@ -539,7 +539,7 @@ void init()
                 "a S&W Revolver"};
         d.base_descr = {
                 "A six-shot double-action revolver."};
-        d.weight = (Weight::light + Weight::medium) / 2;
+        d.weight = Weight::moderately_light;
         d.tile = gfx::TileId::revolver;
         d.ranged.max_ammo = 6;
         d.ranged.dmg = WpnDmg(5, 10);
@@ -581,7 +581,7 @@ void init()
         d.base_descr = {
                 "A semi-automatic, magazine-fed pistol chambered for the .45 "
                 "ACP cartridge."};
-        d.weight = (Weight::light + Weight::medium) / 2;
+        d.weight = Weight::moderately_light;
         d.tile = gfx::TileId::pistol;
         d.ranged.max_ammo = 7;
         d.ranged.dmg = WpnDmg(5, 12);
@@ -916,7 +916,7 @@ void init()
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
         d.melee.hit_hard_sfx = audio::SfxId::hit_sharp;
         d.melee.miss_sfx = audio::SfxId::miss_light;
-        d.ranged.throw_hit_chance_mod = 0;
+        d.ranged.throw_hit_chance_mod = -10;
         d.ranged.effective_range = {0, 4};
         d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::slashing;
@@ -937,12 +937,15 @@ void init()
         d.tile = gfx::TileId::club;
         d.color = colors::brown();
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(2, 7);
-        d.melee.hit_chance_mod = 10;
+        d.melee.dmg = WpnDmg(3, 6);
+        d.melee.hit_chance_mod = 15;
         d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::blunt;
         d.melee.is_noisy = false;
         d.melee.miss_sfx = audio::SfxId::miss_medium;
+        d.ranged.throw_hit_chance_mod = -10;
+        d.ranged.effective_range = {0, 4};
+        d.ranged.max_range = d.ranged.effective_range.max + 3;
         d.ranged.dmg_type = DmgType::blunt;
         d.land_on_hard_snd_msg = "I hear a thudding sound.";
         d.land_on_hard_sfx = audio::SfxId::END;
@@ -959,8 +962,8 @@ void init()
         d.weight = Weight::medium;
         d.tile = gfx::TileId::hammer;
         d.melee.attack_msgs = {"smash", "smashes"};
-        d.melee.dmg = WpnDmg(3, 7);
-        d.melee.hit_chance_mod = 5;
+        d.melee.dmg = WpnDmg(4, 7);
+        d.melee.hit_chance_mod = 10;
         d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::blunt;
         d.melee.is_noisy = true;
@@ -982,7 +985,7 @@ void init()
         d.tile = gfx::TileId::machete;
         d.melee.attack_msgs = {"chop", "chops"};
         d.melee.dmg = WpnDmg(3, 9);
-        d.melee.hit_chance_mod = 0;
+        d.melee.hit_chance_mod = 5;
         d.melee.can_attack_corpse = true;
         d.melee.dmg_type = DmgType::slashing;
         d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
@@ -1007,7 +1010,7 @@ void init()
         d.tile = gfx::TileId::axe;
         d.melee.attack_msgs = {"strike", "strikes"};
         d.melee.dmg = WpnDmg(3, 12);
-        d.melee.hit_chance_mod = -5;
+        d.melee.hit_chance_mod = 0;
         d.melee.can_attack_corpse = true;
         d.melee.can_attack_door_wood = true;
         d.melee.dmg_type = DmgType::slashing;
@@ -1030,7 +1033,7 @@ void init()
                 "victim, rendering them unable to act for a brief time.",
 
                 "Melee attacks with spiked maces are noisy."};
-        d.weight = (Weight::medium + Weight::heavy) / 2;
+        d.weight = Weight::moderately_heavy;
         d.tile = gfx::TileId::spiked_mace;
         d.melee.attack_msgs = {"strike", "strikes"};
         d.melee.dmg = WpnDmg(1, 14);
@@ -1061,7 +1064,7 @@ void init()
 
                 "Pitchforks are useful in keeping attackers at bay - "
                 "the victim is pushed back when stabbed."};
-        d.weight = (Weight::medium + Weight::heavy) / 2;
+        d.weight = Weight::moderately_heavy;
         d.tile = gfx::TileId::pitchfork;
         d.melee.attack_msgs = {"strike", "strikes"};
         d.melee.dmg = WpnDmg(1, 7);
@@ -1074,7 +1077,6 @@ void init()
         d.melee.hit_small_sfx = audio::SfxId::hit_sharp;
         d.melee.hit_medium_sfx = audio::SfxId::hit_sharp;
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
-        d.ranged.throw_hit_chance_mod = -10;
         d.ranged.dmg_type = DmgType::piercing;
         d.native_containers.push_back(terrain::Id::cabinet);
         d.native_containers.push_back(terrain::Id::cocoon);
@@ -1085,11 +1087,11 @@ void init()
         d.base_name = {"Spear", "Spears", "a Spear"};
         d.base_descr = {
                 "A pole weapon consisting of a wooden shaft and a steel head."};
-        d.weight = (Weight::medium + Weight::heavy) / 2;
+        d.weight = Weight::moderately_heavy;
         d.tile = gfx::TileId::spear;
         d.color = colors::brown();
         d.melee.attack_msgs = {"strike", "strikes"};
-        d.melee.dmg = WpnDmg(1, 8);
+        d.melee.dmg = WpnDmg(1, 9);
         d.melee.hit_chance_mod = 0;
         d.melee.can_attack_corpse = true;
         d.melee.reach = 2;
@@ -1113,13 +1115,12 @@ void init()
         d.tile = gfx::TileId::sledgehammer;
         d.melee.attack_msgs = {"smash", "smashes"};
         d.melee.dmg = WpnDmg(4, 15);
-        d.melee.hit_chance_mod = -15;
+        d.melee.hit_chance_mod = -10;
         d.melee.can_attack_corpse = true;
         d.melee.can_attack_door_wood = true;
         d.melee.can_attack_door_gate = true;
         d.melee.dmg_type = DmgType::blunt;
         d.melee.miss_sfx = audio::SfxId::miss_heavy;
-        d.ranged.throw_hit_chance_mod = -10;
         d.ranged.dmg_type = DmgType::blunt;
         d.native_containers.push_back(terrain::Id::cabinet);
         g_data[(size_t)d.id] = d;
@@ -1453,7 +1454,7 @@ void init()
                 "a lot more difficult (-20% stealth, -20% dodging)."};
         d.ability_mods_while_equipped[(size_t)AbilityId::stealth] = -20;
         d.ability_mods_while_equipped[(size_t)AbilityId::dodging] = -20;
-        d.weight = Weight::heavy;
+        d.weight = Weight::extra_heavy;
         d.color = colors::white();
         d.spawn_std_range.min = 2;
         d.armor.armor_points = 5;
@@ -1915,7 +1916,6 @@ void init()
         d.melee.miss_sfx = audio::SfxId::miss_medium;
         d.melee.dmg_type = DmgType::blunt;
         d.melee.reach = 2;
-        d.ranged.throw_hit_chance_mod = -10;
         d.ranged.dmg_type = DmgType::blunt;
         d.is_unique = true;
         d.xp_on_found = 20;

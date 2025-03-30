@@ -628,7 +628,11 @@ static void make_item_set_priest_dagger(actor::Actor& actor)
 {
         item::Item* item = item::make(item::Id::dagger);
 
-        const std::vector<int> weights = {6, 3, 1};
+        const std::vector<int> weights = {
+                6,  // +1
+                3,  // +2
+                1,  // +3
+        };
 
         item->set_melee_plus(rnd::weighted_choice(weights) + 1);
 
