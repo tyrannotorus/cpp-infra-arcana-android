@@ -318,18 +318,19 @@ static void handle_textinput_event()
 
 static void handle_mousebutton_event()
 {
-        const auto clicks = s_sdl_event.button.clicks;
-        const auto button = s_sdl_event.button.button;
+        const uint8_t clicks = s_sdl_event.button.clicks;
+        const uint8_t button = s_sdl_event.button.button;
 
-        if ((clicks == 2) &&
-            (button == 1)) {
+        if ((clicks == 2) && (button == 1)) {
                 TRACE << "Left mouse button double-click" << std::endl;
 
-                config::set_fullscreen(!config::is_fullscreen());
+                if (config::is_double_click_toggle_fullscreen()) {
+                        config::set_fullscreen(!config::is_fullscreen());
 
-                io::on_user_toggle_fullscreen();
+                        io::on_user_toggle_fullscreen();
 
-                io::clear_input();
+                        io::clear_input();
+                }
         }
 }
 

@@ -90,7 +90,7 @@
 - In the "apply" menu, "a" is always reserved for the Electric Lantern and 'b' for the Medical Bag (and 's' for the Holy Symbol if Exorcist). On the first screen of the "apply" menu, these items will always appear on top and their keys will never be used for any other item.
 - Added "b" as a shortcut command for using the Medical Bag directly from the normal game mode.
 - In most of the menus and screens, the mousewheel can be used for scrolling up and down.
-- Double clicking anywhere toggles fullscreen.
+- Double clicking anywhere toggles fullscreen. Also added an option to enable/disable this feature.
 - A bunch of screens now also support pgup/pgdown/home/end for scrolling.
 
 # Other user interface changes

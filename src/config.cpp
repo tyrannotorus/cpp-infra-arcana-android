@@ -55,6 +55,7 @@ static std::vector<std::string> s_font_image_names;
 static const int s_video_scale_factor_max = 4;
 
 static InputMode s_input_mode = InputMode::standard;
+static bool s_is_double_click_toggle_fullscreen = true;
 static std::string s_font_name;
 static bool s_always_center_view_on_player = false;
 static bool s_is_tiles_mode = false;
@@ -292,6 +293,8 @@ static void set_default_variables()
 
         s_input_mode = InputMode::standard;
 
+        s_is_double_click_toggle_fullscreen = true;
+
         // Use the smallest font
         s_font_name = s_font_image_names[0];
 
@@ -351,26 +354,29 @@ static bool read_config_file()
                 return false;
         }
 
-        s_master_volume_pct_option = to_int(ini["config"]["master_volume_pct_option"]);
-        s_master_volume_pct_adjusted = to_int(ini["config"]["master_volume_pct_adjusted"]);
-        s_is_ambient_audio_enabled = ini["config"]["is_ambient_audio_enabled"] == "1";
-        s_is_ambient_audio_preloaded = ini["config"]["is_ambient_audio_preloaded"] == "1";
-        s_audio_buffer_size = to_int(ini["config"]["audio_buffer_size"]);
-        s_input_mode = (InputMode)to_int(ini["config"]["input_mode"]);
-        s_window_px_w = to_int(ini["config"]["window_px_w"]);
-        s_window_px_h = to_int(ini["config"]["window_px_h"]);
-        s_is_fullscreen = ini["config"]["is_fullscreen"] == "1";
-        s_video_scale_factor = to_int(ini["config"]["video_scale_factor"]);
+        auto config = ini["config"];
 
-        std::string video_scale_str = ini["config"]["video_scale_factor"];
+        s_master_volume_pct_option = to_int(config["master_volume_pct_option"]);
+        s_master_volume_pct_adjusted = to_int(config["master_volume_pct_adjusted"]);
+        s_is_ambient_audio_enabled = config["is_ambient_audio_enabled"] == "1";
+        s_is_ambient_audio_preloaded = config["is_ambient_audio_preloaded"] == "1";
+        s_audio_buffer_size = to_int(config["audio_buffer_size"]);
+        s_input_mode = (InputMode)to_int(config["input_mode"]);
+        s_is_double_click_toggle_fullscreen = config["is_double_click_toggle_fullscreen"] == "1";
+        s_window_px_w = to_int(config["window_px_w"]);
+        s_window_px_h = to_int(config["window_px_h"]);
+        s_is_fullscreen = config["is_fullscreen"] == "1";
+        s_video_scale_factor = to_int(config["video_scale_factor"]);
+
+        std::string video_scale_str = config["video_scale_factor"];
         TRACE << "Read video_scale_factor: '" << video_scale_str << "'" << std::endl;
 
-        s_brightness_pct = to_int(ini["config"]["brightness_pct"]);
-        s_renderer_type = (RendererType)to_int(ini["config"]["renderer_type"]);
+        s_brightness_pct = to_int(config["brightness_pct"]);
+        s_renderer_type = (RendererType)to_int(config["renderer_type"]);
 
-        s_always_center_view_on_player = ini["config"]["always_center_view_on_player"] == "1";
-        s_is_tiles_mode = ini["config"]["is_tiles_mode"] == "1";
-        s_font_name = ini["config"]["font_name"];
+        s_always_center_view_on_player = config["always_center_view_on_player"] == "1";
+        s_is_tiles_mode = config["is_tiles_mode"] == "1";
+        s_font_name = config["font_name"];
 
         if (
                 std::find(
@@ -387,33 +393,33 @@ static bool read_config_file()
 
         update_render_dims();
 
-        s_text_mode_filled_walls = ini["config"]["text_mode_filled_walls"] == "1";
-        s_display_health_bars = ini["config"]["display_health_bars"] == "1";
-        s_use_trap_color_when_obscured = ini["config"]["use_trap_color_when_obscured"] == "1";
-        s_is_intro_lvl_skipped = ini["config"]["is_intro_lvl_skipped"] == "1";
-        s_is_intro_popup_skipped = ini["config"]["is_intro_popup_skipped"] == "1";
-        s_is_any_key_confirm_more = ini["config"]["is_any_key_confirm_more"] == "1";
-        s_auto_select_menu = ini["config"]["auto_select_menu"] == "1";
-        s_hints_mode = (HintsMode)to_int(ini["config"]["hints_mode"]);
-        s_always_warn_new_mon = ini["config"]["always_warn_new_mon"] == "1";
-        s_warn_on_throw_valuable = ini["config"]["warn_on_throw_valuable"] == "1";
-        s_warn_on_light_explosive = ini["config"]["warn_on_light_explosive"] == "1";
-        s_warn_on_drink_malign_potion = ini["config"]["warn_on_drink_malign_potion"] == "1";
-        s_warn_on_ranged_wpn_melee = ini["config"]["warn_on_ranged_wpn_melee"] == "1";
-        s_is_medical_bag_auto_choice = ini["config"]["is_medical_bag_auto_choice"] == "1";
-        s_is_ranged_wpn_auto_reload = ini["config"]["is_ranged_wpn_auto_reload"] == "1";
-        s_delay_projectile_draw = to_int(ini["config"]["delay_projectile_draw"]);
-        s_delay_explosion = to_int(ini["config"]["delay_explosion"]);
+        s_text_mode_filled_walls = config["text_mode_filled_walls"] == "1";
+        s_display_health_bars = config["display_health_bars"] == "1";
+        s_use_trap_color_when_obscured = config["use_trap_color_when_obscured"] == "1";
+        s_is_intro_lvl_skipped = config["is_intro_lvl_skipped"] == "1";
+        s_is_intro_popup_skipped = config["is_intro_popup_skipped"] == "1";
+        s_is_any_key_confirm_more = config["is_any_key_confirm_more"] == "1";
+        s_auto_select_menu = config["auto_select_menu"] == "1";
+        s_hints_mode = (HintsMode)to_int(config["hints_mode"]);
+        s_always_warn_new_mon = config["always_warn_new_mon"] == "1";
+        s_warn_on_throw_valuable = config["warn_on_throw_valuable"] == "1";
+        s_warn_on_light_explosive = config["warn_on_light_explosive"] == "1";
+        s_warn_on_drink_malign_potion = config["warn_on_drink_malign_potion"] == "1";
+        s_warn_on_ranged_wpn_melee = config["warn_on_ranged_wpn_melee"] == "1";
+        s_is_medical_bag_auto_choice = config["is_medical_bag_auto_choice"] == "1";
+        s_is_ranged_wpn_auto_reload = config["is_ranged_wpn_auto_reload"] == "1";
+        s_delay_projectile_draw = to_int(config["delay_projectile_draw"]);
+        s_delay_explosion = to_int(config["delay_explosion"]);
 
         s_default_player_name = "";
 
-        if (ini["config"]["default_player_name_set"] == "1") {
-                s_default_player_name = ini["config"]["default_player_name"];
+        if (config["default_player_name_set"] == "1") {
+                s_default_player_name = config["default_player_name"];
         }
 
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
                 s_has_seen_hint_global[i] =
-                        ini["config"]["has_seen_hint_" + std::to_string(i)] == "1";
+                        config["has_seen_hint_" + std::to_string(i)] == "1";
         }
 
         TRACE_FUNC_END;
@@ -428,47 +434,51 @@ static void write_config_file()
         mINI::INIFile ini_file(paths::config_file_path() + ".ini");
         mINI::INIStructure ini;
 
-        ini["config"]["master_volume_pct_option"] = std::to_string(s_master_volume_pct_option);
-        ini["config"]["master_volume_pct_adjusted"] = std::to_string(s_master_volume_pct_adjusted);
-        ini["config"]["is_ambient_audio_enabled"] = s_is_ambient_audio_enabled ? "1" : "0";
-        ini["config"]["is_ambient_audio_preloaded"] = s_is_ambient_audio_preloaded ? "1" : "0";
-        ini["config"]["audio_buffer_size"] = std::to_string(s_audio_buffer_size);
-        ini["config"]["input_mode"] = std::to_string((int)s_input_mode);
-        ini["config"]["window_px_w"] = std::to_string(s_window_px_w);
-        ini["config"]["window_px_h"] = std::to_string(s_window_px_h);
-        ini["config"]["is_fullscreen"] = s_is_fullscreen ? "1" : "0";
-        ini["config"]["video_scale_factor"] = std::to_string(s_video_scale_factor);
-        ini["config"]["brightness_pct"] = std::to_string(s_brightness_pct);
-        ini["config"]["renderer_type"] = std::to_string((int)s_renderer_type);
-        ini["config"]["always_center_view_on_player"] = s_always_center_view_on_player ? "1" : "0";
-        ini["config"]["is_tiles_mode"] = s_is_tiles_mode ? "1" : "0";
-        ini["config"]["font_name"] = s_font_name;
-        ini["config"]["text_mode_filled_walls"] = s_text_mode_filled_walls ? "1" : "0";
-        ini["config"]["display_health_bars"] = s_display_health_bars ? "1" : "0";
-        ini["config"]["use_trap_color_when_obscured"] = s_use_trap_color_when_obscured ? "1" : "0";
-        ini["config"]["is_intro_lvl_skipped"] = s_is_intro_lvl_skipped ? "1" : "0";
-        ini["config"]["is_intro_popup_skipped"] = s_is_intro_popup_skipped ? "1" : "0";
-        ini["config"]["is_any_key_confirm_more"] = s_is_any_key_confirm_more ? "1" : "0";
-        ini["config"]["auto_select_menu"] = s_auto_select_menu ? "1" : "0";
-        ini["config"]["hints_mode"] = std::to_string((int)s_hints_mode);
-        ini["config"]["always_warn_new_mon"] = s_always_warn_new_mon ? "1" : "0";
-        ini["config"]["warn_on_throw_valuable"] = s_warn_on_throw_valuable ? "1" : "0";
-        ini["config"]["warn_on_light_explosive"] = s_warn_on_light_explosive ? "1" : "0";
-        ini["config"]["warn_on_drink_malign_potion"] = s_warn_on_drink_malign_potion ? "1" : "0";
-        ini["config"]["warn_on_ranged_wpn_melee"] = s_warn_on_ranged_wpn_melee ? "1" : "0";
-        ini["config"]["is_medical_bag_auto_choice"] = s_is_medical_bag_auto_choice ? "1" : "0";
-        ini["config"]["is_ranged_wpn_auto_reload"] = s_is_ranged_wpn_auto_reload ? "1" : "0";
-        ini["config"]["delay_projectile_draw"] = std::to_string(s_delay_projectile_draw);
-        ini["config"]["delay_explosion"] = std::to_string(s_delay_explosion);
+        auto& config = ini["config"];
 
-        ini["config"]["default_player_name_set"] = s_default_player_name.empty() ? "0" : "1";
+        config["master_volume_pct_option"] = std::to_string(s_master_volume_pct_option);
+        config["master_volume_pct_adjusted"] = std::to_string(s_master_volume_pct_adjusted);
+        config["is_ambient_audio_enabled"] = s_is_ambient_audio_enabled ? "1" : "0";
+        config["is_ambient_audio_preloaded"] = s_is_ambient_audio_preloaded ? "1" : "0";
+        config["audio_buffer_size"] = std::to_string(s_audio_buffer_size);
+        config["input_mode"] = std::to_string((int)s_input_mode);
+        config["s_is_double_click_toggle_fullscreen"] =
+                s_is_double_click_toggle_fullscreen ? "1" : "0";
+        config["window_px_w"] = std::to_string(s_window_px_w);
+        config["window_px_h"] = std::to_string(s_window_px_h);
+        config["is_fullscreen"] = s_is_fullscreen ? "1" : "0";
+        config["video_scale_factor"] = std::to_string(s_video_scale_factor);
+        config["brightness_pct"] = std::to_string(s_brightness_pct);
+        config["renderer_type"] = std::to_string((int)s_renderer_type);
+        config["always_center_view_on_player"] = s_always_center_view_on_player ? "1" : "0";
+        config["is_tiles_mode"] = s_is_tiles_mode ? "1" : "0";
+        config["font_name"] = s_font_name;
+        config["text_mode_filled_walls"] = s_text_mode_filled_walls ? "1" : "0";
+        config["display_health_bars"] = s_display_health_bars ? "1" : "0";
+        config["use_trap_color_when_obscured"] = s_use_trap_color_when_obscured ? "1" : "0";
+        config["is_intro_lvl_skipped"] = s_is_intro_lvl_skipped ? "1" : "0";
+        config["is_intro_popup_skipped"] = s_is_intro_popup_skipped ? "1" : "0";
+        config["is_any_key_confirm_more"] = s_is_any_key_confirm_more ? "1" : "0";
+        config["auto_select_menu"] = s_auto_select_menu ? "1" : "0";
+        config["hints_mode"] = std::to_string((int)s_hints_mode);
+        config["always_warn_new_mon"] = s_always_warn_new_mon ? "1" : "0";
+        config["warn_on_throw_valuable"] = s_warn_on_throw_valuable ? "1" : "0";
+        config["warn_on_light_explosive"] = s_warn_on_light_explosive ? "1" : "0";
+        config["warn_on_drink_malign_potion"] = s_warn_on_drink_malign_potion ? "1" : "0";
+        config["warn_on_ranged_wpn_melee"] = s_warn_on_ranged_wpn_melee ? "1" : "0";
+        config["is_medical_bag_auto_choice"] = s_is_medical_bag_auto_choice ? "1" : "0";
+        config["is_ranged_wpn_auto_reload"] = s_is_ranged_wpn_auto_reload ? "1" : "0";
+        config["delay_projectile_draw"] = std::to_string(s_delay_projectile_draw);
+        config["delay_explosion"] = std::to_string(s_delay_explosion);
+
+        config["default_player_name_set"] = s_default_player_name.empty() ? "0" : "1";
 
         if (!s_default_player_name.empty()) {
-                ini["config"]["default_player_name"] = s_default_player_name;
+                config["default_player_name"] = s_default_player_name;
         }
 
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
-                ini["config"]["has_seen_hint_" + std::to_string(i)] =
+                config["has_seen_hint_" + std::to_string(i)] =
                         s_has_seen_hint_global[i] ? "1" : "0";
         }
 
@@ -529,6 +539,7 @@ void init()
 
         // Input
         s_options.emplace_back(std::make_unique<InputModeOption>());
+        s_options.emplace_back(std::make_unique<DoubleClickTogglesFullscreenOption>());
         s_options.emplace_back(std::make_unique<AnyKeyConfirmMoreOption>());
         s_options.emplace_back(std::make_unique<AutoSelectMenuOption>());
         s_options.emplace_back(std::make_unique<MedicalBagAutoChoiceOption>());
@@ -579,6 +590,11 @@ void init()
 InputMode input_mode()
 {
         return s_input_mode;
+}
+
+bool is_double_click_toggle_fullscreen()
+{
+        return s_is_double_click_toggle_fullscreen;
 }
 
 bool always_center_view_on_player()
@@ -1086,6 +1102,33 @@ void InputModeOption::change(const OptionChangeCommand command) const
         }
 
         s_input_mode = (InputMode)(input_mode_nr);
+}
+
+std::string DoubleClickTogglesFullscreenOption::name() const
+{
+        return "Double click fullscreen";
+}
+
+std::string DoubleClickTogglesFullscreenOption::descr() const
+{
+        return "Double click anywhere to toggle fullscreen?";
+}
+
+std::string DoubleClickTogglesFullscreenOption::value_str() const
+{
+        return s_is_double_click_toggle_fullscreen ? "Yes" : "No";
+}
+
+OptionSubmenuType DoubleClickTogglesFullscreenOption::submenu_type() const
+{
+        return OptionSubmenuType::input;
+}
+
+void DoubleClickTogglesFullscreenOption::change(const OptionChangeCommand command) const
+{
+        (void)command;
+
+        s_is_double_click_toggle_fullscreen = !s_is_double_click_toggle_fullscreen;
 }
 
 std::string AlwaysCenterViewOption::name() const

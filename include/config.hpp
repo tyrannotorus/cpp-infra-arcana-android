@@ -47,6 +47,7 @@ namespace config
 void init();
 
 InputMode input_mode();
+bool is_double_click_toggle_fullscreen();
 std::string font_name();
 bool always_center_view_on_player();
 RendererType renderer_type();
