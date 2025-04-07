@@ -784,10 +784,19 @@ void PossessedByZuul::on_death()
 
 void Shapeshifts::on_placed()
 {
-        // NOTE: This function will only ever run for the original shapeshifter
-        // monster, never for the monsters shapeshifted into.
+        // NOTE: This function will only ever run for the original shapeshifter monster, never for
+        // the monsters shapeshifted into.
 
         set_indefinite();
+
+        // To avoid the player discovering every creature that is possible to shapeshift into, limit
+        // shapeshifting to a few different creatures.
+        m_allowed_mon_ids = find_all_possible_shapeshift_monsters();
+
+        const int max_nr_mon = 3;
+
+        rnd::shuffle(m_allowed_mon_ids);
+        m_allowed_mon_ids.resize((size_t)std::min(max_nr_mon, (int)m_allowed_mon_ids.size()));
 
         // The shapeshifter should change into something else asap.
         m_countdown = 0;
@@ -817,8 +826,8 @@ void Shapeshifts::on_death()
         const actor::MonSpawnResult spawned = actor::spawn(m_owner->m_pos, {"MON_SHAPESHIFTER"});
 
         if (spawned.monsters.empty()) {
-                // Failed to spawn monsters, could be that the monster currently shapeshifted into
-                // was able to move into a wall or something, and the shapeshifter cannot spawn
+                // Failed to spawn shapeshifter. It could be that the monster currently shapeshifted
+                // into was able to move into a wall or something, and the shapeshifter cannot spawn
                 // there. Fine, just have the shapeshifter "disappear".
                 return;
         }
@@ -845,6 +854,61 @@ void Shapeshifts::on_death()
         shapeshifter->m_properties.apply(waiting);
 }
 
+std::vector<std::string> Shapeshifts::find_all_possible_shapeshift_monsters() const
+{
+        std::vector<std::string> possible_mon_ids;
+
+        for (const auto& it : actor::g_data) {
+                const actor::ActorData& d = it.second;
+
+                if (is_mon_type_valid_to_shapeshift_into(d)) {
+                        possible_mon_ids.push_back(d.id);
+                }
+        }
+
+        return possible_mon_ids;
+}
+
+bool Shapeshifts::is_mon_type_valid_to_shapeshift_into(const actor::ActorData& d) const
+{
+        const int nr_lvls_out_of_depth_allowed = 2;
+
+        Range allowed_mon_depth_range(
+                d.spawn_min_dlvl - nr_lvls_out_of_depth_allowed,
+                d.spawn_max_dlvl);
+
+        if (allowed_mon_depth_range.max == -1) {
+                allowed_mon_depth_range.max = 999;
+        }
+
+        return (
+                d.can_be_shapeshifted_into &&
+                (d.id != "MON_SHAPESHIFTER") &&
+                d.is_auto_spawn_allowed &&
+                !d.is_unique &&
+                allowed_mon_depth_range.is_in_range(map::g_dlvl));
+}
+
+std::string Shapeshifts::get_random_allowed_shapeshift_mon() const
+{
+        // Get all allowed monster IDs that is not the current monster shapeshifted to.
+        std::vector<std::string> id_bucket;
+
+        std::copy_if(
+                std::begin(m_allowed_mon_ids),
+                std::end(m_allowed_mon_ids),
+                std::back_inserter(id_bucket),
+                [this](const std::string& id) {
+                        return id != m_owner->m_data->id;
+                });
+
+        if (id_bucket.empty()) {
+                return "";
+        }
+
+        return rnd::element(id_bucket);
+}
+
 void Shapeshifts::shapeshift(const Verbose verbose) const
 {
         // Do not allow shapeshifting if standing on a non-walkable position. Otherwise the new
@@ -853,47 +917,23 @@ void Shapeshifts::shapeshift(const Verbose verbose) const
                 return;
         }
 
-        std::vector<std::string> mon_id_bucket;
+        const std::string mon_id = get_random_allowed_shapeshift_mon();
 
-        for (const auto& it : actor::g_data) {
-                const actor::ActorData& d = it.second;
-
-                Range allowed_mon_depth_range(
-                        d.spawn_min_dlvl - 2,
-                        d.spawn_max_dlvl);
-
-                if (allowed_mon_depth_range.max == -1) {
-                        allowed_mon_depth_range.max = 999;
-                }
-
-                if (!d.can_be_shapeshifted_into ||
-                    (d.id == actor::id(*m_owner)) ||
-                    (d.id == "MON_SHAPESHIFTER") ||
-                    !d.is_auto_spawn_allowed ||
-                    d.is_unique ||
-                    !allowed_mon_depth_range.is_in_range(map::g_dlvl)) {
-                        continue;
-                }
-
-                mon_id_bucket.push_back(d.id);
-        }
-
-        if (mon_id_bucket.empty()) {
+        if (mon_id.empty()) {
                 ASSERT(false);
 
                 return;
         }
 
-        if ((verbose == Verbose::yes) &&
-            actor::can_player_see_actor(*m_owner)) {
+        const bool can_player_see_mon = actor::can_player_see_actor(*m_owner);
+
+        if ((verbose == Verbose::yes) && can_player_see_mon) {
                 msg_log::add("It changes shape!");
 
                 draw_blast_at_cells({m_owner->m_pos}, colors::yellow());
         }
 
         m_owner->m_state = ActorState::destroyed;
-
-        const std::string mon_id = rnd::element(mon_id_bucket);
 
         const auto spawned = actor::spawn(m_owner->m_pos, {mon_id});
 
@@ -928,11 +968,8 @@ void Shapeshifts::shapeshift(const Verbose verbose) const
 
         // Set same awareness as the previous monster
         {
-                mon->m_mon_aware_state.aware_counter =
-                        m_owner->m_mon_aware_state.aware_counter;
-
-                mon->m_mon_aware_state.wary_counter =
-                        m_owner->m_mon_aware_state.wary_counter;
+                mon->m_mon_aware_state.aware_counter = m_owner->m_mon_aware_state.aware_counter;
+                mon->m_mon_aware_state.wary_counter = m_owner->m_mon_aware_state.wary_counter;
         }
 
         // Apply shapeshifting on the new monster
@@ -941,6 +978,9 @@ void Shapeshifts::shapeshift(const Verbose verbose) const
                         static_cast<prop::Shapeshifts*>(
                                 prop::make(prop::Id::shapeshifts));
 
+                // Only allow shapeshifting to the same selected monsters.
+                shapeshifts->set_allowed_mon_ids(m_allowed_mon_ids);
+
                 shapeshifts->set_indefinite();
 
                 shapeshifts->m_countdown = rnd::range(3, 5);
@@ -948,7 +988,9 @@ void Shapeshifts::shapeshift(const Verbose verbose) const
                 mon->m_properties.apply(shapeshifts);
         }
 
-        map::update_vision();
+        if (can_player_see_mon) {
+                map::update_vision();
+        }
 }
 
 PropEnded ZealotStop::affect_move_dir(Dir& dir)

@@ -524,10 +524,24 @@ public:
         void on_std_turn() override;
         void on_death() override;
 
+        void set_allowed_mon_ids(const std::vector<std::string>& ids)
+        {
+                m_allowed_mon_ids = ids;
+        }
+
 private:
+        std::vector<std::string> find_all_possible_shapeshift_monsters() const;
+
+        bool is_mon_type_valid_to_shapeshift_into(const actor::ActorData& d) const;
+
+        // Get a random monster from m_allowed_mon_ids, that is not the current monster.
+        std::string get_random_allowed_shapeshift_mon() const;
+
         void shapeshift(Verbose verbose) const;
 
         int m_countdown {-1};
+
+        std::vector<std::string> m_allowed_mon_ids {};
 };
 
 class ZealotStop : public Prop

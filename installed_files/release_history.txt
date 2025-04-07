@@ -50,6 +50,7 @@
 - Mold now appear in a more scattered pattern when they "breed".
 - Leng Spider web bolas now also entangle for a few turns.
 - Void Travelers intercepting player teleportation now also ends invisibility and cloaking.
+- Limited the number of different monster types that a single Shapeshifter can change into.
 - Misc monster balancing (a lot of balancing of stats, group sizes, properties, etc)
 - Added more monsters.
 
