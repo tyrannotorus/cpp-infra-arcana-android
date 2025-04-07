@@ -48,10 +48,9 @@ static const std::vector<terrain::Id> s_terrain_ids_deep = {
 
 static bool can_creature_be_knocked_back(const actor::Actor& actor)
 {
-        // TODO: Previously knockback was for some reason prevented against the player if the bot
-        // was playing ("config::is_bot_playing()"). Consider if that is necessary.
-
         if (
+                // To prevent killing the bot by knocking it into chasms:
+                config::is_bot_playing() ||
                 actor.m_data->prevent_knockback ||
                 (actor.m_data->actor_size >= actor::Size::giant)) {
                 return false;

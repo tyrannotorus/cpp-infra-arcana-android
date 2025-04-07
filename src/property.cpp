@@ -816,38 +816,43 @@ void Shapeshifts::on_death()
 
         const actor::MonSpawnResult spawned = actor::spawn(m_owner->m_pos, {"MON_SHAPESHIFTER"});
 
+        if (spawned.monsters.empty()) {
+                // Failed to spawn monsters, could be that the monster currently shapeshifted into
+                // was able to move into a wall or something, and the shapeshifter cannot spawn
+                // there. Fine, just have the shapeshifter "disappear".
+                return;
+        }
+
         map::update_vision();
 
-        ASSERT(!spawned.monsters.empty());
+        actor::Actor* const shapeshifter = spawned.monsters[0];
 
-        if (!spawned.monsters.empty()) {
-                actor::Actor* const shapeshifter = spawned.monsters[0];
+        shapeshifter->m_mon_aware_state.aware_counter = m_owner->m_mon_aware_state.aware_counter;
+        shapeshifter->m_mon_aware_state.wary_counter = m_owner->m_mon_aware_state.wary_counter;
 
-                shapeshifter->m_mon_aware_state.aware_counter =
-                        m_owner->m_mon_aware_state.aware_counter;
+        // No more shapeshifting.
+        shapeshifter->m_properties.end_prop(prop::Id::shapeshifts);
 
-                shapeshifter->m_mon_aware_state.wary_counter =
-                        m_owner->m_mon_aware_state.wary_counter;
+        // It's affraid!
+        shapeshifter->m_properties.apply(prop::make(prop::Id::terrified));
 
-                // No more shapeshifting
-                shapeshifter->m_properties.end_prop(prop::Id::shapeshifts);
+        // Make the Shapeshifter skip a turn - it looks better if it doesn't immediately move to an
+        // adjacent cell when spawning.
+        Prop* const waiting = prop::make(prop::Id::waiting);
 
-                // It's affraid!
-                shapeshifter->m_properties.apply(
-                        prop::make(prop::Id::terrified));
+        waiting->set_duration(1);
 
-                // Make the Shapeshifter skip a turn - it looks better if it
-                // doesn't immediately move to an adjacent cell when spawning
-                Prop* const waiting = prop::make(prop::Id::waiting);
-
-                waiting->set_duration(1);
-
-                shapeshifter->m_properties.apply(waiting);
-        }
+        shapeshifter->m_properties.apply(waiting);
 }
 
 void Shapeshifts::shapeshift(const Verbose verbose) const
 {
+        // Do not allow shapeshifting if standing on a non-walkable position. Otherwise the new
+        // monster might not be able to spawn there.
+        if (!map::g_terrain.at(m_owner->m_pos)->is_walkable()) {
+                return;
+        }
+
         std::vector<std::string> mon_id_bucket;
 
         for (const auto& it : actor::g_data) {
@@ -888,9 +893,20 @@ void Shapeshifts::shapeshift(const Verbose verbose) const
 
         m_owner->m_state = ActorState::destroyed;
 
-        const auto spawned = actor::spawn(m_owner->m_pos, {rnd::element(mon_id_bucket)});
+        const std::string mon_id = rnd::element(mon_id_bucket);
+
+        const auto spawned = actor::spawn(m_owner->m_pos, {mon_id});
 
         if (spawned.monsters.size() != 1) {
+                TRACE
+                        << "Failed to spawn shapeshift monster "
+                        << "'" << mon_id << "'"
+                        << " From previous monster "
+                        << "'" << actor::name_a(*m_owner) << "'"
+                        << " on terrain "
+                        << "'" << map::g_terrain.at(m_owner->m_pos)->name(Article::a) << "'"
+                        << std::endl;
+
                 ASSERT(false);
 
                 return;

@@ -58,12 +58,16 @@ static std::vector<std::pair<P, int>> free_spawn_positions(
 
         Array2<bool> blocked(map::dims());
 
-        // Get a blocking map for running a floodfill, where actors and doors are free.
+        // Get a blocking map for running a floodfill, where actors are free.
         map_parsers::BlocksWalking(ParseActors::no)
                 .run(blocked, map::rect(), MapParseMode::overwrite);
 
-        // NOTE: Doors are blocking or not depending on their open/closed status. This is because
-        // closed doors should contain breeding monsters.
+        // TODO: There is a theoretical problem with the method below. If there is for example a
+        // request to spawn a monster on an open door, that is surrounded by walls and a closed
+        // door, then the monster cannot spawn anywhere. However this should be very rare.
+
+        // NOTE: Doors are blocking or not depending on their open/closed status. This is good
+        // because closed doors should contain breeding monsters.
 
         Array2<int> flood = floodfill(origin, blocked, max_dist);
 
