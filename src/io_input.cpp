@@ -44,6 +44,11 @@ static void on_window_resized_signalled()
 {
         io::on_window_resized();
         io::clear_screen();
+
+        // This is set to false in the clear_screen() call above, but in this case we really do just
+        // want to show an empty screen.
+        io::g_allow_render = true;
+
         io::update_screen();
         io::clear_input();
 
