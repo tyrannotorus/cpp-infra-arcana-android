@@ -821,9 +821,9 @@ void BrowseInv::on_start()
         // Remove the "browse inventory" key, to avoid player key press misstakes, and to allow
         // using this key for closing the menu.
         //
-        // NOTE: This will only ever affect the first screen (it will not affect screens further
-        // down if the player scrolls down past the first screen), but this should be good enough -
-        // the goal is to prevent double pressing "i".
+        // NOTE: This will only ever affect the first page (it will not affect pages further down if
+        // the player scrolls down past the first page), but this should be good enough - the goal
+        // is to prevent double pressing "i".
         //
         m_browser.remove_key('i');
 
@@ -908,7 +908,7 @@ void BrowseInv::update()
 {
         const io::InputData input = io::read_input();
 
-        if (input.key == 'i') {
+        if ((input.key == 'i') && m_browser.is_on_top_page()) {
                 // Exit screen
 
                 states::pop();
