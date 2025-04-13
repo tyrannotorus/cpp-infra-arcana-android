@@ -552,6 +552,11 @@ static void dump_spawning(xml::Element* spawn_e, actor::ActorData& data)
                         xml::first_child(
                                 spawn_e, "can_be_summoned_by_monster"));
 
+        data.can_spawn_from_tomb =
+                xml::get_text_bool(
+                        xml::first_child(
+                                spawn_e, "can_spawn_from_tomb"));
+
         data.can_be_shapeshifted_into =
                 xml::get_text_bool(
                         xml::first_child(
@@ -751,6 +756,7 @@ void ActorData::reset()
         is_reptile = false;
         is_amphibian = false;
         can_be_summoned_by_mon = false;
+        can_spawn_from_tomb = false;
         can_be_shapeshifted_into = false;
         can_bleed = true;
         can_leave_corpse = true;

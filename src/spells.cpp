@@ -4649,14 +4649,14 @@ void SpellSummon::run_effect(
 {
         (void)seen_targets;
 
-        Range mon_dlvl_range = get_allowed_mon_dlvl_range(skill);
+        Range mon_lvl_range = get_allowed_mon_lvl_range(skill);
 
         TRACE
-                << "Allowed monster dungeon level range: "
-                << "'" << mon_dlvl_range.str() << "'"
+                << "Allowed monster level range: "
+                << "'" << mon_lvl_range.str() << "'"
                 << std::endl;
 
-        std::vector<std::string> summon_bucket = make_summon_bucket(mon_dlvl_range);
+        std::vector<std::string> summon_bucket = make_summon_bucket(mon_lvl_range);
 
         if (summon_bucket.empty()) {
                 TRACE
@@ -4664,14 +4664,14 @@ void SpellSummon::run_effect(
                            "from depth 0."
                         << std::endl;
 
-                mon_dlvl_range.min = 0;
+                mon_lvl_range.min = 0;
 
                 TRACE
                         << "Allowed monster dungeon level range: "
-                        << "'" << mon_dlvl_range.str() << "'"
+                        << "'" << mon_lvl_range.str() << "'"
                         << std::endl;
 
-                summon_bucket = make_summon_bucket(mon_dlvl_range);
+                summon_bucket = make_summon_bucket(mon_lvl_range);
         }
 
         if (summon_bucket.empty()) {
@@ -4687,7 +4687,7 @@ void SpellSummon::run_effect(
         summon(id, caster);
 }
 
-Range SpellSummon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
+Range SpellSummon::get_allowed_mon_lvl_range(const SpellSkill skill) const
 {
         Range dlvl_range;
 
@@ -4718,8 +4718,7 @@ Range SpellSummon::get_allowed_mon_dlvl_range(const SpellSkill skill) const
         return dlvl_range;
 }
 
-std::vector<std::string> SpellSummon::make_summon_bucket(
-        const Range& dlvl_range) const
+std::vector<std::string> SpellSummon::make_summon_bucket(const Range& lvl_range) const
 {
         std::vector<std::string> summon_bucket;
 
@@ -4732,9 +4731,9 @@ std::vector<std::string> SpellSummon::make_summon_bucket(
 
                 // NOTE: The "min" dungeon level in the monster data is used here as a general
                 // "strength" of the monster. The "max" dungeon level is not considered.
-                const int mon_dlvl = data.spawn_min_dlvl;
+                const int mon_lvl = data.spawn_min_dlvl;
 
-                if ((mon_dlvl != -1) && !dlvl_range.is_in_range(mon_dlvl)) {
+                if (!lvl_range.is_in_range(mon_lvl)) {
                         continue;
                 }
 

@@ -60,6 +60,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -151,6 +152,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -249,6 +251,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="20">MONGROUPSIZE_ALONE</group_size>
@@ -349,6 +352,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="20">MONGROUPSIZE_ALONE</group_size>
@@ -449,6 +453,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="3">MONGROUPSIZE_ALONE</group_size>
@@ -548,6 +553,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -645,6 +651,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -741,6 +748,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>0</nr_allowed_to_spawn>
@@ -836,6 +844,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="2">MONGROUPSIZE_ALONE</group_size>
@@ -928,6 +937,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="2">MONGROUPSIZE_ALONE</group_size>
@@ -1025,6 +1035,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -1124,6 +1135,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -1229,6 +1241,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -1321,6 +1334,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>50</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -1411,6 +1425,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="4">MONGROUPSIZE_ALONE</group_size>
@@ -1516,6 +1531,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -1617,6 +1633,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>0</nr_allowed_to_spawn>
@@ -1709,6 +1726,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="2">MONGROUPSIZE_ALONE</group_size>
@@ -1807,6 +1825,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -1903,6 +1922,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -2009,6 +2029,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -2111,6 +2132,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -2213,6 +2235,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -2310,6 +2333,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -2402,6 +2426,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -2494,6 +2519,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -2588,6 +2614,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>50</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="2">MONGROUPSIZE_FEW</group_size>
@@ -2683,6 +2710,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="5">MONGROUPSIZE_FEW</group_size>
@@ -2779,6 +2807,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
         </spawning>
@@ -2866,6 +2895,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="20">MONGROUPSIZE_FEW</group_size>
@@ -2963,6 +2993,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -3062,6 +3093,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -3157,6 +3189,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -3256,6 +3289,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -3357,6 +3391,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -3459,6 +3494,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -3559,6 +3595,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -3659,6 +3696,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -3759,6 +3797,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -3860,6 +3899,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -3960,6 +4000,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -4055,6 +4096,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -4157,6 +4199,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="5">MONGROUPSIZE_ALONE</group_size>
@@ -4263,6 +4306,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -4367,6 +4411,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -4473,6 +4518,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -4575,6 +4621,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -4675,6 +4722,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -4769,6 +4817,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -4866,6 +4915,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="20">MONGROUPSIZE_FEW</group_size>
@@ -4965,6 +5015,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>80</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -5065,6 +5116,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_FEW</group_size>
@@ -5158,6 +5210,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>50</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -5248,6 +5301,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>500</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_FEW</group_size>
@@ -5339,6 +5393,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -5439,6 +5494,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -5542,6 +5598,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -5639,6 +5696,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -5742,6 +5800,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -5835,6 +5894,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -5926,6 +5986,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -6018,6 +6079,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -6111,6 +6173,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -6205,6 +6268,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="4">MONGROUPSIZE_ALONE</group_size>
@@ -6305,6 +6369,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -6395,6 +6460,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -6484,6 +6550,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_SWARM</group_size>
@@ -6593,6 +6660,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -6686,6 +6754,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="10">MONGROUPSIZE_ALONE</group_size>
@@ -6804,6 +6873,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>0</nr_allowed_to_spawn>
@@ -6917,6 +6987,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
@@ -7013,6 +7084,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="20">MONGROUPSIZE_ALONE</group_size>
@@ -7109,6 +7181,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
@@ -7198,6 +7271,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_FEW</group_size>
@@ -7292,6 +7366,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_SWARM</group_size>
@@ -7387,6 +7462,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_SWARM</group_size>
@@ -7486,6 +7562,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_FEW</group_size>
@@ -7582,6 +7659,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="4">MONGROUPSIZE_FEW</group_size>
@@ -7680,6 +7758,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>75</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="4">MONGROUPSIZE_FEW</group_size>
@@ -7782,6 +7861,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -7883,6 +7963,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -7985,6 +8066,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -8085,6 +8167,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -8186,6 +8269,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -8288,6 +8372,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>true</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
@@ -8380,6 +8465,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -8485,6 +8571,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -8586,6 +8673,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -8702,6 +8790,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -8796,6 +8885,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -8888,6 +8978,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -8994,6 +9085,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="10">MONGROUPSIZE_FEW</group_size>
@@ -9102,6 +9194,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -9202,6 +9295,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -9296,6 +9390,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -9393,6 +9488,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_FEW</group_size>
@@ -9495,6 +9591,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_FEW</group_size>
@@ -9596,6 +9693,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_FEW</group_size>
@@ -9695,6 +9793,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>5</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_FEW</group_size>
@@ -9790,6 +9889,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>25</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_FEW</group_size>
@@ -9898,6 +9998,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -9989,6 +10090,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>15</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
@@ -10104,6 +10206,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>0</nr_allowed_to_spawn>
@@ -10203,6 +10306,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>0</nr_allowed_to_spawn>
@@ -10292,6 +10396,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>0</nr_allowed_to_spawn>
@@ -10383,6 +10488,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <spawn_weight>100</spawn_weight>
             <auto_spawn>false</auto_spawn>
             <can_be_summoned_by_monster>false</can_be_summoned_by_monster>
+            <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <unique/>
             <nr_allowed_to_spawn>0</nr_allowed_to_spawn>

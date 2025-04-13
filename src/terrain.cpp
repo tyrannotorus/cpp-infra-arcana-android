@@ -3283,17 +3283,10 @@ void ItemContainer::destroy_single_fragile()
 // -----------------------------------------------------------------------------
 Tomb::Tomb(const P& p, const TerrainData* const data) :
         Terrain(p, data),
-        m_is_open(false),
-        m_is_trait_known(false),
-        m_push_lid_one_in_n(rnd::range(4, 10)),
-        m_appearance(TombAppearance::common),
-        m_trait(TombTrait::END)
+        m_push_lid_one_in_n(rnd::range(4, 10))
 {
         // Contained items
-        const int nr_items_min =
-                rnd::one_in(4)
-                ? 0
-                : 1;
+        const int nr_items_min = rnd::one_in(4) ? 0 : 1;
 
         int nr_items_max = 1;
 
@@ -3311,16 +3304,14 @@ Tomb::Tomb(const P& p, const TerrainData* const data) :
                 terrain::Id::tomb,
                 rnd::range(nr_items_min, nr_items_max));
 
-        // Set appearance - sometimes we base the appearance on the value of the
-        // contained items, and sometimes we set a "common" appearance
-        // regardless of the items. If the tomb is nicer than "common", then it
-        // ALWAYS reflects the items. I.e. if the tomb is "common" it *may*
-        // contain good items, if it's nicer than "common" it's guaranteed to
-        // have good items.
+        // Set appearance - sometimes we base the appearance on the value of the contained items,
+        // and sometimes we set a "common" appearance regardless of the items. If the tomb is nicer
+        // than "common", then it ALWAYS reflects the items. I.e. if the tomb is "common" it MAY
+        // contain good items, if it's nicer than "common" it's guaranteed to have good items.
         if (rnd::one_in(4)) {
                 // Base appearance on value of contained items
 
-                for (const auto* item : m_item_container.items()) {
+                for (const item::Item* item : m_item_container.items()) {
                         const auto item_value = item->data().value;
 
                         if (item_value == item::Value::supreme_treasure) {
@@ -3339,19 +3330,18 @@ Tomb::Tomb(const P& p, const TerrainData* const data) :
         }
 
         if (m_appearance == TombAppearance::marvelous) {
-                m_trait = TombTrait::ghost;
+                m_trap_id = TombTrapId::monster;
         }
         else {
                 // Randomized trait
-                std::vector<int> weights((size_t)TombTrait::END + 1, 0);
+                std::vector<int> weights((size_t)TombTrapId::END + 1, 0);
 
-                weights[(size_t)TombTrait::ghost] = 5;
-                weights[(size_t)TombTrait::other_undead] = 3;
-                weights[(size_t)TombTrait::stench] = 2;
-                weights[(size_t)TombTrait::cursed] = 1;
-                weights[(size_t)TombTrait::END] = 2;
+                weights[(size_t)TombTrapId::monster] = 8;
+                weights[(size_t)TombTrapId::fumes] = 2;
+                weights[(size_t)TombTrapId::cursed] = 1;
+                weights[(size_t)TombTrapId::END] = 2;
 
-                m_trait = TombTrait(rnd::weighted_choice(weights));
+                m_trap_id = TombTrapId(rnd::weighted_choice(weights));
         }
 }
 
@@ -3618,165 +3608,294 @@ DidTriggerTrap Tomb::trigger_trap(actor::Actor* const actor)
 
         (void)actor;
 
-        DidTriggerTrap did_trigger_trap = DidTriggerTrap::no;
-
-        std::string id_to_spawn;
-
-        const bool is_seen = map::g_seen.at(m_pos);
-
-        switch (m_trait) {
-        case TombTrait::ghost: {
-                id_to_spawn = "MON_GHOST";
-
-                const std::string msg = "The air suddenly feels colder.";
-
-                msg_log::add(msg);
-
-                did_trigger_trap = DidTriggerTrap::yes;
+        switch (m_trap_id) {
+        case TombTrapId::monster: {
+                trigger_trap_mon();
         } break;
 
-        case TombTrait::other_undead: {
-                std::vector<std::string> mon_bucket = {
-                        "MON_MUMMY",
-                        "MON_CROC_HEAD_MUMMY",
-                        "MON_ZOMBIE",
-                        "MON_FLOATING_SKULL"};
-
-                id_to_spawn = rnd::element(mon_bucket);
-
-                const std::string msg = "Something rises from the tomb!";
-
-                msg_log::add(msg);
-
-                did_trigger_trap = DidTriggerTrap::yes;
+        case TombTrapId::fumes: {
+                trigger_trap_fumes();
         } break;
 
-        case TombTrait::stench: {
-                if (rnd::coin_toss()) {
-                        if (is_seen) {
-                                msg_log::add(
-                                        "Fumes burst out from the tomb!",
-                                        colors::white(),
-                                        MsgInterruptPlayer::no,
-                                        MorePromptOnMsg::yes);
-                        }
+        case TombTrapId::cursed: {
+                trigger_trap_cursed();
 
-                        Snd snd(
-                                "I hear a burst of gas.",
-                                audio::SfxId::gas,
-                                IgnoreMsgIfOriginSeen::yes,
-                                m_pos,
-                                nullptr,
-                                SndVol::low,
-                                AlertsMon::yes);
-
-                        snd_emit::run(snd);
-
-                        prop::Prop* prop = nullptr;
-
-                        Color fume_color = colors::magenta();
-
-                        const int rnd = rnd::range(1, 100);
-
-                        if (rnd < 20) {
-                                prop = prop::make(prop::Id::poisoned);
-
-                                fume_color = colors::light_green();
-                        }
-                        else if (rnd < 40) {
-                                prop = prop::make(prop::Id::diseased);
-
-                                fume_color = colors::green();
-                        }
-                        else {
-                                prop = prop::make(prop::Id::paralyzed);
-
-                                prop->set_duration(prop->nr_turns_left() * 2);
-                        }
-
-                        explosion::run(
-                                m_pos,
-                                ExplType::apply_prop,
-                                EmitExplSnd::no,
-                                0,
-                                ExplExclCenter::no,
-                                {prop},
-                                fume_color,
-                                ExplIsGas::yes);
-                }
-                else {
-                        // Not fumes
-                        std::vector<std::string> mon_bucket;
-
-                        for (const auto& it : actor::g_data) {
-                                const actor::ActorData& d = it.second;
-
-                                if (d.natural_props[(size_t)prop::Id::ooze] &&
-                                    d.is_auto_spawn_allowed &&
-                                    !d.is_unique) {
-                                        mon_bucket.push_back(d.id);
-                                }
-                        }
-
-                        id_to_spawn = rnd::element(mon_bucket);
-
-                        if (is_seen) {
-                                msg_log::add("Something repulsive creeps up from the tomb!");
-                        }
-                }
-
-                did_trigger_trap = DidTriggerTrap::yes;
         } break;
 
-        case TombTrait::cursed: {
-                map::g_player->m_properties.apply(prop::make(prop::Id::cursed));
-
-                did_trigger_trap = DidTriggerTrap::yes;
-        } break;
-
-        case TombTrait::END:
+        case TombTrapId::END:
                 break;
         }
 
-        if (!id_to_spawn.empty()) {
-                const actor::MonSpawnResult summoned =
-                        actor::spawn(m_pos, {id_to_spawn})
-                                .make_aware_of_player();
-
-                std::for_each(
-                        std::begin(summoned.monsters),
-                        std::end(summoned.monsters),
-                        [this](auto* const mon) {
-                                auto* prop =
-                                        prop::make(
-                                                prop::Id::waiting);
-
-                                prop->set_duration(1);
-
-                                mon->m_properties.apply(prop);
-
-                                if (m_appearance == TombAppearance::marvelous) {
-                                        actor::change_max_hp(
-                                                *mon,
-                                                mon->m_hp,
-                                                Verbose::no);
-
-                                        actor::restore_hp(
-                                                *mon,
-                                                999,
-                                                actor::AllowRestoreAboveMax::no,
-                                                Verbose::no);
-                                }
-                        });
-        }
-
-        m_trait = TombTrait::END;
+        m_trap_id = TombTrapId::END;
 
         m_is_trait_known = true;
 
         TRACE_FUNC_END;
 
-        return did_trigger_trap;
+        return DidTriggerTrap::yes;
+}
+
+void Tomb::trigger_trap_mon() const
+{
+        const std::string mon_id = get_random_allowed_mon_id();
+
+        if (mon_id.empty()) {
+                return;
+        }
+
+        const actor::MonSpawnResult summoned =
+                actor::spawn(m_pos, {mon_id})
+                        .make_aware_of_player();
+
+        if (summoned.monsters.size() != 1) {
+                ASSERT(false);
+
+                return;
+        }
+
+        actor::Actor* const mon = summoned.monsters[0];
+
+        if (map::g_seen.at(m_pos)) {
+                const std::string appear_msg = get_mon_appear_msg(mon_id);
+
+                msg_log::add(appear_msg);
+        }
+
+        prop::Prop* prop = prop::make(prop::Id::waiting);
+
+        prop->set_duration(2);
+
+        mon->m_properties.apply(prop);
+}
+
+std::string Tomb::get_random_allowed_mon_id() const
+{
+        TRACE_FUNC_BEGIN;
+
+        Range mon_lvl_range(map::g_dlvl - 3, map::g_dlvl + 3);
+
+        TRACE
+                << "Allowed monster level range: "
+                << "'" << mon_lvl_range.str() << "'"
+                << std::endl;
+
+        // Make a weighted monster ID bucket of non-Ghost monsters.
+        WeightedItems<std::string> weighted_ids;
+
+        for (auto& it : actor::g_data) {
+                const actor::ActorData& data = it.second;
+
+                if (!data.can_spawn_from_tomb) {
+                        continue;
+                }
+
+                if (data.is_ghost) {
+                        // Ghosts are found separately later with - skip them for now.
+                        continue;
+                }
+
+                // NOTE: The "min" dungeon level in the monster data is used here as a general
+                // "strength" of the monster. The "max" dungeon level is not considered.
+                const int mon_lvl = data.spawn_min_dlvl;
+
+                if (!mon_lvl_range.is_in_range(mon_lvl)) {
+                        continue;
+                }
+
+                weighted_ids.items.push_back(data.id);
+                weighted_ids.weights.push_back(data.spawn_weight);
+        }
+
+#ifndef NDEBUG
+        {
+                std::string mon_ids_debug_str;
+
+                for (size_t i = 0; i < weighted_ids.items.size(); ++i) {
+                        mon_ids_debug_str +=
+                                "\n" +
+                                weighted_ids.items[i] +
+                                " (" +
+                                std::to_string(weighted_ids.weights[i]) +
+                                ")";
+                }
+
+                TRACE
+                        << "Possible monster IDs and weights (Ghosts not included):"
+                        << mon_ids_debug_str
+                        << std::endl;
+        }
+#endif  // NDEBUG
+
+        // Select a non-Ghost monster as the monster to spawn, if possible. This may be overriden by
+        // a Ghost-type monster later.
+        std::string mon_id_to_spawn;
+
+        if (!weighted_ids.items.empty()) {
+                mon_id_to_spawn = weighted_ids.roll();
+        }
+
+        // Find a Ghost-type monster to possibly spawn.
+        //
+        // Use whatever monster has the highest spawn dungeon level, that is also within the max
+        // range of the allowed monster levels.
+        //
+        std::vector<std::string> highest_lvl_ghost_ids;
+        int highest_ghost_lvl = -1;
+
+        for (auto& it : actor::g_data) {
+                const actor::ActorData& data = it.second;
+
+                if (!data.can_spawn_from_tomb) {
+                        continue;
+                }
+
+                if (!data.is_ghost) {
+                        continue;
+                }
+
+                const int mon_lvl = data.spawn_min_dlvl;
+
+                if (mon_lvl > mon_lvl_range.max) {
+                        continue;
+                }
+
+                // Valid Ghost-type monster found.
+
+                const std::string& id = it.first;
+
+                if (mon_lvl < highest_ghost_lvl) {
+                        // We have already found higher level Ghost-monsters.
+                        ASSERT(!highest_lvl_ghost_ids.empty());
+                }
+                else if (mon_lvl == highest_ghost_lvl) {
+                        // This is among the highest level Ghost-type monsters.
+                        ASSERT(!highest_lvl_ghost_ids.empty());
+
+                        highest_lvl_ghost_ids.push_back(id);
+                }
+                else {
+                        // This is higher than the currently highest level Ghost-type monsters.
+
+                        highest_lvl_ghost_ids.clear();
+
+                        highest_lvl_ghost_ids.push_back(id);
+
+                        highest_ghost_lvl = mon_lvl;
+                }
+        }
+
+#ifndef NDEBUG
+        {
+                std::string mon_ids_debug_str;
+
+                for (const std::string& ghost_id : highest_lvl_ghost_ids) {
+                        mon_ids_debug_str += "\n" + ghost_id;
+                }
+
+                TRACE
+                        << "Possible Ghost monsters to spawn:"
+                        << mon_ids_debug_str
+                        << std::endl;
+        }
+#endif  // NDEBUG
+
+        ASSERT(!highest_lvl_ghost_ids.empty());
+
+        // Randomly spawn a non-Ghost or Ghost monster (with more weight towards a Ghost monster).
+        const Fraction ghost_chance(3, 4);
+
+        if (!highest_lvl_ghost_ids.empty() &&
+            (ghost_chance.roll() || weighted_ids.items.empty())) {
+                const std::string ghost_id = rnd::element(highest_lvl_ghost_ids);
+
+                mon_id_to_spawn = ghost_id;
+        }
+
+        TRACE << "Tomb monster ID to spawn: '" << mon_id_to_spawn << "'" << std::endl;
+
+        TRACE_FUNC_END;
+
+        return mon_id_to_spawn;
+}
+
+std::string Tomb::get_mon_appear_msg(const std::string& mon_id) const
+{
+        const actor::ActorData& d = actor::g_data.at(mon_id);
+
+        // TODO: In the future it would be better to check which "base" monster it is (ghost, ooze,
+        // ...) if such an inheritance system is implemented.
+
+        if (d.is_ghost) {
+                return "The air suddenly feels colder.";
+        }
+
+        if (d.natural_props[(size_t)prop::Id::ooze]) {
+                return "Something repulsive creeps up from the tomb!";
+        }
+
+        // Standard message.
+        return "Something rises from the tomb!";
+}
+
+void Tomb::trigger_trap_fumes() const
+{
+        const bool is_seen = map::g_seen.at(m_pos);
+
+        if (is_seen) {
+                msg_log::add(
+                        "Fumes burst out from the tomb!",
+                        colors::white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::yes);
+        }
+
+        Snd snd(
+                "I hear a burst of gas.",
+                audio::SfxId::gas,
+                IgnoreMsgIfOriginSeen::yes,
+                m_pos,
+                nullptr,
+                SndVol::low,
+                AlertsMon::yes);
+
+        snd_emit::run(snd);
+
+        prop::Prop* prop = nullptr;
+
+        Color fume_color = colors::magenta();
+
+        const int rnd = rnd::range(1, 100);
+
+        if (rnd < 20) {
+                prop = prop::make(prop::Id::poisoned);
+
+                fume_color = colors::light_green();
+        }
+        else if (rnd < 40) {
+                prop = prop::make(prop::Id::diseased);
+
+                fume_color = colors::green();
+        }
+        else {
+                prop = prop::make(prop::Id::paralyzed);
+
+                prop->set_duration(prop->nr_turns_left() * 2);
+        }
+
+        explosion::run(
+                m_pos,
+                ExplType::apply_prop,
+                EmitExplSnd::no,
+                0,
+                ExplExclCenter::no,
+                {prop},
+                fume_color,
+                ExplIsGas::yes);
+}
+
+void Tomb::trigger_trap_cursed() const
+{
+        map::g_player->m_properties.apply(prop::make(prop::Id::cursed));
 }
 
 // -----------------------------------------------------------------------------

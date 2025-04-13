@@ -174,6 +174,7 @@ struct ActorData
         bool is_reptile;
         bool is_amphibian;
         bool can_be_summoned_by_mon;
+        bool can_spawn_from_tomb;
         bool can_be_shapeshifted_into;
         bool can_bleed;
         bool can_leave_corpse;

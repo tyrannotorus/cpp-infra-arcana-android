@@ -2625,9 +2625,9 @@ private:
         // NOTE: There is no way for the summon implementation classes to control the allowed
         // dungeon level range of the monsters. For spells that should summon a specific monster,
         // make sure that the monster is in range for the summoners spell skill!
-        Range get_allowed_mon_dlvl_range(SpellSkill skill) const;
+        Range get_allowed_mon_lvl_range(SpellSkill skill) const;
 
-        std::vector<std::string> make_summon_bucket(const Range& dlvl_range) const;
+        std::vector<std::string> make_summon_bucket(const Range& mon_lvl_range) const;
 
         void summon(const std::string& id, actor::Actor* caster) const;
 

@@ -1162,18 +1162,15 @@ private:
         Color m_color {};
 };
 
-// NOTE: In some previous versions, it was possible to inspect the tomb and get
-// a hint about its trait ("It has an aura of unrest", "There are foreboding
-// carved signs", etc). This is currently not possible - you open the tomb and
-// any "trap" it has will trigger. Therefore the TombTrait type could be
-// removed, and instead an effect is just randomized when the tomb is
-// opened. But it should be kept the way it is; it could be useful. Maybe some
-// sort of hint will be re-implemented.
-enum class TombTrait
+// NOTE: In some previous versions, it was possible to inspect the tomb and get a hint about its
+// trait ("It has an aura of unrest", "There are foreboding carved signs", etc). This is currently
+// not possible - you open the tomb and any "trap" it has will trigger. Therefore the TombTrait type
+// could be removed, and instead an effect is just randomized when the tomb is opened. But it should
+// be kept the way it is; it could be useful. Maybe some sort of hint will be re-implemented.
+enum class TombTrapId
 {
-        ghost,
-        other_undead,  // Zombies, Mummies, ...
-        stench,        // Fumes, Ooze-type monster
+        monster,
+        fumes,
         cursed,
         END
 };
@@ -1218,14 +1215,22 @@ public:
 private:
         DidTriggerTrap trigger_trap(actor::Actor* actor) override;
 
+        void trigger_trap_mon() const;
+        std::string get_random_allowed_mon_id() const;
+        std::string get_mon_appear_msg(const std::string& mon_id) const;
+
+        void trigger_trap_fumes() const;
+
+        void trigger_trap_cursed() const;
+
         void player_loot();
 
-        bool m_is_open;
-        bool m_is_trait_known;
+        bool m_is_open {false};
+        bool m_is_trait_known {false};
 
         int m_push_lid_one_in_n;
-        TombAppearance m_appearance;
-        TombTrait m_trait;
+        TombAppearance m_appearance {TombAppearance::common};
+        TombTrapId m_trap_id {TombTrapId::END};
 };
 
 enum class ChestMaterial

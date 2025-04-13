@@ -9,6 +9,7 @@
 - Hazy Mirrors no longer recall forgotten spells, instead they identify all carried items. They are also much rarer than before.
 - If the player has a cursed item, gongs have a high chance of giving the "bless" bonus (which also removes one curse).
 - Magic traps ("strange shape") starts hidden again just like mechanical traps, however traps are no longer spawned in corridors.
+- The type of monsters that can appear from tombs is now limited based on the current dungeon level (previously mid/late game monsters could spawn from tombs early in the game).
 
 # Backgrounds (classes)
 - Exorcists can no longer store spirit points above max level indefinitely, instead they gain fervor points for destroying manuscripts, altars, etc. Fervor can be used for casting spells, and is used automatically when there is not enough spirit points to cast from. The "Prolonged Life" trait also uses fervor instead of spirit.
