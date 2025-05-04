@@ -18,6 +18,7 @@
 #include "debug.hpp"
 #include "item_att_property.hpp"
 #include "item_data.hpp"
+#include "misc.hpp"
 #include "paths.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
@@ -506,10 +507,26 @@ static void dump_group_size(xml::Element* group_e, actor::ActorData& data)
                 "weight",
                 rule.weight);
 
-        xml::try_get_attribute_int(
-                group_e,
-                "required_dungeon_level",
-                rule.required_dlvl);
+        std::string required_dlvl_str;
+
+        const bool did_get_required_dlvl =
+                xml::try_get_attribute_str(
+                        group_e,
+                        "required_dungeon_level",
+                        required_dlvl_str);
+
+        if (did_get_required_dlvl) {
+                if (required_dlvl_str[0] == '+') {
+                        // Relative to minimum spawn dungeon level.
+                        const int relative_dlvl = to_int(required_dlvl_str.substr(1));
+
+                        rule.required_dlvl = data.spawn_min_dlvl + relative_dlvl;
+                }
+                else {
+                        // Absolute value.
+                        rule.required_dlvl = to_int(required_dlvl_str);
+                }
+        }
 
         data.group_sizes.push_back(rule);
 }
