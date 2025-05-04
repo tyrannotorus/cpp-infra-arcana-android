@@ -1112,6 +1112,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_FLYING</property>
             <property>PROP_R_BLIND</property>
             <property>PROP_R_DISEASE</property>
+            <property>PROP_REDUCED_PIERCE_DMG</property>
         </properties>
 
         <ai>
@@ -6642,6 +6643,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_DARKVISION</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_DISEASE</property>
+            <property>PROP_REDUCED_PIERCE_DMG</property>
         </properties>
 
         <ai>
@@ -6736,6 +6738,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_DARKVISION</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_DISEASE</property>
+            <property>PROP_REDUCED_PIERCE_DMG</property>
         </properties>
 
         <ai>
@@ -6842,6 +6845,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_DARKVISION</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_DISEASE</property>
+            <property>PROP_REDUCED_PIERCE_DMG</property>
         </properties>
 
         <spells>
@@ -6956,6 +6960,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_DARKVISION</property>
             <property>PROP_R_SLEEP</property>
             <property>PROP_R_DISEASE</property>
+            <property>PROP_REDUCED_PIERCE_DMG</property>
         </properties>
 
         <spells>
@@ -8091,7 +8096,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <name_the>the Putrid Ooze</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
-            <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. A malodorous broth of purulence bubbles about its nucleus, indicating it is ridden with disease.</description>
+            <description>A product of all that has festered in forgotten vaults for untold ages. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. A malodorous broth of purulence bubbles about its nucleus, indicating it is ridden with disease.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -8149,6 +8154,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_SLEEP</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_OOZE</property>
+            <property>PROP_REDUCED_PIERCE_DMG</property>
         </properties>
 
         <ai>
@@ -8196,7 +8202,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <name_the>the Lurking Ooze</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
-            <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. This species has developed a trait that allows it to mimic the colors of its surroundings, rendering it nearly invisible to its prey.</description>
+            <description>A product of all that has festered in forgotten vaults for untold ages. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. This species has developed a trait that allows it to mimic the colors of its surroundings, rendering it nearly invisible to its prey.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -8253,6 +8259,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_SLEEP</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_OOZE</property>
+            <property>PROP_REDUCED_PIERCE_DMG</property>
         </properties>
 
         <ai>
@@ -8300,7 +8307,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <name_the>the Poison Ooze</name_the>
             <corpse_name_a></corpse_name_a>
             <corpse_name_the></corpse_name_the>
-            <description>A product of all that has festered in forgotten chambers for untold ages. Whether by nefarious design or as a consequence of prolonged exposure to the corruption encapsulated within the church's walls, it has stirred to life, inching towards any prey it seeks to devour. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. The alarmingly green hue of this particular specimen indicates its utter venomousness.</description>
+            <description>A product of all that has festered in forgotten vaults for untold ages. It exudes a mephitic cloud stemming from the unknown chemical processes that are constantly occurring within it. The alarmingly green hue of this particular specimen indicates its utter venomousness.</description>
             <allow_wielded_weapon_description>false</allow_wielded_weapon_description>
             <allow_speed_description>true</allow_speed_description>
             <wary_message>seems disturbed.</wary_message>
@@ -8358,6 +8365,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <property>PROP_R_SLEEP</property>
             <property>PROP_DARKVISION</property>
             <property>PROP_OOZE</property>
+            <property>PROP_REDUCED_PIERCE_DMG</property>
         </properties>
 
         <ai>
