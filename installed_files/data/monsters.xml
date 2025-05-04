@@ -10369,6 +10369,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <item_set>ITEMSET_HIGH_PRIEST_GUARD_ROGUE</item_set>
         </items>
 
+        <spells>
+            <spell skill="SPELLSKILL_EXPERT">SPELL_TELEPORT</spell>
+        </spells>
+
         <properties>
             <property>PROP_R_FEAR</property>
             <property>PROP_R_BREATH</property>
@@ -10457,7 +10461,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
         <attacks>
             <attack id="ITEMINTR_CLAW">
-                <damage>10</damage>
+                <damage>12</damage>
                 <property_applied>PROP_INFECTED</property_applied>
             </attack>
         </attacks>
