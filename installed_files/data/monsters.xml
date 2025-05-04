@@ -255,9 +255,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="20">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="60" required_dungeon_level="2">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="20" required_dungeon_level="3">MONGROUPSIZE_PACK</group_size>
-            <group_size weight="1"  required_dungeon_level="3">MONGROUPSIZE_SWARM</group_size>
+            <group_size weight="60" required_dungeon_level="+1">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="20" required_dungeon_level="+2">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1"  required_dungeon_level="+3">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_CRYPT</native_room>
@@ -356,7 +356,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="20">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="60" required_dungeon_level="2">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="60" required_dungeon_level="+2">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_CRYPT</native_room>
@@ -457,7 +457,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_be_shapeshifted_into>false</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="3">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="1" required_dungeon_level="2">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="1" required_dungeon_level="+2">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_CRYPT</native_room>
@@ -2337,7 +2337,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
-            <group_size required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
+            <group_size required_dungeon_level="+4">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_SPIDER</native_room>
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CAVE</native_room>
@@ -2430,7 +2430,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
-            <group_size required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
+            <group_size required_dungeon_level="+4">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_SPIDER</native_room>
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CAVE</native_room>
@@ -2523,7 +2523,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size>MONGROUPSIZE_ALONE</group_size>
-            <group_size required_dungeon_level="12">MONGROUPSIZE_FEW</group_size>
+            <group_size required_dungeon_level="+4">MONGROUPSIZE_FEW</group_size>
             <native_room>ROOM_SPIDER</native_room>
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CAVE</native_room>
@@ -4820,7 +4820,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size>MONGROUPSIZE_ALONE</group_size>
+            <group_size weight="6">MONGROUPSIZE_ALONE</group_size>
+            <group_size weight="3" required_dungeon_level="+2">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="1" required_dungeon_level="+8">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_CAVE</native_room>
             <native_room>ROOM_CHASM</native_room>
@@ -4918,9 +4920,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="20">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="10">MONGROUPSIZE_PACK</group_size>
-            <group_size weight="1">MONGROUPSIZE_SWARM</group_size>
+            <group_size weight="10">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="6" required_dungeon_level="+2">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1" required_dungeon_level="+4">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_MONSTER</native_room>
             <native_room>ROOM_CRYPT</native_room>
@@ -5990,8 +5992,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="4">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="2">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="4" required_dungeon_level="+2">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="4" required_dungeon_level="+4">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1" required_dungeon_level="+6">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CHASM</native_room>
@@ -6082,8 +6085,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="3">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="2">MONGROUPSIZE_ALONE</group_size>
+            <group_size weight="8" required_dungeon_level="+2">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="4" required_dungeon_level="+4">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1" required_dungeon_level="+6">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_FOREST</native_room>
             <native_room>ROOM_CHASM</native_room>
@@ -6271,9 +6276,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <can_spawn_from_tomb>false</can_spawn_from_tomb>
             <can_be_shapeshifted_into>true</can_be_shapeshifted_into>
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
-            <group_size weight="4">MONGROUPSIZE_ALONE</group_size>
-            <group_size weight="1" required_dungeon_level="10">MONGROUPSIZE_FEW</group_size>
-            <group_size weight="10" required_dungeon_level="20">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
+            <group_size weight="2" required_dungeon_level="10">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="8" required_dungeon_level="20">MONGROUPSIZE_PACK</group_size>
             <native_room>ROOM_CAVE</native_room>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_FOREST</native_room>
@@ -8163,7 +8168,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
         <spawning>
             <min_dungeon_level>2</min_dungeon_level>
-            <max_dungeon_level>6</max_dungeon_level>
+            <max_dungeon_level>8</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
             <can_be_summoned_by_monster>true</can_be_summoned_by_monster>
@@ -8172,6 +8177,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
             <group_size weight="3">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="20" required_dungeon_level="+2">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1"  required_dungeon_level="+3">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_DAMP</native_room>
             <native_room>ROOM_CHASM</native_room>
@@ -8274,6 +8281,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
             <group_size weight="3">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="20" required_dungeon_level="+2">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1"  required_dungeon_level="+3">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_DAMP</native_room>
             <native_room>ROOM_CHASM</native_room>
@@ -8334,7 +8343,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
         <attacks>
             <attack id="ITEMINTR_PUS_SPEW">
-                <damage>4</damage>
+                <damage>6</damage>
                 <property_applied>PROP_POISONED</property_applied>
             </attack>
         </attacks>
@@ -8367,7 +8376,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         </ai>
 
         <spawning>
-            <min_dungeon_level>7</min_dungeon_level>
+            <min_dungeon_level>6</min_dungeon_level>
             <max_dungeon_level>12</max_dungeon_level>
             <spawn_weight>100</spawn_weight>
             <auto_spawn>true</auto_spawn>
@@ -8377,6 +8386,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <nr_allowed_to_spawn>-1</nr_allowed_to_spawn>
             <group_size weight="1">MONGROUPSIZE_ALONE</group_size>
             <group_size weight="3">MONGROUPSIZE_FEW</group_size>
+            <group_size weight="20" required_dungeon_level="+2">MONGROUPSIZE_PACK</group_size>
+            <group_size weight="1"  required_dungeon_level="+3">MONGROUPSIZE_SWARM</group_size>
             <native_room>ROOM_PLAIN</native_room>
             <native_room>ROOM_DAMP</native_room>
             <native_room>ROOM_CHASM</native_room>
