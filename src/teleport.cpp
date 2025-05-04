@@ -157,17 +157,6 @@ static void make_all_mon_not_seeing_player_unaware()
         }
 }
 
-static void confuse_player()
-{
-        msg_log::add("I suddenly find myself in a different location!");
-
-        prop::Prop* prop = prop::make(prop::Id::confused);
-
-        prop->set_duration(8);
-
-        map::g_player->m_properties.apply(prop);
-}
-
 static bool should_player_ctrl_tele(const ShouldCtrlTele ctrl_tele)
 {
         switch (ctrl_tele) {
@@ -223,6 +212,45 @@ static void filter_out_near(const P& origin, std::vector<P>& positions)
                 else {
                         ++it;
                 }
+        }
+}
+
+static void handle_properties_ended_by_teleporting(actor::Actor& actor)
+{
+        const std::vector<prop::Id> props_ended = {
+                prop::Id::entangled,
+                prop::Id::stuck,
+                prop::Id::nailed};
+
+        const prop::PropEndConfig cfg(
+                prop::PropEndAllowCallEndHook::no,
+                prop::PropEndAllowMsg::no,
+                prop::PropEndAllowHistoricMsg::yes);
+
+        for (const prop::Id id : props_ended) {
+                actor.m_properties.end_prop(id, cfg);
+        }
+}
+
+static void handle_player_confusion(
+        actor::Actor& actor_teleporting,
+        const bool has_tele_ctrl,
+        const bool is_affected_by_void_traveler)
+{
+        if (!actor::is_player(&actor_teleporting)) {
+                return;
+        }
+
+        const bool is_confused = actor_teleporting.m_properties.has(prop::Id::confused);
+
+        if (!has_tele_ctrl || is_confused || is_affected_by_void_traveler) {
+                msg_log::add("I suddenly find myself in a different location!");
+
+                prop::Prop* prop = prop::make(prop::Id::confused);
+
+                prop->set_duration(8);
+
+                map::g_player->m_properties.apply(prop);
         }
 }
 
@@ -326,21 +354,9 @@ void teleport(
                 actor.m_mon_aware_state.player_aware_of_me_counter = 0;
         }
 
-        const std::vector<prop::Id> props_ended = {
-                prop::Id::entangled,
-                prop::Id::stuck,
-                prop::Id::nailed};
+        handle_properties_ended_by_teleporting(actor);
 
-        const prop::PropEndConfig cfg(
-                prop::PropEndAllowCallEndHook::no,
-                prop::PropEndAllowMsg::no,
-                prop::PropEndAllowHistoricMsg::yes);
-
-        for (const prop::Id id : props_ended) {
-                actor.m_properties.end_prop(id, cfg);
-        }
-
-        // Hostile void travelers "intercepts" players teleporting, and calls the player to them.
+        // Hostile void travelers "intercept" players teleporting, and calls the player to them.
         const bool is_affected_by_void_traveler =
                 handle_void_traveler_affecting_player_teleport(
                         actor,
@@ -384,14 +400,7 @@ void teleport(
 
         actor::make_player_aware_seen_monsters();
 
-        const bool is_confused = actor.m_properties.has(prop::Id::confused);
-
-        if (actor::is_player(&actor) &&
-            (!has_tele_ctrl ||
-             is_confused ||
-             is_affected_by_void_traveler)) {
-                confuse_player();
-        }
+        handle_player_confusion(actor, has_tele_ctrl, is_affected_by_void_traveler);
 
         // Bump the target terrain.
         map::g_terrain.at(pos)->bump(actor);
