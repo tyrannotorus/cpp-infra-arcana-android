@@ -13,7 +13,7 @@
 
 namespace version_info
 {
-const std::string g_version_str = "v22.1.0";
+const std::string g_version_str = "v23.0.0";
 const std::string g_copyright_str = "(c) 2011-2025 Martin Tornqvist";
 const std::string g_license_str = "Infra Arcana is free software, see LICENSE.txt.";
 const std::string g_date_str = __DATE__;
