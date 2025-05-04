@@ -365,9 +365,7 @@ AllowAction Terrain::pre_bump(actor::Actor& actor_bumping)
             !props.has(prop::Id::tiny_flying) &&
             can_move(actor_bumping) &&
             map::g_seen.at(m_pos)) {
-                const std::string msg =
-                        "Step into the flames? " +
-                        common_text::g_yes_or_no_hint;
+                const std::string msg = "Step into the flames? " + common_text::g_yes_or_no_hint;
 
                 msg_log::add(
                         msg,
@@ -376,11 +374,11 @@ AllowAction Terrain::pre_bump(actor::Actor& actor_bumping)
                         MorePromptOnMsg::no,
                         CopyToMsgHistory::no);
 
-                const auto query_result = query::yes_or_no();
+                const BinaryAnswer query_result = query::yes_or_no();
 
                 msg_log::clear();
 
-                const bool allowed = query_result == BinaryAnswer::yes;
+                const bool allowed = (query_result == BinaryAnswer::yes);
 
                 return allowed ? AllowAction::yes : AllowAction::no;
         }

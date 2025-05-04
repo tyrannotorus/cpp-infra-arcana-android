@@ -390,25 +390,25 @@ void clear()
                 return;
         }
 
-        bool is_any_copied_to_history = false;
+        bool is_all_copied_to_history = true;
 
         for (auto& line : s_lines) {
                 for (auto& msg : line.messages) {
-                        if (msg.should_copy_to_history() == CopyToMsgHistory::yes) {
-                                is_any_copied_to_history = true;
+                        if (msg.should_copy_to_history() == CopyToMsgHistory::no) {
+                                is_all_copied_to_history = false;
                         }
                 }
         }
 
         if (
                 !is_empty() &&
-                is_any_copied_to_history &&
+                is_all_copied_to_history &&
                 (s_msg_fade_state == MsgFadeState::allow_start_fade)) {
-                // The following is fulfilled:
                 //
-                // * The message log contains messages,
-                // * There is a message that is allowed to be copied to message history (we do not
-                //   want to fade out things like "which direction?"),
+                // All of the following is fulfilled:
+                // * The message log contains messages.
+                // * All messages are allowed to be copied to message history (we do not want to
+                //   fade out things like "which direction?").
                 // * We are allowed to start a new fade.
                 //
                 // Start fading out the messages.
@@ -636,6 +636,9 @@ void more_prompt()
         //
         // This could otherwise happen in cases where the client code is calling "more_prompt"
         // directly while we are fading out another message.
+        //
+        // TODO: Is this still relevant? Or is that from when messages just faded out automatically
+        // in real time (as opposed to fading when the player turns start)?
         //
         s_msg_fade_state = MsgFadeState::prevent_fade;
 

@@ -417,11 +417,12 @@ void MedicalBag::interrupted(const ForceInterruptActions is_forced)
                         MorePromptOnMsg::no,
                         CopyToMsgHistory::no);
 
-                should_continue =
-                        (query::yes_or_no(
-                                 std::nullopt,
-                                 AllowSpaceCancel::no) ==
-                         BinaryAnswer::yes);
+                const BinaryAnswer query_result =
+                        query::yes_or_no(
+                                std::nullopt,
+                                AllowSpaceCancel::no);
+
+                should_continue = (query_result == BinaryAnswer::yes);
 
                 msg_log::clear();
         }
