@@ -16,7 +16,6 @@ CppCheckResults.xml
 *.pyc
 clang-tidy-commands.log
 .cache
-compile_commands.json
 
 # Vim temporary files
 *.swp
