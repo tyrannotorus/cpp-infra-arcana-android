@@ -9,22 +9,28 @@
 
 #include "browser.hpp"
 #include "state.hpp"
+#include "text_page.hpp"
 
 // Shown on top of the title screen at boot, before anything else: this is
 // an alpha build, not the finished game. Sets expectations BEFORE first
 // impressions form - the difference between "this sucks" and "this alpha
 // is promising". Dismissed by any input, fading to black into the title.
-class AlphaNoticeState : public State
+class AlphaNoticeState : public TextPageState
 {
 public:
-        void draw() override;
-
-        void update() override;
-
         StateId id() const override
         {
                 return StateId::alpha_notice;
         }
+
+protected:
+        std::string page_title() const override;
+
+        std::string page_text() const override;
+
+        void on_confirmed() override;
+
+        void on_cancelled() override;
 };
 
 class MainMenuState : public State

@@ -63,52 +63,31 @@ static bool query_overwrite_savefile()
 // -----------------------------------------------------------------------------
 // Alpha notice state
 // -----------------------------------------------------------------------------
-void AlphaNoticeState::draw()
+std::string AlphaNoticeState::page_title() const
 {
-        const auto area = panels::screen_box_area();
-
-        const int center_x = panels::center_x(Panel::screen);
-
-        const std::vector<ColoredString> lines = {
-                {"A L P H A   V E R S I O N", colors::title()},
-                {"", colors::text()},
-                {"This is an early alpha of the Android port of", colors::text()},
-                {"Infra Arcana. It is not the finished game.", colors::text()},
-                {"", colors::text()},
-                {"Expect bugs, rough edges, and missing polish.", colors::text()},
-                {"", colors::text()},
-                {"Tap to continue", colors::gray()},
-        };
-
-        P pos(
-                center_x,
-                ((area.p0.y + area.p1.y) / 2) - ((int)lines.size() / 2));
-
-        for (const auto& line : lines) {
-                if (!line.str.empty()) {
-                        io::draw_text_center(
-                                line.str,
-                                Panel::screen,
-                                pos,
-                                line.color);
-                }
-
-                ++pos.y;
-        }
+        return "Alpha version";
 }
 
-void AlphaNoticeState::update()
+std::string AlphaNoticeState::page_text() const
 {
-        const auto input = io::read_input();
+        return "This is an early alpha of the Android port of Infra "
+               "Arcana. It is not the finished game.\n\n"
+               "Expect bugs, rough edges, and missing polish.";
+}
 
-        if (input.key == -1) {
-                return;
-        }
-
+void AlphaNoticeState::on_confirmed()
+{
         // Acknowledged - a beat of black, then the title screen covers it
         fade::to_black(1500);
 
         states::pop();
+}
+
+void AlphaNoticeState::on_cancelled()
+{
+        // The device back button acknowledges too - a boot notice has
+        // nothing to cancel back to
+        on_confirmed();
 }
 
 // -----------------------------------------------------------------------------
