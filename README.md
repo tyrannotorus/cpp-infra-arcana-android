@@ -24,6 +24,11 @@ liability for any damage to your device when it melts from awesomeness.
 While I am an experienced developer, note this is a personal-use project that's been human-directed
 as far as top-down architecture but 100% slop-coded. Thus beware when forking. Here be dragons.
 
+## APK Releases
+
+- Get them here!
+  https://github.com/tyrannotorus/cpp-infra-arcana-android/releases
+
 ## Supported Platforms
 
 - **arm64-v8a** — modern Android phones and tablets
@@ -44,11 +49,6 @@ as far as top-down architecture but 100% slop-coded. Thus beware when forking. H
 | Hold briefly, then drag | Look: pans the map with the highlighted center tile described live (a quick flick is a move instead) |
 | Back button | Escape |
 | Hamburger button | In-game menu: Actions, Video, Audio, Input, Gameplay, Tome of Wisdom, Quit |
-
-## APK Releases
-
-- Get them here!
-  https://github.com/tyrannotorus/cpp-infra-arcana-android/releases
 
 ## Build
 
