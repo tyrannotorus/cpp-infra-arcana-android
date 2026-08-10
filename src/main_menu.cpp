@@ -70,9 +70,8 @@ std::string AlphaNoticeState::page_title() const
 
 std::string AlphaNoticeState::page_text() const
 {
-        return "This is an early alpha of the Android port of Infra "
-               "Arcana. It is not the finished game.\n\n"
-               "Expect bugs, rough edges, and missing polish.";
+        return "This is an early alpha of the Android port of Infra Arcana.\n"
+               "It is not the finished game.";
 }
 
 void AlphaNoticeState::on_confirmed()
