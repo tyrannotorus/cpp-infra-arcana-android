@@ -20,9 +20,12 @@ namespace version_info
 const std::string g_version_str = "v23.0.0";
 
 // The displayed version: the core version plus our own Android port build
-// increment (Brogue-style major.minor.patch.build). Bump the increment
-// together with versionName/versionCode in android/app/build.gradle.kts.
-const std::string g_build_version_str = g_version_str + ".12";
+// increment (Brogue-style major.minor.patch.build). The release workflow
+// stamps the increment from the git tag; keep it and
+// versionName/versionCode in android/app/build.gradle.kts in sync for
+// local builds. The "-alpha" phase suffix is manual - dropping it when
+// the port leaves alpha is a deliberate decision, not a tag format.
+const std::string g_build_version_str = g_version_str + ".13-alpha";
 const std::string g_copyright_str = "(c) 2011-2025 Martin Tornqvist";
 const std::string g_license_str = "Infra Arcana is free software, see LICENSE.txt.";
 const std::string g_date_str = __DATE__;

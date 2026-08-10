@@ -58,8 +58,8 @@ android {
         applicationId = "camp.werewolf.infraarcana"
         minSdk = 24
         targetSdk = 35
-        versionCode = 23000012
-        versionName = "23.0.0.12"
+        versionCode = 23000013
+        versionName = "23.0.0.13"
 
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")

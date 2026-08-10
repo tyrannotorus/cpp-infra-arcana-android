@@ -72,6 +72,9 @@ int main(int argc, char** argv)
 
         states::push(std::make_unique<MainMenuState>());
 
+        // On top of the title screen, so it is what boot shows first
+        states::push(std::make_unique<AlphaNoticeState>());
+
         states::run();
 
         init::cleanup_session();

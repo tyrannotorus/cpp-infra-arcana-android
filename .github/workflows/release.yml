@@ -32,6 +32,10 @@ jobs:
           VERSION_CODE=$(( MAJOR * 1000000 + MINOR * 10000 + PATCH * 100 + BUILD ))
           sed -i "s/versionCode = .*/versionCode = $VERSION_CODE/" android/app/build.gradle.kts
           sed -i "s/versionName = .*/versionName = \"$TAG\"/" android/app/build.gradle.kts
+          # Stamp the native build increment shown on the title screen,
+          # preserving any phase suffix (e.g. "-alpha") after the number
+          sed -i -E "s/(g_version_str \+ \")\.[0-9]+/\1.$BUILD/" src/version.cpp
+          grep -n "g_build_version_str" src/version.cpp
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > $HOME/ia-release.keystore

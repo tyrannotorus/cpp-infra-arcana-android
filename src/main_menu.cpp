@@ -24,6 +24,7 @@
 #include "create_character.hpp"
 #include "credits.hpp"
 #include "draw_box.hpp"
+#include "fade.hpp"
 #include "game.hpp"
 #include "global.hpp"
 #include "highscore.hpp"
@@ -57,6 +58,57 @@ static bool query_overwrite_savefile()
                 .run();
 
         return (choice == 0);
+}
+
+// -----------------------------------------------------------------------------
+// Alpha notice state
+// -----------------------------------------------------------------------------
+void AlphaNoticeState::draw()
+{
+        const auto area = panels::screen_box_area();
+
+        const int center_x = panels::center_x(Panel::screen);
+
+        const std::vector<ColoredString> lines = {
+                {"A L P H A   V E R S I O N", colors::title()},
+                {"", colors::text()},
+                {"This is an early alpha of the Android port of", colors::text()},
+                {"Infra Arcana. It is not the finished game.", colors::text()},
+                {"", colors::text()},
+                {"Expect bugs, rough edges, and missing polish.", colors::text()},
+                {"", colors::text()},
+                {"Tap to continue", colors::gray()},
+        };
+
+        P pos(
+                center_x,
+                ((area.p0.y + area.p1.y) / 2) - ((int)lines.size() / 2));
+
+        for (const auto& line : lines) {
+                if (!line.str.empty()) {
+                        io::draw_text_center(
+                                line.str,
+                                Panel::screen,
+                                pos,
+                                line.color);
+                }
+
+                ++pos.y;
+        }
+}
+
+void AlphaNoticeState::update()
+{
+        const auto input = io::read_input();
+
+        if (input.key == -1) {
+                return;
+        }
+
+        // Acknowledged - a beat of black, then the title screen covers it
+        fade::to_black(1500);
+
+        states::pop();
 }
 
 // -----------------------------------------------------------------------------
