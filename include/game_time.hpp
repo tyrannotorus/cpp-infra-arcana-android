@@ -45,6 +45,13 @@ void add_actor(actor::Actor* actor);
 
 void tick();
 
+// Number of ticks since the game started. NOT the turn number: this counts
+// every actor action, and a standard turn spans as many ticks as there are
+// actors. Comparing it across a call tells whether the call actually spent
+// game time - e.g. whether an inventory action was carried out or was
+// cancelled/refused (see BrowseInv).
+int tick_count();
+
 int turn_nr();
 
 actor::Actor* current_actor();

@@ -18,6 +18,8 @@
 #undef main
 #endif
 
+#include "android_bootstrap.hpp"
+
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
@@ -53,6 +55,10 @@ static void handle_args(int argc, char** argv)
 int main(int argc, char** argv)
 {
         TRACE_FUNC_BEGIN;
+
+        // Enter internal storage and extract the APK's game data there, so
+        // that the relative data paths used throughout the game just work.
+        android_bootstrap::init();
 
         rnd::seed();
 

@@ -332,6 +332,11 @@ ItemAttackProp* Item::prop_applied_intr_attack(
         return nullptr;
 }
 
+bool Item::can_stack_with(const Item& other) const
+{
+        return id() == other.id();
+}
+
 int Item::weight() const
 {
         auto w = (int)m_data->weight * m_nr_items;

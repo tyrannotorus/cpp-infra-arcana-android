@@ -22,6 +22,7 @@
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
+#include "viewport.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -112,6 +113,24 @@ namespace close
 {
 void player_try_close_or_jam()
 {
+        // Context sensitivity: while the look pin rests on an adjacent
+        // cell (drag-to-look), close/jam acts on THAT cell directly - this
+        // is the path taken by the contextual [ close ] pin (see
+        // GameState::on_map_panned). Otherwise ask for a direction.
+        if (viewport::is_pan_active()) {
+                const P pin_pos = viewport::center_map_pos();
+
+                if (map::is_pos_inside_map(pin_pos) &&
+                    pin_pos.is_adjacent(map::g_player->m_pos) &&
+                    (pin_pos != map::g_player->m_pos)) {
+                        msg_log::clear();
+
+                        player_try_close_or_jam_at(pin_pos);
+
+                        return;
+                }
+        }
+
         msg_log::clear();
 
         const std::string hint =
@@ -138,6 +157,11 @@ void player_try_close_or_jam()
 
                 player_try_close_or_jam_terrain(map::g_terrain.at(p));
         }
+}
+
+void player_try_close_or_jam_at(const P& pos)
+{
+        player_try_close_or_jam_terrain(map::g_terrain.at(pos));
 }
 
 }  // namespace close

@@ -589,7 +589,10 @@ void draw()
                 Panel::map_gui_stats_border,
                 colors::extra_dark_gray());
 
-        draw_box(panels::area(Panel::map_gui_stats_border));
+        draw_box(
+                panels::area(Panel::map_gui_stats_border),
+                colors::dark_gray(),
+                Panel::map_gui_stats_border);
 
         const Panel panel = Panel::map_gui_stats;
 

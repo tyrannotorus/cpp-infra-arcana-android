@@ -31,6 +31,7 @@
 #include "msg_log.hpp"
 #include "panel.hpp"
 #include "paths.hpp"
+#include "popup.hpp"
 #include "pos.hpp"
 #include "query.hpp"
 #include "random.hpp"
@@ -52,7 +53,11 @@ static config::OptionSubmenuType s_current_submenu = config::OptionSubmenuType::
 
 static std::vector<std::string> s_font_image_names;
 
+// The font a fresh install starts with (see set_default_variables)
+static const std::string s_default_font_name = "13x24_typewriter.png";
+
 static const int s_video_scale_factor_max = 4;
+static const int s_map_scale_factor_max = 4;
 
 static InputMode s_input_mode = InputMode::standard;
 static bool s_is_double_click_toggle_fullscreen = true;
@@ -62,6 +67,15 @@ static bool s_is_tiles_mode = false;
 static RendererType s_renderer_type = RendererType::auto_select;
 static bool s_is_fullscreen = false;
 static int s_video_scale_factor = 1;
+static bool s_side_panel_left = false;
+static std::string s_action_bar_order;
+static std::string s_action_bar_disabled;
+
+// Scale of the in-world (map) display, relative to the gui. Applied in tiles
+// mode only (scaling text mode would require stretched glyph rendering). On
+// touch devices the map is zoomed in for playability; a later iteration will
+// make this adjustable by pinch zooming.
+static int s_map_scale_factor = 2;
 static int s_brightness_pct = 100;
 static bool s_text_mode_filled_walls = true;
 static bool s_display_health_bars = true;
@@ -81,7 +95,6 @@ static bool s_has_seen_hint_global[(size_t)hints::Id::END];
 static bool s_always_warn_new_mon = false;
 static int s_delay_projectile_draw = -1;
 static int s_delay_explosion = -1;
-static std::string s_default_player_name;
 static bool s_is_bot_playing = false;
 static bool s_is_stress_test = false;
 static bool s_is_gj_mode = false;
@@ -245,8 +258,8 @@ static void update_render_dims()
 
                 s_gui_cell_px_w = font_dims.x;
                 s_gui_cell_px_h = font_dims.y;
-                s_map_cell_px_w = 20;
-                s_map_cell_px_h = 20;
+                s_map_cell_px_w = config::g_tile_img_px * s_map_scale_factor;
+                s_map_cell_px_h = config::g_tile_img_px * s_map_scale_factor;
         }
         else {
                 const auto font_dims = parse_dims_from_font_name(s_font_name);
@@ -273,7 +286,8 @@ static int calc_default_video_scale_factor(const P& native_res)
 
         int f = (native_res.x + 500) / 1000;
 
-        f = std::clamp(f, 1, s_video_scale_factor_max);
+        // Mobile default is at least 2x (readability on handheld screens)
+        f = std::clamp(f, 2, s_video_scale_factor_max);
 
         TRACE
                 << "Calculated a default video scale factor of "
@@ -295,8 +309,20 @@ static void set_default_variables()
 
         s_is_double_click_toggle_fullscreen = true;
 
-        // Use the smallest font
-        s_font_name = s_font_image_names[0];
+        // The typewriter face at 13x24 - the interface is laid out to be
+        // read at that cell size on a phone. NOTE: The font list is sorted
+        // by cell size, so entry 0 is the smallest one available - the
+        // fallback if the intended font is not installed.
+        const auto default_font =
+                std::find(
+                        std::cbegin(s_font_image_names),
+                        std::cend(s_font_image_names),
+                        s_default_font_name);
+
+        s_font_name =
+                (default_font == std::cend(s_font_image_names))
+                ? s_font_image_names[0]
+                : *default_font;
 
         s_always_center_view_on_player = true;
 
@@ -315,6 +341,18 @@ static void set_default_variables()
         s_audio_buffer_size = 512;
         s_renderer_type = RendererType::auto_select;
         s_is_fullscreen = true;
+
+        // Side stats panel on the LEFT by default - which puts the action
+        // bar's buttons and the [ x ] close control on the right, under the
+        // right thumb (swiping toward the screen edge flips it, see
+        // io_input). The map's centering follows the panel side, and
+        // nothing else - see viewport's visible_view_center.
+        s_side_panel_left = true;
+
+        s_map_scale_factor = 2;
+
+        s_action_bar_order = "";
+        s_action_bar_disabled = "";
         s_video_scale_factor = calc_default_video_scale_factor(native_res);
         s_brightness_pct = 100;
         s_text_mode_filled_walls = true;
@@ -334,7 +372,6 @@ static void set_default_variables()
         s_is_ranged_wpn_auto_reload = false;
         s_delay_projectile_draw = 25;
         s_delay_explosion = 250;
-        s_default_player_name = "";
 
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
                 s_has_seen_hint_global[i] = false;
@@ -354,7 +391,27 @@ static bool read_config_file()
                 return false;
         }
 
+        if (!ini.has("config")) {
+                return false;
+        }
+
         auto config = ini["config"];
+
+        // The config file is written as a complete set of keys - if
+        // fundamental keys are missing, the file is empty or truncated (e.g.
+        // the process was killed in the middle of writing it, which can
+        // happen on Android). Then ignore the whole file and use defaults,
+        // instead of reading garbage values (e.g. a video scale factor of
+        // zero, which would crash the window setup).
+        if (!config.has("video_scale_factor") ||
+            !config.has("delay_explosion")) {
+                TRACE_ERROR_RELEASE
+                        << "Config file is empty or truncated, "
+                        << "falling back to default values"
+                        << std::endl;
+
+                return false;
+        }
 
         s_master_volume_pct_option = to_int(config["master_volume_pct_option"]);
         s_master_volume_pct_adjusted = to_int(config["master_volume_pct_adjusted"]);
@@ -366,7 +423,23 @@ static bool read_config_file()
         s_window_px_w = to_int(config["window_px_w"]);
         s_window_px_h = to_int(config["window_px_h"]);
         s_is_fullscreen = config["is_fullscreen"] == "1";
-        s_video_scale_factor = to_int(config["video_scale_factor"]);
+        s_side_panel_left = config["side_panel_left"] == "1";
+
+        if (config.has("map_scale_factor")) {
+                s_map_scale_factor =
+                        std::clamp(
+                                to_int(config["map_scale_factor"]),
+                                1,
+                                s_map_scale_factor_max);
+        }
+
+        s_action_bar_order = config["action_bar_order"];
+        s_action_bar_disabled = config["action_bar_disabled"];
+        s_video_scale_factor =
+                std::clamp(
+                        to_int(config["video_scale_factor"]),
+                        1,
+                        s_video_scale_factor_max);
 
         std::string video_scale_str = config["video_scale_factor"];
         TRACE << "Read video_scale_factor: '" << video_scale_str << "'" << std::endl;
@@ -411,12 +484,6 @@ static bool read_config_file()
         s_delay_projectile_draw = to_int(config["delay_projectile_draw"]);
         s_delay_explosion = to_int(config["delay_explosion"]);
 
-        s_default_player_name = "";
-
-        if (config["default_player_name_set"] == "1") {
-                s_default_player_name = config["default_player_name"];
-        }
-
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
                 s_has_seen_hint_global[i] =
                         config["has_seen_hint_" + std::to_string(i)] == "1";
@@ -431,7 +498,10 @@ static void write_config_file()
 {
         TRACE_FUNC_BEGIN;
 
-        mINI::INIFile ini_file(paths::config_file_path() + ".ini");
+        const std::string file_path = paths::config_file_path() + ".ini";
+        const std::string tmp_file_path = file_path + ".tmp";
+
+        mINI::INIFile ini_file(tmp_file_path);
         mINI::INIStructure ini;
 
         auto& config = ini["config"];
@@ -447,6 +517,10 @@ static void write_config_file()
         config["window_px_w"] = std::to_string(s_window_px_w);
         config["window_px_h"] = std::to_string(s_window_px_h);
         config["is_fullscreen"] = s_is_fullscreen ? "1" : "0";
+        config["side_panel_left"] = s_side_panel_left ? "1" : "0";
+        config["map_scale_factor"] = std::to_string(s_map_scale_factor);
+        config["action_bar_order"] = s_action_bar_order;
+        config["action_bar_disabled"] = s_action_bar_disabled;
         config["video_scale_factor"] = std::to_string(s_video_scale_factor);
         config["brightness_pct"] = std::to_string(s_brightness_pct);
         config["renderer_type"] = std::to_string((int)s_renderer_type);
@@ -471,18 +545,26 @@ static void write_config_file()
         config["delay_projectile_draw"] = std::to_string(s_delay_projectile_draw);
         config["delay_explosion"] = std::to_string(s_delay_explosion);
 
-        config["default_player_name_set"] = s_default_player_name.empty() ? "0" : "1";
-
-        if (!s_default_player_name.empty()) {
-                config["default_player_name"] = s_default_player_name;
-        }
-
         for (size_t i = 0; i < (size_t)hints::Id::END; ++i) {
                 config["has_seen_hint_" + std::to_string(i)] =
                         s_has_seen_hint_global[i] ? "1" : "0";
         }
 
         ini_file.generate(ini);
+
+        // Atomically replace the previous config file - the process may be
+        // killed at any time (especially on Android), and a truncated config
+        // file must never be left behind
+        std::error_code error;
+
+        std::filesystem::rename(tmp_file_path, file_path, error);
+
+        if (error) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to replace config file: "
+                        << error.message()
+                        << std::endl;
+        }
 
         TRACE_FUNC_END;
 }
@@ -528,6 +610,7 @@ void init()
         s_options.emplace_back(std::make_unique<RendererTypeOption>());
         s_options.emplace_back(std::make_unique<FullscreenOption>());
         s_options.emplace_back(std::make_unique<VideoScaleOption>());
+        s_options.emplace_back(std::make_unique<GameScaleOption>());
         s_options.emplace_back(std::make_unique<BrightnessOption>());
         s_options.emplace_back(std::make_unique<TextModeFilledWallsOption>());
 
@@ -625,6 +708,43 @@ bool is_fullscreen()
 int video_scale_factor()
 {
         return s_video_scale_factor;
+}
+
+int map_scale_factor()
+{
+        return s_map_scale_factor;
+}
+
+bool is_side_panel_left()
+{
+        return s_side_panel_left;
+}
+
+void set_side_panel_left(const bool value)
+{
+        s_side_panel_left = value;
+
+        write_config_file();
+}
+
+std::string action_bar_order()
+{
+        return s_action_bar_order;
+}
+
+std::string action_bar_disabled()
+{
+        return s_action_bar_disabled;
+}
+
+void set_action_bar_layout(
+        const std::string& order_csv,
+        const std::string& disabled_csv)
+{
+        s_action_bar_order = order_csv;
+        s_action_bar_disabled = disabled_csv;
+
+        write_config_file();
 }
 
 int brightness_pct()
@@ -836,18 +956,6 @@ int delay_projectile_draw()
 int delay_explosion()
 {
         return s_delay_explosion;
-}
-
-void set_default_player_name(const std::string& name)
-{
-        s_default_player_name = name;
-
-        write_config_file();
-}
-
-std::string default_player_name()
-{
-        return s_default_player_name;
 }
 
 void set_fullscreen(const bool value)
@@ -1354,12 +1462,15 @@ void RendererTypeOption::change(OptionChangeCommand command) const
 
 std::string VideoScaleOption::name() const
 {
-        return "Video scale factor";
+        return "Menu scale";
 }
 
 std::string VideoScaleOption::descr() const
 {
-        return "Scale all graphics by this factor.";
+        return (
+                "Scale of the menus and interface (the side panel, message "
+                "log, and menu screens). The game world is additionally "
+                "scaled by the \"Game scale\" option.");
 }
 
 std::string VideoScaleOption::value_str() const
@@ -1401,6 +1512,66 @@ void VideoScaleOption::change(OptionChangeCommand command) const
 
         if (s_video_scale_factor != scale_factor_before) {
                 io::on_user_toggle_scaling();
+        }
+}
+
+std::string GameScaleOption::name() const
+{
+        return "Game scale";
+}
+
+std::string GameScaleOption::descr() const
+{
+        return (
+                "Scale of the game world (the map), independent of the "
+                "menu scale. Applied when using the tile set.");
+}
+
+std::string GameScaleOption::value_str() const
+{
+        return std::to_string(s_map_scale_factor) + "x";
+}
+
+OptionSubmenuType GameScaleOption::submenu_type() const
+{
+        return OptionSubmenuType::video;
+}
+
+void GameScaleOption::change(OptionChangeCommand command) const
+{
+        const int scale_factor_before = s_map_scale_factor;
+
+        switch (command) {
+        case OptionChangeCommand::enter: {
+                if (s_map_scale_factor < s_map_scale_factor_max) {
+                        ++s_map_scale_factor;
+                }
+                else {
+                        s_map_scale_factor = 1;
+                }
+        } break;
+
+        case OptionChangeCommand::right: {
+                if (s_map_scale_factor < s_map_scale_factor_max) {
+                        ++s_map_scale_factor;
+                }
+        } break;
+
+        case OptionChangeCommand::left: {
+                if (s_map_scale_factor > 1) {
+                        --s_map_scale_factor;
+                }
+        } break;
+        }
+
+        if (s_map_scale_factor != scale_factor_before) {
+                update_render_dims();
+
+                io::init_other();
+
+                states::draw();
+
+                io::update_screen();
         }
 }
 
@@ -2082,108 +2253,59 @@ void ExplosionDelayOption::change(OptionChangeCommand command) const
 // -----------------------------------------------------------------------------
 // Options state
 // -----------------------------------------------------------------------------
-OptionsState::OptionsState() :
-        m_browser((int)config::OptionSubmenuType::END)
-{
-        m_browser.set_custom_menu_keys({'v', 'a', 'i', 'g'});
-}
+OptionsState::OptionsState() = default;
 
 StateId OptionsState::id() const
 {
         return StateId::options;
 }
 
-void OptionsState::update()
+std::string OptionsState::page_title() const
 {
-        const io::InputData input = io::read_input();
-
-        const MenuAction action =
-                m_browser.read(
-                        input,
-                        MenuInputMode::scrolling_and_letters,
-                        ForceAutoSelect::yes);
-
-        switch (action) {
-        case MenuAction::esc:
-        case MenuAction::space: {
-                states::pop();
-                return;
-        } break;
-
-        case MenuAction::selected: {
-                const auto submenu = (config::OptionSubmenuType)m_browser.y();
-
-                filter_current_options(submenu);
-
-                s_current_submenu = submenu;
-
-                states::push(std::make_unique<OptionsSubmenuState>());
-        } break;
-
-        default: {
-        } break;
-        }
+        return "Options";
 }
 
-void OptionsState::draw()
+std::vector<MenuPageEntry> OptionsState::page_entries() const
 {
-        draw_box(panels::area(Panel::screen));
-
-        io::draw_text_center(
-                " Options ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), 0},
-                colors::title(),
-                io::DrawBg::yes,
-                colors::black(),
-                true);  // Allow pixel-level adjustment
-
-        // io::draw_text_center(
-        //         std::string(
-        //                 " " +
-        //                 common_text::g_set_option_hint +
-        //                 " " +
-        //                 common_text::g_screen_exit_hint +
-        //                 " "),
-        //         Panel::screen,
-        //         {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
-        //         colors::title(),
-        //         io::DrawBg::yes,
-        //         colors::black(),
-        //         true);  // Allow pixel-level adjustment
-
-        const auto nr_submenus = (int)config::OptionSubmenuType::END;
-
-        const int x = panels::center_x(Panel::screen) - 4;
-
-        int y = panels::center_y(Panel::screen) - (nr_submenus / 2) - 1;
+        std::vector<MenuPageEntry> entries;
 
         for (int i = 0; i < (int)config::OptionSubmenuType::END; ++i) {
-                auto submenu_type = config::OptionSubmenuType(i);
-
-                const std::string name =
-                        submenu_name_with_key_shortcut(submenu_type);
-
-                const Color& color =
-                        (m_browser.is_at_idx((int)i))
-                        ? colors::menu_highlight()
-                        : colors::menu_dark();
-
-                io::draw_text(name, Panel::screen, {x, y}, color);
-
-                ++y;
+                entries.push_back(
+                        {submenu_name_with_key_shortcut(
+                                 (config::OptionSubmenuType)i),
+                         ""});
         }
 
-        draw_user_data_info();
+        return entries;
+}
+
+void OptionsState::on_entry_selected(const int idx)
+{
+        states::push(
+                std::make_unique<OptionsSubmenuState>(
+                        (config::OptionSubmenuType)idx));
 }
 
 // -----------------------------------------------------------------------------
 // Options submenu state
 // -----------------------------------------------------------------------------
-OptionsSubmenuState::OptionsSubmenuState() :
-        m_browser((int)s_current_options.size())
+static void change_current_option(
+        const int idx,
+        const config::OptionChangeCommand command)
 {
-        m_browser.enable_left_right_keys();
+        s_current_options[idx]->change(command);
+
+        write_config_file();
+
+        io::clear_input();
+}
+
+OptionsSubmenuState::OptionsSubmenuState(
+        const config::OptionSubmenuType submenu)
+{
+        s_current_submenu = submenu;
+
+        filter_current_options(submenu);
 }
 
 StateId OptionsSubmenuState::id() const
@@ -2191,123 +2313,53 @@ StateId OptionsSubmenuState::id() const
         return StateId::options_submenu;
 }
 
-void OptionsSubmenuState::update()
+std::string OptionsSubmenuState::page_title() const
 {
-        // Some options play a custom selection audio, so they must disable the
-        // one played by the menu browser.
-        const bool enable_selection_audio =
-                s_current_options[m_browser.y()]
-                        ->allow_browser_selection_audio();
-
-        m_browser.set_selection_audio_enabled(enable_selection_audio);
-
-        const io::InputData input = io::read_input();
-
-        const MenuAction action = m_browser.read(input, MenuInputMode::scrolling);
-
-        const config::Option* const option = s_current_options[m_browser.y()];
-
-        bool did_set_option = false;
-
-        switch (action) {
-        case MenuAction::esc:
-        case MenuAction::space: {
-                states::pop();
-                return;
-        } break;
-
-        case MenuAction::selected: {
-                option->change(config::OptionChangeCommand::enter);
-                did_set_option = true;
-        } break;
-
-        case MenuAction::left: {
-                option->change(config::OptionChangeCommand::left);
-                did_set_option = true;
-        } break;
-
-        case MenuAction::right: {
-                option->change(config::OptionChangeCommand::right);
-                did_set_option = true;
-        } break;
-
-        default: {
-        } break;
-        }
-
-        if (did_set_option) {
-                write_config_file();
-
-                io::clear_input();
-        }
+        return submenu_name(s_current_submenu);
 }
 
-void OptionsSubmenuState::draw()
+std::string OptionsSubmenuState::page_hint() const
 {
-        draw_box(panels::area(Panel::screen));
+        return common_text::g_set_option_hint;
+}
 
-        io::draw_text_center(
-                " " + submenu_name(s_current_submenu) + " ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), 0},
-                colors::title(),
-                io::DrawBg::yes,
-                colors::black(),
-                true);  // Allow pixel-level adjustment
+std::vector<MenuPageEntry> OptionsSubmenuState::page_entries() const
+{
+        std::vector<MenuPageEntry> entries;
 
-        io::draw_text_center(
-                std::string(
-                        " " +
-                        common_text::g_set_option_hint +
-                        " " +
-                        common_text::g_screen_exit_hint +
-                        " "),
-                Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
-                colors::title(),
-                io::DrawBg::yes,
-                colors::black(),
-                true);  // Allow pixel-level adjustment
+        entries.reserve(s_current_options.size());
 
-        int y = 0;
-
-        const int nr_shown = m_browser.nr_items_shown();
-
-        for (int i = 0; i < nr_shown; ++i) {
-                const config::Option* const option = s_current_options[i];
-
-                const std::string name = option->name();
-
-                const Color& color =
-                        (m_browser.is_at_idx((int)i))
-                        ? colors::menu_highlight()
-                        : colors::menu_dark();
-
-                io::draw_text(
-                        name,
-                        Panel::options,
-                        {0, y},
-                        color);
-
-                const std::string value_str = option->value_str();
-
-                if (!value_str.empty()) {
-                        // io::draw_text(
-                        //         ":",
-                        //         Panel::options_values,
-                        //         {s_opt_values_x_pos - 2, y},
-                        //         color);
-
-                        io::draw_text(
-                                value_str,
-                                Panel::options_values,
-                                {0, y},
-                                color);
-                }
-
-                ++y;
+        for (const config::Option* const option : s_current_options) {
+                entries.push_back({option->name(), option->value_str()});
         }
 
+        return entries;
+}
+
+void OptionsSubmenuState::on_entry_selected(const int idx)
+{
+        change_current_option(idx, config::OptionChangeCommand::enter);
+}
+
+void OptionsSubmenuState::on_entry_left(const int idx)
+{
+        change_current_option(idx, config::OptionChangeCommand::left);
+}
+
+void OptionsSubmenuState::on_entry_right(const int idx)
+{
+        change_current_option(idx, config::OptionChangeCommand::right);
+}
+
+bool OptionsSubmenuState::entry_plays_selection_audio(const int idx) const
+{
+        // Some options play a custom selection audio, so they must disable
+        // the one played by the menu browser
+        return s_current_options[idx]->allow_browser_selection_audio();
+}
+
+void OptionsSubmenuState::draw_page_content()
+{
         const config::Option* const selected_option =
                 s_current_options[m_browser.y()];
 
@@ -2324,4 +2376,28 @@ void OptionsSubmenuState::draw()
                         {0, 0},
                         colors::text());
         }
+}
+
+int OptionsSubmenuState::list_x0(const int block_w) const
+{
+        (void)block_w;
+
+        return panels::p0(Panel::options).x;
+}
+
+int OptionsSubmenuState::list_y0(const int nr_entries_shown) const
+{
+        (void)nr_entries_shown;
+
+        return panels::p0(Panel::options).y;
+}
+
+int OptionsSubmenuState::list_max_x1() const
+{
+        return panels::p0(Panel::options_descr).x - 2;
+}
+
+bool OptionsSubmenuState::use_left_right_keys() const
+{
+        return true;
 }

@@ -14,6 +14,7 @@
 #include "global.hpp"
 #include "io.hpp"
 #include "state.hpp"
+#include "text_page.hpp"
 #include "time.hpp"
 
 namespace actor
@@ -84,7 +85,15 @@ public:
 
         void draw() override;
 
+        bool has_map_display_draw() const override;
+
+        void draw_map_display() override;
+
         void update() override;
+
+        void on_map_panned() override;
+
+        void on_resume() override;
 
         StateId id() const override;
 
@@ -97,16 +106,35 @@ private:
 // -----------------------------------------------------------------------------
 // Win game state
 // -----------------------------------------------------------------------------
-class WinGameState : public State
+// The winning ending, read one section at a time - the same page the
+// opening story is told on (see IntroStoryState), and its bookend.
+//
+// Tapping continues to the next section, and the [ x ] control steps back
+// to the one before. The FIRST section has no [ x ]: the ending is not
+// something to back out of, and there is nothing behind it to back out to
+// (the game is over - see Trapezohedron::pre_pickup_hook). Continuing past
+// the last section fades out and leaves the page, revealing the game
+// summary underneath.
+class WinGameState : public TextPageState
 {
 public:
         WinGameState() = default;
 
-        void draw() override;
-
-        void update() override;
-
         StateId id() const override;
+
+        bool has_close_button() const override;
+
+protected:
+        std::string page_title() const override;
+
+        std::string page_text() const override;
+
+        void on_confirmed() override;
+
+        void on_cancelled() override;
+
+private:
+        size_t m_section_idx {0};
 };
 
 #endif  // GAME_HPP

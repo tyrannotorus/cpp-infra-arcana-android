@@ -25,6 +25,7 @@
 #include "map.hpp"
 #include "msg_log.hpp"
 #include "state.hpp"
+#include "text_format.hpp"
 
 namespace item_pickup
 {
@@ -104,38 +105,76 @@ item::Item* unload_ranged_wpn(item::Wpn& wpn)
         return spawned_ammo;
 }
 
+bool can_unload_item_at_player()
+{
+        const item::Item* const item = map::g_items.at(map::g_player->m_pos);
+
+        if (!item ||
+            !item->data().ranged.is_ranged_wpn ||
+            item->data().ranged.has_infinite_ammo) {
+                return false;
+        }
+
+        return static_cast<const item::Wpn*>(item)->m_ammo_loaded > 0;
+}
+
 void try_unload_or_pick()
 {
-        item::Item* item = map::g_items.at(map::g_player->m_pos);
+        if (can_unload_item_at_player()) {
+                item::Item* const item = map::g_items.at(map::g_player->m_pos);
 
-        if (item &&
-            item->data().ranged.is_ranged_wpn &&
-            !item->data().ranged.has_infinite_ammo) {
                 auto* const wpn = static_cast<item::Wpn*>(item);
 
                 item::Item* const spawned_ammo = unload_ranged_wpn(*wpn);
 
-                if (spawned_ammo) {
-                        audio::play(audio::SfxId::pickup);
+                ASSERT(spawned_ammo);
 
-                        const std::string name_a =
-                                item->name(
-                                        ItemNameType::a,
-                                        ItemNameInfo::yes);
+                audio::play(audio::SfxId::pickup);
 
-                        msg_log::add("I unload " + name_a + ".");
+                const std::string name_a =
+                        item->name(
+                                ItemNameType::a,
+                                ItemNameInfo::yes);
 
-                        map::g_player->m_inv.put_in_backpack(spawned_ammo);
+                msg_log::add("I unload " + name_a + ".");
 
-                        game_time::tick();
+                map::g_player->m_inv.put_in_backpack(spawned_ammo);
 
-                        return;
-                }
+                game_time::tick();
+
+                return;
         }
 
-        // Did not unload a ranged weapon, run the normal item picking instead
+        // Nothing to unload here (no item, not a firearm, or empty already),
+        // run the normal item picking instead
 
         try_pick();
+}
+
+void print_item_at_player_msg()
+{
+        item::Item* const item = map::g_items.at(map::g_player->m_pos);
+
+        if (!item) {
+                return;
+        }
+
+        // Only print the item name if the item will not be "found" by stepping
+        // on it, otherwise there would be redundant messages, e.g. "A Muddy
+        // Potion." --> "I have found a Muddy Potion!"
+        if ((item->data().xp_on_found <= 0) || item->data().is_found) {
+                std::string item_name =
+                        item->name(
+                                ItemNameType::plural,
+                                ItemNameInfo::yes,
+                                ItemNameAttackInfo::main_attack_mode);
+
+                item_name = text_format::first_to_upper(item_name);
+
+                msg_log::add(item_name + ".");
+        }
+
+        item->discover();
 }
 
 }  // namespace item_pickup

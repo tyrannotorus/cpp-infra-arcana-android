@@ -11,13 +11,47 @@
 #include <utility>
 #include <vector>
 
+#include "action_bar.hpp"
+#include "context_pins.hpp"
 #include "debug.hpp"
+#include "draw_box.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
 static std::vector<std::unique_ptr<State>> s_current_states;
+
+bool State::has_close_button() const
+{
+        return screen_has_close_button(id());
+}
+
+// The lowest state that is currently drawn: everything from here up is
+// drawn, everything below it is covered. Shared by the drawing and the
+// graphics cycling passes, which must agree on it exactly.
+static std::vector<std::unique_ptr<State>>::iterator first_drawn_state()
+{
+        auto it = std::end(s_current_states);
+
+        while (it != std::begin(s_current_states)) {
+                --it;
+
+                const auto& state_ptr = *it;
+
+                // If not drawn overlayed, this state is the bottom layer
+                // (but only if it has been started and drawing is not paused
+                // for it).
+                if (!state_ptr->draw_overlayed() &&
+                    state_ptr->has_started() &&
+                    !state_ptr->is_drawing_disabled()) {
+                        break;
+                }
+        }
+
+        return it;
+}
 
 static void run_state_iteration()
 {
@@ -108,26 +142,10 @@ void cycle_graphics(const io::GraphicsCycle cycle)
                 return;
         }
 
-        // Find the first state to draw from.
-        auto cycle_from = std::end(s_current_states);
-
-        while (cycle_from != std::begin(s_current_states)) {
-                --cycle_from;
-
-                const auto& state_ptr = *cycle_from;
-
-                // If not drawn overlayed, cycle graphics from this state as
-                // bottom layer (but only if the state has been started and
-                // drawing is not paused for the state).
-                if (!state_ptr->draw_overlayed() &&
-                    state_ptr->has_started() &&
-                    !state_ptr->is_drawing_disabled()) {
-                        break;
-                }
-        }
-
-        // Cycle graphics in every state from this state onward.
-        for (; cycle_from != std::end(s_current_states); ++cycle_from) {
+        // Cycle graphics in every state from the bottom drawn layer onward.
+        for (auto cycle_from = first_drawn_state();
+             cycle_from != std::end(s_current_states);
+             ++cycle_from) {
                 const auto& state_ptr = *cycle_from;
 
                 // Do NOT cycle graphics in states which are not yet started
@@ -150,26 +168,10 @@ void draw()
 
         io::clear_screen();
 
-        // Find the first state to draw from.
-        auto draw_from = std::end(s_current_states);
-
-        while (draw_from != std::begin(s_current_states)) {
-                --draw_from;
-
-                const auto& state_ptr = *draw_from;
-
-                // If not drawn overlayed, cycle graphics from this state as
-                // bottom layer (but only if the state has been started and
-                // drawing is not paused for the state).
-                if (!state_ptr->draw_overlayed() &&
-                    state_ptr->has_started() &&
-                    !state_ptr->is_drawing_disabled()) {
-                        break;
-                }
-        }
-
-        // Draw every state from this state onward.
-        for (; draw_from != std::end(s_current_states); ++draw_from) {
+        // Draw every state from the bottom drawn layer onward.
+        for (auto draw_from = first_drawn_state();
+             draw_from != std::end(s_current_states);
+             ++draw_from) {
                 const auto& state_ptr = *draw_from;
 
                 // Do NOT draw states which are not yet started (they may need
@@ -182,6 +184,53 @@ void draw()
                         state_ptr->draw();
                 }
         }
+
+        // The touch action bar is always drawn on top of every state, and
+        // the context pins with it - they are an overlay of whatever is
+        // being played, not content of a screen (see context_pins)
+        action_bar::draw();
+
+        context_pins::draw();
+}
+
+bool draw_map_display()
+{
+        if (is_empty()) {
+                return false;
+        }
+
+        const auto first = first_drawn_state();
+
+        // Checked BEFORE anything is cleared - a partial redraw is all or
+        // nothing, and the caller falls back to a full draw
+        for (auto it = first; it != std::end(s_current_states); ++it) {
+                const auto& state_ptr = *it;
+
+                if (!state_ptr->has_started() ||
+                    state_ptr->is_drawing_disabled()) {
+                        continue;
+                }
+
+                if (!state_ptr->has_map_display_draw()) {
+                        return false;
+                }
+        }
+
+        io::clear_display_texture(io::Display::map);
+
+        for (auto it = first; it != std::end(s_current_states); ++it) {
+                const auto& state_ptr = *it;
+
+                if (state_ptr->has_started() &&
+                    !state_ptr->is_drawing_disabled()) {
+                        state_ptr->draw_map_display();
+                }
+        }
+
+        // NOTE: The action bar and the context pins are NOT redrawn - they
+        // live on the bar display, which still holds them.
+
+        return true;
 }
 
 void on_window_resized()

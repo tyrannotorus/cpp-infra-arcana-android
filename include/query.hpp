@@ -52,8 +52,17 @@ void cleanup();
 
 void wait_for_key_press();
 
+// An optional third answer to a yes/no query, bound to a key and shown as
+// a tappable context pin, e.g. [ take ammo ] when asked to pick
+// up a loaded ranged weapon (see context_pins::add)
+struct SpecialChoice
+{
+        char key {0};
+        std::string label {};
+};
+
 BinaryAnswer yes_or_no(
-        std::optional<char> key_for_special_event = std::nullopt,
+        std::optional<SpecialChoice> special_choice = std::nullopt,
         AllowSpaceCancel allow_space_cancel = AllowSpaceCancel::yes);
 
 Dir dir(AllowCenter allow_center);

@@ -25,6 +25,7 @@
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_trap.hpp"
+#include "viewport.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -120,6 +121,26 @@ void player_disarm()
 
         if (!is_allowed) {
                 return;
+        }
+
+        // Context sensitivity: while the look pin rests on an adjacent cell
+        // (drag-to-look), disarming acts on THAT cell directly - this is the
+        // path taken by the contextual [ disarm ] pin (see
+        // GameState::on_map_panned). There is NO "disarm" action bar button;
+        // this is the touch path for it, with the on-screen keyboard 'p' and
+        // its direction query as the fallback.
+        if (viewport::is_pan_active()) {
+                const P pin_pos = viewport::center_map_pos();
+
+                if (map::is_pos_inside_map(pin_pos) &&
+                    pin_pos.is_adjacent(map::g_player->m_pos) &&
+                    (pin_pos != map::g_player->m_pos)) {
+                        msg_log::clear();
+
+                        try_disarm_terrain_at(pin_pos);
+
+                        return;
+                }
         }
 
         const std::string hint =

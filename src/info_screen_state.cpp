@@ -6,25 +6,31 @@
 
 #include "info_screen_state.hpp"
 
+#include <algorithm>
+
 #include "SDL.h"
 #include "colors.hpp"
 #include "common_text.hpp"
+#include "config.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
+#include "io_internal.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
+#include "scrollbar.hpp"
 
 void InfoScreenState::draw_interface() const
 {
-        draw_box(panels::area(Panel::screen));
+        draw_box(panels::screen_box_area());
 
         const int screen_center_x = panels::center_x(Panel::screen);
 
         io::draw_text_center(
                 " " + title() + " ",
                 Panel::screen,
-                {screen_center_x, 0},
+                {screen_center_x, panels::screen_box_area().p0.y},
                 colors::title());
 
         const std::string cmd_info =
@@ -32,62 +38,210 @@ void InfoScreenState::draw_interface() const
                 ? common_text::g_scrollable_info_screen_hint
                 : common_text::g_screen_exit_hint;
 
-        io::draw_text_center(
-                " " + cmd_info + " ",
-                Panel::screen,
-                {screen_center_x, panels::y1(Panel::screen)},
-                colors::title());
+        if (!cmd_info.empty()) {
+                io::draw_text_center(
+                        " " + cmd_info + " ",
+                        Panel::screen,
+                        {screen_center_x, panels::screen_box_area().p1.y},
+                        colors::title());
+        }
+}
+
+R InfoScreenState::content_px_rect() const
+{
+        return io::panel_logical_px_rect(Panel::info_screen_content);
+}
+
+void InfoScreenState::draw_scrollable_content() const
+{
+        const int nr_lines_tot = get_lines_total();
+
+        if (nr_lines_tot <= 0) {
+                return;
+        }
+
+        const int cell_h = config::gui_cell_px_h();
+
+        const int first = first_visible_line();
+
+        const int last = last_visible_line();
+
+        const R content_px = content_px_rect();
+
+        // Clip partially visible lines at the top and bottom edges
+        io::set_clip_rect_px(Panel::info_screen_content, content_px);
+
+        const P panel_p0_px = content_px.p0;
+
+        for (int i = first; i <= last; ++i) {
+                const auto line = content_line(i);
+
+                if (line.str.empty()) {
+                        continue;
+                }
+
+                const P px_pos(
+                        panel_p0_px.x,
+                        panel_p0_px.y + (i * cell_h) - m_scroll_px);
+
+                io::draw_text_at_px(
+                        line.str,
+                        px_pos,
+                        line.color,
+                        io::DrawBg::no,
+                        colors::black());
+        }
+
+        io::disable_clip_rect();
+
+        draw_scroll_affordances();
+}
+
+void InfoScreenState::draw_scroll_affordances() const
+{
+        const R content_px = content_px_rect();
+
+        scrollbar::draw_content_fades(content_px, m_scroll_px, max_scroll_px());
+
+        scrollbar::draw(
+                scrollbar::track_px_rect(content_px),
+                m_scroll_px,
+                max_scroll_px());
+}
+
+bool InfoScreenState::try_begin_touch_drag(const P& logical_px)
+{
+        if ((type() != InfoScreenType::scrolling) || (max_scroll_px() <= 0)) {
+                return false;
+        }
+
+        const R track = scrollbar::track_px_rect(content_px_rect());
+
+        if (!scrollbar::grab_px_rect(track).is_pos_inside(logical_px)) {
+                return false;
+        }
+
+        m_is_scrollbar_drag_active = true;
+
+        m_scrollbar_drag.begin(
+                track,
+                logical_px.y,
+                m_scroll_px,
+                max_scroll_px());
+
+        on_touch_drag_move(logical_px);
+
+        return true;
+}
+
+void InfoScreenState::on_touch_drag_move(const P& logical_px)
+{
+        if (!m_is_scrollbar_drag_active) {
+                return;
+        }
+
+        set_scroll_px(
+                m_scrollbar_drag.scroll_px_at(
+                        scrollbar::track_px_rect(content_px_rect()),
+                        logical_px.y,
+                        m_scroll_px,
+                        max_scroll_px()));
+}
+
+void InfoScreenState::on_touch_drag_end()
+{
+        m_is_scrollbar_drag_active = false;
+}
+
+int InfoScreenState::max_scroll_px() const
+{
+        const int cell_h = config::gui_cell_px_h();
+
+        const int content_px_h = get_lines_total() * cell_h;
+
+        return std::max(0, content_px_h - content_px_rect().h());
+}
+
+void InfoScreenState::set_scroll_px(const int scroll_px)
+{
+        m_scroll_px = std::clamp(scroll_px, 0, max_scroll_px());
+}
+
+void InfoScreenState::scroll_to_bottom()
+{
+        m_scroll_px = max_scroll_px();
+}
+
+int InfoScreenState::first_visible_line() const
+{
+        return m_scroll_px / config::gui_cell_px_h();
+}
+
+int InfoScreenState::last_visible_line() const
+{
+        const int cell_h = config::gui_cell_px_h();
+
+        const int last = (m_scroll_px + content_px_rect().h() - 1) / cell_h;
+
+        return std::min(get_lines_total() - 1, last);
+}
+
+void InfoScreenState::on_confirmed()
+{
+        states::pop();
+}
+
+void InfoScreenState::on_cancelled()
+{
+        states::pop();
 }
 
 void InfoScreenState::update()
 {
-        const int line_jump = 3;
+        const int line_jump_px = 3 * config::gui_cell_px_h();
 
-        const int nr_lines_tot = get_lines_total();
+        const int page_jump_px =
+                content_px_rect().h() - config::gui_cell_px_h();
 
         const auto input = io::read_input();
-
-        const int panel_h = panels::h(Panel::info_screen_content);
 
         switch (input.key) {
         case SDLK_KP_2:
         case SDLK_DOWN: {
-                m_top_idx += line_jump;
-
-                const int top_nr_max = std::max(0, nr_lines_tot - panel_h);
-
-                m_top_idx = std::min(top_nr_max, m_top_idx);
+                set_scroll_px(m_scroll_px + line_jump_px);
         } break;
 
         case SDLK_KP_8:
         case SDLK_UP: {
-                m_top_idx = std::max(0, m_top_idx - line_jump);
+                set_scroll_px(m_scroll_px - line_jump_px);
         } break;
 
         case SDLK_PAGEUP: {
-                m_top_idx = std::max(0, m_top_idx - panel_h + 1);
+                set_scroll_px(m_scroll_px - page_jump_px);
         } break;
 
         case SDLK_PAGEDOWN: {
-                m_top_idx += panel_h - 1;
-
-                const int top_nr_max = std::max(0, nr_lines_tot - panel_h);
-
-                m_top_idx = std::min(top_nr_max, m_top_idx);
+                set_scroll_px(m_scroll_px + page_jump_px);
         } break;
 
         case SDLK_HOME: {
-                m_top_idx = 0;
+                set_scroll_px(0);
         } break;
 
         case SDLK_END: {
-                m_top_idx = std::max(0, nr_lines_tot - panel_h);
+                scroll_to_bottom();
         } break;
 
-        case SDLK_SPACE:
+        case SDLK_RETURN:
+        case SDLK_SPACE: {
+                // NOTE: A tap anywhere sends the confirm key (see
+                // io_input) - these screens are read and then tapped away,
+                // and scrolled with their scrollbar meanwhile
+                on_confirmed();
+        } break;
+
         case SDLK_ESCAPE: {
-                // Exit screen
-                states::pop();
+                on_cancelled();
         } break;
 
         default:

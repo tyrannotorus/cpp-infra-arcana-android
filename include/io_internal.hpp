@@ -44,8 +44,15 @@ extern SDL_Window* g_sdl_window;
 extern SDL_Renderer* g_sdl_renderer;
 extern SDL_Texture* g_font_texture_with_contours;
 extern SDL_Texture* g_font_texture;
-extern SDL_Texture* g_tile_textures_with_contours[(size_t)gfx::TileId::END];
-extern SDL_Texture* g_tile_textures[(size_t)gfx::TileId::END];
+
+// All tile images live in one texture (see load_tiles) - drawing them out of
+// a single texture is what lets SDL merge the map into one draw call.
+extern SDL_Texture* g_tile_atlas;
+extern SDL_Texture* g_tile_atlas_with_contours;
+
+// Where a tile's image sits in the atlas
+R tile_atlas_px_rect(gfx::TileId tile);
+
 extern SDL_Texture* g_logo_texture;
 
 // Used for centering the rendering area on the screen
@@ -78,6 +85,12 @@ int panel_px_h(Panel panel);
 P panel_px_dims(Panel panel);
 
 void set_clip_rect_to_panel(Panel panel);
+
+// Clips drawing to a logical pixel area within a panel's display (for
+// content areas that are not a panel of their own, e.g. the text rows of
+// a text page)
+void set_clip_rect_px(Panel panel, R px_area);
+
 void disable_clip_rect();
 
 void draw_character_at_px(
@@ -86,6 +99,15 @@ void draw_character_at_px(
         const Color& color,
         io::DrawBg draw_bg = io::DrawBg::yes,
         const Color& bg_color = {0, 0, 0});
+
+// Draws a tile out of the atlas, without touching the background or the
+// current display (the batched map drawing sets those up once - see
+// MapDrawBuffer)
+void draw_tile_at_px(
+        gfx::TileId tile,
+        const P& px_pos,
+        const Color& color,
+        const Color& bg_color);
 
 void draw_text_at_px(
         const std::string& str,

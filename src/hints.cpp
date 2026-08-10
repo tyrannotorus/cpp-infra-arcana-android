@@ -7,6 +7,7 @@
 #include "hints.hpp"
 
 #include <cstring>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -16,9 +17,9 @@
 #include "io.hpp"
 #include "map.hpp"
 #include "msg_log.hpp"
-#include "popup.hpp"
 #include "saving.hpp"
 #include "state.hpp"
+#include "text_page.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -49,19 +50,27 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
         case hints::Id::destroying_corpses:
                 return {
                         "Destroying corpses",
-                        "Corpses can be destroyed by pressing [k] or [w]. This "
-                        "can be very useful against certain types of monsters. "
-                        "Some weapons, such as Machetes, makes it easier to "
-                        "destroy corpses - check the item description to see "
-                        "if a weapon has such a bonus. Also, a well-placed "
-                        "stick of dynamite or Molotov Cocktail is usually an "
-                        "effective way of stopping persistent monsters."};
+                        "Corpses can be destroyed by kicking them, which is "
+                        "very useful against certain types of monsters. Drag "
+                        "the map onto the corpse and tap the [ kick ] button, "
+                        "or use the kick action and swipe towards it."
+
+                        "\n\nThe wielded weapon is used instead of the boot if "
+                        "it is suited for the work - some weapons, such as "
+                        "Machetes, makes it easier to destroy corpses. Check "
+                        "the item description to see if a weapon has such a "
+                        "bonus. Also, a well-placed stick of dynamite or "
+                        "Molotov Cocktail is usually an effective way of "
+                        "stopping persistent monsters."};
 
         case hints::Id::unload_weapons:
                 return {
                         "Unloading weapons",
-                        "Ammunition can be unloaded from firearms on the "
-                        "ground by pressing [u] or [G]."};
+                        "Ammunition can be taken from a firearm on the "
+                        "ground, leaving the weapon itself behind, with the "
+                        "[ take ammo ] button beside [ pick up ]. A loaded "
+                        "firearm found in a container can be emptied the "
+                        "same way, when asked whether to pick it up."};
 
         case hints::Id::infected:
                 return {
@@ -105,7 +114,8 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                         "A simple list of active status effects is shown in the normal "
                         "game screen. "
 
-                        "\n\nIn the character screen (accessed by pressing [C] or [@]), a more "
+                        "\n\nIn the character screen (the menu button, then "
+                        "\"Character description\"), a more "
                         "detailed list can be seen, including a description of each effect. "
 
                         "\n\nStatus effects shown with CAPITAL LETTERS are \"permanent\", "
@@ -156,6 +166,47 @@ static std::pair<std::string, std::string> id_to_text(const hints::Id id)
                 return {"", ""};
         }
 }
+
+// A hint is a descriptive page like any other (see TextPageState): the
+// title in the top border, the text framed by the divider rules, and
+// "tap to continue" in the footer
+class HintState : public TextPageState
+{
+public:
+        HintState(std::string title, std::string text) :
+                m_title(std::move(title)),
+                m_text(std::move(text))
+        {}
+
+        void on_start() override
+        {
+                TextPageState::on_start();
+
+                // Hints are kept in the message history, for reading again
+                // later on
+                add_text_to_msg_history();
+        }
+
+        StateId id() const override
+        {
+                return StateId::hint;
+        }
+
+protected:
+        std::string page_title() const override
+        {
+                return s_title_prefix + m_title;
+        }
+
+        std::string page_text() const override
+        {
+                return m_text;
+        }
+
+private:
+        const std::string m_title;
+        const std::string m_text;
+};
 
 static bool should_display_hint(const hints::Id id)
 {
@@ -229,10 +280,8 @@ void display(const Id id)
                 return;
         }
 
-        popup::Popup(popup::AddToMsgHistory::yes)
-                .set_title(s_title_prefix + text.first)
-                .set_msg(text.second)
-                .run();
+        states::run_until_state_done(
+                std::make_unique<HintState>(text.first, text.second));
 
         s_hints_displayed[(size_t)id] = true;
 

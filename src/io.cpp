@@ -28,7 +28,8 @@
 #include "audio.hpp"
 #include "config.hpp"
 #include "debug.hpp"
-#include "direction.hpp"
+#include "io_display.hpp"
+#include "io_icons.hpp"
 #include "io_internal.hpp"
 #include "paths.hpp"
 #include "state.hpp"
@@ -56,90 +57,247 @@ static SDL_Surface* load_surface(const std::string& path)
         return surface;
 }
 
+// -----------------------------------------------------------------------------
+// Image preparation
+//
+// The tile atlas and the font image are recolored and contoured at startup.
+// Both passes used to run through read_px_on_surface / put_px_on_surface -
+// a function call, a switch on the pixel size and an SDL_GetRGB or
+// SDL_MapRGB, for every pixel and every one of its eight neighbours. Over
+// the atlas and the 2048x32 font image that is around one and a half
+// million of them, which is real time on a phone or tablet CPU, spent
+// before the game shows anything.
+//
+// The surfaces are converted to one known 32 bit format up front (see
+// load_surface_as_rgba32) so both passes can address pixels directly.
+// Comparisons mask the alpha channel off, matching the old behaviour -
+// SDL_GetRGB ignored alpha, and SDL_MapRGB wrote it fully opaque.
+// -----------------------------------------------------------------------------
+static uint32_t rgb_mask_of(const SDL_Surface& surface)
+{
+        return ~surface.format->Amask;
+}
+
+static uint32_t map_color(const SDL_Surface& surface, const Color& color)
+{
+        return SDL_MapRGB(
+                surface.format,
+                color.r(),
+                color.g(),
+                color.b());
+}
+
+// Loads an image, converted to a known 32 bit pixel format
+static SDL_Surface* load_surface_as_rgba32(const std::string& path)
+{
+        auto* const surface = load_surface(path);
+
+        if (surface->format->format == SDL_PIXELFORMAT_RGBA32) {
+                return surface;
+        }
+
+        auto* const converted =
+                SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA32, 0);
+
+        SDL_FreeSurface(surface);
+
+        if (!converted) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to convert surface from path '"
+                        << path
+                        << "': "
+                        << SDL_GetError()
+                        << std::endl;
+
+                PANIC;
+        }
+
+        return converted;
+}
+
 static void swap_surface_color(
         SDL_Surface& surface,
         const Color& color_before,
         const Color& color_after)
 {
-        for (int x = 0; x < surface.w; ++x) {
-                for (int y = 0; y < surface.h; ++y) {
-                        const P p(x, y);
+        ASSERT(surface.format->BytesPerPixel == 4);
 
-                        const auto color = io::read_px_on_surface(surface, p);
+        const uint32_t rgb_mask = rgb_mask_of(surface);
 
-                        if (color == color_before) {
-                                io::put_px_on_surface(surface, p, color_after);
+        const uint32_t before = map_color(surface, color_before) & rgb_mask;
+
+        // NOTE: Not masked - as SDL_MapRGB did, this writes opaque alpha
+        const uint32_t after = map_color(surface, color_after);
+
+        SDL_LockSurface(&surface);
+
+        auto* const pixels = (uint32_t*)surface.pixels;
+
+        const int stride = surface.pitch / 4;
+
+        for (int y = 0; y < surface.h; ++y) {
+                uint32_t* const row = pixels + ((size_t)y * (size_t)stride);
+
+                for (int x = 0; x < surface.w; ++x) {
+                        if ((row[x] & rgb_mask) == before) {
+                                row[x] = after;
                         }
                 }
         }
+
+        SDL_UnlockSurface(&surface);
 }
 
-static bool should_put_contour_at(
-        const SDL_Surface& surface,
-        const P& surface_px_pos,
-        const R& surface_px_rect,
-        const Color& bg_color,
-        const Color& contour_color)
+// -----------------------------------------------------------------------------
+// Tile atlas
+//
+// Every tile image is packed into ONE texture, and drawn with a source
+// rectangle into it. SDL's renderer can only merge consecutive draws that use
+// the same texture (see GLES2_RunCommandQueue) - with a texture per tile, as
+// this used to have, every single map cell cost its own draw call and its own
+// shader/texture bind. Out of one atlas the whole map merges into a single
+// draw call.
+//
+// Cells are padded by one pixel of background, so that nothing of a neighbour
+// can bleed in when the atlas is sampled.
+// -----------------------------------------------------------------------------
+static const int s_atlas_nr_cols = 16;
+
+static const int s_atlas_cell_pad_px = 1;
+
+static int atlas_cell_px_size()
 {
-        // Only allow drawing a contour at pixels with the same color as the
-        // background color parameter.
-        const auto color = io::read_px_on_surface(surface, surface_px_pos);
+        return config::g_tile_img_px + (s_atlas_cell_pad_px * 2);
+}
 
-        if (color != bg_color) {
+static int atlas_nr_rows()
+{
+        const int nr_tiles = (int)gfx::TileId::END;
+
+        return ((nr_tiles + s_atlas_nr_cols - 1) / s_atlas_nr_cols);
+}
+
+// Where a tile's image starts in the atlas (inside its padding)
+static P atlas_tile_px_pos(const gfx::TileId id)
+{
+        const int i = (int)id;
+
+        return {
+                ((i % s_atlas_nr_cols) * atlas_cell_px_size()) +
+                        s_atlas_cell_pad_px,
+                ((i / s_atlas_nr_cols) * atlas_cell_px_size()) +
+                        s_atlas_cell_pad_px};
+}
+
+// Contours a single image within a surface. Only pixels inside the given
+// rectangle are read, so that images packed side by side in an atlas contour
+// exactly as they would on their own.
+//
+// A background pixel gets a contour if any of its eight neighbours holds
+// something that will actually be drawn - i.e. neither the background nor a
+// contour. Writing in place is safe: a contour pixel is never background
+// afterwards, so it is never revisited, and the neighbour test excludes the
+// contour color, so a contour never seeds another one.
+static void draw_black_contour_in_rect(
+        SDL_Surface& surface,
+        const R& surface_px_rect,
+        const Color& bg_color)
+{
+        ASSERT(surface.format->BytesPerPixel == 4);
+
+        const uint32_t rgb_mask = rgb_mask_of(surface);
+
+        const uint32_t bg = map_color(surface, bg_color) & rgb_mask;
+
+        const uint32_t contour = map_color(surface, colors::black());
+
+        const uint32_t contour_rgb = contour & rgb_mask;
+
+        SDL_LockSurface(&surface);
+
+        auto* const pixels = (uint32_t*)surface.pixels;
+
+        const int stride = surface.pitch / 4;
+
+        for (int y = surface_px_rect.p0.y; y <= surface_px_rect.p1.y; ++y) {
+                const int adj_y0 = std::max(surface_px_rect.p0.y, y - 1);
+                const int adj_y1 = std::min(surface_px_rect.p1.y, y + 1);
+
+                uint32_t* const row = pixels + ((size_t)y * (size_t)stride);
+
+                for (int x = surface_px_rect.p0.x;
+                     x <= surface_px_rect.p1.x;
+                     ++x) {
+                        if ((row[x] & rgb_mask) != bg) {
 #ifndef NDEBUG
-                if ((color.r() != color.g()) ||
-                    (color.r() != color.b())) {
-                        TRACE
-                                << "Found color other than grayscale color: "
-                                << (int)color.r()
-                                << ","
-                                << (int)color.g()
-                                << ","
-                                << (int)color.b()
-                                << " - at position: "
-                                << surface_px_pos.x
-                                << "x"
-                                << surface_px_pos.y
-                                << std::endl
-                                << "(Background color is: "
-                                << (int)bg_color.r()
-                                << ","
-                                << (int)bg_color.g()
-                                << ","
-                                << (int)bg_color.b()
-                                << ")"
-                                << std::endl;
+                                // The art is grayscale on the background
+                                // color - anything else means the image (or
+                                // the recolor pass before this) is wrong
+                                uint8_t r;
+                                uint8_t g;
+                                uint8_t b;
 
-                        PANIC;
-                }
+                                SDL_GetRGB(row[x], surface.format, &r, &g, &b);
+
+                                if ((r != g) || (r != b)) {
+                                        TRACE
+                                                << "Found color other than "
+                                                << "grayscale color: "
+                                                << (int)r << ","
+                                                << (int)g << ","
+                                                << (int)b
+                                                << " - at position: "
+                                                << x << "x" << y
+                                                << std::endl;
+
+                                        PANIC;
+                                }
 #endif  // NDEBUG
 
-                return false;
+                                continue;
+                        }
+
+                        const int adj_x0 =
+                                std::max(surface_px_rect.p0.x, x - 1);
+
+                        const int adj_x1 =
+                                std::min(surface_px_rect.p1.x, x + 1);
+
+                        bool has_drawn_neighbour = false;
+
+                        for (int adj_y = adj_y0;
+                             (adj_y <= adj_y1) && !has_drawn_neighbour;
+                             ++adj_y) {
+                                const uint32_t* const adj_row =
+                                        pixels +
+                                        ((size_t)adj_y * (size_t)stride);
+
+                                for (int adj_x = adj_x0;
+                                     adj_x <= adj_x1;
+                                     ++adj_x) {
+                                        if ((adj_x == x) && (adj_y == y)) {
+                                                continue;
+                                        }
+
+                                        const uint32_t adj =
+                                                adj_row[adj_x] & rgb_mask;
+
+                                        if ((adj != bg) &&
+                                            (adj != contour_rgb)) {
+                                                has_drawn_neighbour = true;
+
+                                                break;
+                                        }
+                                }
+                        }
+
+                        if (has_drawn_neighbour) {
+                                row[x] = contour;
+                        }
+                }
         }
 
-        // Draw a contour here if it has a neighbour with different color than
-        // the background or contour color (i.e. if it has a neighbour with a
-        // color that will be drawn to the screen).
-        auto pred = [&](const auto d) {
-                const auto adj_p = surface_px_pos + d;
-
-                if (!surface_px_rect.is_pos_inside(adj_p)) {
-                        return false;
-                }
-
-                const auto adj_color = io::read_px_on_surface(surface, adj_p);
-
-                const bool is_bg_color = (adj_color == bg_color);
-                const bool is_contour_color = (adj_color == contour_color);
-
-                return !is_bg_color && !is_contour_color;
-        };
-
-        return (
-                std::any_of(
-                        std::cbegin(dir_utils::g_dir_list),
-                        std::cend(dir_utils::g_dir_list),
-                        pred));
+        SDL_UnlockSurface(&surface);
 }
 
 static void draw_black_contour_for_surface(
@@ -148,24 +306,7 @@ static void draw_black_contour_for_surface(
 {
         const R surface_px_rect({0, 0}, {surface.w - 1, surface.h - 1});
 
-        const auto contour_color = colors::black();
-
-        for (const auto& surface_px_pos : surface_px_rect.positions()) {
-                const bool should_put_contour =
-                        should_put_contour_at(
-                                surface,
-                                surface_px_pos,
-                                surface_px_rect,
-                                bg_color,
-                                contour_color);
-
-                if (should_put_contour) {
-                        io::put_px_on_surface(
-                                surface,
-                                surface_px_pos,
-                                contour_color);
-                }
-        }
+        draw_black_contour_in_rect(surface, surface_px_rect, bg_color);
 }
 
 static void verify_tile_colors(
@@ -204,24 +345,19 @@ static void verify_tile_colors(
 #endif  // NDEBUG
 }
 
-static void verify_texture_size(
-        SDL_Texture* texture,
+static void verify_surface_size(
+        const SDL_Surface& surface,
         const P& expected_size,
         const std::string& img_path)
 {
-        P size;
-
-        SDL_QueryTexture(texture, nullptr, nullptr, &size.x, &size.y);
-
-        // Verify width and height of loaded image
-        if (size != expected_size) {
+        if ((surface.w != expected_size.x) || (surface.h != expected_size.y)) {
                 TRACE_ERROR_RELEASE
                         << "Tile image at \""
                         << img_path
                         << "\" has wrong size: "
-                        << size.x
+                        << surface.w
                         << "x"
-                        << size.x
+                        << surface.h
                         << ", expected: "
                         << expected_size.x
                         << "x"
@@ -390,7 +526,9 @@ static void load_font()
 
         TRACE << "Loading font image: " << img_path << std::endl;
 
-        SDL_Surface* const surface = load_surface(img_path);
+        // NOTE: A known 32 bit format - the recolor and contour passes below
+        // address the pixels directly
+        SDL_Surface* const surface = load_surface_as_rgba32(img_path);
 
         swap_surface_color(*surface, colors::black(), colors::magenta());
 
@@ -413,33 +551,33 @@ static void load_font()
         TRACE_FUNC_END;
 }
 
-static void load_tile(const gfx::TileId id, const P& cell_px_dims)
+// Blits one tile image into its cell of the atlas surface.
+static void blit_tile_into_atlas(
+        const gfx::TileId id,
+        SDL_Surface& atlas,
+        const P& img_px_dims)
 {
-        const std::string img_path = paths::tiles_dir() + gfx::tile_id_to_filename(id);
-
-        TRACE << "Loading tile image: " << img_path << std::endl;
+        const std::string img_path =
+                paths::tiles_dir() + gfx::tile_id_to_filename(id);
 
         SDL_Surface* const surface = load_surface(img_path);
 
+        verify_surface_size(*surface, img_px_dims, img_path);
+
         verify_tile_colors(*surface, img_path);
 
-        swap_surface_color(*surface, colors::black(), colors::magenta());
+        // A straight copy - the atlas background must not blend through
+        SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
 
-        set_surface_color_key(*surface, colors::magenta());
+        const P tile_px_pos = atlas_tile_px_pos(id);
 
-        // Create the non-contour version
-        SDL_Texture* texture = create_texture_from_surface(*surface);
+        SDL_Rect dst_rect {
+                tile_px_pos.x,
+                tile_px_pos.y,
+                img_px_dims.x,
+                img_px_dims.y};
 
-        io::g_tile_textures[(size_t)id] = texture;
-
-        draw_black_contour_for_surface(*surface, colors::magenta());
-
-        // Create the version with contour
-        texture = create_texture_from_surface(*surface);
-
-        io::g_tile_textures_with_contours[(size_t)id] = texture;
-
-        verify_texture_size(texture, cell_px_dims, img_path);
+        SDL_BlitSurface(surface, nullptr, &atlas, &dst_rect);
 
         SDL_FreeSurface(surface);
 }
@@ -448,13 +586,77 @@ static void load_tiles()
 {
         TRACE_FUNC_BEGIN;
 
-        const P cell_px_dims(
-                config::map_cell_px_w(),
-                config::map_cell_px_h());
+        // NOTE: The source images always have this size - when the map is
+        // drawn scaled up, the tiles are stretched at draw time (see
+        // draw_tile, which uses the logical map cell size).
+        const P img_px_dims(
+                config::g_tile_img_px,
+                config::g_tile_img_px);
+
+        const P atlas_px_dims(
+                s_atlas_nr_cols * atlas_cell_px_size(),
+                atlas_nr_rows() * atlas_cell_px_size());
+
+        TRACE
+                << "Building tile atlas of "
+                << atlas_px_dims.x << "x" << atlas_px_dims.y
+                << " pixels for "
+                << (int)gfx::TileId::END << " tiles"
+                << std::endl;
+
+        SDL_Surface* const atlas =
+                SDL_CreateRGBSurfaceWithFormat(
+                        0,
+                        atlas_px_dims.x,
+                        atlas_px_dims.y,
+                        32,
+                        SDL_PIXELFORMAT_RGBA32);
+
+        if (!atlas) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to create tile atlas surface: "
+                        << SDL_GetError()
+                        << std::endl;
+
+                PANIC;
+        }
+
+        // The whole atlas - the cell padding included - starts out as the
+        // color that is keyed away, so that padding never draws
+        const auto& bg = colors::magenta();
+
+        SDL_FillRect(
+                atlas,
+                nullptr,
+                SDL_MapRGBA(atlas->format, bg.r(), bg.g(), bg.b(), 0xFFU));
 
         for (size_t i = 0; i < (size_t)gfx::TileId::END; ++i) {
-                load_tile((gfx::TileId)i, cell_px_dims);
+                blit_tile_into_atlas((gfx::TileId)i, *atlas, img_px_dims);
         }
+
+        // The tile art is black on white; black becomes the keyed-away
+        // background (as it is for the font image)
+        swap_surface_color(*atlas, colors::black(), bg);
+
+        set_surface_color_key(*atlas, bg);
+
+        io::g_tile_atlas = create_texture_from_surface(*atlas);
+
+        // The contoured variant - each tile is contoured within its own cell
+        // rectangle, so no tile can see its neighbours
+        for (size_t i = 0; i < (size_t)gfx::TileId::END; ++i) {
+                const P tile_px_pos = atlas_tile_px_pos((gfx::TileId)i);
+
+                const R tile_px_rect(
+                        tile_px_pos,
+                        tile_px_pos + img_px_dims - 1);
+
+                draw_black_contour_in_rect(*atlas, tile_px_rect, bg);
+        }
+
+        io::g_tile_atlas_with_contours = create_texture_from_surface(*atlas);
+
+        SDL_FreeSurface(atlas);
 
         TRACE_FUNC_END;
 }
@@ -466,9 +668,18 @@ namespace io
 {
 SDL_Texture* g_font_texture_with_contours = nullptr;
 SDL_Texture* g_font_texture = nullptr;
-SDL_Texture* g_tile_textures[(size_t)gfx::TileId::END] = {};
-SDL_Texture* g_tile_textures_with_contours[(size_t)gfx::TileId::END] = {};
+SDL_Texture* g_tile_atlas = nullptr;
+SDL_Texture* g_tile_atlas_with_contours = nullptr;
 SDL_Texture* g_logo_texture = nullptr;
+
+R tile_atlas_px_rect(const gfx::TileId tile)
+{
+        const P p0 = atlas_tile_px_pos(tile);
+
+        const P dims(config::g_tile_img_px, config::g_tile_img_px);
+
+        return {p0, p0 + dims - 1};
+}
 
 P g_rendering_px_offset = {};
 
@@ -477,6 +688,10 @@ void init_sdl()
         TRACE_FUNC_BEGIN;
 
         cleanup_sdl();
+
+        // The touch translation layer (io_input.cpp) owns all finger events -
+        // do not synthesize mouse events from touches.
+        SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 
         const uint32_t sdl_init_flags =
                 SDL_INIT_VIDEO |
@@ -568,6 +783,8 @@ void init_other()
 
         SDL_SetRenderDrawBlendMode(io::g_sdl_renderer, SDL_BLENDMODE_BLEND);
 
+        init_displays();
+
         load_font();
 
         if (config::is_tiles_mode()) {
@@ -584,6 +801,10 @@ void init_other()
 void cleanup_other()
 {
         TRACE_FUNC_BEGIN;
+
+        cleanup_icons();
+
+        cleanup_displays();
 
         if (g_sdl_renderer) {
                 SDL_DestroyRenderer(g_sdl_renderer);
@@ -622,11 +843,11 @@ void on_user_toggle_scaling()
         TRACE_FUNC_END;
 }
 
-void set_clip_rect_to_panel(const Panel panel)
+void set_clip_rect_px(const Panel panel, R px_area)
 {
-        auto px_area = gui_to_px_rect(panels::area(panel));
+        set_display_for_panel(panel);
 
-        px_area = px_area.scaled_up(config::video_scale_factor());
+        px_area = px_area.with_offset(current_display_draw_px_offset());
 
         const SDL_Rect clip_rect {
                 px_area.p0.x,
@@ -635,6 +856,24 @@ void set_clip_rect_to_panel(const Panel panel)
                 px_area.h()};
 
         SDL_RenderSetClipRect(g_sdl_renderer, &clip_rect);
+}
+
+void set_clip_rect_to_panel(const Panel panel)
+{
+        auto px_area = gui_to_px_rect(panels::area(panel));
+
+        if (panel == Panel::map) {
+                // The map display renders one cell of overscan beyond each
+                // panel edge, for smooth sub-cell scrolling (see io_display)
+                const P overscan(
+                        config::map_cell_px_w(),
+                        config::map_cell_px_h());
+
+                px_area.p0 = px_area.p0 - overscan;
+                px_area.p1 = px_area.p1 + overscan;
+        }
+
+        set_clip_rect_px(panel, px_area);
 }
 
 void disable_clip_rect()
@@ -665,7 +904,7 @@ void draw_character_at_px(
                         bg_color);
         }
 
-        // Set up the texture clip rectangle, before calculating scaling
+        // Set up the texture clip rectangle
         // NOTE: We expect one pixel separator between each glyph.
         auto char_px_pos = gfx::character_pos(character);
 
@@ -679,16 +918,10 @@ void draw_character_at_px(
         clip_rect.w = gui_cell_px_dims.x;
         clip_rect.h = gui_cell_px_dims.y;
 
-        // * Now apply offset and scaling *
-
-        // Scaling
-        const int scale_factor = config::video_scale_factor();
-
-        px_pos = px_pos.scaled_up(scale_factor);
-        gui_cell_px_dims = gui_cell_px_dims.scaled_up(scale_factor);
-
-        // Apply rendering offsets (to center the graphics in the window)
-        px_pos = px_pos.with_offsets(g_rendering_px_offset);
+        // NOTE: Drawing happens at logical resolution - video scaling and
+        // window centering are applied when compositing the display textures
+        // to the window (see io_display.cpp).
+        px_pos = px_pos.with_offsets(current_display_draw_px_offset());
 
         SDL_Rect render_rect;
 
@@ -696,6 +929,9 @@ void draw_character_at_px(
         render_rect.y = px_pos.y;
         render_rect.w = gui_cell_px_dims.x;
         render_rect.h = gui_cell_px_dims.y;
+
+        mark_current_display_used(
+                {px_pos, px_pos + gui_cell_px_dims - 1});
 
         SDL_Texture* texture = nullptr;
 
@@ -722,6 +958,8 @@ void draw_character_at_px(
 
 void draw_character(const CharacterDrawObj& obj)
 {
+        set_display_for_panel(obj.panel);
+
         const auto px_pos = gui_to_px_coords(obj.panel, obj.pos);
 
         const auto sdl_color = obj.color.sdl_color();
@@ -735,59 +973,84 @@ void draw_character(const CharacterDrawObj& obj)
                 sdl_color_bg);
 }
 
+void draw_tile_at_px(
+        const gfx::TileId tile,
+        const P& px_pos,
+        const Color& color,
+        const Color& bg_color)
+{
+        const P map_cell_px_dims(
+                config::map_cell_px_w(),
+                config::map_cell_px_h());
+
+        const P offset_px_pos =
+                px_pos.with_offsets(current_display_draw_px_offset());
+
+        const SDL_Rect render_rect {
+                offset_px_pos.x,
+                offset_px_pos.y,
+                map_cell_px_dims.x,
+                map_cell_px_dims.y};
+
+        mark_current_display_used(
+                {offset_px_pos, offset_px_pos + map_cell_px_dims - 1});
+
+        SDL_Texture* texture = nullptr;
+
+        if ((color == colors::black()) || (bg_color == colors::black())) {
+                // Foreground or background is black - no contours
+                texture = g_tile_atlas;
+        }
+        else {
+                // Both foreground and background are non-black - use contours
+                texture = g_tile_atlas_with_contours;
+        }
+
+        const auto src = tile_atlas_px_rect(tile);
+
+        const SDL_Rect src_rect {
+                src.p0.x,
+                src.p0.y,
+                src.w(),
+                src.h()};
+
+        const Color color_adapted =
+                color.with_brightness(config::brightness_pct());
+
+        SDL_SetTextureColorMod(
+                texture,
+                color_adapted.r(),
+                color_adapted.g(),
+                color_adapted.b());
+
+        SDL_RenderCopy(g_sdl_renderer, texture, &src_rect, &render_rect);
+}
+
 void draw_tile(const TileDrawObj& obj)
 {
-        P px_pos = map_to_px_coords(obj.panel, obj.pos);
+        set_display_for_panel(obj.panel);
 
-        P map_cell_px_dims(config::map_cell_px_w(), config::map_cell_px_h());
+        const P px_pos = map_to_px_coords(obj.panel, obj.pos);
 
         if (obj.draw_bg == DrawBg::yes) {
-                // NOTE: No rendering offsets or scaling calculated yet, the
-                // rectangle function performs its own offsets and scaling
+                const P map_cell_px_dims(
+                        config::map_cell_px_w(),
+                        config::map_cell_px_h());
+
+                // NOTE: The rectangle function applies the display draw
+                // offset itself
                 draw_rectangle_filled(
                         {px_pos, px_pos + map_cell_px_dims - 1},
                         obj.bg_color);
         }
 
-        // * Now apply offset and scaling *
-
-        // Scaling
-        const int scale_factor = config::video_scale_factor();
-
-        px_pos = px_pos.scaled_up(scale_factor);
-        map_cell_px_dims = map_cell_px_dims.scaled_up(scale_factor);
-
-        // Apply rendering offsets (to center the graphics in the window)
-        px_pos = px_pos.with_offsets(g_rendering_px_offset);
-
-        SDL_Rect render_rect;
-
-        render_rect.x = px_pos.x;
-        render_rect.y = px_pos.y;
-        render_rect.w = map_cell_px_dims.x;
-        render_rect.h = map_cell_px_dims.y;
-
-        SDL_Texture* texture = nullptr;
-
-        if ((obj.color == colors::black()) ||
-            (obj.bg_color == colors::black())) {
-                // Foreground or background is black - no contours
-                texture = g_tile_textures[(size_t)obj.tile];
-        }
-        else {
-                // Both foreground and background are non-black - use contours
-                texture = g_tile_textures_with_contours[(size_t)obj.tile];
-        }
-
-        const Color color = obj.color.with_brightness(config::brightness_pct());
-
-        SDL_SetTextureColorMod(texture, color.r(), color.g(), color.b());
-
-        SDL_RenderCopy(g_sdl_renderer, texture, nullptr, &render_rect);
+        draw_tile_at_px(obj.tile, px_pos, obj.color, obj.bg_color);
 }
 
 void cover_panel(const Panel panel, const Color& color)
 {
+        set_display_for_panel(panel);
+
         const auto px_area = gui_to_px_rect(panels::area(panel));
 
         draw_rectangle_filled(px_area, color);
@@ -798,13 +1061,13 @@ void cover_area(
         const R& area,
         const Color& color)
 {
+        set_display_for_panel(panel);
+
         const auto panel_p0 = panels::p0(panel);
 
         const auto screen_area = area.with_offset(panel_p0);
 
-        const auto px_area =
-                gui_to_px_rect(screen_area)
-                        .with_offset(g_rendering_px_offset);
+        const auto px_area = gui_to_px_rect(screen_area);
 
         draw_rectangle_filled(px_area, color);
 }
@@ -827,7 +1090,8 @@ void cover_cell(const Panel panel, const P& offset)
 
 void draw_logo()
 {
-        // Set pixel position *before* applying rendering offset and scaling
+        set_display(Display::screen);
+
         const int screen_px_w = panel_px_w(Panel::screen);
 
         P img_px_dims;
@@ -839,18 +1103,7 @@ void draw_logo()
                 &img_px_dims.x,
                 &img_px_dims.y);
 
-        P px_pos((screen_px_w - img_px_dims.x) / 2, 0);
-
-        // * Now apply offset and scaling *
-
-        // Scaling
-        const int scale_factor = config::video_scale_factor();
-
-        px_pos = px_pos.scaled_up(scale_factor);
-        img_px_dims = img_px_dims.scaled_up(scale_factor);
-
-        // Apply rendering offsets (to center the graphics in the window)
-        px_pos = px_pos.with_offsets(g_rendering_px_offset);
+        const P px_pos((screen_px_w - img_px_dims.x) / 2, 0);
 
         SDL_Rect render_rect;
 
@@ -858,6 +1111,8 @@ void draw_logo()
         render_rect.y = px_pos.y;
         render_rect.w = img_px_dims.x;
         render_rect.h = img_px_dims.y;
+
+        mark_current_display_used({px_pos, px_pos + img_px_dims - 1});
 
         const int mod_value = std::min(255, (config::brightness_pct() * 255) / 100);
 
@@ -912,6 +1167,15 @@ void sleep(const uint32_t duration)
 
                 while (SDL_GetTicks() < wait_until) {
                         SDL_PumpEvents();
+
+                        // A map shake animates through any wait - notably
+                        // the blast animation's own delay, which is exactly
+                        // when an explosion should be shaking the ground.
+                        // Stepping it is a composite and a present, the
+                        // drawn frame is reused as it stands.
+                        if (step_map_shake()) {
+                                update_screen();
+                        }
                 }
         }
 }

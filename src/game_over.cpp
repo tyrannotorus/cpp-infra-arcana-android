@@ -66,7 +66,9 @@ void on_game_over()
         init::cleanup_session();
 
         // Show game summary first, then highscores.
-        states::push(std::make_unique<BrowseHighscore>());
+        states::push(
+                std::make_unique<BrowseHighscore>(
+                        IsAfterGameOver::yes));
 
         states::push(std::move(game_over_summary));
 }

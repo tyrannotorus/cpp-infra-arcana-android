@@ -7,10 +7,17 @@
 #ifndef GAME_COMMANDS_HPP
 #define GAME_COMMANDS_HPP
 
+#include <string>
+
 namespace io
 {
 struct InputData;
 }  // namespace io
+
+namespace item
+{
+class Wpn;
+}  // namespace item
 
 enum class GameCmd
 {
@@ -38,15 +45,16 @@ enum class GameCmd
         wait_long,
         reload,
         kick,
+        kick_at_look_pin,
         close,
         unload,
         fire,
+        toggle_aim,
         get,
         inventory,
-        apply_item,
-        drop_item,
         swap_weapon,
         throw_item,
+        toggle_throw,
         toggle_lantern,
         use_medical_bag,
         look,
@@ -58,7 +66,6 @@ enum class GameCmd
         minimap,
         msg_history,
         manual,
-        options,
         game_menu,
         quit,
 
@@ -89,9 +96,48 @@ GameCmd to_cmd(const io::InputData& input);
 
 void handle(GameCmd cmd);
 
+// Why the wielded ranged weapon cannot be fired right now - out of ammo,
+// on fire, a Mi-go gun that would drain more health than is left - or an
+// empty string when it can be.
+//
+// NOTE: Targeting is a MODE, and it is engaged whether or not the shot is
+// possible: a gun that has run dry is exactly when the [ reload ] and
+// [ swap weapon ] pins inside that mode are wanted, and refusing to open
+// it would leave a player with an empty gun no way to reach either. So
+// the aim marker opens regardless, and asks this to decide whether to
+// offer [ fire ], what to say instead, and how to answer a fire command
+// it cannot obey.
+std::string ranged_wpn_unfireable_reason(const item::Wpn& wpn);
+
 char fire_key();
 char throw_key();
 char view_key();
+char get_key();
+
+char unload_key();
+char close_key();
+char disarm_key();
+
+// The [ swap ] and [ reload ] pins of the aim marker (see marker.cpp)
+char swap_weapon_key();
+char reload_key();
+
+// Key of the contextual [ kick ] look-pin button (see
+// GameState::on_map_panned). It is deliberately NOT the kick key: the
+// kick command itself - and its action bar button - keeps asking for a
+// direction, while this one kicks the pinned cell directly. No keyboard
+// key produces it; the button carries the keycode (see
+// context_pins::add).
+int kick_at_look_pin_key();
+
+// Keys of the action bar's target and throw buttons. They are
+// deliberately NOT the fire and throw keys: a bar button TOGGLES its
+// targeting mode - engaging it, and dropping out of it when tapped again
+// while it is engaged - while the plain keys (the keyboard, and the
+// [ fire ] / [ throw ] context pins) always mean "loose it at the
+// reticle". No keyboard key produces these.
+int toggle_aim_key();
+int toggle_throw_key();
 
 }  // namespace game_commands
 

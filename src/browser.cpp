@@ -323,13 +323,40 @@ Range MenuBrowser::range_shown() const
 
 void MenuBrowser::update_range_shown()
 {
-        // Shown ranged defined?
-        if (m_list_h >= 0) {
-                const int top = (m_y / m_list_h) * m_list_h;
-                const int btm = std::min(top + m_list_h, m_nr_items) - 1;
-
-                m_range_shown.set(top, btm);
+        if (m_list_h < 0) {
+                // List height undefined - everything is shown
+                return;
         }
+
+        if (m_nr_items <= m_list_h) {
+                m_range_shown.set(0, m_nr_items - 1);
+
+                return;
+        }
+
+        // The window SLIDES with the marker rather than flipping pages: it
+        // stays put until the marker comes within a few entries of an edge
+        // and there is more list beyond it, and from there it follows the
+        // marker one entry at a time until the true end of the list, where
+        // it stops and the marker walks the last entries by itself.
+        //
+        // The margin is what makes it read as scrolling rather than
+        // jumping - you always see where you are heading. It is capped for
+        // short windows, so that the marker cannot end up outside one.
+        const int margin = std::min(3, (m_list_h - 1) / 2);
+
+        int top = std::max(0, m_range_shown.min);
+
+        // Marker approaching the bottom edge - the window must start late
+        // enough to keep the margin visible below it
+        top = std::max(top, m_y + margin - m_list_h + 1);
+
+        // Marker approaching the top edge - and early enough above it
+        top = std::min(top, m_y - margin);
+
+        top = std::clamp(top, 0, m_nr_items - m_list_h);
+
+        m_range_shown.set(top, top + m_list_h - 1);
 }
 
 int MenuBrowser::nr_items_shown() const
@@ -406,6 +433,10 @@ void MenuBrowser::reset(const int nr_items, const int list_h)
         m_list_h = std::min(list_h, nr_menu_keys_avail(keys));
 
         m_y = 0;
+
+        // A new list starts at the top - the window must not be inherited
+        // from whatever list this browser held before
+        m_range_shown.set(-1, -1);
 
         update_range_shown();
 }

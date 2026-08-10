@@ -25,6 +25,7 @@
 #include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "pickup.hpp"
 #include "pos.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
@@ -113,7 +114,15 @@ void drop_item_from_inv(
                 }
         }
 
-        drop_item_on_map(actor.m_pos, *item_to_drop);
+        auto* const dropped = drop_item_on_map(actor.m_pos, *item_to_drop);
+
+        // The tile under the player changed - re-trigger the tile status
+        // message fresh, so the log shows the dropped item (the standing
+        // [ pick up ] button appears by itself, offering taking it back)
+        if (dropped &&
+            (map::g_items.at(map::g_player->m_pos) == dropped)) {
+                item_pickup::print_item_at_player_msg();
+        }
 }
 
 item::Item* drop_item_on_map(const P& intended_pos, item::Item& item)

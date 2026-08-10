@@ -28,9 +28,12 @@
 #include "game_commands.hpp"
 #include "game_time.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
+#include "io_internal.hpp"
 #include "item.hpp"
 #include "item_curse.hpp"
 #include "item_data.hpp"
+#include "item_explosive.hpp"
 #include "map.hpp"
 #include "marker.hpp"
 #include "msg_log.hpp"
@@ -42,6 +45,8 @@
 #include "query.hpp"
 #include "random.hpp"
 #include "rect.hpp"
+#include "reload.hpp"
+#include "scrollbar.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -49,9 +54,11 @@
 // -----------------------------------------------------------------------------
 static const int s_nr_turns_to_handle_armor = 7;
 
-// Number of description lines to scroll past the item description (up or down),
-// when the item description must be scrolled due to lack of window space.
-static const int nr_descr_lines_scroll_past = 6;
+// The rows are indented as if they still began with a "(x)" selection key.
+// The key itself is gone (there is no keyboard to press it on - entries are
+// engaged by tapping), but the indentation is what separates the rows from
+// the screen border, and keeps the item names lined up.
+static const int s_key_indent_w = 4;
 
 // Index can mean Slot index or Backpack Index (both start from zero)
 static bool run_drop_query(
@@ -212,6 +219,138 @@ static void on_equipable_backpack_item_selected(const size_t backpack_idx)
         game_time::tick();
 }
 
+// Takes off what is worn or wielded in the slot (armor comes off over
+// several turns instead)
+static void unequip_slot_item(InvSlot& slot)
+{
+        if (!slot.item) {
+                return;
+        }
+
+        // HACK: The Flagellant Torture Collar is not allowed to be removed.
+        if (slot.item->id() == item::Id::torture_collar) {
+                print_cannot_remove_torture_collar_msg(*slot.item);
+
+                return;
+        }
+
+        if (slot.id == SlotId::body) {
+                if (map::g_player->m_properties.has(prop::Id::burning)) {
+                        msg_log::add("Not while burning.");
+
+                        return;
+                }
+
+                actor::player_state::g_remove_armor_countdown =
+                        s_nr_turns_to_handle_armor;
+
+                game_time::tick();
+
+                return;
+        }
+
+        map::g_player->m_inv.unequip_slot(slot.id);
+
+        game_time::tick();
+}
+
+// Drops the item (asking how many, for a stack), or refuses to
+static void try_drop_item(
+        item::Item& item,
+        const InvType inv_type,
+        const size_t idx)
+{
+        // HACK: The Flagellant Torture Collar is not allowed to be removed.
+        if (item.id() == item::Id::torture_collar) {
+                print_cannot_remove_torture_collar_msg(item);
+
+                return;
+        }
+
+        if (item.current_curse().is_active()) {
+                const std::string name =
+                        item.name(
+                                ItemNameType::plain,
+                                ItemNameInfo::none,
+                                ItemNameAttackInfo::none);
+
+                msg_log::add("I refuse to drop the " + name + "!");
+
+                return;
+        }
+
+        if ((inv_type == InvType::slots) &&
+            (idx == (size_t)SlotId::body)) {
+                // Body armor is dropped when it has been taken off
+                actor::player_state::g_remove_armor_countdown =
+                        s_nr_turns_to_handle_armor;
+
+                actor::player_state::g_is_dropping_armor_from_body = true;
+
+                game_time::tick();
+
+                return;
+        }
+
+        if (run_drop_query(item, inv_type, idx)) {
+                game_time::tick();
+        }
+}
+
+// Opens the throw marker with the item, unless throwing it is refused (or
+// the player thinks better of throwing something valuable). Returns
+// whether the marker was opened.
+static bool try_throw_item(item::Item& item)
+{
+        const std::string name =
+                item.name(
+                        ItemNameType::plain,
+                        ItemNameInfo::none,
+                        ItemNameAttackInfo::none);
+
+        if (item.current_curse().is_active()) {
+                msg_log::add("I refuse to throw the " + name + "!");
+
+                return false;
+        }
+
+        const Inventory& inv = map::g_player->m_inv;
+
+        const bool is_potion = (item.data().type == ItemType::potion);
+
+        const bool is_equipped =
+                ((&item == inv.item_in_slot(SlotId::wpn)) ||
+                 (&item == inv.item_in_slot(SlotId::wpn_alt)));
+
+        if (config::warn_on_throw_valuable() && (is_potion || is_equipped)) {
+                const std::string msg =
+                        "Throw the " +
+                        name +
+                        "? " +
+                        common_text::g_yes_or_no_hint;
+
+                msg_log::add(
+                        msg,
+                        colors::light_white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+
+                const BinaryAnswer answer = query::yes_or_no();
+
+                msg_log::clear();
+
+                if (answer == BinaryAnswer::no) {
+                        return false;
+                }
+        }
+
+        states::push(
+                std::make_unique<Throwing>(map::g_player->m_pos, item));
+
+        return true;
+}
+
 static void reserve_key_for_filtered_inventory_index(
         const char key,
         const int filtered_inventory_index,
@@ -270,39 +409,16 @@ StateId InvState::id() const
         return StateId::inventory;
 }
 
-void InvState::cycle_graphics(const io::GraphicsCycle cycle)
+std::vector<ActionPin> InvState::marked_entry_actions() const
 {
-        if (cycle != io::GraphicsCycle::slow) {
-                return;
-        }
-
-        const size_t nr_lines_can_be_displayed =
-                panels::h(Panel::inventory_descr);
-
-        const size_t nr_lines = make_detailed_descr_lines().size();
-
-        if ((nr_lines > nr_lines_can_be_displayed) && (nr_lines != 0)) {
-                const size_t last_idx_shown =
-                        std::max(0, m_descr_idx) +
-                        nr_lines_can_be_displayed - 1;
-
-                const size_t last_line_idx = nr_lines - 1;
-
-                const size_t reset_idx =
-                        (last_line_idx + nr_descr_lines_scroll_past);
-
-                if (last_idx_shown >= reset_idx) {
-                        m_descr_idx = -nr_descr_lines_scroll_past;
-                }
-                else {
-                        m_descr_idx += 1;
-                }
-        }
+        return marked_item_actions();
 }
 
-void InvState::on_window_resized()
+void InvState::run_action(const int action_id)
 {
-        m_descr_idx = -nr_descr_lines_scroll_past;
+        run_item_action((ItemActionId)action_id);
+
+        // NOTE: This object may now be deleted!
 }
 
 void InvState::set_viewed_item(
@@ -310,7 +426,9 @@ void InvState::set_viewed_item(
         const ItemNameAttackInfo attack_info)
 {
         if (item != m_viewed_item) {
-                m_descr_idx = -nr_descr_lines_scroll_past;
+                // Another item is being looked at - its description starts
+                // at the top
+                m_descr.reset_scroll();
         }
 
         m_viewed_item = item;
@@ -320,36 +438,20 @@ void InvState::set_viewed_item(
 void InvState::draw_slot(
         const SlotId id,
         const int y,
-        const char key,
         const bool is_marked,
         const ItemNameAttackInfo attack_info)
 {
-        // Draw key
-        Color color =
-                is_marked
-                ? colors::menu_key_highlight()
-                : colors::menu_key_dark();
-
-        P p(0, y);
-
-        std::string key_str = "(?)";
-
-        key_str[1] = key;
-
-        io::draw_text(
-                key_str,
-                Panel::inventory_menu,
-                p,
-                color);
-
-        p.x += (int)key_str.length() + 1;
+        // NOTE: The rows keep the indentation of the "(x)" selection key
+        // that used to be drawn here - there is no keyboard to press it
+        // on, entries are engaged by tapping (see s_key_indent_w)
+        P p(s_key_indent_w, y);
 
         // Draw slot label
         const InvSlot& slot = map::g_player->m_inv.m_slots[(size_t)id];
 
         const std::string slot_name = slot.name;
 
-        color =
+        const Color color =
                 is_marked
                 ? colors::light_white()
                 : colors::menu_dark();
@@ -393,13 +495,6 @@ void InvState::draw_slot(
                         Panel::inventory_menu,
                         p,
                         color_item);
-
-                draw_weight_pct_and_dots(
-                        p,
-                        item_name.size(),
-                        *item,
-                        color_item,
-                        is_marked);
         }
         else {
                 // No item in this slot
@@ -421,29 +516,12 @@ void InvState::draw_slot(
 void InvState::draw_backpack_item(
         const size_t backpack_idx,
         const int y,
-        const char key,
         const bool is_marked,
         const ItemNameAttackInfo attack_info)
 {
-        // Draw key
-        const Color color =
-                is_marked
-                ? colors::menu_key_highlight()
-                : colors::menu_key_dark();
-
-        std::string key_str = "(?)";
-
-        key_str[1] = key;
-
-        P p(0, y);
-
-        io::draw_text(
-                key_str,
-                Panel::inventory_menu,
-                p,
-                color);
-
-        p.x += (int)key_str.length() + 1;
+        // NOTE: Indented as if the "(x)" selection key was still drawn
+        // here, see draw_slot
+        P p(s_key_indent_w, y);
 
         // Draw item
         const item::Item* const item = map::g_player->m_inv.m_backpack[backpack_idx];
@@ -473,97 +551,10 @@ void InvState::draw_backpack_item(
                 p,
                 color_item);
 
-        draw_weight_pct_and_dots(
-                p,
-                item_name.size(),
-                *item,
-                color_item,
-                is_marked);
-
         if (is_marked) {
                 set_viewed_item(item, attack_info);
                 draw_item_descr();
         }
-}
-
-void InvState::draw_weight_pct_and_dots(
-        const P item_pos,
-        const size_t item_name_len,
-        const item::Item& item,
-        const Color& item_name_color,
-        const bool is_marked) const
-{
-        const int weight_carried_tot = map::g_player->m_inv.total_item_weight();
-
-        int item_weight_pct = 0;
-
-        if (weight_carried_tot > 0) {
-                item_weight_pct = (item.weight() * 100) / weight_carried_tot;
-        }
-
-        ASSERT(item_weight_pct >= 0 && item_weight_pct <= 100);
-
-        std::string weight_str;
-        int weight_x = 0;
-
-        if (item_weight_pct > 0 && item_weight_pct < 100) {
-                weight_str = std::to_string(item_weight_pct) + "%";
-
-                weight_x =
-                        panels::w(Panel::inventory_menu) -
-                        (int)weight_str.size();
-
-                const P weight_pos(weight_x, item_pos.y);
-
-                const Color weight_color =
-                        is_marked
-                        ? colors::light_white()
-                        : colors::menu_dark();
-
-                io::draw_text(
-                        weight_str,
-                        Panel::inventory_menu,
-                        weight_pos,
-                        weight_color);
-        }
-        else {
-                // Zero weight, or 100% of weight
-
-                // No weight percent is displayed
-                weight_str = "";
-                weight_x = panels::w(Panel::inventory_menu);
-        }
-
-        int dots_x = item_pos.x + (int)item_name_len;
-        int dots_w = weight_x - dots_x;
-
-        std::string dots_str;
-        Color dots_color;
-
-        // At least one dot must be drawn, otherwise we truncate the name
-        if (dots_w > 0) {
-                // Item name fits
-                dots_str = std::string(dots_w, '.');
-
-                dots_color =
-                        is_marked
-                        ? colors::white()
-                        : item_name_color.shaded(85);
-        }
-        else {
-                // Item name does not fit
-                dots_str = " (...) ";
-                dots_w = (int)dots_str.size();
-                dots_x = weight_x - dots_w;
-
-                dots_color = colors::gray();
-        }
-
-        io::draw_text(
-                dots_str,
-                Panel::inventory_menu,
-                P(dots_x, item_pos.y),
-                dots_color);
 }
 
 std::vector<std::string> InvState::make_detailed_descr_lines() const
@@ -726,11 +717,26 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
         lines.emplace_back(weight_str);
 
         // -------------------------------------------------------------
+        // The state of the item right now - LAST, after everything that
+        // describes what it is
+        // -------------------------------------------------------------
+        if (m_viewed_item->data().type == ItemType::explosive) {
+                const auto* const explosive =
+                        static_cast<const item::Explosive*>(m_viewed_item);
+
+                if (explosive->is_lit()) {
+                        lines.emplace_back(explosive->str_when_lit());
+                }
+        }
+
+        // -------------------------------------------------------------
         // Format the lines
         // -------------------------------------------------------------
         std::vector<std::string> formatted_lines;
 
-        const int w = panels::w(Panel::inventory_descr);
+        // NOTE: Not the full panel width - the description column keeps
+        // room for its scrollbar
+        const int w = m_descr.text_w();
 
         for (const std::string& line : lines) {
                 const std::vector<std::string> new_formatted_lines =
@@ -749,7 +755,7 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
         return formatted_lines;
 }
 
-void InvState::draw_item_descr() const
+void InvState::draw_item_descr()
 {
         // NOTE: We clear this area of the screen regardless of whether there is
         // a description to draw or not.
@@ -759,62 +765,53 @@ void InvState::draw_item_descr() const
                 return;
         }
 
-        const std::vector<std::string> lines = make_detailed_descr_lines();
-
-        if (m_descr_idx >= (int)lines.size()) {
-                ASSERT(false);
-                return;
-        }
-
-        P pos(0, 0);
-
-        const int nr_lines = (int)lines.size();
-        const int max_nr_lines_shown = panels::h(Panel::inventory_descr);
-        const int y1 = max_nr_lines_shown - 1;
-        const int idx_lo = 0;
-        const int idx_hi = std::max(0, nr_lines - max_nr_lines_shown);
-        const int descr_idx = std::clamp(m_descr_idx, idx_lo, idx_hi);
-        const int last_idx_can_show = descr_idx + max_nr_lines_shown - 1;
-        const int y_to_fade_from = (y1 * 3) / 4;
-        const int last_idx = std::min(last_idx_can_show, nr_lines - 1);
-        const bool should_fade = last_idx_can_show < (nr_lines - 1);
-
-        for (int i = descr_idx; i <= last_idx; ++i) {
-                const std::string& line = lines[i];
-
-                Color color = colors::text();
-
-                if (should_fade && (pos.y >= y_to_fade_from)) {
-                        const int y_rel = pos.y - y_to_fade_from;
-                        const int y1_rel = y1 - y_to_fade_from;
-
-                        const int pct_shaded = (y_rel * 99) / y1_rel;
-
-                        color = color.shaded(pct_shaded);
-                }
-
-                io::draw_text(
-                        line,
-                        Panel::inventory_descr,
-                        pos,
-                        color);
-
-                ++pos.y;
-        }
+        m_descr.draw(make_detailed_descr_lines(), colors::text());
 }
 
 // -----------------------------------------------------------------------------
 // Inventory browsing state
 // -----------------------------------------------------------------------------
+int BrowseInv::list_size() const
+{
+        return (int)SlotId::END +
+                (int)map::g_player->m_inv.m_backpack.size();
+}
+
+void BrowseInv::on_inventory_changed()
+{
+        sync_browser_to_inventory();
+}
+
+void BrowseInv::sync_browser_to_inventory()
+{
+        // Items may have moved between the slots and the backpack
+        // (equipping, dropping, using something up), so the browser is
+        // re-made for the current inventory - but left on the entry the
+        // player had marked.
+        const int y = m_browser.y();
+
+        map::g_player->m_inv.sort_backpack();
+
+        m_browser.reset(list_size(), panels::h(Panel::inventory_menu));
+
+        // NOTE: set_y clamps to the current number of entries
+        m_browser.set_y(y);
+}
+
+void BrowseInv::on_resume()
+{
+        // A screen opened from here has closed
+        //
+        // NOTE: Drawing is deliberately NOT resumed here - see
+        // InvState::pop_if_action_spent_turn
+        sync_browser_to_inventory();
+}
+
 void BrowseInv::on_start()
 {
         map::g_player->m_inv.sort_backpack();
 
-        const int list_size =
-                (int)SlotId::END +
-                (int)map::g_player->m_inv.m_backpack.size();
-
-        m_browser.reset(list_size, panels::h(Panel::inventory_menu));
+        m_browser.reset(list_size(), panels::h(Panel::inventory_menu));
 
         m_browser.set_selection_audio_enabled(false);
 
@@ -834,31 +831,33 @@ void BrowseInv::on_start()
 
 void BrowseInv::draw()
 {
-        draw_box(panels::area(Panel::screen));
+        draw_box(panels::screen_box_area());
 
         const int browser_y = m_browser.y();
 
         const auto nr_slots = (size_t)SlotId::END;
 
         io::draw_text_center(
-                " Browsing inventory ",
+                " Inventory ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), 0},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p0.y},
                 colors::title());
 
+        // The same footer as the other selectable lists (the screen is
+        // closed with the [ x ] control)
         io::draw_text_center(
-                " " + common_text::g_screen_exit_hint + " ",
+                " " + common_text::g_menu_select_hint + " ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p1.y},
                 colors::title());
+
+        prepare_action_pins();
 
         const Range idx_range_shown = m_browser.range_shown();
 
         int y = 0;
 
         for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
-                const char key = m_browser.menu_keys()[y];
-
                 const bool is_marked = browser_y == i;
 
                 if (i < (int)nr_slots) {
@@ -867,7 +866,6 @@ void BrowseInv::draw()
                         draw_slot(
                                 slot_id,
                                 y,
-                                key,
                                 is_marked,
                                 ItemNameAttackInfo::main_attack_mode);
                 }
@@ -878,7 +876,6 @@ void BrowseInv::draw()
                         draw_backpack_item(
                                 backpack_idx,
                                 y,
-                                key,
                                 is_marked,
                                 ItemNameAttackInfo::main_attack_mode);
                 }
@@ -886,27 +883,37 @@ void BrowseInv::draw()
                 ++y;
         }
 
-        // Draw "more" labels
-        if (!m_browser.is_on_top_page()) {
-                io::draw_text(
-                        common_text::g_next_page_up_hint,
-                        Panel::inventory_menu,
-                        {0, -1},
-                        colors::light_white());
-        }
+        // Where the list continues, its edge fades out
+        draw_list_fades();
 
-        if (!m_browser.is_on_btm_page()) {
-                io::draw_text(
-                        common_text::g_next_page_down_hint,
-                        Panel::inventory_menu,
-                        {0, panels::h(Panel::inventory_menu)},
-                        colors::light_white());
+        // Last - the pins sit on top of the faded out end of the text
+        draw_action_pins();
+
+        // An action taken from here can ask a question that is answered in
+        // the message log ("Light a Stick of Dynamite?"). The log is not
+        // part of this screen, so it is drawn on top while it waits -
+        // otherwise the game would sit waiting for an answer to a question
+        // the player cannot see.
+        if (msg_log::is_waiting_prompt()) {
+                io::cover_panel(Panel::log);
+
+                msg_log::draw();
         }
 }
 
 void BrowseInv::update()
 {
+        if (pop_if_action_spent_turn()) {
+                // NOTE: This object is now deleted!
+                return;
+        }
+
         const io::InputData input = io::read_input();
+
+        if (handle_pending_action()) {
+                // NOTE: This object may now be deleted!
+                return;
+        }
 
         if ((input.key == 'i') && m_browser.is_on_top_page()) {
                 // Exit screen
@@ -937,8 +944,312 @@ void BrowseInv::update()
         }
 }
 
-void BrowseInv::on_selected() const
+InvState::MarkedItem BrowseInv::marked_item() const
 {
+        MarkedItem marked;
+
+        Inventory& inv = map::g_player->m_inv;
+
+        if (m_browser.y() < (int)SlotId::END) {
+                marked.inv_type = InvType::slots;
+                marked.idx = (size_t)m_browser.y();
+                marked.item = inv.m_slots[marked.idx].item;
+        }
+        else {
+                marked.inv_type = InvType::backpack;
+                marked.idx = (size_t)m_browser.y() - (size_t)SlotId::END;
+
+                if (marked.idx < inv.m_backpack.size()) {
+                        marked.item = inv.m_backpack[marked.idx];
+                }
+        }
+
+        return marked;
+}
+
+// A lit explosive is carried like anything else, but there is nothing
+// left to do with it except throw it or put it down (see item::Explosive)
+static bool is_lit_explosive(const item::Item& item)
+{
+        return (item.data().type == ItemType::explosive) &&
+                static_cast<const item::Explosive&>(item).is_lit();
+}
+
+// Lighting one from a screen: the screen has closed already (the question
+// and the outcome belong on the map), and if the player was not hurt while
+// lighting it, the throw marker opens with the lit item - the common case
+// is to light and throw in one motion.
+static void light_explosive_and_aim(const size_t backpack_idx)
+{
+        const std::vector<item::Explosive*> lit_before =
+                item::player_lit_explosives();
+
+        const int hp_before = map::g_player->m_hp;
+
+        activate(backpack_idx);
+
+        item::Explosive* newly_lit = nullptr;
+
+        for (auto* const explosive : item::player_lit_explosives()) {
+                const bool was_lit_before =
+                        std::find(
+                                std::begin(lit_before),
+                                std::end(lit_before),
+                                explosive) != std::end(lit_before);
+
+                if (!was_lit_before) {
+                        newly_lit = explosive;
+
+                        break;
+                }
+        }
+
+        if (!newly_lit) {
+                // Nothing was lit (the player said no, or it was refused)
+                return;
+        }
+
+        if (map::g_player->m_hp < hp_before) {
+                // Interrupted - something hurt the player while the fuse
+                // was being lit, and aiming a throw is not what they need
+                // to decide right now
+                return;
+        }
+
+        states::push(
+                std::make_unique<ThrowingExplosive>(
+                        map::g_player->m_pos,
+                        *newly_lit));
+}
+
+// Whether using the item commits it there and then: it is consumed (or
+// ends up in the player's hand), the answer to any confirmation decides
+// the turn, and the player is left standing in the world. Such a use
+// closes the inventory FIRST, so that its question ("Light a Stick of
+// Dynamite?") and its outcome are seen on the map - the message log is
+// not part of this screen.
+static bool is_committing_activation(const item::ItemData& d)
+{
+        switch (d.type) {
+        case ItemType::potion:
+        case ItemType::scroll:
+        case ItemType::explosive:
+                return true;
+
+        default:
+                return false;
+        }
+}
+
+// The verb for using an item, by what the item is ("use" covers whatever
+// has no better word)
+static std::string activate_label(const item::ItemData& d)
+{
+        switch (d.type) {
+        case ItemType::potion:
+                return "drink";
+
+        case ItemType::scroll:
+                return "read";
+
+        case ItemType::explosive:
+                return "light";
+
+        default:
+                return "use";
+        }
+}
+
+std::vector<ActionPin> BrowseInv::marked_item_actions() const
+{
+        std::vector<ActionPin> pins;
+
+        if (!m_allow_inv_action) {
+                // The screen is only being read (the game info screens
+                // borrow it)
+                return pins;
+        }
+
+        const MarkedItem marked = marked_item();
+
+        const Inventory& inv = map::g_player->m_inv;
+
+        if (!marked.item) {
+                if (marked.inv_type == InvType::slots) {
+                        // An empty slot is filled from the backpack
+                        const bool is_worn =
+                                (marked.idx == (size_t)SlotId::body) ||
+                                (marked.idx == (size_t)SlotId::head);
+
+                        pins.push_back(
+                                {(int)ItemActionId::equip_in,
+                                 is_worn ? "wear" : "wield",
+                                 {}});
+                }
+
+                return pins;
+        }
+
+        const item::ItemData& d = marked.item->data();
+
+        if (is_lit_explosive(*marked.item)) {
+                // Burning in hand - it must be thrown or put down
+                pins.push_back({(int)ItemActionId::throw_item, "throw", {}});
+                pins.push_back({(int)ItemActionId::drop, "drop", {}});
+
+                return pins;
+        }
+
+        // Primary action first
+        if (marked.inv_type == InvType::slots) {
+                pins.push_back({(int)ItemActionId::unequip, "remove", {}});
+        }
+        else if ((d.type == ItemType::melee_wpn) ||
+                 (d.type == ItemType::ranged_wpn)) {
+                pins.push_back({(int)ItemActionId::equip, "wield", {}});
+        }
+        else if ((d.type == ItemType::armor) ||
+                 (d.type == ItemType::head_wear)) {
+                pins.push_back({(int)ItemActionId::equip, "wear", {}});
+        }
+        else if (d.has_std_activate) {
+                pins.push_back({(int)ItemActionId::activate, activate_label(d), {}});
+        }
+
+        // Reloading is done with the weapon in hand
+        const bool is_wielded_firearm =
+                (marked.item == inv.item_in_slot(SlotId::wpn)) &&
+                d.ranged.is_ranged_wpn &&
+                !d.ranged.has_infinite_ammo;
+
+        if (is_wielded_firearm) {
+                pins.push_back({(int)ItemActionId::reload, "reload", {}});
+        }
+
+        if (d.ranged.is_throwable_wpn) {
+                pins.push_back({(int)ItemActionId::throw_item, "throw", {}});
+        }
+
+        // Last - the one action that is not wanted by accident
+        pins.push_back({(int)ItemActionId::drop, "drop", {}});
+
+        return pins;
+}
+
+void InvState::run_item_action(const ItemActionId action_id)
+{
+        const MarkedItem marked = marked_item();
+
+        Inventory& inv = map::g_player->m_inv;
+
+        msg_log::clear();
+
+        note_action_started();
+
+        switch (action_id) {
+        case ItemActionId::equip_in:
+                // Opens the item selection for the marked slot - the
+                // inventory stays under it
+                states::push(
+                        std::make_unique<Equip>(inv.m_slots[marked.idx]));
+                break;
+
+        case ItemActionId::equip:
+                on_equipable_backpack_item_selected(marked.idx);
+                break;
+
+        case ItemActionId::unequip:
+                unequip_slot_item(inv.m_slots[marked.idx]);
+                break;
+
+        case ItemActionId::activate:
+                if (marked.item &&
+                    is_committing_activation(marked.item->data())) {
+                        const size_t backpack_idx = marked.idx;
+
+                        const bool is_explosive =
+                                (marked.item->data().type ==
+                                 ItemType::explosive);
+
+                        // NOTE: Read before popping - this object is
+                        // deleted by then
+                        const bool aim_after_lighting =
+                                is_explosive && should_aim_after_lighting();
+
+                        states::pop();
+
+                        // NOTE: This object is now deleted!
+                        if (aim_after_lighting) {
+                                light_explosive_and_aim(backpack_idx);
+                        }
+                        else {
+                                activate(backpack_idx);
+                        }
+
+                        return;
+                }
+
+                activate(marked.idx);
+                break;
+
+        case ItemActionId::reload:
+                reload::try_reload(*map::g_player, marked.item);
+                break;
+
+        case ItemActionId::throw_item:
+                if (marked.item && is_lit_explosive(*marked.item)) {
+                        // A burning fuse is aimed with the blast overlay
+                        auto* const explosive =
+                                static_cast<item::Explosive*>(marked.item);
+
+                        disable_drawing();
+
+                        states::push(
+                                std::make_unique<ThrowingExplosive>(
+                                        map::g_player->m_pos,
+                                        *explosive));
+                }
+                else if (marked.item) {
+                        // The throw is aimed on the MAP - this screen is
+                        // not drawn under the marker (see states::draw),
+                        // and any confirmation is asked over the map too.
+                        // Drawing is resumed by the next update (see
+                        // pop_if_action_spent_turn), or right here if the
+                        // throw is refused.
+                        disable_drawing();
+
+                        if (!try_throw_item(*marked.item)) {
+                                enable_drawing();
+                        }
+                }
+                break;
+
+        case ItemActionId::drop:
+                if (marked.item && is_lit_explosive(*marked.item)) {
+                        // Put down where the player stands, still burning
+                        static_cast<item::Explosive*>(marked.item)
+                                ->drop_lit_at_player(true);
+
+                        game_time::tick();
+                }
+                else if (marked.item) {
+                        try_drop_item(
+                                *marked.item,
+                                marked.inv_type,
+                                marked.idx);
+                }
+                break;
+        }
+
+        close_if_action_spent_time();
+
+        // NOTE: This object may now be deleted!
+}
+
+void BrowseInv::on_selected()
+{
+        note_action_started();
+
         const InvType inv_type_marked =
                 (m_browser.y() < (int)SlotId::END)
                 ? InvType::slots
@@ -956,7 +1267,7 @@ void BrowseInv::on_selected() const
         }
 }
 
-void BrowseInv::on_inventory_slot_selected(InvSlot& slot) const
+void BrowseInv::on_inventory_slot_selected(InvSlot& slot)
 {
         if (!slot.item) {
                 // No item in slot, let player select something
@@ -969,42 +1280,19 @@ void BrowseInv::on_inventory_slot_selected(InvSlot& slot) const
         }
 }
 
-void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot) const
+void BrowseInv::on_inventory_slot_with_item_selected(InvSlot& slot)
 {
-        states::pop();
-
         msg_log::clear();
 
-        // NOTE: This object is now deleted!
+        unequip_slot_item(slot);
 
-        // HACK: The Flagellant Torture Collar is not allowed to be removed.
-        if (slot.item->id() == item::Id::torture_collar) {
-                print_cannot_remove_torture_collar_msg(*slot.item);
-        }
-        else if (slot.id == SlotId::body) {
-                if (map::g_player->m_properties.has(prop::Id::burning)) {
-                        msg_log::add("Not while burning.");
+        close_if_action_spent_time();
 
-                        return;
-                }
-
-                actor::player_state::g_remove_armor_countdown =
-                        s_nr_turns_to_handle_armor;
-
-                game_time::tick();
-        }
-        else {
-                map::g_player->m_inv.unequip_slot(slot.id);
-
-                game_time::tick();
-        }
+        // NOTE: This object may now be deleted!
 }
 
-void BrowseInv::on_backpack_item_selected(const size_t backpack_idx) const
+void BrowseInv::on_backpack_item_selected(const size_t backpack_idx)
 {
-        // Exit screen
-        states::pop();
-
         item::Item* item = map::g_player->m_inv.m_backpack[backpack_idx];
 
         const item::ItemData& data = item->data();
@@ -1018,375 +1306,10 @@ void BrowseInv::on_backpack_item_selected(const size_t backpack_idx) const
         else {
                 activate(backpack_idx);
         }
-}
 
-// -----------------------------------------------------------------------------
-// Apply item state
-// -----------------------------------------------------------------------------
-void Apply::on_start()
-{
-        map::g_player->m_inv.sort_backpack();
+        close_if_action_spent_time();
 
-        std::vector<item::Item*>& backpack = map::g_player->m_inv.m_backpack;
-
-        m_filtered_backpack_indexes.clear();
-
-        m_filtered_backpack_indexes.reserve(backpack.size());
-
-        for (size_t i = 0; i < backpack.size(); ++i) {
-                const item::Item* const item = backpack[i];
-
-                const item::ItemData& d = item->data();
-
-                if (d.has_std_activate) {
-                        FilteredInvEntry entry;
-                        entry.relative_idx = i;
-                        entry.is_slot = false;
-
-                        m_filtered_backpack_indexes.push_back(entry);
-                }
-        }
-
-        if (m_filtered_backpack_indexes.empty()) {
-                // Exit screen
-                states::pop();
-
-                msg_log::add("I carry nothing to apply.");
-
-                return;
-        }
-
-        m_browser.reset(
-                (int)m_filtered_backpack_indexes.size(),
-                panels::h(Panel::inventory_menu));
-
-        m_browser.set_selection_audio_enabled(false);
-
-        // NOTE: These must be called in reverse order, because the key will be moved to the top.
-        if (player_bon::is_bg(Bg::exorcist)) {
-                reserve_key_for_item_id(item::Id::holy_symbol, 's');
-        }
-        reserve_key_for_item_id(item::Id::medical_bag, 'b');
-        reserve_key_for_item_id(item::Id::lantern, 'a');
-
-        audio::play(audio::SfxId::backpack);
-}
-
-void Apply::draw()
-{
-        // Only draw this state if it's the current state, so that messages can be drawn on the map.
-        if (!states::is_current_state(this)) {
-                return;
-        }
-
-        draw_box(panels::area(Panel::screen));
-
-        const int browser_y = m_browser.y();
-
-        io::draw_text_center(
-                " Apply which item? ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), 0},
-                colors::title());
-
-        io::draw_text_center(
-                " " + common_text::g_screen_exit_hint + " ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
-                colors::title());
-
-        const Range idx_range_shown = m_browser.range_shown();
-
-        int y = 0;
-
-        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
-                const char key = m_browser.menu_keys()[y];
-
-                const bool is_marked = browser_y == i;
-
-                // TODO: Update this if "applying" from slots should be supported.
-                const size_t backpack_idx = m_filtered_backpack_indexes[i].relative_idx;
-
-                draw_backpack_item(
-                        backpack_idx,
-                        y,
-                        key,
-                        is_marked,
-                        ItemNameAttackInfo::main_attack_mode);
-
-                ++y;
-        }
-
-        // Draw "more" labels
-        if (!m_browser.is_on_top_page()) {
-                io::draw_text(
-                        common_text::g_next_page_up_hint,
-                        Panel::inventory_menu,
-                        {0, -1},
-                        colors::light_white());
-        }
-
-        if (!m_browser.is_on_btm_page()) {
-                io::draw_text(
-                        common_text::g_next_page_down_hint,
-                        Panel::inventory_menu,
-                        {0, panels::h(Panel::inventory_menu)},
-                        colors::light_white());
-        }
-}
-
-void Apply::update()
-{
-        io::InputData input = io::read_input();
-
-        const MenuAction action =
-                m_browser.read(input, MenuInputMode::scrolling_and_letters);
-
-        switch (action) {
-        case MenuAction::selected: {
-                if (!m_filtered_backpack_indexes.empty()) {
-                        // TODO: Update this if "applying" from slots should be supported.
-                        const size_t backpack_idx =
-                                m_filtered_backpack_indexes[m_browser.y()].relative_idx;
-
-                        // Exit screen
-                        states::pop();
-
-                        activate(backpack_idx);
-
-                        return;
-                }
-        } break;
-
-        case MenuAction::esc:
-        case MenuAction::space: {
-                // Exit screen
-                states::pop();
-                return;
-        } break;
-
-        default:
-                break;
-        }
-}
-
-void Apply::reserve_key_for_item_id(const item::Id id, const char key)
-{
-        Inventory& inventory = map::g_player->m_inv;
-
-        int filtered_inv_idx_with_item = -1;
-
-        for (size_t i = 0; i < m_filtered_backpack_indexes.size(); ++i) {
-                FilteredInvEntry& entry = m_filtered_backpack_indexes[i];
-
-                const item::Item* const item = inventory.m_backpack[entry.relative_idx];
-
-                if (item->id() == id) {
-                        filtered_inv_idx_with_item = (int)i;
-
-                        break;
-                }
-        }
-
-        reserve_key_for_filtered_inventory_index(
-                key,
-                filtered_inv_idx_with_item,
-                m_filtered_backpack_indexes,
-                m_browser);
-}
-
-// -----------------------------------------------------------------------------
-// Drop item state
-// -----------------------------------------------------------------------------
-void Drop::on_start()
-{
-        map::g_player->m_inv.sort_backpack();
-
-        const int list_size =
-                (int)SlotId::END +
-                (int)map::g_player->m_inv.m_backpack.size();
-
-        m_browser.reset(
-                list_size,
-                panels::h(Panel::inventory_menu));
-
-        m_browser.set_selection_audio_enabled(false);
-
-        // The 'i' key is removed in the inventory menu, so we remove it in this menu as well for
-        // consistency.
-        m_browser.remove_key('i');
-
-        audio::play(audio::SfxId::backpack);
-}
-
-void Drop::draw()
-{
-        draw_box(panels::area(Panel::screen));
-
-        io::draw_text_center(
-                " Drop which item? ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), 0},
-                colors::title());
-
-        io::draw_text_center(
-                " " + common_text::g_screen_exit_hint + " ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
-                colors::title());
-
-        const int browser_y = m_browser.y();
-
-        const Range idx_range_shown = m_browser.range_shown();
-
-        int y = 0;
-
-        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
-                const char key = m_browser.menu_keys()[y];
-
-                const bool is_marked = browser_y == i;
-
-                if (i < (int)SlotId::END) {
-                        const auto slot_id = (SlotId)i;
-
-                        draw_slot(
-                                slot_id,
-                                y,
-                                key,
-                                is_marked,
-                                ItemNameAttackInfo::main_attack_mode);
-                }
-                else {
-                        // This index is in backpack
-                        const auto backpack_idx =
-                                (size_t)(i - (int)SlotId::END);
-
-                        draw_backpack_item(
-                                backpack_idx,
-                                y,
-                                key,
-                                is_marked,
-                                ItemNameAttackInfo::main_attack_mode);
-                }
-
-                ++y;
-        }
-
-        // Draw "more" labels
-        if (!m_browser.is_on_top_page()) {
-                io::draw_text(
-                        common_text::g_next_page_up_hint,
-                        Panel::inventory_menu,
-                        {0, -1},
-                        colors::light_white());
-        }
-
-        if (!m_browser.is_on_btm_page()) {
-                io::draw_text(
-                        common_text::g_next_page_down_hint,
-                        Panel::inventory_menu,
-                        {0, panels::h(Panel::inventory_menu)},
-                        colors::light_white());
-        }
-}
-
-void Drop::update()
-{
-        const io::InputData input = io::read_input();
-
-        const MenuAction action =
-                m_browser.read(input, MenuInputMode::scrolling_and_letters);
-
-        switch (action) {
-        case MenuAction::selected: {
-                on_selected();
-        } break;
-
-        case MenuAction::esc:
-        case MenuAction::space: {
-                // Exit screen
-                states::pop();
-        } break;
-
-        default:
-                break;
-        }
-}
-
-void Drop::on_selected() const
-{
-        const int browser_y = m_browser.y();
-
-        const InvType inv_type_marked =
-                (m_browser.y() < (int)SlotId::END)
-                ? InvType::slots
-                : InvType::backpack;
-
-        auto idx = (size_t)browser_y;
-
-        item::Item* item = nullptr;
-
-        Inventory& inv = map::g_player->m_inv;
-
-        if (inv_type_marked == InvType::slots) {
-                if (!inv.has_item_in_slot((SlotId)idx)) {
-                        // No item in this slot, just do nothing (keep browsing
-                        // for item to drop).
-                        return;
-                }
-
-                item = inv.m_slots[idx].item;
-        }
-        else {
-                // Backpack item marked.
-                idx -= (size_t)SlotId::END;
-
-                item = inv.m_backpack[idx];
-        }
-
-        ASSERT(item);
-
-        // Exit screen
-        states::pop();
-
-        // HACK: The Flagellant Torture Collar is not allowed to be removed.
-        if (item->id() == item::Id::torture_collar) {
-                print_cannot_remove_torture_collar_msg(*item);
-
-                return;
-        }
-
-        if (item->current_curse().is_active()) {
-                const std::string name =
-                        item->name(
-                                ItemNameType::plain,
-                                ItemNameInfo::none,
-                                ItemNameAttackInfo::none);
-
-                msg_log::add("I refuse to drop the " + name + "!");
-
-                return;
-        }
-
-        if ((inv_type_marked == InvType::slots) &&
-            (idx == (size_t)SlotId::body)) {
-                // Body slot marked, start dropping the armor
-                actor::player_state::g_remove_armor_countdown =
-                        s_nr_turns_to_handle_armor;
-
-                actor::player_state::g_is_dropping_armor_from_body = true;
-
-                game_time::tick();
-        }
-        else {
-                // Not dropping from body slot, drop immediately
-                const bool did_drop =
-                        run_drop_query(*item, inv_type_marked, idx);
-
-                if (did_drop) {
-                        game_time::tick();
-                }
-        }
+        // NOTE: This object may now be deleted!
 }
 
 // -----------------------------------------------------------------------------
@@ -1453,7 +1376,7 @@ void Equip::on_start()
 
 void Equip::draw()
 {
-        draw_box(panels::area(Panel::screen));
+        draw_box(panels::screen_box_area());
 
         const bool has_item = !m_filtered_backpack_indexes.empty();
 
@@ -1496,7 +1419,7 @@ void Equip::draw()
                 io::draw_text(
                         " " + heading + " " + common_text::g_any_key_hint + " ",
                         Panel::screen,
-                        {0, 0},
+                        panels::screen_box_area().p0,
                         colors::light_white());
 
                 return;
@@ -1507,13 +1430,13 @@ void Equip::draw()
         io::draw_text_center(
                 " " + heading + " ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), 0},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p0.y},
                 colors::title());
 
         io::draw_text_center(
                 " " + common_text::g_screen_exit_hint + " ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p1.y},
                 colors::title());
 
         const int browser_y = m_browser.y();
@@ -1542,29 +1465,14 @@ void Equip::draw()
                 draw_backpack_item(
                         backpack_idx,
                         y,
-                        key,
                         is_marked,
                         att_inf);
 
                 ++y;
         }
 
-        // Draw "more" labels
-        if (!m_browser.is_on_top_page()) {
-                io::draw_text(
-                        common_text::g_next_page_up_hint,
-                        Panel::inventory_menu,
-                        {0, -1},
-                        colors::light_white());
-        }
-
-        if (!m_browser.is_on_btm_page()) {
-                io::draw_text(
-                        common_text::g_next_page_down_hint,
-                        Panel::inventory_menu,
-                        {0, panels::h(Panel::inventory_menu)},
-                        colors::light_white());
-        }
+        // Where the list continues, its edge fades out
+        draw_list_fades();
 }
 
 void Equip::update()
@@ -1646,13 +1554,16 @@ void SelectThrow::on_start()
                 }
         }
 
-        // Filter backpack
+        // Filter backpack. NOTE: Explosives are listed too, lit or not -
+        // an unlit one is lit from here (its pin), and a lit one is thrown
+        // from here like anything else.
         for (size_t i = 0; i < inventory.m_backpack.size(); ++i) {
                 const item::Item* const item = inventory.m_backpack[i];
 
                 const item::ItemData& d = item->data();
 
-                if (d.ranged.is_throwable_wpn) {
+                if (d.ranged.is_throwable_wpn ||
+                    (d.type == ItemType::explosive)) {
                         FilteredInvEntry entry;
                         entry.relative_idx = i;
                         entry.is_slot = false;
@@ -1667,7 +1578,7 @@ void SelectThrow::on_start()
                 // Nothing to throw, exit screen.
                 states::pop();
 
-                msg_log::add("I carry no throwing weapons.");
+                msg_log::add("I carry nothing to throw.");
 
                 return;
         }
@@ -1681,21 +1592,84 @@ void SelectThrow::on_start()
         audio::play(audio::SfxId::backpack);
 }
 
+InvState::MarkedItem SelectThrow::marked_item() const
+{
+        MarkedItem marked;
+
+        if ((m_browser.y() < 0) ||
+            (m_browser.y() >= (int)m_filtered_inv.size())) {
+                return marked;
+        }
+
+        const FilteredInvEntry& entry = m_filtered_inv[m_browser.y()];
+
+        Inventory& inv = map::g_player->m_inv;
+
+        marked.idx = entry.relative_idx;
+
+        if (entry.is_slot) {
+                marked.inv_type = InvType::slots;
+                marked.item = inv.m_slots[entry.relative_idx].item;
+        }
+        else {
+                marked.inv_type = InvType::backpack;
+
+                if (entry.relative_idx < inv.m_backpack.size()) {
+                        marked.item = inv.m_backpack[entry.relative_idx];
+                }
+        }
+
+        return marked;
+}
+
+std::vector<ActionPin> SelectThrow::marked_item_actions() const
+{
+        std::vector<ActionPin> pins;
+
+        const MarkedItem marked = marked_item();
+
+        if (!marked.item) {
+                return pins;
+        }
+
+        const item::ItemData& d = marked.item->data();
+
+        if ((d.type == ItemType::explosive) &&
+            !static_cast<const item::Explosive*>(marked.item)->is_lit()) {
+                // Lighting it is the primary action - the throw is then
+                // aimed right after (see light_explosive_and_aim). The
+                // unlit thing can still be thrown as the plain object it
+                // is though (lobbing a stick of dynamite over to where it
+                // is wanted, getting rid of dead weight), so it keeps the
+                // throw pin as well.
+                pins.push_back({(int)ItemActionId::activate, "light", {}});
+                pins.push_back({(int)ItemActionId::throw_item, "throw", {}});
+
+                return pins;
+        }
+
+        pins.push_back({(int)ItemActionId::throw_item, "throw", {}});
+
+        return pins;
+}
+
 void SelectThrow::draw()
 {
-        draw_box(panels::area(Panel::screen));
+        draw_box(panels::screen_box_area());
 
         io::draw_text_center(
                 " Throw which item? ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), 0},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p0.y},
                 colors::title());
 
         io::draw_text_center(
-                " " + common_text::g_screen_exit_hint + " ",
+                " " + common_text::g_menu_select_hint + " ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p1.y},
                 colors::title());
+
+        prepare_action_pins();
 
         const int browser_y = m_browser.y();
 
@@ -1704,8 +1678,6 @@ void SelectThrow::draw()
         int y = 0;
 
         for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
-                const char key = m_browser.menu_keys()[y];
-
                 const bool is_marked = browser_y == i;
 
                 const FilteredInvEntry& inv_entry = m_filtered_inv[i];
@@ -1716,7 +1688,6 @@ void SelectThrow::draw()
                         draw_slot(
                                 slot_id,
                                 y,
-                                key,
                                 is_marked,
                                 ItemNameAttackInfo::thrown);
                 }
@@ -1727,7 +1698,6 @@ void SelectThrow::draw()
                         draw_backpack_item(
                                 backpack_idx,
                                 y,
-                                key,
                                 is_marked,
                                 ItemNameAttackInfo::thrown);
                 }
@@ -1735,94 +1705,40 @@ void SelectThrow::draw()
                 ++y;
         }
 
-        // Draw "more" labels
-        if (!m_browser.is_on_top_page()) {
-                io::draw_text(
-                        common_text::g_next_page_up_hint,
-                        Panel::inventory_menu,
-                        {0, -1},
-                        colors::light_white());
-        }
+        // Where the list continues, its edge fades out
+        draw_list_fades();
 
-        if (!m_browser.is_on_btm_page()) {
-                io::draw_text(
-                        common_text::g_next_page_down_hint,
-                        Panel::inventory_menu,
-                        {0, panels::h(Panel::inventory_menu)},
-                        colors::light_white());
-        }
+        // Last - the pins sit on top of the faded out end of the text
+        draw_action_pins();
 }
 
 void SelectThrow::update()
 {
+        if (pop_if_action_spent_turn()) {
+                // NOTE: This object is now deleted!
+                return;
+        }
+
         const io::InputData input = io::read_input();
+
+        if (handle_pending_action()) {
+                // NOTE: This object may now be deleted!
+                return;
+        }
 
         const MenuAction action = m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
-        const FilteredInvEntry& inv_entry_marked = m_filtered_inv[m_browser.y()];
-
-        const Inventory& inv = map::g_player->m_inv;
-
-        item::Item* item = nullptr;
-
-        if (inv_entry_marked.is_slot) {
-                item = inv.m_slots[inv_entry_marked.relative_idx].item;
-        }
-        else {
-                // Backpack item selected
-                item = inv.m_backpack[inv_entry_marked.relative_idx];
-        }
-
-        ASSERT(item);
-
         switch (action) {
         case MenuAction::selected: {
-                states::pop();
+                // The same thing the primary pin does (throw, or light
+                // what has to be lit first)
+                const std::vector<ActionPin> pins = marked_item_actions();
 
-                const std::string name =
-                        item->name(
-                                ItemNameType::plain,
-                                ItemNameInfo::none,
-                                ItemNameAttackInfo::none);
-
-                if (item->current_curse().is_active()) {
-                        msg_log::add("I refuse to throw the " + name + "!");
-
-                        return;
+                if (!pins.empty()) {
+                        run_item_action((ItemActionId)pins.front().id);
                 }
 
-                const bool is_potion = (item->data().type == ItemType::potion);
-
-                const bool is_equipped =
-                        ((item == inv.item_in_slot(SlotId::wpn)) ||
-                         (item == inv.item_in_slot(SlotId::wpn_alt)));
-
-                if (config::warn_on_throw_valuable() &&
-                    (is_potion || is_equipped)) {
-                        const std::string msg =
-                                "Throw the " +
-                                name +
-                                "? " +
-                                common_text::g_yes_or_no_hint;
-
-                        msg_log::add(
-                                msg,
-                                colors::light_white(),
-                                MsgInterruptPlayer::no,
-                                MorePromptOnMsg::no,
-                                CopyToMsgHistory::no);
-
-                        const BinaryAnswer answer = query::yes_or_no();
-
-                        msg_log::clear();
-
-                        if (answer == BinaryAnswer::no) {
-                                return;
-                        }
-                }
-
-                states::push(std::make_unique<Throwing>(map::g_player->m_pos, *item));
-
+                // NOTE: This object may now be deleted!
                 return;
         } break;
 
@@ -1950,14 +1866,14 @@ void SelectIdentify::on_start()
 
 void SelectIdentify::draw()
 {
-        draw_box(panels::area(Panel::screen));
+        draw_box(panels::screen_box_area());
 
         const int browser_y = m_browser.y();
 
         io::draw_text_center(
                 " Identify which item? ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), 0},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p0.y},
                 colors::title());
 
         const Range idx_range_shown = m_browser.range_shown();
@@ -1965,8 +1881,6 @@ void SelectIdentify::draw()
         int y = 0;
 
         for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
-                const char key = m_browser.menu_keys()[y];
-
                 const bool is_marked = browser_y == i;
 
                 const FilteredInvEntry& inv_entry = m_filtered_inv[i];
@@ -1977,7 +1891,6 @@ void SelectIdentify::draw()
                         draw_slot(
                                 slot_id,
                                 y,
-                                key,
                                 is_marked,
                                 ItemNameAttackInfo::main_attack_mode);
                 }
@@ -1988,7 +1901,6 @@ void SelectIdentify::draw()
                         draw_backpack_item(
                                 backpack_idx,
                                 y,
-                                key,
                                 is_marked,
                                 ItemNameAttackInfo::main_attack_mode);
                 }
@@ -1996,22 +1908,8 @@ void SelectIdentify::draw()
                 ++y;
         }
 
-        // Draw "more" labels
-        if (!m_browser.is_on_top_page()) {
-                io::draw_text(
-                        common_text::g_next_page_up_hint,
-                        Panel::inventory_menu,
-                        {0, -1},
-                        colors::light_white());
-        }
-
-        if (!m_browser.is_on_btm_page()) {
-                io::draw_text(
-                        common_text::g_next_page_down_hint,
-                        Panel::inventory_menu,
-                        {0, panels::h(Panel::inventory_menu)},
-                        colors::light_white());
-        }
+        // Where the list continues, its edge fades out
+        draw_list_fades();
 }
 
 void SelectIdentify::update()

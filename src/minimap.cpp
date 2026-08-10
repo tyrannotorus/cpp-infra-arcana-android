@@ -126,17 +126,19 @@ static void draw_title()
         io::draw_text_center(
                 " Viewing map ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), 0},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p0.y},
                 colors::title());
 }
 
 static void draw_minimap_hint()
 {
-        io::draw_text_center(
-                " " + common_text::g_minimap_exit_hint + " ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
-                colors::title());
+        if (!common_text::g_minimap_exit_hint.empty()) {
+                io::draw_text_center(
+                        " " + common_text::g_minimap_exit_hint + " ",
+                        Panel::screen,
+                        {panels::center_x(Panel::screen), panels::screen_box_area().p1.y},
+                        colors::title());
+        }
 }
 
 static map::MinimapAppearance get_top_memory_appearance_at_map_pos(const P& pos)
@@ -328,7 +330,7 @@ static int draw_legend()
 // -----------------------------------------------------------------------------
 void ViewMinimap::draw()
 {
-        draw_box(panels::area(Panel::screen));
+        draw_box(panels::screen_box_area());
 
         draw_title();
 

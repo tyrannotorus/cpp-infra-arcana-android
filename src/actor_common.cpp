@@ -55,7 +55,8 @@ static Color color_player()
                 return colors::red();
         }
 
-        if (actor::player_state::g_active_explosive) {
+        if (!item::player_lit_explosives().empty()) {
+                // Carrying something with a burning fuse
                 return colors::yellow();
         }
 
@@ -137,13 +138,11 @@ static LightSize calc_light_size_player_specific()
 {
         auto light_size = LightSize::none;
 
-        const item::Explosive* active_explosive = actor::player_state::g_active_explosive.get();
-
-        if (active_explosive) {
-                const item::Id id = active_explosive->data().id;
-
-                if (id == item::Id::flare) {
+        for (const auto* const explosive : item::player_lit_explosives()) {
+                if (explosive->data().id == item::Id::flare) {
                         light_size = LightSize::fov;
+
+                        break;
                 }
         }
 

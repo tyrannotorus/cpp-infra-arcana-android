@@ -21,6 +21,7 @@
 #include "config.hpp"
 #include "create_character.hpp"
 #include "debug.hpp"
+#include "fade.hpp"
 #include "game.hpp"
 #include "game_over.hpp"
 #include "game_time.hpp"
@@ -62,6 +63,11 @@ Trapezohedron::Trapezohedron(ItemData* item_data) :
 ItemPrePickResult Trapezohedron::pre_pickup_hook()
 {
         game::add_history_event("Beheld The Shining Trapezohedron");
+
+        // The world goes out before the ending is told. NOTE: This is
+        // drawn over the MAP, so it happens while the game state is still
+        // the one on top - before any of the popping and pushing below.
+        fade::to_black();
 
         saving::erase_save();
 
@@ -249,8 +255,6 @@ MedBagAction MedicalBag::choose_action_manual() const
                 .set_msg("Available supplies: " + std::to_string(m_nr_supplies))
                 .setup_menu_mode(
                         choices,
-                        {'q', 's', 'w'},
-                        popup::MenuModeShowCancelHint::yes,
                         &choice)
                 .run();
 

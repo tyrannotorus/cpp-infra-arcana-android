@@ -5304,7 +5304,8 @@ void SpellTransmut::run_effect(
         }
 
         // NOTE: This will possibly make the player "discover" the item, so it
-        // should occur last, after the "appear" message.
+        // should occur last, after the "appear" message. (The standing
+        // [ pick up ] pin appears by itself for the new item.)
         item_drop::drop_item_on_map(map::g_player->m_pos, *item_new);
 }
 

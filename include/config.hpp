@@ -10,12 +10,18 @@
 #include <string>
 
 #include "browser.hpp"
+#include "menu_page.hpp"
 #include "state.hpp"
 
 namespace hints
 {
 enum class Id;
 }  // namespace hints
+
+namespace config
+{
+enum class OptionSubmenuType;
+}  // namespace config
 
 enum class InputMode
 {
@@ -44,6 +50,11 @@ enum class HintsMode
 
 namespace config
 {
+// Size of the source tile images in pixels. The logical map cell size is
+// this value multiplied by the map scale factor (tiles are stretched when
+// drawn at map scale factors above one).
+inline constexpr int g_tile_img_px = 20;
+
 void init();
 
 InputMode input_mode();
@@ -56,6 +67,20 @@ void set_fullscreen(bool value);
 bool is_fullscreen();
 int video_scale_factor();
 int brightness_pct();
+
+// If true, the in-game side stats panel is laid out on the left side of the
+// screen instead of the right (toggled by swiping the panel on touch
+// devices, to support both right and left handed play)
+bool is_side_panel_left();
+void set_side_panel_left(bool value);
+
+// Action bar layout (see action_bar): comma separated action id lists.
+// Empty strings mean "use the defaults".
+std::string action_bar_order();
+std::string action_bar_disabled();
+void set_action_bar_layout(
+        const std::string& order_csv,
+        const std::string& disabled_csv);
 
 // Actual window size (i.e. not logical size)
 void set_window_px_w(int w);
@@ -71,6 +96,9 @@ int gui_cell_px_h();
 // Logical map cell size
 int map_cell_px_w();
 int map_cell_px_h();
+
+// Scale of the in-world (map) display relative to the gui (tiles mode)
+int map_scale_factor();
 
 bool text_mode_filled_walls();
 bool display_health_bars();
@@ -102,39 +130,59 @@ void set_hint_seen_global(hints::Id id);
 bool always_warn_new_mon();
 int delay_projectile_draw();
 int delay_explosion();
-void set_default_player_name(const std::string& name);
-std::string default_player_name();
 
 }  // namespace config
 
-class OptionsState : public State
+// The options root page (Video / Audio / Input / Gameplay), reachable from
+// the title screen
+class OptionsState : public MenuPageState
 {
 public:
         OptionsState();
 
-        void update() override;
-
-        void draw() override;
-
         StateId id() const override;
 
-private:
-        MenuBrowser m_browser;
+protected:
+        std::string page_title() const override;
+
+        std::vector<MenuPageEntry> page_entries() const override;
+
+        void on_entry_selected(int idx) override;
 };
 
-class OptionsSubmenuState : public State
+// An options submenu (e.g. Video), pushed from the options root page or
+// engaged directly from the in-game menu
+class OptionsSubmenuState : public MenuPageState
 {
 public:
-        OptionsSubmenuState();
-
-        void update() override;
-
-        void draw() override;
+        OptionsSubmenuState(config::OptionSubmenuType submenu);
 
         StateId id() const override;
 
-private:
-        MenuBrowser m_browser;
+protected:
+        std::string page_title() const override;
+
+        std::string page_hint() const override;
+
+        std::vector<MenuPageEntry> page_entries() const override;
+
+        void on_entry_selected(int idx) override;
+
+        void on_entry_left(int idx) override;
+
+        void on_entry_right(int idx) override;
+
+        bool entry_plays_selection_audio(int idx) const override;
+
+        void draw_page_content() override;
+
+        int list_x0(int block_w) const override;
+
+        int list_y0(int nr_entries_shown) const override;
+
+        int list_max_x1() const override;
+
+        bool use_left_right_keys() const override;
 };
 
 #endif  // CONFIG_HPP

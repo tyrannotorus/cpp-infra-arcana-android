@@ -6,8 +6,6 @@
 
 #include "view_actor_descr.hpp"
 
-#include "SDL_keycode.h"
-
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
@@ -24,15 +22,12 @@
 #include "debug.hpp"
 #include "global.hpp"
 #include "inventory.hpp"
-#include "io.hpp"
 #include "item.hpp"
 #include "item_weapon.hpp"
 #include "map.hpp"
-#include "panel.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
-#include "text.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -661,78 +656,35 @@ StateId ViewActorDescr::id() const
         return StateId::view_actor;
 }
 
-void ViewActorDescr::draw()
-{
-        io::cover_panel(Panel::screen);
-
-        draw_interface();
-
-        int y = 0;
-
-        // Fixed decription
-        {
-                Text text;
-
-                text.set_w(panels::w(Panel::info_screen_content));
-                text.set_str(actor::descr(m_actor));
-                text.set_color(colors::text());
-
-                text.draw(Panel::info_screen_content, {0, y});
-
-                y += text.nr_lines();
-        }
-
-        // Auto description
-        {
-                const std::string auto_descr_str = auto_description_str(m_actor);
-
-                if (!auto_descr_str.empty()) {
-                        ++y;
-
-                        Text text;
-
-                        text.set_w(panels::w(Panel::info_screen_content));
-                        text.set_str(auto_description_str(m_actor));
-                        text.set_color(colors::text());
-
-                        text.draw(Panel::info_screen_content, {0, y});
-
-                        y += text.nr_lines();
-                }
-        }
-
-        // Current properties (not all are shown)
-        {
-                ++y;
-
-                Text text;
-
-                text.set_w(panels::w(Panel::info_screen_content));
-                text.set_str(temporary_properties_str(m_actor));
-                text.set_color(colors::text());
-
-                text.draw(Panel::info_screen_content, {0, y});
-        }
-}
-
-void ViewActorDescr::update()
-{
-        const io::InputData input = io::read_input();
-
-        switch (input.key) {
-        case SDLK_SPACE:
-        case SDLK_ESCAPE: {
-                // Exit screen
-                states::pop();
-        } break;
-
-        default:
-        {
-        } break;
-        }
-}
-
-std::string ViewActorDescr::title() const
+std::string ViewActorDescr::page_title() const
 {
         return text_format::first_to_upper(actor::name_a(m_actor));
+}
+
+std::string ViewActorDescr::page_text() const
+{
+        std::string str;
+
+        // One blank row between the sections
+        auto add_section = [&str](const std::string& section_str) {
+                if (section_str.empty()) {
+                        return;
+                }
+
+                if (!str.empty()) {
+                        str += "\n\n";
+                }
+
+                str += section_str;
+        };
+
+        // Fixed decription
+        add_section(actor::descr(m_actor));
+
+        add_section(auto_description_str(m_actor));
+
+        // Current properties (not all are shown)
+        add_section(temporary_properties_str(m_actor));
+
+        return str;
 }

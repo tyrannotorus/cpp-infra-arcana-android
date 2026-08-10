@@ -90,6 +90,12 @@ public:
 
         std::string plus_str(ItemNameAttackInfo attack_info) const;
 
+        // Whether two items are the same thing, and can therefore be
+        // carried as one stack. Items of the same kind can still differ in
+        // a way that must be kept apart (a LIT explosive from an unlit
+        // one, see item::Explosive).
+        virtual bool can_stack_with(const Item& other) const;
+
         // E.g. "(Off)" for Lanterns, or "(4/7)" for Pistols
         virtual std::string name_info_str(
                 const ItemNameIdentified id_type =

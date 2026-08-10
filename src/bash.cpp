@@ -291,6 +291,18 @@ void run()
         bash_something_at_pos(pos);
 }
 
+void run_at(const P& pos)
+{
+        bash_something_at_pos(pos);
+}
+
+bool is_kickable_terrain(const terrain::Terrain& terrain)
+{
+        const std::unique_ptr<const item::Item> kick_wpn = make_tmp_kick_wpn();
+
+        return is_allowed_use_wpn_on_terrain(*kick_wpn, terrain);
+}
+
 void try_sprain_player()
 {
         const bool is_frenzied = map::g_player->m_properties.has(prop::Id::frenzied);

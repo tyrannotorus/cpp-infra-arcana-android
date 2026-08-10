@@ -9,6 +9,7 @@
 
 namespace item
 {
+class Explosive;
 class Item;
 }  // namespace item
 
@@ -26,7 +27,8 @@ void throw_item(
         const P& tgt_pos,
         item::Item& item_thrown);
 
-void player_throw_lit_explosive(const P& aim_cell);
+// Throws a LIT explosive the player is carrying (it leaves the inventory)
+void player_throw_lit_explosive(const P& aim_cell, item::Explosive& explosive);
 
 }  // namespace throwing
 

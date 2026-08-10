@@ -21,6 +21,7 @@
 #include "gfx.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
 #include "map.hpp"
@@ -40,6 +41,39 @@
 // Background color to draw in cases where one "object" is obscuring another,
 // such as when an item is on top of a trap.
 static Array2<std::optional<Color>> s_bg_color_obscured(0, 0);
+
+// Everything the map layers want drawn this frame, resolved per cell and
+// handed to SDL in one batch at the end (see io::MapDrawBuffer)
+static io::MapDrawBuffer s_draw_buffer;
+
+// The view cell area the buffer covers - the visible view plus the margin
+// that viewport::is_in_drawn_view allows (partial cells at the panel edges
+// and the sub-cell scroll overscan)
+static R drawn_view_area()
+{
+        const R view = viewport::get_map_view_area();
+
+        return {
+                viewport::to_view_pos(view.p0) - 2,
+                viewport::to_view_pos(view.p1) + 2};
+}
+
+// The same area in MAP coordinates, clipped to the map - what the cell
+// iterating draw passes need to visit, and nothing more
+static R drawn_map_area()
+{
+        const R view = viewport::get_map_view_area();
+
+        return {
+                {std::max(0, view.p0.x - 2), std::max(0, view.p0.y - 2)},
+                {std::min(map::w() - 1, view.p1.x + 2),
+                 std::min(map::h() - 1, view.p1.y + 2)}};
+}
+
+static void put(const io::MapDrawObj& obj)
+{
+        s_draw_buffer.put(obj);
+}
 
 static gfx::TileId get_player_tile_for_wpn_id(const item::Id item_id)
 {
@@ -323,76 +357,91 @@ static void adapt_color_for_distance_to_player(Color& color, const P& pos)
 
 static void draw_terrains()
 {
-        const size_t nr_positions = map::nr_positions();
+        // NOTE: Only the cells that can actually be drawn are visited. This
+        // used to walk every position of the (60x60) map and cull each one
+        // with viewport::is_in_drawn_view - which recomputes the view area
+        // per call - to end up drawing the few hundred cells in view.
+        const R area = drawn_map_area();
 
-        for (size_t i = 0; i < nr_positions; ++i) {
-                if (!map::g_seen.at(i)) {
-                        continue;
-                }
+        for (int x = area.p0.x; x <= area.p1.x; ++x) {
+                for (int y = area.p0.y; y <= area.p1.y; ++y) {
+                        const P p(x, y);
 
-                const terrain::Terrain* const t = map::g_terrain.at(i);
+                        const size_t i = map::g_terrain.pos_to_idx(p);
 
-                io::MapDrawObj draw_obj;
-
-                draw_obj.pos = viewport::to_view_pos(t->pos());
-
-                auto gore_tile = gfx::TileId::END;
-                char gore_character = 0;
-
-                if (t->can_have_gore()) {
-                        gore_tile = t->gore_tile();
-                        gore_character = t->gore_character();
-                }
-
-                if (gore_tile == gfx::TileId::END) {
-                        draw_obj.tile = t->tile();
-                        draw_obj.character = t->character();
-                        draw_obj.color = t->color();
-                }
-                else {
-                        draw_obj.tile = gore_tile;
-                        draw_obj.character = gore_character;
-                        draw_obj.color = colors::red();
-                }
-
-                const Color terrain_color_bg = t->color_bg();
-
-                if (terrain_color_bg == colors::black()) {
-                        // Set background color to use if this terrain is
-                        // obscured by another object (e.g. an item on a trap).
-                        set_bg_color_obscured_terrain(t, i);
-                }
-                else {
-                        draw_obj.color_bg = terrain_color_bg;
-
-                        s_bg_color_obscured.at(i) = terrain_color_bg;
-                }
-
-                if (config::text_mode_filled_walls()) {
-                        if (draw_obj.character == '#') {
-                                // Any terrain with the '#' symbol is converted
-                                // to a filled rectangle instead.
-                                //
-                                // NOTE: No other (static) terrain except WALLS
-                                // (or terrain imitating walls, such as hidden
-                                // doors) must use the '#' character!
-                                //
-                                draw_obj.character = io::g_filled_rect_char;
+                        if (!map::g_seen.at(i)) {
+                                continue;
                         }
-                        else if (t->id() == terrain::Id::grate) {
-                                // Since we are using filled rectangle as wall
-                                // symbol, then we can use the '#' character for
-                                // grates (looks good for this terrain, but
-                                // obviously not if walls are also using this).
-                                draw_obj.character = '#';
+
+                        const terrain::Terrain* const t = map::g_terrain.at(i);
+
+                        io::MapDrawObj draw_obj;
+
+                        draw_obj.pos = viewport::to_view_pos(p);
+
+                        auto gore_tile = gfx::TileId::END;
+                        char gore_character = 0;
+
+                        if (t->can_have_gore()) {
+                                gore_tile = t->gore_tile();
+                                gore_character = t->gore_character();
                         }
+
+                        if (gore_tile == gfx::TileId::END) {
+                                draw_obj.tile = t->tile();
+                                draw_obj.character = t->character();
+                                draw_obj.color = t->color();
+                        }
+                        else {
+                                draw_obj.tile = gore_tile;
+                                draw_obj.character = gore_character;
+                                draw_obj.color = colors::red();
+                        }
+
+                        const Color terrain_color_bg = t->color_bg();
+
+                        if (terrain_color_bg == colors::black()) {
+                                // Set background color to use if this terrain
+                                // is obscured by another object (e.g. an item
+                                // on a trap).
+                                set_bg_color_obscured_terrain(t, i);
+                        }
+                        else {
+                                draw_obj.color_bg = terrain_color_bg;
+
+                                s_bg_color_obscured.at(i) = terrain_color_bg;
+                        }
+
+                        if (config::text_mode_filled_walls()) {
+                                if (draw_obj.character == '#') {
+                                        // Any terrain with the '#' symbol is
+                                        // converted to a filled rectangle
+                                        // instead.
+                                        //
+                                        // NOTE: No other (static) terrain
+                                        // except WALLS (or terrain imitating
+                                        // walls, such as hidden doors) must
+                                        // use the '#' character!
+                                        //
+                                        draw_obj.character =
+                                                io::g_filled_rect_char;
+                                }
+                                else if (t->id() == terrain::Id::grate) {
+                                        // Since we are using filled rectangle
+                                        // as wall symbol, then we can use the
+                                        // '#' character for grates (looks good
+                                        // for this terrain, but obviously not
+                                        // if walls are also using this).
+                                        draw_obj.character = '#';
+                                }
+                        }
+
+                        adapt_color_for_light_level(draw_obj.color, i);
+
+                        adapt_color_for_distance_to_player(draw_obj.color, p);
+
+                        put(draw_obj);
                 }
-
-                adapt_color_for_light_level(draw_obj.color, i);
-
-                adapt_color_for_distance_to_player(draw_obj.color, t->pos());
-
-                draw_obj.draw();
         }
 }
 
@@ -402,6 +451,10 @@ static void draw_dead_actors()
                 const P& p = actor->m_pos;
 
                 if (!map::g_seen.at(p) || !actor::is_corpse(*actor)) {
+                        continue;
+                }
+
+                if (!viewport::is_in_drawn_view(p)) {
                         continue;
                 }
 
@@ -418,16 +471,16 @@ static void draw_dead_actors()
 
                 set_bg_color_when_obscured_dead_actor(*actor);
 
-                draw_obj.draw();
+                put(draw_obj);
         }
 }
 
 static void draw_items()
 {
-        const P map_dims = map::dims();
+        const R area = drawn_map_area();
 
-        for (int x = 0; x < map_dims.x; ++x) {
-                for (int y = 0; y < map_dims.y; ++y) {
+        for (int x = area.p0.x; x <= area.p1.x; ++x) {
+                for (int y = area.p0.y; y <= area.p1.y; ++y) {
                         const P p(x, y);
 
                         if (!map::g_seen.at(p)) {
@@ -451,7 +504,7 @@ static void draw_items()
 
                         use_bg_color_obscuring(draw_obj.color_bg, p);
 
-                        draw_obj.draw();
+                        put(draw_obj);
                 }
         }
 }
@@ -470,6 +523,10 @@ static void draw_mobiles()
                         continue;
                 }
 
+                if (!viewport::is_in_drawn_view(p)) {
+                        continue;
+                }
+
                 io::MapDrawObj draw_obj;
 
                 draw_obj.pos = viewport::to_view_pos(p);
@@ -479,7 +536,7 @@ static void draw_mobiles()
 
                 adapt_color_for_light_level(draw_obj.color, p);
 
-                draw_obj.draw();
+                put(draw_obj);
         }
 }
 
@@ -524,7 +581,7 @@ static void draw_living_seen_monster(const actor::Actor& mon)
 
         adapt_color_for_light_level(draw_obj.color, mon.m_pos);
 
-        draw_obj.draw();
+        put(draw_obj);
 }
 
 static void draw_living_hidden_monster(const actor::Actor& mon)
@@ -548,13 +605,17 @@ static void draw_living_hidden_monster(const actor::Actor& mon)
 
         adapt_color_for_light_level(draw_obj.color, mon.m_pos);
 
-        draw_obj.draw();
+        put(draw_obj);
 }
 
 static void draw_living_monsters()
 {
         for (actor::Actor* actor : game_time::g_actors) {
                 if (actor::is_player(actor) || !actor::is_alive(*actor)) {
+                        continue;
+                }
+
+                if (!viewport::is_in_drawn_view(actor->m_pos)) {
                         continue;
                 }
 
@@ -584,11 +645,12 @@ static void draw_unseen_cells_from_player_memory()
 {
         R view = viewport::get_map_view_area();
 
-        // Also draw a little bit outside the viewport - we allow showing a
-        // fraction of tiles if the map panel size is not aligned with a whole
-        // number of map tiles (for example 15.6 map tiles can be shown on the Y
-        // axis). The drawing is clipped to the map panel, so pixels outside the
-        // map panel will not be drawn.
+        // Also draw a little bit outside the viewport - partial tiles can be
+        // shown when the map panel size is not a whole number of map tiles,
+        // and the map display renders one cell of overscan beyond each panel
+        // edge for smooth sub-cell scrolling. The drawing is clipped to the
+        // map panel plus the overscan ring.
+        view.p0 = view.p0.with_offsets(-2, -2);
         view.p1 = view.p1.with_offsets(2, 2);
 
         for (int x = view.p0.x; x < view.p1.x; ++x) {
@@ -627,7 +689,7 @@ static void draw_unseen_cells_from_player_memory()
 
                         draw_obj.color = draw_obj.color.shaded(80);
 
-                        draw_obj.draw();
+                        put(draw_obj);
                 }
         }
 }
@@ -636,7 +698,15 @@ static void draw_player_character()
 {
         const actor::Actor& player = *map::g_player;
 
-        if (!viewport::is_in_view(player.m_pos)) {
+        // NOTE: One cell outside the view is also drawn (the overscan ring
+        // used for smooth sub-cell scrolling)
+        const auto view_area = viewport::get_map_view_area();
+
+        const R overscan_area(
+                view_area.p0 - 1,
+                view_area.p1 + 1);
+
+        if (!overscan_area.is_pos_inside(player.m_pos)) {
                 return;
         }
 
@@ -655,7 +725,7 @@ static void draw_player_character()
         draw_obj.color = color;
         draw_obj.color_bg = color_bg;
 
-        draw_obj.draw();
+        put(draw_obj);
 }
 
 // -----------------------------------------------------------------------------
@@ -665,8 +735,20 @@ namespace draw_map
 {
 void run()
 {
-        // NOTE: This will also setup the whole array with default values.
-        s_bg_color_obscured.resize(map::dims());
+        // NOTE: Array2::resize frees and reallocates - only do it when the
+        // map size actually changed (i.e. on a new level), and clear the
+        // existing storage otherwise.
+        if (s_bg_color_obscured.dims() == map::dims()) {
+                std::fill(
+                        std::begin(s_bg_color_obscured),
+                        std::end(s_bg_color_obscured),
+                        std::optional<Color>());
+        }
+        else {
+                s_bg_color_obscured.resize(map::dims());
+        }
+
+        s_draw_buffer.reset(drawn_view_area());
 
         draw_unseen_cells_from_player_memory();
         draw_terrains();
@@ -677,9 +759,51 @@ void run()
 
         draw_player_character();
 
+        s_draw_buffer.draw();
+
 #ifndef NDEBUG
         io::g_allow_render = true;
 #endif  // NDEBUG
+}
+
+void draw_reticle(const P& view_pos, const Color& color)
+{
+        io::set_display_for_panel(Panel::map);
+
+        const P cell_dims(
+                config::map_cell_px_w(),
+                config::map_cell_px_h());
+
+        const P p0 = io::map_to_px_coords(Panel::map, view_pos);
+        const P p1 = p0 + cell_dims - 1;
+
+        // Bracket arm length and line thickness, scaled to the cell size
+        const int arm = std::max(3, cell_dims.x / 3);
+        const int thickness = std::max(1, cell_dims.x / 8);
+
+        auto bracket_part = [&color](
+                                    const int x0,
+                                    const int y0,
+                                    const int x1,
+                                    const int y1) {
+                io::draw_rectangle_filled({P(x0, y0), P(x1, y1)}, color);
+        };
+
+        // Top left corner
+        bracket_part(p0.x, p0.y, p0.x + arm - 1, p0.y + thickness - 1);
+        bracket_part(p0.x, p0.y, p0.x + thickness - 1, p0.y + arm - 1);
+
+        // Top right corner
+        bracket_part(p1.x - arm + 1, p0.y, p1.x, p0.y + thickness - 1);
+        bracket_part(p1.x - thickness + 1, p0.y, p1.x, p0.y + arm - 1);
+
+        // Bottom left corner
+        bracket_part(p0.x, p1.y - thickness + 1, p0.x + arm - 1, p1.y);
+        bracket_part(p0.x, p1.y - arm + 1, p0.x + thickness - 1, p1.y);
+
+        // Bottom right corner
+        bracket_part(p1.x - arm + 1, p1.y - thickness + 1, p1.x, p1.y);
+        bracket_part(p1.x - thickness + 1, p1.y - arm + 1, p1.x, p1.y);
 }
 
 }  // namespace draw_map

@@ -29,12 +29,11 @@
 #include "insanity.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
-#include "item_data.hpp"
-#include "item_weapon.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "pickup.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
@@ -538,32 +537,6 @@ static void player_detect_stuck_doors()
         }
 }
 
-static bool should_print_unload_wpn_hint()
-{
-        const auto* const item = map::g_items.at(map::g_player->m_pos);
-
-        if (!item) {
-                return false;
-        }
-
-        const auto d = item->data();
-
-        const bool is_ranged_wpn_using_ammo =
-                (d.type == ItemType::ranged_wpn) &&
-                !d.ranged.has_infinite_ammo &&
-                (d.ranged.max_ammo > 0);
-
-        if (is_ranged_wpn_using_ammo) {
-                const auto* const wpn = static_cast<const item::Wpn*>(item);
-
-                if (wpn->m_ammo_loaded > 0) {
-                        return true;
-                }
-        }
-
-        return false;
-}
-
 static void player_start_turn()
 {
         handle_warn_player_encumbered();
@@ -604,7 +577,9 @@ static void player_start_turn()
 
         player_items_start_turn();
 
-        if (should_print_unload_wpn_hint()) {
+        // Standing on a loaded firearm - the [ unload ] standing pin
+        // is up, tell the player what it is for
+        if (item_pickup::can_unload_item_at_player()) {
                 hints::display(hints::Id::unload_weapons);
         }
 

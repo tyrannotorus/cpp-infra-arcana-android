@@ -31,6 +31,7 @@
 #include "marker.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "pickup.hpp"
 #include "pos.hpp"
 #include "property.hpp"
 #include "property_data.hpp"
@@ -404,4 +405,12 @@ void teleport(
 
         // Bump the target terrain.
         map::g_terrain.at(pos)->bump(actor);
+
+        // Teleported onto an item - re-trigger the tile status message
+        // (the standing [ pick up ] pin appears by itself). The bump
+        // may have moved the player again (e.g. a teleporting trap) - the
+        // helper checks the CURRENT player cell, so this stays correct.
+        if (actor::is_player(&actor) && actor::is_alive(actor)) {
+                item_pickup::print_item_at_player_msg();
+        }
 }

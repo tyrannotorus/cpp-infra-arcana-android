@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "SDL_keycode.h"
+#include "actions_config.hpp"
 #include "actor.hpp"
 #include "actor_data.hpp"
 #include "actor_factory.hpp"
@@ -82,10 +83,64 @@
 #include "terrain_factory.hpp"
 #include "terrain_trap.hpp"
 #include "text_format.hpp"
+#include "view_actor_descr.hpp"
+#include "viewport.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+// Opens the detailed description of a visible monster at the look "pin"
+// (the view's centering point while the map is manually panned, see
+// GameState::on_map_panned). The view key is also sent by tapping the
+// [ describe ] context pin.
+static void handle_view_command()
+{
+        if (!viewport::is_pan_active()) {
+                // The view is centered on the player - there is no pinned
+                // cell to describe
+                return;
+        }
+
+        const P pin_pos = viewport::center_map_pos();
+
+        if (!map::is_pos_inside_map(pin_pos)) {
+                return;
+        }
+
+        actor::Actor* const actor = map::living_actor_at(pin_pos);
+
+        if (actor &&
+            !actor::is_player(actor) &&
+            actor::can_player_see_actor(*actor)) {
+                msg_log::clear();
+
+                states::push(std::make_unique<ViewActorDescr>(*actor));
+        }
+}
+
+// Kicks the cell at the look "pin" directly, with no direction query -
+// the contextual [ kick ] button shown while the map is panned onto an
+// adjacent cell (see GameState::on_map_panned). The plain kick command
+// keeps its direction query, for the keyboard and the action bar button.
+static void handle_kick_at_look_pin_command()
+{
+        if (!viewport::is_pan_active()) {
+                return;
+        }
+
+        const P pin_pos = viewport::center_map_pos();
+
+        if (!map::is_pos_inside_map(pin_pos) ||
+            !pin_pos.is_adjacent(map::g_player->m_pos) ||
+            (pin_pos == map::g_player->m_pos)) {
+                return;
+        }
+
+        msg_log::clear();
+
+        bash::run_at(pin_pos);
+}
+
 static void query_quit()
 {
         int choice = 0;
@@ -99,8 +154,6 @@ static void query_quit()
                 .set_msg(msg)
                 .setup_menu_mode(
                         {"(N)o", "(Y)es"},
-                        {'n', 'y'},
-                        popup::MenuModeShowCancelHint::no,
                         &choice)
                 .run();
 
@@ -140,50 +193,35 @@ static void handle_fire_command_melee(item::Wpn& wpn)
 
 static void handle_fire_command_firearm(item::Wpn& wpn)
 {
-        if (!map::g_player->m_properties.allow_attack_ranged(Verbose::yes)) {
-                return;
-        }
+        const bool is_empty =
+                (wpn.m_ammo_loaded <= 0) &&
+                !wpn.data().ranged.has_infinite_ammo;
 
-        const item::ItemData& item_data = wpn.data();
+        if (is_empty && config::is_ranged_wpn_auto_reload()) {
+                // The player asked for the fire command to load the gun
+                // for them
+                const int tick_count_before = game_time::tick_count();
 
-        if ((wpn.m_ammo_loaded <= 0) &&
-            !item_data.ranged.has_infinite_ammo) {
-                // Not enough ammo loaded - auto reload?
-                if (config::is_ranged_wpn_auto_reload()) {
-                        reload::try_reload(*map::g_player, &wpn);
+                reload::try_reload(*map::g_player, &wpn);
+
+                if (game_time::tick_count() != tick_count_before) {
+                        // Loading it (or fumbling the attempt) WAS this
+                        // command's action, and it cost the turn - aiming
+                        // comes on the next one
+                        return;
                 }
-                else {
-                        msg_log::add("There is no ammo loaded.");
-                }
 
-                return;
+                // There was nothing to load it with. Fall through and
+                // engage the targeting anyway - see below.
         }
 
-        bool is_mi_go_wpn = false;
-        int mi_go_wpn_hp_drain = 0;
-
-        switch (item_data.id) {
-        case item::Id::electric_gun:
-                is_mi_go_wpn = true;
-                mi_go_wpn_hp_drain = g_electric_gun_hp_drained;
-                break;
-
-        case item::Id::morphic_blaster:
-                is_mi_go_wpn = true;
-                mi_go_wpn_hp_drain = g_morphic_blaster_hp_drained;
-                break;
-
-        default:
-                break;
-        }
-
-        if (is_mi_go_wpn && !allow_player_fire_mi_go_weapon(mi_go_wpn_hp_drain)) {
-                msg_log::add("Firing the gun now would destroy me.");
-
-                return;
-        }
-
-        // OK - we can fire the gun.
+        // NOTE: The marker opens whether or not the gun can be fired (see
+        // game_commands::ranged_wpn_unfireable_reason). Targeting is a
+        // MODE, and a gun that has run dry is exactly when the [ reload ]
+        // and [ swap weapon ] pins inside that mode are wanted - refusing
+        // to open it here, as this used to, left a player holding an empty
+        // gun no way to reach either. The marker says why it cannot be
+        // fired, and offers no [ fire ] pin.
         states::push(std::make_unique<Aiming>(map::g_player->m_pos, wpn));
 }
 
@@ -245,36 +283,116 @@ static void handle_activate_item_shortcut_command(const item::Id item_id)
         }
 }
 
+// The in-game menu (the hamburger button) - a standard fullscreen menu
+// page. Screens opened from it (options submenus, the actions config, the
+// manual) stack on top: closing such a screen (the [ x ] control / back
+// button) falls back to this page, which keeps its state like any other
+// menu page. The [ x ] on THIS page returns to the game.
+class GameMenuState : public MenuPageState
+{
+public:
+        StateId id() const override
+        {
+                return StateId::game_menu;
+        }
+
+protected:
+        std::string page_title() const override
+        {
+                return "Menu";
+        }
+
+        std::vector<MenuPageEntry> page_entries() const override
+        {
+                // NOTE: The letter prefixes are visual flavour only -
+                // there is no keyboard to type them on, entries are engaged
+                // by tapping. Duplicates ("A", "V") are therefore fine.
+                return {
+                        {"(A)ctions", ""},
+                        {"(C)haracter description", ""},
+                        {"(M)essage history", ""},
+                        {"(V)iew Minimap", ""},
+                        {"(V)ideo", ""},
+                        {"(A)udio", ""},
+                        {"(I)nput", ""},
+                        {"(G)ameplay", ""},
+                        {"(T)ome of Wisdom", ""},
+                        {"(Q)uit", ""},
+                };
+        }
+
+        void on_entry_selected(const int idx) override
+        {
+                switch (idx) {
+                case 0: {
+                        // Action bar configuration
+                        states::push(
+                                std::make_unique<ActionsConfigState>());
+                } break;
+
+                case 1: {
+                        // Character description - it has no action bar
+                        // button, this is where it lives
+                        const game_summary_data::GameSummaryData game_data =
+                                game_summary_data::collect();
+
+                        auto character_descr =
+                                std::make_unique<CharacterDescr>();
+
+                        character_descr->setup(game_data);
+
+                        states::push(std::move(character_descr));
+                } break;
+
+                case 2: {
+                        // Message history - it has no action bar button,
+                        // this is where it lives
+                        states::push(std::make_unique<MsgHistoryState>());
+                } break;
+
+                case 3: {
+                        // The minimap DOES keep its action bar button (an
+                        // optional one, like every bar action) - it is here
+                        // as well, for players who turn that button off
+                        states::push(std::make_unique<ViewMinimap>());
+                } break;
+
+                case 4:
+                case 5:
+                case 6:
+                case 7: {
+                        // An options submenu (Video / Audio / Input /
+                        // Gameplay)
+                        const auto submenu =
+                                (config::OptionSubmenuType)(idx - 4);
+
+                        states::push(
+                                std::make_unique<OptionsSubmenuState>(
+                                        submenu));
+                } break;
+
+                case 8: {
+                        // Help (the manual)
+                        states::push(std::make_unique<BrowseManual>());
+                } break;
+
+                case 9: {
+                        // NOTE: An accepted quit pops all states down to
+                        // the main menu - this state is destroyed, so
+                        // nothing must be done here afterwards. A declined
+                        // quit simply stays on this page.
+                        query_quit();
+                } break;
+
+                default:
+                        break;
+                }
+        }
+};
+
 static void handle_game_menu_command()
 {
-        const auto choices = std::vector<std::string> {
-                "(T)ome of Wisdom",
-                "(O)ptions",
-                "(Q)uit",
-        };
-
-        int choice = 0;
-
-        popup::Popup(popup::AddToMsgHistory::no)
-                .setup_menu_mode(
-                        choices,
-                        {'t', 'o', 'q'},
-                        popup::MenuModeShowCancelHint::yes,
-                        &choice)
-                .run();
-
-        if (choice == 0) {
-                // Manual
-                states::push(std::make_unique<BrowseManual>());
-        }
-        else if (choice == 1) {
-                // Options
-                states::push(std::make_unique<OptionsState>());
-        }
-        else if (choice == 2) {
-                // Quit
-                query_quit();
-        }
+        states::push(std::make_unique<GameMenuState>());
 }
 
 static void handle_swap_weapon_command()
@@ -500,15 +618,16 @@ static GameCmd to_cmd_default(const io::InputData& input)
         case SDLK_F1:
                 return GameCmd::manual;
 
-        case '=':
-                return GameCmd::options;
-
         case 'r':
                 return GameCmd::reload;
 
         case 'k':
         case 'w':
                 return GameCmd::kick;
+
+        case SDLK_F13:
+                // Sent only by the contextual [ kick ] look-pin button
+                return GameCmd::kick_at_look_pin;
 
         case 'c':
                 return GameCmd::close;
@@ -520,18 +639,20 @@ static GameCmd to_cmd_default(const io::InputData& input)
         case 'f':
                 return GameCmd::fire;
 
+        case SDLK_F14:
+                // Sent only by the action bar's target button
+                return GameCmd::toggle_aim;
+
+        case SDLK_F15:
+                // Sent only by the action bar's throw button
+                return GameCmd::toggle_throw;
+
         case 'g':
         case ',':
                 return GameCmd::get;
 
         case 'i':
                 return GameCmd::inventory;
-
-        case 'a':
-                return GameCmd::apply_item;
-
-        case 'd':
-                return GameCmd::drop_item;
 
         case 'z':
                 return GameCmd::swap_weapon;
@@ -735,20 +856,27 @@ GameCmd to_cmd(const io::InputData& input)
 
 void handle(const GameCmd cmd)
 {
-        if (cmd != GameCmd::none) {
-                msg_log::clear();
+        // Input that maps to no command is INERT - it does not answer, and
+        // it does not disturb what is on screen.
+        //
+        // NOTE: This is not the desktop case of a mistyped command. Every
+        // tap that no control claimed arrives here (a tap synthesizes the
+        // confirm key, which is no game command - see io_input), so a
+        // finger landing an inch off a pin used to be met with "Unknown
+        // command." and a [ help ] pin, and the status messages it was
+        // reading - along with their context pins - were wiped to make
+        // room for that. Both are gone: a mis-tap now leaves the screen
+        // exactly as it was, which is also what keeps drag-to-look alive
+        // through one (see the look-pin block at the end of this
+        // function).
+        if ((cmd == GameCmd::undefined) || (cmd == GameCmd::none)) {
+                return;
         }
 
-        switch (cmd) {
-        case GameCmd::undefined: {
-                msg_log::add(
-                        "Press [?] for help.",
-                        colors::light_white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
-        } break;
+        msg_log::clear();
 
+        switch (cmd) {
+        case GameCmd::undefined:
         case GameCmd::none:
                 break;
 
@@ -847,10 +975,6 @@ void handle(const GameCmd cmd)
                 states::push(std::make_unique<BrowseManual>());
         } break;
 
-        case GameCmd::options: {
-                states::push(std::make_unique<OptionsState>());
-        } break;
-
         case GameCmd::reload: {
                 auto* const wpn =
                         map::g_player->m_inv.item_in_slot(SlotId::wpn);
@@ -862,6 +986,10 @@ void handle(const GameCmd cmd)
                 bash::run();
         } break;
 
+        case GameCmd::kick_at_look_pin: {
+                handle_kick_at_look_pin_command();
+        } break;
+
         case GameCmd::close: {
                 close::player_try_close_or_jam();
         } break;
@@ -870,7 +998,11 @@ void handle(const GameCmd cmd)
                 item_pickup::try_unload_or_pick();
         } break;
 
-        case GameCmd::fire: {
+        case GameCmd::fire:
+        case GameCmd::toggle_aim: {
+                // Reaching here means targeting is NOT engaged (an open
+                // marker would have handled the toggle itself, see
+                // MarkerState::update) - so both engage it
                 handle_fire_command();
         } break;
 
@@ -880,14 +1012,6 @@ void handle(const GameCmd cmd)
 
         case GameCmd::inventory: {
                 states::push(std::make_unique<BrowseInv>());
-        } break;
-
-        case GameCmd::apply_item: {
-                states::push(std::make_unique<Apply>());
-        } break;
-
-        case GameCmd::drop_item: {
-                states::push(std::make_unique<Drop>());
         } break;
 
         case GameCmd::swap_weapon: {
@@ -926,23 +1050,21 @@ void handle(const GameCmd cmd)
                 handle_auto_move_command(Dir::up_left);
         } break;
 
-        case GameCmd::throw_item: {
-                const item::Item* explosive = actor::player_state::g_active_explosive.get();
+        case GameCmd::throw_item:
+        case GameCmd::toggle_throw: {
+                // Reaching here means no throw is being aimed (an open
+                // marker would have handled the toggle itself, see
+                // MarkerState::update) - so both start one.
+                //
+                // NOTE: A LIT explosive is carried like any other item now,
+                // and is thrown from this list like any other item (see
+                // SelectThrow)
+                const bool is_allowed =
+                        map::g_player->m_properties
+                                .allow_attack_ranged(Verbose::yes);
 
-                if (explosive) {
-                        states::push(
-                                std::make_unique<ThrowingExplosive>(
-                                        map::g_player->m_pos, *explosive));
-                }
-                else {
-                        // Not holding explosive - run throwing attack instead
-                        const bool is_allowed =
-                                map::g_player->m_properties
-                                        .allow_attack_ranged(Verbose::yes);
-
-                        if (is_allowed) {
-                                states::push(std::make_unique<SelectThrow>());
-                        }
+                if (is_allowed) {
+                        states::push(std::make_unique<SelectThrow>());
                 }
         } break;
 
@@ -955,7 +1077,13 @@ void handle(const GameCmd cmd)
         } break;
 
         case GameCmd::look: {
-                states::push(std::make_unique<Viewing>(map::g_player->m_pos));
+                // Looking around IS dragging the map (the center pin, see
+                // GameState::on_map_panned) - there is no look mode to
+                // enter. The view key instead describes a visible monster
+                // at the pin. The Viewing marker state remains only for
+                // flows where the game view is otherwise unreachable
+                // (surveying the map from the trait pick info menu).
+                handle_view_command();
         } break;
 
         case GameCmd::auto_interact: {
@@ -1463,6 +1591,62 @@ void handle(const GameCmd cmd)
 
         }  // switch
 
+        // Drag-to-look is a transient mode: engaging any action ends it,
+        // and the camera snaps back to the player. The exception is
+        // describing the pinned cell ([ describe ] / the view key), which
+        // keeps the pin, so that closing the description returns to the
+        // cell that was being looked at.
+        //
+        // NOTE: This runs AFTER the command - the close/jam and kick
+        // handlers read the pin (see close::player_try_close_or_jam and
+        // handle_kick_at_look_pin_command), so it must still be there
+        // while they run. Unmapped input never gets this far at all (it
+        // returns at the top of this function), so a stray tap leaves the
+        // look alone.
+        if (!viewport::is_pan_active()) {
+                // Not looking around - the camera is following the player
+                // as usual, and must NOT be forced to center (that would
+                // re-center the view on every single command)
+                return;
+        }
+
+        switch (cmd) {
+        case GameCmd::look:
+        case GameCmd::none:
+        case GameCmd::undefined:
+                break;
+
+        case GameCmd::throw_item:
+        case GameCmd::toggle_throw:
+                // Throwing while looking around runs THROUGH the pin: the
+                // item selection screen must be able to return to it
+                // (cancelled), and the throw marker takes over the pinned
+                // cell (see MarkerState::on_start) instead of starting on
+                // the player. The marker ends the pan when it is popped.
+                break;
+
+        case GameCmd::fire:
+        case GameCmd::toggle_aim:
+                // Aiming while looking around likewise takes over the
+                // pinned cell rather than auto-targeting somewhere else -
+                // the reticle appears exactly where the player was already
+                // looking. NOTE: The aim marker is only PUSHED here, it
+                // starts later (see states::start), so the pan has to
+                // survive this block for it to find the pin. If the
+                // command did not open a marker at all (no ammo loaded,
+                // firing would be lethal, ...), the look ends as usual.
+                if (states::contains_state(StateId::marker)) {
+                        break;
+                }
+
+                viewport::end_pan_and_center_on_player();
+                break;
+
+        default:
+                viewport::end_pan_and_center_on_player();
+                break;
+        }
+
 }  // handle
 
 char fire_key()
@@ -1478,6 +1662,90 @@ char throw_key()
 char view_key()
 {
         return 'v';
+}
+
+char get_key()
+{
+        return 'g';
+}
+
+char unload_key()
+{
+        return 'u';
+}
+
+char close_key()
+{
+        return 'c';
+}
+
+char disarm_key()
+{
+        return 'p';
+}
+
+char swap_weapon_key()
+{
+        return 'z';
+}
+
+char reload_key()
+{
+        return 'r';
+}
+
+int kick_at_look_pin_key()
+{
+        return SDLK_F13;
+}
+
+int toggle_aim_key()
+{
+        return SDLK_F14;
+}
+
+int toggle_throw_key()
+{
+        return SDLK_F15;
+}
+
+std::string ranged_wpn_unfireable_reason(const item::Wpn& wpn)
+{
+        if (!map::g_player->m_properties.allow_attack_ranged(Verbose::no)) {
+                // NOTE: Burning is the only thing that stops the player
+                // from shooting (see Burning::allow_attack_ranged) - if
+                // some other property ever does, its reason belongs here
+                // as well
+                return common_text::g_burning_prevent_attack_ranged;
+        }
+
+        const item::ItemData& d = wpn.data();
+
+        if ((wpn.m_ammo_loaded <= 0) && !d.ranged.has_infinite_ammo) {
+                return "There is no ammo loaded.";
+        }
+
+        int mi_go_wpn_hp_drain = 0;
+
+        switch (d.id) {
+        case item::Id::electric_gun:
+                mi_go_wpn_hp_drain = g_electric_gun_hp_drained;
+                break;
+
+        case item::Id::morphic_blaster:
+                mi_go_wpn_hp_drain = g_morphic_blaster_hp_drained;
+                break;
+
+        default:
+                break;
+        }
+
+        if ((mi_go_wpn_hp_drain > 0) &&
+            !allow_player_fire_mi_go_weapon(mi_go_wpn_hp_drain)) {
+                return "Firing the gun now would destroy me.";
+        }
+
+        return {};
 }
 
 }  // namespace game_commands

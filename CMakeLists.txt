@@ -29,6 +29,7 @@ option(
 # ------------------------------------------------------------------------------
 set(COMMON_SRC
         include/ability_values.hpp
+        include/action_list_state.hpp
         include/actor.hpp
         include/actor_act.hpp
         include/actor_cycle_graphics.hpp
@@ -73,6 +74,7 @@ set(COMMON_SRC
         include/draw_map.hpp
         include/drop.hpp
         include/explosion.hpp
+        include/fade.hpp
         include/flood.hpp
         include/fov.hpp
         include/game.hpp
@@ -167,6 +169,7 @@ set(COMMON_SRC
         include/terrain_trap.hpp
         include/text.hpp
         include/text_format.hpp
+        include/text_page.hpp
         include/throwing.hpp
         include/time.hpp
         include/version.hpp
@@ -177,6 +180,9 @@ set(COMMON_SRC
         include/xml.hpp
 
         src/ability_values.cpp
+        src/action_bar.cpp
+        src/action_list_state.cpp
+        src/actions_config.cpp
         src/actor.cpp
         src/actor_act.cpp
         src/actor_common.cpp
@@ -213,6 +219,7 @@ set(COMMON_SRC
         src/colors.cpp
         src/common_text.cpp
         src/config.cpp
+        src/context_pins.cpp
         src/create_character.cpp
         src/debug.cpp
         src/direction.cpp
@@ -223,6 +230,7 @@ set(COMMON_SRC
         src/draw_map.cpp
         src/drop.cpp
         src/explosion.cpp
+        src/fade.cpp
         src/flood.cpp
         src/fov.cpp
         src/game.cpp
@@ -331,6 +339,7 @@ set(COMMON_SRC
         src/terrain_trap.cpp
         src/text.cpp
         src/text_format.cpp
+        src/text_page.cpp
         src/throwing.cpp
         src/time.cpp
         src/version.cpp
@@ -351,7 +360,9 @@ SET(SRC
         src/io.cpp
         src/io_animation.cpp
         src/io_coordinates.cpp
+        src/io_display.cpp
         src/io_draw_obj.cpp
+        src/io_icons.cpp
         src/io_input.cpp
         src/io_primitives.cpp
         src/io_px_manip.cpp

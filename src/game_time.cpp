@@ -55,6 +55,11 @@ static int s_std_turn_delay = s_ticks_per_turn;
 
 static int s_turn_nr = 0;
 
+// Every actor action, not just the player's - see game_time::tick_count.
+// NOTE: Deliberately NOT saved with the game: it is only ever compared
+// with itself within a session.
+static int s_tick_count = 0;
+
 static int speed_to_pct(const actor::Speed speed)
 {
         switch (speed) {
@@ -339,6 +344,11 @@ void load()
         s_turn_nr = saving::get_int();
 }
 
+int tick_count()
+{
+        return s_tick_count;
+}
+
 int turn_nr()
 {
         return s_turn_nr;
@@ -451,6 +461,8 @@ void tick()
         if (!map::g_player || !actor::is_alive(*map::g_player)) {
                 return;
         }
+
+        ++s_tick_count;
 
 #ifndef NDEBUG
         ASSERT(g_allow_tick);

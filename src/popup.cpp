@@ -21,6 +21,8 @@
 #include "debug.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
+#include "menu_page.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
@@ -54,46 +56,133 @@ static int max_msg_w()
         return 74;
 }
 
+// Tracks the extent of the popup box drawn this frame (used for closing the
+// popup when tapping outside it on touch devices)
+static R s_recorded_box_area = {-1, -1, -1, -1};
+
+// Tappable confirm/cancel button areas drawn at the bottom of popups on
+// touch devices (gui cell coordinates)
+static R s_ok_button_area = {-1, -1, -1, -1};
+static R s_cancel_button_area = {-1, -1, -1, -1};
+
+// Menu choice rows of the most recently drawn menu popup: screen gui row
+// and the choice index on that row (for tapping entries directly)
+struct ChoiceRow
+{
+        int y;
+        int idx;
+};
+
+static std::vector<ChoiceRow> s_choice_rows;
+
+static void reset_recorded_box_area()
+{
+        s_recorded_box_area = {-1, -1, -1, -1};
+        s_ok_button_area = {-1, -1, -1, -1};
+        s_cancel_button_area = {-1, -1, -1, -1};
+
+        s_choice_rows.clear();
+}
+
+// Draws tappable [ ok ] / [ cancel ] buttons centered on a popup line
+// (replaces the keyboard oriented hint texts on touch devices)
+static void draw_popup_buttons(const int y, const bool with_cancel)
+{
+        const std::string ok_str = "[ ok ]";
+        const std::string cancel_str = "[ cancel ]";
+
+        const std::string gap = "   ";
+
+        const int total_w =
+                with_cancel
+                ? (int)(ok_str.size() + gap.size() + cancel_str.size())
+                : (int)ok_str.size();
+
+        const int screen_center_x = panels::center_x(Panel::screen);
+
+        const int x0 = screen_center_x - (total_w / 2);
+
+        io::draw_text(
+                " " + ok_str + " ",
+                Panel::screen,
+                {x0 - 1, y},
+                colors::menu_highlight(),
+                io::DrawBg::yes,
+                colors::black());
+
+        s_ok_button_area = {
+                x0,
+                y,
+                x0 + (int)ok_str.size() - 1,
+                y};
+
+        if (with_cancel) {
+                const int cancel_x0 =
+                        x0 + (int)ok_str.size() + (int)gap.size();
+
+                io::draw_text(
+                        " " + cancel_str + " ",
+                        Panel::screen,
+                        {cancel_x0 - 1, y},
+                        colors::menu_dark(),
+                        io::DrawBg::yes,
+                        colors::black());
+
+                s_cancel_button_area = {
+                        cancel_x0,
+                        y,
+                        cancel_x0 + (int)cancel_str.size() - 1,
+                        y};
+        }
+}
+
+static void record_box_line(const int line_w, const int line_y)
+{
+        const auto screen_center_x = panels::center_x(Panel::screen);
+
+        const int x0 = screen_center_x - (line_w / 2) - 1;
+        const int x1 = screen_center_x + (line_w / 2) + 1;
+
+        if (s_recorded_box_area.p0.x < 0) {
+                s_recorded_box_area = {x0, line_y, x1, line_y};
+        }
+        else {
+                R& r = s_recorded_box_area;
+
+                r.p0.x = std::min(r.p0.x, x0);
+                r.p1.x = std::max(r.p1.x, x1);
+                r.p0.y = std::min(r.p0.y, line_y);
+                r.p1.y = std::max(r.p1.y, line_y);
+        }
+}
+
 static void draw_horizontal_line(const int line_w, const int line_y)
 {
-        const P cell_px_dims(
-                config::gui_cell_px_w(),
-                config::gui_cell_px_h());
+        record_box_line(line_w, line_y);
 
         const auto screen_center_x = panels::center_x(Panel::screen);
 
-        const auto p0 =
-                P(screen_center_x - (line_w / 2), line_y)
-                        .scaled_up(cell_px_dims)
-                        .with_y_offset(cell_px_dims.y / 2);
+        const int x0 = screen_center_x - (line_w / 2);
 
-        const auto p1 =
-                P(screen_center_x + (line_w / 2), line_y)
-                        .scaled_up(cell_px_dims)
-                        .with_y_offset(cell_px_dims.y / 2);
-
-        io::draw_rectangle({p0, p1}, colors::dark_gray());
+        draw_menu_divider(x0, x0 + line_w - 1, line_y);
 }
 
-static int find_key_str_len(const std::string& str)
+// Draws the popup title embedded in the top border of the fullscreen box
+// (the same way fullscreen menu pages draw their titles)
+static void draw_title_in_border(const std::string& title)
 {
-        if (str.empty()) {
-                ASSERT(false);
-
-                return 0;
+        if (title.empty()) {
+                return;
         }
 
-        if (str[0] != '(') {
-                return 0;
-        }
-
-        for (size_t i = 0; i < str.size(); ++i) {
-                if (str[i] == ')') {
-                        return (int)i + 1;
-                }
-        }
-
-        return 0;
+        io::draw_text_center(
+                " " + title + " ",
+                Panel::screen,
+                {panels::center_x(Panel::screen), panels::screen_box_area().p0.y},
+                colors::title(),
+                io::DrawBg::yes,
+                colors::black(),
+                true);  // Allow pixel-level adjustment
 }
 
 // -----------------------------------------------------------------------------
@@ -144,12 +233,18 @@ void Popup::copy_common_config(
         to->m_msg = from->m_msg;
         to->m_sfx = from->m_sfx;
         to->m_add_to_msg_history = from->m_add_to_msg_history;
+        to->m_cancelled_result = from->m_cancelled_result;
+}
+
+Popup& Popup::set_cancelled_result(bool* const cancelled_result)
+{
+        m_popup_state->m_cancelled_result = cancelled_result;
+
+        return *this;
 }
 
 Popup& Popup::setup_menu_mode(
         const std::vector<std::string>& choices,
-        const std::vector<char>& menu_keys,
-        const MenuModeShowCancelHint show_cancel_hint,
         int* menu_choice_result)
 {
         auto new_popup_state = std::make_unique<MenuPopupState>();
@@ -157,8 +252,6 @@ Popup& Popup::setup_menu_mode(
         copy_common_config(m_popup_state.get(), new_popup_state.get());
 
         new_popup_state->m_menu_choices = choices;
-        new_popup_state->m_menu_keys = menu_keys;
-        new_popup_state->m_show_cancel_hint = show_cancel_hint;
         new_popup_state->m_menu_choice_result = menu_choice_result;
 
         m_popup_state = std::move(new_popup_state);
@@ -257,49 +350,42 @@ void MsgPopupState::draw()
 {
         const auto text_max_w = max_msg_w();
         const auto msg_lines = text_format::split(m_msg, text_max_w);
-        const auto text_h = (int)msg_lines.size() + 3;
 
-        int horizontal_line_w = 0;
+        const bool show_msg_centered = msg_lines.size() == 1;
 
-        {
-                const auto msg_line_w =
-                        (msg_lines.size() == 1)
-                        ? (int)msg_lines[0].size()
-                        : text_max_w;
+        // Divider rules kept within the stylistic width limits (a rule
+        // narrower than the text is fine - reads as a section divider)
+        const int horizontal_line_w =
+                std::clamp(
+                        show_msg_centered
+                                ? (int)msg_lines[0].size()
+                                : text_max_w,
+                        g_divider_min_w,
+                        g_divider_max_w);
 
-                const auto title_w = (int)m_title.size();
+        reset_recorded_box_area();
 
-                const auto confirm_line_w = (int)common_text::g_confirm_hint.size();
+        draw_box(panels::screen_box_area());
 
-                const int padding = 12;
+        draw_title_in_border(m_title);
 
-                horizontal_line_w =
-                        std::max(
-                                {title_w + padding,
-                                 msg_line_w,
-                                 confirm_line_w + padding});
+        Text text(m_msg);
 
-                horizontal_line_w = std::min(horizontal_line_w, text_max_w);
-        }
+        text.set_w(text_max_w);
 
-        draw_box(panels::area(Panel::screen));
+        const int nr_lines =
+                show_msg_centered ? 1 : text.nr_lines();
 
-        auto y = get_title_y(text_h);
+        // The whole block - top rule, one padding row, the message lines,
+        // one padding row, bottom rule (with the confirm hint embedded) -
+        // is centered vertically on the screen
+        const int block_h = nr_lines + 4;
+
+        int y = panels::center_y(Panel::screen) - (block_h / 2);
 
         draw_horizontal_line(horizontal_line_w, y);
 
-        if (!m_title.empty()) {
-                io::draw_text_center(
-                        " " + m_title + " ",
-                        Panel::screen,
-                        {panels::center_x(Panel::screen), y},
-                        colors::title(),
-                        io::DrawBg::yes,
-                        colors::black(),
-                        true);  // Allow pixel-level adjustmet
-        }
-
-        const bool show_msg_centered = msg_lines.size() == 1;
+        y += 2;
 
         if (show_msg_centered) {
                 // Centered one-liner message.
@@ -307,32 +393,22 @@ void MsgPopupState::draw()
                 // NOTE: draw_text_center just takes a plain std::string -
                 // *FORMATTING NOT SUPPORTED!*
 
-                for (const std::string& line : msg_lines) {
-                        ++y;
+                io::draw_text_center(
+                        msg_lines[0],
+                        Panel::screen,
+                        {panels::center_x(Panel::screen), y},
+                        colors::text(),
+                        io::DrawBg::no,
+                        colors::black(),
+                        true);  // Allow pixel-level adjustmet
 
-                        io::draw_text_center(
-                                line,
-                                Panel::screen,
-                                {panels::center_x(Panel::screen), y},
-                                colors::text(),
-                                io::DrawBg::no,
-                                colors::black(),
-                                true);  // Allow pixel-level adjustmet
-                }
-
-                y += 2;
+                ++y;
         }
         else {
                 // Multiline message, formatting supported here (draw_text takes
                 // a Text object).
 
-                ++y;
-
                 const auto text_x0 = get_x0(text_max_w);
-
-                Text text(m_msg);
-
-                text.set_w(text_max_w);
 
                 io::draw_text(
                         text,
@@ -341,8 +417,10 @@ void MsgPopupState::draw()
                         colors::text(),
                         io::DrawBg::no);
 
-                y += text.nr_lines() + 1;
+                y += nr_lines;
         }
+
+        ++y;
 
         draw_horizontal_line(horizontal_line_w, y);
 
@@ -366,8 +444,16 @@ void MsgPopupState::update()
         const auto input = io::read_input();
 
         switch (input.key) {
-        case SDLK_SPACE:
         case SDLK_ESCAPE:
+                // Cancelled (the [ x ] control / back button)
+                if (m_cancelled_result) {
+                        *m_cancelled_result = true;
+                }
+
+                states::pop();
+                break;
+
+        case SDLK_SPACE:
         case SDLK_RETURN:
 #ifndef NDEBUG
         // Cheat key for descending
@@ -388,11 +474,7 @@ MenuPopupState::MenuPopupState() = default;
 
 void MenuPopupState::on_start_specific()
 {
-        ASSERT(m_menu_choices.size() == m_menu_keys.size());
-
         m_browser.reset((int)m_menu_choices.size());
-
-        m_browser.set_custom_menu_keys(m_menu_keys);
 }
 
 void MenuPopupState::draw()
@@ -400,17 +482,12 @@ void MenuPopupState::draw()
         const auto text_max_w = max_msg_w();
         const auto msg_lines = text_format::split(m_msg, text_max_w);
         const auto nr_msg_lines = (int)msg_lines.size();
-        const auto title_h = m_title.empty() ? 0 : 1;
 
-        const auto nr_blank_lines =
-                ((nr_msg_lines == 0) && (title_h == 0))
-                ? 0
-                : 1;
+        const auto nr_blank_lines = (nr_msg_lines == 0) ? 0 : 1;
 
         const auto nr_choices = (int)m_menu_choices.size();
 
         const auto text_h_tot =
-                title_h +
                 nr_msg_lines +
                 nr_blank_lines +
                 nr_choices;
@@ -435,41 +512,25 @@ void MenuPopupState::draw()
                         ? 0
                         : (int)msg_lines[0].size();
 
-                const auto title_w = (int)m_title.size();
-
-                const auto cancel_line_w =
-                        (m_show_cancel_hint == MenuModeShowCancelHint::yes)
-                        ? (int)common_text::g_cancel_hint.size()
-                        : 0;
-
                 const int padding = 12;
 
                 horizontal_line_w =
                         std::max(
-                                {title_w + padding,
-                                 msg_line_w,
-                                 choice_lines_max_w + padding,
-                                 cancel_line_w + padding});
+                                msg_line_w,
+                                choice_lines_max_w + padding);
 
                 horizontal_line_w = std::min(horizontal_line_w, text_max_w);
         }
 
-        draw_box(panels::area(Panel::screen));
+        reset_recorded_box_area();
+
+        draw_box(panels::screen_box_area());
+
+        draw_title_in_border(m_title);
 
         int y = get_title_y(text_h_tot);
 
         draw_horizontal_line(horizontal_line_w, y);
-
-        if (!m_title.empty()) {
-                io::draw_text_center(
-                        " " + m_title + " ",
-                        Panel::screen,
-                        {panels::center_x(Panel::screen), y},
-                        colors::title(),
-                        io::DrawBg::yes,
-                        colors::black(),
-                        true);  // Allow pixel-level adjustmet
-        }
 
         ++y;
 
@@ -501,7 +562,7 @@ void MenuPopupState::draw()
                 ++y;
         }
 
-        if (!msg_lines.empty() || !m_title.empty()) {
+        if (!msg_lines.empty()) {
                 ++y;
         }
 
@@ -512,7 +573,9 @@ void MenuPopupState::draw()
         for (size_t i = 0; i < m_menu_choices.size(); ++i) {
                 const auto choice_str = m_menu_choices[i];
 
-                const int key_str_len = find_key_str_len(choice_str);
+                s_choice_rows.push_back({y, (int)i});
+
+                const int key_str_len = menu_key_prefix_len(choice_str);
 
                 int draw_x_pos = choice_x_pos;
 
@@ -556,21 +619,10 @@ void MenuPopupState::draw()
                 ++y;
         }
 
-        if (m_show_cancel_hint == MenuModeShowCancelHint::yes) {
-                ++y;
-        }
-
+        // Menu popups are operated by swiping (navigate) and tapping
+        // (select); cancelling is done via the [ x ] control, tapping
+        // outside the popup, or a "No" style choice - no button row
         draw_horizontal_line(horizontal_line_w, y);
-
-        if (m_show_cancel_hint == MenuModeShowCancelHint::yes) {
-                io::draw_text_center(
-                        " " + common_text::g_cancel_hint + " ",
-                        Panel::screen,
-                        {panels::center_x(Panel::screen), y},
-                        colors::menu_dark(),
-                        io::DrawBg::yes,
-                        colors::black());
-        }
 }
 
 void MenuPopupState::update()
@@ -585,10 +637,13 @@ void MenuPopupState::update()
 
         const auto input = io::read_input();
 
+        // NOTE: Scrolling input only - any "(x)" style letters in the choice
+        // strings are purely stylistic (entries are engaged by tapping, or
+        // by swiping and confirming)
         const auto action =
                 m_browser.read(
                         input,
-                        MenuInputMode::scrolling_and_letters,
+                        MenuInputMode::scrolling,
                         ForceAutoSelect::yes);
 
         switch (action) {
@@ -617,6 +672,32 @@ void MenuPopupState::update()
         case MenuAction::none:
                 break;
         }
+}
+
+bool MenuPopupState::try_tap(const P& logical_px)
+{
+        const P gui_pos(
+                logical_px.x / config::gui_cell_px_w(),
+                logical_px.y / config::gui_cell_px_h());
+
+        if ((gui_pos.x < s_recorded_box_area.p0.x) ||
+            (gui_pos.x > s_recorded_box_area.p1.x)) {
+                return false;
+        }
+
+        for (const auto& row : s_choice_rows) {
+                if (row.y == gui_pos.y) {
+                        m_browser.set_y(row.idx);
+
+                        break;
+                }
+        }
+
+        // NOTE: Deliberately reported as NOT handled - the input layer then
+        // synthesizes a confirm key for the tap (see io_input.cpp), which
+        // selects the marked entry through the normal update path (a tap
+        // handler must not pop states itself)
+        return false;
 }
 
 // -----------------------------------------------------------------------------
@@ -685,30 +766,22 @@ void NumberQueryPopupState::draw()
 
                 horizontal_line_w =
                         std::max(
-                                {(int)m_title.size() + padding,
-                                 msg_line_w,
+                                {msg_line_w,
                                  nr_str_max_w + padding,
                                  confirm_line_w + padding});
 
                 horizontal_line_w = std::min(horizontal_line_w, text_max_w);
         }
 
-        draw_box(panels::area(Panel::screen));
+        reset_recorded_box_area();
+
+        draw_box(panels::screen_box_area());
+
+        draw_title_in_border(m_title);
 
         auto y = get_title_y(text_h);
 
         draw_horizontal_line(horizontal_line_w, y);
-
-        if (!m_title.empty()) {
-                io::draw_text_center(
-                        " " + m_title + " ",
-                        Panel::screen,
-                        {panels::center_x(Panel::screen), y},
-                        colors::title(),
-                        io::DrawBg::yes,
-                        colors::black(),
-                        true);  // Allow pixel-level adjustmet
-        }
 
         const bool show_msg_centered = msg_lines.size() == 1;
 
@@ -777,20 +850,7 @@ void NumberQueryPopupState::draw()
 
         draw_horizontal_line(horizontal_line_w, y);
 
-        const std::string hint =
-                " " +
-                common_text::g_confirm_drop_hint +
-                " " +
-                common_text::g_cancel_hint +
-                " ";
-
-        io::draw_text_center(
-                hint,
-                Panel::screen,
-                {panels::center_x(Panel::screen), y},
-                colors::menu_dark(),
-                io::DrawBg::yes,
-                colors::black());
+        draw_popup_buttons(y, true);
 }
 
 void NumberQueryPopupState::update()
@@ -918,6 +978,21 @@ void NumberQueryPopupState::update()
                 m_has_player_entered_value = true;
                 m_is_empty_nr = false;
         }
+}
+
+R box_area()
+{
+        return s_recorded_box_area;
+}
+
+R ok_button_area()
+{
+        return s_ok_button_area;
+}
+
+R cancel_button_area()
+{
+        return s_cancel_button_area;
 }
 
 }  // namespace popup

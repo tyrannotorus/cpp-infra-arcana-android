@@ -9,6 +9,8 @@
 
 #include <memory>
 
+struct P;
+
 namespace io
 {
 enum class GraphicsCycle;
@@ -16,15 +18,19 @@ enum class GraphicsCycle;
 
 enum class StateId
 {
+        actions_config,
         browse_highscore_entry,
         browse_spells,
+        credits,
         game,
+        game_menu,
         game_over_summary,
         highscore,
+        hint,
+        intro_story,
         inventory,
         main_menu,
         manual,
-        manual_page,
         marker,
         message_history,
         new_game,
@@ -72,6 +78,19 @@ public:
 
         virtual void draw() {}
 
+        // Whether everything this state draws that can CHANGE from tile
+        // animation lives on the map display, so that it can be refreshed
+        // without redrawing the rest of the interface (see
+        // states::draw_map_display).
+        virtual bool has_map_display_draw() const
+        {
+                return false;
+        }
+
+        // Redraws only this state's map display content. Only called when
+        // has_map_display_draw() is true.
+        virtual void draw_map_display() {}
+
         // If true, this state is drawn overlayed on the state(s) below. This
         // can be used for example to draw a marker state on top of the map.
         virtual bool draw_overlayed() const
@@ -83,6 +102,41 @@ public:
 
         // Read input, process game logic etc.
         virtual void update() {}
+
+        // The map view was panned by dragging (e.g. the free look marker
+        // state syncs its marker to the view center on this)
+        virtual void on_map_panned() {}
+
+        // A tap at a position (logical screen pixels). Returns true if the
+        // state handled the tap directly (e.g. toggling the tapped row) -
+        // then no key is synthesized for it.
+        virtual bool try_tap(const P& logical_px)
+        {
+                (void)logical_px;
+
+                return false;
+        }
+
+        // Direct touch dragging from an explicit HANDLE (a drag handle, a
+        // scrollbar) - the ONLY kind of drag zone there is. Content areas
+        // are never draggable: over them a gesture is a swipe, and text is
+        // scrolled with its scrollbar. If this returns true for the
+        // touch start position, subsequent finger movement is reported via
+        // on_touch_drag_move, and release via on_touch_drag_end - and the
+        // gesture is not interpreted as scrolling or swiping.
+        virtual bool try_begin_touch_drag(const P& logical_px)
+        {
+                (void)logical_px;
+
+                return false;
+        }
+
+        virtual void on_touch_drag_move(const P& logical_px)
+        {
+                (void)logical_px;
+        }
+
+        virtual void on_touch_drag_end() {}
 
         // All states above have been popped
         virtual void on_resume() {}
@@ -117,6 +171,14 @@ public:
 
         virtual StateId id() const = 0;
 
+        // Whether this screen's fullscreen border carries the [ x ] close
+        // control, and whether tapping there does anything. Answered from
+        // the state's id by default (see screen_has_close_button) -
+        // override only where ONE instance has to differ from the rest of
+        // its kind, e.g. the first page of the winning ending, which is
+        // not something to back out of.
+        virtual bool has_close_button() const;
+
 private:
         bool m_has_started {false};
         bool m_is_drawing_disabled {false};
@@ -137,6 +199,17 @@ void start();
 void cycle_graphics(io::GraphicsCycle cycle);
 
 void draw();
+
+// Redraws ONLY the map display, for animation that changes nothing else -
+// tile graphics cycling and flash animations. GameState::cycle_graphics
+// touches terrain and actors and nothing more, so the side stats panel,
+// the message log and the action bar still hold exactly what they held
+// last frame; their textures are left alone.
+//
+// Returns false if any currently drawn state has content that cannot be
+// refreshed this way - NOTHING is drawn then, and the caller must fall
+// back to a full draw().
+bool draw_map_display();
 
 void on_window_resized();
 

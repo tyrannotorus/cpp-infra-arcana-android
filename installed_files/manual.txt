@@ -83,7 +83,7 @@ Many things in the game can be interacted with by moving into them (i.e. by "bum
    * Move into fountains to drink from them
 
 --------------------------------------------------------------------------------
-Information on the game screen
+The game screen
 --------------------------------------------------------------------------------
 On the right hand side of the screen, information is listed about your character and your carried equipment. The following is an example of what these lines can look like:
 
@@ -93,7 +93,7 @@ On the right hand side of the screen, information is listed about your character
    Depth             2 : Current floor (or "dungeon level")
 
    Health         9/16 : Current and maximum Hit Points
-                         See "Hit Points, Wounds and healing" for more info
+                         See "Hit points and wounds" for more info
 
    Spirit          8/8 : Current and maximum Spirit Points
                          See "Spirit and spell casting" for more info
@@ -125,7 +125,7 @@ On the right hand side of the screen, information is listed about your character
                          can be used for
 
    Med. Suppl.      24 : Remaining Medical Bag Supplies
-                         See "Hit Points, Wounds and healing" for more info
+                         See "Hit points and wounds" for more info
 
    Armor             3 : Armor Points
                          Each point reduces physical damage taken by 1
@@ -172,7 +172,7 @@ Note that explosives are not used like throwing weapons. Instead they are used b
 In any inventory screen, you can see percentage values to the far right of each item. This is how many percent of your total carried weight that each item takes (the numbers roughly adds up to 100%, but there will be rounding errors, since decimals are not shown). So if you are overburdened, an item with a high percentage value might be a good candidate to drop.
 
 --------------------------------------------------------------------------------
-Hit Points, Wounds and healing
+Hit points and wounds
 --------------------------------------------------------------------------------
 The state of your physical health is described in two ways:
 
@@ -240,7 +240,7 @@ When you stay out of an aware monster's vision for a certain number of turns (an
 Monsters also react to noise, and may disturb nearby monsters when becoming aware, alerting them to your presence. Medium and heavy melee weapons will make noise on attacks, so a light weapon might be more ideal for a stealthy combat approach. Some sounds are louder than others, for example firing a gun or kicking down a door is likely to attract some attention.
 
 --------------------------------------------------------------------------------
-High scores and memorial files
+High scores and memorials
 --------------------------------------------------------------------------------
 Winning is not necessarily the sole purpose of Infra Arcana - there is also challenge to be found in exploring further, gaining more abilities, discovering more items, or encountering stranger and more powerful monsters than in previous attempts.
 

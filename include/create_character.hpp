@@ -12,14 +12,11 @@
 #include <vector>
 
 #include "browser.hpp"
+#include "menu_descr_page.hpp"
+#include "menu_page.hpp"
 #include "player_bon.hpp"
 #include "state.hpp"
-
-enum class TraitScreenMode
-{
-        pick_new,
-        view_unavail
-};
+#include "text_page.hpp"
 
 enum class IsCharacterCreationTraitPick
 {
@@ -40,47 +37,72 @@ public:
         }
 };
 
-class PickBgState : public State
+// The character menus are standard two column description pages (list of
+// picks, description of the marked pick), which also auto-replay recorded
+// picks: stepping BACK during character creation ([ x ] / escape) resets
+// the session and replays all but the last pick (picks are applied
+// immediately when made, so "back" can only be implemented as a replay).
+class CreateCharPageState : public MenuDescrPageState
+{
+public:
+        void update() override;
+};
+
+class PickBgState : public CreateCharPageState
 {
 public:
         void on_start() override;
 
         void update() override;
-
-        void draw() override;
 
         StateId id() const override
         {
                 return StateId::pick_background;
         }
 
-private:
-        MenuBrowser m_browser {};
+protected:
+        std::string page_title() const override;
 
+        std::vector<MenuPageEntry> page_entries() const override;
+
+        int default_marked_idx() const override;
+
+        void on_entry_selected(int idx) override;
+
+        void on_cancelled() override;
+
+        void draw_page_content() override;
+
+private:
         std::vector<Bg> m_bgs {};
 };
 
-class PickOccultistState : public State
+class PickOccultistState : public CreateCharPageState
 {
 public:
         void on_start() override;
-
-        void update() override;
-
-        void draw() override;
 
         StateId id() const override
         {
                 return StateId::pick_background_occultist;
         }
 
-private:
-        MenuBrowser m_browser {};
+protected:
+        std::string page_title() const override;
 
+        std::vector<MenuPageEntry> page_entries() const override;
+
+        void on_entry_selected(int idx) override;
+
+        void on_cancelled() override;
+
+        void draw_page_content() override;
+
+private:
         std::vector<OccultistDomain> m_domains {};
 };
 
-class PickTraitState : public State
+class PickTraitState : public CreateCharPageState
 {
 public:
         PickTraitState(std::string title, IsCharacterCreationTraitPick is_char_creation) :
@@ -93,68 +115,72 @@ public:
 
         void update() override;
 
-        void draw() override;
-
-        void on_window_resized() override;
-
         StateId id() const override
         {
                 return StateId::pick_trait;
         }
 
+protected:
+        std::string page_title() const override;
+
+        std::string page_hint() const override;
+
+        std::vector<MenuPageEntry> page_entries() const override;
+
+        void on_entry_selected(int idx) override;
+
+        void on_cancelled() override;
+
+        bool handle_custom_input(const io::InputData& input) override;
+
+        Color entry_color(int idx, bool is_marked) const override;
+
+        void draw_page_content() override;
+
 private:
-        void init_browsers();
+        // The pickable traits, followed by the currently unavailable ones
+        // (prerequisites not met) - the unavailable traits are browsable
+        // (shown in red, with their prerequisites in the description) but
+        // cannot be selected
+        Trait trait_at(int idx) const;
 
-        void draw_trait_menu_item(
-                Trait trait,
-                int y,
-                bool is_marked,
-                const MenuBrowser& browser) const;
-
-        void draw_trait_prereq_info(
-                const player_bon::TraitPrereqData& prereq_data,
-                int x,
-                int y) const;
-
-        MenuBrowser m_browser_traits_avail {};
-        MenuBrowser m_browser_traits_unavail {};
+        bool is_idx_unavail(int idx) const;
 
         std::vector<Trait> m_traits_avail {};
         std::vector<Trait> m_traits_unavail {};
-
-        TraitScreenMode m_screen_mode {TraitScreenMode::pick_new};
 
         std::string m_title;
         IsCharacterCreationTraitPick m_is_char_creation;
 };
 
-class RemoveTraitState : public State
+class RemoveTraitState : public CreateCharPageState
 {
 public:
         void on_start() override;
 
         void update() override;
 
-        void draw() override;
-
-        void on_window_resized() override;
-
         StateId id() const override
         {
                 return StateId::remove_trait;
         }
 
+protected:
+        std::string page_title() const override;
+
+        std::string page_hint() const override;
+
+        std::vector<MenuPageEntry> page_entries() const override;
+
+        void on_entry_selected(int idx) override;
+
+        void on_cancelled() override;
+
+        bool handle_custom_input(const io::InputData& input) override;
+
+        void draw_page_content() override;
+
 private:
-        void init_browser();
-
-        void draw_trait_menu_item(
-                Trait trait,
-                int y,
-                bool is_marked,
-                const MenuBrowser& browser) const;
-
-        MenuBrowser m_browser {};
-
         std::vector<Trait> m_traits_can_be_removed {};
 };
 
@@ -163,9 +189,13 @@ class EnterNameState : public State
 public:
         void on_start() override;
 
+        void on_popped() override;
+
         void update() override;
 
         void draw() override;
+
+        bool try_tap(const P& logical_px) override;
 
         StateId id() const override
         {
@@ -174,6 +204,28 @@ public:
 
 private:
         std::string m_current_str {};
+};
+
+// The "The story so far..." intro page, as a character creation step of
+// its own (after name entry, before the game starts) - so that its [ x ]
+// control steps BACK to the name entry instead of dropping the player
+// into the game.
+class IntroStoryState : public TextPageState
+{
+public:
+        void on_start() override;
+
+        StateId id() const override
+        {
+                return StateId::intro_story;
+        }
+
+protected:
+        std::string page_title() const override;
+
+        std::string page_text() const override;
+
+        void on_cancelled() override;
 };
 
 #endif  // CREATE_CHARACTER_HPP

@@ -49,32 +49,6 @@ static SpellSkill s_spell_skills[(size_t)SpellId::END];
 
 static bool s_is_forgotten[(size_t)SpellId::END];
 
-static void draw_descr_box(const std::vector<ColoredString>& lines)
-{
-        io::cover_panel(Panel::inventory_descr);
-
-        P pos(0, 0);
-
-        for (const ColoredString& line : lines) {
-                const std::vector<std::string> formatted =
-                        text_format::split(
-                                line.str,
-                                panels::w(Panel::inventory_descr));
-
-                for (const std::string& formatted_line : formatted) {
-                        io::draw_text(
-                                formatted_line,
-                                Panel::inventory_descr,
-                                pos,
-                                line.color);
-
-                        ++pos.y;
-                }
-
-                ++pos.y;
-        }
-}
-
 static void try_cast(Spell* const spell)
 {
         const prop::PropHandler& props = map::g_player->m_properties;
@@ -167,31 +141,26 @@ static void try_cast(Spell* const spell)
         }
 }
 
+// A spell's row in the list. Laid out like an inventory row (see
+// InvState::draw_backpack_item): indented as if a "(x)" selection key
+// were drawn at the start, which it is not - there is no keyboard to
+// press it on, entries are engaged by tapping.
 static void draw_spell_menu_line(
         const Spell* const spell,
         const int y,
-        const char menu_key,
         const bool is_marked)
 {
-        std::string key_str = "(?)";
+        // Matches InvState's s_key_indent_w
+        constexpr int key_indent_w = 4;
 
-        key_str[1] = menu_key;
+        const std::string name = text_format::first_to_upper(spell->name());
 
-        const std::string name = spell->name();
-
-        constexpr int cost_label_x = 23;
+        constexpr int cost_label_x = 23 + key_indent_w;
         constexpr int skill_label_x = cost_label_x + 10;
 
-        int x = 0;
+        int x = key_indent_w;
 
-        Color color =
-                is_marked
-                ? colors::menu_key_highlight()
-                : colors::menu_key_dark();
-
-        io::draw_text(key_str, Panel::inventory_menu, {x, y}, color);
-
-        x = (int)key_str.size() + 1;
+        Color color;
 
         if (s_is_forgotten[(size_t)spell->id()]) {
                 color =
@@ -214,9 +183,12 @@ static void draw_spell_menu_line(
 
         std::string fill_str;
 
-        const size_t fill_size = cost_label_x - x - name.size();
+        // NOTE: Signed - a name reaching the cost column gives no dots at
+        // all. Unsigned, as this was, it wrapped to an enormous count and
+        // hung the game on a long enough spell name.
+        const int fill_size = cost_label_x - x - (int)name.size();
 
-        for (size_t ii = 0; ii < fill_size; ++ii) {
+        for (int ii = 0; ii < fill_size; ++ii) {
                 fill_str.push_back('.');
         }
 
@@ -299,25 +271,6 @@ static void draw_spell_menu_line(
         }
 }
 
-static void draw_spell_descr(const Spell* const spell)
-{
-        const SpellSkill skill = player_spells::spell_skill(spell->id());
-
-        const std::vector<std::string> descr =
-                spell->descr(skill, SpellSrc::learned);
-
-        std::vector<ColoredString> lines;
-
-        lines.reserve(descr.size());
-
-        for (const std::string& line : descr) {
-                lines.emplace_back(line, colors::light_white());
-        }
-
-        if (!lines.empty()) {
-                draw_descr_box(lines);
-        }
-}
 
 // -----------------------------------------------------------------------------
 // player_spells
@@ -631,67 +584,145 @@ void BrowseSpell::on_start()
                 return;
         }
 
-        m_browser.reset((int)s_learned_spells.size());
+        m_browser.reset(
+                (int)s_learned_spells.size(),
+                panels::h(Panel::inventory_menu));
 
         m_browser.set_selection_audio_enabled(false);
 }
 
+Spell* BrowseSpell::marked_spell() const
+{
+        const int y = m_browser.y();
+
+        if ((y < 0) || (y >= (int)s_learned_spells.size())) {
+                return nullptr;
+        }
+
+        return s_learned_spells[y];
+}
+
+std::vector<ActionPin> BrowseSpell::marked_entry_actions() const
+{
+        if (!m_allow_cast || !marked_spell()) {
+                // Opened only to be read (from the character screen) -
+                // there is nothing to do with a spell here
+                return {};
+        }
+
+        return {{(int)SpellActionId::cast, "cast", {}}};
+}
+
+void BrowseSpell::run_action(const int action_id)
+{
+        ASSERT((SpellActionId)action_id == SpellActionId::cast);
+
+        (void)action_id;
+
+        Spell* const spell = marked_spell();
+
+        if (!spell) {
+                return;
+        }
+
+        // NOTE: The screen closes BEFORE the spell runs - casting spends
+        // the turn, and some spells go on to aim out on the map (see
+        // CtrlObj, CtrlTele), which must happen over the game view rather
+        // than over this list.
+        states::pop();
+
+        // NOTE: This object is now deleted!
+
+        try_cast(spell);
+}
+
+void BrowseSpell::draw_spell_descr()
+{
+        const Spell* const spell = marked_spell();
+
+        if (!spell) {
+                return;
+        }
+
+        if (spell != m_viewed_spell) {
+                // Another spell is being looked at - its description
+                // starts at the top
+                m_descr.reset_scroll();
+
+                m_viewed_spell = spell;
+        }
+
+        const SpellSkill skill = player_spells::spell_skill(spell->id());
+
+        m_descr.draw(
+                spell->descr(skill, SpellSrc::learned),
+                colors::light_white());
+}
+
 void BrowseSpell::draw()
 {
-        draw_box(panels::area(Panel::screen));
-
-        const int nr_spells = (int)s_learned_spells.size();
+        draw_box(panels::screen_box_area());
 
         io::draw_text_center(
-                " Known spells ",
+                " Cast spell ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), 0},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p0.y},
                 colors::title());
 
         io::draw_text_center(
-                " " + common_text::g_screen_exit_hint + " ",
+                " " + common_text::g_menu_select_hint + " ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p1.y},
                 colors::title());
+
+        // The pins are laid out first - the description needs to know how
+        // many of its bottom rows they take (see ActionListState)
+        prepare_action_pins();
+
+        const Range idx_range_shown = m_browser.range_shown();
 
         int y = 0;
 
-        for (int i = 0; i < nr_spells; ++i) {
-                Spell* const spell = s_learned_spells[i];
-
-                const char menu_key = m_browser.menu_keys()[i];
-
-                const bool is_marked = m_browser.is_at_idx(i);
-
-                draw_spell_menu_line(spell, y, menu_key, is_marked);
-
-                if (is_marked) {
-                        draw_spell_descr(spell);
-                }
+        for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
+                draw_spell_menu_line(
+                        s_learned_spells[i],
+                        y,
+                        m_browser.is_at_idx(i));
 
                 ++y;
         }
+
+        draw_spell_descr();
+
+        // Where the list continues, its edge fades out
+        draw_list_fades();
+
+        // Last - the pins sit on top of the faded out end of the text
+        draw_action_pins();
 }
 
 void BrowseSpell::update()
 {
-        auto input = io::read_input();
+        const io::InputData input = io::read_input();
+
+        if (handle_pending_action()) {
+                // NOTE: This object may now be deleted!
+                return;
+        }
 
         const MenuAction action =
-                m_browser.read(
-                        input,
-                        MenuInputMode::scrolling_and_letters);
+                m_browser.read(input, MenuInputMode::scrolling_and_letters);
 
         switch (action) {
         case MenuAction::selected: {
+                // The same thing the [ cast ] pin does. NOTE: On a screen
+                // WITH pins a tap only marks the row (see
+                // ActionListState::try_tap), so this is the keyboard path.
                 if (m_allow_cast) {
-                        Spell* const spell = s_learned_spells[m_browser.y()];
-
-                        // Exit screen
-                        states::pop();
-
-                        try_cast(spell);
+                        run_action((int)SpellActionId::cast);
                 }
+
+                // NOTE: This object may now be deleted!
                 return;
         } break;
 

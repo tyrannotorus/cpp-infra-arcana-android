@@ -8,46 +8,43 @@
 
 namespace common_text
 {
-const std::string g_next_page_up_hint =
-        "[page up, <] more";
-
-const std::string g_next_page_down_hint =
-        "[page down, >] more";
-
 const std::string g_screen_exit_hint =
-        "[space, esc] to exit";
+        // Screens close via the [ x ] control
+        "";
 
 const std::string g_minimap_exit_hint =
-        "[space, esc, m] to exit";
-
-const std::string g_game_over_summary_exit_hint =
-        "[space, esc] to show high scores";
+        "";
 
 const std::string g_set_option_hint =
-        "[enter, left, right] to set option";
+        // Options are stepped by swiping sideways (or tapping the row)
+        "swipe left/right to set option";
 
-const std::string g_scroll_hint =
-        "[2/8, down/up, pgup/pgdown, home/end] to scroll";
+const std::string g_menu_select_hint =
+        // The standard footer hint of pages with a selectable list
+        "swipe/tap to select";
 
 const std::string g_scrollable_info_screen_hint =
-        g_scroll_hint +
-        " " +
-        g_screen_exit_hint;
+        // Content scrolls with its scrollbar; screens close via the [ x ]
+        // control - neither needs a footer hint
+        "";
 
 const std::string g_cancel_hint =
-        "[space, esc] to cancel";
+        // Cancelling is done via [ cancel ] context pins, the [ x ]
+        // close control, or the device back button - there is no esc
+        // action bar button, and no key hint text
+        "";
 
 const std::string g_confirm_hint =
-        "[space, esc, enter] to continue";
-
-const std::string g_confirm_drop_hint =
-        "[enter] to confirm";
+        // Tapping the screen sends enter, and the action bar has esc
+        "tap to continue";
 
 const std::string g_any_key_hint =
-        "[any key] to continue";
+        "tap to continue";
 
 const std::string g_yes_or_no_hint =
-        "[y/n]";
+        // Yes/no queries show tappable [ yes ] / [ no ] buttons after the
+        // question instead of a key hint (see msg_log)
+        "";
 
 const std::string g_direction_query =
         "Which direction?";
@@ -63,6 +60,9 @@ const std::string g_shock_prevent_cmd =
 
 const std::string g_fire_prevent_cmd =
         "Fire is spreading!";
+
+const std::string g_burning_prevent_attack_ranged =
+        "Not while burning.";
 
 const std::string g_mon_disappear =
         "suddenly disappears!";

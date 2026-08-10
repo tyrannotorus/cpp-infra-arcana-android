@@ -1,67 +1,99 @@
-# Guide for building Infra Arcana
+# Infra Arcana (Android)
 
-## Fetching the source code
+## Description
 
-Clone the IA repository on GitLab:
+Infra Arcana (Android) is a native Android port of [Infra Arcana](https://gitlab.com/martin-tornqvist/ia),
+Martin Törnqvist's Lovecraftian horror roguelike, vendored at v23.0.0 and rebuilt for touch.
+It runs the original game as a native SDL2 app with gesture controls, a mobile action bar,
+and a renderer reworked for phone and tablet GPUs.
 
-    https://gitlab.com/martin-tornqvist/ia
+## User Disclaimer
 
-## Which branch should I build?
-**develop** - If you want to try out new features early (the develop branch should be relatively stable and bug free, feel free to open issues if you encounter bugs or crashes).
+Infra Arcana (Android) is shared free with the roguelike community and provided **as-is, without any
+warranty**. It is an independent personal-use app; use it at your own risk. The author accepts no
+liability for any damage to your device when it melts from awesomeness.
 
-**tags (v15.0, v16.0, etc)** - If you want to build one of the official releases (note that the build method may be very different for older versions).
+## Dev Disclaimer
 
-## Building Infra Arcana
+While I am an experienced developer, note this is a personal-use project that's been human-directed
+as far as top-down architecture but 100% slop-coded. Thus beware when forking. Here be dragons.
 
-Infra Arcana is built with [CMake](https://cmake.org/), which is a build system generator. CMake can generate GNU Makefiles, Code::Blocks projects, Visual Studio solutions, etc for many different platforms. Look for an online tutorial on how to use CMake (some pointers are given below).
+## Supported Platforms
 
-This game uses SDL2, SDL2_image, and SDL_mixer. There are two ways to include these dependencies:
-* Use the system installation of SDL on Linux, or use the bundled prebuilt version in Windows
-* Build the bundled SDL source code and link it statically into the game binary.
+- **arm64-v8a** — modern Android phones and tablets
+- **armeabi-v7a** — older 32-bit devices
+- **x86_64** — emulators
+- I have no other devices to test with. Send me one! :)
 
-The first method is the default behavior, it will be used if nothing else is specified. Buiding SDL from source and linking it statically is enabled via the CMake option "IA_BUILD_STATIC_SDL" (use -DIA_BUILD_STATIC_SDL=ON when running cmake to configure this mode). The "official" releases of the game are built with SDL statically linked, so there is no need to install any SDL dependencies to play those releases.
+## Supported Firmware
 
-### Unix/Linux/macOS
-You need CMake and build tools (e.g. GNU Make + gcc). Also you need dependencies to SDL2, SDL2-image, and SDL2-mixer (unless you want to use the option to build the bundled SDL source code).
+- Android 7.0 (Nougat, API 24) and newer. Built against Android 15 (API 35).
 
-To install dependencies on Debian, Ubuntu and other DEB-based systems, try:
+## Controls
 
-    apt install build-essential cmake
-    
-    # Also, if using system installation of SDL (default method):
-    apt install libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0
+| Gesture | Action |
+|---|---|
+| Swipe (8 directions) | Move |
+| Tap | Enter (confirm/select) |
+| Hold briefly, then drag | Look: pans the map with the highlighted center tile described live (a quick flick is a move instead) |
+| Back button | Escape |
+| Hamburger button | In-game menu: Actions, Video, Audio, Input, Gameplay, Tome of Wisdom, Quit |
 
-(Or whatever versions of the SDL2 libraries are available.)
+## APK Releases
 
-On Fedora and other RPM-based systems, try:
+- Get them here!
+  https://github.com/tyrannotorus/cpp-infra-arcana-android/releases
 
-    dnf install g++ make cmake
-    
-    # Also, if using system installation of SDL (default method):
-    dnf install SDL2 SDL2_image SDL2_mixer
+## Build
 
-On macOS, using [Homebrew](https://brew.sh/):
+    cd android && ./gradlew assembleStaging
+    # -> android/app/build/outputs/apk/staging/app-staging.apk
 
-    brew install cmake
-    
-    # Also, if using system installation of SDL (default method):
-    brew install sdl2 sdl2_image sdl2_mixer
+Toolchain pins: Gradle 8.14.3 · AGP 8.7.3 · compileSdk/targetSdk 35 · minSdk 24 ·
+NDK 28.0.13004108 · CMake 3.22.1. The Android SDK/NDK components install on demand
+via `sdkmanager`; everything else (SDL2, SDL2_image, SDL2_mixer, game data) is
+vendored in-tree, so there are no other dependencies to fetch.
 
-Now you can build IA (stand in the root of the IA repo and run these commands):
+Staging builds are debug-signed. Release builds (`./gradlew assembleRelease`) are
+signed only if an `android/keystore.properties` (gitignored) provides a keystore:
 
-    mkdir -p build && cd build && cmake .. && make ia
+    storeFile=/path/to/release.keystore
+    storePassword=...
+    keyAlias=release
+    keyPassword=...
 
-Alternatively, you can build the bundled SDL source code and link it statically:
+## Releasing
 
-    mkdir build && cd build && cmake -DIA_BUILD_STATIC_SDL=ON .. && make ia
+Tag the commit `vMAJOR.MINOR.PATCH.BUILD` (e.g. `v23.0.0.13`), then draft and publish a
+GitHub release for it. CI builds the release APK, stamps the version from the tag, signs
+it with the release key held in repository secrets (`KEYSTORE_BASE64`,
+`KEYSTORE_PASSWORD`, `KEY_PASSWORD`; key alias `release`), and attaches it to the release.
 
-### Windows
-You need CMake, and some IDE or build tools of your choice (such as [Code::Blocks](http://www.codeblocks.org), or [Visual Studio](https://www.visualstudio.com/)).
+## How the port works
 
-Run CMake. If you use the graphical interface, then for "Where is the source code?" select the root folder of the ia repo (NOT the "src" folder), and for "Where to build the binaries?" select a folder called "build" in the ia repo (the "build" folder may not actually exist yet, but it doesn't matter, just specify this path). Run "Configure" and "Generate".
+- **No new dependencies:** SDL2 2.30.9, SDL2_image 2.8.2 and SDL2_mixer 2.8.0 are built
+  as shared libraries from the sources IA already vendors in `third_party/SDL/src/`
+  (PNG via stb_image, OGG via stb_vorbis). SDL's Java glue (`SDLActivity`) is sourced
+  directly from the vendored `SDL2-2.30.9/android-project/` tree.
+- **Android project:** `android/` (Gradle Kotlin DSL); native build via
+  `android/app/src/main/jni/CMakeLists.txt`, which compiles all of `src/*.cpp` into
+  `libmain.so` (`SDL_main` is provided by force-including `SDL_main.h` on `main.cpp`).
+- **Assets:** the whole `installed_files/` tree is packed into the APK; at first run
+  `jni/android_bootstrap.cpp` chdirs to internal storage and extracts it (driven by a
+  build-time sha256 manifest, re-extracts on content change), so the game's
+  cwd-relative data paths work unmodified. Saves go to SDL's pref path as on desktop.
 
-You may need to set up some system environment variables to fix errors, depending on which type of project you are generating.
+## License
 
-After running CMake, if everything went fine, the project (of the type that you selected) should be available in the "build" folder. Open this project and build the "ia" target.
+Infra Arcana is by [Martin Törnqvist](https://gitlab.com/martin-tornqvist/ia) and is
+licensed under the **GNU Affero General Public License v3.0 or later**, as is this port.
+This is an unofficial port, not affiliated with or endorsed by upstream — report issues
+with this port here, never to upstream.
 
-For example, if you generated a Code::Blocks project, then in the drop-down target list (near the top of the screen) select the "ia" target. Build by clicking on the yellow cogwheel, then run the game by clicking on the green arrow.
+### Credits
+
+- **Infra Arcana** by Martin Törnqvist — the game itself: code, art, audio and design.
+  [Homepage](https://sites.google.com/site/infraarcana) ·
+  [Source](https://gitlab.com/martin-tornqvist/ia). AGPL-3.0-or-later.
+- **SDL2 / SDL2_image / SDL2_mixer** — Sam Lantinga and contributors (zlib license), vendored.
+- Per-file asset and library licenses ship with the game data in `installed_files/`.

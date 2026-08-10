@@ -6,21 +6,13 @@
 
 #include "manual.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <fstream>
-#include <memory>
-#include <utility>
 #include <vector>
 
-#include "SDL_keycode.h"
 #include "colors.hpp"
-#include "common_text.hpp"
 #include "debug.hpp"
-#include "draw_box.hpp"
-#include "io.hpp"
-#include "panel.hpp"
-#include "rect.hpp"
-#include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -50,37 +42,12 @@ static std::vector<std::string> read_manual_file()
         return lines;
 }
 
-static std::vector<std::string> format_lines(
-        std::vector<std::string>& raw_lines)
-{
-        std::vector<std::string> formatted_lines;
-
-        for (auto& raw_line : raw_lines) {
-                // Format the line if it does not start with a space
-                const bool should_format_line =
-                        !raw_line.empty() &&
-                        raw_line[0] != ' ';
-
-                if (should_format_line) {
-                        const auto split_line = text_format::split(
-                                raw_line,
-                                panels::w(Panel::info_screen_content));
-
-                        for (const auto& line : split_line) {
-                                formatted_lines.push_back(line);
-                        }
-                }
-                else {
-                        // Do not format line
-                        formatted_lines.push_back(raw_line);
-                }
-        }
-
-        return formatted_lines;
-}
-
+// Sorts the raw file lines into chapters. A chapter header is a delimiter
+// rule, the chapter title, and another delimiter rule.
+// NOTE: The lines are kept RAW (unwrapped) - they are wrapped to the
+// description column when drawn, so that the layout follows the panel.
 static std::vector<ManualPage> init_pages(
-        const std::vector<std::string>& formatted_lines)
+        const std::vector<std::string>& raw_lines)
 {
         std::vector<ManualPage> pages;
 
@@ -88,11 +55,8 @@ static std::vector<ManualPage> init_pages(
 
         const std::string delim(80, '-');
 
-        // Sort the parsed lines into different pages
-        for (size_t line_idx = 0;
-             line_idx < formatted_lines.size();
-             ++line_idx) {
-                if (formatted_lines[line_idx] == delim) {
+        for (size_t line_idx = 0; line_idx < raw_lines.size(); ++line_idx) {
+                if (raw_lines[line_idx] == delim) {
                         if (!current_page.lines.empty()) {
                                 pages.push_back(current_page);
 
@@ -103,16 +67,96 @@ static std::vector<ManualPage> init_pages(
                         ++line_idx;
 
                         // The title is printed on this line
-                        current_page.title = formatted_lines[line_idx];
+                        current_page.title = raw_lines[line_idx];
 
                         // Skip second delimiter
                         line_idx += 2;
+
+                        if (line_idx >= raw_lines.size()) {
+                                break;
+                        }
                 }
 
-                current_page.lines.push_back(formatted_lines[line_idx]);
+                current_page.lines.push_back(raw_lines[line_idx]);
+        }
+
+        // NOTE: The last chapter is not followed by a delimiter - without
+        // this it would be dropped
+        if (!current_page.lines.empty()) {
+                pages.push_back(current_page);
         }
 
         return pages;
+}
+
+// The column that continuation lines of a wrapped manual line are indented
+// to. Body text just starts at the left edge, but a line that starts with
+// spaces is a row of one of the manual's command tables
+// ("   x         DESCRIPTION") - such a row stays readable only if its
+// continuation lines line up with the description column.
+static int hanging_indent(const std::string& line, const int w)
+{
+        const size_t text_start = line.find_first_not_of(' ');
+
+        if ((text_start == std::string::npos) || (text_start == 0)) {
+                return 0;
+        }
+
+        // The gap between the table's key column and its text column
+        const size_t gap = line.find("  ", text_start);
+
+        const size_t indent =
+                (gap == std::string::npos)
+                ? text_start
+                : line.find_first_not_of(' ', gap);
+
+        if (indent == std::string::npos) {
+                return (int)text_start;
+        }
+
+        // Never indent so far that hardly any text fits on a line
+        return std::min((int)indent, w / 2);
+}
+
+// Appends one raw manual line, wrapped to the given width (see
+// hanging_indent). The manual is plain text - no color markup.
+static void append_manual_line(
+        std::vector<std::vector<ColoredString>>& lines,
+        const std::string& raw_line,
+        const int w)
+{
+        if (raw_line.empty() || (w <= 0)) {
+                lines.emplace_back();
+
+                return;
+        }
+
+        const std::string indent(hanging_indent(raw_line, w), ' ');
+
+        std::string rest = raw_line;
+
+        while ((int)rest.size() > w) {
+                // Break at the last space that fits, or hard break a word
+                // too long for the column
+                size_t brk = rest.rfind(' ', w);
+
+                if ((brk == std::string::npos) ||
+                    ((int)brk <= (int)indent.size())) {
+                        brk = (size_t)w;
+                }
+
+                lines.push_back({{rest.substr(0, brk), colors::text()}});
+
+                const size_t next = rest.find_first_not_of(' ', brk);
+
+                if (next == std::string::npos) {
+                        return;
+                }
+
+                rest = indent + rest.substr(next);
+        }
+
+        lines.push_back({{rest, colors::text()}});
 }
 
 // -----------------------------------------------------------------------------
@@ -125,146 +169,57 @@ StateId BrowseManual::id() const
 
 void BrowseManual::on_start()
 {
-        m_raw_lines = read_manual_file();
+        m_pages = init_pages(read_manual_file());
 
-        const auto formatted_lines = format_lines(m_raw_lines);
-
-        m_pages = init_pages(formatted_lines);
-
-        m_browser.reset(m_pages.size());
+        // NOTE: After the pages are set up, so that the entry list exists
+        MenuPageState::on_start();
 }
 
-void BrowseManual::draw()
+std::string BrowseManual::page_title() const
 {
-        draw_box(panels::area(Panel::screen));
+        return "Tome of Wisdom";
+}
 
-        io::draw_text_center(
-                " Browsing manual ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), 0},
-                colors::title(),
-                io::DrawBg::yes,
-                colors::black(),
-                true);  // Allow pixel-level adjustment
+std::string BrowseManual::page_hint() const
+{
+        // Chapters are read beside the list - there is nothing to select,
+        // and the screen closes via the [ x ] control
+        return "";
+}
 
-        io::draw_text_center(
-                " " + common_text::g_screen_exit_hint + " ",
-                Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
-                colors::title(),
-                io::DrawBg::yes,
-                colors::black(),
-                true);  // Allow pixel-level adjustment
+std::vector<MenuPageEntry> BrowseManual::page_entries() const
+{
+        std::vector<MenuPageEntry> entries;
 
-        const int nr_pages = m_pages.size();
+        entries.reserve(m_pages.size());
 
-        const int labels_y0 = 1;
-
-        for (int idx = 0; idx < (int)nr_pages; ++idx) {
-                const bool is_marked = m_browser.y() == idx;
-
-                const int y = labels_y0 + idx;
-
-                auto str =
-                        std::string("(") +
-                        m_browser.menu_keys()[idx] +
-                        std::string(")");
-
-                auto color =
-                        is_marked
-                        ? colors::menu_key_highlight()
-                        : colors::menu_key_dark();
-
-                io::draw_text(
-                        str,
-                        Panel::screen,
-                        {1, y},
-                        color);
-
-                const auto& page = m_pages[idx];
-
-                color =
-                        is_marked
-                        ? colors::menu_highlight()
-                        : colors::menu_dark();
-
-                io::draw_text(
-                        page.title,
-                        Panel::screen,
-                        {5, y},
-                        color);
+        for (const auto& page : m_pages) {
+                entries.push_back({page.title, ""});
         }
+
+        return entries;
 }
 
-void BrowseManual::on_window_resized()
+void BrowseManual::on_entry_selected(const int idx)
 {
-        // const auto formatted_lines = format_lines(raw_lines_);
-
-        // pages_ = init_pages(formatted_lines);
+        // The marked chapter is already shown beside the list - marking a
+        // chapter IS reading it
+        (void)idx;
 }
 
-void BrowseManual::update()
+void BrowseManual::draw_page_content()
 {
-        const auto input = io::read_input();
-
-        const MenuAction action =
-                m_browser.read(
-                        input,
-                        MenuInputMode::scrolling_and_letters);
-
-        switch (action) {
-        case MenuAction::selected: {
-                const auto& page = m_pages[m_browser.y()];
-
-                std::unique_ptr<State> browse_page(
-                        new BrowseManualPage(page));
-
-                states::push(std::move(browse_page));
-        } break;
-
-        case MenuAction::esc:
-        case MenuAction::space: {
-                states::pop();
-        } break;
-
-        default:
-                break;
+        if (m_pages.empty()) {
+                return;
         }
-}
 
-// -----------------------------------------------------------------------------
-// Manual page
-// -----------------------------------------------------------------------------
-StateId BrowseManualPage::id() const
-{
-        return StateId::manual_page;
-}
+        const auto& page = m_pages[m_browser.y()];
 
-void BrowseManualPage::draw()
-{
-        draw_interface();
+        std::vector<std::vector<ColoredString>> lines;
 
-        const int nr_lines_tot = m_page.lines.size();
-
-        const int btm_nr =
-                std::min(
-                        m_top_idx + panels::h(Panel::info_screen_content) - 1,
-                        nr_lines_tot - 1);
-
-        int screen_y = 1;
-
-        for (int i = m_top_idx; i <= btm_nr; ++i) {
-                io::draw_text(
-                        m_page.lines[i],
-                        Panel::screen,
-                        {panels::x0(Panel::info_screen_content), screen_y},
-                        colors::text());
-
-                ++screen_y;
+        for (const auto& raw_line : page.lines) {
+                append_manual_line(lines, raw_line, descr_text_w());
         }
-}
 
-std::string BrowseManualPage::title() const
-{
-        return m_page.title;
+        draw_descr_lines(lines);
 }

@@ -34,11 +34,13 @@
 #include "item_data.hpp"
 #include "item_misc.hpp"
 #include "map.hpp"
+#include "marker.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
 #include "sound.hpp"
+#include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
 #include "terrain_door.hpp"
@@ -301,6 +303,36 @@ static void player_act()
                 if (is_target_adj_to_unseen_cell ||
                     is_new_known_adj_closed_door) {
                         actor::player_state::g_auto_move_dir = Dir::END;
+                }
+
+                return;
+        }
+
+        // A swap or a reload was run from the aim marker, and the turn it
+        // cost has now passed without the player being interrupted - pick
+        // the aim back up on the cell it was left on, rather than making
+        // them target all over again (see MarkerState and the [ swap ] /
+        // [ reload ] pins in marker.cpp).
+        //
+        // NOTE: The fire command is re-issued rather than a marker pushed
+        // directly, so that a swap to a different KIND of weapon opens the
+        // marker that weapon calls for (and so that a firearm left with no
+        // ammo behaves exactly as if fire had been pressed).
+        if (actor::player_state::g_is_aim_marker_pending) {
+                const P aim_pos = actor::player_state::g_aim_marker_pending_pos;
+
+                actor::player_state::g_is_aim_marker_pending = false;
+
+                game_commands::handle(GameCmd::fire);
+
+                // NOTE: The request is left only once the marker is known
+                // to have been pushed (it starts, and consumes the
+                // request, a state cycle later - see states::start). The
+                // command may well decline to open one at all, and a
+                // request left lying around would then be picked up by
+                // some unrelated marker later on.
+                if (states::contains_state(StateId::marker)) {
+                        marker::request_start_pos(aim_pos);
                 }
 
                 return;

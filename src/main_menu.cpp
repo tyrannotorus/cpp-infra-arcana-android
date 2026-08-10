@@ -6,6 +6,8 @@
 
 #include "main_menu.hpp"
 
+#include "menu_page.hpp"
+
 #include <algorithm>
 #include <cstddef>
 #include <memory>
@@ -17,8 +19,10 @@
 #include "audio.hpp"
 #include "audio_data.hpp"
 #include "colors.hpp"
+#include "common_text.hpp"
 #include "config.hpp"
 #include "create_character.hpp"
+#include "credits.hpp"
 #include "draw_box.hpp"
 #include "game.hpp"
 #include "global.hpp"
@@ -38,8 +42,6 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static std::string s_git_sha1_str;
-
 static std::string s_current_quote;
 
 static bool query_overwrite_savefile()
@@ -51,8 +53,6 @@ static bool query_overwrite_savefile()
                 .set_msg("Start a new game?")
                 .setup_menu_mode(
                         {"(Y)es", "(N)o"},
-                        {'y', 'n'},
-                        popup::MenuModeShowCancelHint::no,
                         &choice)
                 .run();
 
@@ -63,9 +63,9 @@ static bool query_overwrite_savefile()
 // Main menu state
 // -----------------------------------------------------------------------------
 MainMenuState::MainMenuState() :
-        m_browser(MenuBrowser(6))
+        m_browser(MenuBrowser(7))
 {
-        m_browser.set_custom_menu_keys({'n', 'r', 't', 'o', 'g', 'e'});
+        m_browser.set_custom_menu_keys({'n', 'r', 't', 'o', 'g', 'c', 'e'});
 }
 
 MainMenuState::~MainMenuState() = default;
@@ -78,7 +78,7 @@ StateId MainMenuState::id() const
 void MainMenuState::draw()
 {
         if (config::is_tiles_mode()) {
-                draw_box(panels::area(Panel::screen));
+                draw_box(panels::screen_box_area());
         }
 
         if (config::is_tiles_mode()) {
@@ -123,6 +123,7 @@ void MainMenuState::draw()
                 "(T)ome of Wisdom",
                 "(O)ptions",
                 "(G)raveyard",
+                "(C)redits",
                 "(E)scape to reality"};
 
         const P screen_dims = panels::dims(Panel::screen);
@@ -220,30 +221,25 @@ void MainMenuState::draw()
                 }
         }
 
-        std::string build_str = version_info::g_version_str + " (";
-
-        if (!s_git_sha1_str.empty()) {
-                build_str += s_git_sha1_str + ", ";
-        }
-
-        build_str += version_info::g_date_str + ")";
-
+        // The version (core version + port build increment), inset by the
+        // standard border content inset (same as the [ x ] control) - the
+        // copyright and license footer lives on the credits page
         io::draw_text_right(
-                " " + build_str + " ",
+                " " + version_info::g_build_version_str + " ",
                 Panel::screen,
-                {panels::x1(Panel::screen) - 1, 0},
+                {panels::screen_box_area().p1.x - g_screen_border_content_inset,
+                 panels::screen_box_area().p0.y},
                 colors::gray());
 
+        // The standard select guidance footer
         io::draw_text_center(
-                std::string(
-                        " " +
-                        version_info::g_copyright_str +
-                        ", " +
-                        version_info::g_license_str +
-                        " "),
+                " " + common_text::g_menu_select_hint + " ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
-                colors::gray());
+                {panels::center_x(Panel::screen), panels::screen_box_area().p1.y},
+                colors::title(),
+                io::DrawBg::yes,
+                colors::black(),
+                true);  // Allow pixel-level adjustment
 
 }  // draw
 
@@ -282,6 +278,15 @@ void MainMenuState::update()
                         }
 
                         audio::fade_out_music();
+
+                        // A new game starts with no menu history: pages must
+                        // not open on the previous game's picks (the marked
+                        // entry is remembered per page title, see
+                        // MenuPageState). NOTE: This is the NEW GAME entry
+                        // point only - stepping back during character
+                        // creation restarts the session too, and must keep
+                        // its memory to return to the entry you picked.
+                        forget_remembered_marked_entries();
 
                         init::init_session();
 
@@ -326,6 +331,11 @@ void MainMenuState::update()
                 } break;
 
                 case 5: {
+                        // Credits
+                        states::push(std::make_unique<CreditsState>());
+                } break;
+
+                case 6: {
                         // Exit
                         states::pop();
                 } break;
@@ -341,10 +351,6 @@ void MainMenuState::update()
 
 void MainMenuState::on_start()
 {
-        const auto sha1_result = version_info::read_git_sha1_str_from_file();
-
-        s_git_sha1_str = sha1_result.value_or("");
-
         s_current_quote = messages::get_random_menu_quote();
 
         // Do not play the music in debug mode (it gets extremely repetitive).

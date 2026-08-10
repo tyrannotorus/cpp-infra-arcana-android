@@ -14,17 +14,23 @@
 #include "audio_data.hpp"
 #include "browser.hpp"
 #include "query.hpp"
+#include "rect.hpp"
 #include "state.hpp"
 
 namespace popup
 {
-enum class AddToMsgHistory
-{
-        no,
-        yes
-};
+// The screen gui cell area of the most recently drawn popup box (used for
+// closing the popup when tapping outside it on touch devices). Has negative
+// coordinates if no popup has been drawn.
+R box_area();
 
-enum class MenuModeShowCancelHint
+// Tappable confirm/cancel button areas of the most recently drawn popup
+// (gui cells; negative coordinates when not present)
+R ok_button_area();
+
+R cancel_button_area();
+
+enum class AddToMsgHistory
 {
         no,
         yes
@@ -54,10 +60,11 @@ public:
 
         Popup& set_msg(const std::string& msg);
 
+        // NOTE: A "(x)" style key prefix in a choice string is purely
+        // stylistic - entries are engaged by tapping (or swipe + confirm),
+        // never by letter keys, so duplicate letters are fine.
         Popup& setup_menu_mode(
                 const std::vector<std::string>& choices,
-                const std::vector<char>& menu_keys,
-                MenuModeShowCancelHint show_cancel_hint,
                 int* menu_choice_result);
 
         Popup& setup_number_query_mode(
@@ -65,6 +72,10 @@ public:
                 int* number_result);
 
         Popup& set_sfx(audio::SfxId sfx);
+
+        // The pointed-to flag is set to true if the popup is closed via
+        // escape (the [ x ] control / back button) instead of confirmed
+        Popup& set_cancelled_result(bool* cancelled_result);
 
 private:
         void copy_common_config(const PopupState* from, PopupState* to) const;
@@ -103,6 +114,10 @@ protected:
         std::string m_msg {};
         audio::SfxId m_sfx {audio::SfxId::END};
         AddToMsgHistory m_add_to_msg_history;
+
+        // If set, receives true when the popup is closed via escape (the
+        // [ x ] control / back button) rather than confirmed
+        bool* m_cancelled_result {nullptr};
 };
 
 class MsgPopupState : public PopupState
@@ -127,14 +142,14 @@ public:
 
         void update() override;
 
+        bool try_tap(const P& logical_px) override;
+
 private:
         friend class Popup;
 
         void on_start_specific() override;
 
         std::vector<std::string> m_menu_choices {};
-        std::vector<char> m_menu_keys {};
-        MenuModeShowCancelHint m_show_cancel_hint {MenuModeShowCancelHint::no};
         int* m_menu_choice_result {nullptr};
         MenuBrowser m_browser {};
 };

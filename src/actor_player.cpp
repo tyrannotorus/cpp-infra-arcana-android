@@ -926,6 +926,11 @@ void Actor::interrupt_actions(const ForceInterruptActions is_forced)
         player_state::g_wait_turns_left = -1;
 
         player_state::g_auto_move_dir = Dir::END;
+
+        // Something happened during the turn that a swap or a reload from
+        // the aim marker cost - do not put the player back behind the
+        // sights, give them a normal turn to react with
+        player_state::g_is_aim_marker_pending = false;
 }
 
 item::Wpn* Actor::make_kick_wpn(const Actor& mon_kicked) const

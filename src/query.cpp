@@ -10,9 +10,12 @@
 #include <string>
 
 #include "SDL_keycode.h"
+#include "colors.hpp"
 #include "config.hpp"
+#include "context_pins.hpp"
 #include "game_commands.hpp"
 #include "io.hpp"
+#include "msg_log.hpp"
 #include "popup.hpp"
 #include "state.hpp"
 
@@ -47,11 +50,25 @@ void wait_for_key_press()
 }
 
 BinaryAnswer yes_or_no(
-        std::optional<char> key_for_special_event,
+        std::optional<SpecialChoice> special_choice,
         const AllowSpaceCancel allow_space_cancel)
 {
         if (!s_is_inited || config::is_bot_playing()) {
                 return BinaryAnswer::yes;
+        }
+
+        // Show tappable answer pins above the action bar (tapping a pin
+        // sends the corresponding key)
+        msg_log::set_waiting_query(true);
+
+        context_pins::add("yes", 'y', colors::menu_highlight());
+        context_pins::add("no", 'n', colors::menu_dark());
+
+        if (special_choice) {
+                context_pins::add(
+                        special_choice->label,
+                        special_choice->key,
+                        colors::menu_dark());
         }
 
         states::draw();
@@ -63,8 +80,8 @@ BinaryAnswer yes_or_no(
                 input = io::read_input();
 
                 const bool is_special_key_pressed =
-                        key_for_special_event.has_value() &&
-                        (input.key == key_for_special_event.value());
+                        special_choice.has_value() &&
+                        (input.key == special_choice->key);
 
                 const bool is_canceled_with_space =
                         (input.key == SDLK_SPACE) &&
@@ -79,8 +96,11 @@ BinaryAnswer yes_or_no(
                 }
         }
 
-        if (key_for_special_event.has_value() &&
-            (input.key == key_for_special_event.value())) {
+        msg_log::set_waiting_query(false);
+        context_pins::clear();
+
+        if (special_choice.has_value() &&
+            (input.key == special_choice->key)) {
                 return BinaryAnswer::special;
         }
         else if (input.key == 'y') {
@@ -205,8 +225,22 @@ Dir dir(const AllowCenter allow_center)
                 return Dir::END;
         }
 
+        // The direction is answered by swiping - offer a tappable cancel
+        // pin (there is deliberately no escape action bar button)
+        msg_log::set_waiting_query(true);
+
+        context_pins::add(
+                "cancel",
+                (char)SDLK_ESCAPE,
+                colors::menu_dark());
+
         states::draw();
         io::update_screen();
+
+        const auto cleanup = []() {
+                msg_log::set_waiting_query(false);
+                context_pins::clear();
+        };
 
         while (true) {
                 const auto input = io::read_input();
@@ -215,31 +249,40 @@ Dir dir(const AllowCenter allow_center)
 
                 switch (game_cmd) {
                 case GameCmd::right:
+                        cleanup();
                         return Dir::right;
 
                 case GameCmd::down:
+                        cleanup();
                         return Dir::down;
 
                 case GameCmd::left:
+                        cleanup();
                         return Dir::left;
 
                 case GameCmd::up:
+                        cleanup();
                         return Dir::up;
 
                 case GameCmd::down_right:
+                        cleanup();
                         return Dir::down_right;
 
                 case GameCmd::up_right:
+                        cleanup();
                         return Dir::up_right;
 
                 case GameCmd::down_left:
+                        cleanup();
                         return Dir::down_left;
 
                 case GameCmd::up_left:
+                        cleanup();
                         return Dir::up_left;
 
                 case GameCmd::wait:
                         if (allow_center == AllowCenter::yes) {
+                                cleanup();
                                 return Dir::center;
                         }
                         break;
@@ -249,6 +292,7 @@ Dir dir(const AllowCenter allow_center)
                 }
 
                 if ((input.key == SDLK_SPACE) || (input.key == SDLK_ESCAPE)) {
+                        cleanup();
                         return Dir::END;
                 }
         }

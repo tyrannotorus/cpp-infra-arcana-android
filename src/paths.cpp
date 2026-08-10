@@ -292,6 +292,11 @@ std::string images_dir()
         return gfx_dir() + "/images/";
 }
 
+std::string icons_dir()
+{
+        return gfx_dir() + "/icons/";
+}
+
 std::string logo_img_path()
 {
         return images_dir() + "/main_menu_logo.png";

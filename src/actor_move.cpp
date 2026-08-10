@@ -29,6 +29,7 @@
 #include "map.hpp"
 #include "map_parsing.hpp"
 #include "msg_log.hpp"
+#include "pickup.hpp"
 #include "player_bon.hpp"
 #include "pos.hpp"
 #include "property.hpp"
@@ -103,30 +104,6 @@ static void player_displace_allied_mon(actor::Actor& mon, const P& new_mon_pos)
         }
 
         mon.m_pos = new_mon_pos;
-}
-
-static void player_walk_on_item(item::Item* const item)
-{
-        if (!item) {
-                return;
-        }
-
-        // Only print the item name if the item will not be "found" by stepping
-        // on it, otherwise there would be redundant messages, e.g. "A Muddy
-        // Potion." --> "I have found a Muddy Potion!"
-        if ((item->data().xp_on_found <= 0) || item->data().is_found) {
-                std::string item_name =
-                        item->name(
-                                ItemNameType::plural,
-                                ItemNameInfo::yes,
-                                ItemNameAttackInfo::main_attack_mode);
-
-                item_name = text_format::first_to_upper(item_name);
-
-                msg_log::add(item_name + ".");
-        }
-
-        item->discover();
 }
 
 static void print_corpses_at_player_msgs()
@@ -399,7 +376,7 @@ static void move_player_non_center_direction(const P& target)
 
                 player.m_pos = target;
 
-                player_walk_on_item(map::g_items.at(player.m_pos));
+                item_pickup::print_item_at_player_msg();
 
                 print_corpses_at_player_msgs();
 

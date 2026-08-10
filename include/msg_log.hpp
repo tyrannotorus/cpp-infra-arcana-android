@@ -16,6 +16,8 @@
 #include "info_screen_state.hpp"
 #include "state.hpp"
 
+struct P;
+
 namespace io
 {
 enum class GraphicsCycle;
@@ -115,11 +117,34 @@ namespace msg_log
 {
 inline constexpr size_t g_nr_log_lines = 3;
 
-const std::string g_more_str = "[space]";
+// Tapping the screen confirms "more" prompts (a tap sends the confirm
+// key). Styled like a context pin, and drawn on an own row below the
+// messages - it stays with the text it is holding, unlike the pins, which
+// live down by the action bar (see context_pins).
+const std::string g_more_str = "[ tap to continue ]";
 
 void init();
 
 void draw();
+
+// Whether the log is currently waiting for input (a "more" prompt or a
+// query) - its content must then not be overwritten
+bool is_waiting_prompt();
+
+// Whether a "more" prompt specifically is waiting. NOTE: This is NOT the
+// same as is_waiting_prompt: a "more" prompt is answered by tapping and
+// nothing else, while a QUERY may well be answered by a gesture - the
+// direction query (see query::dir) is answered by swiping.
+bool is_waiting_more_prompt();
+
+// Marks that a log query is waiting for an answer (see query::yes_or_no),
+// so that the query text is not overwritten (see is_waiting_prompt)
+void set_waiting_query(bool waiting);
+
+// NOTE: The tappable [ action ] pins accompanying the messages are added
+// through context_pins - they are drawn on top of the action bar, not
+// here. The log only decides WHEN they go stale: clearing it, or adding a
+// message, drops the pins that belonged to the previous context.
 
 void on_player_turn_start();
 
@@ -162,13 +187,9 @@ public:
 
         void draw() override;
 
-        void update() override;
-
         StateId id() const override;
 
 private:
-        void init_top_btm_line_numbers();
-
         std::string title() const override;
 
         InfoScreenType type() const override
@@ -176,8 +197,7 @@ private:
                 return InfoScreenType::scrolling;
         }
 
-        // NOTE: m_top_idx is in InfoScreenState.
-        int m_btm_idx {0};
+        ColoredString content_line(int line_idx) const override;
 
         std::vector<Msg> m_history {};
 

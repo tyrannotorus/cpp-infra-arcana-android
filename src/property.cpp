@@ -2055,7 +2055,7 @@ bool Burning::allow_pray(Verbose verbose) const
 bool Burning::allow_attack_ranged(const Verbose verbose) const
 {
         if (actor::is_player(m_owner) && (verbose == Verbose::yes)) {
-                msg_log::add("Not while burning.");
+                msg_log::add(common_text::g_burning_prevent_attack_ranged);
         }
 
         return false;
@@ -2168,11 +2168,10 @@ int Paralyzed::ability_mod(const AbilityId ability) const
 void Paralyzed::on_applied()
 {
         if (actor::is_player(m_owner)) {
-                item::Explosive* const explosive =
-                        actor::player_state::g_active_explosive.get();
-
-                if (explosive) {
-                        explosive->on_player_paralyzed();
+                // NOTE: The hook destroys the explosive, so the list is
+                // taken first
+                for (auto* const explosive : item::player_lit_explosives()) {
+                        explosive->drop_lit_at_player(false);
                 }
         }
 }

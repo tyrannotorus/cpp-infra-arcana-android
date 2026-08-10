@@ -29,6 +29,7 @@ std::string gfx_dir();
 std::string fonts_dir();
 std::string tiles_dir();
 std::string images_dir();
+std::string icons_dir();
 
 std::string logo_img_path();
 std::string logo_small_img_path();

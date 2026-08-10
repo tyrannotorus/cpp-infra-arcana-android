@@ -27,3 +27,8 @@ GTAGS
 
 # Temporary files
 tmp/
+
+# Android build outputs (build/ dirs are covered by the rule at the top)
+android/.gradle/
+android/app/.cxx/
+android/local.properties

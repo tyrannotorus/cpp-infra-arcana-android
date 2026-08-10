@@ -15,15 +15,21 @@
 #include "colors.hpp"
 #include "debug.hpp"
 #include "game_time.hpp"
+#include "config.hpp"
+#include "context_pins.hpp"
 #include "global.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
+#include "io_internal.hpp"
 #include "map.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "query.hpp"
+#include "rect.hpp"
 #include "saving.hpp"
+#include "state.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -45,9 +51,18 @@ static const int s_max_nr_repeats = 9;
 // "(xN)" where N is guaranteed to be a single digit, see above.
 static const int s_repeat_str_len = 4;
 
-static const int s_space_reserved_for_more_prompt = (int)msg_log::g_more_str.size() + 1;
-
 static bool s_is_waiting_more_pompt = false;
+
+// A log query (see query::yes_or_no) is waiting for an answer - the log
+// content must not be overwritten while this is set.
+static bool s_is_waiting_query = false;
+
+// NOTE: The tappable [ action ] pins that used to trail the messages here
+// are their own thing now, drawn on top of the action bar instead (see
+// context_pins) - within reach of the thumb, rather than at the far top of
+// the screen. What remains here is their LIFETIME: a pushed pin belongs to
+// the context of the messages it was added with, so adding a message or
+// clearing the log drops the pins along with it.
 
 // When the message log is cleared, the current messages fade out. New messages will interrupt the
 // fading and remove the messages immediately. This tracks the state of the fade mechanism.
@@ -128,15 +143,13 @@ static int worst_case_msg_w_for_line_nr(
         const int line_nr,
         const std::string& text)
 {
-        const int space_reserved_for_more_prompt_this_line =
-                (line_nr == (msg_log::g_nr_log_lines - 1))
-                ? s_space_reserved_for_more_prompt
-                : 0;
+        // NOTE: The "more" prompt is always drawn on an own row below the
+        // messages - no line space is reserved
+        (void)line_nr;
 
         const int max_w =
                 (int)text.size() +
-                s_repeat_str_len +
-                space_reserved_for_more_prompt_this_line;
+                s_repeat_str_len;
 
         return max_w;
 }
@@ -145,8 +158,7 @@ static int msg_area_w_avail_for_text_part()
 {
         const int w_avail =
                 panels::w(Panel::log) -
-                s_repeat_str_len -
-                s_space_reserved_for_more_prompt;
+                s_repeat_str_len;
 
         return w_avail;
 }
@@ -190,61 +202,41 @@ static std::string convert_to_frenzied_str(const std::string& str)
         return frenzied_str;
 }
 
-static void draw_line(
-        const std::vector<Msg>& line,
-        const Panel panel,
-        const P& pos)
+// The log content overlays the top of the screen, with each row aligned
+// horizontally towards the action bar's button side (upper left or upper
+// right corner).
+static bool is_right_aligned()
 {
-        const int shade_pct =
-                (s_msg_fade_state == MsgFadeState::is_fading)
-                ? (100 - s_msg_fade_pct)
-                : 0;
-
-        for (const Msg& msg : line) {
-                io::draw_text(
-                        msg.text_with_repeats(),
-                        panel,
-                        pos.with_x_offset(msg.x_pos()),
-                        msg.color().shaded(shade_pct),
-                        io::DrawBg::no);
-        }
+        // The bar's buttons flow from the corner opposite the side stats
+        // panel (see action_bar)
+        return config::is_side_panel_left();
 }
 
-static void draw_more_prompt()
+// Width in gui cells of a line's messages
+static int line_w(const MsgLine& line)
 {
-        int more_x0 = 0;
-
-        size_t line_nr = find_current_line_nr();
-
-        const auto& line = s_lines[line_nr];
-
-        if (!line.messages.empty()) {
-                const auto& last_msg = line.messages.back();
-
-                more_x0 = x_after_msg(&last_msg);
-
-                // If this is not the last line, the "more" prompt text may be moved to the
-                // beginning of the next line if it does not fit on the current line. For the last
-                // line however, the "more" text MUST fit on the line (handled when adding
-                // messages).
-                if (line_nr != (msg_log::g_nr_log_lines - 1)) {
-                        const int more_x1 = more_x0 + (int)msg_log::g_more_str.size() - 1;
-
-                        if (more_x1 >= panels::w(Panel::log)) {
-                                more_x0 = 0;
-                                ++line_nr;
-                        }
-                }
+        if (line.messages.empty()) {
+                return 0;
         }
 
-        ASSERT((more_x0 + (int)msg_log::g_more_str.size()) <= (panels::w(Panel::log)));
+        return x_after_msg(&line.messages.back()) - 1;
+}
 
-        io::draw_text(
+// Width in gui cells of the trailing content following the newest line
+// (the "more" prompt)
+static int trailing_w()
+{
+        return (int)msg_log::g_more_str.size();
+}
+
+static void draw_trailing(const P& px_pos)
+{
+        io::draw_text_at_px(
                 msg_log::g_more_str,
-                Panel::log,
-                {more_x0, (int)line_nr},
+                px_pos,
                 colors::msg_more(),
-                io::DrawBg::no);
+                io::DrawBg::no,
+                colors::black());
 }
 
 static void on_msg_not_fit_on_line(
@@ -335,6 +327,8 @@ void init()
         s_history_size = 0;
         s_history_count = 0;
         s_is_waiting_more_pompt = false;
+        s_is_waiting_query = false;
+        context_pins::clear();
         s_msg_fade_state = MsgFadeState::allow_start_fade;
         s_msg_fade_pct = 0;
         s_msg_fade_turn_count = 0;
@@ -342,23 +336,92 @@ void init()
 
 void draw()
 {
-        io::cover_panel(Panel::log);
+        // NOTE: The log is an overlay on top of the fullscreen map - only
+        // the text itself covers the map (each text cell has a black
+        // background), so the map stays visible where the log is empty.
+        //
+        // The content overlays the top of the screen, with each row
+        // aligned horizontally towards the action bar's button side. The
+        // top of the screen is for READING - the actions that go with what
+        // is read are pins down by the bar (see context_pins).
 
-        int y = 0;
+        int nr_lines = 0;
 
-        for (const auto& line : s_lines) {
-                if (line.messages.empty()) {
-                        break;
+        while ((nr_lines < (int)msg_log::g_nr_log_lines) &&
+               !s_lines[nr_lines].messages.empty()) {
+                ++nr_lines;
+        }
+
+        const bool has_trailing = s_is_waiting_more_pompt;
+
+        if ((nr_lines == 0) && !has_trailing) {
+                return;
+        }
+
+        io::set_display_for_panel(Panel::log);
+
+        const int cell_w = config::gui_cell_px_w();
+        const int cell_h = config::gui_cell_px_h();
+
+        const R panel_px = io::panel_logical_px_rect(Panel::log);
+
+        // The "more" prompt goes on an own row below the newest message
+        // line, clearly set apart from the text
+        const int trailing_w_cells = has_trailing ? trailing_w() : 0;
+
+        const int nr_rows = nr_lines + (has_trailing ? 1 : 0);
+
+        const int shade_pct =
+                (s_msg_fade_state == MsgFadeState::is_fading)
+                ? (100 - s_msg_fade_pct)
+                : 0;
+
+        auto row_px_y = [&](const int row) {
+                return panel_px.p0.y + (row * cell_h);
+        };
+
+        auto row_px_x0 = [&](const int w_cells) {
+                if (is_right_aligned()) {
+                        return panel_px.p1.x + 1 - (w_cells * cell_w);
                 }
 
-                draw_line(line.messages, Panel::log, {0, y});
+                return panel_px.p0.x;
+        };
 
-                ++y;
+        for (int i = 0; i < nr_lines; ++i) {
+                const int x0_px = row_px_x0(line_w(s_lines[i]));
+                const int y_px = row_px_y(i);
+
+                for (const Msg& msg : s_lines[i].messages) {
+                        io::draw_text_at_px(
+                                msg.text_with_repeats(),
+                                {x0_px + (msg.x_pos() * cell_w), y_px},
+                                msg.color().shaded(shade_pct),
+                                io::DrawBg::yes,
+                                colors::black());
+                }
         }
 
-        if (s_is_waiting_more_pompt) {
-                draw_more_prompt();
+        if (has_trailing) {
+                draw_trailing(
+                        {row_px_x0(trailing_w_cells),
+                         row_px_y(nr_rows - 1)});
         }
+}
+
+bool is_waiting_prompt()
+{
+        return s_is_waiting_more_pompt || s_is_waiting_query;
+}
+
+bool is_waiting_more_prompt()
+{
+        return s_is_waiting_more_pompt;
+}
+
+void set_waiting_query(const bool waiting)
+{
+        s_is_waiting_query = waiting;
 }
 
 void on_player_turn_start()
@@ -385,6 +448,9 @@ void on_player_turn_start()
 
 void clear()
 {
+        // Context pins never outlive the log content they belong to
+        context_pins::clear();
+
         if (s_msg_fade_state == MsgFadeState::is_fading) {
                 // Fade out it ongoing, clearing the log has no effect.
                 return;
@@ -463,6 +529,10 @@ void add(
                 // stuff like equip hooks for items).
                 return;
         }
+
+        // New messages invalidate any context pins (the pins belong to
+        // the context of the previous messages)
+        context_pins::clear();
 
         if (str.empty()) {
                 return;
@@ -714,29 +784,17 @@ StateId MsgHistoryState::id() const
         return StateId::message_history;
 }
 
-void MsgHistoryState::init_top_btm_line_numbers()
-{
-        const auto history_size = (int)m_history.size();
-
-        const auto panel_h = panels::h(Panel::info_screen_content);
-
-        m_top_idx = history_size - panel_h;
-        m_top_idx = std::max(0, m_top_idx);
-
-        m_btm_idx = m_top_idx + panel_h;
-        m_btm_idx = std::min(history_size - 1, m_btm_idx);
-}
-
 void MsgHistoryState::on_start()
 {
         m_history = msg_log::history();
 
-        init_top_btm_line_numbers();
+        // Start at the latest messages
+        scroll_to_bottom();
 }
 
 void MsgHistoryState::on_window_resized()
 {
-        init_top_btm_line_numbers();
+        scroll_to_bottom();
 }
 
 std::string MsgHistoryState::title() const
@@ -748,8 +806,11 @@ std::string MsgHistoryState::title() const
         }
         else {
                 // History has content
-                const std::string msg_nr_str_first = std::to_string(m_top_idx + 1);
-                const std::string msg_nr_str_last = std::to_string(m_btm_idx + 1);
+                const std::string msg_nr_str_first =
+                        std::to_string(first_visible_line() + 1);
+
+                const std::string msg_nr_str_last =
+                        std::to_string(last_visible_line() + 1);
 
                 title =
                         "Messages " +
@@ -765,36 +826,12 @@ void MsgHistoryState::draw()
 {
         draw_interface();
 
-        int y = 0;
-
-        for (int i = m_top_idx; i <= m_btm_idx; ++i) {
-                const Msg& msg = m_history[i];
-
-                io::draw_text(
-                        msg.text_with_repeats(),
-                        Panel::info_screen_content,
-                        {0, y},
-                        msg.color(),
-                        io::DrawBg::no);
-
-                ++y;
-        }
+        draw_scrollable_content();
 }
 
-void MsgHistoryState::update()
+ColoredString MsgHistoryState::content_line(const int line_idx) const
 {
-        InfoScreenState::update();
+        const Msg& msg = m_history[line_idx];
 
-        if (states::current_state() != this) {
-                // State has been popped.
-                return;
-        }
-
-        const int history_size = (int)m_history.size();
-
-        const int panel_h = panels::h(Panel::info_screen_content);
-
-        m_btm_idx = std::min(
-                m_top_idx + panel_h - 1,
-                history_size - 1);
+        return {msg.text_with_repeats(), msg.color()};
 }

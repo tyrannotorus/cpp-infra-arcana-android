@@ -18,21 +18,29 @@
 #include "actor_data.hpp"
 #include "actor_items.hpp"
 #include "actor_player_state.hpp"
+#include "actor_see.hpp"
 #include "array2.hpp"
 #include "audio.hpp"
 #include "audio_data.hpp"
+#include "bash.hpp"
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "config.hpp"
+#include "context_pins.hpp"
 #include "create_character.hpp"
 #include "debug.hpp"
 #include "draw_health_bars.hpp"
 #include "draw_map.hpp"
+#include "fade.hpp"
+#include "game_commands.hpp"
 #include "game_over.hpp"
 #include "game_time.hpp"
 #include "init.hpp"
 #include "insanity.hpp"
+#include "inventory.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
+#include "item_data.hpp"
 #include "map.hpp"
 #include "map_builder.hpp"
 #include "map_controller.hpp"
@@ -50,7 +58,9 @@
 #include "rect.hpp"
 #include "saving.hpp"
 #include "terrain.hpp"
+#include "terrain_door.hpp"
 #include "text_format.hpp"
+#include "view.hpp"
 #include "viewport.hpp"
 
 // -----------------------------------------------------------------------------
@@ -66,28 +76,6 @@ static int s_death_overlay_tint = 0;
 static int s_death_overlay_last_update_cycle = 0;
 
 static std::vector<HistoryEvent> s_history_events;
-
-static const std::string s_intro_msg_default =
-        "I stand at the end of a cobbled forest path, before me lies a shunned "
-        "and decrepit old church building. This is the access point to the "
-        "domains of the abhorred \"Cult of Starry Wisdom\". "
-        "I am determined to enter these sprawling catacombs and rob them of "
-        "treasures and knowledge. Somewhere below lies my true destiny, "
-        "an artifact of non-human origin referred to as "
-        "{COLOR_YELLOW}\"The shining Trapezohedron\"{reset_color} "
-        "- a window to all the secrets of the universe!";
-
-static const std::string s_intro_msg_exorcist =
-        "I stand at the end of a cobbled forest path, before me lies a shunned "
-        "and decrepit old church building. This is the access point to the "
-        "domains of the abhorred \"Cult of Starry Wisdom\". "
-        "I am determined to enter these sprawling catacombs and purge them of "
-        "the corruption that dwells within. Somewhere below lies "
-        "an artifact of non-human origin referred to as "
-        "{COLOR_YELLOW}\"The shining Trapezohedron\"{reset_color} "
-        "- rumored to be a window to all the secrets of the universe. "
-        "This must be destroyed, so that none more may be tempted by "
-        "its deceitful promises!";
 
 static const std::vector<std::string> s_win_msg_default = {
         {"As I approach the crystal, an eerie glow illuminates the area. "
@@ -438,28 +426,11 @@ void GameState::on_start()
 
                 game::add_history_event("Started journey");
 
-                if (!config::is_intro_lvl_skipped() &&
-                    !config::is_intro_popup_skipped()) {
-                        io::clear_screen();
-
-                        std::string intro_msg;
-
-                        switch (player_bon::bg()) {
-                        case Bg::exorcist:
-                                intro_msg = s_intro_msg_exorcist;
-                                break;
-
-                        default:
-                                intro_msg = s_intro_msg_default;
-                                break;
-                        }
-
-                        popup::Popup(popup::AddToMsgHistory::yes)
-                                .set_title("The story so far...")
-                                .set_msg(intro_msg)
-                                .run();
-                }
-        }  // namespace game
+                // NOTE: The "The story so far..." intro popup is shown by
+                // IntroStoryState (create_character.cpp) - a character
+                // creation step of its own, so that its [ x ] control can
+                // step BACK to the name entry.
+        }
 
         if (config::is_intro_lvl_skipped() ||
             (m_entry_mode == GameEntryMode::load_game)) {
@@ -517,21 +488,96 @@ void GameState::cycle_graphics(const io::GraphicsCycle cycle)
         }
 }
 
-void GameState::draw()
+// The movement key that steps from the player onto an ADJACENT position -
+// used by the contextual [ open ] button, since a closed door is opened by
+// walking into it (there is no open command)
+static int move_key_towards(const P& adjacent_pos)
+{
+        const P d = adjacent_pos - map::g_player->m_pos;
+
+        if (d.x > 0) {
+                return (d.y < 0)
+                        ? SDLK_KP_9
+                        : ((d.y > 0) ? SDLK_KP_3 : SDLK_KP_6);
+        }
+
+        if (d.x < 0) {
+                return (d.y < 0)
+                        ? SDLK_KP_7
+                        : ((d.y > 0) ? SDLK_KP_1 : SDLK_KP_4);
+        }
+
+        return (d.y < 0) ? SDLK_KP_8 : SDLK_KP_2;
+}
+
+// While the map is manually panned, the cell at the view's centering point
+// (the look "pin") is highlighted - dragging the map IS the look
+// interaction (see GameState::on_map_panned)
+static void draw_look_pin()
+{
+        if (!viewport::is_pan_active()) {
+                return;
+        }
+
+        const P pin_pos = viewport::center_map_pos();
+
+        if (!viewport::is_in_view(pin_pos) ||
+            !map::is_pos_inside_map(pin_pos)) {
+                return;
+        }
+
+        // Corner brackets overlaid on the cell - the cell's content stays
+        // visible under the reticle
+        draw_map::draw_reticle(viewport::to_view_pos(pin_pos));
+}
+
+bool GameState::has_map_display_draw() const
+{
+        // Tile graphics cycling and flash animations only change what is on
+        // the map (see GameState::cycle_graphics, which walks terrain and
+        // actors). The stats panel, the log and the action bar change on
+        // game actions, and those always go through a full draw.
+        return (map::w() > 0);
+}
+
+void GameState::draw_map_display()
 {
         if (map::w() == 0) {
                 return;
         }
 
         if (states::is_current_state(this)) {
-                viewport::show(map::g_player->m_pos);
+                const bool was_panned = viewport::is_pan_active();
+
+                if (viewport::should_auto_center()) {
+                        // If a manual pan was just dropped (the player
+                        // moved, e.g. by a movement swipe while looking
+                        // around), snap the camera back to fully centered
+                        // on the player - even if the player is still
+                        // within the panned view
+                        viewport::show(
+                                map::g_player->m_pos,
+                                was_panned
+                                        ? viewport::ForceCentering::yes
+                                        : viewport::ForceCentering::no);
+                }
         }
 
         draw_map::run();
 
-        map_mode_gui::draw();
+        // NOTE: Only when the game is the current state - the marker states
+        // draw their own (identical looking) marker at the pin position
+        if (states::is_current_state(this)) {
+                draw_look_pin();
+        }
 
-        msg_log::draw();
+        // NOTE: Everything that goes on the MAP display is drawn together,
+        // before the overlays on their own displays. Switching the render
+        // target is a pipeline flush and, on the tile based GPUs mobile
+        // devices use, a resolve of the whole target - so the fewer times
+        // per frame the drawing hops between displays, the better. The
+        // overlays composite on top of the map regardless of the order they
+        // were drawn in; only the composite order decides what covers what.
 
         // NOTE: This must be drawn BEFORE life bars and other such overlay
         // graphics - otherwise the life bars will flash as well.
@@ -553,9 +599,184 @@ void GameState::draw()
                         s_death_overlay_tint = std::max(min_tint, s_death_overlay_tint - 10);
                 }
 
+                io::set_display_for_panel(Panel::map);
+
                 io::draw_rectangle_filled_mod_blending(
                         io::gui_to_px_rect(panels::area(Panel::map)),
                         colors::red().tinted(s_death_overlay_tint));
+        }
+}
+
+void GameState::draw()
+{
+        if (map::w() == 0) {
+                return;
+        }
+
+        draw_map_display();
+
+        map_mode_gui::draw();
+
+        msg_log::draw();
+}
+
+void GameState::on_map_panned()
+{
+        // Dragging the map IS the look interaction: describe the cell at
+        // the view's centering point (the look "pin"). Looking is free -
+        // no game time passes.
+        if (msg_log::is_waiting_prompt()) {
+                // The log is waiting for input (a "more" prompt or a yes/no
+                // question) - do not wipe it
+                return;
+        }
+
+        const P pin_pos = viewport::center_map_pos();
+
+        if (!map::is_pos_inside_map(pin_pos)) {
+                return;
+        }
+
+        msg_log::clear();
+
+        view::print_location_info_msgs(pin_pos);
+
+        // A visible monster at the pin can be described in detail - offer
+        // it via a context pin (sends the view key)
+        const actor::Actor* const actor = map::living_actor_at(pin_pos);
+
+        const bool is_visible_mon_at_pin =
+                actor &&
+                !actor::is_player(actor) &&
+                actor::can_player_see_actor(*actor);
+
+        if (is_visible_mon_at_pin) {
+                context_pins::add("describe", game_commands::view_key());
+        }
+
+        // Context-sensitive actions for the pinned cell. Each button sends
+        // the key of a command whose handler acts on the pin when it rests
+        // on an adjacent cell (see close::player_try_close_or_jam and
+        // bash::run) - except [ open ], which sends the movement key
+        // towards the door, since walking into a door IS how it is opened.
+        // There is NO "close door" action bar button - this is THE touch
+        // path for closing and jamming doors (the on-screen keyboard 'c'
+        // with its direction query remains as a fallback), nor a "disarm"
+        // one; kicking does have a bar button, and keeps it. NOTE: Hidden
+        // (secret) doors and undiscovered traps must not be revealed by
+        // the buttons.
+        const bool is_pin_adjacent =
+                pin_pos.is_adjacent(map::g_player->m_pos) &&
+                (pin_pos != map::g_player->m_pos);
+
+        if (is_pin_adjacent && map::g_seen.at(pin_pos)) {
+                const auto* const terrain = map::g_terrain.at(pin_pos);
+
+                if ((terrain->id() == terrain::Id::door) &&
+                    !terrain->is_hidden()) {
+                        const auto* const door =
+                                static_cast<const terrain::Door*>(terrain);
+
+                        if (door->is_open()) {
+                                context_pins::add(
+                                        "close",
+                                        game_commands::close_key());
+                        }
+                        else {
+                                context_pins::add(
+                                        "open",
+                                        move_key_towards(pin_pos));
+
+                                if ((door->type() !=
+                                     terrain::DoorType::metal) &&
+                                    map::g_player->m_inv
+                                            .has_item_in_backpack(
+                                                    item::Id::iron_spike)) {
+                                        // A closed door can be jammed shut
+                                        // with an iron spike (the close
+                                        // command handles it)
+                                        context_pins::add(
+                                                "jam",
+                                                game_commands::close_key());
+                                }
+                        }
+                }
+
+                // A fountain is drunk from by walking into it (there is no
+                // drink command), so this sends the movement key towards
+                // it, the same way [ open ] does for a door. NOTE: A
+                // dried-up one gets no pin - the pin would promise a drink
+                // that bumping only answers with "the fountain is
+                // dried-up". That reveals nothing: whether it has run dry
+                // is part of the fountain's name and color, and the name
+                // is printed for the pinned cell right above.
+                if (terrain->id() == terrain::Id::fountain) {
+                        const auto* const fountain =
+                                static_cast<const terrain::Fountain*>(
+                                        terrain);
+
+                        if (fountain->has_drinks_left()) {
+                                context_pins::add(
+                                        "drink",
+                                        move_key_towards(pin_pos));
+                        }
+                }
+
+                // A visible monster standing there, or anything that a
+                // kick could do something to - doors, crates, tombs, etc.
+                // Kicking a MONSTER at the pin is the whole point of the
+                // button: it is how a specific target is kicked without
+                // answering the direction query (bash_something_at_pos
+                // kicks a monster at the position before considering the
+                // terrain). NOTE: The hidden check is what keeps a secret
+                // door (kickable, unlike the wall it looks like) from
+                // giving itself away, and the visibility check does the
+                // same for a monster the player cannot see.
+                const bool is_kickable_terrain_at_pin =
+                        !terrain->is_hidden() &&
+                        bash::is_kickable_terrain(*terrain);
+
+                // Bashing a corpse apart is the same command, and this is
+                // the touch path for it (see the "destroying corpses"
+                // hint) - a corpse is neither a living monster nor
+                // terrain, so it needs its own check
+                const bool is_corpse_at_pin =
+                        bash::get_corpse_to_bash_at(pin_pos) != nullptr;
+
+                if (is_visible_mon_at_pin ||
+                    is_kickable_terrain_at_pin ||
+                    is_corpse_at_pin) {
+                        context_pins::add(
+                                "kick",
+                                game_commands::kick_at_look_pin_key());
+                }
+
+                // A revealed trap can be disarmed. NOTE: The hidden check
+                // is what keeps an undiscovered trap from giving itself
+                // away.
+                if ((terrain->id() == terrain::Id::trap) &&
+                    !terrain->is_hidden()) {
+                        context_pins::add(
+                                "disarm",
+                                game_commands::disarm_key());
+                }
+        }
+
+        // NOTE: Throwing is NOT offered here - it is an action bar button
+        // (removed from the pin 2026-08-05). Engaging it while looking
+        // still throws from the pinned cell though: the item selection
+        // screen leaves the pin alone, so cancelling out of it returns to
+        // looking at the same cell, and picking an item puts the throw
+        // marker on that cell (see MarkerState::on_start).
+}
+
+void GameState::on_resume()
+{
+        // Returning from a screen that was opened off the look pin (the
+        // throw item selection) - the pin is still where it was, so put its
+        // actions back on the log row
+        if (viewport::is_pan_active()) {
+                on_map_panned();
         }
 }
 
@@ -636,72 +857,81 @@ void GameState::update()
 // -----------------------------------------------------------------------------
 // Win game state
 // -----------------------------------------------------------------------------
-void WinGameState::draw()
-{
-        const int padding = 9;
-        const int x0 = padding;
-        const int max_w = panels::w(Panel::screen) - (padding * 2);
-
-        int y = 2;
-
-        std::vector<std::string> win_msg;
-
-        switch (player_bon::bg()) {
-        default:
-                win_msg = s_win_msg_default;
-                break;
-        }
-
-        for (const std::string& section_msg : win_msg) {
-                const std::vector<std::string> section_lines =
-                        text_format::split(section_msg, max_w);
-
-                for (const std::string& line : section_lines) {
-                        io::draw_text(
-                                line,
-                                Panel::screen,
-                                {x0, y},
-                                colors::white(),
-                                io::DrawBg::no,
-                                colors::black());
-
-                        ++y;
-                }
-                ++y;
-        }
-
-        ++y;
-
-        const int screen_w = panels::w(Panel::screen);
-        const int screen_h = panels::h(Panel::screen);
-
-        io::draw_text_center(
-                common_text::g_confirm_hint,
-                Panel::screen,
-                {(screen_w - 1) / 2, screen_h - 2},
-                colors::menu_dark(),
-                io::DrawBg::no,
-                colors::black(),
-                false);  // Do not allow pixel-level adjustment
-}
-
-void WinGameState::update()
-{
-        const io::InputData input = io::read_input();
-
-        switch (input.key) {
-        case SDLK_SPACE:
-        case SDLK_ESCAPE:
-        case SDLK_RETURN:
-                states::pop();
-                break;
-
-        default:
-                break;
-        }
-}
-
 StateId WinGameState::id() const
 {
         return StateId::win_game;
+}
+
+bool WinGameState::has_close_button() const
+{
+        // The first section has none - see the class comment
+        return m_section_idx > 0;
+}
+
+std::string WinGameState::page_title() const
+{
+        // None - the ending is read as prose, and a heading over it would
+        // be the game talking over the end of the story
+        return "";
+}
+
+std::string WinGameState::page_text() const
+{
+        // NOTE: One section per page. The switch has no cases of its own
+        // yet - the ending is the same whatever the player was - but it is
+        // where a background's own ending would go.
+        const std::vector<std::string>* win_msg = nullptr;
+
+        switch (player_bon::bg()) {
+        default:
+                win_msg = &s_win_msg_default;
+                break;
+        }
+
+        if (m_section_idx >= win_msg->size()) {
+                ASSERT(false);
+
+                return "";
+        }
+
+        return (*win_msg)[m_section_idx];
+}
+
+void WinGameState::on_confirmed()
+{
+        if ((m_section_idx + 1) < s_win_msg_default.size()) {
+                ++m_section_idx;
+
+                rebuild_text();
+
+                // The next section is read from ITS top, not from however
+                // far the previous one was scrolled
+                set_scroll_px(0);
+
+                return;
+        }
+
+        // The last section has been read - out into the dark, and on to
+        // the game summary waiting underneath (see on_game_over)
+        fade::to_black();
+
+        states::pop();
+
+        // NOTE: This object is now deleted!
+}
+
+void WinGameState::on_cancelled()
+{
+        if (m_section_idx == 0) {
+                // Nothing to step back to, and the ending is not something
+                // to back out of - the [ x ] is not even drawn here (see
+                // has_close_button)
+                return;
+        }
+
+        --m_section_idx;
+
+        rebuild_text();
+
+        set_scroll_px(0);
 }

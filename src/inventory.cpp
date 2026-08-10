@@ -176,7 +176,7 @@ bool Inventory::try_stack_in_backpack(item::Item* item)
         for (size_t i = 0; i < m_backpack.size(); ++i) {
                 auto* const other = m_backpack[i];
 
-                if (other->id() != item->id()) {
+                if (!other->can_stack_with(*item)) {
                         continue;
                 }
 

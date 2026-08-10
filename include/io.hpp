@@ -82,6 +82,38 @@ struct MapDrawObj
         Color color_bg {colors::black()};
 };
 
+// A frame's worth of map cells, resolved to at most one object per cell
+// before anything is handed to SDL.
+//
+// Why this exists: SDL only merges consecutive draws that use the same
+// texture and the same shader (a solid fill and a texture copy are different
+// shaders - see GLES2_RunCommandQueue). Drawing the map cell by cell, each
+// one a background rectangle followed by a tile copy, therefore cost two
+// draw calls and a shader switch PER CELL, and the map layers (terrain,
+// corpses, items, mobiles, monsters) paid that repeatedly for the same cell.
+//
+// Buffering resolves the layers in memory - later layers simply replace
+// earlier ones, as overdrawing did - and then emits the whole map as one
+// pass of backgrounds (grouped by color) and one pass of foregrounds (all
+// out of the tile atlas). That is a handful of draw calls for the map
+// instead of a couple of thousand.
+class MapDrawBuffer
+{
+public:
+        // Sets the view cell area that will be drawn, and clears it
+        void reset(const R& view_area);
+
+        // Stores an object at its view position. Objects that would not draw
+        // anything are ignored, leaving whatever an earlier layer put there.
+        void put(const MapDrawObj& obj);
+
+        void draw() const;
+
+private:
+        R m_view_area {{0, 0}, {-1, -1}};
+        std::vector<MapDrawObj> m_cells {};
+};
+
 struct InputData
 {
         int key {-1};
@@ -199,6 +231,14 @@ void draw_rectangle_filled(
         const Color& color,
         uint8_t alpha = SDL_ALPHA_OPAQUE);
 
+// Fills many rectangles of the SAME color in a single draw call. Filling
+// them one by one queues one draw call each, which is what made the map's
+// cell backgrounds so expensive.
+void draw_rectangles_filled(
+        const std::vector<R>& px_rects,
+        const Color& color,
+        uint8_t alpha = SDL_ALPHA_OPAQUE);
+
 void draw_rectangle_filled_mod_blending(
         R px_rect,
         const Color& color,
@@ -230,6 +270,18 @@ void sleep(uint32_t duration);
 void clear_input();
 
 InputData read_input();
+
+// Shows/hides the on-screen keyboard (the two finger tap gesture toggles
+// it manually - these are for screens that require text entry, e.g. the
+// name entry screen)
+void show_screen_keyboard();
+
+void hide_screen_keyboard();
+
+// Height in logical pixels of the screen area covered by the on-screen
+// keyboard, or 0 when it is down. The window is never resized for the
+// keyboard, so screens with text entry must keep their content above this.
+int screen_keyboard_covered_px_h();
 
 }  // namespace io
 

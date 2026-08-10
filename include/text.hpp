@@ -44,24 +44,46 @@ public:
         Text(std::string str) :
                 m_raw_str(std::move(str)) {}
 
+        // NOTE: The text is compiled lazily, and the result is kept (see
+        // compile) - so everything the compilation depends on must drop it
+        // when changed. The color especially: it is what "{reset_color}"
+        // resolves to, and a text compiled before its color was set would
+        // silently keep resetting to the default (black).
+
         void set_str(std::string str)
         {
                 m_raw_str = std::move(str);
+
+                m_actions.clear();
         }
 
         void append_str(const std::string& str)
         {
                 m_raw_str += str;
+
+                m_actions.clear();
         }
 
         void set_w(const int w)
         {
-                m_max_w = w;
+                if ((size_t)w == m_max_w) {
+                        return;
+                }
+
+                m_max_w = (size_t)w;
+
+                m_actions.clear();
         }
 
         void set_color(const Color& color)
         {
+                if (color == m_default_color) {
+                        return;
+                }
+
                 m_default_color = color;
+
+                m_actions.clear();
         }
 
         void draw(Panel panel, const P& pos);

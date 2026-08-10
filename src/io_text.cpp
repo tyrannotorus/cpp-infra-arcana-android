@@ -13,6 +13,7 @@
 #include "colors.hpp"
 #include "config.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
 #include "io_internal.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
@@ -41,14 +42,41 @@ void draw_text_at_px(
         const int msg_w = (int)str.size();
         const int msg_px_w = msg_w * cell_px_w;
 
-        const SDL_Color sdl_color = color.sdl_color();
-        const SDL_Color sdl_bg_color = bg_color.sdl_color();
-
-        const Color sdl_color_gray = colors::gray();
+        const Color color_gray = colors::gray();
 
         const int screen_px_w = panel_px_w(Panel::screen);
         const int msg_px_x1 = px_pos.x + msg_px_w - 1;
         const bool msg_w_fit_on_screen = msg_px_x1 < screen_px_w;
+
+        // How many characters of the string actually land on the screen -
+        // the drawing stops at the first one that does not
+        int nr_drawn = 0;
+
+        for (int x = px_pos.x;
+             (nr_drawn < msg_w) && (x >= 0) && (x < screen_px_w);
+             x += cell_px_w) {
+                ++nr_drawn;
+        }
+
+        if (nr_drawn == 0) {
+                return;
+        }
+
+        // ONE background rectangle for the whole run. A filled rectangle and
+        // a glyph copy are drawn by different shaders, so alternating them
+        // per character cost two draw calls and a shader switch per
+        // character, and nothing could be merged. With the background out of
+        // the way first, the glyphs are one unbroken run of copies from the
+        // font texture - a single draw call for the whole string.
+        if (draw_bg == io::DrawBg::yes) {
+                const P run_px_dims(
+                        nr_drawn * cell_px_w,
+                        config::gui_cell_px_h());
+
+                io::draw_rectangle_filled(
+                        {px_pos, px_pos + run_px_dims - 1},
+                        bg_color);
+        }
 
         // X position to start drawing dots ("(..)") instead when the message
         // does not fit on the screen horizontally.
@@ -56,21 +84,20 @@ void draw_text_at_px(
         size_t dots_idx = 0;
         const int px_x_dots = screen_px_w - (cell_px_w * 5);
 
-        for (int i = 0; i < msg_w; ++i) {
-                if (px_pos.x < 0 || px_pos.x >= screen_px_w) {
-                        return;
-                }
-
+        for (int i = 0; i < nr_drawn; ++i) {
                 const bool draw_dots =
                         !msg_w_fit_on_screen &&
                         (px_pos.x >= px_x_dots);
 
+                // NOTE: The background is already drawn, but the color is
+                // still what decides which font texture is used (contoured
+                // glyphs on a non-black background)
                 if (draw_dots) {
                         draw_character_at_px(
                                 dots[dots_idx],
                                 px_pos,
-                                sdl_color_gray,
-                                draw_bg,
+                                color_gray,
+                                io::DrawBg::no,
                                 bg_color);
 
                         ++dots_idx;
@@ -80,9 +107,9 @@ void draw_text_at_px(
                         draw_character_at_px(
                                 str[i],
                                 px_pos,
-                                sdl_color,
-                                draw_bg,
-                                sdl_bg_color);
+                                color,
+                                io::DrawBg::no,
+                                bg_color);
                 }
 
                 px_pos.x += cell_px_w;
@@ -97,6 +124,8 @@ void draw_text(
         const DrawBg draw_bg,
         const Color& bg_color)
 {
+        set_display_for_panel(panel);
+
         text.set_color(color);
 
         const P origin_pos = pos;
@@ -141,6 +170,8 @@ void draw_text_center(
         const Color& bg_color,
         const bool is_pixel_pos_adj_allowed)
 {
+        set_display_for_panel(panel);
+
         const int len = (int)str.size();
         const int len_half = len / 2;
         const int x_pos_left = pos.x - len_half;
@@ -167,6 +198,8 @@ void draw_text_right(
         const DrawBg draw_bg,
         const Color& bg_color)
 {
+        set_display_for_panel(panel);
+
         const int x_pos_left = pos.x - (int)str.size() + 1;
 
         P px_pos = gui_to_px_coords(panel, {x_pos_left, pos.y});

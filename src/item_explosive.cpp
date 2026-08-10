@@ -25,7 +25,9 @@
 #include "property_data.hpp"
 #include "property_factory.hpp"
 #include "property_handler.hpp"
+#include "inventory.hpp"
 #include "query.hpp"
+#include "saving.hpp"
 #include "random.hpp"
 #include "sound.hpp"
 #include "terrain.hpp"
@@ -42,6 +44,42 @@
 // -----------------------------------------------------------------------------
 namespace item
 {
+bool Explosive::can_stack_with(const Item& other) const
+{
+        if (!Item::can_stack_with(other)) {
+                return false;
+        }
+
+        // A lit explosive is a thing of its own - never stacked with the
+        // unlit ones it came from, and never with another lit one (each
+        // burns down on its own)
+        return !is_lit() &&
+                !static_cast<const Explosive&>(other).is_lit();
+}
+
+std::string Explosive::name_info_str(const ItemNameIdentified id_type) const
+{
+        (void)id_type;
+
+        return is_lit() ? "(Lit)" : "";
+}
+
+void Explosive::save_hook() const
+{
+        saving::put_int(m_fuse_turns);
+}
+
+void Explosive::load_hook()
+{
+        m_fuse_turns = saving::get_int();
+}
+
+void Explosive::destroy_self()
+{
+        // NOTE: This deletes the item
+        map::g_player->m_inv.remove_item_in_backpack_with_ptr(this, true);
+}
+
 ConsumeItem Explosive::activate(actor::Actor* const actor)
 {
         (void)actor;
@@ -52,17 +90,8 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
                 return ConsumeItem::no;
         }
 
-        const Explosive* const held_explosive =
-                actor::player_state::g_active_explosive.get();
-
-        if (held_explosive) {
-                const std::string name_held =
-                        held_explosive->name(
-                                ItemNameType::a,
-                                ItemNameInfo::none);
-
-                msg_log::add("I am already holding " + name_held + ".");
-
+        if (is_lit()) {
+                // Already burning - there is nothing left to light
                 return ConsumeItem::no;
         }
 
@@ -91,16 +120,47 @@ ConsumeItem Explosive::activate(actor::Actor* const actor)
                 }
         }
 
-        // Make a copy to use as the held ignited explosive.
-        auto* cpy = static_cast<Explosive*>(item::make(data().id, 1));
+        // One is taken from the stack and lit - the lit one is carried on
+        // its own from here (see the class comment). NOTE: Taking it from
+        // the stack may delete THIS object, so everything needed from it
+        // is read first.
+        auto* const lit = static_cast<Explosive*>(item::make(data().id, 1));
 
-        cpy->m_fuse_turns = std_fuse_turns();
+        lit->m_fuse_turns = lit->std_fuse_turns();
 
-        actor::player_state::g_active_explosive.reset(cpy);
+        map::g_player->m_inv.decr_item(this);
 
-        cpy->on_player_ignite();
+        // NOTE: This object may now be deleted!
 
-        return ConsumeItem::yes;
+        map::g_player->m_inv.put_in_backpack(lit);
+
+        lit->on_player_ignite();
+
+        // The stack was already decremented above
+        return ConsumeItem::no;
+}
+
+std::vector<Explosive*> player_lit_explosives()
+{
+        std::vector<Explosive*> lit;
+
+        if (!map::g_player) {
+                return lit;
+        }
+
+        for (auto* const item : map::g_player->m_inv.m_backpack) {
+                if (item->data().type != ItemType::explosive) {
+                        continue;
+                }
+
+                auto* const explosive = static_cast<Explosive*>(item);
+
+                if (explosive->is_lit()) {
+                        lit.push_back(explosive);
+                }
+        }
+
+        return lit;
 }
 
 void Dynamite::on_player_ignite() const
@@ -138,11 +198,13 @@ void Dynamite::on_std_turn_player_hold_ignited()
                 // Fuse has run out
                 msg_log::add("The dynamite explodes in my hand!");
 
-                actor::player_state::g_active_explosive.reset();
+                const P player_pos = map::g_player->m_pos;
+
+                destroy_self();
 
                 // NOTE: This object is now deleted.
 
-                explosion::run(map::g_player->m_pos, ExplType::expl);
+                explosion::run(player_pos, ExplType::expl);
         }
 }
 
@@ -157,17 +219,20 @@ void Dynamite::on_thrown_ignited_landing(const P& p)
         game_time::add_mob(t);
 }
 
-void Dynamite::on_player_paralyzed()
+void Dynamite::drop_lit_at_player(const bool is_deliberate)
 {
-        msg_log::add("The lit Dynamite stick falls from my hand!");
+        msg_log::add(
+                is_deliberate
+                        ? "I put down the lit Dynamite stick."
+                        : "The lit Dynamite stick falls from my hand!");
 
         const int fuse_turns = m_fuse_turns;
 
-        actor::player_state::g_active_explosive.reset();
+        const P p = map::g_player->m_pos;
+
+        destroy_self();
 
         // NOTE: This object is now deleted.
-
-        const P& p = map::g_player->m_pos;
 
         const terrain::Id t_id = map::g_terrain.at(p)->id();
 
@@ -212,11 +277,11 @@ void Molotov::on_std_turn_player_hold_ignited()
         if (m_fuse_turns <= 0) {
                 msg_log::add("The Molotov Cocktail explodes in my hand!");
 
-                actor::player_state::g_active_explosive.reset();
+                const P player_pos = map::g_player->m_pos;
+
+                destroy_self();
 
                 // NOTE: This object is now deleted.
-
-                const P player_pos = map::g_player->m_pos;
 
                 Snd snd(
                         "I hear an explosion!",
@@ -261,15 +326,18 @@ void Molotov::on_thrown_ignited_landing(const P& p)
                 {prop::make(prop::Id::burning)});
 }
 
-void Molotov::on_player_paralyzed()
+void Molotov::drop_lit_at_player(const bool is_deliberate)
 {
-        msg_log::add("The lit Molotov Cocktail falls from my hand!");
-
-        actor::player_state::g_active_explosive.reset();
-
-        // NOTE: This object is now deleted.
+        msg_log::add(
+                is_deliberate
+                        ? "I put down the lit Molotov Cocktail."
+                        : "The lit Molotov Cocktail falls from my hand!");
 
         const P player_pos = map::g_player->m_pos;
+
+        destroy_self();
+
+        // NOTE: This object is now deleted.
 
         Snd snd(
                 "I hear an explosion!",
@@ -305,7 +373,9 @@ void Flare::on_std_turn_player_hold_ignited()
         if (m_fuse_turns <= 0) {
                 msg_log::add("The flare is extinguished.");
 
-                actor::player_state::g_active_explosive.reset();
+                destroy_self();
+
+                // NOTE: This object is now deleted.
         }
 }
 
@@ -320,17 +390,20 @@ void Flare::on_thrown_ignited_landing(const P& p)
         game_time::add_mob(t);
 }
 
-void Flare::on_player_paralyzed()
+void Flare::drop_lit_at_player(const bool is_deliberate)
 {
-        msg_log::add("The lit Flare falls from my hand!");
+        msg_log::add(
+                is_deliberate
+                        ? "I put down the lit Flare."
+                        : "The lit Flare falls from my hand!");
 
         const int fuse_turns = m_fuse_turns;
 
-        actor::player_state::g_active_explosive.reset();
+        const P p = map::g_player->m_pos;
+
+        destroy_self();
 
         // NOTE: This object is now deleted.
-
-        const P& p = map::g_player->m_pos;
 
         const terrain::Id t_id = map::g_terrain.at(p)->id();
 
@@ -363,7 +436,7 @@ void SmokeGrenade::on_std_turn_player_hold_ignited()
         if (m_fuse_turns <= 0) {
                 msg_log::add("The smoke grenade is extinguished.");
 
-                actor::player_state::g_active_explosive.reset();
+                destroy_self();
 
                 // NOTE: This object is now deleted.
         }
@@ -374,15 +447,18 @@ void SmokeGrenade::on_thrown_ignited_landing(const P& p)
         explosion::run_smoke_explosion_at(p, 0);
 }
 
-void SmokeGrenade::on_player_paralyzed()
+void SmokeGrenade::drop_lit_at_player(const bool is_deliberate)
 {
-        msg_log::add("The ignited smoke grenade falls from my hand!");
+        msg_log::add(
+                is_deliberate
+                        ? "I put down the ignited smoke grenade."
+                        : "The ignited smoke grenade falls from my hand!");
 
-        actor::player_state::g_active_explosive.reset();
+        const P p = map::g_player->m_pos;
+
+        destroy_self();
 
         // NOTE: This object is now deleted.
-
-        const P& p = map::g_player->m_pos;
 
         const terrain::Id t_id = map::g_terrain.at(p)->id();
 

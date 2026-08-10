@@ -6,10 +6,15 @@
 
 #include "draw_box.hpp"
 
+#include <string>
+
 #include "config.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
+#include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
+#include "state.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
@@ -214,11 +219,118 @@ static void draw_line_ver(
         io::draw_rectangle({{x3, y0}, {x3, y1}}, color);
 }
 
+static const std::string s_close_button_str = " [ x ] ";
+
+// Gui cell area of the close control text in the top border row, at the
+// corner OPPOSITE the side stats panel (the action button side), slightly
+// inset from the border box corner
+static R close_button_gui_area()
+{
+        const int len = (int)s_close_button_str.size();
+
+        const int inset = g_screen_border_content_inset;
+
+        const auto box = panels::screen_box_area();
+
+        const int y = box.p0.y;
+
+        if (config::is_side_panel_left()) {
+                // Side panel on the left - the control goes top right
+                const int x1 = box.p1.x - inset;
+
+                return {x1 - len + 1, y, x1, y};
+        }
+        else {
+                // Side panel on the right - the control goes top left
+                const int x0 = box.p0.x + inset;
+
+                return {x0, y, x0 + len - 1, y};
+        }
+}
+
+static void draw_close_button()
+{
+        const auto area = close_button_gui_area();
+
+        io::draw_text(
+                s_close_button_str,
+                Panel::screen,
+                area.p0,
+                colors::title(),
+                io::DrawBg::yes,
+                colors::black());
+}
+
 // -----------------------------------------------------------------------------
 // Global namesapce
 // -----------------------------------------------------------------------------
-void draw_box(R border, const Color& color)
+bool screen_has_close_button(const StateId id)
 {
+        switch (id) {
+        case StateId::actions_config:
+        case StateId::browse_highscore_entry:
+        case StateId::browse_spells:
+        case StateId::credits:
+        case StateId::game_menu:
+        case StateId::game_over_summary:
+        case StateId::highscore:
+        case StateId::hint:
+        case StateId::intro_story:
+        case StateId::inventory:
+        case StateId::manual:
+        case StateId::message_history:
+        case StateId::options:
+        case StateId::options_submenu:
+        case StateId::pick_background:
+        case StateId::pick_background_occultist:
+        case StateId::pick_name:
+        case StateId::pick_trait:
+        case StateId::player_character_descr:
+        case StateId::popup:
+        case StateId::query_number:
+        case StateId::remove_trait:
+        case StateId::view_actor:
+        case StateId::view_minimap:
+        case StateId::win_game:
+                return true;
+
+        default:
+                return false;
+        }
+}
+
+R screen_close_button_hit_px_rect()
+{
+        const auto area = close_button_gui_area();
+
+        const P cell(config::gui_cell_px_w(), config::gui_cell_px_h());
+
+        const P p0 = io::gui_to_px_coords(area.p0) - cell;
+
+        const P p1 =
+                io::gui_to_px_coords(area.p1 + 1) - 1 + cell;
+
+        return {p0, p1};
+}
+
+void draw_box(R border, const Color& color, const Panel panel)
+{
+        io::set_display_for_panel(panel);
+
+        // A fullscreen border of a closable screen gets the [ x ] close
+        // control (drawn last, embedded in the top border line). NOTE:
+        // Fullscreen borders span the margin-inset box area - not the
+        // whole screen (see panels::screen_box_area).
+        const State* const state = states::current_state();
+
+        const auto box_area = panels::screen_box_area();
+
+        const bool with_close_button =
+                state &&
+                state->has_close_button() &&
+                (border.p0 == box_area.p0) &&
+                (border.p1 == box_area.p1);
+
         // Convert border from gui coordinates to pixel coordinates
         // NOTE: All coordinates are pixel coordinates from this point
         border = io::gui_to_px_rect(border);
@@ -236,6 +348,10 @@ void draw_box(R border, const Color& color)
                 border.p1 = border.p1 - cell_dims_half;
 
                 io::draw_rectangle(border, color);
+
+                if (with_close_button) {
+                        draw_close_button();
+                }
 
                 return;
         }
@@ -270,4 +386,8 @@ void draw_box(R border, const Color& color)
         // Vertical lines
         draw_line_ver(line_l_p, cell_dims, line_h, color);
         draw_line_ver(line_r_p, cell_dims, line_h, color);
+
+        if (with_close_button) {
+                draw_close_button();
+        }
 }

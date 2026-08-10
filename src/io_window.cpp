@@ -12,6 +12,7 @@
 #include "SDL_video.h"
 #include "config.hpp"
 #include "debug.hpp"
+#include "io_display.hpp"
 #include "io_internal.hpp"
 #include "version.hpp"
 
@@ -272,6 +273,9 @@ void on_window_resized()
 
         panels::init(io::px_to_gui_coords(new_logical_px_dims));
 
+        // The display textures are sized to the screen panel
+        init_displays();
+
         update_rendering_offsets();
 
         states::on_window_resized();
@@ -318,6 +322,8 @@ void update_screen()
         }
 #endif  // NDEBUG
 
+        composite_display_textures();
+
         SDL_RenderPresent(g_sdl_renderer);
 
 #ifndef NDEBUG
@@ -341,9 +347,7 @@ void clear_screen()
         }
 #endif  // NDEBUG
 
-        SDL_SetRenderDrawColor(g_sdl_renderer, 0U, 0U, 0U, 0xFFU);
-
-        SDL_RenderClear(g_sdl_renderer);
+        clear_display_textures();
 }
 
 P get_native_resolution()

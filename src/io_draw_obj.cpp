@@ -14,6 +14,7 @@
 #include "debug.hpp"
 #include "gfx.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
 #include "io_internal.hpp"
 #include "map.hpp"
 #include "panel.hpp"
@@ -25,15 +26,54 @@
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static P map_cell_px_dims()
+{
+        return {config::map_cell_px_w(), config::map_cell_px_h()};
+}
+
+static R map_cell_px_rect(const P& view_pos)
+{
+        const P px_pos = io::map_to_px_coords(Panel::map, view_pos);
+
+        return {px_pos, px_pos + map_cell_px_dims() - 1};
+}
+
 static void draw_filled_rect(const P& view_pos, const Color& color)
 {
-        const auto px_pos = io::gui_to_px_coords(Panel::map, view_pos);
+        io::draw_rectangle_filled(map_cell_px_rect(view_pos), color);
+}
 
-        const auto px_dims =
-                P(config::gui_cell_px_w(),
-                  config::gui_cell_px_h());
+static bool is_drawable(const io::MapDrawObj& obj)
+{
+        return (
+                (obj.tile != gfx::TileId::END) &&
+                (obj.character != 0) &&
+                (obj.character != ' '));
+}
 
-        io::draw_rectangle_filled({px_pos, px_pos + px_dims - 1}, color);
+// Rectangles of one color, filled together in a single draw call
+struct ColoredRects
+{
+        Color color {};
+        std::vector<R> px_rects {};
+};
+
+static std::vector<R>& rects_for_color(
+        std::vector<ColoredRects>& groups,
+        const Color& color)
+{
+        // NOTE: A frame only ever has a handful of distinct background colors
+        // (black for almost everything, plus a few terrain and monster
+        // markers), so a linear search is the right lookup here.
+        for (ColoredRects& group : groups) {
+                if (group.color == color) {
+                        return group.px_rects;
+                }
+        }
+
+        groups.push_back({color, {}});
+
+        return groups.back().px_rects;
 }
 
 // -----------------------------------------------------------------------------
@@ -61,12 +101,7 @@ void draw_map_obj(const MapDrawObj& obj)
         // NOTE: It is not checked here if the object is inside the map, this is
         // the callers responsibility.
 
-        const bool is_drawable =
-                (obj.tile != gfx::TileId::END) &&
-                (obj.character != 0) &&
-                (obj.character != ' ');
-
-        if (!is_drawable) {
+        if (!is_drawable(obj)) {
                 return;
         }
 
@@ -102,6 +137,127 @@ void draw_map_obj(const MapDrawObj& obj)
                 char_obj.draw_bg = DrawBg::yes;
 
                 char_obj.draw();
+        }
+
+        disable_clip_rect();
+}
+
+void MapDrawBuffer::reset(const R& view_area)
+{
+        m_view_area = view_area;
+
+        const size_t nr_cells =
+                (size_t)std::max(0, view_area.w()) *
+                (size_t)std::max(0, view_area.h());
+
+        // NOTE: assign() over the existing storage - the buffer keeps its
+        // allocation from frame to frame
+        m_cells.assign(nr_cells, MapDrawObj());
+}
+
+void MapDrawBuffer::put(const MapDrawObj& obj)
+{
+        if (!is_drawable(obj) || !m_view_area.is_pos_inside(obj.pos)) {
+                return;
+        }
+
+        const P offset = obj.pos - m_view_area.p0;
+
+        m_cells[((size_t)offset.y * (size_t)m_view_area.w()) +
+                (size_t)offset.x] = obj;
+}
+
+void MapDrawBuffer::draw() const
+{
+        if (m_cells.empty()) {
+                return;
+        }
+
+        set_display(Display::map);
+
+        // NOTE: Set ONCE for the whole map, not per cell - a clip rectangle
+        // change is a command of its own, which breaks the run of draws that
+        // SDL would otherwise merge
+        set_clip_rect_to_panel(Panel::map);
+
+        const bool is_tiles = config::is_tiles_mode();
+
+        // Pass 1: the cell backgrounds, one fill call per distinct color
+        std::vector<ColoredRects> bg_groups;
+
+        for (const MapDrawObj& obj : m_cells) {
+                if (!is_drawable(obj)) {
+                        continue;
+                }
+
+                const bool is_filled_rect_char =
+                        !is_tiles && (obj.character == g_filled_rect_char);
+
+                // A filled rectangle "glyph" IS its own background
+                const Color& color =
+                        is_filled_rect_char
+                        ? obj.color
+                        : obj.color_bg;
+
+                rects_for_color(bg_groups, color)
+                        .push_back(map_cell_px_rect(obj.pos));
+        }
+
+        for (const ColoredRects& group : bg_groups) {
+                draw_rectangles_filled(group.px_rects, group.color);
+        }
+
+        // Pass 2: the foregrounds. Everything comes out of one texture, so
+        // the whole map merges into a single draw call - except that the
+        // contoured and non-contoured variants are separate textures, so
+        // they are emitted in two runs rather than interleaved.
+        for (int pass = 0; pass < 2; ++pass) {
+                const bool want_contours = (pass == 1);
+
+                for (const MapDrawObj& obj : m_cells) {
+                        if (!is_drawable(obj)) {
+                                continue;
+                        }
+
+                        if (!is_tiles &&
+                            (obj.character == g_filled_rect_char)) {
+                                // Already drawn as its own background
+                                continue;
+                        }
+
+                        // NOTE: Must match the texture choice made by
+                        // draw_tile_at_px / draw_character_at_px - the point
+                        // of the two runs is that each one uses exactly one
+                        // texture
+                        const bool has_contours =
+                                is_tiles
+                                ? ((obj.color != colors::black()) &&
+                                   (obj.color_bg != colors::black()))
+                                : (obj.color_bg != colors::black());
+
+                        if (has_contours != want_contours) {
+                                continue;
+                        }
+
+                        const P px_pos =
+                                map_to_px_coords(Panel::map, obj.pos);
+
+                        if (is_tiles) {
+                                draw_tile_at_px(
+                                        obj.tile,
+                                        px_pos,
+                                        obj.color,
+                                        obj.color_bg);
+                        }
+                        else {
+                                draw_character_at_px(
+                                        obj.character,
+                                        px_pos,
+                                        obj.color,
+                                        DrawBg::no,
+                                        obj.color_bg);
+                        }
+                }
         }
 
         disable_clip_rect();

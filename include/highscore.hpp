@@ -47,10 +47,22 @@ std::vector<HighscoreEntry> entries_sorted();
 
 }  // namespace highscore
 
+enum class IsAfterGameOver
+{
+        no,
+        yes
+};
+
+// The high score table. Shown after dying, where it is the last thing
+// between the player and the title screen (a tap continues), and from the
+// main menu's graveyard, where entries are browsed and opened.
 class BrowseHighscore : public State
 {
 public:
         BrowseHighscore() = default;
+
+        BrowseHighscore(const IsAfterGameOver is_after_game_over) :
+                m_is_after_game_over(is_after_game_over) {}
 
         void on_start() override;
 
@@ -72,6 +84,8 @@ private:
         std::vector<HighscoreEntry> m_entries;
 
         MenuBrowser m_browser;
+
+        const IsAfterGameOver m_is_after_game_over {IsAfterGameOver::no};
 };
 
 class BrowseHighscoreEntry : public InfoScreenState
@@ -97,6 +111,8 @@ private:
         {
                 return InfoScreenType::scrolling;
         }
+
+        ColoredString content_line(int line_idx) const override;
 
         void read_file();
 

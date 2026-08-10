@@ -15,6 +15,9 @@
 #include "direction.hpp"
 #include "gfx.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
+#include "io_icons.hpp"
+#include "io_internal.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
@@ -49,6 +52,45 @@ void cleanup_sdl_audio() {}
 void update_screen() {}
 
 void clear_screen() {}
+
+void set_display(const Display) {}
+
+void set_display_for_panel(const Panel) {}
+
+int panel_px_w(const Panel panel)
+{
+        return panels::w(panel);
+}
+
+int panel_px_h(const Panel panel)
+{
+        // Cell size 1 in the tests - pixel dimensions equal cell dimensions
+        return panels::h(panel);
+}
+
+R panel_logical_px_rect(const Panel panel)
+{
+        return panels::area(panel);
+}
+
+void draw_icon(
+        const std::string&,
+        const P&,
+        const int,
+        const Color&) {}
+
+void cleanup_icons() {}
+
+void set_clip_rect_to_panel(const Panel) {}
+
+void disable_clip_rect() {}
+
+void draw_text_at_px(
+        const std::string&,
+        P,
+        const Color&,
+        const DrawBg,
+        const Color&) {}
 
 P get_native_resolution()
 {

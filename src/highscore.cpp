@@ -285,24 +285,27 @@ void BrowseHighscore::draw()
                 return;
         }
 
-        draw_box(panels::area(Panel::screen));
+        draw_box(panels::screen_box_area());
 
         io::draw_text_center(
                 " Browsing high scores ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), 0},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p0.y},
                 colors::title(),
                 io::DrawBg::yes,
                 colors::black(),
                 true);  // Allow pixel-level adjustment
 
+        const std::string hint =
+                (m_is_after_game_over == IsAfterGameOver::yes)
+                // The last thing before the title screen
+                ? common_text::g_confirm_hint
+                : "tap an entry to view its game summary";
+
         io::draw_text_center(
-                std::string(
-                        " [select] to view game summary " +
-                        common_text::g_screen_exit_hint +
-                        " "),
+                " " + hint + " ",
                 Panel::screen,
-                {panels::center_x(Panel::screen), panels::y1(Panel::screen)},
+                {panels::center_x(Panel::screen), panels::screen_box_area().p1.y},
                 colors::title(),
                 io::DrawBg::yes,
                 colors::black(),
@@ -408,7 +411,7 @@ void BrowseHighscore::draw()
                 io::draw_text(
                         "(More - Page Down)",
                         Panel::screen,
-                        {0, panels::y1(Panel::screen)},
+                        {panels::screen_box_area().p0.x, panels::screen_box_area().p1.y},
                         colors::light_white());
         }
 }
@@ -435,6 +438,15 @@ void BrowseHighscore::update()
 
         switch (action) {
         case MenuAction::selected: {
+                if (m_is_after_game_over == IsAfterGameOver::yes) {
+                        // Nothing to browse here - the player has just
+                        // read their own summary, and a tap continues to
+                        // the title screen
+                        states::pop();
+
+                        return;
+                }
+
                 const int browser_y = m_browser.y();
 
                 ASSERT(browser_y < (int)m_entries.size());
@@ -477,31 +489,19 @@ void BrowseHighscoreEntry::on_start()
 
 void BrowseHighscoreEntry::on_window_resized()
 {
-        m_top_idx = 0;
+        set_scroll_px(0);
 }
 
 void BrowseHighscoreEntry::draw()
 {
         draw_interface();
 
-        const int nr_lines_tot = m_lines.size();
+        draw_scrollable_content();
+}
 
-        int btm_nr =
-                std::min(
-                        m_top_idx + panels::h(Panel::info_screen_content) - 1,
-                        nr_lines_tot - 1);
-
-        int y = 0;
-
-        for (int i = m_top_idx; i <= btm_nr; ++i) {
-                io::draw_text(
-                        m_lines[i],
-                        Panel::info_screen_content,
-                        {0, y},
-                        colors::text());
-
-                ++y;
-        }
+ColoredString BrowseHighscoreEntry::content_line(const int line_idx) const
+{
+        return {m_lines[line_idx], colors::text()};
 }
 
 void BrowseHighscoreEntry::read_file()

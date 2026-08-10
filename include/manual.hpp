@@ -7,12 +7,11 @@
 #ifndef MANUAL_HPP
 #define MANUAL_HPP
 
-#include <algorithm>
 #include <string>
 #include <vector>
 
-#include "browser.hpp"
-#include "info_screen_state.hpp"
+#include "menu_descr_page.hpp"
+#include "menu_page.hpp"
 #include "state.hpp"
 
 struct ManualPage
@@ -21,53 +20,31 @@ struct ManualPage
         std::vector<std::string> lines {};
 };
 
-class BrowseManual : public State
+// The manual - a standard two column description page: the chapter list on
+// the left, the text of the marked chapter beside it (scrolled with its
+// scrollbar).
+class BrowseManual : public MenuDescrPageState
 {
 public:
         BrowseManual() = default;
 
         void on_start() override;
 
-        void draw() override;
-
-        void on_window_resized() override;
-
-        void update() override;
-
         StateId id() const override;
 
-private:
-        MenuBrowser m_browser;
+protected:
+        std::string page_title() const override;
 
-        std::vector<std::string> m_raw_lines;
+        std::string page_hint() const override;
 
-        std::vector<ManualPage> m_pages;
-};
+        std::vector<MenuPageEntry> page_entries() const override;
 
-class BrowseManualPage : public InfoScreenState
-{
-public:
-        BrowseManualPage(const ManualPage& page) :
-                m_page(page) {}
+        void on_entry_selected(int idx) override;
 
-        void draw() override;
-
-        StateId id() const override;
+        void draw_page_content() override;
 
 private:
-        std::string title() const override;
-
-        InfoScreenType type() const override
-        {
-                return InfoScreenType::scrolling;
-        }
-
-        const ManualPage& m_page;
-
-        int get_lines_total() const override
-        {
-                return m_page.lines.size();
-        }
+        std::vector<ManualPage> m_pages {};
 };
 
 #endif  // MANUAL_HPP

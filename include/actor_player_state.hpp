@@ -13,6 +13,7 @@
 #include "colors.hpp"
 #include "direction.hpp"
 #include "global.hpp"
+#include "pos.hpp"
 
 namespace item
 {
@@ -34,7 +35,6 @@ extern int g_equip_armor_countdown;
 extern int g_remove_armor_countdown;
 extern bool g_is_dropping_armor_from_body;
 extern item::Item* g_item_equipping;
-extern std::unique_ptr<item::Explosive> g_active_explosive;
 extern item::Item* g_last_thrown_item;
 extern std::unique_ptr<item::Wpn> g_unarmed_wpn;
 
@@ -47,6 +47,21 @@ extern int g_wait_turns_left;
 // Auto-move command state
 extern Dir g_auto_move_dir;
 extern bool g_has_taken_auto_move_step;
+
+// Re-opening the aim marker after an action taken from within it.
+//
+// Swapping weapons and reloading are done straight from the aim marker
+// (their [ swap ] and [ reload ] pins), but they cost a turn - and a turn
+// cannot pass while the marker is on top of the game state, since that is
+// what runs the monsters. So the marker closes, the action runs, the
+// monsters act, and the aim is picked back up on the same cell when the
+// player's turn comes around again (see player_act and MarkerState).
+//
+// Being interrupted meanwhile - attacked, a monster coming into view, ...
+// - drops the request, so the player is put back in control of a normal
+// turn instead of back behind the sights (see interrupt_actions).
+extern bool g_is_aim_marker_pending;
+extern P g_aim_marker_pending_pos;
 
 // Shock and insanity state
 extern int g_insanity;

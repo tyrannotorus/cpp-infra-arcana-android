@@ -20,8 +20,11 @@
 
 enum class SpellSkill;
 
+struct Color;
+
 namespace item
 {
+class Explosive;
 class Item;
 class Wpn;
 }  // namespace item
@@ -36,9 +39,28 @@ namespace io
 struct InputData;
 }  // namespace io
 
+namespace marker
+{
+// Places the reticle of the NEXT marker state opened on this cell,
+// instead of it auto-targeting or taking over the look pin (consumed by
+// the first MarkerState::on_start that runs afterwards).
+//
+// Used for putting the player back exactly where they were aiming after
+// an action taken from within the marker itself - the [ swap ] and
+// [ reload ] pins, which close the marker so that the turn they cost can
+// pass (see actor::player_state::g_is_aim_marker_pending).
+void request_start_pos(const P& pos);
+
+}  // namespace marker
+
 // -----------------------------------------------------------------------------
 // Abstract marker state base class
 // -----------------------------------------------------------------------------
+// All marker states share the center pin targeting interaction: dragging
+// pans the map with the marker fixed at the view's centering point (the
+// "pin" - drawn as the corner bracket reticle). One finger dragging is
+// for looking/targeting, movement swipes/direction keys NEVER move the
+// marker (blanket rule - swipes are reserved for player movement).
 class MarkerState : public State
 {
 public:
@@ -52,7 +74,22 @@ public:
 
         void on_popped() final;
 
+        void on_map_panned() override;
+
         void draw() final;
+
+        // A marker draws its aim line, reticle and blast overlay on the map
+        // display and nowhere else, so a tile animation refresh can redraw
+        // it along with the map underneath (see states::draw_map_display)
+        bool has_map_display_draw() const final
+        {
+                return true;
+        }
+
+        void draw_map_display() final
+        {
+                draw();
+        }
 
         bool draw_overlayed() const final
         {
@@ -68,12 +105,32 @@ public:
 protected:
         virtual void on_start_hook() {}
 
+        virtual void on_popped_hook() {}
+
+        // Whether a movement swipe cancels the marker interaction and
+        // performs the movement (markers used during normal play). Not
+        // allowed e.g. when surveying the map from the trait pick menu
+        // (moving mid character creation), or for a forced teleport.
+        virtual bool allow_swipe_cancel() const
+        {
+                return true;
+        }
+
         void draw_marker(
                 const std::vector<P>& line,
-                int orange_until_including_king_dist,
-                int orange_from_king_dist,
-                int red_from_king_dist,
-                int red_from_idx);
+                int warn_until_including_king_dist,
+                int warn_from_king_dist,
+                int out_of_range_from_king_dist,
+                int blocked_from_idx);
+
+        // The reticle and path colors. Looking and aiming are green, with
+        // the stretches outside the effective range in orange; throwing
+        // has a warm ramp of its own, so that a throw in progress is never
+        // mistaken for the look pin. Out of range (and blocked) is red for
+        // all of them.
+        virtual const Color& marker_color_normal() const;
+
+        virtual const Color& marker_color_warning() const;
 
         // Fire etc
         virtual void handle_input(const io::InputData& input) = 0;
@@ -114,7 +171,14 @@ protected:
         bool m_allow_draw {true};
 
 private:
-        void move(Dir dir, int nr_steps = 1);
+        // Whether a start position was requested for this marker (see
+        // marker::request_start_pos) - it then starts there. The request
+        // is consumed either way.
+        bool try_go_to_requested_pos();
+
+        // Whether the marker was opened while looking around (drag-to-look)
+        // - it then starts on the cell being looked at
+        bool try_go_to_look_pin();
 
         bool try_go_to_tgt();
 
@@ -124,6 +188,12 @@ private:
 // -----------------------------------------------------------------------------
 // View marker state
 // -----------------------------------------------------------------------------
+// Detailed look mode: drag-to-look with actor descriptions available via
+// the look command / the [ describe ] context pin.
+//
+// NOTE: Only used where the game view is otherwise unreachable (the trait
+// pick info menu) - in the plain game state, dragging the map IS looking
+// (see GameState::on_map_panned).
 class Viewing : public MarkerState
 {
 public:
@@ -131,6 +201,13 @@ public:
                 MarkerState(origin) {}
 
 protected:
+        bool allow_swipe_cancel() const override
+        {
+                // Only used from the trait pick info menu - the player
+                // must not move mid character creation
+                return false;
+        }
+
         void on_moved() override;
 
         void handle_input(const io::InputData& input) override;
@@ -171,6 +248,10 @@ protected:
                 return true;
         }
 
+        // Red: the line of fire never reads as the green look pin or the
+        // orange throw
+        const Color& marker_color_normal() const override;
+
         Range effective_king_dist_range() const override;
 
         int max_king_dist() const override;
@@ -205,6 +286,9 @@ protected:
                 return true;
         }
 
+        // Red, like any other attack (see Aiming)
+        const Color& marker_color_normal() const override;
+
         int max_king_dist() const override;
 
         item::Wpn& m_wpn;
@@ -227,13 +311,21 @@ protected:
 
         bool use_player_tgt() const override
         {
-                return true;
+                // A throw does NOT auto-target: opened while looking around
+                // it takes over the cell being looked at, and otherwise it
+                // starts on the player, to be dragged onto a target (the
+                // [ throw ] button appears once it is off the player).
+                return false;
         }
 
         bool show_blocked() const override
         {
                 return true;
         }
+
+        // Orange: a throw being aimed must never read as the green look pin
+        // or the red attack (see also ThrowingExplosive)
+        const Color& marker_color_normal() const override;
 
         Range effective_king_dist_range() const override;
 
@@ -248,7 +340,7 @@ protected:
 class ThrowingExplosive : public MarkerState
 {
 public:
-        ThrowingExplosive(const P& origin, const item::Item& explosive) :
+        ThrowingExplosive(const P& origin, item::Explosive& explosive) :
                 MarkerState(origin),
                 m_explosive(explosive) {}
 
@@ -269,9 +361,12 @@ protected:
                 return true;
         }
 
+        // As for any other throw (see Throwing)
+        const Color& marker_color_normal() const override;
+
         int max_king_dist() const override;
 
-        const item::Item& m_explosive;
+        item::Explosive& m_explosive;
 };
 
 // -----------------------------------------------------------------------------
@@ -283,6 +378,12 @@ public:
         CtrlTele(const P& origin, Array2<bool> blocked, int max_dist = -1);
 
 protected:
+        bool allow_swipe_cancel() const override
+        {
+                // The teleport is not optional
+                return false;
+        }
+
         void on_start_hook() override;
 
         void on_moved() override;

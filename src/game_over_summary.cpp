@@ -342,40 +342,26 @@ void GameOverSummary::draw()
 {
         io::clear_screen();
 
-        draw_box(panels::area(Panel::screen));
+        draw_box(panels::screen_box_area());
 
         const int screen_center_x = panels::center_x(Panel::screen);
 
         io::draw_text_center(
                 " " + title() + " ",
                 Panel::screen,
-                {screen_center_x, 0},
+                {screen_center_x, panels::screen_box_area().p0.y},
                 colors::title());
-
-        const std::string command_info =
-                common_text::g_scroll_hint +
-                " " +
-                common_text::g_game_over_summary_exit_hint;
 
         io::draw_text_center(
-                " " + command_info + " ",
+                " " + common_text::g_confirm_hint + " ",
                 Panel::screen,
-                {screen_center_x, panels::y1(Panel::screen)},
+                {screen_center_x, panels::screen_box_area().p1.y},
                 colors::title());
 
-        const int nr_lines = (int)m_lines.size();
+        draw_scrollable_content();
+}
 
-        int y = 0;
-
-        const int panel_h = panels::h(Panel::info_screen_content);
-
-        for (int i = m_top_idx;
-             (i < nr_lines) && ((i - m_top_idx) < panel_h);
-             ++i) {
-                const ColoredString& line = m_lines[i];
-
-                io::draw_text(line.str, Panel::info_screen_content, {0, y}, line.color);
-
-                ++y;
-        }
+ColoredString GameOverSummary::content_line(const int line_idx) const
+{
+        return m_lines[line_idx];
 }

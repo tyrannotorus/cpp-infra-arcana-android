@@ -45,7 +45,7 @@ static R map_pos_to_px_rect(const P& pos)
 {
         const P view_pos = viewport::to_view_pos(pos);
 
-        const P px_pos = io::map_to_px_coords(view_pos);
+        const P px_pos = io::map_to_px_coords(Panel::map, view_pos);
 
         const P px_dims(
                 config::map_cell_px_w(),

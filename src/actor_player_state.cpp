@@ -16,7 +16,6 @@ int g_equip_armor_countdown {0};
 int g_remove_armor_countdown {0};
 bool g_is_dropping_armor_from_body {false};
 item::Item* g_item_equipping {nullptr};
-std::unique_ptr<item::Explosive> g_active_explosive {};
 item::Item* g_last_thrown_item {nullptr};
 std::unique_ptr<item::Wpn> g_unarmed_wpn {};
 
@@ -26,6 +25,9 @@ int g_wait_turns_left {-1};
 
 Dir g_auto_move_dir {Dir::END};
 bool g_has_taken_auto_move_step {false};
+
+bool g_is_aim_marker_pending {false};
+P g_aim_marker_pending_pos {0, 0};
 
 int g_insanity {0};
 double g_shock {0.0};
@@ -54,7 +56,6 @@ void init()
         g_remove_armor_countdown = 0;
         g_is_dropping_armor_from_body = false;
         g_item_equipping = nullptr;
-        g_active_explosive.reset();
         g_last_thrown_item = nullptr;
         g_unarmed_wpn.reset();
 
@@ -64,6 +65,9 @@ void init()
 
         g_auto_move_dir = Dir::END;
         g_has_taken_auto_move_step = false;
+
+        g_is_aim_marker_pending = false;
+        g_aim_marker_pending_pos = {0, 0};
 
         g_insanity = 0;
         g_shock = 0.0;

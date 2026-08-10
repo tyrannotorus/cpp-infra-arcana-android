@@ -15,6 +15,7 @@
 #include "config.hpp"
 #include "game_time.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
@@ -97,6 +98,8 @@ static void draw_health_bar(const actor::Actor& actor)
 // -----------------------------------------------------------------------------
 void draw_health_bars()
 {
+        io::set_display_for_panel(Panel::map);
+
         for (auto* actor : game_time::g_actors) {
                 if (actor::is_alive(*actor) && can_player_see_actor(*actor)) {
                         draw_health_bar(*actor);

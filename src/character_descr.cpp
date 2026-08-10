@@ -259,23 +259,10 @@ void CharacterDescr::draw()
 {
         draw_interface();
 
-        int y = 0;
+        draw_scrollable_content();
+}
 
-        const int nr_lines_tot = (int)m_lines.size();
-
-        int btm_nr = std::min(
-                m_top_idx + panels::h(Panel::info_screen_content) - 1,
-                nr_lines_tot - 1);
-
-        for (int i = m_top_idx; i <= btm_nr; ++i) {
-                const ColoredString& line = m_lines[i];
-
-                io::draw_text(
-                        line.str,
-                        Panel::info_screen_content,
-                        {0, y},
-                        line.color);
-
-                ++y;
-        }
+ColoredString CharacterDescr::content_line(const int line_idx) const
+{
+        return m_lines[line_idx];
 }

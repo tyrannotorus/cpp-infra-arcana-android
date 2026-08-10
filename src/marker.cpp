@@ -24,15 +24,20 @@
 #include "colors.hpp"
 #include "common_text.hpp"
 #include "config.hpp"
+#include "context_pins.hpp"
 #include "debug.hpp"
+#include "draw_map.hpp"
 #include "explosion.hpp"
 #include "game_commands.hpp"
 #include "gfx.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_explosive.hpp"
 #include "item_factory.hpp"
+#include "item_weapon.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -56,6 +61,80 @@
 // Private
 // -----------------------------------------------------------------------------
 
+// A cell the next marker opened shall start on, see
+// marker::request_start_pos
+static bool s_has_requested_start_pos = false;
+static P s_requested_start_pos;
+
+// Whether there is a weapon readied to swap to - the [ swap weapon ] pin
+// of the aim marker. Swapping to nothing but an empty hand mid-aim is not
+// something anyone means to do, so the pin stays away then.
+static bool has_readied_wpn_to_swap_to()
+{
+        return map::g_player->m_inv.item_in_slot(SlotId::wpn_alt) != nullptr;
+}
+
+// Whether the weapon being aimed takes ammunition and is not already full
+// - the [ reload ] pin.
+//
+// NOTE: Whether the player actually CARRIES ammunition for it is left
+// unchecked here (that would mean walking the backpack every time the
+// reticle moves) - reload::try_reload says so itself, and costs no turn
+// when it cannot be done.
+static bool can_reload_wpn(const item::Wpn& wpn)
+{
+        const auto& ranged = wpn.data().ranged;
+
+        return ranged.is_ranged_wpn &&
+                !ranged.has_infinite_ammo &&
+                (ranged.max_ammo > 0) &&
+                (wpn.m_ammo_loaded < ranged.max_ammo);
+}
+
+// Runs a command that costs a turn from within the aim marker, WITHOUT
+// giving up the aim.
+//
+// The marker has to close for the turn to actually pass: it sits on top of
+// the game state, which is what runs the monsters, so nothing would move
+// while it is up. So it closes, the command runs, the monsters take their
+// turn, and a request is left behind to put the reticle back on the same
+// cell when the player is next to act (see player_act). Being interrupted
+// meanwhile - attacked, something coming into view - drops that request
+// (see Actor::interrupt_actions), leaving the player a normal turn to
+// react with instead of a mouthful of sights.
+//
+// NOTE: The marker state is DESTROYED by this call - do not touch it (or
+// any of its members) afterwards. The aim position is therefore taken BY
+// VALUE: callers pass their own m_pos, which dies with the state.
+static void run_cmd_and_resume_aim(const GameCmd cmd, const P aim_pos)
+{
+        msg_log::clear();
+
+        states::pop();
+
+        // NOTE: The marker state is now destroyed
+
+        actor::player_state::g_is_aim_marker_pending = true;
+        actor::player_state::g_aim_marker_pending_pos = aim_pos;
+
+        // NOTE: The request is set BEFORE the command runs, so that
+        // anything interrupting the player during it drops the request too
+        game_commands::handle(cmd);
+}
+
+// -----------------------------------------------------------------------------
+// marker
+// -----------------------------------------------------------------------------
+namespace marker
+{
+void request_start_pos(const P& pos)
+{
+        s_has_requested_start_pos = true;
+        s_requested_start_pos = pos;
+}
+
+}  // namespace marker
+
 // -----------------------------------------------------------------------------
 // Marker state
 // -----------------------------------------------------------------------------
@@ -68,7 +147,21 @@ void MarkerState::on_start()
 {
         m_pos = map::g_player->m_pos;
 
-        if (use_player_tgt()) {
+        // Resuming an aim that an action taken from the marker interrupted
+        // (the [ swap weapon ] and [ reload ] pins) - the reticle goes back
+        // on the very cell it was left on
+        const bool did_start_at_requested_pos = try_go_to_requested_pos();
+
+        // Opened from drag-to-look (e.g. the contextual [ throw ] button):
+        // the marker takes over the cell that was being looked at - its
+        // reticle replaces the look pin, rather than auto-targeting
+        // somewhere else
+        const bool did_start_at_look_pin =
+                !did_start_at_requested_pos && try_go_to_look_pin();
+
+        if (!did_start_at_requested_pos &&
+            !did_start_at_look_pin &&
+            use_player_tgt()) {
                 // First, attempt to place marker at player target.
                 const bool did_go_to_tgt = try_go_to_tgt();
 
@@ -83,6 +176,11 @@ void MarkerState::on_start()
         }
 
         on_start_hook();
+
+        // Dragging pans the view with the marker fixed at the centering
+        // point - center the view on the marker so that the marker and
+        // the center "pin" coincide from the start
+        viewport::show(m_pos, viewport::ForceCentering::yes);
 
         on_moved();
 }
@@ -99,6 +197,24 @@ void MarkerState::on_window_resized()
 
 void MarkerState::on_popped()
 {
+        on_popped_hook();
+
+        // The view may have scrolled beyond the map edges - drop any
+        // manual pan and snap the camera back to the player
+        viewport::end_pan_and_center_on_player();
+}
+
+void MarkerState::on_map_panned()
+{
+        const P center = viewport::center_map_pos();
+
+        if (center != m_pos) {
+                m_pos = center;
+
+                msg_log::clear();
+
+                on_moved();
+        }
 }
 
 void MarkerState::draw()
@@ -126,12 +242,12 @@ void MarkerState::draw()
 
         const Range effective_dist_range = effective_king_dist_range();
 
-        const int orange_until_including_dist =
+        const int warn_until_including_dist =
                 (effective_dist_range.min == -1)
                 ? -1
                 : (effective_dist_range.min - 1);
 
-        const int orange_from_dist =
+        const int warn_from_dist =
                 (effective_dist_range.max == -1)
                 ? -1
                 : (effective_dist_range.max + 1);
@@ -140,9 +256,11 @@ void MarkerState::draw()
         // being aimed HAS a maximum distance (greater than -1), then the marker
         // should be red from distances greater than the maximum distance.
         const int max_dist = max_king_dist();
-        const int red_from_dist = (max_dist == -1) ? -1 : (max_dist + 1);
 
-        int red_from_idx = -1;
+        const int out_of_range_from_dist =
+                (max_dist == -1) ? -1 : (max_dist + 1);
+
+        int blocked_from_idx = -1;
 
         if (show_blocked()) {
                 for (size_t i = 0; i < line.size(); ++i) {
@@ -153,7 +271,7 @@ void MarkerState::draw()
                         }
 
                         if (map::g_seen.at(p) && is_pos_blocked(p)) {
-                                red_from_idx = (int)i;
+                                blocked_from_idx = (int)i;
                                 break;
                         }
                 }
@@ -161,10 +279,10 @@ void MarkerState::draw()
 
         draw_marker(
                 line,
-                orange_until_including_dist,
-                orange_from_dist,
-                red_from_dist,
-                red_from_idx);
+                warn_until_including_dist,
+                warn_from_dist,
+                out_of_range_from_dist,
+                blocked_from_idx);
 
         on_draw();
 }
@@ -178,8 +296,6 @@ bool MarkerState::is_pos_blocked(const P& pos) const
 
 void MarkerState::update()
 {
-        const int nr_jump_steps = 5;
-
         io::InputData input;
 
         if (!config::is_bot_playing()) {
@@ -188,89 +304,125 @@ void MarkerState::update()
 
         const GameCmd game_cmd = game_commands::to_cmd(input);
 
+        switch (game_cmd) {
+        case GameCmd::right:
+        case GameCmd::down:
+        case GameCmd::left:
+        case GameCmd::up:
+        case GameCmd::up_right:
+        case GameCmd::down_right:
+        case GameCmd::up_left:
+        case GameCmd::down_left:
+        case GameCmd::auto_move_right:
+        case GameCmd::auto_move_down:
+        case GameCmd::auto_move_left:
+        case GameCmd::auto_move_up:
+        case GameCmd::auto_move_up_right:
+        case GameCmd::auto_move_down_right:
+        case GameCmd::auto_move_up_left:
+        case GameCmd::auto_move_down_left: {
+                if (!allow_swipe_cancel()) {
+                        // Swipes do nothing here (the current cell info
+                        // shall not be cleared by ignored input)
+                        return;
+                }
+
+                // A movement swipe cancels the targeting and performs the
+                // move - the same way a movement swipe during drag-to-look
+                // cancels looking and returns to normal, centered play
+                // (swipes are for movement, dragging is for targeting)
+                msg_log::clear();
+
+                states::pop();
+
+                // NOTE: This object is now destroyed
+
+                game_commands::handle(game_cmd);
+
+                return;
+        }
+
+        case GameCmd::toggle_aim:
+        case GameCmd::toggle_throw: {
+                // The action bar's target and throw buttons are MODE
+                // TOGGLES: one of them engaged the targeting, and tapping
+                // it again drops out of it. Either one closes whichever
+                // mode is up - a button that opens a way of aiming can
+                // never be the thing that looses the shot.
+                //
+                // NOTE: The bar buttons only - the [ fire ] / [ throw ]
+                // context pins and the plain keys still loose it (see
+                // game_commands::toggle_aim_key).
+                if (!allow_swipe_cancel()) {
+                        // Targeting that cannot be walked away from cannot
+                        // be tapped away from either (a forced teleport,
+                        // surveying the map mid character creation)
+                        return;
+                }
+
+                msg_log::clear();
+
+                states::pop();
+
+                // NOTE: This object is now destroyed
+
+                // A throw is aimed on top of the screen that chose the
+                // item, so popping the marker alone would only step back
+                // into the item list. The button cancels the whole FLOW -
+                // back to play - since stepping back to the list is what
+                // the [ cancel ] pin and the [ x ] control already do.
+                //
+                // NOTE: This is a no-op for an aim marker, which is opened
+                // straight from the game state with nothing in between.
+                const State* const below = states::current_state();
+
+                if (below && (below->id() == StateId::inventory)) {
+                        states::pop();
+                }
+
+                return;
+        }
+
+        default:
+                break;
+        }
+
         if (game_cmd != GameCmd::none) {
                 msg_log::clear();
         }
 
-        switch (game_cmd) {
-        case GameCmd::right:
-                move(Dir::right);
-                break;
+        // Delegate to child classes (e.g. fire, throw, cancel)
+        handle_input(input);
+}
 
-        case GameCmd::down:
-                move(Dir::down);
-                break;
+// The marker colors carry ONE system, across every kind of aiming:
+//
+//   hue        = what you are doing - green looking, orange throwing, red
+//                attacking (see the marker_color_normal overrides)
+//   gold       = it reaches, but with reduced effect (outside the item's
+//                effective range - a weaker hit, half damage)
+//   gray       = it does not reach at all (past the maximum range, or the
+//                path is blocked) - inert, the same "unavailable" gray the
+//                rest of the interface uses, and deliberately NOT a fourth
+//                hue competing with the three above
+const Color& MarkerState::marker_color_normal() const
+{
+        return colors::light_green();
+}
 
-        case GameCmd::left:
-                move(Dir::left);
-                break;
-
-        case GameCmd::up:
-                move(Dir::up);
-                break;
-
-        case GameCmd::up_right:
-                move(Dir::up_right);
-                break;
-
-        case GameCmd::down_right:
-                move(Dir::down_right);
-                break;
-
-        case GameCmd::up_left:
-                move(Dir::up_left);
-                break;
-
-        case GameCmd::down_left:
-                move(Dir::down_left);
-                break;
-
-        case GameCmd::auto_move_right:
-                move(Dir::right, nr_jump_steps);
-                break;
-
-        case GameCmd::auto_move_down:
-                move(Dir::down, nr_jump_steps);
-                break;
-
-        case GameCmd::auto_move_left:
-                move(Dir::left, nr_jump_steps);
-                break;
-
-        case GameCmd::auto_move_up:
-                move(Dir::up, nr_jump_steps);
-                break;
-
-        case GameCmd::auto_move_up_right:
-                move(Dir::up_right, nr_jump_steps);
-                break;
-
-        case GameCmd::auto_move_down_right:
-                move(Dir::down_right, nr_jump_steps);
-                break;
-
-        case GameCmd::auto_move_up_left:
-                move(Dir::up_left, nr_jump_steps);
-                break;
-
-        case GameCmd::auto_move_down_left:
-                move(Dir::down_left, nr_jump_steps);
-                break;
-
-        default:
-                // Input not handled here - delegate to child classes
-                handle_input(input);
-        }
+const Color& MarkerState::marker_color_warning() const
+{
+        return colors::gold();
 }
 
 void MarkerState::draw_marker(
         const std::vector<P>& line,
-        int orange_until_including_king_dist,
-        int orange_from_king_dist,
-        int red_from_king_dist,
-        int red_from_idx)
+        int warn_until_including_king_dist,
+        int warn_from_king_dist,
+        int out_of_range_from_king_dist,
+        int blocked_from_idx)
 {
-        Color color = colors::light_green();
+        Color color = marker_color_normal();
 
         // Draw the line
 
@@ -286,31 +438,33 @@ void MarkerState::draw_marker(
 
                 const int dist = king_dist(m_origin, line_pos);
 
-                const bool is_near_orange =
-                        (orange_until_including_king_dist != -1) &&
-                        (dist <= orange_until_including_king_dist);
+                const bool is_warn_by_near_dist =
+                        (warn_until_including_king_dist != -1) &&
+                        (dist <= warn_until_including_king_dist);
 
-                const bool is_far_orange =
-                        (orange_from_king_dist != -1) &&
-                        (dist >= orange_from_king_dist);
+                const bool is_warn_by_far_dist =
+                        (warn_from_king_dist != -1) &&
+                        (dist >= warn_from_king_dist);
 
-                const bool is_red_by_dist =
-                        (red_from_king_dist != -1) &&
-                        (dist >= red_from_king_dist);
+                const bool is_out_of_range =
+                        (out_of_range_from_king_dist != -1) &&
+                        (dist >= out_of_range_from_king_dist);
 
-                const bool is_red_by_idx =
-                        (red_from_idx != -1) &&
-                        ((int)line_idx >= red_from_idx);
+                const bool is_blocked =
+                        (blocked_from_idx != -1) &&
+                        ((int)line_idx >= blocked_from_idx);
 
                 // NOTE: Final color is stored for drawing the head.
-                if (is_red_by_idx || is_red_by_dist) {
-                        color = colors::light_red();
+                if (is_blocked || is_out_of_range) {
+                        // Nothing happens out here - the same gray whatever
+                        // is being aimed (see the color system above)
+                        color = colors::gray();
                 }
-                else if (is_near_orange || is_far_orange) {
-                        color = colors::orange();
+                else if (is_warn_by_near_dist || is_warn_by_far_dist) {
+                        color = marker_color_warning();
                 }
                 else {
-                        color = colors::light_green();
+                        color = marker_color_normal();
                 }
 
                 // Do not draw the head yet
@@ -336,41 +490,58 @@ void MarkerState::draw_marker(
 
         if (viewport::is_in_view(head_pos)) {
                 // If we are currently only drawing the head and the line is
-                // empty, draw the head as orange if the aiming has a defined
-                // minimum effective range (if the line is non-empty, the head
-                // color would be set by the line drawing above)
-                if (line.empty() && (orange_until_including_king_dist >= 0)) {
-                        color = colors::orange();
+                // empty, draw the head in the warning color if the aiming
+                // has a defined minimum effective range (if the line is
+                // non-empty, the head color would be set by the line
+                // drawing above)
+                if (line.empty() && (warn_until_including_king_dist >= 0)) {
+                        color = marker_color_warning();
                 }
 
                 const P view_pos = viewport::to_view_pos(head_pos);
 
-                io::MapDrawObj draw_obj;
-
-                draw_obj.pos = view_pos;
-                draw_obj.tile = gfx::TileId::aim_marker_head;
-                draw_obj.character = 'X';
-                draw_obj.color = color;
-                draw_obj.color_bg = colors::black();
-
-                draw_obj.draw();
+                // Corner brackets overlaid on the cell, keeping the cell's
+                // content (e.g. the targeted monster) visible - the color
+                // carries the same semantics as the line
+                draw_map::draw_reticle(view_pos, color);
         }
 }
 
-void MarkerState::move(const Dir dir, const int nr_steps)
+bool MarkerState::try_go_to_requested_pos()
 {
-        const P new_pos(m_pos + dir_utils::offset(dir).scaled_up(nr_steps));
-
-        // We limit the distance from the player that the marker can be moved to
-        // (mostly just to avoid segfaults or weird integer wraparound behavior)
-        // The limit is an arbitrary big number, larger than any map should be
-        const int max_dist_from_player = 300;
-
-        if (king_dist(map::g_player->m_pos, new_pos) <= max_dist_from_player) {
-                m_pos = new_pos;
-
-                on_moved();
+        if (!s_has_requested_start_pos) {
+                return false;
         }
+
+        // NOTE: The request is consumed whether it can be honored or not -
+        // it is meant for the very next marker, and must never leak into a
+        // later one
+        s_has_requested_start_pos = false;
+
+        if (!map::is_pos_inside_map(s_requested_start_pos)) {
+                return false;
+        }
+
+        m_pos = s_requested_start_pos;
+
+        return true;
+}
+
+bool MarkerState::try_go_to_look_pin()
+{
+        if (!viewport::is_pan_active()) {
+                return false;
+        }
+
+        const P pin_pos = viewport::center_map_pos();
+
+        if (!map::is_pos_inside_map(pin_pos)) {
+                return false;
+        }
+
+        m_pos = pin_pos;
+
+        return true;
 }
 
 bool MarkerState::try_go_to_tgt()
@@ -423,30 +594,20 @@ void Viewing::on_moved()
 
         view::print_location_info_msgs(m_pos);
 
+        // A visible monster at the marker can be described in detail -
+        // offer it via a context pin (sends the view key)
         const actor::Actor* const actor = map::living_actor_at(m_pos);
 
         if (actor &&
             !actor::is_player(actor) &&
             actor::can_player_see_actor(*actor)) {
-                const std::string msg =
-                        std::string("[") +
-                        game_commands::view_key() +
-                        std::string("] for description");
-
-                msg_log::add(
-                        msg,
-                        colors::light_white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
+                context_pins::add("describe", game_commands::view_key());
         }
 
-        msg_log::add(
-                common_text::g_cancel_hint,
-                colors::light_white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
+        context_pins::add(
+                "cancel",
+                (char)SDLK_ESCAPE,
+                colors::menu_dark());
 }
 
 void Viewing::handle_input(const io::InputData& input)
@@ -478,18 +639,61 @@ void Viewing::handle_input(const io::InputData& input)
 // -----------------------------------------------------------------------------
 void Aiming::on_moved()
 {
-        view::print_living_actor_info_msg(m_pos);
+        auto* const actor = map::living_actor_at(m_pos);
+
+        const bool is_visible_monster =
+                actor &&
+                !actor::is_player(actor) &&
+                actor::can_player_see_actor(*actor);
+
+        // "Fire <weapon> at <target>."
+        std::string tgt_name;
+
+        if (is_visible_monster) {
+                tgt_name = actor::name_the(*actor);
+        }
+        else if (map::g_seen.at(m_pos)) {
+                tgt_name = map::g_terrain.at(m_pos)->name(Article::the);
+        }
+        else {
+                tgt_name = "the darkness";
+        }
+
+        const std::string wpn_name =
+                m_wpn.name(ItemNameType::plain, ItemNameInfo::none);
+
+        msg_log::add(
+                "Fire " + wpn_name + " at " + tgt_name + ".",
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
+
+        // The targeting is engaged even when the shot cannot be taken -
+        // that is what puts [ reload ] and [ swap weapon ] within reach of
+        // a player holding an empty gun (see
+        // game_commands::ranged_wpn_unfireable_reason). Say why instead of
+        // talking about hit chances and range, and offer no [ fire ].
+        const std::string unfireable_reason =
+                game_commands::ranged_wpn_unfireable_reason(m_wpn);
+
+        const bool can_fire = unfireable_reason.empty();
+
+        if (!can_fire) {
+                msg_log::add(
+                        unfireable_reason,
+                        colors::msg_note(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+        }
 
         const int dist = king_dist(m_origin, m_pos);
 
         const bool is_in_max_range = (dist <= max_king_dist());
 
-        if (is_in_max_range) {
-                auto* const actor = map::living_actor_at(m_pos);
-
-                if (actor &&
-                    !actor::is_player(actor) &&
-                    actor::can_player_see_actor(*actor)) {
+        if (can_fire && is_in_max_range) {
+                if (is_visible_monster) {
                         RangedAttData att_data(
                                 map::g_player,
                                 m_origin,
@@ -525,18 +729,30 @@ void Aiming::on_moved()
                 }
         }
 
-        const std::string msg =
-                std::string("[") +
-                game_commands::fire_key() +
-                std::string("] to fire ") +
-                common_text::g_cancel_hint;
+        // NOTE: The pins are ordered by how often they are wanted, LEAST
+        // first: the row flows from the thumb's corner (see context_pins),
+        // so the last ones added land nearest the thumb. Getting the gun
+        // ready comes first because it is the rarer errand - and it is
+        // done from behind the sights, without giving up the aim, see
+        // run_cmd_and_resume_aim.
+        if (has_readied_wpn_to_swap_to()) {
+                context_pins::add(
+                        "swap weapon",
+                        game_commands::swap_weapon_key());
+        }
 
-        msg_log::add(
-                msg,
-                colors::light_white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
+        if (can_reload_wpn(m_wpn)) {
+                context_pins::add("reload", game_commands::reload_key());
+        }
+
+        if (can_fire && (m_pos != map::g_player->m_pos)) {
+                context_pins::add("fire", game_commands::fire_key());
+        }
+
+        context_pins::add(
+                "cancel",
+                (char)SDLK_ESCAPE,
+                colors::menu_dark());
 }
 
 void Aiming::handle_input(const io::InputData& input)
@@ -556,8 +772,39 @@ void Aiming::handle_input(const io::InputData& input)
                 game_cmd = game_commands::to_cmd(input);
         }
 
+        if ((game_cmd == GameCmd::swap_weapon) &&
+            has_readied_wpn_to_swap_to()) {
+                run_cmd_and_resume_aim(GameCmd::swap_weapon, m_pos);
+
+                // NOTE: This object is now destroyed
+                return;
+        }
+
+        if ((game_cmd == GameCmd::reload) && can_reload_wpn(m_wpn)) {
+                run_cmd_and_resume_aim(GameCmd::reload, m_pos);
+
+                // NOTE: This object is now destroyed
+                return;
+        }
+
         if ((game_cmd == GameCmd::fire) || (input.key == SDLK_RETURN)) {
                 if (m_pos == map::g_player->m_pos) {
+                        return;
+                }
+
+                // There is no [ fire ] pin when the shot cannot be taken,
+                // but the fire key can still ask for it - and so can a
+                // stray tap, which synthesizes the confirm key. Stay in
+                // the targeting, where the pins that DO something about it
+                // are.
+                //
+                // NOTE: The log was cleared for this input (see
+                // MarkerState::update), so the cell's messages and pins
+                // have to be put back - reason included.
+                if (!game_commands::ranged_wpn_unfireable_reason(m_wpn)
+                             .empty()) {
+                        on_moved();
+
                         return;
                 }
 
@@ -584,6 +831,14 @@ void Aiming::handle_input(const io::InputData& input)
         }
 }
 
+const Color& Aiming::marker_color_normal() const
+{
+        // An attack being aimed is red - the line of fire and its reticle
+        // are told apart from the green look pin and the orange throw at a
+        // glance (see the color system in MarkerState)
+        return colors::light_red();
+}
+
 Range Aiming::effective_king_dist_range() const
 {
         return m_wpn.data().ranged.effective_range;
@@ -599,45 +854,84 @@ int Aiming::max_king_dist() const
 // -----------------------------------------------------------------------------
 void AimingMeleeWpn::on_moved()
 {
-        view::print_living_actor_info_msg(m_pos);
+        actor::Actor* const actor = map::living_actor_at(m_pos);
+
+        const bool is_visible_monster =
+                actor &&
+                !actor::is_player(actor) &&
+                actor::can_player_see_actor(*actor);
+
+        // "Attack <target> with <weapon>."
+        std::string tgt_name;
+
+        if (is_visible_monster) {
+                tgt_name = actor::name_the(*actor);
+        }
+        else if (map::g_seen.at(m_pos)) {
+                tgt_name = map::g_terrain.at(m_pos)->name(Article::the);
+        }
+        else {
+                tgt_name = "the darkness";
+        }
+
+        const std::string wpn_name =
+                m_wpn.name(ItemNameType::plain, ItemNameInfo::none);
+
+        msg_log::add(
+                "Attack " + tgt_name + " with " + wpn_name + ".",
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
 
         const int dist = king_dist(m_origin, m_pos);
 
         const bool is_in_max_range = (dist <= max_king_dist());
 
-        if (is_in_max_range) {
-                actor::Actor* const actor = map::living_actor_at(m_pos);
+        if (is_in_max_range && is_visible_monster) {
+                MeleeAttData att_data(map::g_player, *actor, m_wpn);
 
-                if (actor &&
-                    !actor::is_player(actor) &&
-                    actor::can_player_see_actor(*actor)) {
-                        MeleeAttData att_data(map::g_player, *actor, m_wpn);
+                const int hit_chance =
+                        ability_roll::success_chance_pct_actual(
+                                att_data.hit_chance_tot);
 
-                        const int hit_chance =
-                                ability_roll::success_chance_pct_actual(
-                                        att_data.hit_chance_tot);
-
-                        msg_log::add(
-                                std::to_string(hit_chance) + "% hit chance.",
-                                colors::light_white(),
-                                MsgInterruptPlayer::no,
-                                MorePromptOnMsg::no,
-                                CopyToMsgHistory::no);
-                }
+                msg_log::add(
+                        std::to_string(hit_chance) + "% hit chance.",
+                        colors::light_white(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
+        }
+        else if (!is_in_max_range) {
+                msg_log::add(
+                        "Out of reach.",
+                        colors::msg_note(),
+                        MsgInterruptPlayer::no,
+                        MorePromptOnMsg::no,
+                        CopyToMsgHistory::no);
         }
 
-        const std::string msg =
-                std::string("[") +
-                game_commands::fire_key() +
-                std::string("] to attack ") +
-                common_text::g_cancel_hint;
+        // Aiming a melee weapon is the same targeting mode, so it swaps
+        // the same way - and it is what makes the swap reversible, since
+        // going from a firearm to a melee weapon lands here.
+        //
+        // NOTE: Before the strike, so that the strike lands nearest the
+        // thumb - see the pin order in Aiming::on_moved.
+        if (has_readied_wpn_to_swap_to()) {
+                context_pins::add(
+                        "swap weapon",
+                        game_commands::swap_weapon_key());
+        }
 
-        msg_log::add(
-                msg,
-                colors::light_white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
+        // Striking is only possible within the weapon's reach
+        if ((m_pos != map::g_player->m_pos) && is_in_max_range) {
+                context_pins::add("attack", game_commands::fire_key());
+        }
+
+        context_pins::add(
+                "cancel",
+                (char)SDLK_ESCAPE,
+                colors::menu_dark());
 }
 
 void AimingMeleeWpn::handle_input(const io::InputData& input)
@@ -657,6 +951,14 @@ void AimingMeleeWpn::handle_input(const io::InputData& input)
                 game_cmd = game_commands::to_cmd(input);
         }
 
+        if ((game_cmd == GameCmd::swap_weapon) &&
+            has_readied_wpn_to_swap_to()) {
+                run_cmd_and_resume_aim(GameCmd::swap_weapon, m_pos);
+
+                // NOTE: This object is now destroyed
+                return;
+        }
+
         if ((game_cmd == GameCmd::fire) || (input.key == SDLK_RETURN)) {
                 if (m_pos == map::g_player->m_pos) {
                         return;
@@ -667,7 +969,18 @@ void AimingMeleeWpn::handle_input(const io::InputData& input)
                 const bool is_in_max_range = (dist <= max_king_dist());
 
                 if (!is_in_max_range) {
-                        // TODO: Print a message or something?
+                        msg_log::add(
+                                "Out of reach.",
+                                colors::msg_note(),
+                                MsgInterruptPlayer::no,
+                                MorePromptOnMsg::no,
+                                CopyToMsgHistory::no);
+
+                        context_pins::add(
+                                "cancel",
+                                (char)SDLK_ESCAPE,
+                                colors::menu_dark());
+
                         return;
                 }
 
@@ -700,6 +1013,12 @@ bool AimingMeleeWpn::is_pos_blocked(const P& pos) const
         return !map::g_terrain.at(pos)->is_projectile_passable();
 }
 
+const Color& AimingMeleeWpn::marker_color_normal() const
+{
+        // Striking at weapon reach is an attack like any other (see Aiming)
+        return colors::light_red();
+}
+
 int AimingMeleeWpn::max_king_dist() const
 {
         return m_wpn.data().melee.reach;
@@ -710,18 +1029,50 @@ int AimingMeleeWpn::max_king_dist() const
 // -----------------------------------------------------------------------------
 void Throwing::on_moved()
 {
-        view::print_living_actor_info_msg(m_pos);
+        auto* const actor = map::living_actor_at(m_pos);
+
+        const bool is_visible_monster =
+                actor &&
+                !actor::is_player(actor) &&
+                actor::can_player_see_actor(*actor);
+
+        // "Throw <item> at <monster>." / "Throw <item> onto <terrain>."
+        const std::string item_name =
+                m_inv_item->name(
+                        ItemNameType::a,
+                        ItemNameInfo::none,
+                        ItemNameAttackInfo::none);
+
+        std::string msg = "Throw " + item_name;
+
+        if (m_pos == map::g_player->m_pos) {
+                // The marker was not opened from drag-to-look, so it starts
+                // on the player - there is nothing to throw at yet
+                msg += " - drag to aim";
+        }
+        else if (is_visible_monster) {
+                msg += " at " + actor::name_the(*actor);
+        }
+        else if (map::g_seen.at(m_pos)) {
+                msg += " onto " + map::g_terrain.at(m_pos)->name(Article::the);
+        }
+        else {
+                msg += " into the darkness";
+        }
+
+        msg_log::add(
+                msg + ".",
+                colors::light_white(),
+                MsgInterruptPlayer::no,
+                MorePromptOnMsg::no,
+                CopyToMsgHistory::no);
 
         const int dist = king_dist(m_origin, m_pos);
 
         const bool is_in_max_range = (dist <= max_king_dist());
 
         if (is_in_max_range) {
-                auto* const actor = map::living_actor_at(m_pos);
-
-                if (actor &&
-                    !actor::is_player(actor) &&
-                    actor::can_player_see_actor(*actor)) {
+                if (is_visible_monster) {
                         ThrowAttData att_data(
                                 map::g_player,
                                 m_origin,
@@ -757,18 +1108,14 @@ void Throwing::on_moved()
                 }
         }
 
-        const std::string msg =
-                std::string("[") +
-                game_commands::throw_key() +
-                std::string("] to throw ") +
-                common_text::g_cancel_hint;
+        if (m_pos != map::g_player->m_pos) {
+                context_pins::add("throw", game_commands::throw_key());
+        }
 
-        msg_log::add(
-                msg,
-                colors::light_white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
+        context_pins::add(
+                "cancel",
+                (char)SDLK_ESCAPE,
+                colors::menu_dark());
 }
 
 void Throwing::handle_input(const io::InputData& input)
@@ -813,6 +1160,16 @@ void Throwing::handle_input(const io::InputData& input)
         }
 }
 
+const Color& Throwing::marker_color_normal() const
+{
+        // Orange all the way out to the maximum throwing range - the throw
+        // path and reticle are told apart from the green look pin and the
+        // red attack at a glance. NOTE: The warning color (gold, the throw
+        // landing for half damage) and the out of range color are the
+        // standard ones, see MarkerState.
+        return colors::orange();
+}
+
 Range Throwing::effective_king_dist_range() const
 {
         return m_inv_item->data().ranged.effective_range;
@@ -843,6 +1200,8 @@ void ThrowingExplosive::on_draw()
 
         const Color color = colors::red();
 
+        io::set_display_for_panel(Panel::map);
+
         // Draw explosion radius area overlay
         for (int y = expl_area.p0.y; y <= expl_area.p1.y; ++y) {
                 for (int x = expl_area.p0.x; x <= expl_area.p1.x; ++x) {
@@ -854,7 +1213,8 @@ void ThrowingExplosive::on_draw()
 
                         const P view_pos = viewport::to_view_pos(p);
 
-                        const P px_pos = io::map_to_px_coords(view_pos);
+                        const P px_pos =
+                                io::map_to_px_coords(Panel::map, view_pos);
 
                         const P px_dims(
                                 config::map_cell_px_w(),
@@ -870,29 +1230,42 @@ void ThrowingExplosive::on_draw()
 
 void ThrowingExplosive::on_moved()
 {
-        const std::string name = m_explosive.name(ItemNameType::a, ItemNameInfo::none);
+        auto* const actor = map::living_actor_at(m_pos);
+
+        const bool is_visible_monster =
+                actor &&
+                !actor::is_player(actor) &&
+                actor::can_player_see_actor(*actor);
+
+        // "Throw <explosive> at <monster>." / "... onto <terrain>."
+        const std::string name =
+                m_explosive.name(ItemNameType::a, ItemNameInfo::none);
+
+        std::string msg = "Throw " + name;
+
+        if (is_visible_monster) {
+                msg += " at " + actor::name_the(*actor);
+        }
+        else if (map::g_seen.at(m_pos)) {
+                msg += " onto " + map::g_terrain.at(m_pos)->name(Article::the);
+        }
+        else {
+                msg += " into the darkness";
+        }
 
         msg_log::add(
-                "Throwing " + name + ".",
-                colors::text(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
-
-        view::print_location_info_msgs(m_pos);
-
-        const std::string msg =
-                std::string("[") +
-                game_commands::throw_key() +
-                std::string("] to throw ") +
-                common_text::g_cancel_hint;
-
-        msg_log::add(
-                msg,
+                msg + ".",
                 colors::light_white(),
                 MsgInterruptPlayer::no,
                 MorePromptOnMsg::no,
                 CopyToMsgHistory::no);
+
+        context_pins::add("throw", game_commands::throw_key());
+
+        context_pins::add(
+                "cancel",
+                (char)SDLK_ESCAPE,
+                colors::menu_dark());
 }
 
 void ThrowingExplosive::handle_input(const io::InputData& input)
@@ -904,15 +1277,23 @@ void ThrowingExplosive::handle_input(const io::InputData& input)
 
                 const P pos = m_pos;
 
+                auto* const explosive = &m_explosive;
+
                 states::pop();
 
                 // NOTE: This object is now destroyed
 
-                throwing::player_throw_lit_explosive(pos);
+                throwing::player_throw_lit_explosive(pos, *explosive);
         }
         else if ((input.key == SDLK_ESCAPE) || (input.key == SDLK_SPACE)) {
                 states::pop();
         }
+}
+
+const Color& ThrowingExplosive::marker_color_normal() const
+{
+        // A lit explosive is thrown like anything else (see Throwing)
+        return colors::orange();
 }
 
 int ThrowingExplosive::max_king_dist() const
@@ -968,12 +1349,7 @@ void CtrlTele::on_moved()
                         MorePromptOnMsg::no,
                         CopyToMsgHistory::no);
 
-                msg_log::add(
-                        "[enter] to try teleporting here",
-                        colors::light_white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
+                context_pins::add("teleport here", (char)SDLK_RETURN);
         }
 }
 
@@ -1506,24 +1882,13 @@ void CtrlObj::on_moved()
                 CopyToMsgHistory::no);
 
         if (is_allowed_at_dist() && !m_possible_actions.empty()) {
-                const terrain::Terrain* const terrain = map::g_terrain.at(m_pos);
-                const std::string name_the = terrain->name(Article::the);
-                const std::string control_str = "[enter] to control " + name_the;
-
-                msg_log::add(
-                        control_str,
-                        colors::light_white(),
-                        MsgInterruptPlayer::no,
-                        MorePromptOnMsg::no,
-                        CopyToMsgHistory::no);
+                context_pins::add("control", (char)SDLK_RETURN);
         }
 
-        msg_log::add(
-                common_text::g_cancel_hint,
-                colors::light_white(),
-                MsgInterruptPlayer::no,
-                MorePromptOnMsg::no,
-                CopyToMsgHistory::no);
+        context_pins::add(
+                "cancel",
+                (char)SDLK_ESCAPE,
+                colors::menu_dark());
 }
 
 void CtrlObj::handle_input(const io::InputData& input)
@@ -1635,26 +2000,20 @@ CtrlObjActionPtr CtrlObj::query_control() const
 {
         popup::Popup popup(popup::AddToMsgHistory::no);
 
-        std::vector<char> menu_keys;
         std::vector<std::string> menu_labels;
 
-        menu_keys.reserve(m_possible_actions.size());
         menu_labels.reserve(m_possible_actions.size());
 
         for (const CtrlObjActionPtr& action : m_possible_actions) {
-                menu_keys.push_back(action->menu_key());
                 menu_labels.push_back(action->menu_label(*m_terrain));
         }
 
-        menu_keys.push_back(0);
         menu_labels.emplace_back("(space, esc) Choose another position");
 
         int choice = 0;
 
         popup.setup_menu_mode(
                 menu_labels,
-                menu_keys,
-                popup::MenuModeShowCancelHint::no,
                 &choice);
 
         popup.set_title("Control object");

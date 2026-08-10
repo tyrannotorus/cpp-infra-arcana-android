@@ -29,6 +29,7 @@
 #include "game_time.hpp"
 #include "global.hpp"
 #include "io.hpp"
+#include "inventory.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_explosive.hpp"
@@ -37,6 +38,7 @@
 #include "map.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
+#include "pickup.hpp"
 #include "pos.hpp"
 #include "property_data.hpp"
 #include "property_handler.hpp"
@@ -130,12 +132,11 @@ static bool is_noisy_terrain(const terrain::Terrain& terrain)
 // -----------------------------------------------------------------------------
 namespace throwing
 {
-void player_throw_lit_explosive(const P& aim_cell)
+void player_throw_lit_explosive(
+        const P& aim_cell,
+        item::Explosive& explosive_ref)
 {
-        ASSERT(actor::player_state::g_active_explosive.get());
-
-        item::Explosive* const explosive =
-                actor::player_state::g_active_explosive.get();
+        item::Explosive* const explosive = &explosive_ref;
 
         const int max_range = explosive->data().ranged.max_range;
 
@@ -195,7 +196,10 @@ void player_throw_lit_explosive(const P& aim_cell)
                 explosive->on_thrown_ignited_landing(end_pos);
         }
 
-        actor::player_state::g_active_explosive.reset();
+        // The explosive has left the player's hands
+        map::g_player->m_inv.remove_item_in_backpack_with_ptr(explosive, true);
+
+        // NOTE: The explosive is now deleted
 
         // Attacking ends cloaking and sanctuary
         map::g_player->m_properties.end_prop(prop::Id::cloaked);
@@ -437,6 +441,8 @@ void throw_item(
                 SndVol::low,
                 alerts);
 
+        item::Item* landed = nullptr;
+
         if (item_thrown.data().ranged.always_break_on_throw ||
             ((break_item_one_in_n != -1) &&
              rnd::one_in(break_item_one_in_n))) {
@@ -444,7 +450,7 @@ void throw_item(
         }
         else {
                 // Not destroyed
-                item_drop::drop_item_on_map(drop_pos, item_thrown);
+                landed = item_drop::drop_item_on_map(drop_pos, item_thrown);
         }
 
         if (!is_actor_hit) {
@@ -456,6 +462,14 @@ void throw_item(
                         // Run the sound that we set up earlier
                         snd.run();
                 }
+        }
+
+        // The thrown item landed at the player's feet - re-trigger the
+        // tile status message fresh (the standing [ pick up ] pin
+        // appears by itself)
+        if (landed &&
+            (map::g_items.at(map::g_player->m_pos) == landed)) {
+                item_pickup::print_item_at_player_msg();
         }
 
         on_attack_performed(actor_throwing);

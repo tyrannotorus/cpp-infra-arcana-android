@@ -13,6 +13,11 @@
 namespace version_info
 {
 extern const std::string g_version_str;
+
+// Core version plus the Android port build increment
+// (major.minor.patch.build) - the user facing version string
+extern const std::string g_build_version_str;
+
 extern const std::string g_copyright_str;
 extern const std::string g_license_str;
 extern const std::string g_date_str;

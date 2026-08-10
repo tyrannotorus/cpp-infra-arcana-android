@@ -54,6 +54,8 @@ private:
                 return InfoScreenType::scrolling;
         }
 
+        ColoredString content_line(int line_idx) const override;
+
         std::vector<ColoredString> m_lines {};
 
         int get_lines_total() const override

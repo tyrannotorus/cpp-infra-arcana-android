@@ -29,6 +29,15 @@ namespace bash
 // Query player for direction
 void run();
 
+// Bash whatever is at the given position (monster, corpse, terrain) with
+// no direction query - the contextual [ kick ] look-pin button (see
+// GameState::on_map_panned and GameCmd::kick_at_look_pin)
+void run_at(const P& pos);
+
+// Whether a kick could do anything to the terrain - the predicate behind
+// the contextual [ kick ] look-pin button (see GameState::on_map_panned)
+bool is_kickable_terrain(const terrain::Terrain& terrain);
+
 void try_sprain_player();
 
 void attack_terrain(const P& att_pos, const item::Item& wpn);

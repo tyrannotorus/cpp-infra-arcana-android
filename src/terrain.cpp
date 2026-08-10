@@ -1737,8 +1737,6 @@ void Stairs::bump(actor::Actor& actor_bumping)
                 .set_title("A staircase leading downwards")
                 .setup_menu_mode(
                         {"(D)escend", "(S)ave and quit"},
-                        {'d', 's'},
-                        popup::MenuModeShowCancelHint::yes,
                         &choice)
                 .run();
 
@@ -3192,18 +3190,10 @@ void ItemContainer::on_item_found(
                 (wpn->m_ammo_loaded > 0) &&
                 !data.ranged.has_infinite_ammo;
 
-        if (is_unloadable_wpn) {
-                msg_log::add("Unload? [u]");
-        }
-
-        auto answer = BinaryAnswer::no;
-
-        if (is_unloadable_wpn) {
-                answer = query::yes_or_no('u');
-        }
-        else {
-                answer = query::yes_or_no();
-        }
+        const auto answer =
+                is_unloadable_wpn
+                ? query::yes_or_no(query::SpecialChoice {'u', "take ammo"})
+                : query::yes_or_no();
 
         msg_log::clear();
 

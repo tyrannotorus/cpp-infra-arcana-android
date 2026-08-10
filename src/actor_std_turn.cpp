@@ -324,8 +324,11 @@ static void player_std_turn()
 
         player_regen_meditative_focused();
 
-        if (actor::player_state::g_active_explosive) {
-                actor::player_state::g_active_explosive->on_std_turn_player_hold_ignited();
+        // Every burning fuse counts down, wherever it is carried. NOTE:
+        // The hook may destroy the explosive (the fuse running out), so
+        // the list is taken first.
+        for (auto* const explosive : item::player_lit_explosives()) {
+                explosive->on_std_turn_player_hold_ignited();
 
                 if (!actor::is_alive(*map::g_player)) {
                         return;
