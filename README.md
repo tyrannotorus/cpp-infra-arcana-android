@@ -17,7 +17,7 @@ and a renderer reworked for phone and tablet GPUs.
 
 Infra Arcana (Android) is shared free with the roguelike community and provided **as-is, without any
 warranty**. It is an independent personal-use app; use it at your own risk. The author accepts no
-liability for any damage to your device when it melts from awesomeness.
+liability when Cthulhu devours your soul.
 
 ## Dev Disclaimer
 
