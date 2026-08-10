@@ -49,10 +49,10 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Name the APK
-        run: cp android/app/build/outputs/apk/release/app-release.apk \
-               "infra-arcana-${GITHUB_REF_NAME}.apk"
+        run: cp android/app/build/outputs/apk/release/app-release.apk "infra-arcana-${GITHUB_REF_NAME}.apk"
 
       - name: Upload APK to release
         uses: softprops/action-gh-release@v2
         with:
           files: infra-arcana-${{ github.ref_name }}.apk
+          fail_on_unmatched_files: true
