@@ -7,6 +7,12 @@ Martin Törnqvist's Lovecraftian horror roguelike, vendored at v23.0.0 and rebui
 It runs the original game as a native SDL2 app with gesture controls, a mobile action bar,
 and a renderer reworked for phone and tablet GPUs.
 
+<img width="2340" height="1080" alt="Screenshot_20260810_113047_Infra Arcana" src="https://github.com/user-attachments/assets/e629c835-7850-4cb6-a17b-2a5e01281c34" />
+<img width="2340" height="1080" alt="Screenshot_20260810_113125_Infra Arcana" src="https://github.com/user-attachments/assets/1a88b2da-9a9b-49fe-b0eb-489daa969378" />
+<img width="2340" height="1080" alt="Screenshot_20260810_113206_Infra Arcana" src="https://github.com/user-attachments/assets/238633dd-0542-4879-8480-cafe1abd7e2d" />
+<img width="2340" height="1080" alt="Screenshot_20260810_113237_Infra Arcana" src="https://github.com/user-attachments/assets/a17c5523-e183-4058-8f3f-be33050230c0" />
+<img width="2340" height="1080" alt="Screenshot_20260810_113356_Infra Arcana" src="https://github.com/user-attachments/assets/2d2a6824-4de2-4d59-acdd-6e12aadcd866" />
+
 ## User Disclaimer
 
 Infra Arcana (Android) is shared free with the roguelike community and provided **as-is, without any
