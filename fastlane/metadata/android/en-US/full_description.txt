@@ -1,5 +1,3 @@
-Infra Arcana is a roguelike set in the early 20th century, inspired by the horror fiction of H.P. Lovecraft. Beneath a shunned and decrepit old church lie the sprawling catacombs of the Cult of Starry Wisdom. Descend to rob them of treasures and knowledge, and seek the artifact of non-human origin known as the Shining Trapezohedron - a window to all the secrets of the universe. Every expedition is procedurally generated, with scarce resources, permanent death, and horrors that erode your investigator's sanity.
+Infra Arcana is a Roguelike set in the early 20th century. The goal is to explore the lair of a dreaded cult called The Church of Starry Wisdom. Buried deep beneath their hallowed grounds lies an artifact called The Shining Trapezohedron - a window to all secrets of the universe. Your ultimate goal is to unearth this artifact.
 
-This is the Android port with native touch controls - swipe to move, tap to confirm, drag to aim - a configurable action bar, and mobile-first menus and inventory.
-
-The port is in early alpha: perfectly playable, but expect bugs or unrefinement.
+This is an unofficial Android port prioritizing a mobile-friendly UI/UX.
