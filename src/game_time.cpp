@@ -28,6 +28,7 @@
 #include "global.hpp"
 #include "inventory.hpp"
 #include "item.hpp"
+#include "item_explosive.hpp"
 #include "map.hpp"
 #include "map_controller.hpp"
 #include "map_travel.hpp"
@@ -217,6 +218,9 @@ static void run_std_turn_events()
         for (auto* const terrain : map::g_terrain) {
                 terrain->on_new_turn();
         }
+
+        // Flames set off any unlit explosives lying in burning cells
+        item::trigger_explosives_on_burning_cells();
 
         const std::vector<terrain::Terrain*> mobs_cpy = game_time::g_mobs;
 

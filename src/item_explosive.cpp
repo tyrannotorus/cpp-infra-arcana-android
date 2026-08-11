@@ -163,6 +163,50 @@ std::vector<Explosive*> player_lit_explosives()
         return lit;
 }
 
+void trigger_explosives_on_ground_at(const P& pos)
+{
+        auto* const item = map::g_items.at(pos);
+
+        if (!item || (item->data().type != ItemType::explosive)) {
+                return;
+        }
+
+        // The stack is taken off the map before anything goes off, so that
+        // chained explosions cannot set it off a second time
+        map::g_items.at(pos) = nullptr;
+
+        const int nr_items =
+                item->data().is_stackable
+                ? item->m_nr_items
+                : 1;
+
+        const auto* const explosive = static_cast<Explosive*>(item);
+
+        // Each item of a stack reacts separately, one after the other
+        for (int i = 0; i < nr_items; ++i) {
+                explosive->on_triggered_on_ground(pos);
+        }
+
+        delete explosive;
+}
+
+void trigger_explosives_on_burning_cells()
+{
+        const int map_w = map::w();
+        const int map_h = map::h();
+
+        for (int x = 0; x < map_w; ++x) {
+                for (int y = 0; y < map_h; ++y) {
+                        const P pos(x, y);
+
+                        if (map::g_items.at(pos) &&
+                            map::g_terrain.at(pos)->is_burning()) {
+                                trigger_explosives_on_ground_at(pos);
+                        }
+                }
+        }
+}
+
 void Dynamite::on_player_ignite() const
 {
         msg_log::add("I light a dynamite stick.");
@@ -245,6 +289,15 @@ void Dynamite::drop_lit_at_player(const bool is_deliberate)
 
                 game_time::add_mob(t);
         }
+}
+
+void Dynamite::on_triggered_on_ground(const P& p) const
+{
+        if (map::g_seen.at(p)) {
+                msg_log::add("The dynamite explodes!");
+        }
+
+        explosion::run(p, ExplType::expl);
 }
 
 void Molotov::on_player_ignite() const
@@ -359,6 +412,32 @@ void Molotov::drop_lit_at_player(const bool is_deliberate)
                 {prop::make(prop::Id::burning)});
 }
 
+void Molotov::on_triggered_on_ground(const P& p) const
+{
+        if (map::g_seen.at(p)) {
+                msg_log::add("The Molotov Cocktail bursts into flames!");
+        }
+
+        Snd snd(
+                "I hear an explosion!",
+                audio::SfxId::explosion_molotov,
+                IgnoreMsgIfOriginSeen::yes,
+                p,
+                nullptr,
+                SndVol::high,
+                AlertsMon::yes);
+
+        snd.run();
+
+        explosion::run(
+                p,
+                ExplType::apply_prop,
+                EmitExplSnd::no,
+                0,
+                ExplExclCenter::no,
+                {prop::make(prop::Id::burning)});
+}
+
 void Flare::on_player_ignite() const
 {
         msg_log::add("I light a Flare.");
@@ -418,6 +497,23 @@ void Flare::drop_lit_at_player(const bool is_deliberate)
         }
 }
 
+void Flare::on_triggered_on_ground(const P& p) const
+{
+        if (map::g_seen.at(p)) {
+                msg_log::add("The flare ignites!");
+        }
+
+        auto* const t =
+                static_cast<terrain::LitFlare*>(
+                        terrain::make(terrain::Id::lit_flare, p));
+
+        t->set_nr_turns(std_fuse_turns());
+
+        game_time::add_mob(t);
+
+        map::update_vision();
+}
+
 void SmokeGrenade::on_player_ignite() const
 {
         msg_log::add("I ignite a smoke grenade.");
@@ -465,6 +561,15 @@ void SmokeGrenade::drop_lit_at_player(const bool is_deliberate)
         if (t_id != terrain::Id::chasm) {
                 explosion::run_smoke_explosion_at(map::g_player->m_pos);
         }
+}
+
+void SmokeGrenade::on_triggered_on_ground(const P& p) const
+{
+        if (map::g_seen.at(p)) {
+                msg_log::add("The smoke grenade ignites!");
+        }
+
+        explosion::run_smoke_explosion_at(p);
 }
 
 Color SmokeGrenade::ignited_projectile_color() const
