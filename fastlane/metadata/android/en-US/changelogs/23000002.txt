@@ -1,0 +1,6 @@
+- Swipe gestures to move and navigate menus
+- Menu scrollbars and close buttons
+- Easy-access actions toolbar with togglable/movable buttons
+- Refined inventory screen with action context pins
+- Refined throw item screen with context pins
+- Support for right-handed and southpaw play (just swipe at the side menu)

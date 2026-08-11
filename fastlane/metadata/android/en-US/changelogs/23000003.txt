@@ -1,0 +1,3 @@
+- Explosive items on the ground can now be triggered by neighbouring explosive catalysts (like other bombs). This is the only planned gameplay change from upstream 23.0.0.
+- Re-added the Swap Weapons action. Default is toggled off.
+- Some UI formatting fixes

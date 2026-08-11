@@ -1,29 +1,10 @@
 build/
-target/
-obj/
-dep/
-test/bin
-test/obj
-*.o
 *~
 \#*
-*.patch
-CppCheckResults.xml
-*.mk
-*.layout
-*.layout.orig
-*.depend
-*.pyc
-clang-tidy-commands.log
 .cache
 
 # Vim temporary files
 *.swp
-
-# Emacs gtags
-GPATH
-GRTAGS
-GTAGS
 
 # Temporary files
 tmp/
