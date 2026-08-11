@@ -20,8 +20,6 @@
 // -----------------------------------------------------------------------------
 static const std::vector<ColoredString>& credits_lines()
 {
-        // NOTE: When the Android port moves to github, add its repository
-        // link under the Werewolf Camp entry
         static const std::vector<ColoredString> lines = {
                 {"Infra Arcana", colors::title()},
                 // NOTE: The bitmap fonts are ASCII only (no "o umlaut")
@@ -31,6 +29,7 @@ static const std::vector<ColoredString>& credits_lines()
                 {"Android port", colors::title()},
                 {"by Werewolf Camp", colors::text()},
                 {"werewolf.camp", colors::gray()},
+                {"github.com/tyrannotorus/cpp-infra-arcana-android", colors::gray()},
         };
 
         return lines;
