@@ -24,18 +24,27 @@ jobs:
       - name: Install NDK + CMake
         run: sdkmanager "ndk;28.0.13004108" "cmake;3.22.1"
 
-      - name: Stamp version from tag
+      # The tagged source must already carry the version - F-Droid builds
+      # the tag as-is, so a CI-time rewrite would make the two APKs differ.
+      # A release with a forgotten bump fails here instead of shipping.
+      - name: Verify committed version matches tag
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           IFS='.' read -r MAJOR MINOR PATCH BUILD <<< "$TAG"
           BUILD="${BUILD:-0}"
           VERSION_CODE=$(( MAJOR * 1000000 + MINOR * 10000 + PATCH * 100 + BUILD ))
-          sed -i "s/versionCode = .*/versionCode = $VERSION_CODE/" android/app/build.gradle.kts
-          sed -i "s/versionName = .*/versionName = \"$TAG\"/" android/app/build.gradle.kts
-          # Stamp the native build increment shown on the title screen,
-          # preserving any phase suffix (e.g. "-alpha") after the number
-          sed -i -E "s/(g_version_str \+ \")\.[0-9]+/\1.$BUILD/" src/version.cpp
-          grep -n "g_build_version_str" src/version.cpp
+          fail=0
+          grep -q "versionCode = $VERSION_CODE\$" android/app/build.gradle.kts \
+            || { echo "::error::build.gradle.kts versionCode != $VERSION_CODE"; fail=1; }
+          grep -q "versionName = \"$TAG\"\$" android/app/build.gradle.kts \
+            || { echo "::error::build.gradle.kts versionName != \"$TAG\""; fail=1; }
+          grep -q "g_version_str = \"v$MAJOR.$MINOR.$PATCH\"" src/version.cpp \
+            || { echo "::error::version.cpp g_version_str != v$MAJOR.$MINOR.$PATCH"; fail=1; }
+          grep -qE "g_version_str \+ \"\.$BUILD(-|\")" src/version.cpp \
+            || { echo "::error::version.cpp build increment != .$BUILD"; fail=1; }
+          test -f "fastlane/metadata/android/en-US/changelogs/$VERSION_CODE.txt" \
+            || { echo "::error::missing fastlane changelog $VERSION_CODE.txt"; fail=1; }
+          exit $fail
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > $HOME/ia-release.keystore
