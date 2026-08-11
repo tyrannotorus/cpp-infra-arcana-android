@@ -57,14 +57,12 @@
 // putting something down is a [ drop ] action pin of the item in the
 // inventory, so the bar does not need a second way in (the separate
 // "Drop which item?" screen it opened is gone with it) - and NO
-// "reload" or "swap to readied weapon" actions (removed 2026-08-06):
-// both are context pins of the targeting mode now, reached by engaging
-// the target button and tapping [ reload ] / [ swap weapon ]. That is
-// only safe because targeting engages even when the shot cannot be
-// taken (see game_commands::ranged_wpn_unfireable_reason) - a gun that
-// has run dry is exactly when both are wanted, and refusing to open the
-// marker then would strand them. Reloading is additionally a [ reload ]
-// pin of the wielded firearm in the inventory.
+// "reload" action: it is a context pin of the targeting mode (safe
+// because targeting engages even when the shot cannot be taken, see
+// game_commands::ranged_wpn_unfireable_reason) and a [ reload ] pin of
+// the wielded firearm in the inventory. The "swap" button coexists with
+// the [ swap weapon ] targeting pin - swapping is also wanted outside
+// of aiming.
 static const std::vector<action_bar::ActionDef> s_all_actions = {
         // NOTE: The target and throw buttons TOGGLE their targeting mode
         // rather than sending the fire/throw key - tapping one while
@@ -73,15 +71,16 @@ static const std::vector<action_bar::ActionDef> s_all_actions = {
         // the [ fire ] / [ throw ] context pin.
         {"fire", "point_scan", "Target wielded weapon", {SDLK_F14, false}},
         {"throw", "switch_access_shortcut", "Throw item", {SDLK_F15, false}},
+        {"swap", "swap_horiz", "Swap to readied weapon", {'z', false}, false},
         {"inventory", "backpack", "Inventory", {'i', false}},
-        {"medical", "medical_services", "Use medical bag", {'b', false}},
+        {"medical", "medical_services", "Use medical bag", {'b', false}, false},
         {"cast", "auto_fix_high", "Cast spell", {'x', false}},
         {"wait", "hourglass_empty", "Wait one turn", {'.', false}},
-        {"rest", "bedtime", "Rest", {'s', false}},
+        {"rest", "bedtime", "Rest", {'s', false}, false},
         {"kick", "sports_martial_arts", "Kick", {'k', false}},
         {"noise", "campaign", "Make noise", {'n', false}},
         {"lantern", "flashlight_on", "Toggle lantern", {'l', false}},
-        {"minimap", "map", "View minimap", {'m', false}},
+        {"minimap", "map", "View minimap", {'m', false}, false},
 };
 
 // The hamburger menu button - always the first button, not configurable. It
@@ -94,7 +93,7 @@ static const action_bar::ActionDef s_hamburger = {
         {SDLK_ESCAPE, false}};
 
 // User configuration: ordering of all action ids, and the disabled subset
-// (default: registry order, everything enabled)
+// (default: registry order, enabled per each action's default_enabled)
 static std::vector<std::string> s_order;
 static std::set<std::string> s_disabled;
 static bool s_config_loaded = false;
@@ -155,14 +154,19 @@ static void load_config_if_needed()
                 }
         }
 
-        // Append registry actions missing from the stored order (e.g. actions
-        // added in a newer version), so that new actions always surface
+        // Append registry actions missing from the stored order (new
+        // actions, or no stored config at all), toggled per their registry
+        // default. Actions in the stored order keep what the player chose.
         for (const auto& def : s_all_actions) {
                 if (std::find(
                             std::begin(s_order),
                             std::end(s_order),
                             def.id) == std::end(s_order)) {
                         s_order.push_back(def.id);
+
+                        if (!def.default_enabled) {
+                                s_disabled.insert(def.id);
+                        }
                 }
         }
 

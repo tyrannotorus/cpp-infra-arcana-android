@@ -27,6 +27,7 @@
 #include "io_display.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
+#include "item_explosive.hpp"
 #include "line_calc.hpp"
 #include "map.hpp"
 #include "map_parsing.hpp"
@@ -271,6 +272,11 @@ static void apply_explosion_on_pos(
 
                 game_time::add_mob(smoke);
         }
+
+        // The blast sets off any unlit explosives lying here. Done last,
+        // so that this cell is fully resolved (e.g. a carrier killed above
+        // has dropped their items) before the chained explosion runs.
+        item::trigger_explosives_on_ground_at(pos);
 }
 
 static void apply_explosion_property_on_pos(
@@ -306,6 +312,9 @@ static void apply_explosion_property_on_pos(
 
                         corpse->m_properties.apply(prop_cpy);
                 }
+
+                // The flames set off any unlit explosives lying here
+                item::trigger_explosives_on_ground_at(pos);
         }
 }
 

@@ -60,66 +60,6 @@ static const int s_nr_turns_to_handle_armor = 7;
 // the screen border, and keeps the item names lined up.
 static const int s_key_indent_w = 4;
 
-// Index can mean Slot index or Backpack Index (both start from zero)
-static bool run_drop_query(
-        item::Item& item,
-        const InvType inv_type,
-        const size_t idx)
-{
-        TRACE_FUNC_BEGIN;
-
-        const item::ItemData& data = item.data();
-
-        msg_log::clear();
-
-        if (!data.is_stackable || (item.m_nr_items <= 1)) {
-                // Not a stack
-                TRACE << "Item not stackable, or only one item" << std::endl;
-
-                item_drop::drop_item_from_inv(*map::g_player, inv_type, idx);
-
-                TRACE_FUNC_END;
-
-                return true;
-        }
-
-        TRACE << "Item is stackable and more than one" << std::endl;
-
-        states::draw();
-
-        const std::string title =
-                item.name(ItemNameType::plural) +
-                " - drop how many?";
-
-        query::QueryNumberConfig query_config;
-
-        query_config.allowed_range = {0, item.m_nr_items};
-        query_config.default_value = item.m_nr_items;
-        query_config.cancel_returns_default = false;
-
-        const int nr_to_drop = query::number(query_config, title);
-
-        if (nr_to_drop <= 0) {
-                TRACE << "Nr to drop <= 0, nothing to be done" << std::endl;
-
-                TRACE_FUNC_END;
-
-                return false;
-        }
-
-        // Number to drop is at least one
-
-        item_drop::drop_item_from_inv(
-                *map::g_player,
-                inv_type,
-                idx,
-                nr_to_drop);
-
-        TRACE_FUNC_END;
-
-        return true;
-}
-
 static void cap_str_to_menu_x1(
         std::string& str,
         const int str_x0)
@@ -254,7 +194,7 @@ static void unequip_slot_item(InvSlot& slot)
         game_time::tick();
 }
 
-// Drops the item (asking how many, for a stack), or refuses to
+// Drops the item (ONE of a stack), or refuses to
 static void try_drop_item(
         item::Item& item,
         const InvType inv_type,
@@ -292,9 +232,11 @@ static void try_drop_item(
                 return;
         }
 
-        if (run_drop_query(item, inv_type, idx)) {
-                game_time::tick();
-        }
+        // One item per tap - no "drop how many?" count query (poor mobile
+        // UX)
+        item_drop::drop_item_from_inv(*map::g_player, inv_type, idx, 1);
+
+        game_time::tick();
 }
 
 // Opens the throw marker with the item, unless throwing it is refused (or
@@ -1226,13 +1168,24 @@ void InvState::run_item_action(const ItemActionId action_id)
 
         case ItemActionId::drop:
                 if (marked.item && is_lit_explosive(*marked.item)) {
-                        // Put down where the player stands, still burning
-                        static_cast<item::Explosive*>(marked.item)
-                                ->drop_lit_at_player(true);
+                        // Put down where the player stands, still burning.
+                        // The screen closes FIRST - the drop can explode
+                        // things, which must play out on a visible map.
+                        auto* const explosive =
+                                static_cast<item::Explosive*>(marked.item);
+
+                        states::pop();
+
+                        // NOTE: This object is now deleted!
+
+                        explosive->drop_lit_at_player(true);
 
                         game_time::tick();
+
+                        return;
                 }
-                else if (marked.item) {
+
+                if (marked.item) {
                         try_drop_item(
                                 *marked.item,
                                 marked.inv_type,

@@ -78,6 +78,12 @@ public:
         virtual Color ignited_projectile_color() const = 0;
         virtual std::string str_on_player_throw() const = 0;
 
+        // Reaction of one unlit explosive of this type when fire or an
+        // explosion washes over the cell it lies in. The item has already
+        // been taken off the map when this runs - in a stack, each item
+        // reacts separately, one after the other.
+        virtual void on_triggered_on_ground(const P& p) const = 0;
+
 protected:
         Explosive(ItemData* const item_data) :
                 Item(item_data),
@@ -102,6 +108,15 @@ protected:
 // The lit explosives the player is carrying, in backpack order
 std::vector<Explosive*> player_lit_explosives();
 
+// Fire or an explosion washing over a map cell sets off the explosives
+// lying there: the unlit item stack, and any lit dynamite (a catalyst
+// does not care whether the fuse is already burning)
+void trigger_explosives_on_ground_at(const P& pos);
+
+// Sets off explosives lying in burning cells, or sharing a cell with a
+// burning flare. Runs once per standard turn, after terrains have acted.
+void trigger_explosives_on_burning_cells();
+
 class Dynamite : public Explosive
 {
 public:
@@ -111,6 +126,7 @@ public:
         void on_thrown_ignited_landing(const P& p) override;
         void on_std_turn_player_hold_ignited() override;
         void drop_lit_at_player(bool is_deliberate) override;
+        void on_triggered_on_ground(const P& p) const override;
 
         Color ignited_projectile_color() const override
         {
@@ -140,6 +156,7 @@ public:
         void on_thrown_ignited_landing(const P& p) override;
         void on_std_turn_player_hold_ignited() override;
         void drop_lit_at_player(bool is_deliberate) override;
+        void on_triggered_on_ground(const P& p) const override;
 
         Color ignited_projectile_color() const override
         {
@@ -173,6 +190,7 @@ public:
         void on_thrown_ignited_landing(const P& p) override;
         void on_std_turn_player_hold_ignited() override;
         void drop_lit_at_player(bool is_deliberate) override;
+        void on_triggered_on_ground(const P& p) const override;
 
         Color ignited_projectile_color() const override
         {
@@ -206,6 +224,7 @@ public:
         void on_thrown_ignited_landing(const P& p) override;
         void on_std_turn_player_hold_ignited() override;
         void drop_lit_at_player(bool is_deliberate) override;
+        void on_triggered_on_ground(const P& p) const override;
 
         Color ignited_projectile_color() const override;
 

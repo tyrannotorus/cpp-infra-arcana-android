@@ -125,6 +125,10 @@ public:
 
         void on_new_turn() override;
 
+        // Explodes, whether the fuse has run out or a catalyst set it off.
+        // NOTE: This object is deleted!
+        void detonate();
+
 private:
         int m_nr_turns_left {1};
 };

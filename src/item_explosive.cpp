@@ -163,6 +163,94 @@ std::vector<Explosive*> player_lit_explosives()
         return lit;
 }
 
+static void trigger_explosive_items_at(const P& pos)
+{
+        auto* const item = map::g_items.at(pos);
+
+        if (!item || (item->data().type != ItemType::explosive)) {
+                return;
+        }
+
+        // The stack is taken off the map before anything goes off, so that
+        // chained explosions cannot set it off a second time
+        map::g_items.at(pos) = nullptr;
+
+        const int nr_items =
+                item->data().is_stackable
+                ? item->m_nr_items
+                : 1;
+
+        const auto* const explosive = static_cast<Explosive*>(item);
+
+        // Each item of a stack reacts separately, one after the other
+        for (int i = 0; i < nr_items; ++i) {
+                explosive->on_triggered_on_ground(pos);
+        }
+
+        delete explosive;
+}
+
+static terrain::LitDynamite* lit_dynamite_at(const P& pos)
+{
+        for (auto* const mob : game_time::g_mobs) {
+                if ((mob->id() == terrain::Id::lit_dynamite) &&
+                    (mob->pos() == pos)) {
+                        return static_cast<terrain::LitDynamite*>(mob);
+                }
+        }
+
+        return nullptr;
+}
+
+void trigger_explosives_on_ground_at(const P& pos)
+{
+        trigger_explosive_items_at(pos);
+
+        // A catalyst does not care whether the fuse is already burning -
+        // lit sticks lying here detonate as well. Re-scanned after each
+        // detonation: the chained explosions mutate the mob list.
+        while (auto* const lit = lit_dynamite_at(pos)) {
+                if (map::g_seen.at(pos)) {
+                        msg_log::add("The dynamite explodes!");
+                }
+
+                lit->detonate();
+
+                // NOTE: "lit" is now deleted
+        }
+}
+
+void trigger_explosives_on_burning_cells()
+{
+        // Flares burning on the ground are fire catalysts too - set off
+        // explosives sharing their cell. Positions are collected first:
+        // triggering runs explosions, which mutate the mob list.
+        std::vector<P> lit_flare_positions;
+
+        for (const auto* const mob : game_time::g_mobs) {
+                if (mob->id() == terrain::Id::lit_flare) {
+                        lit_flare_positions.push_back(mob->pos());
+                }
+        }
+
+        for (const P& pos : lit_flare_positions) {
+                trigger_explosives_on_ground_at(pos);
+        }
+
+        const int map_w = map::w();
+        const int map_h = map::h();
+
+        for (int x = 0; x < map_w; ++x) {
+                for (int y = 0; y < map_h; ++y) {
+                        const P pos(x, y);
+
+                        if (map::g_terrain.at(pos)->is_burning()) {
+                                trigger_explosives_on_ground_at(pos);
+                        }
+                }
+        }
+}
+
 void Dynamite::on_player_ignite() const
 {
         msg_log::add("I light a dynamite stick.");
@@ -245,6 +333,15 @@ void Dynamite::drop_lit_at_player(const bool is_deliberate)
 
                 game_time::add_mob(t);
         }
+}
+
+void Dynamite::on_triggered_on_ground(const P& p) const
+{
+        if (map::g_seen.at(p)) {
+                msg_log::add("The dynamite explodes!");
+        }
+
+        explosion::run(p, ExplType::expl);
 }
 
 void Molotov::on_player_ignite() const
@@ -359,6 +456,32 @@ void Molotov::drop_lit_at_player(const bool is_deliberate)
                 {prop::make(prop::Id::burning)});
 }
 
+void Molotov::on_triggered_on_ground(const P& p) const
+{
+        if (map::g_seen.at(p)) {
+                msg_log::add("The Molotov Cocktail bursts into flames!");
+        }
+
+        Snd snd(
+                "I hear an explosion!",
+                audio::SfxId::explosion_molotov,
+                IgnoreMsgIfOriginSeen::yes,
+                p,
+                nullptr,
+                SndVol::high,
+                AlertsMon::yes);
+
+        snd.run();
+
+        explosion::run(
+                p,
+                ExplType::apply_prop,
+                EmitExplSnd::no,
+                0,
+                ExplExclCenter::no,
+                {prop::make(prop::Id::burning)});
+}
+
 void Flare::on_player_ignite() const
 {
         msg_log::add("I light a Flare.");
@@ -382,12 +505,16 @@ void Flare::on_std_turn_player_hold_ignited()
 void Flare::on_thrown_ignited_landing(const P& p)
 {
         auto* const t =
-                static_cast<terrain::LitDynamite*>(
+                static_cast<terrain::LitFlare*>(
                         terrain::make(terrain::Id::lit_flare, p));
 
         t->set_nr_turns(m_fuse_turns);
 
         game_time::add_mob(t);
+
+        // The burning flare is a fire catalyst - it sets off any unlit
+        // explosives lying where it lands
+        trigger_explosives_on_ground_at(p);
 }
 
 void Flare::drop_lit_at_player(const bool is_deliberate)
@@ -409,13 +536,34 @@ void Flare::drop_lit_at_player(const bool is_deliberate)
 
         if (t_id != terrain::Id::chasm) {
                 auto* const t =
-                        static_cast<terrain::LitDynamite*>(
+                        static_cast<terrain::LitFlare*>(
                                 terrain::make(terrain::Id::lit_flare, p));
 
                 t->set_nr_turns(fuse_turns);
 
                 game_time::add_mob(t);
+
+                // The burning flare is a fire catalyst - it sets off any
+                // unlit explosives lying here
+                trigger_explosives_on_ground_at(p);
         }
+}
+
+void Flare::on_triggered_on_ground(const P& p) const
+{
+        if (map::g_seen.at(p)) {
+                msg_log::add("The flare ignites!");
+        }
+
+        auto* const t =
+                static_cast<terrain::LitFlare*>(
+                        terrain::make(terrain::Id::lit_flare, p));
+
+        t->set_nr_turns(std_fuse_turns());
+
+        game_time::add_mob(t);
+
+        map::update_vision();
 }
 
 void SmokeGrenade::on_player_ignite() const
@@ -465,6 +613,15 @@ void SmokeGrenade::drop_lit_at_player(const bool is_deliberate)
         if (t_id != terrain::Id::chasm) {
                 explosion::run_smoke_explosion_at(map::g_player->m_pos);
         }
+}
+
+void SmokeGrenade::on_triggered_on_ground(const P& p) const
+{
+        if (map::g_seen.at(p)) {
+                msg_log::add("The smoke grenade ignites!");
+        }
+
+        explosion::run_smoke_explosion_at(p);
 }
 
 Color SmokeGrenade::ignited_projectile_color() const
