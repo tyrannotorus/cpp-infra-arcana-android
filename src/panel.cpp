@@ -282,12 +282,15 @@ static void set_info_scrreen_panel(const P& max_gui_dims)
         const int info_screen_x0 = screen_center_x - ((info_screen_w / 2) - 1);
         const int info_screen_x1 = info_screen_x0 + info_screen_w - 1;
 
+        // NOTE: Inset by one row from the border box at the TOP and at the
+        // BOTTOM (the same inner margin as the inventory screen), so that
+        // the content is never flush against the border
         set_panel_area(
                 Panel::info_screen_content,
                 info_screen_x0,
-                panels::g_screen_margin_top + 1,
+                panels::g_screen_margin_top + 2,
                 info_screen_x1,
-                max_gui_dims.y - 2 - panels::g_screen_margin_bottom);
+                max_gui_dims.y - 3 - panels::g_screen_margin_bottom);
 }
 
 // -----------------------------------------------------------------------------

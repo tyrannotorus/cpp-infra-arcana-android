@@ -163,7 +163,7 @@ std::vector<Explosive*> player_lit_explosives()
         return lit;
 }
 
-void trigger_explosives_on_ground_at(const P& pos)
+static void trigger_explosive_items_at(const P& pos)
 {
         auto* const item = map::g_items.at(pos);
 
@@ -190,8 +190,53 @@ void trigger_explosives_on_ground_at(const P& pos)
         delete explosive;
 }
 
+static terrain::LitDynamite* lit_dynamite_at(const P& pos)
+{
+        for (auto* const mob : game_time::g_mobs) {
+                if ((mob->id() == terrain::Id::lit_dynamite) &&
+                    (mob->pos() == pos)) {
+                        return static_cast<terrain::LitDynamite*>(mob);
+                }
+        }
+
+        return nullptr;
+}
+
+void trigger_explosives_on_ground_at(const P& pos)
+{
+        trigger_explosive_items_at(pos);
+
+        // A catalyst does not care whether the fuse is already burning -
+        // lit sticks lying here detonate as well. Re-scanned after each
+        // detonation: the chained explosions mutate the mob list.
+        while (auto* const lit = lit_dynamite_at(pos)) {
+                if (map::g_seen.at(pos)) {
+                        msg_log::add("The dynamite explodes!");
+                }
+
+                lit->detonate();
+
+                // NOTE: "lit" is now deleted
+        }
+}
+
 void trigger_explosives_on_burning_cells()
 {
+        // Flares burning on the ground are fire catalysts too - set off
+        // explosives sharing their cell. Positions are collected first:
+        // triggering runs explosions, which mutate the mob list.
+        std::vector<P> lit_flare_positions;
+
+        for (const auto* const mob : game_time::g_mobs) {
+                if (mob->id() == terrain::Id::lit_flare) {
+                        lit_flare_positions.push_back(mob->pos());
+                }
+        }
+
+        for (const P& pos : lit_flare_positions) {
+                trigger_explosives_on_ground_at(pos);
+        }
+
         const int map_w = map::w();
         const int map_h = map::h();
 
@@ -199,8 +244,7 @@ void trigger_explosives_on_burning_cells()
                 for (int y = 0; y < map_h; ++y) {
                         const P pos(x, y);
 
-                        if (map::g_items.at(pos) &&
-                            map::g_terrain.at(pos)->is_burning()) {
+                        if (map::g_terrain.at(pos)->is_burning()) {
                                 trigger_explosives_on_ground_at(pos);
                         }
                 }
@@ -461,12 +505,16 @@ void Flare::on_std_turn_player_hold_ignited()
 void Flare::on_thrown_ignited_landing(const P& p)
 {
         auto* const t =
-                static_cast<terrain::LitDynamite*>(
+                static_cast<terrain::LitFlare*>(
                         terrain::make(terrain::Id::lit_flare, p));
 
         t->set_nr_turns(m_fuse_turns);
 
         game_time::add_mob(t);
+
+        // The burning flare is a fire catalyst - it sets off any unlit
+        // explosives lying where it lands
+        trigger_explosives_on_ground_at(p);
 }
 
 void Flare::drop_lit_at_player(const bool is_deliberate)
@@ -488,12 +536,16 @@ void Flare::drop_lit_at_player(const bool is_deliberate)
 
         if (t_id != terrain::Id::chasm) {
                 auto* const t =
-                        static_cast<terrain::LitDynamite*>(
+                        static_cast<terrain::LitFlare*>(
                                 terrain::make(terrain::Id::lit_flare, p));
 
                 t->set_nr_turns(fuse_turns);
 
                 game_time::add_mob(t);
+
+                // The burning flare is a fire catalyst - it sets off any
+                // unlit explosives lying here
+                trigger_explosives_on_ground_at(p);
         }
 }
 

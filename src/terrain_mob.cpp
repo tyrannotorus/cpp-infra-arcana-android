@@ -305,17 +305,23 @@ void LitDynamite::on_new_turn()
         --m_nr_turns_left;
 
         if (m_nr_turns_left <= 0) {
-                const P p(m_pos);
-
-                // Removing the dynamite before the explosion, so it can't be
-                // rendered after the explosion (e.g. if there are "more"
-                // prompts).
-                game_time::erase_mob(this, true);
+                detonate();
 
                 // NOTE: This object is now deleted
-
-                explosion::run(p, ExplType::expl, EmitExplSnd::yes);
         }
+}
+
+void LitDynamite::detonate()
+{
+        const P p(m_pos);
+
+        // Removed before the explosion, so it can't be rendered after it
+        // (e.g. if there are "more" prompts)
+        game_time::erase_mob(this, true);
+
+        // NOTE: This object is now deleted
+
+        explosion::run(p, ExplType::expl, EmitExplSnd::yes);
 }
 
 std::string LitDynamite::name(const Article article) const

@@ -53,6 +53,10 @@ struct ActionDef
         const char* label;
 
         Action action;
+
+        // Whether the button starts toggled on (a stored actions config
+        // takes precedence)
+        bool default_enabled {true};
 };
 
 // All configurable actions, in default order (excludes the hamburger)

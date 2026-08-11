@@ -108,13 +108,13 @@ protected:
 // The lit explosives the player is carrying, in backpack order
 std::vector<Explosive*> player_lit_explosives();
 
-// Fire or an explosion washing over a map cell sets off any unlit
-// explosives lying there (a mechanic of this port - upstream leaves items
-// on the ground untouched by fire and blasts)
+// Fire or an explosion washing over a map cell sets off the explosives
+// lying there: the unlit item stack, and any lit dynamite (a catalyst
+// does not care whether the fuse is already burning)
 void trigger_explosives_on_ground_at(const P& pos);
 
-// Sets off explosives lying in burning cells. Runs once per standard
-// turn, after terrains have acted.
+// Sets off explosives lying in burning cells, or sharing a cell with a
+// burning flare. Runs once per standard turn, after terrains have acted.
 void trigger_explosives_on_burning_cells();
 
 class Dynamite : public Explosive
