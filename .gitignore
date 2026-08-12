@@ -9,6 +9,9 @@ build/
 # Temporary files
 tmp/
 
+# Session handoff notes (local only)
+pickup.md
+
 # Android build outputs (build/ dirs are covered by the rule at the top)
 android/.gradle/
 android/app/.cxx/
