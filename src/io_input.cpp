@@ -1483,12 +1483,17 @@ static void handle_finger_up_event()
                         return;
                 }
 
-                // Swipes starting on the action bar are ignored
-                const auto bar_px_rect =
-                        io::panel_logical_px_rect(Panel::action_bar);
+                // Swipes starting on the action bar are ignored - only
+                // while the bar is shown (play states). Its panel rect
+                // still exists on menu screens, where it must not eat
+                // swipes (menus use the full screen height).
+                if (action_bar::is_visible()) {
+                        const auto bar_px_rect =
+                                io::panel_logical_px_rect(Panel::action_bar);
 
-                if (bar_px_rect.is_pos_inside(start_logical_px)) {
-                        return;
+                        if (bar_px_rect.is_pos_inside(start_logical_px)) {
+                                return;
+                        }
                 }
 
                 // Swiping the side stats panel slides it to the other side
