@@ -70,6 +70,10 @@ static int s_video_scale_factor = 1;
 static bool s_side_panel_left = false;
 static std::string s_action_bar_order;
 static std::string s_action_bar_disabled;
+static bool s_is_dpad_movement = false;
+static int s_dpad_offset_px_x = 0;
+static int s_dpad_offset_px_y = 0;
+static int s_dpad_scale_pct = 100;
 
 // Scale of the in-world (map) display, relative to the gui. Applied in tiles
 // mode only (scaling text mode would require stretched glyph rendering). On
@@ -353,6 +357,14 @@ static void set_default_variables()
 
         s_action_bar_order = "";
         s_action_bar_disabled = "";
+
+        // Swiping the map is what moves by default - the pad is offered to
+        // players who would rather press keys than aim a gesture
+        s_is_dpad_movement = false;
+        s_dpad_offset_px_x = 0;
+        s_dpad_offset_px_y = 0;
+        s_dpad_scale_pct = 100;
+
         s_video_scale_factor = calc_default_video_scale_factor(native_res);
         s_brightness_pct = 100;
         s_text_mode_filled_walls = true;
@@ -435,6 +447,17 @@ static bool read_config_file()
 
         s_action_bar_order = config["action_bar_order"];
         s_action_bar_disabled = config["action_bar_disabled"];
+
+        // NOTE: Guarded - a config file written before the movement pad
+        // existed has none of these keys, and reading them as zeroes would
+        // scale the pad down to nothing
+        if (config.has("dpad_movement")) {
+                s_is_dpad_movement = config["dpad_movement"] == "1";
+                s_dpad_offset_px_x = to_int(config["dpad_offset_px_x"]);
+                s_dpad_offset_px_y = to_int(config["dpad_offset_px_y"]);
+                s_dpad_scale_pct = to_int(config["dpad_scale_pct"]);
+        }
+
         s_video_scale_factor =
                 std::clamp(
                         to_int(config["video_scale_factor"]),
@@ -521,6 +544,10 @@ static void write_config_file()
         config["map_scale_factor"] = std::to_string(s_map_scale_factor);
         config["action_bar_order"] = s_action_bar_order;
         config["action_bar_disabled"] = s_action_bar_disabled;
+        config["dpad_movement"] = s_is_dpad_movement ? "1" : "0";
+        config["dpad_offset_px_x"] = std::to_string(s_dpad_offset_px_x);
+        config["dpad_offset_px_y"] = std::to_string(s_dpad_offset_px_y);
+        config["dpad_scale_pct"] = std::to_string(s_dpad_scale_pct);
         config["video_scale_factor"] = std::to_string(s_video_scale_factor);
         config["brightness_pct"] = std::to_string(s_brightness_pct);
         config["renderer_type"] = std::to_string((int)s_renderer_type);
@@ -621,6 +648,7 @@ void init()
         s_options.emplace_back(std::make_unique<AudioBufferSizeOption>());
 
         // Input
+        s_options.emplace_back(std::make_unique<MovementModeOption>());
         s_options.emplace_back(std::make_unique<InputModeOption>());
         s_options.emplace_back(std::make_unique<DoubleClickTogglesFullscreenOption>());
         s_options.emplace_back(std::make_unique<AnyKeyConfirmMoreOption>());
@@ -743,6 +771,54 @@ void set_action_bar_layout(
 {
         s_action_bar_order = order_csv;
         s_action_bar_disabled = disabled_csv;
+
+        write_config_file();
+}
+
+bool is_dpad_movement()
+{
+        return s_is_dpad_movement;
+}
+
+void set_dpad_movement(const bool value)
+{
+        s_is_dpad_movement = value;
+
+        write_config_file();
+}
+
+int dpad_offset_px_x()
+{
+        return s_dpad_offset_px_x;
+}
+
+int dpad_offset_px_y()
+{
+        return s_dpad_offset_px_y;
+}
+
+int dpad_scale_pct()
+{
+        return s_dpad_scale_pct;
+}
+
+void set_dpad_placement(
+        const int offset_px_x,
+        const int offset_px_y,
+        const int scale_pct)
+{
+        // NOTE: The pad persists its placement whenever a drag ends, which
+        // includes every drag that changed nothing - do not rewrite the
+        // config file for those
+        if ((offset_px_x == s_dpad_offset_px_x) &&
+            (offset_px_y == s_dpad_offset_px_y) &&
+            (scale_pct == s_dpad_scale_pct)) {
+                return;
+        }
+
+        s_dpad_offset_px_x = offset_px_x;
+        s_dpad_offset_px_y = offset_px_y;
+        s_dpad_scale_pct = scale_pct;
 
         write_config_file();
 }
@@ -1146,6 +1222,37 @@ void AudioBufferSizeOption::change(const OptionChangeCommand command) const
                 << std::endl;
 
         io::init_sdl_audio();
+}
+
+std::string MovementModeOption::name() const
+{
+        return "Movement";
+}
+
+std::string MovementModeOption::descr() const
+{
+        return (
+                "Move by swiping the map in the direction to go, or with an "
+                "on-screen movement pad. The pad is placed in the bottom "
+                "corner opposite the stats panel - hold it to move or resize "
+                "it, and tap elsewhere to put it down.");
+}
+
+std::string MovementModeOption::value_str() const
+{
+        return s_is_dpad_movement ? "D-pad" : "Swipe";
+}
+
+OptionSubmenuType MovementModeOption::submenu_type() const
+{
+        return OptionSubmenuType::input;
+}
+
+void MovementModeOption::change(const OptionChangeCommand command) const
+{
+        (void)command;
+
+        s_is_dpad_movement = !s_is_dpad_movement;
 }
 
 std::string InputModeOption::name() const

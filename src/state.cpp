@@ -14,6 +14,7 @@
 #include "action_bar.hpp"
 #include "context_pins.hpp"
 #include "debug.hpp"
+#include "dpad.hpp"
 #include "draw_box.hpp"
 #include "io.hpp"
 #include "io_display.hpp"
@@ -186,8 +187,11 @@ void draw()
         }
 
         // The touch action bar is always drawn on top of every state, and
-        // the context pins with it - they are an overlay of whatever is
-        // being played, not content of a screen (see context_pins)
+        // the context pins and the movement pad with it - they are an
+        // overlay of whatever is being played, not content of a screen (see
+        // context_pins, dpad)
+        dpad::draw();
+
         action_bar::draw();
 
         context_pins::draw();

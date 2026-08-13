@@ -43,6 +43,19 @@ enum class DrawBg
         yes
 };
 
+// A touch interaction that changes what a gesture is going to do, rather
+// than doing something itself, has nothing to show for itself at the moment
+// it takes - the device's own haptics are what confirm it (see
+// haptic_feedback, and dpad, which is the only thing needing them).
+enum class HapticFeedback
+{
+        // Something was picked up or engaged (a long press landing)
+        press,
+
+        // Something clicked into place (the pad snapping to its slot)
+        tick
+};
+
 struct TileDrawObj
 {
         void draw() const;
@@ -270,6 +283,10 @@ void sleep(uint32_t duration);
 void clear_input();
 
 InputData read_input();
+
+// A short buzz from the device. Does nothing when the user has touch
+// feedback switched off in the system settings.
+void haptic_feedback(HapticFeedback kind);
 
 // Shows/hides the on-screen keyboard (the two finger tap gesture toggles
 // it manually - these are for screens that require text entry, e.g. the

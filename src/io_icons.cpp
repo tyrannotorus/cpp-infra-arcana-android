@@ -121,7 +121,8 @@ void draw_icon(
         const std::string& name,
         const P& center_px,
         const int px_size,
-        const Color& color)
+        const Color& color,
+        const double angle)
 {
         // Rasterize the vector art at exactly the size it is drawn at, so
         // that the icon is crisp.
@@ -185,7 +186,22 @@ void draw_icon(
                 color_adapted.g(),
                 color_adapted.b());
 
-        SDL_RenderCopy(g_sdl_renderer, texture, nullptr, &render_rect);
+        if (angle == 0.0) {
+                SDL_RenderCopy(g_sdl_renderer, texture, nullptr, &render_rect);
+
+                return;
+        }
+
+        // Turned about the destination rectangle's own center (the default
+        // pivot), so the glyph stays where it was placed
+        SDL_RenderCopyEx(
+                g_sdl_renderer,
+                texture,
+                nullptr,
+                &render_rect,
+                angle,
+                nullptr,
+                SDL_FLIP_NONE);
 }
 
 void cleanup_icons()
