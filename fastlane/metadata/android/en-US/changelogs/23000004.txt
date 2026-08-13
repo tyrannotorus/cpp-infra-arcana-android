@@ -1,0 +1,4 @@
+- Optional d-pad for movement, off by default (Options > Input > Movement)
+- Hold the d-pad to move or resize it; it swaps sides with the interface
+- Fixed a dead swipe zone at the bottom of menus
+- Fixed dropped characters when typing a name

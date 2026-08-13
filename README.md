@@ -68,10 +68,21 @@ signed only if an `android/keystore.properties` (gitignored) provides a keystore
 
 ## Releasing
 
-Tag the commit `vMAJOR.MINOR.PATCH.BUILD` (e.g. `v23.0.0.13`), then draft and publish a
-GitHub release for it. CI builds the release APK, stamps the version from the tag, signs
-it with the release key held in repository secrets (`KEYSTORE_BASE64`,
-`KEYSTORE_PASSWORD`, `KEY_PASSWORD`; key alias `release`), and attaches it to the release.
+The tagged source must already carry the version: F-Droid builds the tag as-is, so
+CI must not rewrite it. Commit these together, then tag:
+
+- `android/app/build.gradle.kts` — `versionCode` (MAJOR × 1000000 + MINOR × 10000 +
+  PATCH × 100 + BUILD) and `versionName` (the tag without its `v`)
+- `src/version.cpp` — the build increment in `g_build_version_str`, keeping any phase
+  suffix (`.4-alpha`); `g_version_str` stays at the vendored upstream version
+- `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`
+
+Tag the commit `vMAJOR.MINOR.PATCH.BUILD` (e.g. `v23.0.0.13` — no phase suffix in the
+tag), then draft and publish a GitHub release for it. CI verifies the committed version
+against the tag and fails the release if any of the above is missing or stale, then
+builds the release APK, signs it with the release key held in repository secrets
+(`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_PASSWORD`; key alias `release`), and
+attaches it to the release.
 
 ## How the port works
 
