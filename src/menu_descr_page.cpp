@@ -67,7 +67,7 @@ int MenuDescrPageState::list_x0(const int block_w) const
 {
         (void)block_w;
 
-        return panels::p0(Panel::menu_descr_list).x;
+        return panels::p0(m_list_panel).x;
 }
 
 int MenuDescrPageState::list_y0(const int nr_entries_shown) const
@@ -75,21 +75,18 @@ int MenuDescrPageState::list_y0(const int nr_entries_shown) const
         (void)nr_entries_shown;
 
         // Top aligned - the list grows downwards from the same row as the
-        // first line of the description text (the panel is inset from the
-        // border box, see panels::init)
-        return panels::p0(Panel::menu_descr_list).y;
+        // first line of the description text
+        return panels::p0(m_list_panel).y;
 }
 
 int MenuDescrPageState::list_max_x1() const
 {
-        return panels::p0(Panel::menu_descr_text).x - 2;
+        return panels::p1(m_list_panel).x;
 }
 
 int MenuDescrPageState::list_h() const
 {
-        // One row of buffer at the bottom, so that a full list does not
-        // run into the border box
-        return panels::h(Panel::menu_descr_list) - 1;
+        return panels::h(m_list_panel);
 }
 
 void MenuDescrPageState::draw_descr_lines(

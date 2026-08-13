@@ -43,6 +43,14 @@ void append_descr_text(
 class MenuDescrPageState : public MenuPageState
 {
 public:
+        // The default column pair suits a plain list; a page with a value
+        // column needs wider ones (see the settings page)
+        MenuDescrPageState(
+                Panel list_panel = Panel::menu_descr_list,
+                Panel descr_panel = Panel::menu_descr_text) :
+                m_list_panel(list_panel),
+                m_descr(descr_panel) {}
+
         bool try_begin_touch_drag(const P& logical_px) override;
 
         void on_touch_drag_move(const P& logical_px) override;
@@ -72,7 +80,9 @@ protected:
         int descr_text_w() const;
 
 private:
-        DescrColumn m_descr {Panel::menu_descr_text};
+        const Panel m_list_panel;
+
+        DescrColumn m_descr;
 
         int m_descr_last_marked_idx {-1};
 };

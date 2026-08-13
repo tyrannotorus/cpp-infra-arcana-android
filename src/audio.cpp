@@ -117,17 +117,6 @@ static void load_game_sound_effects()
         }
 }
 
-static void load_ambient_sounds()
-{
-        for (auto i = (int)audio::SfxId::AMB_START + 1;
-             i < (int)audio::SfxId::END;
-             ++i) {
-                const auto id = (audio::SfxId)i;
-
-                load_audio_id(id);
-        }
-}
-
 static int next_channel(
         const int from,
         const int first_channel,
@@ -250,13 +239,8 @@ void init()
 
         ASSERT(s_nr_files_loaded == (int)SfxId::AMB_START);
 
-        if (config::is_ambient_audio_preloaded() &&
-            config::is_ambient_audio_enabled()) {
-                load_ambient_sounds();
-
-                // -1 to adjust for SfxId::AMB_START.
-                ASSERT(s_nr_files_loaded == ((int)SfxId::END - 1));
-        }
+        // NOTE: The ambient clips are NOT preloaded - each one is loaded the
+        // first time it plays, to keep startup short and memory down
 
         // Load music
         s_mus_chunks.resize((size_t)MusId::END);

@@ -418,23 +418,10 @@ static SDL_Renderer* create_renderer()
 {
         TRACE_FUNC_BEGIN;
 
-        uint32_t flags = 0U;
-
-        switch (config::renderer_type()) {
-        case RendererType::auto_select:
-                break;
-
-        case RendererType::sw:
-                flags = SDL_RENDERER_SOFTWARE;
-                break;
-
-        case RendererType::END:
-                ASSERT(false);
-                break;
-        }
-
+        // No renderer flags - SDL picks the best driver it can, which on a
+        // phone means the accelerated one
         SDL_Renderer* const renderer =
-                SDL_CreateRenderer(io::g_sdl_window, -1, flags);
+                SDL_CreateRenderer(io::g_sdl_window, -1, 0U);
 
         if (!renderer) {
                 TRACE_ERROR_RELEASE
@@ -743,7 +730,12 @@ void init_sdl_audio()
         const int audio_freq = 44100;
         const Uint16 audio_format = MIX_DEFAULT_FORMAT;
         const int audio_channels = MIX_DEFAULT_CHANNELS;
-        const int audio_buffers = config::audio_buffer_size();
+
+        // Chunk size in sample frames. Big enough that the mixer is not
+        // starved (an underrun is heard as crackling), small enough that a
+        // sound effect still lands with the turn that caused it - about 12
+        // ms at the frequency above.
+        const int audio_buffers = 512;
 
         const int result =
                 Mix_OpenAudio(
@@ -819,7 +811,7 @@ void cleanup_other()
         TRACE_FUNC_END;
 }
 
-void on_user_toggle_fullscreen()
+void on_render_device_reset()
 {
         TRACE_FUNC_BEGIN;
 
@@ -881,12 +873,15 @@ void disable_clip_rect()
         SDL_RenderSetClipRect(g_sdl_renderer, nullptr);
 }
 
-void draw_character_at_px(
+// Draws the glyph into a cell of the given size, stretching it from the
+// font's own cell (see draw_character_at_px, draw_map_character_at_px)
+static void draw_character_in_cell(
         const char character,
         P px_pos,
         const Color& color,
         const io::DrawBg draw_bg,
-        const Color& bg_color)
+        const Color& bg_color,
+        const P& cell_px_dims)
 {
         // TODO: Black foreground looks terrible with grayscale shaded font
         // image (all shades of white are colored black). The current solution
@@ -894,13 +889,16 @@ void draw_character_at_px(
         // really necessary.
         ASSERT(color != colors::black());
 
-        P gui_cell_px_dims(config::gui_cell_px_w(), config::gui_cell_px_h());
+        // The glyph's size in the font image
+        const P font_cell_px_dims(
+                config::gui_cell_px_w(),
+                config::gui_cell_px_h());
 
         if (draw_bg == io::DrawBg::yes) {
                 // NOTE: No rendering offsets or scaling calculated yet, the
                 // rectangle function performs its own offsets and scaling.
                 io::draw_rectangle_filled(
-                        {px_pos, px_pos + gui_cell_px_dims - 1},
+                        {px_pos, px_pos + cell_px_dims - 1},
                         bg_color);
         }
 
@@ -908,15 +906,15 @@ void draw_character_at_px(
         // NOTE: We expect one pixel separator between each glyph.
         auto char_px_pos = gfx::character_pos(character);
 
-        char_px_pos.x *= (gui_cell_px_dims.x + 1);
-        char_px_pos.y *= (gui_cell_px_dims.y);
+        char_px_pos.x *= (font_cell_px_dims.x + 1);
+        char_px_pos.y *= (font_cell_px_dims.y);
 
         SDL_Rect clip_rect;
 
         clip_rect.x = char_px_pos.x;
         clip_rect.y = char_px_pos.y;
-        clip_rect.w = gui_cell_px_dims.x;
-        clip_rect.h = gui_cell_px_dims.y;
+        clip_rect.w = font_cell_px_dims.x;
+        clip_rect.h = font_cell_px_dims.y;
 
         // NOTE: Drawing happens at logical resolution - video scaling and
         // window centering are applied when compositing the display textures
@@ -927,11 +925,11 @@ void draw_character_at_px(
 
         render_rect.x = px_pos.x;
         render_rect.y = px_pos.y;
-        render_rect.w = gui_cell_px_dims.x;
-        render_rect.h = gui_cell_px_dims.y;
+        render_rect.w = cell_px_dims.x;
+        render_rect.h = cell_px_dims.y;
 
         mark_current_display_used(
-                {px_pos, px_pos + gui_cell_px_dims - 1});
+                {px_pos, px_pos + cell_px_dims - 1});
 
         SDL_Texture* texture = nullptr;
 
@@ -954,6 +952,40 @@ void draw_character_at_px(
                 color_adapted.b());
 
         SDL_RenderCopy(g_sdl_renderer, texture, &clip_rect, &render_rect);
+}
+
+void draw_character_at_px(
+        const char character,
+        const P& px_pos,
+        const Color& color,
+        const io::DrawBg draw_bg,
+        const Color& bg_color)
+{
+        draw_character_in_cell(
+                character,
+                px_pos,
+                color,
+                draw_bg,
+                bg_color,
+                {config::gui_cell_px_w(), config::gui_cell_px_h()});
+}
+
+void draw_map_character_at_px(
+        const char character,
+        const P& px_pos,
+        const Color& color,
+        const Color& bg_color)
+{
+        // Stretched into the map cell, so that the game scale applies in
+        // text mode as it does to tiles. The background is drawn by the
+        // batched map pass, not here.
+        draw_character_in_cell(
+                character,
+                px_pos,
+                color,
+                io::DrawBg::no,
+                bg_color,
+                {config::map_cell_px_w(), config::map_cell_px_h()});
 }
 
 void draw_character(const CharacterDrawObj& obj)

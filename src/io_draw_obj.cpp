@@ -226,9 +226,9 @@ void MapDrawBuffer::draw() const
                         }
 
                         // NOTE: Must match the texture choice made by
-                        // draw_tile_at_px / draw_character_at_px - the point
-                        // of the two runs is that each one uses exactly one
-                        // texture
+                        // draw_tile_at_px / draw_map_character_at_px - the
+                        // point of the two runs is that each one uses
+                        // exactly one texture
                         const bool has_contours =
                                 is_tiles
                                 ? ((obj.color != colors::black()) &&
@@ -250,11 +250,10 @@ void MapDrawBuffer::draw() const
                                         obj.color_bg);
                         }
                         else {
-                                draw_character_at_px(
+                                draw_map_character_at_px(
                                         obj.character,
                                         px_pos,
                                         obj.color,
-                                        DrawBg::no,
                                         obj.color_bg);
                         }
                 }

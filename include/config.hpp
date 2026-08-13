@@ -8,8 +8,11 @@
 #define CONFIG_HPP
 
 #include <string>
+#include <vector>
 
 #include "browser.hpp"
+#include "config_options.hpp"
+#include "menu_descr_page.hpp"
 #include "menu_page.hpp"
 #include "state.hpp"
 
@@ -17,27 +20,6 @@ namespace hints
 {
 enum class Id;
 }  // namespace hints
-
-namespace config
-{
-enum class OptionSubmenuType;
-}  // namespace config
-
-enum class InputMode
-{
-        standard,
-        vi_keys,
-
-        END
-};
-
-enum class RendererType
-{
-        auto_select,
-        sw,
-
-        END
-};
 
 enum class HintsMode
 {
@@ -57,14 +39,8 @@ inline constexpr int g_tile_img_px = 20;
 
 void init();
 
-InputMode input_mode();
-bool is_double_click_toggle_fullscreen();
 std::string font_name();
-bool always_center_view_on_player();
-RendererType renderer_type();
 bool is_tiles_mode();
-void set_fullscreen(bool value);
-bool is_fullscreen();
 int video_scale_factor();
 int brightness_pct();
 
@@ -93,13 +69,6 @@ int dpad_offset_px_y();
 int dpad_scale_pct();
 void set_dpad_placement(int offset_px_x, int offset_px_y, int scale_pct);
 
-// Actual window size (i.e. not logical size)
-void set_window_px_w(int w);
-void set_window_px_h(int h);
-
-int window_px_w();
-int window_px_h();
-
 // Logical gui cell size
 int gui_cell_px_w();
 int gui_cell_px_h();
@@ -111,13 +80,10 @@ int map_cell_px_h();
 // Scale of the in-world (map) display relative to the gui (tiles mode)
 int map_scale_factor();
 
-bool text_mode_filled_walls();
 bool display_health_bars();
 bool use_trap_color_when_obscured();
 int master_volume_pct();
 bool is_ambient_audio_enabled();
-bool is_ambient_audio_preloaded();
-int audio_buffer_size();
 bool is_bot_playing();
 void enable_bot_playing();
 void toggle_bot_playing();
@@ -133,8 +99,6 @@ bool is_medical_bag_auto_choice();
 bool is_ranged_wpn_auto_reload();
 bool is_intro_lvl_skipped();
 bool is_intro_popup_skipped();
-bool is_any_key_confirm_more();
-bool is_auto_select_menu();
 HintsMode hints_mode();
 bool has_seen_hint_global(hints::Id id);
 void set_hint_seen_global(hints::Id id);
@@ -144,29 +108,14 @@ int delay_explosion();
 
 }  // namespace config
 
-// The options root page (Video / Audio / Input / Gameplay), reachable from
-// the title screen
-class OptionsState : public MenuPageState
+// Every setting on one page, reachable from the title screen and the
+// in-game menu: the options grouped into sections by their submenu type,
+// each under a header row, with the marked option's description beside the
+// list. Longer than the screen - it scrolls like any menu list.
+class SettingsState : public MenuDescrPageState
 {
 public:
-        OptionsState();
-
-        StateId id() const override;
-
-protected:
-        std::string page_title() const override;
-
-        std::vector<MenuPageEntry> page_entries() const override;
-
-        void on_entry_selected(int idx) override;
-};
-
-// An options submenu (e.g. Video), pushed from the options root page or
-// engaged directly from the in-game menu
-class OptionsSubmenuState : public MenuPageState
-{
-public:
-        OptionsSubmenuState(config::OptionSubmenuType submenu);
+        SettingsState();
 
         StateId id() const override;
 
@@ -176,6 +125,8 @@ protected:
         std::string page_hint() const override;
 
         std::vector<MenuPageEntry> page_entries() const override;
+
+        int default_marked_idx() const override;
 
         void on_entry_selected(int idx) override;
 
@@ -187,13 +138,25 @@ protected:
 
         void draw_page_content() override;
 
-        int list_x0(int block_w) const override;
-
-        int list_y0(int nr_entries_shown) const override;
-
         int list_max_x1() const override;
 
         bool use_left_right_keys() const override;
+
+private:
+        // A list row: an option, or a section header (option = nullptr)
+        struct Row
+        {
+                config::Option* option {nullptr};
+                std::string header {};
+        };
+
+        void build_rows();
+
+        void change_marked_option(
+                int idx,
+                config::OptionChangeCommand command);
+
+        std::vector<Row> m_rows {};
 };
 
 #endif  // CONFIG_HPP

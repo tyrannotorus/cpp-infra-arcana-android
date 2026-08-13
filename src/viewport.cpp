@@ -31,9 +31,6 @@ static P s_p0;
 static bool s_pan_active = false;
 static P s_pan_anchor_player_pos;
 
-// Always move viewport if focused position is closer to the edge than this:
-constexpr static int s_min_required_viewport_edge_dist = g_fov_radi_int + 1;
-
 static P get_view_dims()
 {
         const auto map_panel_gui_dims = panels::dims(Panel::map);
@@ -112,18 +109,6 @@ R get_map_view_area()
 
 void show(const P& map_pos, const ForceCentering force_centering)
 {
-        const auto map_view_area = get_map_view_area();
-
-        const auto smallest_dist_hor =
-                std::min(
-                        map_pos.x - map_view_area.p0.x,
-                        map_view_area.p1.x - map_pos.x);
-
-        const auto smallest_dist_ver =
-                std::min(
-                        map_pos.y - map_view_area.p0.y,
-                        map_view_area.p1.y - map_pos.y);
-
         const auto centered_pos = map_pos - visible_view_center();
 
         const P p0_before = s_p0;
@@ -134,21 +119,10 @@ void show(const P& map_pos, const ForceCentering force_centering)
                 s_pan_active = false;
         }
 
-        if (config::always_center_view_on_player() ||
-            (force_centering == ForceCentering::yes)) {
-                // Always center the view (both X/Y axis)
-                s_p0 = centered_pos;
-        }
-        else {
-                // Only center if needed (for X/Y axis separately)
-                if (smallest_dist_hor < s_min_required_viewport_edge_dist) {
-                        s_p0.x = centered_pos.x;
-                }
-
-                if (smallest_dist_ver < s_min_required_viewport_edge_dist) {
-                        s_p0.y = centered_pos.y;
-                }
-        }
+        // The view is always centered on the focused position: a phone screen
+        // shows too few cells to let the player walk near its edge, and a
+        // single step of the camera is what the follow tween below animates
+        s_p0 = centered_pos;
 
         // TODO: Instead of clearing all flash animations, it would be better to update their
         // positions. This prevents showing an attack flash animation the player if they are knocked

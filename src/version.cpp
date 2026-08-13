@@ -25,7 +25,7 @@ const std::string g_version_str = "v23.0.0";
 // versionName/versionCode in android/app/build.gradle.kts in sync for
 // local builds. The "-alpha" phase suffix is manual - dropping it when
 // the port leaves alpha is a deliberate decision, not a tag format.
-const std::string g_build_version_str = g_version_str + ".4-alpha";
+const std::string g_build_version_str = g_version_str + ".5-alpha";
 const std::string g_copyright_str = "(c) 2011-2025 Martin Tornqvist";
 const std::string g_license_str = "Infra Arcana is free software, see LICENSE.txt.";
 const std::string g_date_str = __DATE__;

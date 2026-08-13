@@ -20,12 +20,6 @@ struct SDL_Renderer;
 struct SDL_Texture;
 struct SDL_Surface;
 
-enum class IsFullscreen
-{
-        no,
-        yes
-};
-
 namespace io
 {
 struct FlashData
@@ -72,11 +66,7 @@ void put_px_on_surface(
 
 void init_window();
 
-void try_set_window_gui_cells(P new_gui_dims);
-
 void on_window_resized();
-
-bool is_window_maximized();
 
 P sdl_window_gui_dims();
 
@@ -93,12 +83,22 @@ void set_clip_rect_px(Panel panel, R px_area);
 
 void disable_clip_rect();
 
+// Draws the glyph at the font's own cell size
 void draw_character_at_px(
         char character,
-        P px_pos,
+        const P& px_pos,
         const Color& color,
         io::DrawBg draw_bg = io::DrawBg::yes,
         const Color& bg_color = {0, 0, 0});
+
+// Draws the glyph stretched into the map cell, so that the game scale
+// applies in text mode as it does to tiles. Draws no background - the
+// batched map pass fills those (see MapDrawBuffer).
+void draw_map_character_at_px(
+        char character,
+        const P& px_pos,
+        const Color& color,
+        const Color& bg_color);
 
 // Draws a tile out of the atlas, without touching the background or the
 // current display (the batched map drawing sets those up once - see

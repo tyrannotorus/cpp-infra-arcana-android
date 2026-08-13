@@ -15,7 +15,6 @@ enum class OptionSubmenuType
 {
         video,
         audio,
-        input,
         gameplay,
         END
 };
@@ -76,62 +75,7 @@ public:
         }
 };
 
-class PreloadAmbientAudioOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class AudioBufferSizeOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-
-        bool allow_browser_selection_audio() const override
-        {
-                return false;
-        }
-};
-
 class MovementModeOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class InputModeOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class DoubleClickTogglesFullscreenOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class AlwaysCenterViewOption : public Option
 {
 public:
         std::string name() const override;
@@ -152,26 +96,6 @@ public:
 };
 
 class FontOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class RendererTypeOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class FullscreenOption : public Option
 {
 public:
         std::string name() const override;
@@ -202,16 +126,6 @@ public:
 };
 
 class BrightnessOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class TextModeFilledWallsOption : public Option
 {
 public:
         std::string name() const override;
@@ -252,26 +166,6 @@ public:
 };
 
 class SkipIntroPopupOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class AnyKeyConfirmMoreOption : public Option
-{
-public:
-        std::string name() const override;
-        std::string descr() const override;
-        std::string value_str() const override;
-        OptionSubmenuType submenu_type() const override;
-        void change(OptionChangeCommand command) const override;
-};
-
-class AutoSelectMenuOption : public Option
 {
 public:
         std::string name() const override;

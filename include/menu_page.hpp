@@ -43,13 +43,17 @@ void forget_remembered_marked_entries();
 constexpr int g_divider_min_w = 28;
 constexpr int g_divider_max_w = 56;
 
-// One selectable row of a menu page. The label may start with a stylistic
-// "(x)" key prefix, which is drawn in the menu key colors. The value is an
-// optional second column (e.g. the current value of an option).
+// One row of a menu page. The label may start with a stylistic "(x)" key
+// prefix, which is drawn in the menu key colors. The value is an optional
+// second column (e.g. the current value of an option).
+//
+// A header row names the section below it: browsing steps over it, it
+// cannot be selected or tapped, and it has no value column.
 struct MenuPageEntry
 {
         std::string label {};
         std::string value {};
+        bool is_header {false};
 };
 
 // The standard fullscreen menu page: a fullscreen border with the page title

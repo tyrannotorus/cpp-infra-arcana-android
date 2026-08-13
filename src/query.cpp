@@ -39,16 +39,6 @@ void cleanup()
         s_is_inited = false;
 }
 
-void wait_for_key_press()
-{
-        if (s_is_inited && !config::is_bot_playing()) {
-                states::draw();
-                io::update_screen();
-
-                io::read_input();
-        }
-}
-
 BinaryAnswer yes_or_no(
         std::optional<SpecialChoice> special_choice,
         const AllowSpaceCancel allow_space_cancel)
@@ -172,29 +162,24 @@ void wait_for_msg_more()
         states::draw();
         io::update_screen();
 
-        // Determine criteria for confirming more prompt (decided by config)
-        if (config::is_any_key_confirm_more()) {
-                wait_for_key_press();
-        }
-        else {
-                // Only some keys confirm more prompts
-                while (true) {
-                        const auto input = io::read_input();
+        // Only some keys confirm more prompts - a tap sends one of them (see
+        // io_input), so this is what every confirmation goes through
+        while (true) {
+                const auto input = io::read_input();
 
-                        if ((input.key == SDLK_SPACE) ||
-                            (input.key == SDLK_ESCAPE) ||
-                            (input.key == SDLK_RETURN) ||
-                            (input.key == SDLK_TAB)
+                if ((input.key == SDLK_SPACE) ||
+                    (input.key == SDLK_ESCAPE) ||
+                    (input.key == SDLK_RETURN) ||
+                    (input.key == SDLK_TAB)
 #ifndef NDEBUG
-                            ||
-                            // Cheat key for descending
-                            (input.key == SDLK_F2) ||
-                            // Cheat key for teleporting
-                            (input.key == SDLK_F7)
+                    ||
+                    // Cheat key for descending
+                    (input.key == SDLK_F2) ||
+                    // Cheat key for teleporting
+                    (input.key == SDLK_F7)
 #endif  // NDEBUG
-                        ) {
-                                break;
-                        }
+                ) {
+                        break;
                 }
         }
 }

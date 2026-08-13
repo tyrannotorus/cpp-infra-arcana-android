@@ -412,28 +412,22 @@ static void draw_terrains()
                                 s_bg_color_obscured.at(i) = terrain_color_bg;
                         }
 
-                        if (config::text_mode_filled_walls()) {
-                                if (draw_obj.character == '#') {
-                                        // Any terrain with the '#' symbol is
-                                        // converted to a filled rectangle
-                                        // instead.
-                                        //
-                                        // NOTE: No other (static) terrain
-                                        // except WALLS (or terrain imitating
-                                        // walls, such as hidden doors) must
-                                        // use the '#' character!
-                                        //
-                                        draw_obj.character =
-                                                io::g_filled_rect_char;
-                                }
-                                else if (t->id() == terrain::Id::grate) {
-                                        // Since we are using filled rectangle
-                                        // as wall symbol, then we can use the
-                                        // '#' character for grates (looks good
-                                        // for this terrain, but obviously not
-                                        // if walls are also using this).
-                                        draw_obj.character = '#';
-                                }
+                        if (draw_obj.character == '#') {
+                                // Any terrain with the '#' symbol is converted
+                                // to a filled rectangle instead.
+                                //
+                                // NOTE: No other (static) terrain except WALLS
+                                // (or terrain imitating walls, such as hidden
+                                // doors) must use the '#' character!
+                                //
+                                draw_obj.character = io::g_filled_rect_char;
+                        }
+                        else if (t->id() == terrain::Id::grate) {
+                                // Since walls are drawn as filled rectangles,
+                                // the '#' character is free for grates (looks
+                                // good for this terrain, but obviously not if
+                                // walls are also using this).
+                                draw_obj.character = '#';
                         }
 
                         adapt_color_for_light_level(draw_obj.color, i);

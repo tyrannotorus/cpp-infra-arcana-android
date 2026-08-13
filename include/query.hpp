@@ -50,8 +50,6 @@ void init();
 
 void cleanup();
 
-void wait_for_key_press();
-
 // An optional third answer to a yes/no query, bound to a key and shown as
 // a tappable context pin, e.g. [ take ammo ] when asked to pick
 // up a loaded ranged weapon (see context_pins::add)

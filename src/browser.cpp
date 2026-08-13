@@ -222,15 +222,13 @@ MenuAction MenuBrowser::read(
 
                 // Allow selecting this menu item if:
                 //
-                // * A different position was selected with a letter key, or
-                // * Auto select is enabled, or
+                // * The letter of the already marked entry was pressed, or
                 // * The browser is configured to auto select
                 //
                 // Otherwise only jump to this position.
                 //
                 const bool allow_select =
                         !is_new_idx_selected ||
-                        config::is_auto_select_menu() ||
                         (force_auto_select == ForceAutoSelect::yes);
 
                 if (allow_select) {
@@ -254,13 +252,22 @@ void MenuBrowser::move(const VerDir dir)
 {
         const int last_idx = m_nr_items - 1;
 
-        if (dir == VerDir::up) {
-                // Up
-                m_y = (m_y == 0) ? last_idx : (m_y - 1);
-        }
-        else {
-                // Down
-                m_y = (m_y == last_idx) ? 0 : (m_y + 1);
+        // Steps over unselectable entries, wrapping in the same direction
+        int y = m_y;
+
+        for (int i = 0; i < m_nr_items; ++i) {
+                if (dir == VerDir::up) {
+                        y = (y == 0) ? last_idx : (y - 1);
+                }
+                else {
+                        y = (y == last_idx) ? 0 : (y + 1);
+                }
+
+                if (is_selectable(y)) {
+                        m_y = y;
+
+                        break;
+                }
         }
 
         update_range_shown();
@@ -425,6 +432,8 @@ void MenuBrowser::reset(const int nr_items, const int list_h)
 {
         m_nr_items = nr_items;
 
+        m_unselectable.clear();
+
         const std::vector<char>& keys = m_menu_keys;
 
         // The size of the list viewable on screen is capped to the global number of menu selection
@@ -474,5 +483,68 @@ void MenuBrowser::set_y_nearest_valid()
         }
         else {
                 m_y = 0;
+
+                return;
         }
+
+        if (is_selectable(m_y)) {
+                return;
+        }
+
+        // Unselectable (a header, or a stale remembered position) - take
+        // the nearest selectable entry below, else above
+        int idx = next_selectable(m_y, VerDir::down);
+
+        if (idx < 0) {
+                idx = next_selectable(m_y, VerDir::up);
+        }
+
+        if (idx >= 0) {
+                m_y = idx;
+        }
+}
+
+int MenuBrowser::next_selectable(const int idx, const VerDir dir) const
+{
+        const int step = (dir == VerDir::up) ? -1 : 1;
+
+        for (int i = idx; (i >= 0) && (i < m_nr_items); i += step) {
+                if (is_selectable(i)) {
+                        return i;
+                }
+        }
+
+        return -1;
+}
+
+bool MenuBrowser::is_selectable(const int idx) const
+{
+        if ((idx < 0) || (idx >= (int)m_unselectable.size())) {
+                return true;
+        }
+
+        return !m_unselectable[idx];
+}
+
+void MenuBrowser::set_unselectable(const std::vector<bool>& unselectable)
+{
+        const bool has_any_selectable =
+                std::any_of(
+                        std::cbegin(unselectable),
+                        std::cend(unselectable),
+                        [](const bool is_unselectable) {
+                                return !is_unselectable;
+                        });
+
+        if (!has_any_selectable && !unselectable.empty()) {
+                ASSERT(false);
+
+                return;
+        }
+
+        m_unselectable = unselectable;
+
+        set_y_nearest_valid();
+
+        update_range_shown();
 }

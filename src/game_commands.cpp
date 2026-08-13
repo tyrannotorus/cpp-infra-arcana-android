@@ -312,10 +312,7 @@ protected:
                         {"(C)haracter description", ""},
                         {"(M)essage history", ""},
                         {"(V)iew Minimap", ""},
-                        {"(V)ideo", ""},
-                        {"(A)udio", ""},
-                        {"(I)nput", ""},
-                        {"(G)ameplay", ""},
+                        {"(S)ettings", ""},
                         {"(T)ome of Wisdom", ""},
                         {"(Q)uit", ""},
                 };
@@ -357,26 +354,16 @@ protected:
                         states::push(std::make_unique<ViewMinimap>());
                 } break;
 
-                case 4:
-                case 5:
-                case 6:
-                case 7: {
-                        // An options submenu (Video / Audio / Input /
-                        // Gameplay)
-                        const auto submenu =
-                                (config::OptionSubmenuType)(idx - 4);
-
-                        states::push(
-                                std::make_unique<OptionsSubmenuState>(
-                                        submenu));
+                case 4: {
+                        states::push(std::make_unique<SettingsState>());
                 } break;
 
-                case 8: {
+                case 5: {
                         // Help (the manual)
                         states::push(std::make_unique<BrowseManual>());
                 } break;
 
-                case 9: {
+                case 6: {
                         // NOTE: An accepted quit pops all states down to
                         // the main menu - this state is destroyed, so
                         // nothing must be done here afterwards. A declined
@@ -770,67 +757,6 @@ static GameCmd to_cmd_default(const io::InputData& input)
         return GameCmd::undefined;
 }  // to_cmd_default
 
-static GameCmd to_cmd_vi(const io::InputData& input)
-{
-        // Overriden keys for vi-mode
-        switch (input.key) {
-        case 'l':
-                return GameCmd::right;
-
-        case 'L':
-                return GameCmd::auto_move_right;
-
-        case 'j':
-                return GameCmd::down;
-
-        case 'J':
-                return GameCmd::auto_move_down;
-
-        case 'h':
-                return GameCmd::left;
-
-        case 'H':
-                return GameCmd::auto_move_left;
-
-        case 'k':
-                return GameCmd::up;
-
-        case 'K':
-                return GameCmd::auto_move_up;
-
-        case 'u':
-                return GameCmd::up_right;
-
-        case 'U':
-                return GameCmd::auto_move_up_right;
-
-        case 'n':
-                return GameCmd::down_right;
-
-        case 'N':
-                return GameCmd::auto_move_down_right;
-
-        case 'b':
-                return GameCmd::down_left;
-
-        case 'B':
-                return GameCmd::auto_move_down_left;
-
-        case 'y':
-                return GameCmd::up_left;
-
-        case 'Y':
-                return GameCmd::auto_move_up_left;
-
-        default:
-                break;
-        }
-
-        // Input not overriden, delegate to default keys
-        return to_cmd_default(input);
-
-}  // to_cmd_vi
-
 // -----------------------------------------------------------------------------
 // game_commands
 // -----------------------------------------------------------------------------
@@ -838,20 +764,7 @@ namespace game_commands
 {
 GameCmd to_cmd(const io::InputData& input)
 {
-        switch (config::input_mode()) {
-        case InputMode::standard:
-                return to_cmd_default(input);
-
-        case InputMode::vi_keys:
-                return to_cmd_vi(input);
-
-        case InputMode::END:
-                break;
-        }
-
-        PANIC;
-
-        return (GameCmd)0;
+        return to_cmd_default(input);
 }
 
 void handle(const GameCmd cmd)

@@ -43,19 +43,7 @@ static std::string make_window_title()
         return title;
 }
 
-static uint32_t get_sdl_window_flags(const IsFullscreen is_fullscreen)
-{
-        if (is_fullscreen == IsFullscreen::no) {
-                return SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-        }
-        else {
-                return SDL_WINDOW_FULLSCREEN_DESKTOP;
-        }
-}
-
-static SDL_Window* create_sdl_window(
-        const P& px_dims,
-        const IsFullscreen is_fullscreen)
+static SDL_Window* create_sdl_window(const P& px_dims)
 {
         TRACE_FUNC_BEGIN;
 
@@ -66,8 +54,6 @@ static SDL_Window* create_sdl_window(
 
         const auto title = make_window_title();
 
-        const auto sdl_window_flags = get_sdl_window_flags(is_fullscreen);
-
         window =
                 SDL_CreateWindow(
                         title.c_str(),
@@ -75,7 +61,7 @@ static SDL_Window* create_sdl_window(
                         SDL_WINDOWPOS_CENTERED,
                         px_dims.x,
                         px_dims.y,
-                        sdl_window_flags);
+                        SDL_WINDOW_FULLSCREEN_DESKTOP);
 
         if (!window) {
                 TRACE << "Failed to create window: "
@@ -152,36 +138,7 @@ static SDL_Window* init_window_fullscreen()
 
         panels::init(io::px_to_gui_coords(window_size));
 
-        auto* const window = create_sdl_window(window_size, IsFullscreen::yes);
-
-        return window;
-}
-
-static SDL_Window* init_window_windowed()
-{
-        const auto window_size =
-                P(
-                        config::window_px_w(),
-                        config::window_px_h());
-
-        const auto window_logical_size =
-                window_size.scaled_down(
-                        config::video_scale_factor());
-
-        TRACE
-                << "Window size: "
-                << window_size.x << "x"
-                << window_size.y
-                << std::endl;
-
-        TRACE << "Window logical size: "
-              << window_logical_size.x << "x"
-              << window_logical_size.y
-              << std::endl;
-
-        panels::init(io::px_to_gui_coords(window_logical_size));
-
-        auto* const window = create_sdl_window(window_size, IsFullscreen::no);
+        auto* const window = create_sdl_window(window_size);
 
         return window;
 }
@@ -210,21 +167,9 @@ void init_window()
                 << native_resolution.y
                 << std::endl;
 
-        if (config::is_fullscreen()) {
-                g_sdl_window = init_window_fullscreen();
-
-                if (!g_sdl_window) {
-                        // Fullscreen failed, do windowed mode instead.
-                        config::set_fullscreen(false);
-                }
-        }
-
-        // NOTE: Fullscreen may have been disabled while attempting to set up a
-        // fullscreen window (see above), so we check again here if fullscreen
-        // is enabled.
-        if (!config::is_fullscreen()) {
-                g_sdl_window = init_window_windowed();
-        }
+        // The window is ALWAYS fullscreen - there is no windowed mode to fall
+        // back to on a phone
+        g_sdl_window = init_window_fullscreen();
 
         if (!g_sdl_window) {
                 TRACE_ERROR_RELEASE
@@ -237,17 +182,6 @@ void init_window()
         }
 
         update_rendering_offsets();
-}
-
-void try_set_window_gui_cells(P new_gui_dims)
-{
-        const auto new_logical_px_size = io::gui_to_px_coords(new_gui_dims);
-
-        const auto new_px_size =
-                new_logical_px_size.scaled_up(
-                        config::video_scale_factor());
-
-        SDL_SetWindowSize(g_sdl_window, new_px_size.x, new_px_size.y);
 }
 
 void on_window_resized()
@@ -268,9 +202,6 @@ void on_window_resized()
               << new_logical_px_dims.y
               << std::endl;
 
-        config::set_window_px_w(new_px_dims.x);
-        config::set_window_px_h(new_px_dims.y);
-
         panels::init(io::px_to_gui_coords(new_logical_px_dims));
 
         // The display textures are sized to the screen panel
@@ -279,20 +210,6 @@ void on_window_resized()
         update_rendering_offsets();
 
         states::on_window_resized();
-}
-
-bool is_window_maximized()
-{
-        // TODO: This does not seem to work very well:
-        // * The flag is sometimes not set when maximizing the window
-        // * The flag sometimes gets "stuck" after the window is restored from
-        //   being maximized. The flag is only cleared again after tabbing to
-        //   another window and back again, or after minimizing and restoring
-        //   the window
-        //
-        // Is this an SDL bug?
-        //
-        return SDL_GetWindowFlags(g_sdl_window) & SDL_WINDOW_MAXIMIZED;
 }
 
 P sdl_window_gui_dims()
