@@ -48,9 +48,8 @@ static const Cell s_cells[9] = {
         {SDLK_KP_2, "arrow_forward", 90.0},
         {SDLK_KP_3, "arrow_forward", 45.0}};
 
-// The pad never scales below three action bar buttons (so the shared glyph
-// size always fits), and no further up than this - a ceiling that keeps it
-// within reach of the thumb holding the device.
+// A ceiling on scaling up, keeping the pad within reach of the thumb
+// holding the device (the floor is a bar button, see min_scale_pct).
 static const int s_max_scale_pct = 150;
 
 // User placement: an offset in logical screen pixels from the default slot,
@@ -67,6 +66,10 @@ static bool s_is_resizing = false;
 static P s_drag_start_px(0, 0);
 static P s_drag_start_offset_px(0, 0);
 static int s_drag_start_grid_px = 0;
+
+// Whether the pad sits in its default slot, so that clicking into it can be
+// felt exactly once (see move_from)
+static bool s_is_snapped_to_default = true;
 
 // Whether the pad is the chosen movement mode. NOTE: The setting, not what
 // is on screen - the map reserves the pad's column for as long as the mode
@@ -138,18 +141,13 @@ static int max_grid_px_w()
         return (base_grid_px() * s_max_scale_pct) / 100;
 }
 
-// Edge of the square grab area centred on the resize handle. The pad
-// reserves half of it as a transparent margin on its top and outer side, so
-// that the whole square is within the pad's own area (a touch outside it
-// belongs to whatever is under it).
-static int grab_px()
-{
-        return (cell_min_px() * 4) / 3;
-}
-
+// Half the square grab area centred on the resize handle. The pad carries
+// exactly this as a transparent margin on its top and outer side, so that
+// the whole square is within the pad's own area (a touch outside it belongs
+// to whatever is under it).
 static int grab_margin_px()
 {
-        return grab_px() / 2;
+        return (cell_min_px() * 2) / 3;
 }
 
 // How near the default slot a drag has to land to click back into it: half
@@ -284,9 +282,19 @@ static void persist_placement()
                 s_scale_pct);
 }
 
-// Whether the pad is currently sitting in its default slot, so that
-// clicking into it can be felt exactly once (see move_from)
-static bool s_is_snapped_to_default = true;
+// Starts carrying the pad from a finger position, either moving or scaling
+// it (see edit_drag_move)
+static void begin_drag(const P& logical_px, const bool is_resizing)
+{
+        const P offset = placement_offset_px();
+
+        s_is_edit_drag_active = true;
+        s_is_resizing = is_resizing;
+        s_drag_start_px = logical_px;
+        s_drag_start_offset_px = offset;
+        s_drag_start_grid_px = grid_px_w();
+        s_is_snapped_to_default = (offset == P(0, 0));
+}
 
 // Moving the pad with the finger, clicking into the default slot when it
 // lands near it
@@ -331,11 +339,7 @@ static void resize_from(const P& logical_px)
 
         const int away_y = s_drag_start_px.y - logical_px.y;
 
-        const int size =
-                std::clamp(
-                        s_drag_start_grid_px + ((away_x + away_y) / 2),
-                        (base_grid_px() * min_scale_pct()) / 100,
-                        max_grid_px_w());
+        const int size = s_drag_start_grid_px + ((away_x + away_y) / 2);
 
         s_scale_pct =
                 std::clamp(
@@ -540,12 +544,7 @@ void begin_edit_mode(const P& logical_px)
 
         // The finger that lifted the pad carries it straight on - it is
         // already down, and moving it is what a held finger is for
-        s_is_edit_drag_active = true;
-        s_is_resizing = false;
-        s_drag_start_px = logical_px;
-        s_drag_start_offset_px = placement_offset_px();
-        s_drag_start_grid_px = grid_px_w();
-        s_is_snapped_to_default = (placement_offset_px() == P(0, 0));
+        begin_drag(logical_px, false);
 }
 
 bool is_edit_active()
@@ -559,13 +558,12 @@ void begin_edit_drag(const P& logical_px)
                 return;
         }
 
-        s_is_edit_drag_active = true;
-        s_is_resizing =
-                handle_grab_px_rect(grid_px_rect()).is_pos_inside(logical_px);
-        s_drag_start_px = logical_px;
-        s_drag_start_offset_px = placement_offset_px();
-        s_drag_start_grid_px = grid_px_w();
-        s_is_snapped_to_default = (placement_offset_px() == P(0, 0));
+        // Scaling if the finger came down on the corner handle, moving
+        // otherwise
+        begin_drag(
+                logical_px,
+                handle_grab_px_rect(grid_px_rect())
+                        .is_pos_inside(logical_px));
 }
 
 void edit_drag_move(const P& logical_px)

@@ -198,10 +198,10 @@ static std::vector<const action_bar::ActionDef*> visible_buttons()
         return buttons;
 }
 
-// Buttons have a FIXED size (square, half the bar height) regardless of
-// how many are enabled, flowing in up to two rows from the hamburger's
-// corner inward and FILLING FROM THE BOTTOM UP (a single row of buttons
-// sits at the very bottom of the screen). When the side panel is on the
+// Buttons are laid out at a fixed size (see button_px_dims), flowing in up
+// to two rows from the hamburger's corner inward and FILLING FROM THE
+// BOTTOM UP (a single row of buttons sits at the very bottom of the
+// screen). When the side panel is on the
 // left (the bar column mirrored to the right), the flow starts from the
 // right edge instead, so that the hamburger always sits at the screen
 // corner opposite the side panel. Buttons beyond the bar's fixed capacity

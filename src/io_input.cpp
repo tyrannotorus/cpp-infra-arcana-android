@@ -313,11 +313,10 @@ static void handle_textinput_event()
         // Every character of the event is queued, and the first one is
         // handed over right away.
         //
-        // NOTE: The event queue must NOT be cleared here (it was, which is
-        // what limited typing to one character per commit): it holds the
-        // keystrokes typed while this event was being processed - and, on a
-        // touch device, a gesture in progress, which clearing input also
-        // abandons.
+        // NOTE: The event queue must NOT be cleared here - it holds the
+        // keystrokes typed while this event was being processed, and, on a
+        // touch device, any gesture in progress (which clearing input
+        // abandons, see clear_input).
         for (int i = 0; text[i] != '\0'; ++i) {
                 const char text_char = text[i];
 
@@ -941,6 +940,32 @@ static bool is_touch_still_pressing()
                 (s_touch_tap_max_dist * min_window_dim);
 }
 
+// Advances a position to where the gesture's finger is RIGHT NOW, taking
+// the last of the queued motion events (and dropping the rest).
+//
+// NOTE: Touch events can arrive faster than frames can be presented, and
+// handling one motion per presented frame builds an ever growing backlog -
+// the content lags behind the finger, badly on slow devices. Every drag
+// therefore folds all queued motion into one step, and renders ONCE.
+static void take_latest_finger_motion(float& x, float& y)
+{
+        SDL_PumpEvents();
+
+        SDL_Event queued_event;
+
+        while (SDL_PeepEvents(
+                       &queued_event,
+                       1,
+                       SDL_GETEVENT,
+                       SDL_FINGERMOTION,
+                       SDL_FINGERMOTION) > 0) {
+                if (queued_event.tfinger.fingerId == s_touch_finger_id) {
+                        x = queued_event.tfinger.x;
+                        y = queued_event.tfinger.y;
+                }
+        }
+}
+
 // A finger held still on the movement pad lifts it for arranging: dragging
 // on from there moves it, and its cells stop taking movement steps until it
 // is put down again.
@@ -1074,29 +1099,11 @@ static void handle_single_finger_motion()
         }
 
         if (s_dpad_drag_active) {
-                // Carrying (or scaling) the pad. As with the other drags,
-                // only the latest queued position matters: drain the motion
-                // events and render once, or the redraws fall behind the
-                // finger.
+                // Carrying (or scaling) the pad
                 float drag_x = s_sdl_event.tfinger.x;
                 float drag_y = y;
 
-                SDL_PumpEvents();
-
-                SDL_Event queued_event;
-
-                while (SDL_PeepEvents(
-                               &queued_event,
-                               1,
-                               SDL_GETEVENT,
-                               SDL_FINGERMOTION,
-                               SDL_FINGERMOTION) > 0) {
-                        if (queued_event.tfinger.fingerId ==
-                            s_touch_finger_id) {
-                                drag_x = queued_event.tfinger.x;
-                                drag_y = queued_event.tfinger.y;
-                        }
-                }
+                take_latest_finger_motion(drag_x, drag_y);
 
                 dpad::edit_drag_move(touch_logical_px(drag_x, drag_y));
 
@@ -1109,28 +1116,11 @@ static void handle_single_finger_motion()
 
         if (s_bar_drag_active) {
                 // Carrying a lifted action bar button - the bar reorders
-                // itself under it. As with the other drags, only the latest
-                // queued position matters: drain the motion events and
-                // render once, or the redraws fall behind the finger.
+                // itself under it
                 float drag_x = s_sdl_event.tfinger.x;
                 float drag_y = y;
 
-                SDL_PumpEvents();
-
-                SDL_Event queued_event;
-
-                while (SDL_PeepEvents(
-                               &queued_event,
-                               1,
-                               SDL_GETEVENT,
-                               SDL_FINGERMOTION,
-                               SDL_FINGERMOTION) > 0) {
-                        if (queued_event.tfinger.fingerId ==
-                            s_touch_finger_id) {
-                                drag_x = queued_event.tfinger.x;
-                                drag_y = queued_event.tfinger.y;
-                        }
-                }
+                take_latest_finger_motion(drag_x, drag_y);
 
                 action_bar::reorder_drag_move(
                         touch_logical_px(drag_x, drag_y));
@@ -1145,28 +1135,11 @@ static void handle_single_finger_motion()
         const float scale = (float)config::video_scale_factor();
 
         if (s_touch_drag_active) {
-                // Direct content dragging (e.g. row reordering) - only the
-                // latest queued position matters, so drain the queue and
-                // render once
+                // Direct content dragging (e.g. row reordering)
                 float drag_x = s_sdl_event.tfinger.x;
                 float drag_y = y;
 
-                SDL_PumpEvents();
-
-                SDL_Event queued_event;
-
-                while (SDL_PeepEvents(
-                               &queued_event,
-                               1,
-                               SDL_GETEVENT,
-                               SDL_FINGERMOTION,
-                               SDL_FINGERMOTION) > 0) {
-                        if (queued_event.tfinger.fingerId ==
-                            s_touch_finger_id) {
-                                drag_x = queued_event.tfinger.x;
-                                drag_y = queued_event.tfinger.y;
-                        }
-                }
+                take_latest_finger_motion(drag_x, drag_y);
 
                 const P window_px(
                         (int)(drag_x * (float)window_px_dims.x),
@@ -1190,32 +1163,10 @@ static void handle_single_finger_motion()
                 // pan is kept on release (settling on the nearest cell),
                 // and the camera snaps back to the player on any play
                 // movement (see viewport::should_auto_center).
-                //
-                // NOTE: Touch events can arrive faster than frames can be
-                // presented - processing one motion per presented frame
-                // builds up an ever growing event backlog (the map lags
-                // behind the finger, badly on slow devices). All queued
-                // motion events are therefore folded into one scroll step,
-                // and the result is rendered ONCE.
                 float latest_x = x;
                 float latest_y = y;
 
-                SDL_PumpEvents();
-
-                SDL_Event queued_event;
-
-                while (SDL_PeepEvents(
-                               &queued_event,
-                               1,
-                               SDL_GETEVENT,
-                               SDL_FINGERMOTION,
-                               SDL_FINGERMOTION) > 0) {
-                        if (queued_event.tfinger.fingerId ==
-                            s_touch_finger_id) {
-                                latest_x = queued_event.tfinger.x;
-                                latest_y = queued_event.tfinger.y;
-                        }
-                }
+                take_latest_finger_motion(latest_x, latest_y);
 
                 const float dx_px =
                         (latest_x - s_map_pan_last_x) *

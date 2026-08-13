@@ -46,7 +46,7 @@ enum class DrawBg
 // A touch interaction that changes what a gesture is going to do, rather
 // than doing something itself, has nothing to show for itself at the moment
 // it takes - the device's own haptics are what confirm it (see
-// haptic_feedback, and dpad, which is the only thing needing them).
+// haptic_feedback).
 enum class HapticFeedback
 {
         // Something was picked up or engaged (a long press landing)
