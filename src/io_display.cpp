@@ -16,6 +16,7 @@
 #include "config.hpp"
 #include "context_pins.hpp"
 #include "debug.hpp"
+#include "dpad.hpp"
 #include "io.hpp"
 #include "io_internal.hpp"
 #include "panel.hpp"
@@ -98,6 +99,9 @@ static R display_logical_px_rect(const io::Display display)
         case io::Display::side:
                 return io::panel_logical_px_rect(
                         Panel::map_gui_stats_border);
+
+        case io::Display::dpad:
+                return dpad::display_px_rect();
 
         case io::Display::bar: {
                 auto rect = io::panel_logical_px_rect(Panel::action_bar);
@@ -496,6 +500,18 @@ void set_display_px_offset(const Display display, const P& px_offset)
         s_display_px_offsets[(size_t)display] = px_offset;
 }
 
+void set_display_px_origin(const Display display, const P& px_pos)
+{
+        ASSERT(display != Display::END);
+
+        R& rect = s_display_px_rects[(size_t)display];
+
+        const P dims = rect.dims();
+
+        rect.p0 = px_pos;
+        rect.p1 = px_pos + dims - 1;
+}
+
 void reset_display_px_offsets()
 {
         for (P& offset : s_display_px_offsets) {
@@ -749,6 +765,15 @@ void run_side_panel_slide_animation()
         const int old_side_x0 =
                 panel_logical_px_rect(Panel::map_gui_stats_border).p0.x;
 
+        const int old_dpad_x0 = dpad::origin_px().x;
+
+        // A pad the player has placed by hand keeps the same spot relative
+        // to its now-opposite anchor - and is put down first, since the
+        // interface it is being arranged within is about to move
+        dpad::exit_edit_mode();
+
+        dpad::mirror_placement();
+
         // A manually panned map snaps back to the player as part of the
         // slide animation
         viewport::end_pan();
@@ -782,6 +807,8 @@ void run_side_panel_slide_animation()
 
         const int bar_start =
                 old_bar_x0 - panel_logical_px_rect(Panel::action_bar).p0.x;
+
+        const int dpad_start = old_dpad_x0 - dpad::origin_px().x;
 
         const int side_start = old_side_x0 - new_side_rect.p0.x;
 
@@ -836,6 +863,10 @@ void run_side_panel_slide_animation()
                 set_display_px_offset(
                         Display::bar,
                         {(int)std::lround((float)bar_start * remaining), 0});
+
+                set_display_px_offset(
+                        Display::dpad,
+                        {(int)std::lround((float)dpad_start * remaining), 0});
 
                 int side_off;
 

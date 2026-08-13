@@ -2,6 +2,8 @@ package camp.werewolf.infraarcana;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
+import android.view.View;
 import android.view.WindowInsets;
 
 import org.libsdl.app.SDLActivity;
@@ -16,6 +18,23 @@ public class IAActivity extends SDLActivity {
     // Called from native code
     public static int screenKeyboardHeightPx() {
         return sScreenKeyboardPxH;
+    }
+
+    // Called from native code (see io::haptic_feedback) on the game thread -
+    // posted to the view, since haptics are dispatched through the view
+    // hierarchy. Honours the system's touch feedback setting, so it is
+    // silent for players who have that off.
+    public static void performHapticTick(final boolean isLongPress) {
+        final View view = mSurface;
+
+        if (view == null) {
+            return;
+        }
+
+        view.post(() -> view.performHapticFeedback(
+                isLongPress
+                        ? HapticFeedbackConstants.LONG_PRESS
+                        : HapticFeedbackConstants.CLOCK_TICK));
     }
 
     @Override

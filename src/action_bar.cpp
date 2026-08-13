@@ -198,27 +198,20 @@ static std::vector<const action_bar::ActionDef*> visible_buttons()
         return buttons;
 }
 
-// Buttons have a FIXED size (square, half the bar height) regardless of
-// how many are enabled, flowing in up to two rows from the hamburger's
-// corner inward and FILLING FROM THE BOTTOM UP (a single row of buttons
-// sits at the very bottom of the screen). When the side panel is on the
+// Buttons are laid out at a fixed size (see button_px_dims), flowing in up
+// to two rows from the hamburger's corner inward and FILLING FROM THE
+// BOTTOM UP (a single row of buttons sits at the very bottom of the
+// screen). When the side panel is on the
 // left (the bar column mirrored to the right), the flow starts from the
 // right edge instead, so that the hamburger always sits at the screen
 // corner opposite the side panel. Buttons beyond the bar's fixed capacity
 // are not shown.
-static P button_px_dims()
-{
-        const int h = io::panel_logical_px_rect(Panel::action_bar).h() / 2;
-
-        return {h, h};
-}
-
 static int buttons_per_row()
 {
         const auto bar_px_rect =
                 io::panel_logical_px_rect(Panel::action_bar);
 
-        return std::max(1, bar_px_rect.w() / button_px_dims().x);
+        return std::max(1, bar_px_rect.w() / action_bar::button_px_dims().x);
 }
 
 static int max_buttons()
@@ -233,7 +226,7 @@ static R button_px_rect(const int button_idx)
         const auto bar_px_rect =
                 io::panel_logical_px_rect(Panel::action_bar);
 
-        const auto dims = button_px_dims();
+        const auto dims = action_bar::button_px_dims();
 
         const int per_row = buttons_per_row();
 
@@ -268,7 +261,7 @@ static int slot_idx_at(const P& logical_px)
         const auto bar_px_rect =
                 io::panel_logical_px_rect(Panel::action_bar);
 
-        const auto dims = button_px_dims();
+        const auto dims = action_bar::button_px_dims();
 
         const int per_row = buttons_per_row();
 
@@ -290,27 +283,22 @@ static int slot_idx_at(const P& logical_px)
 static int s_drag_button_idx = -1;
 static P s_drag_px;
 
+// The face of a button, inset from its slot (see draw_button_face)
+static R button_face_px_rect(const R& slot_px_rect)
+{
+        return {
+                slot_px_rect.p0.with_offsets(2, 2),
+                slot_px_rect.p1.with_offsets(-2, -2)};
+}
+
 static void draw_button(
         const action_bar::ActionDef& def,
         const R& px_rect,
         const bool is_lifted = false)
 {
-        const R button_rect(
-                px_rect.p0.with_offsets(2, 2),
-                px_rect.p1.with_offsets(-2, -2));
+        action_bar::draw_button_face(px_rect, is_lifted);
 
-        io::draw_rectangle_filled(
-                button_rect,
-                colors::extra_dark_gray());
-
-        // A lifted button is outlined and tinted like a marked menu entry,
-        // so that it clearly reads as "held"
-        io::draw_rectangle(
-                button_rect,
-                is_lifted ? colors::menu_highlight() : colors::dark_gray());
-
-        const int icon_size =
-                (std::min(button_rect.w(), button_rect.h()) * 3) / 4;
+        const R button_rect = button_face_px_rect(px_rect);
 
         const P center(
                 button_rect.p0.x + (button_rect.w() / 2),
@@ -320,7 +308,7 @@ static void draw_button(
         io::draw_icon(
                 def.icon,
                 center,
-                icon_size,
+                action_bar::icon_px_size(),
                 is_lifted ? colors::menu_highlight() : colors::light_sepia());
 }
 
@@ -409,6 +397,38 @@ const ActionDef* action_def(const std::string& id)
         }
 
         return nullptr;
+}
+
+P button_px_dims()
+{
+        const int h = io::panel_logical_px_rect(Panel::action_bar).h() / 2;
+
+        return {h, h};
+}
+
+int icon_px_size()
+{
+        const auto dims = button_px_dims();
+
+        const R face =
+                button_face_px_rect({P(0, 0), P(dims.x - 1, dims.y - 1)});
+
+        return (std::min(face.w(), face.h()) * 3) / 4;
+}
+
+void draw_button_face(const R& px_rect, const bool is_highlighted)
+{
+        const R face = button_face_px_rect(px_rect);
+
+        io::draw_rectangle_filled(face, colors::extra_dark_gray());
+
+        // A highlighted face is outlined and tinted like a marked menu
+        // entry, so that it clearly reads as "held"
+        io::draw_rectangle(
+                face,
+                is_highlighted
+                        ? colors::menu_highlight()
+                        : colors::dark_gray());
 }
 
 bool is_visible()

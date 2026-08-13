@@ -46,6 +46,18 @@ enum class Display
         log,
         side,
         screen,
+
+        // The optional movement pad (see dpad), under the action bar it
+        // borrows its chrome from - the pad can be dragged anywhere on
+        // screen, the bar included, and must never cover it.
+        //
+        // Its texture is sized to the LARGEST the pad can be scaled to
+        // rather than to the screen, and the display's screen origin
+        // travels with the pad instead (see set_display_px_origin) - a
+        // screen sized texture would cost a screen sized clear and resolve
+        // every frame to carry a pad.
+        dpad,
+
         bar,
 
         // Over absolutely everything, the action bar included - for
@@ -98,6 +110,13 @@ void composite_display_textures();
 
 // Composite offset in logical pixels (used for animating displays).
 void set_display_px_offset(Display display, const P& px_offset);
+
+// Moves a display's screen area, keeping the size its texture was created
+// with. For a display whose content travels the screen (the movement pad),
+// this is what places the texture - drawing itself stays in screen
+// coordinates. NOTE: The content must still fit within the created size,
+// which is the whole point of sizing that texture to the content's maximum.
+void set_display_px_origin(Display display, const P& px_pos);
 
 void reset_display_px_offsets();
 

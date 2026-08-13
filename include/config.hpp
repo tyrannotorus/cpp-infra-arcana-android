@@ -82,6 +82,17 @@ void set_action_bar_layout(
         const std::string& order_csv,
         const std::string& disabled_csv);
 
+// Whether moving is done with the on-screen movement pad instead of by
+// swiping the map (see dpad), and where the player has placed and how far
+// they have scaled that pad: an offset in logical screen pixels from its
+// default slot, and a percentage of its default size.
+bool is_dpad_movement();
+void set_dpad_movement(bool value);
+int dpad_offset_px_x();
+int dpad_offset_px_y();
+int dpad_scale_pct();
+void set_dpad_placement(int offset_px_x, int offset_px_y, int scale_pct);
+
 // Actual window size (i.e. not logical size)
 void set_window_px_w(int w);
 void set_window_px_h(int h);

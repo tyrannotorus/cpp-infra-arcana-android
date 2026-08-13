@@ -11,6 +11,7 @@
 
 #include "actor.hpp"
 #include "config.hpp"
+#include "dpad.hpp"
 #include "global.hpp"
 #include "io.hpp"
 #include "io_display.hpp"
@@ -50,25 +51,43 @@ static int side_panel_cells()
         return (side_px_w + map_cell_w - 1) / map_cell_w;
 }
 
+// Width in map cells of the movement pad's column, or zero when the pad is
+// not the movement mode (see dpad::reserved_px_w)
+static int dpad_cells()
+{
+        const int map_cell_w = config::map_cell_px_w();
+
+        return (dpad::reserved_px_w() + map_cell_w - 1) / map_cell_w;
+}
+
 // The view's centering point (view cell coordinates). The map's
-// "centeredness" on the player is biased left or right ONLY by the user's
-// handedness - the side the stats panel is on. It must NEVER depend on
-// any other UI geometry (the log, the action bar): those overlays move
-// around, and tying the map centering to them breaks it (this happened
-// once when the log moved from the bottom to the top of the screen).
+// "centeredness" on the player is biased left or right ONLY by the two
+// things that permanently take a column of the screen: the user's
+// handedness - the side the stats panel is on - and, when it is the chosen
+// movement mode, the pad on the opposite side. It must NEVER depend on any
+// other UI geometry (the log, the action bar), nor on where the pad has
+// been dragged or how far it has been scaled: those overlays move around,
+// and tying the map centering to them breaks it (this happened once when
+// the log moved from the bottom to the top of the screen).
 static P visible_view_center()
 {
         const auto view_dims = get_view_dims();
 
         const int side_cells = side_panel_cells();
 
+        // The pad sits on the edge opposite the stats panel, so handedness
+        // alone decides which side each of them takes
+        const int pad_cells = dpad_cells();
+
         int x_lo = 0;
         int x_hi = view_dims.x;
 
         if (config::is_side_panel_left()) {
                 x_lo += side_cells;
+                x_hi -= pad_cells;
         }
         else {
+                x_lo += pad_cells;
                 x_hi -= side_cells;
         }
 

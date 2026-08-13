@@ -101,6 +101,16 @@ public:
         }
 };
 
+class MovementModeOption : public Option
+{
+public:
+        std::string name() const override;
+        std::string descr() const override;
+        std::string value_str() const override;
+        OptionSubmenuType submenu_type() const override;
+        void change(OptionChangeCommand command) const override;
+};
+
 class InputModeOption : public Option
 {
 public:
