@@ -33,6 +33,18 @@ static void set_panel_area(
         s_panels[(size_t)panel] = {x0, y0, x1, y1};
 }
 
+// Every full screen page runs its content panel between these two rows -
+// inset from the border box top and bottom, so nothing is flush against it
+static int page_content_y0()
+{
+        return panels::g_screen_margin_top + 2;
+}
+
+static int page_content_y1(const P& max_gui_dims)
+{
+        return max_gui_dims.y - 3 - panels::g_screen_margin_bottom;
+}
+
 static void finalize_screen_dims()
 {
         R& screen = s_panels[(size_t)Panel::screen];
@@ -175,11 +187,10 @@ static void set_menu_descr_page_panels(const P& max_gui_dims)
         const int descr_x0 = menu_x1 + 2;
         const int descr_x1 = descr_x0 + descr_w - 1;
 
-        // NOTE: One row further down than the border box, so that neither
-        // the list nor the description is flush against it - both columns
-        // then simply start at the top of their panel
-        const int y0 = panels::g_screen_margin_top + 2;
-        const int y1 = max_gui_dims.y - 2 - panels::g_screen_margin_bottom;
+        // Both columns simply start at the top of their panel, which is
+        // already inset from the border box (see page_content_y0)
+        const int y0 = page_content_y0();
+        const int y1 = page_content_y1(max_gui_dims);
 
         set_panel_area(
                 Panel::menu_descr_list,
@@ -214,8 +225,8 @@ static void set_options_state_panels(const P& max_gui_dims)
         const int descr_x0 = values_x1 + 2;
         const int descr_x1 = descr_x0 + descr_w - 1;
 
-        const int y0 = panels::g_screen_margin_top + 1;
-        const int y1 = max_gui_dims.y - 2 - panels::g_screen_margin_bottom;
+        const int y0 = page_content_y0();
+        const int y1 = page_content_y1(max_gui_dims);
 
         set_panel_area(
                 Panel::options,
@@ -252,11 +263,8 @@ static void set_inventory_state_panels(const P& max_gui_dims)
         const int inventory_descr_x0 = max_gui_dims.x - inventory_descr_w - 1;
         const int inventory_menu_x1 = inventory_descr_x0 - 2;
 
-        // NOTE: Inset by one row from the border box at the TOP and at the
-        // BOTTOM, so that nothing (the item list, the description, the
-        // item action pins in the bottom corner) is flush against it
-        const int y0 = panels::g_screen_margin_top + 2;
-        const int y1 = max_gui_dims.y - 3 - panels::g_screen_margin_bottom;
+        const int y0 = page_content_y0();
+        const int y1 = page_content_y1(max_gui_dims);
 
         set_panel_area(
                 Panel::inventory_menu,
@@ -282,15 +290,12 @@ static void set_info_scrreen_panel(const P& max_gui_dims)
         const int info_screen_x0 = screen_center_x - ((info_screen_w / 2) - 1);
         const int info_screen_x1 = info_screen_x0 + info_screen_w - 1;
 
-        // NOTE: Inset by one row from the border box at the TOP and at the
-        // BOTTOM (the same inner margin as the inventory screen), so that
-        // the content is never flush against the border
         set_panel_area(
                 Panel::info_screen_content,
                 info_screen_x0,
-                panels::g_screen_margin_top + 2,
+                page_content_y0(),
                 info_screen_x1,
-                max_gui_dims.y - 3 - panels::g_screen_margin_bottom);
+                page_content_y1(max_gui_dims));
 }
 
 // -----------------------------------------------------------------------------

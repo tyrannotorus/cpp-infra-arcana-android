@@ -27,6 +27,7 @@
 #include "hints.hpp"
 #include "ini.h"
 #include "io.hpp"
+#include "menu_descr_page.hpp"
 #include "misc.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
@@ -59,13 +60,8 @@ static const std::string s_default_font_name = "13x24_typewriter.png";
 static const int s_video_scale_factor_max = 4;
 static const int s_map_scale_factor_max = 4;
 
-static InputMode s_input_mode = InputMode::standard;
-static bool s_is_double_click_toggle_fullscreen = true;
 static std::string s_font_name;
-static bool s_always_center_view_on_player = false;
 static bool s_is_tiles_mode = false;
-static RendererType s_renderer_type = RendererType::auto_select;
-static bool s_is_fullscreen = false;
 static int s_video_scale_factor = 1;
 static bool s_side_panel_left = false;
 static std::string s_action_bar_order;
@@ -75,13 +71,12 @@ static int s_dpad_offset_px_x = 0;
 static int s_dpad_offset_px_y = 0;
 static int s_dpad_scale_pct = 100;
 
-// Scale of the in-world (map) display, relative to the gui. Applied in tiles
-// mode only (scaling text mode would require stretched glyph rendering). On
-// touch devices the map is zoomed in for playability; a later iteration will
-// make this adjustable by pinch zooming.
+// Scale of the in-world (map) display, relative to the gui - applied to
+// tiles and to text mode alike. The map is zoomed in by default for
+// playability on a handheld; a later iteration will make this adjustable by
+// pinch zooming.
 static int s_map_scale_factor = 2;
 static int s_brightness_pct = 100;
-static bool s_text_mode_filled_walls = true;
 static bool s_display_health_bars = true;
 static bool s_use_trap_color_when_obscured = true;
 static bool s_warn_on_throw_valuable = false;
@@ -92,8 +87,6 @@ static bool s_is_medical_bag_auto_choice = false;
 static bool s_is_ranged_wpn_auto_reload = false;
 static bool s_is_intro_lvl_skipped = false;
 static bool s_is_intro_popup_skipped = false;
-static bool s_is_any_key_confirm_more = false;
-static bool s_auto_select_menu = false;
 static HintsMode s_hints_mode = HintsMode::once;
 static bool s_has_seen_hint_global[(size_t)hints::Id::END];
 static bool s_always_warn_new_mon = false;
@@ -105,10 +98,6 @@ static bool s_is_gj_mode = false;
 static int s_master_volume_pct_option = 100;
 static int s_master_volume_pct_adjusted = 100;
 static bool s_is_ambient_audio_enabled = false;
-static bool s_is_ambient_audio_preloaded = false;
-static int s_audio_buffer_size = 512;
-static int s_window_px_w = -1;
-static int s_window_px_h = -1;
 static int s_gui_cell_px_w = -1;
 static int s_gui_cell_px_h = -1;
 static int s_map_cell_px_w = -1;
@@ -122,9 +111,6 @@ static std::string submenu_name(config::OptionSubmenuType submenu_type)
 
         case config::OptionSubmenuType::audio:
                 return "Audio";
-
-        case config::OptionSubmenuType::input:
-                return "Input";
 
         case config::OptionSubmenuType::gameplay:
                 return "Gameplay";
@@ -147,9 +133,6 @@ static std::string submenu_name_with_key_shortcut(
 
         case config::OptionSubmenuType::audio:
                 return "(A)udio";
-
-        case config::OptionSubmenuType::input:
-                return "(I)nput";
 
         case config::OptionSubmenuType::gameplay:
                 return "(G)ameplay";
@@ -257,19 +240,22 @@ static void update_render_dims()
 {
         TRACE_FUNC_BEGIN;
 
-        if (s_is_tiles_mode) {
-                const auto font_dims = parse_dims_from_font_name(s_font_name);
+        const auto font_dims = parse_dims_from_font_name(s_font_name);
 
-                s_gui_cell_px_w = font_dims.x;
-                s_gui_cell_px_h = font_dims.y;
+        s_gui_cell_px_w = font_dims.x;
+        s_gui_cell_px_h = font_dims.y;
+
+        // The map cell is the tile or the glyph, scaled by the game scale.
+        // In text mode the glyph is stretched into it (see
+        // draw_map_character_at_px) - at these integer factors nearest
+        // neighbour sampling keeps it crisp.
+        if (s_is_tiles_mode) {
                 s_map_cell_px_w = config::g_tile_img_px * s_map_scale_factor;
                 s_map_cell_px_h = config::g_tile_img_px * s_map_scale_factor;
         }
         else {
-                const auto font_dims = parse_dims_from_font_name(s_font_name);
-
-                s_gui_cell_px_w = s_map_cell_px_w = font_dims.x;
-                s_gui_cell_px_h = s_map_cell_px_h = font_dims.y;
+                s_map_cell_px_w = font_dims.x * s_map_scale_factor;
+                s_map_cell_px_h = font_dims.y * s_map_scale_factor;
         }
 
         TRACE << "GUI cell size: " << s_gui_cell_px_w << "x" << s_gui_cell_px_h << std::endl;
@@ -309,10 +295,6 @@ static void set_default_variables()
 {
         TRACE_FUNC_BEGIN;
 
-        s_input_mode = InputMode::standard;
-
-        s_is_double_click_toggle_fullscreen = true;
-
         // The typewriter face at 13x24 - the interface is laid out to be
         // read at that cell size on a phone. NOTE: The font list is sorted
         // by cell size, so entry 0 is the smallest one available - the
@@ -328,23 +310,14 @@ static void set_default_variables()
                 ? s_font_image_names[0]
                 : *default_font;
 
-        s_always_center_view_on_player = true;
-
         s_is_tiles_mode = true;
 
         update_render_dims();
 
         const P native_res = io::get_native_resolution();
 
-        s_window_px_w = native_res.x;
-        s_window_px_h = native_res.y;
-
         s_master_volume_pct_option = s_master_volume_pct_adjusted = 100;
         s_is_ambient_audio_enabled = true;
-        s_is_ambient_audio_preloaded = false;
-        s_audio_buffer_size = 512;
-        s_renderer_type = RendererType::auto_select;
-        s_is_fullscreen = true;
 
         // Side stats panel on the LEFT by default - which puts the action
         // bar's buttons and the [ x ] close control on the right, under the
@@ -367,13 +340,10 @@ static void set_default_variables()
 
         s_video_scale_factor = calc_default_video_scale_factor(native_res);
         s_brightness_pct = 100;
-        s_text_mode_filled_walls = true;
         s_display_health_bars = true;
         s_use_trap_color_when_obscured = false;
         s_is_intro_lvl_skipped = false;
         s_is_intro_popup_skipped = false;
-        s_is_any_key_confirm_more = false;
-        s_auto_select_menu = false;
         s_hints_mode = HintsMode::once;
         s_always_warn_new_mon = true;
         s_warn_on_throw_valuable = true;
@@ -428,13 +398,6 @@ static bool read_config_file()
         s_master_volume_pct_option = to_int(config["master_volume_pct_option"]);
         s_master_volume_pct_adjusted = to_int(config["master_volume_pct_adjusted"]);
         s_is_ambient_audio_enabled = config["is_ambient_audio_enabled"] == "1";
-        s_is_ambient_audio_preloaded = config["is_ambient_audio_preloaded"] == "1";
-        s_audio_buffer_size = to_int(config["audio_buffer_size"]);
-        s_input_mode = (InputMode)to_int(config["input_mode"]);
-        s_is_double_click_toggle_fullscreen = config["is_double_click_toggle_fullscreen"] == "1";
-        s_window_px_w = to_int(config["window_px_w"]);
-        s_window_px_h = to_int(config["window_px_h"]);
-        s_is_fullscreen = config["is_fullscreen"] == "1";
         s_side_panel_left = config["side_panel_left"] == "1";
 
         if (config.has("map_scale_factor")) {
@@ -468,9 +431,6 @@ static bool read_config_file()
         TRACE << "Read video_scale_factor: '" << video_scale_str << "'" << std::endl;
 
         s_brightness_pct = to_int(config["brightness_pct"]);
-        s_renderer_type = (RendererType)to_int(config["renderer_type"]);
-
-        s_always_center_view_on_player = config["always_center_view_on_player"] == "1";
         s_is_tiles_mode = config["is_tiles_mode"] == "1";
         s_font_name = config["font_name"];
 
@@ -489,13 +449,10 @@ static bool read_config_file()
 
         update_render_dims();
 
-        s_text_mode_filled_walls = config["text_mode_filled_walls"] == "1";
         s_display_health_bars = config["display_health_bars"] == "1";
         s_use_trap_color_when_obscured = config["use_trap_color_when_obscured"] == "1";
         s_is_intro_lvl_skipped = config["is_intro_lvl_skipped"] == "1";
         s_is_intro_popup_skipped = config["is_intro_popup_skipped"] == "1";
-        s_is_any_key_confirm_more = config["is_any_key_confirm_more"] == "1";
-        s_auto_select_menu = config["auto_select_menu"] == "1";
         s_hints_mode = (HintsMode)to_int(config["hints_mode"]);
         s_always_warn_new_mon = config["always_warn_new_mon"] == "1";
         s_warn_on_throw_valuable = config["warn_on_throw_valuable"] == "1";
@@ -532,14 +489,6 @@ static void write_config_file()
         config["master_volume_pct_option"] = std::to_string(s_master_volume_pct_option);
         config["master_volume_pct_adjusted"] = std::to_string(s_master_volume_pct_adjusted);
         config["is_ambient_audio_enabled"] = s_is_ambient_audio_enabled ? "1" : "0";
-        config["is_ambient_audio_preloaded"] = s_is_ambient_audio_preloaded ? "1" : "0";
-        config["audio_buffer_size"] = std::to_string(s_audio_buffer_size);
-        config["input_mode"] = std::to_string((int)s_input_mode);
-        config["s_is_double_click_toggle_fullscreen"] =
-                s_is_double_click_toggle_fullscreen ? "1" : "0";
-        config["window_px_w"] = std::to_string(s_window_px_w);
-        config["window_px_h"] = std::to_string(s_window_px_h);
-        config["is_fullscreen"] = s_is_fullscreen ? "1" : "0";
         config["side_panel_left"] = s_side_panel_left ? "1" : "0";
         config["map_scale_factor"] = std::to_string(s_map_scale_factor);
         config["action_bar_order"] = s_action_bar_order;
@@ -550,17 +499,12 @@ static void write_config_file()
         config["dpad_scale_pct"] = std::to_string(s_dpad_scale_pct);
         config["video_scale_factor"] = std::to_string(s_video_scale_factor);
         config["brightness_pct"] = std::to_string(s_brightness_pct);
-        config["renderer_type"] = std::to_string((int)s_renderer_type);
-        config["always_center_view_on_player"] = s_always_center_view_on_player ? "1" : "0";
         config["is_tiles_mode"] = s_is_tiles_mode ? "1" : "0";
         config["font_name"] = s_font_name;
-        config["text_mode_filled_walls"] = s_text_mode_filled_walls ? "1" : "0";
         config["display_health_bars"] = s_display_health_bars ? "1" : "0";
         config["use_trap_color_when_obscured"] = s_use_trap_color_when_obscured ? "1" : "0";
         config["is_intro_lvl_skipped"] = s_is_intro_lvl_skipped ? "1" : "0";
         config["is_intro_popup_skipped"] = s_is_intro_popup_skipped ? "1" : "0";
-        config["is_any_key_confirm_more"] = s_is_any_key_confirm_more ? "1" : "0";
-        config["auto_select_menu"] = s_auto_select_menu ? "1" : "0";
         config["hints_mode"] = std::to_string((int)s_hints_mode);
         config["always_warn_new_mon"] = s_always_warn_new_mon ? "1" : "0";
         config["warn_on_throw_valuable"] = s_warn_on_throw_valuable ? "1" : "0";
@@ -634,30 +578,21 @@ void init()
         // Video
         s_options.emplace_back(std::make_unique<TilesModeOption>());
         s_options.emplace_back(std::make_unique<FontOption>());
-        s_options.emplace_back(std::make_unique<RendererTypeOption>());
-        s_options.emplace_back(std::make_unique<FullscreenOption>());
         s_options.emplace_back(std::make_unique<VideoScaleOption>());
         s_options.emplace_back(std::make_unique<GameScaleOption>());
         s_options.emplace_back(std::make_unique<BrightnessOption>());
-        s_options.emplace_back(std::make_unique<TextModeFilledWallsOption>());
 
         // Audio
         s_options.emplace_back(std::make_unique<MasterVolumeOption>());
         s_options.emplace_back(std::make_unique<AmbientAudioEnabledOption>());
-        s_options.emplace_back(std::make_unique<PreloadAmbientAudioOption>());
-        s_options.emplace_back(std::make_unique<AudioBufferSizeOption>());
-
-        // Input
-        s_options.emplace_back(std::make_unique<MovementModeOption>());
-        s_options.emplace_back(std::make_unique<InputModeOption>());
-        s_options.emplace_back(std::make_unique<DoubleClickTogglesFullscreenOption>());
-        s_options.emplace_back(std::make_unique<AnyKeyConfirmMoreOption>());
-        s_options.emplace_back(std::make_unique<AutoSelectMenuOption>());
-        s_options.emplace_back(std::make_unique<MedicalBagAutoChoiceOption>());
-        s_options.emplace_back(std::make_unique<AutoReloadOption>());
 
         // Gameplay
-        s_options.emplace_back(std::make_unique<AlwaysCenterViewOption>());
+        //
+        // How the player moves is the first thing they will want to change,
+        // so it heads the list
+        s_options.emplace_back(std::make_unique<MovementModeOption>());
+        s_options.emplace_back(std::make_unique<MedicalBagAutoChoiceOption>());
+        s_options.emplace_back(std::make_unique<AutoReloadOption>());
         s_options.emplace_back(std::make_unique<SkipIntroLevelOption>());
         s_options.emplace_back(std::make_unique<SkipIntroPopupOption>());
         s_options.emplace_back(std::make_unique<DisplayHintsOption>());
@@ -698,21 +633,6 @@ void init()
         update_render_dims();
 }
 
-InputMode input_mode()
-{
-        return s_input_mode;
-}
-
-bool is_double_click_toggle_fullscreen()
-{
-        return s_is_double_click_toggle_fullscreen;
-}
-
-bool always_center_view_on_player()
-{
-        return s_always_center_view_on_player;
-}
-
 bool is_tiles_mode()
 {
         return s_is_tiles_mode;
@@ -721,16 +641,6 @@ bool is_tiles_mode()
 std::string font_name()
 {
         return s_font_name;
-}
-
-RendererType renderer_type()
-{
-        return s_renderer_type;
-}
-
-bool is_fullscreen()
-{
-        return s_is_fullscreen;
 }
 
 int video_scale_factor()
@@ -828,30 +738,6 @@ int brightness_pct()
         return s_brightness_pct;
 }
 
-void set_window_px_w(const int w)
-{
-        s_window_px_w = w;
-
-        write_config_file();
-}
-
-void set_window_px_h(const int h)
-{
-        s_window_px_h = h;
-
-        write_config_file();
-}
-
-int window_px_w()
-{
-        return s_window_px_w;
-}
-
-int window_px_h()
-{
-        return s_window_px_h;
-}
-
 int gui_cell_px_w()
 {
         return s_gui_cell_px_w;
@@ -872,11 +758,6 @@ int map_cell_px_h()
         return s_map_cell_px_h;
 }
 
-bool text_mode_filled_walls()
-{
-        return s_text_mode_filled_walls;
-}
-
 bool display_health_bars()
 {
         return s_display_health_bars;
@@ -895,16 +776,6 @@ int master_volume_pct()
 bool is_ambient_audio_enabled()
 {
         return s_is_ambient_audio_enabled;
-}
-
-bool is_ambient_audio_preloaded()
-{
-        return s_is_ambient_audio_preloaded;
-}
-
-int audio_buffer_size()
-{
-        return s_audio_buffer_size;
 }
 
 bool is_bot_playing()
@@ -982,16 +853,6 @@ bool is_intro_popup_skipped()
         return s_is_intro_popup_skipped;
 }
 
-bool is_any_key_confirm_more()
-{
-        return s_is_any_key_confirm_more;
-}
-
-bool is_auto_select_menu()
-{
-        return s_auto_select_menu;
-}
-
 HintsMode hints_mode()
 {
         return s_hints_mode;
@@ -1032,13 +893,6 @@ int delay_projectile_draw()
 int delay_explosion()
 {
         return s_delay_explosion;
-}
-
-void set_fullscreen(const bool value)
-{
-        s_is_fullscreen = value;
-
-        write_config_file();
 }
 
 // -----------------------------------------------------------------------------
@@ -1141,89 +995,6 @@ void AmbientAudioEnabledOption::change(const OptionChangeCommand command) const
         audio::play(audio::SfxId::menu_select);
 }
 
-std::string PreloadAmbientAudioOption::name() const
-{
-        return "Preload ambient sounds";
-}
-
-std::string PreloadAmbientAudioOption::descr() const
-{
-        return (
-                "Load all ambient sound clips on game startup, otherwise load "
-                "each sound individually when played for the first time "
-                "(a small delay may occur when this happens).");
-}
-
-std::string PreloadAmbientAudioOption::value_str() const
-{
-        return s_is_ambient_audio_preloaded ? "Yes" : "No";
-}
-
-OptionSubmenuType PreloadAmbientAudioOption::submenu_type() const
-{
-        return OptionSubmenuType::audio;
-}
-
-void PreloadAmbientAudioOption::change(const OptionChangeCommand command) const
-{
-        (void)command;
-
-        s_is_ambient_audio_preloaded = !s_is_ambient_audio_preloaded;
-}
-
-std::string AudioBufferSizeOption::name() const
-{
-        return "Audio buffer size";
-}
-
-std::string AudioBufferSizeOption::descr() const
-{
-        return (
-                "Lower values decrease latency, but may cause "
-                "sound crackling (audio buffer underruns) "
-                "on devices with slow CPU.\n"
-                "Increase it to get smoother sound, "
-                "but with the cost of increasing sound delay.");
-}
-
-std::string AudioBufferSizeOption::value_str() const
-{
-        return std::to_string(s_audio_buffer_size);
-}
-
-OptionSubmenuType AudioBufferSizeOption::submenu_type() const
-{
-        return OptionSubmenuType::audio;
-}
-
-void AudioBufferSizeOption::change(const OptionChangeCommand command) const
-{
-        const Range allowed_range(512, 4096);
-
-        if ((command == OptionChangeCommand::enter) ||
-            (command == OptionChangeCommand::right)) {
-                // Enter or right
-                s_audio_buffer_size <<= 1;
-        }
-        else {
-                // Left
-                s_audio_buffer_size >>= 1;
-        }
-
-        s_audio_buffer_size =
-                std::clamp(
-                        s_audio_buffer_size,
-                        allowed_range.min,
-                        allowed_range.max);
-
-        TRACE
-                << "Audio buffer size: "
-                << s_audio_buffer_size
-                << std::endl;
-
-        io::init_sdl_audio();
-}
-
 std::string MovementModeOption::name() const
 {
         return "Movement";
@@ -1245,7 +1016,7 @@ std::string MovementModeOption::value_str() const
 
 OptionSubmenuType MovementModeOption::submenu_type() const
 {
-        return OptionSubmenuType::input;
+        return OptionSubmenuType::gameplay;
 }
 
 void MovementModeOption::change(const OptionChangeCommand command) const
@@ -1253,126 +1024,6 @@ void MovementModeOption::change(const OptionChangeCommand command) const
         (void)command;
 
         s_is_dpad_movement = !s_is_dpad_movement;
-}
-
-std::string InputModeOption::name() const
-{
-        return "Input mode";
-}
-
-std::string InputModeOption::descr() const
-{
-        return (
-                "Use default input mode (numerical keypad or arrow keys), or "
-                "\"Vi-keys\". See the game manual for more information.");
-}
-
-std::string InputModeOption::value_str() const
-{
-        switch (s_input_mode) {
-        case InputMode::standard:
-                return "Default";
-
-        case InputMode::vi_keys:
-                return "Vi-keys";
-
-        case InputMode::END:
-                break;
-        }
-
-        return "";
-
-        ASSERT(false);
-}
-
-OptionSubmenuType InputModeOption::submenu_type() const
-{
-        return OptionSubmenuType::input;
-}
-
-void InputModeOption::change(const OptionChangeCommand command) const
-{
-        auto input_mode_nr = (int)s_input_mode;
-
-        const auto nr_input_modes = (int)InputMode::END;
-
-        if ((command == OptionChangeCommand::enter) ||
-            (command == OptionChangeCommand::right)) {
-                // Enter or right
-                if (input_mode_nr < (nr_input_modes - 1)) {
-                        ++input_mode_nr;
-                }
-                else {
-                        input_mode_nr = 0;
-                }
-        }
-        else {
-                // Left
-                if (input_mode_nr > 0) {
-                        --input_mode_nr;
-                }
-                else {
-                        input_mode_nr = nr_input_modes - 1;
-                }
-        }
-
-        s_input_mode = (InputMode)(input_mode_nr);
-}
-
-std::string DoubleClickTogglesFullscreenOption::name() const
-{
-        return "Double click fullscreen";
-}
-
-std::string DoubleClickTogglesFullscreenOption::descr() const
-{
-        return "Double click anywhere to toggle fullscreen?";
-}
-
-std::string DoubleClickTogglesFullscreenOption::value_str() const
-{
-        return s_is_double_click_toggle_fullscreen ? "Yes" : "No";
-}
-
-OptionSubmenuType DoubleClickTogglesFullscreenOption::submenu_type() const
-{
-        return OptionSubmenuType::input;
-}
-
-void DoubleClickTogglesFullscreenOption::change(const OptionChangeCommand command) const
-{
-        (void)command;
-
-        s_is_double_click_toggle_fullscreen = !s_is_double_click_toggle_fullscreen;
-}
-
-std::string AlwaysCenterViewOption::name() const
-{
-        return "Always center view";
-}
-
-std::string AlwaysCenterViewOption::descr() const
-{
-        return (
-                "Keep the view centered on the player, otherwise only center "
-                "when the player is near the edge of the view.");
-}
-
-std::string AlwaysCenterViewOption::value_str() const
-{
-        return s_always_center_view_on_player ? "Yes" : "No";
-}
-
-OptionSubmenuType AlwaysCenterViewOption::submenu_type() const
-{
-        return OptionSubmenuType::gameplay;
-}
-
-void AlwaysCenterViewOption::change(OptionChangeCommand command) const
-{
-        (void)command;
-
-        s_always_center_view_on_player = !s_always_center_view_on_player;
 }
 
 std::string TilesModeOption::name() const
@@ -1467,106 +1118,6 @@ void FontOption::change(OptionChangeCommand command) const
         io::init_other();
 }
 
-std::string FullscreenOption::name() const
-{
-        return "Fullscreen";
-}
-
-std::string FullscreenOption::descr() const
-{
-        return (
-                "Run in fullscreen mode (borderless fullscreen window) or "
-                "use resizable window. This can also be toggled by pressing "
-                "Alt-Enter.");
-}
-
-std::string FullscreenOption::value_str() const
-{
-        return s_is_fullscreen ? "Yes" : "No";
-}
-
-OptionSubmenuType FullscreenOption::submenu_type() const
-{
-        return OptionSubmenuType::video;
-}
-
-void FullscreenOption::change(OptionChangeCommand command) const
-{
-        (void)command;
-
-        config::set_fullscreen(!s_is_fullscreen);
-
-        io::on_user_toggle_fullscreen();
-}
-
-std::string RendererTypeOption::name() const
-{
-        return "Use hardware acceleration";
-}
-
-std::string RendererTypeOption::descr() const
-{
-        return (
-                "Use automatic selection (attempt to use hardware "
-                "acceleration first, or use software fallback), or "
-                "force using software renderer. "
-                "If you experience any graphical issues, setting this option "
-                "to \"Software\" may fix the problem.");
-}
-
-std::string RendererTypeOption::value_str() const
-{
-        switch (s_renderer_type) {
-        case RendererType::auto_select:
-                return "Auto select";
-
-        case RendererType::sw:
-                return "Software";
-
-        case RendererType::END:
-                break;
-        }
-
-        ASSERT(false);
-
-        return "";
-}
-
-OptionSubmenuType RendererTypeOption::submenu_type() const
-{
-        return OptionSubmenuType::video;
-}
-
-void RendererTypeOption::change(OptionChangeCommand command) const
-{
-        auto renderer_type_nr = (int)s_renderer_type;
-        const auto nr_renderer_types = (int)RendererType::END;
-
-        if ((command == OptionChangeCommand::enter) ||
-            (command == OptionChangeCommand::right)) {
-                // Enter or right
-                if (renderer_type_nr < (nr_renderer_types - 1)) {
-                        ++renderer_type_nr;
-                }
-                else {
-                        renderer_type_nr = 0;
-                }
-        }
-        else {
-                // Left
-                if (renderer_type_nr > 0) {
-                        --renderer_type_nr;
-                }
-                else {
-                        renderer_type_nr = nr_renderer_types - 1;
-                }
-        }
-
-        s_renderer_type = (RendererType)(renderer_type_nr);
-
-        io::init_other();
-}
-
 std::string VideoScaleOption::name() const
 {
         return "Menu scale";
@@ -1631,7 +1182,7 @@ std::string GameScaleOption::descr() const
 {
         return (
                 "Scale of the game world (the map), independent of the "
-                "menu scale. Applied when using the tile set.");
+                "menu scale.");
 }
 
 std::string GameScaleOption::value_str() const
@@ -1725,38 +1276,6 @@ void BrightnessOption::change(const OptionChangeCommand command) const
         s_brightness_pct = std::clamp(s_brightness_pct, 20, 220);
 
         colors::init();
-}
-
-std::string TextModeFilledWallsOption::name() const
-{
-        return "Text mode wall symbol";
-}
-
-std::string TextModeFilledWallsOption::descr() const
-{
-        return (
-                "Symbol used for representing walls in text mode "
-                "(when tiles are not used).");
-}
-
-std::string TextModeFilledWallsOption::value_str() const
-{
-        return s_text_mode_filled_walls ? "Filled rectangle" : "Hash sign";
-}
-
-OptionSubmenuType TextModeFilledWallsOption::submenu_type() const
-{
-        return OptionSubmenuType::video;
-}
-
-void TextModeFilledWallsOption::change(OptionChangeCommand command) const
-{
-        (void)command;
-
-        s_text_mode_filled_walls = !s_text_mode_filled_walls;
-
-        // Redefine the terrain data list.
-        terrain::init();
 }
 
 std::string DisplayHealthBarsOption::name() const
@@ -1876,71 +1395,6 @@ void SkipIntroPopupOption::change(OptionChangeCommand command) const
         (void)command;
 
         s_is_intro_popup_skipped = !s_is_intro_popup_skipped;
-}
-
-std::string AnyKeyConfirmMoreOption::name() const
-{
-        return "Any key to proceed";
-}
-
-std::string AnyKeyConfirmMoreOption::descr() const
-{
-        return (
-                "Any key confirms \"" +
-                msg_log::g_more_str +
-                "\" prompts in the message log (which can happen for example "
-                "when a monster appears as a warning to the player), "
-                "otherwise only space (and a few other keys) confirms these "
-                "prompts. Keeping the option disabled is safer.");
-}
-
-std::string AnyKeyConfirmMoreOption::value_str() const
-{
-        return s_is_any_key_confirm_more ? "Yes" : "No";
-}
-
-OptionSubmenuType AnyKeyConfirmMoreOption::submenu_type() const
-{
-        return OptionSubmenuType::input;
-}
-
-void AnyKeyConfirmMoreOption::change(OptionChangeCommand command) const
-{
-        (void)command;
-
-        s_is_any_key_confirm_more = !s_is_any_key_confirm_more;
-}
-
-std::string AutoSelectMenuOption::name() const
-{
-        return "Auto select menu entries";
-}
-
-std::string AutoSelectMenuOption::descr() const
-{
-        return (
-                "If disabled, pressing a letter key while in a menu only jumps "
-                "to that position, and a second press (or enter) is required "
-                "to select it (this is only applicable for menus where the options "
-                "have descriptions, such as the trait selection menu). "
-                "If enabled, pressing a letter immediately selects that entry.");
-}
-
-std::string AutoSelectMenuOption::value_str() const
-{
-        return s_auto_select_menu ? "Yes" : "No";
-}
-
-OptionSubmenuType AutoSelectMenuOption::submenu_type() const
-{
-        return OptionSubmenuType::input;
-}
-
-void AutoSelectMenuOption::change(OptionChangeCommand command) const
-{
-        (void)command;
-
-        s_auto_select_menu = !s_auto_select_menu;
 }
 
 std::string DisplayHintsOption::name() const
@@ -2166,7 +1620,7 @@ std::string MedicalBagAutoChoiceOption::value_str() const
 
 OptionSubmenuType MedicalBagAutoChoiceOption::submenu_type() const
 {
-        return OptionSubmenuType::input;
+        return OptionSubmenuType::gameplay;
 }
 
 void MedicalBagAutoChoiceOption::change(OptionChangeCommand command) const
@@ -2195,7 +1649,7 @@ std::string AutoReloadOption::value_str() const
 
 OptionSubmenuType AutoReloadOption::submenu_type() const
 {
-        return OptionSubmenuType::input;
+        return OptionSubmenuType::gameplay;
 }
 
 void AutoReloadOption::change(OptionChangeCommand command) const
@@ -2358,153 +1812,165 @@ void ExplosionDelayOption::change(OptionChangeCommand command) const
 }  // namespace config
 
 // -----------------------------------------------------------------------------
-// Options state
+// Settings state
 // -----------------------------------------------------------------------------
-OptionsState::OptionsState() = default;
-
-StateId OptionsState::id() const
+SettingsState::SettingsState() :
+        MenuDescrPageState(Panel::options, Panel::options_descr)
 {
-        return StateId::options;
+        build_rows();
 }
 
-std::string OptionsState::page_title() const
+StateId SettingsState::id() const
 {
-        return "Options";
+        return StateId::settings;
 }
 
-std::vector<MenuPageEntry> OptionsState::page_entries() const
+void SettingsState::build_rows()
 {
-        std::vector<MenuPageEntry> entries;
+        // One section per submenu type, in enum order: a header naming it,
+        // then its options in registration order
+        m_rows.clear();
 
         for (int i = 0; i < (int)config::OptionSubmenuType::END; ++i) {
-                entries.push_back(
-                        {submenu_name_with_key_shortcut(
-                                 (config::OptionSubmenuType)i),
-                         ""});
+                const auto submenu = (config::OptionSubmenuType)i;
+
+                std::vector<config::Option*> section;
+
+                for (const auto& option : s_options) {
+                        if (option->submenu_type() == submenu) {
+                                section.push_back(option.get());
+                        }
+                }
+
+                if (section.empty()) {
+                        continue;
+                }
+
+                if (!m_rows.empty()) {
+                        // Blank row above every section but the first
+                        m_rows.push_back({nullptr, ""});
+                }
+
+                m_rows.push_back({nullptr, submenu_name(submenu)});
+
+                for (config::Option* const option : section) {
+                        m_rows.push_back({option, ""});
+                }
         }
-
-        return entries;
 }
 
-void OptionsState::on_entry_selected(const int idx)
+std::string SettingsState::page_title() const
 {
-        states::push(
-                std::make_unique<OptionsSubmenuState>(
-                        (config::OptionSubmenuType)idx));
+        return "Settings";
 }
 
-// -----------------------------------------------------------------------------
-// Options submenu state
-// -----------------------------------------------------------------------------
-static void change_current_option(
-        const int idx,
-        const config::OptionChangeCommand command)
-{
-        s_current_options[idx]->change(command);
-
-        write_config_file();
-
-        io::clear_input();
-}
-
-OptionsSubmenuState::OptionsSubmenuState(
-        const config::OptionSubmenuType submenu)
-{
-        s_current_submenu = submenu;
-
-        filter_current_options(submenu);
-}
-
-StateId OptionsSubmenuState::id() const
-{
-        return StateId::options_submenu;
-}
-
-std::string OptionsSubmenuState::page_title() const
-{
-        return submenu_name(s_current_submenu);
-}
-
-std::string OptionsSubmenuState::page_hint() const
+std::string SettingsState::page_hint() const
 {
         return common_text::g_set_option_hint;
 }
 
-std::vector<MenuPageEntry> OptionsSubmenuState::page_entries() const
+std::vector<MenuPageEntry> SettingsState::page_entries() const
 {
         std::vector<MenuPageEntry> entries;
 
-        entries.reserve(s_current_options.size());
+        entries.reserve(m_rows.size());
 
-        for (const config::Option* const option : s_current_options) {
-                entries.push_back({option->name(), option->value_str()});
+        for (const Row& row : m_rows) {
+                if (!row.option) {
+                        entries.push_back({row.header, "", true});
+
+                        continue;
+                }
+
+                entries.push_back(
+                        {row.option->name(), row.option->value_str(), false});
         }
 
         return entries;
 }
 
-void OptionsSubmenuState::on_entry_selected(const int idx)
+int SettingsState::default_marked_idx() const
 {
-        change_current_option(idx, config::OptionChangeCommand::enter);
+        // Row 0 is a header - the browser steps off it by itself, but
+        // starting on the first real option keeps the opening frame right
+        return (m_rows.size() > 1) ? 1 : 0;
 }
 
-void OptionsSubmenuState::on_entry_left(const int idx)
+void SettingsState::change_marked_option(
+        const int idx,
+        const config::OptionChangeCommand command)
 {
-        change_current_option(idx, config::OptionChangeCommand::left);
-}
+        config::Option* const option = m_rows[idx].option;
 
-void OptionsSubmenuState::on_entry_right(const int idx)
-{
-        change_current_option(idx, config::OptionChangeCommand::right);
-}
-
-bool OptionsSubmenuState::entry_plays_selection_audio(const int idx) const
-{
-        // Some options play a custom selection audio, so they must disable
-        // the one played by the menu browser
-        return s_current_options[idx]->allow_browser_selection_audio();
-}
-
-void OptionsSubmenuState::draw_page_content()
-{
-        const config::Option* const selected_option =
-                s_current_options[m_browser.y()];
-
-        const std::string descr_str = selected_option->descr();
-
-        if (!descr_str.empty()) {
-                Text text(descr_str);
-
-                text.set_w(panels::w(Panel::options_descr));
-
-                io::draw_text(
-                        text,
-                        Panel::options_descr,
-                        {0, 0},
-                        colors::text());
+        if (!option) {
+                return;
         }
+
+        option->change(command);
+
+        write_config_file();
+
+        io::clear_input();
+
+        // A changed option may resize the gui (font, scale), which changes
+        // how many rows fit
+        reset_browser();
 }
 
-int OptionsSubmenuState::list_x0(const int block_w) const
+void SettingsState::on_entry_selected(const int idx)
 {
-        (void)block_w;
-
-        return panels::p0(Panel::options).x;
+        change_marked_option(idx, config::OptionChangeCommand::enter);
 }
 
-int OptionsSubmenuState::list_y0(const int nr_entries_shown) const
+void SettingsState::on_entry_left(const int idx)
 {
-        (void)nr_entries_shown;
-
-        return panels::p0(Panel::options).y;
+        change_marked_option(idx, config::OptionChangeCommand::left);
 }
 
-int OptionsSubmenuState::list_max_x1() const
+void SettingsState::on_entry_right(const int idx)
 {
-        return panels::p0(Panel::options_descr).x - 2;
+        change_marked_option(idx, config::OptionChangeCommand::right);
 }
 
-bool OptionsSubmenuState::use_left_right_keys() const
+bool SettingsState::entry_plays_selection_audio(const int idx) const
+{
+        const config::Option* const option = m_rows[idx].option;
+
+        return option ? option->allow_browser_selection_audio() : true;
+}
+
+void SettingsState::draw_page_content()
+{
+        if (m_rows.empty()) {
+                return;
+        }
+
+        const config::Option* const option = m_rows[m_browser.y()].option;
+
+        if (!option) {
+                return;
+        }
+
+        const std::string descr_str = option->descr();
+
+        if (descr_str.empty()) {
+                return;
+        }
+
+        std::vector<std::vector<ColoredString>> lines;
+
+        append_descr_text(lines, descr_str, colors::text(), descr_text_w());
+
+        draw_descr_lines(lines);
+}
+
+int SettingsState::list_max_x1() const
+{
+        // The row tap zone spans the label AND value columns
+        return panels::p1(Panel::options_values).x;
+}
+
+bool SettingsState::use_left_right_keys() const
 {
         return true;
 }

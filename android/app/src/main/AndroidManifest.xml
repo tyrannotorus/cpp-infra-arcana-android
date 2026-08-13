@@ -12,6 +12,7 @@
             android:name=".IAActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:screenOrientation="sensorLandscape"
+            android:autoRemoveFromRecents="true"
             android:exported="true">
 
             <intent-filter>

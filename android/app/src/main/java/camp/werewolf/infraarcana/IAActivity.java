@@ -75,12 +75,13 @@ public class IAActivity extends SDLActivity {
         super.onDestroy();
 
         // SDLActivity only finish()es the Activity when SDL_main returns.
-        // The process - with the native library's static state already
-        // torn down - would survive and be REUSED on the next launch,
-        // coming up broken (and "Exit" in the title menu looked like mere
-        // backgrounding). Kill the process so every launch starts clean.
-        // (SDLActivity.onDestroy has already joined the native thread at
-        // this point.)
+        // The process - with the native library's static state already torn
+        // down - would survive and be REUSED on the next launch, coming up
+        // broken. Kill it so every launch starts clean. (SDLActivity's
+        // onDestroy has already joined the native thread here.) The task
+        // card is dropped by autoRemoveFromRecents, see the manifest -
+        // finish() alone leaves it in the switcher, which reads as the game
+        // having merely been backgrounded.
         android.os.Process.killProcess(android.os.Process.myPid());
     }
 }

@@ -279,8 +279,7 @@ bool screen_has_close_button(const StateId id)
         case StateId::inventory:
         case StateId::manual:
         case StateId::message_history:
-        case StateId::options:
-        case StateId::options_submenu:
+        case StateId::settings:
         case StateId::pick_background:
         case StateId::pick_background_occultist:
         case StateId::pick_name:

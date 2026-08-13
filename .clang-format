@@ -109,7 +109,6 @@ SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
 SpaceBeforeRangeBasedForLoopColon: true
 SpaceInEmptyParentheses: false
-SpaceBeforeRangeBasedForLoopColon: true
 SpacesBeforeTrailingComments: 2
 SpacesInAngles: false
 SpacesInContainerLiterals: false

@@ -1,0 +1,5 @@
+- Options is now one Settings page, grouped by Video, Audio and Gameplay
+- Removed settings that do nothing on a phone; those now use phone defaults
+- Game scale now applies to ASCII, not just tiles
+- Menu screens no longer sit flush against the border
+- Exiting from the title screen now closes the game

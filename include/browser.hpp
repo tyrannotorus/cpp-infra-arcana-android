@@ -96,6 +96,14 @@ public:
 
         void reset(int nr_items, int list_h = -1);
 
+        // Entries the marker may not land on (section headers): browsing
+        // steps over them. Indexed by entry, cleared by reset (call after
+        // it). Out of range entries are selectable. An all unselectable
+        // mask is ignored - the marker must be able to exist somewhere.
+        void set_unselectable(const std::vector<bool>& unselectable);
+
+        bool is_selectable(int idx) const;
+
         const std::vector<char>& menu_keys() const;
 
         // NOTE: This ONLY ever affects the keys on the first screen, if scrolling down to screens
@@ -134,7 +142,11 @@ private:
 
         void update_range_shown();
 
+        // Nearest selectable entry from idx in that direction, or -1
+        int next_selectable(int idx, VerDir dir) const;
+
         std::vector<char> m_menu_keys {std_menu_keys};
+        std::vector<bool> m_unselectable {};
         int m_nr_items {0};
         int m_y {0};
         int m_list_h {-1};

@@ -87,12 +87,22 @@ void forget_remembered_marked_entries()
 // -----------------------------------------------------------------------------
 int MenuPageState::list_h() const
 {
-        // Everything between the screen's border rules, minus the two
-        // divider rules that frame the list. A longer list is shown a page
+        // Everything between the screen's border rules, less the rules
+        // framing the list and the inner margin the panel based pages also
+        // keep (see panel's page_content_y0). A longer list is shown a page
         // at a time (see MenuBrowser::update_range_shown).
+        constexpr int nr_divider_rules = 2;
+        constexpr int nr_inner_margin_rows = 2;
+
         const R box = panels::screen_box_area();
 
-        return std::max(1, (box.p1.y - box.p0.y - 1) - 2);
+        const int rows_between_border_rules = box.p1.y - box.p0.y - 1;
+
+        return std::max(
+                1,
+                rows_between_border_rules -
+                        nr_divider_rules -
+                        nr_inner_margin_rows);
 }
 
 std::string MenuPageState::page_hint() const
@@ -124,11 +134,24 @@ void MenuPageState::reset_browser()
 {
         const int old_y = m_browser.y();
 
-        m_browser.reset((int)page_entries().size(), list_h());
+        const auto entries = page_entries();
+
+        m_browser.reset((int)entries.size(), list_h());
 
         if (use_left_right_keys()) {
                 m_browser.enable_left_right_keys();
         }
+
+        std::vector<bool> headers;
+
+        headers.reserve(entries.size());
+
+        for (const auto& entry : entries) {
+                headers.push_back(entry.is_header);
+        }
+
+        // NOTE: After reset, which clears the mask
+        m_browser.set_unselectable(headers);
 
         m_browser.set_y(old_y);
 }
@@ -200,11 +223,17 @@ void MenuPageState::draw()
                 return;
         }
 
-        // Label/value column widths
+        // Label/value column widths. NOTE: A header names its section and
+        // is not part of the value column alignment - a long one may run
+        // under it.
         int label_w = 0;
         int value_w = 0;
 
         for (const auto& entry : entries) {
+                if (entry.is_header) {
+                        continue;
+                }
+
                 label_w = std::max(label_w, (int)entry.label.size());
                 value_w = std::max(value_w, (int)entry.value.size());
         }
@@ -251,6 +280,16 @@ void MenuPageState::draw()
                 const auto& entry = entries[i];
 
                 const int y = y0 + (i - idx_range_shown.min);
+
+                if (entry.is_header) {
+                        io::draw_text(
+                                entry.label,
+                                Panel::screen,
+                                {x0, y},
+                                colors::title());
+
+                        continue;
+                }
 
                 const bool is_marked = m_browser.is_at_idx(i);
 
@@ -400,6 +439,12 @@ bool MenuPageState::try_tap(const P& logical_px)
                 idx_range_shown.min + (gui_pos.y - m_drawn_list_y0);
 
         if ((idx < idx_range_shown.min) || (idx > idx_range_shown.max)) {
+                return false;
+        }
+
+        // A tap on a header must not move the marker (set_y would push it
+        // to a neighbour), but still selects whatever is marked
+        if (!m_browser.is_selectable(idx)) {
                 return false;
         }
 

@@ -132,7 +132,6 @@ struct InputData
         int key {-1};
         bool is_shift_held {false};
         bool is_ctrl_held {false};
-        bool is_alt_held {false};
 };
 
 void init_sdl();
@@ -157,7 +156,10 @@ std::string sdl_pref_dir();
 // Actual user resolution (i.e. not logical size)
 P get_native_resolution();
 
-void on_user_toggle_fullscreen();
+// Recreates the window, the renderer and every texture, then redraws. Called
+// when the GPU context was lost (see io_input's render device reset).
+void on_render_device_reset();
+
 void on_user_toggle_scaling();
 
 int graphics_cycle_nr(GraphicsCycle cycle_type);

@@ -174,7 +174,7 @@ void MainMenuState::draw()
                 "(N)ew journey",
                 "(R)esurrect",
                 "(T)ome of Wisdom",
-                "(O)ptions",
+                "(S)ettings",
                 "(G)raveyard",
                 "(C)redits",
                 "(E)scape to reality"};
@@ -374,8 +374,8 @@ void MainMenuState::update()
                 } break;
 
                 case 3: {
-                        // Options
-                        states::push(std::make_unique<OptionsState>());
+                        // Settings
+                        states::push(std::make_unique<SettingsState>());
                 } break;
 
                 case 4: {

@@ -53,7 +53,6 @@ static void update_input_mod_key_status()
 
         s_input.is_shift_held = mod & KMOD_SHIFT;
         s_input.is_ctrl_held = mod & KMOD_CTRL;
-        s_input.is_alt_held = mod & KMOD_ALT;
 }
 
 static void on_window_resized_signalled()
@@ -92,29 +91,6 @@ static void window_resized_delayed_draw()
         }
 }
 
-static P calc_gui_dims_offset_for_window_resize_cmd(const char c)
-{
-        if (c == '+') {
-                if (s_input.is_ctrl_held) {
-                        return {0, 1};
-                }
-                else {
-                        return {1, 0};
-                }
-        }
-        else if (c == '-') {
-                if (s_input.is_ctrl_held) {
-                        return {0, -1};
-                }
-                else {
-                        return {-1, 0};
-                }
-        }
-        else {
-                return {0, 0};
-        }
-}
-
 static bool is_printable_ascii_char(const char c)
 {
         // '!' = 33
@@ -136,9 +112,10 @@ static void handle_window_event()
         case SDL_WINDOWEVENT_SIZE_CHANGED: {
                 TRACE << "Window resized" << std::endl;
 
-                if (!config::is_fullscreen()) {
-                        s_is_window_resized = true;
-                }
+                // The window is always fullscreen, so this is the device
+                // being rotated (or the system insets changing) - the panels
+                // must be laid out again for the new size
+                s_is_window_resized = true;
         } break;
 
         case SDL_WINDOWEVENT_RESTORED: {
@@ -179,27 +156,9 @@ static void handle_quit_event()
 
 static void handle_keydown_enter_event()
 {
-        if (s_input.is_alt_held) {
-                TRACE << "Alt-Enter pressed" << std::endl;
+        s_input.key = SDLK_RETURN;
 
-                config::set_fullscreen(!config::is_fullscreen());
-
-                io::on_user_toggle_fullscreen();
-
-                // TODO: For some reason, the alt key gets "stuck" after
-                // toggling fullscreen, and must be cleared here
-                // manually. Don't know if this is an issue in the IA
-                // code, or an SDL bug.
-                SDL_SetModState(KMOD_NONE);
-
-                io::clear_input();
-        }
-        else {
-                // Alt is not held
-                s_input.key = SDLK_RETURN;
-
-                s_is_done_reading_input = true;
-        }
+        s_is_done_reading_input = true;
 }
 
 static void handle_keydown_event()
@@ -292,24 +251,6 @@ static void handle_textinput_event()
 {
         const char* const text = s_sdl_event.text.text;
 
-        const auto c = text[0];
-
-        if (c == '+' || c == '-') {
-                if (config::is_fullscreen() || io::is_window_maximized()) {
-                        return;
-                }
-
-                P gui_dims = io::sdl_window_gui_dims();
-
-                gui_dims += calc_gui_dims_offset_for_window_resize_cmd(c);
-
-                io::try_set_window_gui_cells(gui_dims);
-
-                s_is_window_resized = true;
-
-                return;
-        }
-
         // Every character of the event is queued, and the first one is
         // handed over right away.
         //
@@ -330,24 +271,6 @@ static void handle_textinput_event()
         }
 
         take_pending_text_input();
-}
-
-static void handle_mousebutton_event()
-{
-        const uint8_t clicks = s_sdl_event.button.clicks;
-        const uint8_t button = s_sdl_event.button.button;
-
-        if ((clicks == 2) && (button == 1)) {
-                TRACE << "Left mouse button double-click" << std::endl;
-
-                if (config::is_double_click_toggle_fullscreen()) {
-                        config::set_fullscreen(!config::is_fullscreen());
-
-                        io::on_user_toggle_fullscreen();
-
-                        io::clear_input();
-                }
-        }
 }
 
 static void handle_mousewheel_event()
@@ -1732,10 +1655,8 @@ static void handle_finger_up_event()
 static void handle_render_device_reset_event()
 {
         // The GPU context was lost (e.g. the app was backgrounded and
-        // resumed) - all textures are invalid. Recreate the window, renderer,
-        // and textures, and redraw (on_user_toggle_fullscreen does exactly
-        // this - it does not itself change the fullscreen setting).
-        io::on_user_toggle_fullscreen();
+        // resumed) - all textures are invalid
+        io::on_render_device_reset();
 }
 
 static void handle_polled_event()
@@ -1769,10 +1690,6 @@ static void handle_polled_event()
 
         case SDL_TEXTINPUT: {
                 handle_textinput_event();
-        } break;
-
-        case SDL_MOUSEBUTTONDOWN: {
-                handle_mousebutton_event();
         } break;
 
         case SDL_MOUSEWHEEL: {
@@ -1969,15 +1886,13 @@ InputData read_input()
         while (!s_is_done_reading_input) {
                 idle_between_input_passes();
 
-                if (!config::is_fullscreen()) {
-                        if (s_is_window_resized) {
-                                on_window_resized_signalled();
+                if (s_is_window_resized) {
+                        on_window_resized_signalled();
 
-                                continue;
-                        }
-
-                        window_resized_delayed_draw();
+                        continue;
                 }
+
+                window_resized_delayed_draw();
 
                 // The camera follow tween and the map shake only move the
                 // composite offset of the map display - no state redraw
