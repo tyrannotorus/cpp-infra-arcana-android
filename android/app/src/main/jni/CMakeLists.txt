@@ -13,12 +13,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-O2)
 add_compile_definitions(NDEBUG)
 
+# Reproducible build flags - F-Droid rebuilds the tag and compares the result
+# byte for byte against the published APK (see the Binaries and
+# AllowedAPKSigningKeys recipe fields).
+#
 # Build paths must not travel in a shared artifact. IA's own asserts are
 # compiled out by NDEBUG, but SDL's are not: SDL_assert bakes __FILE__ into
 # libSDL2.so, which put the absolute build root - on CI, a path carrying the
-# account name - into the APK. Rewrite the source root to a relative path, so
-# those strings say "./third_party/SDL/..." wherever the build ran.
-add_compile_options("-ffile-prefix-map=${IA_ROOT}=.")
+# account name - into the APK. Rewrite both source roots to relative paths, so
+# those strings read the same wherever the build ran.
+add_compile_options(
+    "-ffile-prefix-map=${IA_ROOT}=."
+    "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=./android/app/src/main/jni"
+)
+
+# A build id is a hash over the linked output, and the hash section layout
+# varies with the toolchain default - both differ between build hosts. Drop
+# the note and pin the layout.
+add_link_options("LINKER:--build-id=none,--hash-style=gnu")
 
 # -----------------------------------------------------------------------------
 # SDL2 + SDL2_image + SDL2_mixer, built as shared libs from the sources IA
