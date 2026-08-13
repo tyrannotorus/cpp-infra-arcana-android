@@ -20,7 +20,6 @@ extern const std::string g_build_version_str;
 
 extern const std::string g_copyright_str;
 extern const std::string g_license_str;
-extern const std::string g_date_str;
 
 std::optional<std::string> read_git_sha1_str_from_file();
 
