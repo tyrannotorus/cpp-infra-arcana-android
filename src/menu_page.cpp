@@ -31,6 +31,9 @@ static const int s_value_column_gap = 2;
 // How far the divider rules extend beyond the list block on each side
 static const int s_divider_pad = 6;
 
+// Reach beyond an entry's text that still counts as tapping it, in gui cells
+static const int s_entry_tap_margin = 2;
+
 // -----------------------------------------------------------------------------
 // Global namespace
 // -----------------------------------------------------------------------------
@@ -252,8 +255,8 @@ void MenuPageState::draw()
 
         // The list block: the labels padded out to the stylistic divider
         // width, centered on the labels. This is the width of the divider
-        // rules (where they are drawn), of the row tap zone, and of the
-        // scroll fades.
+        // rules (where they are drawn) and of the scroll fades - NOT of the
+        // tap zone, which is the entry's own text (see try_tap).
         const int row_w =
                 std::clamp(
                         block_w + (2 * s_divider_pad),
@@ -275,11 +278,21 @@ void MenuPageState::draw()
                 draw_menu_divider(row_x0, row_x1, y0 + nr_shown);
         }
 
+        m_drawn_entry_x1.clear();
+
         // Entries
         for (int i = idx_range_shown.min; i <= idx_range_shown.max; ++i) {
                 const auto& entry = entries[i];
 
                 const int y = y0 + (i - idx_range_shown.min);
+
+                // Through the value column where there is one, so that
+                // tapping a value hits its row
+                m_drawn_entry_x1.push_back(
+                        entry.value.empty()
+                                ? (x0 + (int)entry.label.size() - 1)
+                                : (x0 + label_w + s_value_column_gap +
+                                   (int)entry.value.size() - 1));
 
                 if (entry.is_header) {
                         io::draw_text(
@@ -354,8 +367,7 @@ void MenuPageState::draw()
 
         // Record the list geometry for tap mapping
         m_drawn_list_y0 = y0;
-        m_drawn_row_x0 = row_x0;
-        m_drawn_row_x1 = row_x1;
+        m_drawn_entry_x0 = x0;
 
         // Remember the marked entry, so a later re-entry of this page
         // restores it
@@ -428,15 +440,23 @@ bool MenuPageState::try_tap(const P& logical_px)
                 logical_px.x / config::gui_cell_px_w(),
                 logical_px.y / config::gui_cell_px_h());
 
-        if ((gui_pos.x < m_drawn_row_x0) ||
-            (gui_pos.x > m_drawn_row_x1)) {
+        const int row = gui_pos.y - m_drawn_list_y0;
+
+        if ((row < 0) || (row >= (int)m_drawn_entry_x1.size())) {
+                return false;
+        }
+
+        // The entry's own text marks it, NOT the whole row - the list block
+        // is padded out to the divider width, and a row test would steal
+        // taps meant to confirm the marked entry
+        if ((gui_pos.x < (m_drawn_entry_x0 - s_entry_tap_margin)) ||
+            (gui_pos.x > (m_drawn_entry_x1[row] + s_entry_tap_margin))) {
                 return false;
         }
 
         const auto idx_range_shown = m_browser.range_shown();
 
-        const int idx =
-                idx_range_shown.min + (gui_pos.y - m_drawn_list_y0);
+        const int idx = idx_range_shown.min + row;
 
         if ((idx < idx_range_shown.min) || (idx > idx_range_shown.max)) {
                 return false;

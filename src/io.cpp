@@ -418,10 +418,24 @@ static SDL_Renderer* create_renderer()
 {
         TRACE_FUNC_BEGIN;
 
-        // No renderer flags - SDL picks the best driver it can, which on a
-        // phone means the accelerated one
-        SDL_Renderer* const renderer =
-                SDL_CreateRenderer(io::g_sdl_window, -1, 0U);
+        // Vsync paces every present, which is what makes the camera follow
+        // advance in even steps, and keeps the idle render loop from
+        // compositing hundreds of frames a second. No other flags: SDL picks
+        // the best driver it can, which on a phone means the accelerated one.
+        SDL_Renderer* renderer =
+                SDL_CreateRenderer(
+                        io::g_sdl_window,
+                        -1,
+                        SDL_RENDERER_PRESENTVSYNC);
+
+        if (!renderer) {
+                TRACE
+                        << "No vsync capable renderer, retrying without: "
+                        << SDL_GetError()
+                        << std::endl;
+
+                renderer = SDL_CreateRenderer(io::g_sdl_window, -1, 0U);
+        }
 
         if (!renderer) {
                 TRACE_ERROR_RELEASE
@@ -1200,12 +1214,9 @@ void sleep(const uint32_t duration)
                 while (SDL_GetTicks() < wait_until) {
                         SDL_PumpEvents();
 
-                        // A map shake animates through any wait - notably
-                        // the blast animation's own delay, which is exactly
-                        // when an explosion should be shaking the ground.
-                        // Stepping it is a composite and a present, the
-                        // drawn frame is reused as it stands.
-                        if (step_map_shake()) {
+                        // The map shake and the camera follow animate through
+                        // any wait - notably the blast animation's own delay
+                        if (step_map_animations()) {
                                 update_screen();
                         }
                 }

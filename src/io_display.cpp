@@ -48,20 +48,126 @@ static P map_overscan_px()
 // Shake offset of the map (see start_map_shake), added to the scroll offset
 static P s_map_shake_px = {0, 0};
 
-// Where the composite samples the map texture: the camera offset and the
-// shake together. The overscan is all the displacement there is drawn
-// content for - beyond it the copy would sample outside the texture.
+// How far behind its drawn framing the camera is (see offset_map_follow),
+// in logical pixels. Floating point - rounding each step would stall the
+// last pixels of the ease.
+static float s_map_follow_px_x = 0.0f;
+static float s_map_follow_px_y = 0.0f;
+
+// Fraction of the remaining distance covered in one reference frame. The
+// alpha is rescaled from the real elapsed time, so the follow takes the same
+// time at any refresh rate.
+static const float s_map_follow_lerp = 0.18f;
+static const float s_map_follow_reference_frame_ms = 16.67f;
+
+// An exponential never arrives; below this the camera has caught up
+static const float s_map_follow_min_px = 0.5f;
+
+// Zero means the camera has just gone behind and the clock has not started
+static uint32_t s_map_follow_last_step_ms = 0;
+
+// Whole cells of the lag the map display was last drawn with
+static P s_map_follow_drawn_cells = {0, 0};
+
+// Whole cells of lag beyond the one cell the composite can carry
+static int follow_whole_cells(const float lag_px, const int cell_px)
+{
+        if (cell_px <= 0) {
+                return 0;
+        }
+
+        const float cell = (float)cell_px;
+
+        if (lag_px > cell) {
+                return (int)((lag_px - cell) / cell) + 1;
+        }
+
+        if (lag_px < -cell) {
+                return -((int)((-lag_px - cell) / cell) + 1);
+        }
+
+        return 0;
+}
+
+// Eases the camera toward its framing. Called once per present, from the
+// composite, so it advances through anything that puts frames on screen.
+static void step_map_follow()
+{
+        if (!io::is_map_follow_active()) {
+                s_map_follow_px_x = 0.0f;
+                s_map_follow_px_y = 0.0f;
+
+                s_map_follow_last_step_ms = 0;
+
+                return;
+        }
+
+        const uint32_t now_ms = SDL_GetTicks();
+
+        if (s_map_follow_last_step_ms == 0) {
+                // This present shows the player on its new cell with the map
+                // not yet caught up - the motion starts from the next one
+                s_map_follow_last_step_ms = now_ms;
+
+                return;
+        }
+
+        const uint32_t elapsed_ms = now_ms - s_map_follow_last_step_ms;
+
+        if (elapsed_ms == 0) {
+                // Leave the clock, so the time is not lost
+                return;
+        }
+
+        s_map_follow_last_step_ms = now_ms;
+
+        const float alpha =
+                1.0f -
+                std::pow(
+                        1.0f - s_map_follow_lerp,
+                        (float)elapsed_ms / s_map_follow_reference_frame_ms);
+
+        // A long stall saturates the alpha, putting the camera where it
+        // should have been by now
+        const float remaining = 1.0f - std::min(alpha, 1.0f);
+
+        s_map_follow_px_x *= remaining;
+        s_map_follow_px_y *= remaining;
+
+        if (!io::is_map_follow_active()) {
+                s_map_follow_px_x = 0.0f;
+                s_map_follow_px_y = 0.0f;
+
+                s_map_follow_last_step_ms = 0;
+        }
+}
+
+// Where the composite samples the map texture: the manual pan, the camera
+// follow and the shake together. The overscan is all the displacement there
+// is drawn content for - beyond it the copy would sample outside the
+// texture.
 static P map_src_offset_px()
 {
+        // One cell: both the overscan and the unit the drawn whole cells are
+        // counted in
         const auto overscan = map_overscan_px();
+
+        // Only what the drawn origin did not take on
+        const P follow(
+                (int)std::lround(
+                        s_map_follow_px_x -
+                        (float)(s_map_follow_drawn_cells.x * overscan.x)),
+                (int)std::lround(
+                        s_map_follow_px_y -
+                        (float)(s_map_follow_drawn_cells.y * overscan.y)));
 
         return {
                 std::clamp(
-                        s_map_scroll_px.x + s_map_shake_px.x,
+                        s_map_scroll_px.x + follow.x + s_map_shake_px.x,
                         -overscan.x,
                         overscan.x),
                 std::clamp(
-                        s_map_scroll_px.y + s_map_shake_px.y,
+                        s_map_scroll_px.y + follow.y + s_map_shake_px.y,
                         -overscan.y,
                         overscan.y)};
 }
@@ -387,6 +493,9 @@ void clear_display_textures()
 
 void composite_display_textures()
 {
+        // The camera advances per present, not per pass of one loop
+        step_map_follow();
+
         SDL_SetRenderTarget(g_sdl_renderer, nullptr);
 
         s_current_display = Display::END;
@@ -424,7 +533,7 @@ void composite_display_textures()
                         // The map is copied as a region: a map-panel sized
                         // window into the overscanned content, shifted by the
                         // sub-cell scroll offset (map panning, the camera
-                        // follow tween, and any shake)
+                        // follow, and any shake)
                         const auto overscan = map_overscan_px();
 
                         const auto scroll = map_src_offset_px();
@@ -531,111 +640,47 @@ void set_map_scroll_px_offset(const P& px_offset)
         s_map_scroll_px = px_offset;
 }
 
-P map_scroll_px_offset()
+void offset_map_follow(const P& px_offset)
 {
-        return s_map_scroll_px;
+        const bool was_settled = !io::is_map_follow_active();
+
+        s_map_follow_px_x += (float)px_offset.x;
+        s_map_follow_px_y += (float)px_offset.y;
+
+        if (was_settled) {
+                // Clock starts at the next present - see step_map_follow
+                s_map_follow_last_step_ms = 0;
+        }
 }
 
-// Camera follow tween state (see start_map_follow_tween)
-static P s_follow_tween_start_px(0, 0);
-static uint32_t s_follow_tween_start_ms = 0;
-static bool s_is_follow_tween_active = false;
-
-// Whether the clock has been started (see step_map_follow_tween)
-static bool s_is_follow_tween_running = false;
-
-static const uint32_t s_follow_tween_duration_ms = 90;
-
-void start_map_follow_tween(const P& px_offset)
+bool is_map_follow_active()
 {
-        s_follow_tween_start_px = px_offset;
-        s_is_follow_tween_active = true;
-
-        // NOTE: The clock is NOT started here - see step_map_follow_tween
-        s_is_follow_tween_running = false;
-
-        // The content starts out visually where it was before the
-        // viewport stepped, and eases to the new position
-        set_map_scroll_px_offset(px_offset);
+        return (std::fabs(s_map_follow_px_x) >= s_map_follow_min_px) ||
+                (std::fabs(s_map_follow_px_y) >= s_map_follow_min_px);
 }
 
-bool is_map_follow_tween_active()
+P map_follow_whole_cells()
 {
-        return s_is_follow_tween_active;
+        return {
+                follow_whole_cells(
+                        s_map_follow_px_x,
+                        config::map_cell_px_w()),
+                follow_whole_cells(
+                        s_map_follow_px_y,
+                        config::map_cell_px_h())};
 }
 
-bool step_map_follow_tween()
+void set_map_follow_drawn_whole_cells(const P& cells)
 {
-        if (!s_is_follow_tween_active) {
-                return false;
-        }
-
-        if (!s_is_follow_tween_running) {
-                // The tween is STARTED where the camera moves - which is in
-                // the middle of a state draw - but it can only be STEPPED
-                // by the animation loop (see io::read_input). Timing it
-                // from the start would spend the tween on everything in
-                // between: the rest of that frame's drawing (the whole map
-                // is redrawn there), its present, and the remaining turn
-                // processing. On a slow device that is longer than the
-                // tween itself, so the first step already found it expired,
-                // jumped the offset to zero and the camera appeared to snap
-                // - no intermediate frame was ever shown.
-                //
-                // So the clock starts at the first step instead. The frame
-                // showing the start offset (the player on its new cell, the
-                // map not yet caught up) is already on screen by then.
-                s_is_follow_tween_running = true;
-
-                s_follow_tween_start_ms = SDL_GetTicks();
-
-                return false;
-        }
-
-        const uint32_t elapsed_ms =
-                SDL_GetTicks() - s_follow_tween_start_ms;
-
-        P new_offset(0, 0);
-
-        if (elapsed_ms >= s_follow_tween_duration_ms) {
-                s_is_follow_tween_active = false;
-        }
-        else {
-                const float t =
-                        (float)elapsed_ms /
-                        (float)s_follow_tween_duration_ms;
-
-                const float u = 1.0f - t;
-
-                const float remaining = u * u * u;  // Cubic.out
-
-                new_offset.set(
-                        (int)std::lround(
-                                (float)s_follow_tween_start_px.x *
-                                remaining),
-                        (int)std::lround(
-                                (float)s_follow_tween_start_px.y *
-                                remaining));
-        }
-
-        if (new_offset == s_map_scroll_px) {
-                return false;
-        }
-
-        set_map_scroll_px_offset(new_offset);
-
-        return true;
+        s_map_follow_drawn_cells = cells;
 }
 
-void cancel_map_follow_tween()
+void cancel_map_follow()
 {
-        if (!s_is_follow_tween_active) {
-                return;
-        }
+        s_map_follow_px_x = 0.0f;
+        s_map_follow_px_y = 0.0f;
 
-        s_is_follow_tween_active = false;
-
-        set_map_scroll_px_offset({0, 0});
+        s_map_follow_last_step_ms = 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -647,9 +692,9 @@ static uint32_t s_shake_start_ms = 0;
 static bool s_is_shake_active = false;
 static bool s_is_shake_running = false;
 
-// The shake is stepped from tight loops (io::sleep spins, and the input
-// loop iterates every millisecond) - it advances at most this often, so
-// that a shake costs a bounded number of composites
+// The shake is stepped from tight loops (see step_map_animations) - it
+// advances at most this often, so a shake costs a bounded number of
+// composites
 static const uint32_t s_shake_step_interval_ms = 12;
 
 static uint32_t s_shake_last_step_ms = 0;
@@ -664,7 +709,7 @@ void start_map_shake(const int amplitude_px, const uint32_t duration_ms)
         s_shake_duration_ms = duration_ms;
         s_is_shake_active = true;
 
-        // NOTE: As with the follow tween, the clock starts at the first
+        // NOTE: As with the camera follow, the clock starts at the first
         // step - not here, where the caller may still have drawing to do
         s_is_shake_running = false;
 }
@@ -674,7 +719,7 @@ bool is_map_shake_active()
         return s_is_shake_active;
 }
 
-bool step_map_shake()
+static bool step_map_shake()
 {
         if (!s_is_shake_active) {
                 return false;
@@ -730,6 +775,34 @@ bool step_map_shake()
         return true;
 }
 
+bool step_map_animations()
+{
+        // Stepped here as well as in the composite, so the camera is up to
+        // date before the redraw decision below. The ease is time based, so
+        // stepping twice in a pass is not double counted.
+        step_map_follow();
+
+        const bool did_step_shake = step_map_shake();
+
+        const bool is_following = is_map_follow_active();
+
+        if (!is_following && !did_step_shake) {
+                return false;
+        }
+
+        // The composite carries at most one cell - past that the drawn view
+        // origin has to move, which means redrawing the map. A state with no
+        // map display has no camera either, so a refused redraw needs no
+        // fallback.
+        if (is_following && viewport::is_camera_redraw_needed()) {
+                viewport::advance_camera();
+
+                states::draw_map_display();
+        }
+
+        return true;
+}
+
 P window_px_to_logical_px(const P& window_px)
 {
         const auto p = window_px - g_rendering_px_offset;
@@ -774,11 +847,15 @@ void run_side_panel_slide_animation()
 
         dpad::mirror_placement();
 
-        // A manually panned map snaps back to the player as part of the
+        // A manually panned map glides back to the player alongside the
         // slide animation
         viewport::end_pan();
 
         s_map_scroll_px = {0, 0};
+
+        // The framing itself is moving here - the camera has nothing to
+        // catch up to
+        viewport::cut_camera();
 
         // Flip the layout, and redraw the game into the display textures at
         // the new positions (the animation below only offsets the compositing

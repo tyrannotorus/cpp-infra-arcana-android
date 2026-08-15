@@ -314,7 +314,7 @@ void go_to_nxt()
 
         actor::player_state::g_target = nullptr;
 
-        viewport::show(map::g_player->m_pos, viewport::ForceCentering::yes);
+        viewport::cut_to(map::g_player->m_pos);
 
         map::update_vision();
 

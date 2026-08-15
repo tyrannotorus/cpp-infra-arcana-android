@@ -7,7 +7,6 @@
 #include "viewport.hpp"
 
 #include <algorithm>
-#include <cstdlib>
 
 #include "actor.hpp"
 #include "config.hpp"
@@ -30,6 +29,10 @@ static P s_p0;
 // not follow the player - until the player moves from the anchor position.
 static bool s_pan_active = false;
 static P s_pan_anchor_player_pos;
+
+// Whole cells of camera lag baked into s_p0 (see place_view_origin) - what
+// lets the camera glide further than the one cell of overscan
+static P s_camera_whole_cells = {0, 0};
 
 static P get_view_dims()
 {
@@ -93,6 +96,47 @@ static P visible_view_center()
                 view_dims.y / 2};
 }
 
+// The framing the camera is heading for
+static P camera_target()
+{
+        return s_p0 - s_camera_whole_cells;
+}
+
+// Draws the view where the camera IS: the target, offset by the whole cells
+// it is behind. The composite carries the sub-cell remainder.
+static void place_view_origin(const P& target)
+{
+        const P p0_before = s_p0;
+
+        s_camera_whole_cells = io::map_follow_whole_cells();
+
+        io::set_map_follow_drawn_whole_cells(s_camera_whole_cells);
+
+        s_p0 = target + s_camera_whole_cells;
+
+        // TODO: Instead of clearing all flash animations, it would be better to update their
+        // positions. This prevents showing an attack flash animation the player if they are knocked
+        // back (typically changes the viewport).
+        if (s_p0 != p0_before) {
+                io::clear_all_flash_animations();
+        }
+}
+
+// Aims the camera at a new target. It stays where it is and becomes that
+// much further behind, easing up per present (see io::offset_map_follow).
+static void glide_view_to(const P& target)
+{
+        const P target_delta = target - camera_target();
+
+        if (target_delta != P(0, 0)) {
+                io::offset_map_follow(
+                        P(-target_delta.x * config::map_cell_px_w(),
+                          -target_delta.y * config::map_cell_px_h()));
+        }
+
+        place_view_origin(target);
+}
+
 // -----------------------------------------------------------------------------
 // viewport
 // -----------------------------------------------------------------------------
@@ -109,42 +153,44 @@ R get_map_view_area()
 
 void show(const P& map_pos, const ForceCentering force_centering)
 {
-        const auto centered_pos = map_pos - visible_view_center();
-
-        const P p0_before = s_p0;
-
         if (force_centering == ForceCentering::yes) {
-                // A forced centering (aiming outside the view, entering a new
-                // level, ...) always ends any manual camera pan
+                // A forced centering (aiming outside the view, returning to
+                // the player after a manual pan, ...) ends any manual pan
                 s_pan_active = false;
         }
 
         // The view is always centered on the focused position: a phone screen
-        // shows too few cells to let the player walk near its edge, and a
-        // single step of the camera is what the follow tween below animates
-        s_p0 = centered_pos;
+        // shows too few cells to let the player walk near its edge
+        glide_view_to(map_pos - visible_view_center());
+}
 
-        // TODO: Instead of clearing all flash animations, it would be better to update their
-        // positions. This prevents showing an attack flash animation the player if they are knocked
-        // back (typically changes the viewport).
-        if (s_p0 != p0_before) {
-                io::clear_all_flash_animations();
+void cut_to(const P& map_pos)
+{
+        s_pan_active = false;
 
-                // A single step (following the player around) slides the
-                // camera with a quick tween instead of snapping tile to
-                // tile. Anything longer (new level, entering/leaving
-                // targeting, snapping back after a manual pan) stays
-                // instant - and could not be shown anyway: the map display
-                // carries exactly ONE cell of overscan, which is all the
-                // scroll offset the composite can sample (see io_display).
-                const P delta = s_p0 - p0_before;
+        io::cancel_map_follow();
 
-                if ((std::abs(delta.x) <= 1) && (std::abs(delta.y) <= 1)) {
-                        io::start_map_follow_tween(
-                                P(-delta.x * config::map_cell_px_w(),
-                                  -delta.y * config::map_cell_px_h()));
-                }
-        }
+        place_view_origin(map_pos - visible_view_center());
+}
+
+void advance_camera()
+{
+        place_view_origin(camera_target());
+}
+
+void cut_camera()
+{
+        io::cancel_map_follow();
+
+        // s_p0 keeps its whole cells - the camera stays where it is drawn
+        s_camera_whole_cells = {0, 0};
+
+        io::set_map_follow_drawn_whole_cells({0, 0});
+}
+
+bool is_camera_redraw_needed()
+{
+        return io::map_follow_whole_cells() != s_camera_whole_cells;
 }
 
 void pan(const P& cell_delta)
@@ -173,6 +219,9 @@ void pan(const P& cell_delta)
                         std::min(limits.p0.y, s_p0.y),
                         std::max(limits.p1.y, s_p0.y));
 
+        // The finger owns the origin now - a glide in flight would fight it
+        cut_camera();
+
         if (!s_pan_active) {
                 s_pan_active = true;
 
@@ -190,8 +239,8 @@ bool should_auto_center()
         }
 
         if (map::g_player->m_pos != s_pan_anchor_player_pos) {
-                // The player has moved - drop the manual pan, and snap the
-                // camera back to following the player
+                // The player has moved - drop the manual pan, and let the
+                // camera glide back to following the player
                 s_pan_active = false;
 
                 return true;
@@ -207,11 +256,9 @@ void end_pan()
 
 void end_pan_and_center_on_player()
 {
-        // NOTE: The centering must be forced - the view may be off center
-        // (or even beyond the map edges) with the player still inside it,
-        // and show() alone only guarantees that the position is visible
         end_pan();
 
+        // Not a cut - the camera glides back from wherever the pan left it
         show(map::g_player->m_pos, ForceCentering::yes);
 }
 

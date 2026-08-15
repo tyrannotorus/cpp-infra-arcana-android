@@ -19,11 +19,6 @@
 
 namespace popup
 {
-// The screen gui cell area of the most recently drawn popup box (used for
-// closing the popup when tapping outside it on touch devices). Has negative
-// coordinates if no popup has been drawn.
-R box_area();
-
 // Tappable confirm/cancel button areas of the most recently drawn popup
 // (gui cells; negative coordinates when not present)
 R ok_button_area();

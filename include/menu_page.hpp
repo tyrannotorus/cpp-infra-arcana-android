@@ -161,7 +161,7 @@ protected:
 
         // Whether the divider rules above and below the list are drawn.
         // The list block extents are computed either way - they are also
-        // the row tap zone and the scroll fade area.
+        // the scroll fade area.
         virtual bool show_list_dividers() const
         {
                 return true;
@@ -183,8 +183,11 @@ private:
         // The row extents span the whole list block (the divider rule
         // width), not just the labels - the rows are finger targets.
         int m_drawn_list_y0 {-1};
-        int m_drawn_row_x0 {-1};
-        int m_drawn_row_x1 {-1};
+
+        // Left edge of the drawn entries, and each visible entry's right
+        // edge (label through value column) - the tap zone, see try_tap
+        int m_drawn_entry_x0 {-1};
+        std::vector<int> m_drawn_entry_x1 {};
 };
 
 #endif  // MENU_PAGE_HPP
