@@ -33,6 +33,11 @@ void show(
 // placing the aim reticle.
 void cut_to(const P& map_pos);
 
+// Whether the centering point is biased away from the overlays that take a
+// column (the stats panel and the movement pad). Turn it off once they have
+// left the screen, and the camera glides the player to dead center.
+void set_center_bias_enabled(bool is_enabled);
+
 // Brings the drawn view origin up to a gliding camera, same target. Driven
 // by the render loop, since not every state re-centers the view every frame
 // (the aim marker only does so when its position leaves the view).

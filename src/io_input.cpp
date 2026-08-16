@@ -1797,6 +1797,30 @@ void clear_input()
         reset_touch_gesture();
 }
 
+bool poll_any_input()
+{
+        SDL_PumpEvents();
+
+        bool has_input = false;
+
+        SDL_Event event;
+
+        while (SDL_PollEvent(&event)) {
+                switch (event.type) {
+                case SDL_FINGERUP:
+                case SDL_KEYDOWN:
+                case SDL_MOUSEBUTTONUP:
+                        has_input = true;
+                        break;
+
+                default:
+                        break;
+                }
+        }
+
+        return has_input;
+}
+
 void haptic_feedback(const HapticFeedback kind)
 {
         android_haptic_tick(kind == HapticFeedback::press);

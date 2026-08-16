@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright Martin Törnqvist <m.tornq@gmail.com>
+// Copyright Werewolf Camp
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
@@ -42,6 +42,10 @@ void forget_remembered_marked_entries();
 
 constexpr int g_divider_min_w = 28;
 constexpr int g_divider_max_w = 56;
+
+// Reach beyond a menu entry's text that still counts as tapping it, in gui
+// cells. Shared with the menu popups, which mark entries the same way.
+constexpr int g_entry_tap_margin = 2;
 
 // One row of a menu page. The label may start with a stylistic "(x)" key
 // prefix, which is drawn in the menu key colors. The value is an optional

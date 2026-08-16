@@ -124,16 +124,4 @@ void draw_rectangles_filled(
                 (int)sdl_rects.size());
 }
 
-void draw_rectangle_filled_mod_blending(
-        R px_rect,
-        const Color& color,
-        uint8_t alpha)
-{
-        SDL_SetRenderDrawBlendMode(io::g_sdl_renderer, SDL_BLENDMODE_MOD);
-
-        draw_rectangle_filled(px_rect, color, alpha);
-
-        SDL_SetRenderDrawBlendMode(io::g_sdl_renderer, SDL_BLENDMODE_BLEND);
-}
-
 }  // namespace io

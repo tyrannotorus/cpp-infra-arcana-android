@@ -38,6 +38,7 @@
 #include "property_handler.hpp"
 #include "query.hpp"
 #include "random.hpp"
+#include "screen_shake.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
@@ -338,6 +339,9 @@ void attack_terrain(const P& att_pos, const item::Item& wpn)
 {
         io::flash_at(att_pos, colors::gray());
 
+        // Whether the door gives or holds, the blow landed
+        screen_shake::on_player_blow();
+
         terrain::Terrain* const terrain = map::g_terrain.at(att_pos);
 
         print_player_attack_terrain_msg(*terrain, att_pos, wpn);
@@ -453,6 +457,8 @@ actor::Actor* get_corpse_to_bash_at(const P& pos)
 void do_fake_attack_on_unseen_terrain(const P& pos, const item::Item& wpn)
 {
         io::flash_at(pos, colors::gray());
+
+        screen_shake::on_player_blow();
 
         print_player_attack_unseen_terrain_msg(wpn);
 

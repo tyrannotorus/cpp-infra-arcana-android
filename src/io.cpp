@@ -419,9 +419,9 @@ static SDL_Renderer* create_renderer()
         TRACE_FUNC_BEGIN;
 
         // Vsync paces every present, which is what makes the camera follow
-        // advance in even steps, and keeps the idle render loop from
-        // compositing hundreds of frames a second. No other flags: SDL picks
-        // the best driver it can, which on a phone means the accelerated one.
+        // advance in even steps, and caps the render loops. It blocks until
+        // vblank - io::sleep takes that off the delay that follows, so a
+        // step is not charged for the wait twice.
         SDL_Renderer* renderer =
                 SDL_CreateRenderer(
                         io::g_sdl_window,
@@ -1204,22 +1204,40 @@ void sleep(const uint32_t duration)
         if ((duration == 0) || config::is_bot_playing()) {
                 return;
         }
-        else if (duration == 1) {
-                SDL_Delay(duration);
+
+        // The animation loops draw, present, then wait - and with vsync the
+        // present already blocked until vblank, so the full delay on top
+        // would charge for that twice. A delay NOT preceded by a blocking
+        // present has nothing to take, so a deliberate pause is left whole.
+        const uint32_t blocked_ms =
+                std::min(take_last_present_block_ms(), duration);
+
+        const uint32_t remaining = duration - blocked_ms;
+
+        if (remaining == 0) {
+                return;
         }
-        else {
-                // Duration longer than 1 ms
-                const auto wait_until = SDL_GetTicks() + duration;
 
-                while (SDL_GetTicks() < wait_until) {
-                        SDL_PumpEvents();
+        if (remaining == 1) {
+                SDL_Delay(remaining);
 
-                        // The map shake and the camera follow animate through
-                        // any wait - notably the blast animation's own delay
-                        if (step_map_animations()) {
-                                update_screen();
-                        }
+                return;
+        }
+
+        const auto wait_until = SDL_GetTicks() + remaining;
+
+        while (SDL_GetTicks() < wait_until) {
+                SDL_PumpEvents();
+
+                // The map shake and the camera follow animate through any
+                // wait - notably the blast animation's own delay
+                if (step_map_animations()) {
+                        update_screen();
                 }
+
+                // Yield rather than spin - the steps above are gated to a
+                // frame at most, so nothing here needs a finer cadence
+                SDL_Delay(1);
         }
 }
 

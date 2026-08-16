@@ -74,9 +74,6 @@ struct ChoiceRow
 
 static std::vector<ChoiceRow> s_choice_rows;
 
-// Reach beyond an entry's text that still counts as tapping it, in gui cells
-static const int s_entry_tap_margin = 2;
-
 static void reset_recorded_tap_areas()
 {
         s_ok_button_area = {-1, -1, -1, -1};
@@ -668,8 +665,8 @@ bool MenuPopupState::try_tap(const P& logical_px)
         // marked entry
         for (const auto& row : s_choice_rows) {
                 if ((row.y == gui_pos.y) &&
-                    (gui_pos.x >= (row.x0 - s_entry_tap_margin)) &&
-                    (gui_pos.x <= (row.x1 + s_entry_tap_margin))) {
+                    (gui_pos.x >= (row.x0 - g_entry_tap_margin)) &&
+                    (gui_pos.x <= (row.x1 + g_entry_tap_margin))) {
                         m_browser.set_y(row.idx);
 
                         break;

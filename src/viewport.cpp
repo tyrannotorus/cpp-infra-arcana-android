@@ -34,6 +34,10 @@ static P s_pan_anchor_player_pos;
 // lets the camera glide further than the one cell of overscan
 static P s_camera_whole_cells = {0, 0};
 
+// Whether the centering point is biased by the overlays (see
+// set_center_bias_enabled)
+static bool s_is_center_bias_enabled = true;
+
 static P get_view_dims()
 {
         const auto map_panel_gui_dims = panels::dims(Panel::map);
@@ -72,6 +76,11 @@ static int dpad_cells()
 static P visible_view_center()
 {
         const auto view_dims = get_view_dims();
+
+        if (!s_is_center_bias_enabled) {
+                // Nothing is taking a column - dead center
+                return {view_dims.x / 2, view_dims.y / 2};
+        }
 
         const int side_cells = side_panel_cells();
 
@@ -176,6 +185,11 @@ void cut_to(const P& map_pos)
 void advance_camera()
 {
         place_view_origin(camera_target());
+}
+
+void set_center_bias_enabled(const bool is_enabled)
+{
+        s_is_center_bias_enabled = is_enabled;
 }
 
 void cut_camera()

@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright Martin Törnqvist <m.tornq@gmail.com>
+// Copyright Werewolf Camp
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
@@ -9,6 +9,7 @@
 
 #include <cstdint>
 
+#include "colors.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
@@ -158,13 +159,35 @@ void set_map_follow_drawn_whole_cells(const P& cells);
 // camera crosses a cell. Returns whether to present.
 bool step_map_animations();
 
-// Shakes the map for a moment, settling back to still - an explosion going
-// off (see explosion::run). Like the camera follow this only moves the
-// window into the map texture, costing a composite per step and never a
-// redraw, and is advanced by step_map_animations. The amplitude is in
-// logical pixels, capped by the map's one cell of overscan. NOTE: The clock
-// starts at the first step, not here.
+// Magnifies the composited map about a point, in logical pixels within the
+// map panel. 1.0 is unzoomed. Samples content already drawn, so it costs
+// nothing but the copy - and cannot zoom OUT, where there is none.
+void set_map_zoom(float zoom, const P& center_px);
+
+// Multiplies the map by a color as it is composited, and nothing else on
+// screen. No tint is pure 255,255,255 - NOT colors::white(), which is
+// c0c0c0 and would darken the map.
+void set_map_tint(const Color& color);
+
+void clear_map_tint();
+
+// Radial darkness closing on a point of the map, in logical pixels.
+// open_frac 1.0 leaves the map clear, 0.0 blacks it out. Applied as the map
+// is composited, so the log and the panels stay clear of it.
+void set_map_vignette(const P& center_px, float open_frac);
+
+void clear_map_vignette();
+
+// Shakes the map for a moment, settling back to still. Only moves the
+// window into the map texture, so it never costs a redraw. Amplitude is
+// capped by max_map_shake_px, a new shake replaces the running one, and the
+// clock starts at the first step. See screen_shake for what events use.
 void start_map_shake(int amplitude_px, uint32_t duration_ms);
+
+// The largest displacement a shake may use. The map texture reserves this
+// beyond the camera's cell of overscan, so a shake is never clipped by a
+// lagging camera; amplitudes are capped to it.
+int max_map_shake_px();
 
 bool is_map_shake_active();
 

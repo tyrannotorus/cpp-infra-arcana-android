@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright Martin Törnqvist <m.tornq@gmail.com>
+// Copyright Werewolf Camp
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
@@ -30,9 +30,6 @@ static const int s_value_column_gap = 2;
 
 // How far the divider rules extend beyond the list block on each side
 static const int s_divider_pad = 6;
-
-// Reach beyond an entry's text that still counts as tapping it, in gui cells
-static const int s_entry_tap_margin = 2;
 
 // -----------------------------------------------------------------------------
 // Global namespace
@@ -449,8 +446,8 @@ bool MenuPageState::try_tap(const P& logical_px)
         // The entry's own text marks it, NOT the whole row - the list block
         // is padded out to the divider width, and a row test would steal
         // taps meant to confirm the marked entry
-        if ((gui_pos.x < (m_drawn_entry_x0 - s_entry_tap_margin)) ||
-            (gui_pos.x > (m_drawn_entry_x1[row] + s_entry_tap_margin))) {
+        if ((gui_pos.x < (m_drawn_entry_x0 - g_entry_tap_margin)) ||
+            (gui_pos.x > (m_drawn_entry_x1[row] + g_entry_tap_margin))) {
                 return false;
         }
 

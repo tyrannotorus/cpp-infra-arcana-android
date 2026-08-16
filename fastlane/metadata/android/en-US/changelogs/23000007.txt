@@ -1,0 +1,7 @@
+- Smoothed camera follow
+- Eased camera return after drag-to-look
+- Tightened menu entry tap surface
+- Added screen shake to hits and kicks
+- Strengthened explosion shake
+- Added death sequence, tap to skip
+- Paced frames to the display refresh
