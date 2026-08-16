@@ -19,10 +19,10 @@ liability when Cthulhu devours your soul.
 
 ## Dev Disclaimer
 
-While I am a 10+ year experienced developer in the industry, note this is a personal-use project that's
-been human-directed as far as top-down architecture, but 100% slop-coded at the ground floor. I've done
-my best to ensure professional code quality standards, but I do not guarantee it like I would my own work.
-Thus is the warning, so beware when forking. Here may be dragons.
+While I am a 10+ year industry veteran, note this project has been human-directed as far as top-down
+architecture, but 100% slop-coded at the ground floor. I've done my best to ensure professional code
+standards, but I do not guarantee it like I would my own work. Thus is the warning, so beware when
+forking. Here may be dragons.
 
 ## APK Releases
 
