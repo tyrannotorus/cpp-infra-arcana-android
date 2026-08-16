@@ -149,6 +149,10 @@ extern bool g_allow_render;
 #endif  // NDEBUG
 void update_screen();
 
+// How long the last present spent blocked on vblank, clearing it so it is
+// only ever taken off one delay (see io::sleep)
+uint32_t take_last_present_block_ms();
+
 void clear_screen();
 
 std::string sdl_pref_dir();
@@ -254,11 +258,6 @@ void draw_rectangles_filled(
         const Color& color,
         uint8_t alpha = SDL_ALPHA_OPAQUE);
 
-void draw_rectangle_filled_mod_blending(
-        R px_rect,
-        const Color& color,
-        uint8_t alpha = SDL_ALPHA_OPAQUE);
-
 void draw_logo();
 
 // Draws a description "box" for items, spells, etc. The parameter lines may be
@@ -283,6 +282,11 @@ void clear_all_flash_animations();
 void sleep(uint32_t duration);
 
 void clear_input();
+
+// Whether a tap or key press is waiting, WITHOUT blocking for one (unlike
+// read_input). Drains the queue either way, so it also serves as the
+// clear_input of a loop that runs its own animation.
+bool poll_any_input();
 
 InputData read_input();
 

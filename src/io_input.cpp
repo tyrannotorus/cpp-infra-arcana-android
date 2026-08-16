@@ -1084,7 +1084,7 @@ static void handle_single_finger_motion()
                 // cells are transferred to the viewport underneath; the
                 // sub-cell remainder slides the composited map content. The
                 // pan is kept on release (settling on the nearest cell),
-                // and the camera snaps back to the player on any play
+                // and the camera glides back to the player on any play
                 // movement (see viewport::should_auto_center).
                 float latest_x = x;
                 float latest_y = y;
@@ -1199,7 +1199,7 @@ static void handle_single_finger_motion()
 
                                 // Manual panning takes over the map
                                 // scroll offset
-                                io::cancel_map_follow_tween();
+                                viewport::cut_camera();
 
                                 // The pan starts from the current finger
                                 // position - the travel so far is NOT
@@ -1403,7 +1403,7 @@ static void handle_finger_up_event()
                 // A provisional pan (targeting, no hold delay) that turned
                 // out to be a quick flick is a movement swipe after all -
                 // fall through to the classification below. The aiming
-                // state pops on the movement, which snaps the camera back,
+                // state pops on the movement, which brings the camera back,
                 // so the panning done meanwhile undoes itself.
                 if (!s_map_pan_provisional || !is_swipe) {
                         // The panned view is kept - ease the sub-cell
@@ -1726,11 +1726,10 @@ static void handle_polled_event()
 //
 // The loop used to delay exactly one millisecond per pass, i.e. it woke up a
 // thousand times a second to step a handful of timers whose shortest gate is
-// twelve milliseconds. On a desktop that is merely wasteful; on a battery
-// powered device it keeps the CPU out of its idle states permanently, and
-// the heat that produces is thermal throttling - which costs frame rate
-// everywhere else. Eight milliseconds is still ~120 passes a second, far
-// finer than any touch input can be perceived to lag.
+// twelve milliseconds. That keeps the CPU out of its idle states
+// permanently, and the heat it produces is thermal throttling - which costs
+// frame rate everywhere else. Eight milliseconds is still ~120 passes a
+// second, far finer than any touch input can be perceived to lag.
 static void idle_between_input_passes()
 {
         if (config::is_bot_playing()) {
@@ -1738,10 +1737,10 @@ static void idle_between_input_passes()
                 return;
         }
 
-        // A camera tween or a map shake is stepped from here, and moves the
-        // composited map every pass - those want a finer cadence
+        // The camera follow and the map shake move the composited map every
+        // pass - those want a finer cadence
         const bool is_map_animating =
-                io::is_map_follow_tween_active() ||
+                io::is_map_follow_active() ||
                 io::is_map_shake_active();
 
         SDL_Delay(is_map_animating ? 2U : 8U);
@@ -1796,6 +1795,30 @@ void clear_input()
 
         // Any in-progress touch gesture just had its finger-up flushed
         reset_touch_gesture();
+}
+
+bool poll_any_input()
+{
+        SDL_PumpEvents();
+
+        bool has_input = false;
+
+        SDL_Event event;
+
+        while (SDL_PollEvent(&event)) {
+                switch (event.type) {
+                case SDL_FINGERUP:
+                case SDL_KEYDOWN:
+                case SDL_MOUSEBUTTONUP:
+                        has_input = true;
+                        break;
+
+                default:
+                        break;
+                }
+        }
+
+        return has_input;
 }
 
 void haptic_feedback(const HapticFeedback kind)
@@ -1894,12 +1917,11 @@ InputData read_input()
 
                 window_resized_delayed_draw();
 
-                // The camera follow tween and the map shake only move the
-                // composite offset of the map display - no state redraw
-                // needed
-                const bool did_step_follow_tween = step_map_follow_tween();
-
-                const bool did_step_shake = step_map_shake();
+                // The camera follow and the map shake move the composite
+                // offset of the map display, and the follow additionally
+                // redraws it whenever the camera glides past what the
+                // overscan can carry (see step_map_animations)
+                const bool is_map_animating = step_map_animations();
 
                 bool should_redraw_cycling = false;
 
@@ -1908,9 +1930,7 @@ InputData read_input()
                 // the whole state, which on a slow device takes longer than
                 // the animation itself and would leave it stepping instead
                 // of moving. Tile animation just waits those moments out.
-                if ((s_last_window_resize_ms == 0) &&
-                    !is_map_follow_tween_active() &&
-                    !is_map_shake_active()) {
+                if ((s_last_window_resize_ms == 0) && !is_map_animating) {
                         should_redraw_cycling = step_graphics_cycling();
                 }
 
@@ -1933,7 +1953,7 @@ InputData read_input()
 
                         update_screen();
                 }
-                else if (did_step_follow_tween || did_step_shake) {
+                else if (is_map_animating) {
                         update_screen();
                 }
 

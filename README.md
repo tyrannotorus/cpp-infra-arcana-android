@@ -105,10 +105,26 @@ licensed under the **GNU Affero General Public License v3.0 or later**, as is th
 This is an unofficial port, not affiliated with or endorsed by upstream — report issues
 with this port here, never to upstream.
 
+### Copyright
+
+This port is a fork, so the two copyrights sit side by side under the one license:
+
+- **Copyright Martin Törnqvist** &lt;m.tornq@gmail.com&gt; — Infra Arcana itself, and every
+  file in this repository derived from it.
+- **Copyright Werewolf Camp** — the Android port's own source files, i.e. those with no
+  upstream counterpart (the touch interface, display separation, and the rest of the
+  mobile work).
+
+Each source file's header names its holder, and carries
+`SPDX-License-Identifier: AGPL-3.0-or-later` either way. New port-original files take the
+Werewolf Camp line; files inherited from upstream keep Martin's, whether or not this port
+has modified them.
+
 ### Credits
 
 - **Infra Arcana** by Martin Törnqvist — the game itself: code, art, audio and design.
   [Homepage](https://sites.google.com/site/infraarcana) ·
   [Source](https://gitlab.com/martin-tornqvist/ia). AGPL-3.0-or-later.
+- **Android port** by Werewolf Camp — touch interface and mobile build. AGPL-3.0-or-later.
 - **SDL2 / SDL2_image / SDL2_mixer** — Sam Lantinga and contributors (zlib license), vendored.
 - Per-file asset and library licenses ship with the game data in `installed_files/`.

@@ -695,6 +695,18 @@ void add(
         map::g_player->on_log_msg_printed();
 }
 
+void set_more_prompt_hint_shown(const bool is_shown)
+{
+        s_is_waiting_more_pompt = is_shown;
+
+        // As in more_prompt - the message must not fade out from under the
+        // hint that is asking to have it read
+        s_msg_fade_state =
+                is_shown
+                ? MsgFadeState::prevent_fade
+                : MsgFadeState::done;
+}
+
 void more_prompt()
 {
         // If the current log is empty, do nothing.

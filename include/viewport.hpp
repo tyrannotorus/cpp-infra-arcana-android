@@ -20,18 +20,43 @@ enum class ForceCentering
 
 R get_map_view_area();
 
-// NOTE: This function does not necessarily center the map on the given position
-// (unless force_centering is true). It only guarantees that the position will
-// be visible in the viewport.
+// Centers the view on the given position. force_centering additionally ends
+// any manual pan.
+//
+// The camera GLIDES there: the view is drawn where the camera currently is,
+// not where it is going (see io::offset_map_follow). Use cut_to for a jump.
 void show(
         const P& map_pos,
         ForceCentering force_centering = ForceCentering::no);
 
+// Centers on the position at once, no glide - a new level, a teleport,
+// placing the aim reticle.
+void cut_to(const P& map_pos);
+
+// Whether the centering point is biased away from the overlays that take a
+// column (the stats panel and the movement pad). Turn it off once they have
+// left the screen, and the camera glides the player to dead center.
+void set_center_bias_enabled(bool is_enabled);
+
+// Brings the drawn view origin up to a gliding camera, same target. Driven
+// by the render loop, since not every state re-centers the view every frame
+// (the aim marker only does so when its position leaves the view).
+void advance_camera();
+
+// Drops any camera lag where the view is drawn - the camera stops where it
+// stands. For when something else takes the map over (manual panning, the
+// interface changing hands).
+void cut_camera();
+
+// Whether the camera has glided into another cell than the map display was
+// drawn with, so the map has to be redrawn at the new origin.
+bool is_camera_redraw_needed();
+
 // Manual camera panning (dragging on touch devices - the "look"
 // interaction, see center_map_pos). Offsets the view by a number of map
 // cells, and suppresses automatic re-centering on the player until the
-// player moves (see should_auto_center), or until a forced centering
-// occurs (e.g. aiming at a position outside the view, or a new level).
+// player moves (see should_auto_center), or until a forced centering or a
+// cut occurs (e.g. aiming at a position outside the view, or a new level).
 //
 // The pan limits allow bringing ANY map cell to the view's centering point
 // - the view may scroll beyond the map edges (showing blackness); the only
@@ -49,17 +74,17 @@ P center_map_pos();
 // Whether the view should currently follow the player. Returns true normally.
 // While a manual pan is active it returns false - until the player has moved
 // from the position where the pan began, at which point the pan is dropped
-// and the camera snaps back to the player (returning true again).
+// and the camera glides back to the player (returning true again).
 bool should_auto_center();
 
 // Immediately drops any active manual pan - the camera follows the player
 // again from the next draw (e.g. when the side panel changes sides, the
-// map snaps back to the player as part of the slide animation).
+// map glides back to the player alongside the slide animation).
 void end_pan();
 
-// Drops any active manual pan AND snaps the camera back to centered on
-// the player - looking around is over (see game_commands::handle: any
-// action other than describing the pinned cell ends drag-to-look)
+// Drops any active manual pan AND glides back to centered on the player -
+// looking around is over (see game_commands::handle: any action other than
+// describing the pinned cell ends drag-to-look)
 void end_pan_and_center_on_player();
 
 // The current view origin (map position of the top left view cell)

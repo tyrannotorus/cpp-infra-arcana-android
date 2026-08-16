@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright Martin Törnqvist <m.tornq@gmail.com>
+// Copyright Werewolf Camp
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
@@ -9,6 +9,7 @@
 
 #include <cstdint>
 
+#include "colors.hpp"
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
@@ -22,11 +23,9 @@
 // centering offsets are applied only at composite time.
 //
 // This allows the map, the message log, and the side stats panel to be
-// positioned (and eventually scaled/panned) independently of each other -
-// e.g. sliding the side panel to the other side of the screen on Android.
-//
-// On desktop, all composite offsets are zero and the result is pixel
-// identical to drawing directly to the window.
+// positioned and panned independently of each other - e.g. sliding the side
+// panel to the other side of the screen, and scrolling the map under the
+// overlays as the camera follows the player.
 // -----------------------------------------------------------------------------
 namespace io
 {
@@ -129,47 +128,72 @@ P display_px_offset(Display display);
 P current_display_draw_px_offset();
 
 // Sub-cell scroll of the map display content, in logical pixels. This is
-// the fractional part of two finger map panning - whole cells shift the
+// the fractional part of manual map panning - whole cells shift the
 // viewport (see viewport::pan), while this offset slides the composited map
 // content smoothly between cell boundaries. The map display is rendered
 // with one cell of overscan beyond each map panel edge, so the sliding
 // edges always show content.
 void set_map_scroll_px_offset(const P& px_offset);
 
-P map_scroll_px_offset();
+// Puts the camera this far behind its drawn framing, in logical pixels, and
+// eases it back to zero by a fraction of what is left per present.
+//
+// ADDS to the current offset, so the camera's screen position stays
+// continuous. Unbounded - the drawn view origin takes on whatever exceeds
+// the composite's one cell (see map_follow_whole_cells). The clock starts
+// at the first present, not here.
+void offset_map_follow(const P& px_offset);
 
-// A short tween of the map scroll offset from the given value back to
-// zero, so that the camera SLIDES when the viewport steps while following
-// the player, instead of snapping tile to tile (see viewport::show).
-// Stepped from the input/render loop (non blocking). NOTE: The tween's
-// clock starts at the first step, not here - see step_map_follow_tween.
-void start_map_follow_tween(const P& px_offset);
+// Whether the camera is still behind its framing
+bool is_map_follow_active();
 
-// Advances the tween; returns whether the offset changed (the screen
-// should then be re-composited). Stepping it costs a composite and a
-// present - the map display is NOT redrawn, only the window into it moves.
-bool step_map_follow_tween();
+// Whole cells of the lag beyond the one cell the composite can carry. The
+// drawn view origin must take these on (see viewport::show).
+P map_follow_whole_cells();
 
-// Whether a camera follow tween is running. While it is, the render loop
-// keeps to compositing: a full state redraw mid-tween is expensive enough
-// on a slow device to eat the whole tween in one frame.
-bool is_map_follow_tween_active();
+// The whole-cell part the map display was last drawn with. The composite
+// offsets by the rest.
+void set_map_follow_drawn_whole_cells(const P& cells);
 
-// Shakes the map for a moment, settling back to still - an explosion going
-// off (see explosion::run). Like the camera tween this only moves the
-// window into the map texture, so it costs a composite per step and never
-// a redraw, and it is stepped by whatever loop is running: io::sleep
-// animates it through the blast's own delay, and the input loop finishes
-// it. The amplitude is in logical pixels, and is capped by the map's one
-// cell of overscan. NOTE: The clock starts at the first step, not here.
+// Advances the camera and the shake, redrawing the map display when the
+// camera crosses a cell. Returns whether to present.
+bool step_map_animations();
+
+// Magnifies the composited map about a point, in logical pixels within the
+// map panel. 1.0 is unzoomed. Samples content already drawn, so it costs
+// nothing but the copy - and cannot zoom OUT, where there is none.
+void set_map_zoom(float zoom, const P& center_px);
+
+// Multiplies the map by a color as it is composited, and nothing else on
+// screen. No tint is pure 255,255,255 - NOT colors::white(), which is
+// c0c0c0 and would darken the map.
+void set_map_tint(const Color& color);
+
+void clear_map_tint();
+
+// Radial darkness closing on a point of the map, in logical pixels.
+// open_frac 1.0 leaves the map clear, 0.0 blacks it out. Applied as the map
+// is composited, so the log and the panels stay clear of it.
+void set_map_vignette(const P& center_px, float open_frac);
+
+void clear_map_vignette();
+
+// Shakes the map for a moment, settling back to still. Only moves the
+// window into the map texture, so it never costs a redraw. Amplitude is
+// capped by max_map_shake_px, a new shake replaces the running one, and the
+// clock starts at the first step. See screen_shake for what events use.
 void start_map_shake(int amplitude_px, uint32_t duration_ms);
 
-bool step_map_shake();
+// The largest displacement a shake may use. The map texture reserves this
+// beyond the camera's cell of overscan, so a shake is never clipped by a
+// lagging camera; amplitudes are capped to it.
+int max_map_shake_px();
 
 bool is_map_shake_active();
 
-// E.g. manual panning takes over the scroll offset
-void cancel_map_follow_tween();
+// Camera home immediately, no easing. Call viewport::cut_to or
+// viewport::cut_camera instead - viewport owns the whole-cell half.
+void cancel_map_follow();
 
 // Translates a window pixel position (e.g. a touch position) to logical
 // screen pixels, i.e. the coordinate space of panels and display textures.
@@ -180,7 +204,7 @@ P window_px_to_logical_px(const P& window_px);
 R panel_logical_px_rect(Panel panel);
 
 // Slides the side stats panel to the other side of the screen with an
-// animated tween (Back.out easing), repositioning the map and log displays
+// animated tween (Cubic.out easing), repositioning the map and log displays
 // accordingly. Persists the new layout in the config.
 void run_side_panel_slide_animation();
 

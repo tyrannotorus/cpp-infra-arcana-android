@@ -24,7 +24,6 @@
 #include "global.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
-#include "io_display.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_explosive.hpp"
@@ -40,6 +39,7 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
+#include "screen_shake.hpp"
 #include "sound.hpp"
 #include "state.hpp"
 #include "terrain.hpp"
@@ -138,14 +138,6 @@ static std::vector<std::vector<P>> positions_reached(
         return out;
 }
 
-// How far the map is thrown by a blast: a third of a cell, so that it
-// reads as a jolt at any cell size, and never more than the map display
-// can show (one cell of overscan, see io_display)
-static int map_shake_amplitude_px()
-{
-        return std::max(2, config::map_cell_px_h() / 3);
-}
-
 static void draw(
         const std::vector<std::vector<P>>& pos_lists,
         const Array2<bool>& blocked,
@@ -204,8 +196,7 @@ static void draw(
                                 // it), so the shake costs no time of its
                                 // own - and it settles at about the same
                                 // moment the last blast frame clears.
-                                io::start_map_shake(
-                                        map_shake_amplitude_px(),
+                                screen_shake::on_explosion(
                                         (uint32_t)config::delay_explosion());
                         }
 

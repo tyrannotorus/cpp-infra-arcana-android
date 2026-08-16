@@ -179,8 +179,9 @@ void MarkerState::on_start()
 
         // Dragging pans the view with the marker fixed at the centering
         // point - center the view on the marker so that the marker and
-        // the center "pin" coincide from the start
-        viewport::show(m_pos, viewport::ForceCentering::yes);
+        // the center "pin" coincide from the start. A cut: they must
+        // coincide immediately, not once a glide has landed.
+        viewport::cut_to(m_pos);
 
         on_moved();
 }
@@ -190,7 +191,7 @@ void MarkerState::on_window_resized()
         // This is safe and convenient:
         m_pos = map::g_player->m_pos;
 
-        viewport::show(m_pos, viewport::ForceCentering::yes);
+        viewport::cut_to(m_pos);
 
         msg_log::clear();
 }

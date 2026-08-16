@@ -28,6 +28,7 @@
 #include "config.hpp"
 #include "context_pins.hpp"
 #include "create_character.hpp"
+#include "death_cinematic.hpp"
 #include "debug.hpp"
 #include "draw_health_bars.hpp"
 #include "draw_map.hpp"
@@ -71,9 +72,6 @@ static int s_xp_pct = 0;
 static int s_xp_accum = 0;
 static TimeData s_start_time;
 static IsWin s_is_win = IsWin::no;
-
-static int s_death_overlay_tint = 0;
-static int s_death_overlay_last_update_cycle = 0;
 
 static std::vector<HistoryEvent> s_history_events;
 
@@ -131,9 +129,6 @@ void init()
         s_xp_pct = 0;
         s_xp_accum = 0;
         s_is_win = IsWin::no;
-
-        s_death_overlay_tint = 100;
-        s_death_overlay_last_update_cycle = 0;
 
         s_history_events.clear();
 }
@@ -444,9 +439,7 @@ void GameState::on_start()
 
                 minimap::clear();
 
-                viewport::show(
-                        map::g_player->m_pos,
-                        viewport::ForceCentering::yes);
+                viewport::cut_to(map::g_player->m_pos);
 
                 map::update_vision();
 
@@ -585,25 +578,6 @@ void GameState::draw_map_display()
 
         if (config::display_health_bars()) {
                 draw_health_bars();
-        }
-
-        // If the player is dead, fade to red.
-        if (!actor::is_alive(*map::g_player)) {
-                const int current_cycle = io::graphics_cycle_nr(io::GraphicsCycle::fast);
-
-                if (current_cycle > s_death_overlay_last_update_cycle) {
-                        s_death_overlay_last_update_cycle = current_cycle;
-
-                        const int min_tint = 30;
-
-                        s_death_overlay_tint = std::max(min_tint, s_death_overlay_tint - 10);
-                }
-
-                io::set_display_for_panel(Panel::map);
-
-                io::draw_rectangle_filled_mod_blending(
-                        io::gui_to_px_rect(panels::area(Panel::map)),
-                        colors::red().tinted(s_death_overlay_tint));
         }
 }
 
@@ -838,13 +812,19 @@ void GameState::update()
 
                 audio::play(audio::SfxId::death);
 
+                // Shown from the cinematic's first frame - it carries the
+                // prompt's hint, and reads the tap itself
                 msg_log::add(
                         "-I AM DEAD!-",
                         colors::msg_bad(),
                         MsgInterruptPlayer::no,
-                        MorePromptOnMsg::yes);
+                        MorePromptOnMsg::no);
+
+                death_cinematic::run();
 
                 saving::erase_save();
+
+                death_cinematic::reset();
 
                 states::pop();
 

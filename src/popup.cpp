@@ -56,28 +56,26 @@ static int max_msg_w()
         return 74;
 }
 
-// Tracks the extent of the popup box drawn this frame (used for closing the
-// popup when tapping outside it on touch devices)
-static R s_recorded_box_area = {-1, -1, -1, -1};
-
 // Tappable confirm/cancel button areas drawn at the bottom of popups on
 // touch devices (gui cell coordinates)
 static R s_ok_button_area = {-1, -1, -1, -1};
 static R s_cancel_button_area = {-1, -1, -1, -1};
 
-// Menu choice rows of the most recently drawn menu popup: screen gui row
-// and the choice index on that row (for tapping entries directly)
+// Menu choice rows of the most recently drawn menu popup: gui row, choice
+// index, and the drawn extent of the choice text (for tapping entries
+// directly)
 struct ChoiceRow
 {
         int y;
         int idx;
+        int x0;
+        int x1;
 };
 
 static std::vector<ChoiceRow> s_choice_rows;
 
-static void reset_recorded_box_area()
+static void reset_recorded_tap_areas()
 {
-        s_recorded_box_area = {-1, -1, -1, -1};
         s_ok_button_area = {-1, -1, -1, -1};
         s_cancel_button_area = {-1, -1, -1, -1};
 
@@ -136,30 +134,8 @@ static void draw_popup_buttons(const int y, const bool with_cancel)
         }
 }
 
-static void record_box_line(const int line_w, const int line_y)
-{
-        const auto screen_center_x = panels::center_x(Panel::screen);
-
-        const int x0 = screen_center_x - (line_w / 2) - 1;
-        const int x1 = screen_center_x + (line_w / 2) + 1;
-
-        if (s_recorded_box_area.p0.x < 0) {
-                s_recorded_box_area = {x0, line_y, x1, line_y};
-        }
-        else {
-                R& r = s_recorded_box_area;
-
-                r.p0.x = std::min(r.p0.x, x0);
-                r.p1.x = std::max(r.p1.x, x1);
-                r.p0.y = std::min(r.p0.y, line_y);
-                r.p1.y = std::max(r.p1.y, line_y);
-        }
-}
-
 static void draw_horizontal_line(const int line_w, const int line_y)
 {
-        record_box_line(line_w, line_y);
-
         const auto screen_center_x = panels::center_x(Panel::screen);
 
         const int x0 = screen_center_x - (line_w / 2);
@@ -363,7 +339,7 @@ void MsgPopupState::draw()
                         g_divider_min_w,
                         g_divider_max_w);
 
-        reset_recorded_box_area();
+        reset_recorded_tap_areas();
 
         draw_box(panels::screen_box_area());
 
@@ -522,7 +498,7 @@ void MenuPopupState::draw()
                 horizontal_line_w = std::min(horizontal_line_w, text_max_w);
         }
 
-        reset_recorded_box_area();
+        reset_recorded_tap_areas();
 
         draw_box(panels::screen_box_area());
 
@@ -573,7 +549,11 @@ void MenuPopupState::draw()
         for (size_t i = 0; i < m_menu_choices.size(); ++i) {
                 const auto choice_str = m_menu_choices[i];
 
-                s_choice_rows.push_back({y, (int)i});
+                s_choice_rows.push_back(
+                        {y,
+                         (int)i,
+                         choice_x_pos,
+                         choice_x_pos + (int)choice_str.size() - 1});
 
                 const int key_str_len = menu_key_prefix_len(choice_str);
 
@@ -680,13 +660,13 @@ bool MenuPopupState::try_tap(const P& logical_px)
                 logical_px.x / config::gui_cell_px_w(),
                 logical_px.y / config::gui_cell_px_h());
 
-        if ((gui_pos.x < s_recorded_box_area.p0.x) ||
-            (gui_pos.x > s_recorded_box_area.p1.x)) {
-                return false;
-        }
-
+        // The choice's own text marks it, NOT the whole row - the rows span
+        // the popup, so a row test would steal taps meant to confirm the
+        // marked entry
         for (const auto& row : s_choice_rows) {
-                if (row.y == gui_pos.y) {
+                if ((row.y == gui_pos.y) &&
+                    (gui_pos.x >= (row.x0 - g_entry_tap_margin)) &&
+                    (gui_pos.x <= (row.x1 + g_entry_tap_margin))) {
                         m_browser.set_y(row.idx);
 
                         break;
@@ -773,7 +753,7 @@ void NumberQueryPopupState::draw()
                 horizontal_line_w = std::min(horizontal_line_w, text_max_w);
         }
 
-        reset_recorded_box_area();
+        reset_recorded_tap_areas();
 
         draw_box(panels::screen_box_area());
 
@@ -978,11 +958,6 @@ void NumberQueryPopupState::update()
                 m_has_player_entered_value = true;
                 m_is_empty_nr = false;
         }
-}
-
-R box_area()
-{
-        return s_recorded_box_area;
 }
 
 R ok_button_area()

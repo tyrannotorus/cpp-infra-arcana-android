@@ -1,5 +1,5 @@
 // =============================================================================
-// Copyright Martin Törnqvist <m.tornq@gmail.com>
+// Copyright Werewolf Camp
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // =============================================================================
@@ -10,13 +10,16 @@
 #include <cmath>
 #include <cstddef>
 #include <ostream>
+#include <vector>
 
 #include "SDL_render.h"
 #include "SDL_timer.h"
+#include "colors.hpp"
 #include "config.hpp"
 #include "context_pins.hpp"
 #include "debug.hpp"
 #include "dpad.hpp"
+#include "easing.hpp"
 #include "io.hpp"
 #include "io_internal.hpp"
 #include "panel.hpp"
@@ -40,28 +43,301 @@ static R s_display_px_rects[(size_t)io::Display::END] = {};
 // the composited map window always has content when sliding between cells.
 static P s_map_scroll_px = {0, 0};
 
+// The map texture reserves one cell for the camera follow plus this much
+// for a shake, so that a shake still has room to move while the camera is
+// at full lag - which is exactly when the player takes a hit
 static P map_overscan_px()
 {
-        return {config::map_cell_px_w(), config::map_cell_px_h()};
+        const int shake = io::max_map_shake_px();
+
+        return {
+                config::map_cell_px_w() + shake,
+                config::map_cell_px_h() + shake};
 }
 
 // Shake offset of the map (see start_map_shake), added to the scroll offset
 static P s_map_shake_px = {0, 0};
 
-// Where the composite samples the map texture: the camera offset and the
-// shake together. The overscan is all the displacement there is drawn
-// content for - beyond it the copy would sample outside the texture.
+// Map magnification and the point it is centered on (see set_map_zoom)
+static float s_map_zoom = 1.0f;
+static P s_map_zoom_center_px = {0, 0};
+
+// Radial gradient for the vignette, built once on first use (see
+// set_map_vignette). Small - it is always stretched, and a soft ramp
+// survives that with linear filtering.
+static SDL_Texture* s_vignette_texture = nullptr;
+static const int s_vignette_texture_px = 512;
+
+// How much of the gradient's radius is fully clear before it starts to
+// darken. Small, so the ramp spans nearly the whole radius and the darkness
+// has no edge to it.
+static const float s_vignette_clear_frac = 0.05f;
+
+// Spread of the gradient at full open, as a fraction of the screen's width
+// plus height - large enough that none of its darkening is on screen yet
+static const float s_vignette_open_span = 1.6f;
+
+// Where the vignette is closing to, and how far (see set_map_vignette)
+static P s_vignette_center_px = {0, 0};
+static float s_vignette_open_frac = 1.0f;
+
+// Multiplied over the map as it is composited (see set_map_tint). NOT
+// initialized from colors::white() - the named colors load from xml long
+// after a file scope static is constructed, so that would capture an
+// unloaded (black) color.
+static Color s_map_tint = Color(255, 255, 255);
+
+// How far behind its drawn framing the camera is (see offset_map_follow),
+// in logical pixels. Floating point - rounding each step would stall the
+// last pixels of the ease.
+static float s_map_follow_px_x = 0.0f;
+static float s_map_follow_px_y = 0.0f;
+
+// Fraction of the remaining distance covered in one reference frame. The
+// alpha is rescaled from the real elapsed time, so the follow takes the same
+// time at any refresh rate.
+static const float s_map_follow_lerp = 0.18f;
+static const float s_map_follow_reference_frame_ms = 16.67f;
+
+// An exponential never arrives; below this the camera has caught up
+static const float s_map_follow_min_px = 0.5f;
+
+// Zero means the camera has just gone behind and the clock has not started
+static uint32_t s_map_follow_last_step_ms = 0;
+
+// Whole cells of the lag the map display was last drawn with
+static P s_map_follow_drawn_cells = {0, 0};
+
+// Whole cells of lag beyond the one cell the composite can carry
+static int follow_whole_cells(const float lag_px, const int cell_px)
+{
+        if (cell_px <= 0) {
+                return 0;
+        }
+
+        const float cell = (float)cell_px;
+
+        if (lag_px > cell) {
+                return (int)((lag_px - cell) / cell) + 1;
+        }
+
+        if (lag_px < -cell) {
+                return -((int)((-lag_px - cell) / cell) + 1);
+        }
+
+        return 0;
+}
+
+// Eases the camera toward its framing. Called once per present, from the
+// composite, so it advances through anything that puts frames on screen.
+static void step_map_follow()
+{
+        if (!io::is_map_follow_active()) {
+                s_map_follow_px_x = 0.0f;
+                s_map_follow_px_y = 0.0f;
+
+                s_map_follow_last_step_ms = 0;
+
+                return;
+        }
+
+        const uint32_t now_ms = SDL_GetTicks();
+
+        if (s_map_follow_last_step_ms == 0) {
+                // This present shows the player on its new cell with the map
+                // not yet caught up - the motion starts from the next one
+                s_map_follow_last_step_ms = now_ms;
+
+                return;
+        }
+
+        const uint32_t elapsed_ms = now_ms - s_map_follow_last_step_ms;
+
+        if (elapsed_ms == 0) {
+                // Leave the clock, so the time is not lost
+                return;
+        }
+
+        s_map_follow_last_step_ms = now_ms;
+
+        const float alpha =
+                1.0f -
+                std::pow(
+                        1.0f - s_map_follow_lerp,
+                        (float)elapsed_ms / s_map_follow_reference_frame_ms);
+
+        // A long stall saturates the alpha, putting the camera where it
+        // should have been by now
+        const float remaining = 1.0f - std::min(alpha, 1.0f);
+
+        s_map_follow_px_x *= remaining;
+        s_map_follow_px_y *= remaining;
+
+        if (!io::is_map_follow_active()) {
+                s_map_follow_px_x = 0.0f;
+                s_map_follow_px_y = 0.0f;
+
+                s_map_follow_last_step_ms = 0;
+        }
+}
+
+// A soft radial ramp - transparent in the middle, opaque black at the rim.
+// Stretched to whatever size the vignette needs, so one small texture
+// serves every stage of the close.
+static SDL_Texture* vignette_texture()
+{
+        if (s_vignette_texture) {
+                return s_vignette_texture;
+        }
+
+        const int dims = s_vignette_texture_px;
+
+        std::vector<uint32_t> pixels((size_t)(dims * dims));
+
+        const float half = (float)dims / 2.0f;
+
+        for (int y = 0; y < dims; ++y) {
+                for (int x = 0; x < dims; ++x) {
+                        const float dx = ((float)x + 0.5f - half) / half;
+                        const float dy = ((float)y + 0.5f - half) / half;
+
+                        const float dist = std::sqrt((dx * dx) + (dy * dy));
+
+                        const float t =
+                                std::clamp(
+                                        (dist - s_vignette_clear_frac) /
+                                                (1.0f - s_vignette_clear_frac),
+                                        0.0f,
+                                        1.0f);
+
+                        // Smoothstep - soft at both ends, so the darkness
+                        // arrives without an edge anywhere along the ramp
+                        const float a = t * t * (3.0f - (2.0f * t));
+
+                        const auto alpha = (uint32_t)std::lround(a * 255.0f);
+
+                        pixels[(size_t)((y * dims) + x)] = (alpha << 24);
+                }
+        }
+
+        s_vignette_texture =
+                SDL_CreateTexture(
+                        io::g_sdl_renderer,
+                        SDL_PIXELFORMAT_ARGB8888,
+                        SDL_TEXTUREACCESS_STATIC,
+                        dims,
+                        dims);
+
+        if (!s_vignette_texture) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to create vignette texture: "
+                        << SDL_GetError()
+                        << std::endl;
+
+                return nullptr;
+        }
+
+        SDL_UpdateTexture(
+                s_vignette_texture,
+                nullptr,
+                pixels.data(),
+                dims * (int)sizeof(uint32_t));
+
+        SDL_SetTextureBlendMode(s_vignette_texture, SDL_BLENDMODE_BLEND);
+
+        SDL_SetTextureScaleMode(s_vignette_texture, SDL_ScaleModeLinear);
+
+        return s_vignette_texture;
+}
+
+// Darkness closing on the vignette's center, drawn straight onto the window
+// over the map's composited area (see set_map_vignette). Window pixels - the
+// map's destination rectangle and the video scale, not logical coordinates.
+static void draw_map_vignette(const SDL_Rect& map_rect, const int scale)
+{
+        if (s_vignette_open_frac >= 1.0f) {
+                return;
+        }
+
+        auto* const texture = vignette_texture();
+
+        if (!texture) {
+                return;
+        }
+
+        // Fully open spreads the gradient far beyond the map, so only its
+        // clear middle is on show; closing shrinks it onto the center point
+        const float span =
+                (float)(map_rect.w + map_rect.h) *
+                s_vignette_open_span *
+                s_vignette_open_frac;
+
+        const int half = (int)std::lround(span / 2.0f);
+
+        const int center_x = map_rect.x + (s_vignette_center_px.x * scale);
+        const int center_y = map_rect.y + (s_vignette_center_px.y * scale);
+
+        const SDL_Rect gradient {
+                center_x - half,
+                center_y - half,
+                half * 2,
+                half * 2};
+
+        // Everything the gradient does not reach is past its rim, i.e.
+        // solid black. Four bands rather than a full screen blend beneath
+        // the gradient.
+        SDL_SetRenderDrawColor(io::g_sdl_renderer, 0U, 0U, 0U, 255U);
+
+        const int gradient_x1 = gradient.x + gradient.w;
+        const int gradient_y1 = gradient.y + gradient.h;
+
+        const int map_x1 = map_rect.x + map_rect.w;
+        const int map_y1 = map_rect.y + map_rect.h;
+
+        const int band_y0 = std::max(map_rect.y, gradient.y);
+        const int band_y1 = std::min(map_y1, gradient_y1);
+
+        const SDL_Rect bands[] {
+                {map_rect.x, map_rect.y, map_rect.w, gradient.y - map_rect.y},
+                {map_rect.x, gradient_y1, map_rect.w, map_y1 - gradient_y1},
+                {map_rect.x, band_y0, gradient.x - map_rect.x, band_y1 - band_y0},
+                {gradient_x1, band_y0, map_x1 - gradient_x1, band_y1 - band_y0}};
+
+        for (const auto& band : bands) {
+                if ((band.w > 0) && (band.h > 0)) {
+                        SDL_RenderFillRect(io::g_sdl_renderer, &band);
+                }
+        }
+
+        SDL_RenderCopy(io::g_sdl_renderer, texture, nullptr, &gradient);
+}
+
+// Where the composite samples the map texture: the manual pan, the camera
+// follow and the shake together. The overscan is all the displacement there
+// is drawn content for - beyond it the copy would sample outside the
+// texture.
 static P map_src_offset_px()
 {
         const auto overscan = map_overscan_px();
 
+        // Only what the drawn origin did not take on
+        const P follow(
+                (int)std::lround(
+                        s_map_follow_px_x -
+                        (float)(s_map_follow_drawn_cells.x *
+                                config::map_cell_px_w())),
+                (int)std::lround(
+                        s_map_follow_px_y -
+                        (float)(s_map_follow_drawn_cells.y *
+                                config::map_cell_px_h())));
+
         return {
                 std::clamp(
-                        s_map_scroll_px.x + s_map_shake_px.x,
+                        s_map_scroll_px.x + follow.x + s_map_shake_px.x,
                         -overscan.x,
                         overscan.x),
                 std::clamp(
-                        s_map_scroll_px.y + s_map_shake_px.y,
+                        s_map_scroll_px.y + follow.y + s_map_shake_px.y,
                         -overscan.y,
                         overscan.y)};
 }
@@ -130,13 +406,6 @@ static R display_logical_px_rect(const io::Display display)
         }
 
         return io::panel_logical_px_rect(Panel::screen);
-}
-
-static float ease_cubic_out(const float t)
-{
-        const float u = 1.0f - t;
-
-        return 1.0f - (u * u * u);
 }
 
 // -----------------------------------------------------------------------------
@@ -282,6 +551,12 @@ void init_displays()
 
 void cleanup_displays()
 {
+        if (s_vignette_texture) {
+                SDL_DestroyTexture(s_vignette_texture);
+
+                s_vignette_texture = nullptr;
+        }
+
         for (auto*& texture : s_display_textures) {
                 if (texture) {
                         SDL_DestroyTexture(texture);
@@ -387,6 +662,9 @@ void clear_display_textures()
 
 void composite_display_textures()
 {
+        // The camera advances per present, not per pass of one loop
+        step_map_follow();
+
         SDL_SetRenderTarget(g_sdl_renderer, nullptr);
 
         s_current_display = Display::END;
@@ -424,16 +702,39 @@ void composite_display_textures()
                         // The map is copied as a region: a map-panel sized
                         // window into the overscanned content, shifted by the
                         // sub-cell scroll offset (map panning, the camera
-                        // follow tween, and any shake)
+                        // follow, and any shake)
                         const auto overscan = map_overscan_px();
 
                         const auto scroll = map_src_offset_px();
 
+                        // Zooming samples a smaller region into the same
+                        // destination. The centering point must land where it
+                        // did unzoomed, which is what it is offset by here.
+                        const int src_w =
+                                (int)std::lround(
+                                        (float)display_rect.w() / s_map_zoom);
+
+                        const int src_h =
+                                (int)std::lround(
+                                        (float)display_rect.h() / s_map_zoom);
+
+                        const int zoom_off_x =
+                                s_map_zoom_center_px.x -
+                                (int)std::lround(
+                                        (float)s_map_zoom_center_px.x /
+                                        s_map_zoom);
+
+                        const int zoom_off_y =
+                                s_map_zoom_center_px.y -
+                                (int)std::lround(
+                                        (float)s_map_zoom_center_px.y /
+                                        s_map_zoom);
+
                         const SDL_Rect src_rect {
-                                overscan.x + scroll.x,
-                                overscan.y + scroll.y,
-                                display_rect.w(),
-                                display_rect.h()};
+                                overscan.x + scroll.x + zoom_off_x,
+                                overscan.y + scroll.y + zoom_off_y,
+                                src_w,
+                                src_h};
 
                         const SDL_Rect dst_rect {
                                 offset.x + (display_rect.p0.x * scale),
@@ -441,11 +742,24 @@ void composite_display_textures()
                                 display_rect.w() * scale,
                                 display_rect.h() * scale};
 
+                        // Set every frame, so a tint can never outlive the
+                        // effect that asked for it
+                        SDL_SetTextureColorMod(
+                                texture,
+                                s_map_tint.r(),
+                                s_map_tint.g(),
+                                s_map_tint.b());
+
                         SDL_RenderCopy(
                                 g_sdl_renderer,
                                 texture,
                                 &src_rect,
                                 &dst_rect);
+
+                        // Straight onto the window, between the map and
+                        // everything composited after it - so the log and
+                        // the panels stay clear of the darkness
+                        draw_map_vignette(dst_rect, scale);
 
                         continue;
                 }
@@ -491,6 +805,35 @@ void composite_display_textures()
 
                 SDL_RenderCopy(g_sdl_renderer, texture, &src_rect, &dst_rect);
         }
+
+}
+
+void set_map_zoom(const float zoom, const P& center_px)
+{
+        s_map_zoom = std::max(1.0f, zoom);
+        s_map_zoom_center_px = center_px;
+}
+
+void set_map_vignette(const P& center_px, const float open_frac)
+{
+        s_vignette_center_px = center_px;
+
+        s_vignette_open_frac = std::clamp(open_frac, 0.0f, 1.0f);
+}
+
+void clear_map_vignette()
+{
+        s_vignette_open_frac = 1.0f;
+}
+
+void set_map_tint(const Color& color)
+{
+        s_map_tint = color;
+}
+
+void clear_map_tint()
+{
+        s_map_tint = Color(255, 255, 255);
 }
 
 void set_display_px_offset(const Display display, const P& px_offset)
@@ -531,111 +874,47 @@ void set_map_scroll_px_offset(const P& px_offset)
         s_map_scroll_px = px_offset;
 }
 
-P map_scroll_px_offset()
+void offset_map_follow(const P& px_offset)
 {
-        return s_map_scroll_px;
+        const bool was_settled = !io::is_map_follow_active();
+
+        s_map_follow_px_x += (float)px_offset.x;
+        s_map_follow_px_y += (float)px_offset.y;
+
+        if (was_settled) {
+                // Clock starts at the next present - see step_map_follow
+                s_map_follow_last_step_ms = 0;
+        }
 }
 
-// Camera follow tween state (see start_map_follow_tween)
-static P s_follow_tween_start_px(0, 0);
-static uint32_t s_follow_tween_start_ms = 0;
-static bool s_is_follow_tween_active = false;
-
-// Whether the clock has been started (see step_map_follow_tween)
-static bool s_is_follow_tween_running = false;
-
-static const uint32_t s_follow_tween_duration_ms = 90;
-
-void start_map_follow_tween(const P& px_offset)
+bool is_map_follow_active()
 {
-        s_follow_tween_start_px = px_offset;
-        s_is_follow_tween_active = true;
-
-        // NOTE: The clock is NOT started here - see step_map_follow_tween
-        s_is_follow_tween_running = false;
-
-        // The content starts out visually where it was before the
-        // viewport stepped, and eases to the new position
-        set_map_scroll_px_offset(px_offset);
+        return (std::fabs(s_map_follow_px_x) >= s_map_follow_min_px) ||
+                (std::fabs(s_map_follow_px_y) >= s_map_follow_min_px);
 }
 
-bool is_map_follow_tween_active()
+P map_follow_whole_cells()
 {
-        return s_is_follow_tween_active;
+        return {
+                follow_whole_cells(
+                        s_map_follow_px_x,
+                        config::map_cell_px_w()),
+                follow_whole_cells(
+                        s_map_follow_px_y,
+                        config::map_cell_px_h())};
 }
 
-bool step_map_follow_tween()
+void set_map_follow_drawn_whole_cells(const P& cells)
 {
-        if (!s_is_follow_tween_active) {
-                return false;
-        }
-
-        if (!s_is_follow_tween_running) {
-                // The tween is STARTED where the camera moves - which is in
-                // the middle of a state draw - but it can only be STEPPED
-                // by the animation loop (see io::read_input). Timing it
-                // from the start would spend the tween on everything in
-                // between: the rest of that frame's drawing (the whole map
-                // is redrawn there), its present, and the remaining turn
-                // processing. On a slow device that is longer than the
-                // tween itself, so the first step already found it expired,
-                // jumped the offset to zero and the camera appeared to snap
-                // - no intermediate frame was ever shown.
-                //
-                // So the clock starts at the first step instead. The frame
-                // showing the start offset (the player on its new cell, the
-                // map not yet caught up) is already on screen by then.
-                s_is_follow_tween_running = true;
-
-                s_follow_tween_start_ms = SDL_GetTicks();
-
-                return false;
-        }
-
-        const uint32_t elapsed_ms =
-                SDL_GetTicks() - s_follow_tween_start_ms;
-
-        P new_offset(0, 0);
-
-        if (elapsed_ms >= s_follow_tween_duration_ms) {
-                s_is_follow_tween_active = false;
-        }
-        else {
-                const float t =
-                        (float)elapsed_ms /
-                        (float)s_follow_tween_duration_ms;
-
-                const float u = 1.0f - t;
-
-                const float remaining = u * u * u;  // Cubic.out
-
-                new_offset.set(
-                        (int)std::lround(
-                                (float)s_follow_tween_start_px.x *
-                                remaining),
-                        (int)std::lround(
-                                (float)s_follow_tween_start_px.y *
-                                remaining));
-        }
-
-        if (new_offset == s_map_scroll_px) {
-                return false;
-        }
-
-        set_map_scroll_px_offset(new_offset);
-
-        return true;
+        s_map_follow_drawn_cells = cells;
 }
 
-void cancel_map_follow_tween()
+void cancel_map_follow()
 {
-        if (!s_is_follow_tween_active) {
-                return;
-        }
+        s_map_follow_px_x = 0.0f;
+        s_map_follow_px_y = 0.0f;
 
-        s_is_follow_tween_active = false;
-
-        set_map_scroll_px_offset({0, 0});
+        s_map_follow_last_step_ms = 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -647,12 +926,27 @@ static uint32_t s_shake_start_ms = 0;
 static bool s_is_shake_active = false;
 static bool s_is_shake_running = false;
 
-// The shake is stepped from tight loops (io::sleep spins, and the input
-// loop iterates every millisecond) - it advances at most this often, so
-// that a shake costs a bounded number of composites
+// The shake is stepped from tight loops (see step_map_animations) - it
+// advances at most this often, so a shake costs a bounded number of
+// composites
 static const uint32_t s_shake_step_interval_ms = 12;
 
+// One oscillation per this much duration - slow enough that several frames
+// land within a cycle at 60 Hz, so the shake does not alias
+static const float s_shake_ms_per_cycle = 60.0f;
+
+// Minimum gap between frames presented for the camera follow (see
+// step_map_animations)
+static const uint32_t s_follow_frame_interval_ms = 15;
+
+static uint32_t s_follow_frame_last_ms = 0;
+
 static uint32_t s_shake_last_step_ms = 0;
+
+int max_map_shake_px()
+{
+        return std::max(4, (config::map_cell_px_h() * 2) / 3);
+}
 
 void start_map_shake(const int amplitude_px, const uint32_t duration_ms)
 {
@@ -660,11 +954,12 @@ void start_map_shake(const int amplitude_px, const uint32_t duration_ms)
                 return;
         }
 
-        s_shake_amplitude_px = amplitude_px;
+        s_shake_amplitude_px = std::min(amplitude_px, max_map_shake_px());
+
         s_shake_duration_ms = duration_ms;
         s_is_shake_active = true;
 
-        // NOTE: As with the follow tween, the clock starts at the first
+        // NOTE: As with the camera follow, the clock starts at the first
         // step - not here, where the caller may still have drawing to do
         s_is_shake_running = false;
 }
@@ -674,7 +969,7 @@ bool is_map_shake_active()
         return s_is_shake_active;
 }
 
-bool step_map_shake()
+static bool step_map_shake()
 {
         if (!s_is_shake_active) {
                 return false;
@@ -704,21 +999,31 @@ bool step_map_shake()
                 const float t =
                         (float)elapsed_ms / (float)s_shake_duration_ms;
 
-                // Shaken hard at the blast, settling to nothing
+                // Shaken hard at the impact, settling to nothing
                 const float decay = (1.0f - t) * (1.0f - t);
+
+                // Whole oscillations, so the shake ends where it started -
+                // one fewer per axis, so it rattles instead of orbiting. A
+                // count fixed regardless of duration aliases on short
+                // shakes (see s_shake_ms_per_cycle).
+                const float cycles_x =
+                        std::max(
+                                1.0f,
+                                std::round(
+                                        (float)s_shake_duration_ms /
+                                        s_shake_ms_per_cycle));
+
+                const float cycles_y = std::max(1.0f, cycles_x - 1.0f);
+
+                const float two_pi = 2.0f * 3.14159265f;
 
                 const float amplitude = (float)s_shake_amplitude_px * decay;
 
-                // Whole oscillations, so the shake ends where it started -
-                // and a different count per axis, so that it rattles
-                // instead of orbiting
-                const float two_pi = 2.0f * 3.14159265f;
-
                 new_offset.set(
                         (int)std::lround(
-                                amplitude * std::sin(t * two_pi * 4.0f)),
+                                amplitude * std::sin(t * two_pi * cycles_x)),
                         (int)std::lround(
-                                amplitude * std::sin(t * two_pi * 3.0f)));
+                                amplitude * std::sin(t * two_pi * cycles_y)));
         }
 
         if (new_offset == s_map_shake_px) {
@@ -726,6 +1031,50 @@ bool step_map_shake()
         }
 
         s_map_shake_px = new_offset;
+
+        return true;
+}
+
+bool step_map_animations()
+{
+        // Stepped here as well as in the composite, so the camera is up to
+        // date before the redraw decision below. The ease is time based, so
+        // stepping twice in a pass is not double counted.
+        step_map_follow();
+
+        const bool did_step_shake = step_map_shake();
+
+        const bool is_following = is_map_follow_active();
+
+        // A frame at most, however tightly the calling loop spins - the
+        // shake has its own interval, the follow would otherwise present as
+        // fast as the CPU allows
+        bool is_follow_frame_due = false;
+
+        if (is_following) {
+                const uint32_t now_ms = SDL_GetTicks();
+
+                if ((now_ms - s_follow_frame_last_ms) >=
+                    s_follow_frame_interval_ms) {
+                        s_follow_frame_last_ms = now_ms;
+
+                        is_follow_frame_due = true;
+                }
+        }
+
+        if (!is_follow_frame_due && !did_step_shake) {
+                return false;
+        }
+
+        // The composite carries at most one cell - past that the drawn view
+        // origin has to move, which means redrawing the map. A state with no
+        // map display has no camera either, so a refused redraw needs no
+        // fallback.
+        if (is_following && viewport::is_camera_redraw_needed()) {
+                viewport::advance_camera();
+
+                states::draw_map_display();
+        }
 
         return true;
 }
@@ -774,11 +1123,15 @@ void run_side_panel_slide_animation()
 
         dpad::mirror_placement();
 
-        // A manually panned map snaps back to the player as part of the
+        // A manually panned map glides back to the player alongside the
         // slide animation
         viewport::end_pan();
 
         s_map_scroll_px = {0, 0};
+
+        // The framing itself is moving here - the camera has nothing to
+        // catch up to
+        viewport::cut_camera();
 
         // Flip the layout, and redraw the game into the display textures at
         // the new positions (the animation below only offsets the compositing
@@ -848,7 +1201,7 @@ void run_side_panel_slide_animation()
 
                 // The log and action bar displays slide to their new
                 // positions with Cubic.out easing
-                const float progress = ease_cubic_out(t);
+                const float progress = ease::cubic_out(t);
 
                 const float remaining = 1.0f - progress;
 
@@ -889,7 +1242,7 @@ void run_side_panel_slide_animation()
                         const float u =
                                 (t - exit_fraction) / (1.0f - exit_fraction);
 
-                        const float p = ease_cubic_out(u);
+                        const float p = ease::cubic_out(u);
 
                         side_off =
                                 (int)std::lround(

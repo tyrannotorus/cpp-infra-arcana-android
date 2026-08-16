@@ -227,6 +227,18 @@ P sdl_window_gui_dims()
 bool g_allow_render = false;
 #endif  // NDEBUG
 
+// How long the last present spent waiting for vblank (see update_screen)
+static uint32_t s_last_present_block_ms = 0;
+
+uint32_t take_last_present_block_ms()
+{
+        const uint32_t ms = s_last_present_block_ms;
+
+        s_last_present_block_ms = 0;
+
+        return ms;
+}
+
 void update_screen()
 {
 #ifndef NDEBUG
@@ -241,7 +253,11 @@ void update_screen()
 
         composite_display_textures();
 
+        const uint32_t present_start_ms = SDL_GetTicks();
+
         SDL_RenderPresent(g_sdl_renderer);
+
+        s_last_present_block_ms = SDL_GetTicks() - present_start_ms;
 
 #ifndef NDEBUG
         if (is_game_state) {

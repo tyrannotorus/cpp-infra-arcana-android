@@ -32,6 +32,7 @@
 #include "property_factory.hpp"
 #include "property_handler.hpp"
 #include "random.hpp"
+#include "screen_shake.hpp"
 #include "sound.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
@@ -385,6 +386,19 @@ static void on_player_hit(
 // -----------------------------------------------------------------------------
 namespace actor
 {
+static void run_hit_map_shake(
+        const Actor& defender,
+        const int dmg,
+        Actor* const attacker)
+{
+        if (is_player(&defender)) {
+                screen_shake::on_player_damaged(dmg, max_hp(defender));
+        }
+        else if (is_player(attacker) && can_player_see_actor(defender)) {
+                screen_shake::on_player_blow();
+        }
+}
+
 void hit(
         Actor& actor,
         int dmg,
@@ -448,6 +462,8 @@ void hit(
                         }
                 }
         }
+
+        run_hit_map_shake(actor, dmg, attacker);
 
         if (is_player(&actor)) {
                 on_player_hit(dmg, dmg_type, allow_wound);

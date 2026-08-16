@@ -371,7 +371,7 @@ void teleport(
         actor.m_pos = pos;
 
         if (actor::is_player(&actor)) {
-                viewport::show(map::g_player->m_pos, viewport::ForceCentering::yes);
+                viewport::cut_to(map::g_player->m_pos);
         }
 
         map::update_vision();

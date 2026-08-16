@@ -137,6 +137,10 @@ bool is_waiting_prompt();
 // direction query (see query::dir) is answered by swiping.
 bool is_waiting_more_prompt();
 
+// Draws the "more" prompt's hint WITHOUT waiting for input, for a sequence
+// that reads input itself (see death_cinematic).
+void set_more_prompt_hint_shown(bool is_shown);
+
 // Marks that a log query is waiting for an answer (see query::yes_or_no),
 // so that the query text is not overwritten (see is_waiting_prompt)
 void set_waiting_query(bool waiting);
