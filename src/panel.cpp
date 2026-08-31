@@ -175,10 +175,8 @@ static void set_game_state_panels(const P& max_gui_dims)
 // marked entry in the right one (see MenuDescrPageState)
 static void set_menu_descr_page_panels(const P& max_gui_dims)
 {
-        // Shrunk to fit narrow screens (high menu scale) - the
-        // description column gives way first, the list keeps room for its
-        // labels. The offered scales are floored so this never drops below
-        // usable (see panels::g_min_screen_cols)
+        // Shrunk to fit narrow screens (high menu scale) - the description
+        // column gives way first, the list keeps room for its labels
         const int tot_w = std::min(78, max_gui_dims.x - 4);
         const int menu_w = std::clamp((tot_w * 26) / 78, 20, 26);
         const int descr_w = tot_w - menu_w - 1;
@@ -213,11 +211,9 @@ static void set_menu_descr_page_panels(const P& max_gui_dims)
 
 static void set_options_state_panels(const P& max_gui_dims)
 {
-        // The label and value columns hold content that cannot wrap, so
-        // on narrow screens (high menu scale) the description column gives
-        // way first, and only below its readable minimum do the other two
-        // shrink (their content then overruns - still better than the
-        // whole page running off the screen edges)
+        // The label and value columns hold content that cannot wrap: the
+        // description shrinks first, below its minimum they do (content
+        // then overruns)
         constexpr int descr_min_w = 14;
 
         const int tot_w = std::min(78, max_gui_dims.x - 4);

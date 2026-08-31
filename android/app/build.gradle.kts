@@ -107,10 +107,7 @@ android {
             isJniDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("debug")
-            // Installs beside the release build (which is signed with a
-            // different key, so it could never be updated in place by a
-            // local build anyway). Own data dir - saves do not collide.
-            // The launcher label is overridden in src/staging/res.
+            // Beside the release install; label overridden in src/staging/res
             applicationIdSuffix = ".staging"
         }
         // Release: the build to hand to someone else. Same code as staging,

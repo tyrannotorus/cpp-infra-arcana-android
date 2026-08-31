@@ -265,11 +265,8 @@ static void update_render_dims()
         TRACE_FUNC_END;
 }
 
-// The largest menu scale that leaves the screen at least
-// panels::g_min_screen_cols wide with the current font. Larger scales are
-// neither offered in the settings nor accepted from the config file - the
-// page layouts adapt down to the floor (see panel.cpp), and below it no
-// layout is usable.
+// Largest menu scale leaving at least panels::g_min_screen_cols with the
+// current font - larger is neither offered nor accepted from the config
 static int max_fitting_video_scale_factor()
 {
         const P native_res = io::get_native_resolution();
@@ -314,8 +311,7 @@ static int calc_default_video_scale_factor(const P& native_res)
         // Mobile default is at least 2x (readability on handheld screens)
         f = std::clamp(f, 2, s_video_scale_factor_max);
 
-        // Never default above what the layouts can fit - on a screen where
-        // not even 2x fits, readability yields to a working layout
+        // Never default above what the layouts can fit
         f = std::min(f, max_fitting_video_scale_factor());
 
         TRACE
@@ -488,11 +484,8 @@ static bool read_config_file()
 
         update_render_dims();
 
-        // A stored menu scale the screen cannot fit is ignored (a config
-        // written by a version that offered such scales) - the default is
-        // used instead, so that nobody stays trapped in an unusable
-        // layout. NOTE: After the font is settled - what fits depends on
-        // the cell size.
+        // A stored menu scale the screen cannot fit falls back to the
+        // default (after the font is settled - fit depends on cell size)
         const int max_scale = max_fitting_video_scale_factor();
 
         if (s_video_scale_factor > max_scale) {

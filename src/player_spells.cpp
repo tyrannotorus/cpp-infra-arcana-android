@@ -141,11 +141,8 @@ static void try_cast(Spell* const spell)
         }
 }
 
-// A spell's row in the list: the name only - the cost and skill level
-// live in the description text (see draw_spell_descr), so the rows fit
-// every menu scale. Indented as if a "(x)" selection key were drawn at
-// the start, which it is not - there is no keyboard to press it on
-// (matches InvState's s_key_indent_w).
+// The name only - cost and skill live in the description text. Indented
+// as if a selection key were drawn (matches InvState's s_key_indent_w).
 static void draw_spell_menu_line(
         const Spell* const spell,
         const int y,
@@ -560,9 +557,8 @@ void BrowseSpell::draw_spell_descr()
 
         const SpellSkill skill = player_spells::spell_skill(spell->id());
 
-        // The cost leads the text - the list rows hold only the names
-        // (like the inventory, whose weight lives in the description),
-        // and the skill level is already part of the description text
+        // The rows hold only names - the cost leads the text instead,
+        // and the skill level is already part of the description
         const Range cost = spell->cost_range(skill, map::g_player);
 
         const std::string resource =

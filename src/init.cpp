@@ -58,12 +58,9 @@ bool g_is_cheat_vision_enabled = false;
 
 bool g_is_demo_mapgen = false;
 
-// Draws and presents the boot loading frame. Called between the heavy
-// init steps: on Android the render surface goes live asynchronously
-// while they run, and a frame presented before that is silently dropped -
-// presenting again after each step means the last one before the first
-// state draw reaches the screen. The event pump (clear_input) is what
-// lets the surface attach; nothing else pumps until the first input read.
+// Presents the boot loading frame. The Android surface attaches
+// asynchronously and earlier presents are dropped - the pump lets it
+// attach, and presenting between init steps means the last one shows.
 // TODO: Use more creative loading messages
 static void present_loading_frame()
 {
@@ -143,9 +140,7 @@ void init_game()
         line_calc::init();
         map_templates::init();
 
-        // One last present, held for a beat: the surface attach has had
-        // the whole init to happen by now, so this one always shows - and
-        // without the hold, a fast boot flashes past the text unseen
+        // Held for a beat - a fast boot would flash past the text unseen
         present_loading_frame();
 
         io::sleep(750);

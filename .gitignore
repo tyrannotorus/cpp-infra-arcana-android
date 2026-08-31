@@ -16,3 +16,4 @@ pickup.md
 android/.gradle/
 android/app/.cxx/
 android/local.properties
+android/app/src/staging/

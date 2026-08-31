@@ -17,8 +17,7 @@ namespace {
 
 const char* const stamp_file_name = ".asset_manifest";
 
-// The APK's AssetManager. NOTE: The jobject behind it is held as a global
-// ref for the life of the process, so the manager stays valid.
+// The backing jobject is held as a global ref so the pointer stays valid
 AAssetManager* get_asset_manager()
 {
         static AAssetManager* mgr = nullptr;
@@ -54,10 +53,8 @@ AAssetManager* get_asset_manager()
         return mgr;
 }
 
-// Reads a file bundled in the APK. NOTE: Straight from the AssetManager -
-// NOT SDL_RWFromFile, which tries the internal storage path first and
-// would read back the previously extracted (outdated) copy of any asset
-// that changed in an app update, instead of the APK's new one.
+// Reads a file bundled in the APK - NOT via SDL_RWFromFile, which prefers
+// the extracted (possibly outdated) disk copy over the APK asset.
 bool read_asset(const std::string& name, std::vector<char>& out)
 {
         AAssetManager* const mgr = get_asset_manager();
