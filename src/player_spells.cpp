@@ -141,24 +141,19 @@ static void try_cast(Spell* const spell)
         }
 }
 
-// A spell's row in the list. Laid out like an inventory row (see
-// InvState::draw_backpack_item): indented as if a "(x)" selection key
-// were drawn at the start, which it is not - there is no keyboard to
-// press it on, entries are engaged by tapping.
+// A spell's row in the list: the name only - the cost and skill level
+// live in the description text (see draw_spell_descr), so the rows fit
+// every menu scale. Indented as if a "(x)" selection key were drawn at
+// the start, which it is not - there is no keyboard to press it on
+// (matches InvState's s_key_indent_w).
 static void draw_spell_menu_line(
         const Spell* const spell,
         const int y,
         const bool is_marked)
 {
-        // Matches InvState's s_key_indent_w
         constexpr int key_indent_w = 4;
 
         const std::string name = text_format::first_to_upper(spell->name());
-
-        constexpr int cost_label_x = 23 + key_indent_w;
-        constexpr int skill_label_x = cost_label_x + 10;
-
-        int x = key_indent_w;
 
         Color color;
 
@@ -178,97 +173,8 @@ static void draw_spell_menu_line(
         io::draw_text(
                 name,
                 Panel::inventory_menu,
-                {x, y},
+                {key_indent_w, y},
                 color);
-
-        std::string fill_str;
-
-        // NOTE: Signed - a name reaching the cost column gives no dots at
-        // all. Unsigned, as this was, it wrapped to an enormous count and
-        // hung the game on a long enough spell name.
-        const int fill_size = cost_label_x - x - (int)name.size();
-
-        for (int ii = 0; ii < fill_size; ++ii) {
-                fill_str.push_back('.');
-        }
-
-        const SpellSkill skill = player_spells::spell_skill(spell->id());
-
-        const Range cost = spell->cost_range(skill, map::g_player);
-
-        if (cost.min > 0) {
-                const Color fill_color = colors::gray().shaded(70);
-
-                io::draw_text(
-                        fill_str,
-                        Panel::inventory_menu,
-                        {x + (int)name.size(), y},
-                        fill_color);
-
-                x = cost_label_x;
-
-                const std::string cost_label =
-                        (spell->cost_type() == SpellCostType::spirit)
-                        ? "SP: "
-                        : "HP: ";
-
-                io::draw_text(
-                        cost_label,
-                        Panel::inventory_menu,
-                        {x, y},
-                        colors::dark_gray());
-
-                x += (int)cost_label.size();
-
-                const Color cost_color =
-                        (spell->cost_type() == SpellCostType::spirit)
-                        ? colors::light_blue()
-                        : colors::light_red();
-
-                io::draw_text(
-                        cost.str(),
-                        Panel::inventory_menu,
-                        {x, y},
-                        cost_color);
-        }
-
-        if (spell->can_be_improved_with_skill()) {
-                x = skill_label_x;
-
-                std::string str = "Skill: ";
-
-                io::draw_text(
-                        str,
-                        Panel::inventory_menu,
-                        {x, y},
-                        colors::dark_gray());
-
-                x += (int)str.size();
-
-                switch (skill) {
-                case SpellSkill::basic:
-                        str = "I";
-                        break;
-
-                case SpellSkill::expert:
-                        str = "II";
-                        break;
-
-                case SpellSkill::master:
-                        str = "III";
-                        break;
-
-                case SpellSkill::transcendent:
-                        str = "IV";
-                        break;
-                }
-
-                io::draw_text(
-                        str,
-                        Panel::inventory_menu,
-                        {x, y},
-                        colors::white());
-        }
 }
 
 
@@ -654,8 +560,30 @@ void BrowseSpell::draw_spell_descr()
 
         const SpellSkill skill = player_spells::spell_skill(spell->id());
 
+        // The cost leads the text - it was a column in the list once, but
+        // narrow screens only fit the names there (like the inventory,
+        // whose weight column lives in the description for the same
+        // reason). The skill level is already part of the description.
+        const Range cost = spell->cost_range(skill, map::g_player);
+
+        const std::string resource =
+                (spell->cost_type() == SpellCostType::spirit)
+                ? "spirit"
+                : "hit points";
+
+        std::vector<std::string> paragraphs = {
+                "Costs " + cost.str() + " " + resource + " to cast."};
+
+        const std::vector<std::string> descr =
+                spell->descr(skill, SpellSrc::learned);
+
+        paragraphs.insert(
+                std::end(paragraphs),
+                std::begin(descr),
+                std::end(descr));
+
         m_descr.draw(
-                spell->descr(skill, SpellSrc::learned),
+                m_descr.wrap_paragraphs(paragraphs),
                 colors::light_white());
 }
 

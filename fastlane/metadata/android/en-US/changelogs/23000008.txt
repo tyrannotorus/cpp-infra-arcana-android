@@ -1,0 +1,5 @@
+- Fixed truncated spell descriptions
+- Fixed menu screens at large menu scales; unfit scales no longer offered
+- Removed the startup developer note
+- Rewrote the manual for touch play
+- Fixed game data not updating on upgrades

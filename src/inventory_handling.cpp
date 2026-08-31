@@ -671,30 +671,7 @@ std::vector<std::string> InvState::make_detailed_descr_lines() const
                 }
         }
 
-        // -------------------------------------------------------------
-        // Format the lines
-        // -------------------------------------------------------------
-        std::vector<std::string> formatted_lines;
-
-        // NOTE: Not the full panel width - the description column keeps
-        // room for its scrollbar
-        const int w = m_descr.text_w();
-
-        for (const std::string& line : lines) {
-                const std::vector<std::string> new_formatted_lines =
-                        text_format::split(line, w);
-
-                if (!formatted_lines.empty()) {
-                        formatted_lines.emplace_back("");
-                }
-
-                formatted_lines.insert(
-                        std::end(formatted_lines),
-                        std::begin(new_formatted_lines),
-                        std::end(new_formatted_lines));
-        }
-
-        return formatted_lines;
+        return m_descr.wrap_paragraphs(lines);
 }
 
 void InvState::draw_item_descr()

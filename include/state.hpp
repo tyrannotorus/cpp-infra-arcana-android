@@ -19,7 +19,6 @@ enum class GraphicsCycle;
 enum class StateId
 {
         actions_config,
-        alpha_notice,
         browse_highscore_entry,
         browse_spells,
         credits,

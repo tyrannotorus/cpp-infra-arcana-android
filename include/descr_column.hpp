@@ -37,6 +37,12 @@ public:
         // zone
         int text_w() const;
 
+        // Word wraps paragraphs to the text width, with an empty line
+        // between them - the form draw() takes. NOTE: draw() does NOT wrap,
+        // each line given to it is one row, clipped at the panel edge.
+        std::vector<std::string> wrap_paragraphs(
+                const std::vector<std::string>& paragraphs) const;
+
         // Back to the top - call when another entry becomes marked
         void reset_scroll();
 

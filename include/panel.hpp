@@ -42,6 +42,13 @@ inline constexpr int g_screen_margin_right = 0;
 inline constexpr int g_screen_margin_top = 1;
 inline constexpr int g_screen_margin_bottom = 0;
 
+// Fewest gui columns any offered menu scale may leave the screen with -
+// the adaptive page layouts shrink to fit down to about this width, and
+// below it no layout is usable (see config's max fitting scale). Chosen
+// to admit a 1280 px wide screen at the 2x readability minimum (49
+// columns).
+inline constexpr int g_min_screen_cols = 48;
+
 void init(const P& max_gui_dims);
 
 R area(Panel panel);

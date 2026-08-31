@@ -1,5 +1,8 @@
 #include "android_bootstrap.hpp"
 
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#include <jni.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -14,42 +17,71 @@ namespace {
 
 const char* const stamp_file_name = ".asset_manifest";
 
-// Reads a file bundled in the APK (SDL_RWFromFile with a relative path routes
-// through the Android AssetManager when the file isn't on disk).
+// The APK's AssetManager. NOTE: The jobject behind it is held as a global
+// ref for the life of the process, so the manager stays valid.
+AAssetManager* get_asset_manager()
+{
+        static AAssetManager* mgr = nullptr;
+
+        if (mgr) {
+                return mgr;
+        }
+
+        JNIEnv* const env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+
+        jobject const activity = (jobject)SDL_AndroidGetActivity();
+
+        if (!env || !activity) {
+                return nullptr;
+        }
+
+        jclass const cls = env->GetObjectClass(activity);
+
+        jmethodID const mid =
+                env->GetMethodID(
+                        cls,
+                        "getAssets",
+                        "()Landroid/content/res/AssetManager;");
+
+        jobject const assets = env->CallObjectMethod(activity, mid);
+
+        mgr = AAssetManager_fromJava(env, env->NewGlobalRef(assets));
+
+        env->DeleteLocalRef(assets);
+        env->DeleteLocalRef(cls);
+        env->DeleteLocalRef(activity);
+
+        return mgr;
+}
+
+// Reads a file bundled in the APK. NOTE: Straight from the AssetManager -
+// NOT SDL_RWFromFile, which tries the internal storage path first and
+// would read back the previously extracted (outdated) copy of any asset
+// that changed in an app update, instead of the APK's new one.
 bool read_asset(const std::string& name, std::vector<char>& out)
 {
-        SDL_RWops* rw = SDL_RWFromFile(name.c_str(), "rb");
+        AAssetManager* const mgr = get_asset_manager();
 
-        if (!rw) {
+        if (!mgr) {
                 return false;
         }
 
-        const Sint64 size = SDL_RWsize(rw);
+        AAsset* const asset =
+                AAssetManager_open(mgr, name.c_str(), AASSET_MODE_BUFFER);
 
-        if (size < 0) {
-                SDL_RWclose(rw);
-
+        if (!asset) {
                 return false;
         }
+
+        const off_t size = AAsset_getLength(asset);
 
         out.resize((size_t)size);
 
-        size_t total = 0;
+        const int n = AAsset_read(asset, out.data(), (size_t)size);
 
-        while (total < (size_t)size) {
-                const size_t n =
-                        SDL_RWread(rw, out.data() + total, 1, size - total);
+        AAsset_close(asset);
 
-                if (n == 0) {
-                        break;
-                }
-
-                total += n;
-        }
-
-        SDL_RWclose(rw);
-
-        return total == (size_t)size;
+        return n == (int)size;
 }
 
 void make_parent_dirs(const std::string& path)

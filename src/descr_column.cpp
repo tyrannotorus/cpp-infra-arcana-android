@@ -16,11 +16,36 @@
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
+#include "text_format.hpp"
 
 int DescrColumn::text_w() const
 {
         // Leave room for the scrollbar and its grab zone
         return panels::w(m_panel) - 3;
+}
+
+std::vector<std::string> DescrColumn::wrap_paragraphs(
+        const std::vector<std::string>& paragraphs) const
+{
+        std::vector<std::string> lines;
+
+        const int w = text_w();
+
+        for (const std::string& paragraph : paragraphs) {
+                const std::vector<std::string> wrapped =
+                        text_format::split(paragraph, w);
+
+                if (!lines.empty()) {
+                        lines.emplace_back("");
+                }
+
+                lines.insert(
+                        std::end(lines),
+                        std::begin(wrapped),
+                        std::end(wrapped));
+        }
+
+        return lines;
 }
 
 void DescrColumn::reset_scroll()

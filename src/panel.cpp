@@ -175,9 +175,13 @@ static void set_game_state_panels(const P& max_gui_dims)
 // marked entry in the right one (see MenuDescrPageState)
 static void set_menu_descr_page_panels(const P& max_gui_dims)
 {
-        constexpr int tot_w = 78;
-        constexpr int menu_w = 26;
-        constexpr int descr_w = tot_w - menu_w - 1;
+        // Shrunk to fit narrow screens (high menu scale) - the
+        // description column gives way first, the list keeps room for its
+        // labels. The offered scales are floored so this never drops below
+        // usable (see panels::g_min_screen_cols)
+        const int tot_w = std::min(78, max_gui_dims.x - 4);
+        const int menu_w = std::clamp((tot_w * 26) / 78, 20, 26);
+        const int descr_w = tot_w - menu_w - 1;
 
         const int screen_center_x = panels::center_x(Panel::screen);
 
@@ -209,10 +213,27 @@ static void set_menu_descr_page_panels(const P& max_gui_dims)
 
 static void set_options_state_panels(const P& max_gui_dims)
 {
-        constexpr int tot_w = 78;
-        constexpr int options_w = 29;
-        constexpr int values_w = 20;
-        constexpr int descr_w = tot_w - options_w - values_w - 2;
+        // The label and value columns hold content that cannot wrap, so
+        // on narrow screens (high menu scale) the description column gives
+        // way first, and only below its readable minimum do the other two
+        // shrink (their content then overruns - still better than the
+        // whole page running off the screen edges)
+        constexpr int descr_min_w = 14;
+
+        const int tot_w = std::min(78, max_gui_dims.x - 4);
+
+        int options_w = 29;
+        int values_w = 20;
+        int descr_w = tot_w - options_w - values_w - 2;
+
+        if (descr_w < descr_min_w) {
+                descr_w = descr_min_w;
+
+                const int remaining = tot_w - descr_w - 2;
+
+                options_w = std::max(18, (remaining * 29) / 49);
+                values_w = std::max(8, remaining - options_w);
+        }
 
         const int screen_center_x = panels::center_x(Panel::screen);
 
@@ -283,7 +304,8 @@ static void set_inventory_state_panels(const P& max_gui_dims)
 
 static void set_info_scrreen_panel(const P& max_gui_dims)
 {
-        constexpr int info_screen_w = 78;
+        // Shrunk to fit narrow screens (high menu scale)
+        const int info_screen_w = std::min(78, max_gui_dims.x - 4);
 
         const int screen_center_x = panels::center_x(Panel::screen);
 
