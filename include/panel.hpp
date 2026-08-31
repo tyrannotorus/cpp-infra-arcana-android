@@ -42,6 +42,10 @@ inline constexpr int g_screen_margin_right = 0;
 inline constexpr int g_screen_margin_top = 1;
 inline constexpr int g_screen_margin_bottom = 0;
 
+// Fewest gui columns any offered menu scale may leave the screen with
+// (the page layouts shrink to fit; a 1280 px screen at 2x gives 49)
+inline constexpr int g_min_screen_cols = 48;
+
 void init(const P& max_gui_dims);
 
 R area(Panel panel);

@@ -265,6 +265,38 @@ static void update_render_dims()
         TRACE_FUNC_END;
 }
 
+// Largest menu scale leaving at least panels::g_min_screen_cols with the
+// current font - larger is neither offered nor accepted from the config
+static int max_fitting_video_scale_factor()
+{
+        const P native_res = io::get_native_resolution();
+
+        // The game is landscape locked - the long side is the width,
+        // regardless of the orientation the display reports at boot
+        const int screen_px_w = std::max(native_res.x, native_res.y);
+
+        P font_dims = parse_dims_from_font_name(s_font_name);
+
+        if (font_dims.x < 1) {
+                // Robustness - the default font's width
+                font_dims.x = 13;
+        }
+
+        int f = 1;
+
+        while (f < s_video_scale_factor_max) {
+                const int next_cols = screen_px_w / ((f + 1) * font_dims.x);
+
+                if (next_cols < panels::g_min_screen_cols) {
+                        break;
+                }
+
+                ++f;
+        }
+
+        return f;
+}
+
 static int calc_default_video_scale_factor(const P& native_res)
 {
         // Set the video scale factor based on the user's native resolution.
@@ -278,6 +310,9 @@ static int calc_default_video_scale_factor(const P& native_res)
 
         // Mobile default is at least 2x (readability on handheld screens)
         f = std::clamp(f, 2, s_video_scale_factor_max);
+
+        // Never default above what the layouts can fit
+        f = std::min(f, max_fitting_video_scale_factor());
 
         TRACE
                 << "Calculated a default video scale factor of "
@@ -448,6 +483,22 @@ static bool read_config_file()
         }
 
         update_render_dims();
+
+        // A stored menu scale the screen cannot fit falls back to the
+        // default (after the font is settled - fit depends on cell size)
+        const int max_scale = max_fitting_video_scale_factor();
+
+        if (s_video_scale_factor > max_scale) {
+                TRACE_ERROR_RELEASE
+                        << "Config menu scale "
+                        << s_video_scale_factor
+                        << " does not fit the screen, using default"
+                        << std::endl;
+
+                s_video_scale_factor =
+                        calc_default_video_scale_factor(
+                                io::get_native_resolution());
+        }
 
         s_display_health_bars = config["display_health_bars"] == "1";
         s_use_trap_color_when_obscured = config["use_trap_color_when_obscured"] == "1";
@@ -1147,7 +1198,7 @@ void VideoScaleOption::change(OptionChangeCommand command) const
 
         switch (command) {
         case OptionChangeCommand::enter: {
-                if (s_video_scale_factor < s_video_scale_factor_max) {
+                if (s_video_scale_factor < max_fitting_video_scale_factor()) {
                         ++s_video_scale_factor;
                 }
                 else {
@@ -1156,7 +1207,7 @@ void VideoScaleOption::change(OptionChangeCommand command) const
         } break;
 
         case OptionChangeCommand::right: {
-                if (s_video_scale_factor < s_video_scale_factor_max) {
+                if (s_video_scale_factor < max_fitting_video_scale_factor()) {
                         ++s_video_scale_factor;
                 }
         } break;

@@ -24,7 +24,6 @@
 #include "create_character.hpp"
 #include "credits.hpp"
 #include "draw_box.hpp"
-#include "fade.hpp"
 #include "game.hpp"
 #include "global.hpp"
 #include "highscore.hpp"
@@ -58,58 +57,6 @@ static bool query_overwrite_savefile()
                 .run();
 
         return (choice == 0);
-}
-
-// -----------------------------------------------------------------------------
-// Alpha notice state
-// -----------------------------------------------------------------------------
-std::string AlphaNoticeState::page_title() const
-{
-        return "Developer Note";
-}
-
-std::string AlphaNoticeState::page_text() const
-{
-        const std::string line_1 =
-                "This is an early alpha of the Android port of Infra Arcana.";
-
-        const std::string line_2 =
-                "It is perfectly playable, but expect bugs or unrefinement.";
-
-        const std::string signature = "- Love, Werewolf Camp";
-
-        // Right-aligned by padding with non-breaking spaces (plain spaces
-        // can be dropped as wrap points; the base page has no alignment
-        // support), in the frame's title color
-        std::string text = line_1 + "\n" + line_2 + "\n\n";
-
-        const size_t block_w = std::max(line_1.size(), line_2.size());
-
-        // Pulled in a touch from the right edge
-        const size_t right_indent = 6;
-
-        for (size_t i = signature.size() + right_indent; i < block_w; ++i) {
-                text += "{_}";
-        }
-
-        text += "{GUICOLOR_TITLE}" + signature;
-
-        return text;
-}
-
-void AlphaNoticeState::on_confirmed()
-{
-        // Acknowledged - a beat of black, then the title screen covers it
-        fade::to_black(1500);
-
-        states::pop();
-}
-
-void AlphaNoticeState::on_cancelled()
-{
-        // The device back button acknowledges too - a boot notice has
-        // nothing to cancel back to
-        on_confirmed();
 }
 
 // -----------------------------------------------------------------------------

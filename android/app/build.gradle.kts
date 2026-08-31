@@ -58,8 +58,8 @@ android {
         applicationId = "camp.werewolf.infraarcana"
         minSdk = 24
         targetSdk = 35
-        versionCode = 23000007
-        versionName = "23.0.0.7"
+        versionCode = 23000008
+        versionName = "23.0.0.8"
 
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
@@ -107,6 +107,8 @@ android {
             isJniDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("debug")
+            // Beside the release install; label overridden in src/staging/res
+            applicationIdSuffix = ".staging"
         }
         // Release: the build to hand to someone else. Same code as staging,
         // but NOT debuggable - a debuggable APK lets anyone who installs it

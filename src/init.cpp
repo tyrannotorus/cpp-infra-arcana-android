@@ -58,6 +58,25 @@ bool g_is_cheat_vision_enabled = false;
 
 bool g_is_demo_mapgen = false;
 
+// Presents the boot loading frame. The Android surface attaches
+// asynchronously and earlier presents are dropped - the pump lets it
+// attach, and presenting between init steps means the last one shows.
+// TODO: Use more creative loading messages
+static void present_loading_frame()
+{
+        io::clear_input();
+
+        io::clear_screen();
+
+        io::draw_text_center(
+                "Loading...",
+                Panel::screen,
+                panels::center(Panel::screen),
+                colors::menu_dark());
+
+        io::update_screen();
+}
+
 void init_io()
 {
         TRACE_FUNC_BEGIN;
@@ -71,19 +90,12 @@ void init_io()
         colors::init();
         io::init_other();
 
-        io::clear_screen();
-
-        // TODO: Use more creative loading messages
-        io::draw_text_center(
-                "Loading...",
-                Panel::screen,
-                panels::center(Panel::screen),
-                colors::menu_dark());
-
-        io::update_screen();
+        present_loading_frame();
 
         query::init();
         audio::init();
+
+        present_loading_frame();
 
         std::queue<std::string>& paths_error_messages = paths::pending_error_messages();
 
@@ -121,10 +133,17 @@ void init_game()
 {
         TRACE_FUNC_BEGIN;
 
+        present_loading_frame();
+
         saving::init();
         messages::init();
         line_calc::init();
         map_templates::init();
+
+        // Held for a beat - a fast boot would flash past the text unseen
+        present_loading_frame();
+
+        io::sleep(750);
 
         TRACE_FUNC_END;
 }
