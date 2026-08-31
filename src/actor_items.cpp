@@ -305,34 +305,6 @@ static void make_for_player_ghoul()
                         item::make(item::Id::player_ghoul_claw)));
 }
 
-// =============================================================================
-// USER TEST - TEMPORARY, REMOVE BEFORE RELEASE
-//
-// Every spell the player is able to learn is known from the start, so that
-// the spell screen can be checked against ALL of the spell descriptions
-// without first finding the manuscripts. This is a testing aid only, not a
-// game rule: delete this function and its one call at the end of
-// make_for_player().
-// =============================================================================
-static void learn_all_spells_user_test()
-{
-        for (int i = 0; i < (int)SpellId::END; ++i) {
-                const auto id = (SpellId)i;
-
-                const std::unique_ptr<const Spell> spell(spells::make(id));
-
-                if (!spell->player_can_learn()) {
-                        // Monster only
-                        continue;
-                }
-
-                // NOTE: Deliberately NOT learn_spell_player() above - that
-                // also identifies the manuscript and grants its discovery
-                // xp, which would skew the test character
-                player_spells::learn_spell(id, Verbose::no);
-        }
-}
-
 static void make_for_player()
 {
         switch (player_bon::bg()) {
@@ -386,9 +358,6 @@ static void make_for_player()
         case Bg::END:
                 break;
         }  // Background switch
-
-        // USER TEST - TEMPORARY, REMOVE BEFORE RELEASE (see above)
-        learn_all_spells_user_test();
 }
 
 static void make_random_item_to_backpack(

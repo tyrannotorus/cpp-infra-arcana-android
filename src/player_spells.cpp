@@ -560,10 +560,9 @@ void BrowseSpell::draw_spell_descr()
 
         const SpellSkill skill = player_spells::spell_skill(spell->id());
 
-        // The cost leads the text - it was a column in the list once, but
-        // narrow screens only fit the names there (like the inventory,
-        // whose weight column lives in the description for the same
-        // reason). The skill level is already part of the description.
+        // The cost leads the text - the list rows hold only the names
+        // (like the inventory, whose weight lives in the description),
+        // and the skill level is already part of the description text
         const Range cost = spell->cost_range(skill, map::g_player);
 
         const std::string resource =
