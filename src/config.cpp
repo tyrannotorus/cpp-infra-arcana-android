@@ -269,11 +269,10 @@ static void update_render_dims()
 // current font - larger is neither offered nor accepted from the config
 static int max_fitting_video_scale_factor()
 {
-        const P native_res = io::get_native_resolution();
+        const P window_px_dims = io::window_px_dims();
 
-        // The game is landscape locked - the long side is the width,
-        // regardless of the orientation the display reports at boot
-        const int screen_px_w = std::max(native_res.x, native_res.y);
+        // Landscape locked - the long side is the width
+        const int screen_px_w = std::max(window_px_dims.x, window_px_dims.y);
 
         P font_dims = parse_dims_from_font_name(s_font_name);
 
@@ -297,16 +296,16 @@ static int max_fitting_video_scale_factor()
         return f;
 }
 
-static int calc_default_video_scale_factor(const P& native_res)
+static int calc_default_video_scale_factor(const P& window_px_dims)
 {
-        // Set the video scale factor based on the user's native resolution.
+        // Set the video scale factor based on the window width.
         // Examples:
         // 1920 x 1080  : 2
         // 2560 x 1440  : 3
         // 3840 x 2160  : 4
         // 7680 x 4320  : 4
 
-        int f = (native_res.x + 500) / 1000;
+        int f = (window_px_dims.x + 500) / 1000;
 
         // Mobile default is at least 2x (readability on handheld screens)
         f = std::clamp(f, 2, s_video_scale_factor_max);
@@ -317,9 +316,9 @@ static int calc_default_video_scale_factor(const P& native_res)
         TRACE
                 << "Calculated a default video scale factor of "
                 << "'" << f << "', "
-                << "based on native resolution of "
-                << "'" << native_res.x << "x" << native_res.y << "' "
-                << "(f = (x_resolution + 500) / 1000, "
+                << "based on window size of "
+                << "'" << window_px_dims.x << "x" << window_px_dims.y << "' "
+                << "(f = (w + 500) / 1000, "
                 << "limited to " << s_video_scale_factor_max << ")"
                 << std::endl;
 
@@ -349,7 +348,7 @@ static void set_default_variables()
 
         update_render_dims();
 
-        const P native_res = io::get_native_resolution();
+        const P window_px_dims = io::window_px_dims();
 
         s_master_volume_pct_option = s_master_volume_pct_adjusted = 100;
         s_is_ambient_audio_enabled = true;
@@ -373,7 +372,7 @@ static void set_default_variables()
         s_dpad_offset_px_y = 0;
         s_dpad_scale_pct = 100;
 
-        s_video_scale_factor = calc_default_video_scale_factor(native_res);
+        s_video_scale_factor = calc_default_video_scale_factor(window_px_dims);
         s_brightness_pct = 100;
         s_display_health_bars = true;
         s_use_trap_color_when_obscured = false;
@@ -497,7 +496,7 @@ static bool read_config_file()
 
                 s_video_scale_factor =
                         calc_default_video_scale_factor(
-                                io::get_native_resolution());
+                                io::window_px_dims());
         }
 
         s_display_health_bars = config["display_health_bars"] == "1";

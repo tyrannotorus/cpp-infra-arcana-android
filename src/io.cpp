@@ -694,6 +694,10 @@ void init_sdl()
         // do not synthesize mouse events from touches.
         SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 
+        // SDL sets the activity orientation on window creation - unhinted,
+        // it guesses from the window size
+        SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+
         const uint32_t sdl_init_flags =
                 SDL_INIT_VIDEO |
                 SDL_INIT_AUDIO |
@@ -723,6 +727,9 @@ void init_sdl()
                 PANIC;
         }
 
+        // Lives as long as SDL does - init_other rebuilds the rest on it
+        init_window();
+
         TRACE_FUNC_END;
 }
 
@@ -730,6 +737,11 @@ void cleanup_sdl()
 {
         if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
                 return;
+        }
+
+        if (g_sdl_window) {
+                SDL_DestroyWindow(g_sdl_window);
+                g_sdl_window = nullptr;
         }
 
         IMG_Quit();
@@ -784,7 +796,7 @@ void init_other()
 
         cleanup_other();
 
-        init_window();
+        layout_window();
         init_renderer();
 
         SDL_SetRenderDrawBlendMode(io::g_sdl_renderer, SDL_BLENDMODE_BLEND);
@@ -815,11 +827,6 @@ void cleanup_other()
         if (g_sdl_renderer) {
                 SDL_DestroyRenderer(g_sdl_renderer);
                 g_sdl_renderer = nullptr;
-        }
-
-        if (g_sdl_window) {
-                SDL_DestroyWindow(g_sdl_window);
-                g_sdl_window = nullptr;
         }
 
         TRACE_FUNC_END;

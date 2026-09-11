@@ -66,7 +66,11 @@ void put_px_on_surface(
 
 void init_window();
 
-void on_window_resized();
+// Lays out the panels for the current window size
+void layout_window();
+
+// False when the window is the size already laid out
+bool on_window_resized();
 
 P sdl_window_gui_dims();
 

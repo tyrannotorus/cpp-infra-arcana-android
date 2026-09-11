@@ -157,11 +157,11 @@ void clear_screen();
 
 std::string sdl_pref_dir();
 
-// Actual user resolution (i.e. not logical size)
-P get_native_resolution();
+// Pixel size of the window - the surface Android grants, not the display
+P window_px_dims();
 
-// Recreates the window, the renderer and every texture, then redraws. Called
-// when the GPU context was lost (see io_input's render device reset).
+// Recreates the renderer and every texture, then redraws. Called when the
+// GPU context was lost (see io_input's render device reset).
 void on_render_device_reset();
 
 void on_user_toggle_scaling();
@@ -284,7 +284,7 @@ void sleep(uint32_t duration);
 void clear_input();
 
 // Whether a tap or key press is waiting, WITHOUT blocking for one (unlike
-// read_input). Drains the queue either way, so it also serves as the
+// read_input). Drains the input queue either way, so it also serves as the
 // clear_input of a loop that runs its own animation.
 bool poll_any_input();
 
