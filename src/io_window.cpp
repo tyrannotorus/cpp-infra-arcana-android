@@ -14,53 +14,37 @@
 #include "debug.hpp"
 #include "io_display.hpp"
 #include "io_internal.hpp"
-#include "version.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-static P get_sdl_window_px_dims()
-{
-        P px_dims;
+// Window size the panels were last laid out for
+static P s_layout_px_dims;
 
-        SDL_GetWindowSize(io::g_sdl_window, &px_dims.x, &px_dims.y);
-
-        return px_dims;
-}
-
-static std::string make_window_title()
-{
-        std::string title = "Infra Arcana ";
-
-        title += version_info::g_version_str;
-
-        const auto git_sha1_result = version_info::read_git_sha1_str_from_file();
-
-        if (git_sha1_result) {
-                title += " (" + git_sha1_result.value() + ")";
-        }
-
-        return title;
-}
-
-static SDL_Window* create_sdl_window(const P& px_dims)
+static SDL_Window* create_sdl_window()
 {
         TRACE_FUNC_BEGIN;
 
-        TRACE << "Attempting to create window with size: "
-              << px_dims.x << ", " << px_dims.y << std::endl;
+        // Request only - fullscreen takes the surface size
+        SDL_Rect display_bounds {};
 
-        SDL_Window* window = nullptr;
+        if (SDL_GetDisplayBounds(0, &display_bounds) != 0) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to read display bounds"
+                        << std::endl
+                        << SDL_GetError()
+                        << std::endl;
 
-        const auto title = make_window_title();
+                PANIC;
+        }
 
-        window =
+        auto* const window =
                 SDL_CreateWindow(
-                        title.c_str(),
+                        "Infra Arcana",
                         SDL_WINDOWPOS_CENTERED,
                         SDL_WINDOWPOS_CENTERED,
-                        px_dims.x,
-                        px_dims.y,
+                        display_bounds.w,
+                        display_bounds.h,
                         SDL_WINDOW_FULLSCREEN_DESKTOP);
 
         if (!window) {
@@ -81,21 +65,7 @@ static P calc_offsets_to_center_rectangle(
 {
         const auto extra_space = outer_dims - inner_dims;
 
-        const auto offsets = extra_space.scaled_down(2);
-
-        return offsets;
-}
-
-static P calc_rendering_offsets(
-        const P& window_px_dims,
-        const P& rendering_area_px_dims)
-{
-        const auto offsets =
-                calc_offsets_to_center_rectangle(
-                        window_px_dims,
-                        rendering_area_px_dims);
-
-        return offsets;
+        return extra_space.scaled_down(2);
 }
 
 static void update_rendering_offsets()
@@ -104,43 +74,19 @@ static void update_rendering_offsets()
         // scaled up. Therefore we scale down the window size to compare it with
         // the screen panel, and then scale up the offsets again afterwards.
 
-        const auto window_px_dims = get_sdl_window_px_dims();
-
         const int scale_factor = config::video_scale_factor();
 
-        const auto window_logical_px_dims = window_px_dims.scaled_down(scale_factor);
+        const auto window_logical_px_dims =
+                io::window_px_dims().scaled_down(scale_factor);
 
         const auto screen_panel_logical_px_dims = io::panel_px_dims(Panel::screen);
 
         const auto rendering_px_offset =
-                calc_rendering_offsets(
+                calc_offsets_to_center_rectangle(
                         window_logical_px_dims,
                         screen_panel_logical_px_dims);
 
         io::g_rendering_px_offset = rendering_px_offset.scaled_up(scale_factor);
-}
-
-static SDL_Window* init_window_fullscreen()
-{
-        TRACE << "Initializing with fullscreen" << std::endl;
-
-        const auto native_resolution = io::get_native_resolution();
-
-        auto window_size = native_resolution;
-
-        window_size = window_size.scaled_down(config::video_scale_factor());
-
-        TRACE
-                << "Fullscreen window size: "
-                << window_size.x << "x"
-                << window_size.y
-                << std::endl;
-
-        panels::init(io::px_to_gui_coords(window_size));
-
-        auto* const window = create_sdl_window(window_size);
-
-        return window;
 }
 
 // -----------------------------------------------------------------------------
@@ -153,23 +99,7 @@ SDL_Renderer* g_sdl_renderer = nullptr;
 
 void init_window()
 {
-        if (g_sdl_window) {
-                SDL_DestroyWindow(g_sdl_window);
-
-                g_sdl_window = nullptr;
-        }
-
-        const P native_resolution = get_native_resolution();
-
-        TRACE
-                << "Native resolution: "
-                << native_resolution.x << "x"
-                << native_resolution.y
-                << std::endl;
-
-        // The window is ALWAYS fullscreen - there is no windowed mode to fall
-        // back to on a phone
-        g_sdl_window = init_window_fullscreen();
+        g_sdl_window = create_sdl_window();
 
         if (!g_sdl_window) {
                 TRACE_ERROR_RELEASE
@@ -181,46 +111,64 @@ void init_window()
                 PANIC;
         }
 
+        const auto px_dims = window_px_dims();
+
+        TRACE << "Window size: "
+              << px_dims.x << "x"
+              << px_dims.y
+              << std::endl;
+}
+
+void layout_window()
+{
+        // The window can be smaller than the display (cutout, nav bar,
+        // multi-window)
+        s_layout_px_dims = window_px_dims();
+
+        panels::init(sdl_window_gui_dims());
+
         update_rendering_offsets();
 }
 
-void on_window_resized()
+bool on_window_resized()
 {
-        const auto new_px_dims = get_sdl_window_px_dims();
+        const auto px_dims = window_px_dims();
 
-        const auto new_logical_px_dims =
-                new_px_dims.scaled_down(
-                        config::video_scale_factor());
+        if (px_dims == s_layout_px_dims) {
+                return false;
+        }
 
         TRACE << "New window size: "
-              << new_px_dims.x << "x"
-              << new_px_dims.y
+              << px_dims.x << "x"
+              << px_dims.y
               << std::endl;
 
-        TRACE << "New logical window size: "
-              << new_logical_px_dims.x << "x"
-              << new_logical_px_dims.y
-              << std::endl;
-
-        panels::init(io::px_to_gui_coords(new_logical_px_dims));
+        layout_window();
 
         // The display textures are sized to the screen panel
         init_displays();
 
-        update_rendering_offsets();
-
         states::on_window_resized();
+
+        return true;
 }
 
 P sdl_window_gui_dims()
 {
-        const auto px_dims = get_sdl_window_px_dims();
-
         const auto logical_px_dims =
-                px_dims.scaled_down(
+                window_px_dims().scaled_down(
                         config::video_scale_factor());
 
         return io::px_to_gui_coords(logical_px_dims);
+}
+
+P window_px_dims()
+{
+        P px_dims;
+
+        SDL_GetWindowSize(g_sdl_window, &px_dims.x, &px_dims.y);
+
+        return px_dims;
 }
 
 #ifndef NDEBUG
@@ -281,24 +229,6 @@ void clear_screen()
 #endif  // NDEBUG
 
         clear_display_textures();
-}
-
-P get_native_resolution()
-{
-        SDL_Rect bounds;
-        const auto result = SDL_GetDisplayUsableBounds(0, &bounds);
-
-        if (result != 0) {
-                TRACE_ERROR_RELEASE
-                        << "Failed to read native resolution"
-                        << std::endl
-                        << SDL_GetError()
-                        << std::endl;
-
-                PANIC;
-        }
-
-        return {bounds.w, bounds.h};
 }
 
 }  // namespace io

@@ -47,6 +47,10 @@ static bool s_is_window_resized = false;
 static const uint32_t s_window_resize_draw_delay_ms = 400U;
 static uint32_t s_last_window_resize_ms = 0U;
 
+// Input events only - window, app and render events must survive a flush
+static constexpr uint32_t s_first_input_event_type = SDL_KEYDOWN;
+static constexpr uint32_t s_last_input_event_type = SDL_MULTIGESTURE;
+
 static void update_input_mod_key_status()
 {
         const auto mod = SDL_GetModState();
@@ -57,7 +61,12 @@ static void update_input_mod_key_status()
 
 static void on_window_resized_signalled()
 {
-        io::on_window_resized();
+        s_is_window_resized = false;
+
+        if (!io::on_window_resized()) {
+                return;
+        }
+
         io::clear_screen();
 
 #ifndef NDEBUG
@@ -69,7 +78,6 @@ static void on_window_resized_signalled()
         io::update_screen();
         io::clear_input();
 
-        s_is_window_resized = false;
         s_last_window_resize_ms = SDL_GetTicks();
 }
 
@@ -216,8 +224,7 @@ static void handle_keydown_event()
                 s_is_done_reading_input = true;
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 }
@@ -1218,9 +1225,7 @@ static void handle_single_finger_motion()
                         (float)window_px_dims.y;
 
                 const float engage_threshold_px =
-                        0.01f * (float)std::min(
-                                        window_px_dims.x,
-                                        window_px_dims.y);
+                        0.01f * (float)std::min(window_px_dims.x, window_px_dims.y);
 
                 if (dy_from_start_px < engage_threshold_px) {
                         return;
@@ -1716,8 +1721,7 @@ static void handle_polled_event()
                 handle_render_device_reset_event();
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 }
@@ -1786,7 +1790,7 @@ void init_input()
 void clear_input()
 {
         SDL_PumpEvents();
-        SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+        SDL_FlushEvents(s_first_input_event_type, s_last_input_event_type);
         s_input = {};
 
         // Characters of a committed string that were still waiting their
@@ -1805,7 +1809,13 @@ bool poll_any_input()
 
         SDL_Event event;
 
-        while (SDL_PollEvent(&event)) {
+        // Input only - the rest is left for the input loop
+        while (SDL_PeepEvents(
+                       &event,
+                       1,
+                       SDL_GETEVENT,
+                       s_first_input_event_type,
+                       s_last_input_event_type) > 0) {
                 switch (event.type) {
                 case SDL_FINGERUP:
                 case SDL_KEYDOWN:
@@ -1891,7 +1901,6 @@ int screen_keyboard_covered_px_h()
 
 InputData read_input()
 {
-
         s_input = {};
         s_is_done_reading_input = false;
         s_is_window_resized = false;
@@ -1966,7 +1975,6 @@ InputData read_input()
 
                 run_handle_event_cycle();
         }
-
 
         return s_input;
 }
