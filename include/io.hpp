@@ -157,7 +157,7 @@ void clear_screen();
 
 std::string sdl_pref_dir();
 
-// Pixel size of the window - the surface Android grants, not the display
+// Pixel size of the window, not the display
 P window_px_dims();
 
 // Recreates the renderer and every texture, then redraws. Called when the

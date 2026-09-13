@@ -694,8 +694,7 @@ void init_sdl()
         // do not synthesize mouse events from touches.
         SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 
-        // SDL sets the activity orientation on window creation - unhinted,
-        // it guesses from the window size
+        // Unhinted, SDL picks the activity orientation from the window size
         SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
         const uint32_t sdl_init_flags =

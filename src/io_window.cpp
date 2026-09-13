@@ -25,7 +25,7 @@ static SDL_Window* create_sdl_window()
 {
         TRACE_FUNC_BEGIN;
 
-        // Fullscreen asks for the display - Android grants the surface anyway
+        // Request only - fullscreen takes the surface size
         SDL_Rect display_bounds {};
 
         if (SDL_GetDisplayBounds(0, &display_bounds) != 0) {
@@ -121,9 +121,8 @@ void init_window()
 
 void layout_window()
 {
-        // From the window, not the display - the window can be smaller
-        // (cutout, nav bar, multi-window) and a display-sized layout crops
-        // both edges
+        // The window can be smaller than the display (cutout, nav bar,
+        // multi-window)
         s_layout_px_dims = window_px_dims();
 
         panels::init(sdl_window_gui_dims());

@@ -47,8 +47,7 @@ static bool s_is_window_resized = false;
 static const uint32_t s_window_resize_draw_delay_ms = 400U;
 static uint32_t s_last_window_resize_ms = 0U;
 
-// Input events. Window, app and render events are state - flushing input
-// must leave them for the input loop
+// Input events only - window, app and render events must survive a flush
 static constexpr uint32_t s_first_input_event_type = SDL_KEYDOWN;
 static constexpr uint32_t s_last_input_event_type = SDL_MULTIGESTURE;
 
@@ -1810,8 +1809,7 @@ bool poll_any_input()
 
         SDL_Event event;
 
-        // Only input is taken - whatever else is queued is left for the
-        // input loop
+        // Input only - the rest is left for the input loop
         while (SDL_PeepEvents(
                        &event,
                        1,
