@@ -7,6 +7,8 @@
 #include "map_mode_gui.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -21,6 +23,7 @@
 #include "global.hpp"
 #include "inventory.hpp"
 #include "io.hpp"
+#include "io_display.hpp"
 #include "item.hpp"
 #include "item_data.hpp"
 #include "item_device.hpp"
@@ -32,6 +35,7 @@
 #include "property_handler.hpp"
 #include "rect.hpp"
 #include "room.hpp"
+#include "scrollbar.hpp"
 #include "text_format.hpp"
 
 // -----------------------------------------------------------------------------
@@ -547,35 +551,113 @@ static void draw_med_suppl(const int y, const Panel panel)
                 io::DrawBg::no);
 }
 
-static void draw_properties(int y, const Panel panel)
+static std::vector<ColoredString> property_lines()
 {
         const prop::PropHandler& properties = map::g_player->m_properties;
 
-        auto property_names = properties.property_names_short();
+        auto lines = properties.property_names_short();
 
         if (map::g_dark.at(map::g_player->m_pos)) {
                 const ColoredString dark = {
                         "DARK AREA",
                         colors::gray()};
 
-                property_names.push_back(dark);
+                lines.push_back(dark);
         }
 
-        for (const auto& name : property_names) {
-                if (y == panels::y1(panel)) {
-                        break;
-                }
+        return lines;
+}
 
-                io::draw_text(
-                        name.str,
-                        panel,
-                        {0, y},
-                        name.color,
-                        io::DrawBg::no,
-                        colors::black());
+#ifndef NDEBUG
+static void draw_debug_pos(const int y, const Panel panel)
+{
+        std::string debug_str =
+                std::to_string(map::g_player->m_pos.x) +
+                "," +
+                std::to_string(map::g_player->m_pos.y);
 
-                ++y;
+        const room::Room* const room = map::g_room_map.at(map::g_player->m_pos);
+
+        if (room) {
+                text_format::append_with_space(
+                        debug_str,
+                        room::room_type_to_str(room->m_type));
         }
+
+        io::draw_text(
+                debug_str,
+                panel,
+                {0, y},
+                colors::yellow(),
+                io::DrawBg::no);
+}
+#endif  // NDEBUG
+
+// One row of the panel content, drawn at its row of the content - an empty
+// one is a blank row
+using DrawRow = std::function<void(int y, Panel panel)>;
+
+// The content is drawn whole into its own display, under the panel's frame;
+// the panel shows a window of it (see io::Display::side_content). It scrolls
+// when it is taller than the window - both only known when drawing (the
+// statuses come and go, the window height is the screen's).
+static float s_scroll_px = 0.0f;
+static int s_max_scroll_px = 0;
+
+static int scroll_px()
+{
+        return (int)std::lround(s_scroll_px);
+}
+
+// Whether the content continues above / below the window
+static bool is_cut_at_top()
+{
+        return scroll_px() > 0;
+}
+
+static bool is_cut_at_bottom()
+{
+        return scroll_px() < s_max_scroll_px;
+}
+
+// The panel's background around the window - the content, with a
+// background of its own, shows through the window from below
+static void cover_frame(const R& frame_px, const R& window_px)
+{
+        const Color& bg = colors::extra_dark_gray();
+
+        io::set_display_for_panel(Panel::map_gui_stats_border);
+
+        io::draw_rectangle_filled(
+                {frame_px.p0, {frame_px.p1.x, window_px.p0.y - 1}},
+                bg);
+
+        io::draw_rectangle_filled(
+                {{frame_px.p0.x, window_px.p1.y + 1}, frame_px.p1},
+                bg);
+
+        io::draw_rectangle_filled(
+                {{frame_px.p0.x, window_px.p0.y},
+                 {window_px.p0.x - 1, window_px.p1.y}},
+                bg);
+
+        io::draw_rectangle_filled(
+                {{window_px.p1.x + 1, window_px.p0.y},
+                 {frame_px.p1.x, window_px.p1.y}},
+                bg);
+}
+
+// Over the content, at the window edges where it continues
+static void draw_scroll_fades(const R& window_px)
+{
+        io::set_display_for_panel(Panel::map_gui_stats_border);
+
+        scrollbar::draw_content_fades(
+                window_px,
+                scroll_px(),
+                s_max_scroll_px,
+                0,
+                colors::extra_dark_gray());
 }
 
 // -----------------------------------------------------------------------------
@@ -585,79 +667,93 @@ namespace map_mode_gui
 {
 void draw()
 {
-        io::cover_panel(
-                Panel::map_gui_stats_border,
+        const Panel panel = Panel::map_gui_stats;
+
+        std::vector<DrawRow> rows;
+
+        rows.emplace_back(draw_name);
+        rows.emplace_back(draw_class);
+        rows.emplace_back(draw_char_lvl_and_xp);
+        rows.emplace_back(draw_dlvl);
+        rows.emplace_back(draw_hp);
+        rows.emplace_back(draw_sp);
+
+        if (player_bon::is_bg(Bg::exorcist)) {
+                rows.emplace_back(draw_exorcist_fervor);
+        }
+
+        rows.emplace_back(draw_shock);
+        rows.emplace_back(draw_insanity);
+        rows.emplace_back();
+        rows.emplace_back(draw_wielded_wpn);
+        rows.emplace_back(draw_alt_wpn);
+        rows.emplace_back();
+        rows.emplace_back(draw_lantern);
+        rows.emplace_back(draw_med_suppl);
+        rows.emplace_back(draw_armor);
+        rows.emplace_back(draw_weight);
+        rows.emplace_back();
+        rows.emplace_back(draw_turn_number);
+        rows.emplace_back();
+
+#ifndef NDEBUG
+        rows.emplace_back(draw_debug_pos);
+        rows.emplace_back();
+#endif  // NDEBUG
+
+        for (const ColoredString& line : property_lines()) {
+                rows.emplace_back(
+                        [line](const int y, const Panel row_panel) {
+                                io::draw_text(
+                                        line.str,
+                                        row_panel,
+                                        {0, y},
+                                        line.color,
+                                        io::DrawBg::no,
+                                        colors::black());
+                        });
+        }
+
+        const R window_px = io::panel_logical_px_rect(panel);
+
+        const int content_px_h = (int)rows.size() * config::gui_cell_px_h();
+
+        s_max_scroll_px = std::max(0, content_px_h - window_px.h());
+
+        s_scroll_px = std::clamp(s_scroll_px, 0.0f, (float)s_max_scroll_px);
+
+        io::set_side_content_scroll_px(scroll_px());
+
+        // The content, whole
+        io::reserve_side_content_px_h(content_px_h);
+
+        io::set_display_for_panel(panel);
+
+        io::draw_rectangle_filled(
+                {window_px.p0,
+                 {window_px.p1.x,
+                  window_px.p0.y +
+                          std::max(content_px_h, window_px.h()) -
+                          1}},
                 colors::extra_dark_gray());
+
+        for (size_t idx = 0; idx < rows.size(); ++idx) {
+                if (rows[idx]) {
+                        rows[idx]((int)idx, panel);
+                }
+        }
+
+        // The frame over it
+        cover_frame(
+                io::panel_logical_px_rect(Panel::map_gui_stats_border),
+                window_px);
 
         draw_box(
                 panels::area(Panel::map_gui_stats_border),
                 colors::dark_gray(),
                 Panel::map_gui_stats_border);
 
-        const Panel panel = Panel::map_gui_stats;
-
-        int y = 0;
-
-        draw_name(y++, panel);
-        draw_class(y++, panel);
-        draw_char_lvl_and_xp(y++, panel);
-        draw_dlvl(y++, panel);
-        draw_hp(y++, panel);
-
-        draw_sp(y++, panel);
-
-        if (player_bon::is_bg(Bg::exorcist)) {
-                draw_exorcist_fervor(y++, panel);
-        }
-
-        draw_shock(y++, panel);
-        draw_insanity(y++, panel);
-
-        ++y;
-
-        draw_wielded_wpn(y++, panel);
-        draw_alt_wpn(y++, panel);
-
-        ++y;
-
-        draw_lantern(y++, panel);
-        draw_med_suppl(y++, panel);
-        draw_armor(y++, panel);
-        draw_weight(y++, panel);
-
-        ++y;
-
-        draw_turn_number(y++, panel);
-
-        ++y;
-
-#ifndef NDEBUG
-        std::string debug_str =
-                std::to_string(map::g_player->m_pos.x) +
-                "," +
-                std::to_string(map::g_player->m_pos.y);
-
-        const room::Room* const room = map::g_room_map.at(map::g_player->m_pos);
-
-        if (room) {
-                const std::string room_name = room::room_type_to_str(room->m_type);
-
-                text_format::append_with_space(
-                        debug_str,
-                        room::room_type_to_str(room->m_type));
-        }
-
-        io::draw_text(
-                debug_str,
-                Panel::map_gui_stats,
-                {0, y},
-                colors::yellow(),
-                io::DrawBg::no);
-
-        y += 2;
-#endif  // NDEBUG
-
-        draw_properties(y, panel);
+        draw_scroll_fades(window_px);
 
         if (config::is_gj_mode()) {
                 draw_text_right(
@@ -722,6 +818,25 @@ void draw()
 
         //         ++y;
         // }
+}
+
+bool scroll_by_px(const float finger_dy_px)
+{
+        const bool was_cut_at_top = is_cut_at_top();
+        const bool was_cut_at_bottom = is_cut_at_bottom();
+
+        // The content follows the finger - moving it up brings later rows in
+        s_scroll_px =
+                std::clamp(
+                        s_scroll_px - finger_dy_px,
+                        0.0f,
+                        (float)s_max_scroll_px);
+
+        io::set_side_content_scroll_px(scroll_px());
+
+        return (
+                (was_cut_at_top != is_cut_at_top()) ||
+                (was_cut_at_bottom != is_cut_at_bottom()));
 }
 
 }  // namespace map_mode_gui

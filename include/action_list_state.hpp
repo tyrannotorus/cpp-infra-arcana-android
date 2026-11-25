@@ -124,7 +124,9 @@ protected:
         // "has the turn been spent since this action started" - asked at
         // two different moments, because an action may finish either
         // within its own call (equipping, dropping) or much later, in a
-        // screen of its own (a throw, aimed out on the map).
+        // screen of its own (a throw, aimed out on the map). A screen of
+        // its own that COMMITS the action closes this one first (see
+        // Throwing, Equip) - the outcome plays out over the game.
         //
         // So: bracket every action with note_action_started() and
         // close_if_action_spent_time(). When the answer cannot be known
@@ -141,19 +143,19 @@ protected:
         void close_if_action_spent_time();
 
         // Call at the VERY TOP of update(), before reading input. Settles
-        // what became of an action this screen started out on the map (a
-        // throw that was aimed): the screen closes if the turn was spent,
-        // and otherwise takes back over, drawing again. Returns true if
-        // this object was deleted - just return from update() then.
+        // what became of an action this screen started in a screen of its
+        // own: this screen closes if the turn was spent, and otherwise
+        // (e.g. a throw cancelled at its marker) takes back over, drawing
+        // again. Returns true if this object was deleted - just return
+        // from update() then.
         //
         // NOTE: Both of those orderings are load bearing. This cannot be
-        // settled in on_resume, because the throw is performed AFTER its
-        // marker pops - nothing has happened yet at that point, and this
+        // settled in on_resume, because a marker performs its action AFTER
+        // it pops - nothing has happened yet at that point, and this
         // screen drawing again there would paint over the map while the
-        // item is still in the air. And it cannot wait until after the
-        // input read, because that read BLOCKS: the screen would come
-        // back up and sit there waiting for a tap, having already spent
-        // the player's turn.
+        // action plays out. And it cannot wait until after the input read,
+        // because that read BLOCKS: the screen would come back up and sit
+        // there waiting for a tap, having already spent the player's turn.
         bool pop_if_action_spent_turn();
 
         bool try_tap(const P& logical_px) final;

@@ -150,8 +150,7 @@ static void on_equipable_backpack_item_selected(const size_t backpack_idx)
                         s_nr_turns_to_handle_armor;
         } break;
 
-        default:
-        {
+        default: {
                 ASSERT(false);
         } break;
         }
@@ -722,7 +721,7 @@ void BrowseInv::on_resume()
         // A screen opened from here has closed
         //
         // NOTE: Drawing is deliberately NOT resumed here - see
-        // InvState::pop_if_action_spent_turn
+        // ActionListState::pop_if_action_spent_turn
         sync_browser_to_inventory();
 }
 
@@ -1023,12 +1022,10 @@ std::vector<ActionPin> BrowseInv::marked_item_actions() const
         if (marked.inv_type == InvType::slots) {
                 pins.push_back({(int)ItemActionId::unequip, "remove", {}});
         }
-        else if ((d.type == ItemType::melee_wpn) ||
-                 (d.type == ItemType::ranged_wpn)) {
+        else if ((d.type == ItemType::melee_wpn) || (d.type == ItemType::ranged_wpn)) {
                 pins.push_back({(int)ItemActionId::equip, "wield", {}});
         }
-        else if ((d.type == ItemType::armor) ||
-                 (d.type == ItemType::head_wear)) {
+        else if ((d.type == ItemType::armor) || (d.type == ItemType::head_wear)) {
                 pins.push_back({(int)ItemActionId::equip, "wear", {}});
         }
         else if (d.has_std_activate) {
@@ -1132,7 +1129,9 @@ void InvState::run_item_action(const ItemActionId action_id)
                         // The throw is aimed on the MAP - this screen is
                         // not drawn under the marker (see states::draw),
                         // and any confirmation is asked over the map too.
-                        // Drawing is resumed by the next update (see
+                        // A committed throw closes this screen before it
+                        // plays out (see Throwing). A cancelled one hands
+                        // it back, drawing again at the next update (see
                         // pop_if_action_spent_turn), or right here if the
                         // throw is refused.
                         disable_drawing();

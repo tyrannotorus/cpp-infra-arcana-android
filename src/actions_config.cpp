@@ -151,7 +151,7 @@ void ActionsConfigState::draw()
 
                 // Action icon
                 io::draw_icon(
-                        def->icon,
+                        action_bar::icon_name(*def),
                         {content.p0.x +
                                  (s_handle_w_cells * cell_w) +
                                  ((s_icon_w_cells * cell_w) / 2),

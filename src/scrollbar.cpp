@@ -44,12 +44,13 @@ static int thumb_px_y0(
         return track_px.p0.y + ((scroll_px * span) / max_scroll_px);
 }
 
-// Fade-to-black hint at the top or bottom edge of a content area,
-// intuitively indicating that the content continues beyond the visible area
+// Fade-out hint (to the content background) at the top or bottom edge of a
+// content area, indicating that the content continues beyond the visible area
 static void draw_fade(
         const R& content_px,
         const bool at_bottom,
-        const int extra_h = 0)
+        const int extra_h,
+        const Color& bg_color)
 {
         const int fade_h = (config::gui_cell_px_h() * 2) + extra_h;
 
@@ -97,7 +98,7 @@ static void draw_fade(
 
                 io::draw_rectangle_filled(
                         step_rect,
-                        colors::black(),
+                        bg_color,
                         alpha);
         }
 }
@@ -170,18 +171,19 @@ void draw_content_fades(
         const R& content_px,
         const int scroll_px,
         const int max_scroll_px,
-        const int extra_bottom_fade_px)
+        const int extra_bottom_fade_px,
+        const Color& bg_color)
 {
         if (max_scroll_px <= 0) {
                 return;
         }
 
         if (scroll_px < max_scroll_px) {
-                draw_fade(content_px, true, extra_bottom_fade_px);
+                draw_fade(content_px, true, extra_bottom_fade_px, bg_color);
         }
 
         if (scroll_px > 0) {
-                draw_fade(content_px, false);
+                draw_fade(content_px, false, 0, bg_color);
         }
 }
 

@@ -58,7 +58,18 @@ struct ActionDef
         // Whether the button starts toggled on (a stored actions config
         // takes precedence)
         bool default_enabled {true};
+
+        // If set, the icon for right now (`icon` otherwise) - a button
+        // switching between modes shows the one that is on
+        const char* (*current_icon)() {nullptr};
+
+        // If set, whether the mode the button switches is on - the button
+        // is drawn lit while it is
+        bool (*is_on)() {nullptr};
 };
+
+// The icon the action's button shows right now
+const char* icon_name(const ActionDef& def);
 
 // All configurable actions, in default order (excludes the hamburger)
 const std::vector<ActionDef>& all_actions();
@@ -99,8 +110,12 @@ int icon_px_size();
 
 // Draws the face of a button (fill and outline) in a pixel rectangle. A
 // highlighted face is outlined like a marked menu entry - the bar uses it
-// for a button held for reordering.
-void draw_button_face(const R& px_rect, bool is_highlighted);
+// for a button held for reordering. A lit face (the button's mode is on) is
+// filled with a dim shade of the highlight color.
+void draw_button_face(
+        const R& px_rect,
+        bool is_highlighted,
+        bool is_lit = false);
 
 // Top y (logical screen px) of the bar's occupied button rows - the bar's
 // actual height depends on how many buttons are enabled (one or two rows).

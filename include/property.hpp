@@ -848,6 +848,7 @@ public:
         void save() const override;
         void load() override;
         std::string msg_end_player() const override;
+        std::string name() const override;
         std::string name_short() const override;
         int ability_mod(AbilityId ability) const override;
         void on_more(const Prop& new_prop) override;

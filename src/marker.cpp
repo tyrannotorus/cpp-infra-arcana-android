@@ -331,10 +331,12 @@ void MarkerState::update()
                 // A movement swipe cancels the targeting and performs the
                 // move - the same way a movement swipe during drag-to-look
                 // cancels looking and returns to normal, centered play
-                // (swipes are for movement, dragging is for targeting)
+                // (swipes are for movement, dragging is for targeting).
+                // The move plays out over the game: a throw's item list,
+                // hidden under this marker, closes too.
                 msg_log::clear();
 
-                states::pop();
+                states::pop_until(StateId::game);
 
                 // NOTE: This object is now destroyed
 
@@ -1149,7 +1151,9 @@ void Throwing::handle_input(const io::InputData& input)
 
                 const P pos = m_pos;
 
-                states::pop();
+                // The throw plays out over the game - the item list it was
+                // picked from, hidden under this marker, closes first
+                states::pop_until(StateId::game);
 
                 // NOTE: This object is now destroyed
 
@@ -1280,7 +1284,8 @@ void ThrowingExplosive::handle_input(const io::InputData& input)
 
                 auto* const explosive = &m_explosive;
 
-                states::pop();
+                // As for any throw (see Throwing)
+                states::pop_until(StateId::game);
 
                 // NOTE: This object is now destroyed
 
@@ -1429,8 +1434,7 @@ bool CtrlObjOpen::can_control(
                 }
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 
@@ -1728,8 +1732,7 @@ DidAction CtrlObjStrike::run(
                 return DidAction::yes;
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 
@@ -1764,8 +1767,7 @@ bool CtrlObjDestrWall::can_control(
                 return true;
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 
@@ -1799,8 +1801,7 @@ DidAction CtrlObjDestrWall::run(
                 return DidAction::yes;
         };
 
-        default:
-        {
+        default: {
         } break;
         }
 

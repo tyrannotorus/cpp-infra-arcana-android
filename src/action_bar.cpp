@@ -21,11 +21,16 @@
 #include "panel.hpp"
 #include "pos.hpp"
 #include "rect.hpp"
+#include "run_mode.hpp"
 #include "state.hpp"
 
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
+static const char* run_icon()
+{
+        return run_mode::is_running() ? "directions_run" : "directions_walk";
+}
 
 // All configurable actions in default order. The action keys are exactly the
 // keyboard keys the game already understands (see game_commands.cpp).
@@ -76,6 +81,7 @@ static const std::vector<action_bar::ActionDef> s_all_actions = {
         {"medical", "medical_services", "Use medical bag", {'b', false}, false},
         {"cast", "auto_fix_high", "Cast spell", {'x', false}},
         {"wait", "hourglass_empty", "Wait one turn", {'.', false}},
+        {"run", "directions_walk", "Toggle run / walk", {SDLK_F16, false}, true, &run_icon, &run_mode::is_running},
         {"rest", "bedtime", "Rest", {'s', false}, false},
         {"kick", "sports_martial_arts", "Kick", {'k', false}},
         {"noise", "campaign", "Make noise", {'n', false}},
@@ -296,7 +302,9 @@ static void draw_button(
         const R& px_rect,
         const bool is_lifted = false)
 {
-        action_bar::draw_button_face(px_rect, is_lifted);
+        const bool is_lit = def.is_on && def.is_on();
+
+        action_bar::draw_button_face(px_rect, is_lifted, is_lit);
 
         const R button_rect = button_face_px_rect(px_rect);
 
@@ -306,10 +314,12 @@ static void draw_button(
 
         // Pale yellow, matching the player name/class in the side panel
         io::draw_icon(
-                def.icon,
+                action_bar::icon_name(def),
                 center,
                 action_bar::icon_px_size(),
-                is_lifted ? colors::menu_highlight() : colors::light_sepia());
+                (is_lifted || is_lit)
+                        ? colors::menu_highlight()
+                        : colors::light_sepia());
 }
 
 // -----------------------------------------------------------------------------
@@ -399,6 +409,11 @@ const ActionDef* action_def(const std::string& id)
         return nullptr;
 }
 
+const char* icon_name(const ActionDef& def)
+{
+        return def.current_icon ? def.current_icon() : def.icon;
+}
+
 P button_px_dims()
 {
         const int h = io::panel_logical_px_rect(Panel::action_bar).h() / 2;
@@ -416,11 +431,18 @@ int icon_px_size()
         return (std::min(face.w(), face.h()) * 3) / 4;
 }
 
-void draw_button_face(const R& px_rect, const bool is_highlighted)
+void draw_button_face(
+        const R& px_rect,
+        const bool is_highlighted,
+        const bool is_lit)
 {
         const R face = button_face_px_rect(px_rect);
 
-        io::draw_rectangle_filled(face, colors::extra_dark_gray());
+        io::draw_rectangle_filled(
+                face,
+                is_lit
+                        ? colors::menu_highlight().shaded(70)
+                        : colors::extra_dark_gray());
 
         // A highlighted face is outlined and tinted like a marked menu
         // entry, so that it clearly reads as "held"

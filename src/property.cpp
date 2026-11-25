@@ -1244,6 +1244,11 @@ void Wound::load()
         m_nr_wounds = saving::get_int();
 }
 
+std::string Wound::name() const
+{
+        return "Wounded (" + std::to_string(m_nr_wounds) + ")";
+}
+
 std::string Wound::name_short() const
 {
         return "Wounded(" + std::to_string(m_nr_wounds) + ")";
@@ -3348,8 +3353,7 @@ void AuraOfDecay::run_effect_on_env_at(const P& p) const
                 }
         } break;
 
-        default:
-        {
+        default: {
         } break;
         }
 }

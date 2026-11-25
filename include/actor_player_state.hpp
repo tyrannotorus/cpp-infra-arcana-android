@@ -48,6 +48,9 @@ extern int g_wait_turns_left;
 extern Dir g_auto_move_dir;
 extern bool g_has_taken_auto_move_step;
 
+// Moves are auto moves (see run_mode)
+extern bool g_is_run_mode;
+
 // Re-opening the aim marker after an action taken from within it.
 //
 // Swapping weapons and reloading are done straight from the aim marker
