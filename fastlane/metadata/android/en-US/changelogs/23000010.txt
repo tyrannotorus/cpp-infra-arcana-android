@@ -1,0 +1,4 @@
+- Added run / walk toggle
+- Added drop all for stacks
+- Made the side panel scrollable
+- Fixed freeze when throwing
