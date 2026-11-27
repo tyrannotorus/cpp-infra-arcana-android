@@ -44,11 +44,9 @@ enum class Display
         map,
         log,
 
-        // The side stats panel's content, drawn whole - as tall as it is -
-        // under the panel's frame (the side display). The panel shows a
-        // window of it, from the scroll position down: scrolling only moves
-        // that window (see set_side_content_scroll_px), nothing is redrawn.
-        // It travels with the side display's offset.
+        // The side stats panel's full content, under the panel's frame
+        // (`side`). Composited as a scrolled window the panel's size,
+        // moved by the side display's offset.
         side_content,
 
         side,

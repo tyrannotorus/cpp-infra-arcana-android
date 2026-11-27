@@ -305,11 +305,7 @@ void ActionListState::close_if_action_spent_time()
 
 bool ActionListState::pop_if_action_spent_turn()
 {
-        // An action started here was carried out in a screen of its own,
-        // and that screen is gone - this is where the question left open by
-        // close_if_action_spent_time gets its answer. See the header for
-        // why it is asked here rather than in on_resume, and why it must be
-        // before the input read.
+        // Answers what close_if_action_spent_time left open (see the header)
         if (did_action_spend_turn()) {
                 states::pop();
 

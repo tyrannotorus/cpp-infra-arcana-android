@@ -59,12 +59,10 @@ struct ActionDef
         // takes precedence)
         bool default_enabled {true};
 
-        // If set, the icon for right now (`icon` otherwise) - a button
-        // switching between modes shows the one that is on
+        // If set, overrides `icon` (a mode toggle shows its current mode)
         const char* (*current_icon)() {nullptr};
 
-        // If set, whether the mode the button switches is on - the button
-        // is drawn lit while it is
+        // If set, the button is drawn lit while this returns true
         bool (*is_on)() {nullptr};
 };
 
@@ -110,8 +108,8 @@ int icon_px_size();
 
 // Draws the face of a button (fill and outline) in a pixel rectangle. A
 // highlighted face is outlined like a marked menu entry - the bar uses it
-// for a button held for reordering. A lit face (the button's mode is on) is
-// filled with a dim shade of the highlight color.
+// for a button held for reordering. A lit face (mode on) is filled with a
+// dim highlight color.
 void draw_button_face(
         const R& px_rect,
         bool is_highlighted,

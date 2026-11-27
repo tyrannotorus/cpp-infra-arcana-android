@@ -357,8 +357,7 @@ static R s_display_used_px_rect[(size_t)io::Display::END] = {};
 // first clear must cover all of them regardless of the used flags
 static bool s_must_clear_all_displays = true;
 
-// The side content display's height (logical pixels) - grown to fit, see
-// io::reserve_side_content_px_h
+// Logical pixels (see io::reserve_side_content_px_h)
 static int s_side_content_px_h = 0;
 
 static int s_side_content_scroll_px = 0;
@@ -379,8 +378,7 @@ static R display_logical_px_rect(const io::Display display)
                 return io::panel_logical_px_rect(Panel::log);
 
         case io::Display::side_content: {
-                // The panel's inner area, extended down to hold all of the
-                // content
+                // The panel's inner area, extended down to fit the content
                 auto rect = io::panel_logical_px_rect(Panel::map_gui_stats);
 
                 rect.p1.y =
@@ -592,12 +590,11 @@ void reserve_side_content_px_h(const int px_h)
                 return;
         }
 
-        // With room for a few more rows, so that a status or two more does
-        // not have it recreated again
+        // Headroom, so a few more statuses do not recreate it
         s_side_content_px_h = px_h + (config::gui_cell_px_h() * 8);
 
         if (!s_display_textures[i]) {
-                // Not set up yet - created at this height when it is
+                // Not created yet - init_displays uses this height
                 return;
         }
 
@@ -828,10 +825,8 @@ void composite_display_textures()
                 }
 
                 if ((Display)i == Display::side_content) {
-                        // A window the size of the panel's inner area, from
-                        // the scroll position down. The content travels
-                        // with its panel - the side display's offset (the
-                        // slide across, the death cinematic).
+                        // The panel's inner area, from the scroll position
+                        // down, moved by the side display's offset
                         const R window = panel_logical_px_rect(Panel::map_gui_stats);
 
                         const auto side_offset =

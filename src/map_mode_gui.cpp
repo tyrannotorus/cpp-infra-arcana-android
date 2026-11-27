@@ -593,14 +593,11 @@ static void draw_debug_pos(const int y, const Panel panel)
 }
 #endif  // NDEBUG
 
-// One row of the panel content, drawn at its row of the content - an empty
-// one is a blank row
+// Draws one content row; empty for a blank row
 using DrawRow = std::function<void(int y, Panel panel)>;
 
-// The content is drawn whole into its own display, under the panel's frame;
-// the panel shows a window of it (see io::Display::side_content). It scrolls
-// when it is taller than the window - both only known when drawing (the
-// statuses come and go, the window height is the screen's).
+// Scroll over the content (see io::Display::side_content), its limit set
+// when drawing
 static float s_scroll_px = 0.0f;
 static int s_max_scroll_px = 0;
 
@@ -620,8 +617,7 @@ static bool is_cut_at_bottom()
         return scroll_px() < s_max_scroll_px;
 }
 
-// The panel's background around the window - the content, with a
-// background of its own, shows through the window from below
+// Fills the frame around the window - the content shows through from below
 static void cover_frame(const R& frame_px, const R& window_px)
 {
         const Color& bg = colors::extra_dark_gray();
@@ -763,61 +759,6 @@ void draw()
                         colors::yellow(),
                         io::DrawBg::yes);
         }
-
-        // TODO: Testing "seen" panel.
-        // TODO: Split the words with a max width.
-        // io::cover_panel(
-        //         Panel::map_gui_descr_border,
-        //         colors::extra_dark_gray().shaded(25));
-
-        // draw_box(panels::area(Panel::map_gui_descr_border));
-
-        // y = 0;
-
-        // const auto foes = actor::seen_foes(*map::g_player);
-
-        // for (const auto* const a : foes)
-        // {
-        //         const auto name = text_format::first_to_upper(a->name_a());
-
-        //         io::draw_text(
-        //                 name,
-        //                 Panel::map_gui_descr,
-        //                 {0, y},
-        //                 colors::text());
-
-        //         ++y;
-        // }
-
-        // for (size_t i = 0; i < map::nr_positions(); ++i)
-        // {
-        //         if (!map::g_seen.at(i))
-        //         {
-        //                 continue;
-        //         }
-
-        //         auto* const item = map::g_items.at(i);
-
-        //         if (!item)
-        //         {
-        //                 continue;
-        //         }
-
-        //         const auto name =
-        //                 text_format::first_to_upper(
-        //                         item->name(
-        //                                 ItemRefType::plural,
-        //                                 ItemRefInf::yes,
-        //                                 ItemRefAttInf::wpn_main_att_mode));
-
-        //         io::draw_text(
-        //                 name,
-        //                 Panel::map_gui_descr,
-        //                 {0, y},
-        //                 colors::text());
-
-        //         ++y;
-        // }
 }
 
 bool scroll_by_px(const float finger_dy_px)
@@ -825,7 +766,7 @@ bool scroll_by_px(const float finger_dy_px)
         const bool was_cut_at_top = is_cut_at_top();
         const bool was_cut_at_bottom = is_cut_at_bottom();
 
-        // The content follows the finger - moving it up brings later rows in
+        // The content follows the finger
         s_scroll_px =
                 std::clamp(
                         s_scroll_px - finger_dy_px,

@@ -608,8 +608,7 @@ static void player_start_turn()
 
         msg_log::on_player_turn_start();
 
-        // Last - after the vision and monster updates, and before the turn
-        // is drawn, so the run / walk button is already off in that frame
+        // Last: after the vision and monster updates, before the turn is drawn
         run_mode::on_player_turn();
 }
 

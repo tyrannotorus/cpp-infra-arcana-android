@@ -193,11 +193,18 @@ static void unequip_slot_item(InvSlot& slot)
         game_time::tick();
 }
 
-// Drops the item (ONE of a stack), or refuses to
+enum class DropAmount
+{
+        one,
+        whole_stack
+};
+
+// Drops one of the stack or all of it (one turn), or refuses to
 static void try_drop_item(
         item::Item& item,
         const InvType inv_type,
-        const size_t idx)
+        const size_t idx,
+        const DropAmount amount)
 {
         // HACK: The Flagellant Torture Collar is not allowed to be removed.
         if (item.id() == item::Id::torture_collar) {
@@ -231,9 +238,17 @@ static void try_drop_item(
                 return;
         }
 
-        // One item per tap - no "drop how many?" count query (poor mobile
-        // UX)
-        item_drop::drop_item_from_inv(*map::g_player, inv_type, idx, 1);
+        // No count query (poor mobile UX) - "drop" and "drop all" pins instead
+        const int nr_to_drop =
+                (amount == DropAmount::whole_stack)
+                ? item.m_nr_items
+                : 1;
+
+        item_drop::drop_item_from_inv(
+                *map::g_player,
+                inv_type,
+                idx,
+                nr_to_drop);
 
         game_time::tick();
 }
@@ -1046,8 +1061,12 @@ std::vector<ActionPin> BrowseInv::marked_item_actions() const
                 pins.push_back({(int)ItemActionId::throw_item, "throw", {}});
         }
 
-        // Last - the one action that is not wanted by accident
+        // Last - the actions that are not wanted by accident
         pins.push_back({(int)ItemActionId::drop, "drop", {}});
+
+        if (d.is_stackable && (marked.item->m_nr_items > 1)) {
+                pins.push_back({(int)ItemActionId::drop_all, "drop all", {}});
+        }
 
         return pins;
 }
@@ -1127,13 +1146,10 @@ void InvState::run_item_action(const ItemActionId action_id)
                 }
                 else if (marked.item) {
                         // The throw is aimed on the MAP - this screen is
-                        // not drawn under the marker (see states::draw),
-                        // and any confirmation is asked over the map too.
-                        // A committed throw closes this screen before it
-                        // plays out (see Throwing). A cancelled one hands
-                        // it back, drawing again at the next update (see
-                        // pop_if_action_spent_turn), or right here if the
-                        // throw is refused.
+                        // not drawn under the marker (see states::draw).
+                        // A committed throw closes it (see Throwing); it
+                        // draws again on a cancel (see
+                        // pop_if_action_spent_turn) or a refusal.
                         disable_drawing();
 
                         if (!try_throw_item(*marked.item)) {
@@ -1165,7 +1181,18 @@ void InvState::run_item_action(const ItemActionId action_id)
                         try_drop_item(
                                 *marked.item,
                                 marked.inv_type,
-                                marked.idx);
+                                marked.idx,
+                                DropAmount::one);
+                }
+                break;
+
+        case ItemActionId::drop_all:
+                if (marked.item) {
+                        try_drop_item(
+                                *marked.item,
+                                marked.inv_type,
+                                marked.idx,
+                                DropAmount::whole_stack);
                 }
                 break;
         }

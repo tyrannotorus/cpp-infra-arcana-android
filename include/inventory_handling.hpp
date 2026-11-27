@@ -47,7 +47,8 @@ enum class ItemActionId
         activate,  // Use / drink / read / light
         reload,
         throw_item,
-        drop
+        drop,     // One of a stack
+        drop_all  // The whole stack
 };
 
 class InvState : public ActionListState

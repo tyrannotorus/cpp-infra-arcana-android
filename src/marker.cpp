@@ -332,8 +332,7 @@ void MarkerState::update()
                 // move - the same way a movement swipe during drag-to-look
                 // cancels looking and returns to normal, centered play
                 // (swipes are for movement, dragging is for targeting).
-                // The move plays out over the game: a throw's item list,
-                // hidden under this marker, closes too.
+                // A throw's item list under this marker closes too.
                 msg_log::clear();
 
                 states::pop_until(StateId::game);
@@ -1151,8 +1150,7 @@ void Throwing::handle_input(const io::InputData& input)
 
                 const P pos = m_pos;
 
-                // The throw plays out over the game - the item list it was
-                // picked from, hidden under this marker, closes first
+                // The item list it was picked from closes first
                 states::pop_until(StateId::game);
 
                 // NOTE: This object is now destroyed

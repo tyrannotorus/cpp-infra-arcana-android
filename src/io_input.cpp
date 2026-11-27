@@ -408,8 +408,7 @@ static const uint32_t s_dpad_edit_hold_ms = 1000U;
 // The movement pad is being moved or scaled by the finger
 static bool s_dpad_drag_active = false;
 
-// The side stats panel is being scrolled by the finger (see
-// try_begin_side_panel_scroll)
+// The side stats panel is being scrolled by the finger
 static bool s_side_panel_scroll_active = false;
 static float s_side_panel_scroll_last_y = 0.0f;
 
@@ -631,11 +630,9 @@ static bool try_handle_side_panel_swipe(
         return true;
 }
 
-// A gesture starting on the side stats panel never pans the map. Vertical
-// finger movement scrolls the panel (whole rows, while its content is
-// taller than it - see map_mode_gui); horizontal movement is left for the
-// release, where it is the swipe moving the panel across (see
-// try_handle_side_panel_swipe).
+// A gesture starting on the side stats panel never pans the map. Mostly
+// vertical movement scrolls the panel; horizontal is left to the release,
+// as the swipe moving the panel across (see try_handle_side_panel_swipe).
 static void try_begin_side_panel_scroll(
         const float x,
         const float y,
@@ -660,8 +657,7 @@ static void try_begin_side_panel_scroll(
 
         s_touch_gesture_consumed = true;
 
-        // From the current finger position - the travel so far is not
-        // applied, so the content does not jump
+        // From here - the travel so far is not applied, so nothing jumps
         s_side_panel_scroll_last_y = y;
 }
 
@@ -1140,8 +1136,8 @@ static void handle_single_finger_motion()
 
                 s_side_panel_scroll_last_y = latest_y;
 
-                // Only the panel's window over its content moves - nothing
-                // is redrawn, unless an edge fade comes or goes
+                // Only the composited window moves - redrawn just when an
+                // edge fade comes or goes
                 if (map_mode_gui::scroll_by_px(dy_px / scale)) {
                         states::draw();
                 }
@@ -1575,9 +1571,8 @@ static void handle_finger_up_event()
                         return;
                 }
 
-                // A "more" prompt owns every tap - never the screen under
-                // it (e.g. the inventory, which draws the prompt over
-                // itself while an action's turn plays out)
+                // A "more" prompt takes the tap, not the screen under it
+                // (e.g. the inventory, drawing the prompt over itself)
                 if (msg_log::is_waiting_more_prompt()) {
                         s_input.key = SDLK_RETURN;
 

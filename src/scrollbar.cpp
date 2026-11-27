@@ -44,8 +44,8 @@ static int thumb_px_y0(
         return track_px.p0.y + ((scroll_px * span) / max_scroll_px);
 }
 
-// Fade-out hint (to the content background) at the top or bottom edge of a
-// content area, indicating that the content continues beyond the visible area
+// Fade to the content background at the top or bottom edge of a content
+// area, hinting that the content continues out of view
 static void draw_fade(
         const R& content_px,
         const bool at_bottom,
