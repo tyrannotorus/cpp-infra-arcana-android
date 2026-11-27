@@ -29,6 +29,7 @@
 #include "dpad.hpp"
 #include "draw_box.hpp"
 #include "io_display.hpp"
+#include "map_mode_gui.hpp"
 #include "msg_log.hpp"
 #include "panel.hpp"
 #include "popup.hpp"
@@ -407,6 +408,10 @@ static const uint32_t s_dpad_edit_hold_ms = 1000U;
 // The movement pad is being moved or scaled by the finger
 static bool s_dpad_drag_active = false;
 
+// The side stats panel is being scrolled by the finger
+static bool s_side_panel_scroll_active = false;
+static float s_side_panel_scroll_last_y = 0.0f;
+
 // Maximum total duration of a swipe - a swipe is a QUICK directional
 // gesture. A slower gesture (e.g. a drag that missed its handle) is not a
 // swipe and does nothing. (Standard touch libraries bound swipes by time
@@ -440,6 +445,8 @@ static void reset_touch_gesture()
 
                 s_dpad_drag_active = false;
         }
+
+        s_side_panel_scroll_active = false;
 
         s_map_pan_active = false;
         s_map_pan_provisional = false;
@@ -621,6 +628,37 @@ static bool try_handle_side_panel_swipe(
 
         // Swipes starting on the side panel never generate movement keys
         return true;
+}
+
+// A gesture starting on the side stats panel never pans the map. Mostly
+// vertical movement scrolls the panel; horizontal is left to the release,
+// as the swipe moving the panel across (see try_handle_side_panel_swipe).
+static void try_begin_side_panel_scroll(
+        const float x,
+        const float y,
+        const P& window_px_dims)
+{
+        const float dx_px = (x - s_touch_start_x) * (float)window_px_dims.x;
+        const float dy_px = (y - s_touch_start_y) * (float)window_px_dims.y;
+
+        const float min_window_dim =
+                (float)std::min(window_px_dims.x, window_px_dims.y);
+
+        if (std::fabs(dy_px) <= (s_touch_tap_max_dist * min_window_dim)) {
+                // Still a tap
+                return;
+        }
+
+        if (std::fabs(dx_px) >= std::fabs(dy_px)) {
+                return;
+        }
+
+        s_side_panel_scroll_active = true;
+
+        s_touch_gesture_consumed = true;
+
+        // From here - the travel so far is not applied, so nothing jumps
+        s_side_panel_scroll_last_y = y;
 }
 
 static void handle_finger_down_event()
@@ -851,7 +889,8 @@ static bool is_touch_still_pressing()
             s_touch_drag_active ||
             s_map_pan_active ||
             s_bar_drag_active ||
-            s_dpad_drag_active) {
+            s_dpad_drag_active ||
+            s_side_panel_scroll_active) {
                 return false;
         }
 
@@ -1085,6 +1124,29 @@ static void handle_single_finger_motion()
                 return;
         }
 
+        if (s_side_panel_scroll_active) {
+                float latest_x = x;
+                float latest_y = y;
+
+                take_latest_finger_motion(latest_x, latest_y);
+
+                const float dy_px =
+                        (latest_y - s_side_panel_scroll_last_y) *
+                        (float)window_px_dims.y;
+
+                s_side_panel_scroll_last_y = latest_y;
+
+                // Only the composited window moves - redrawn just when an
+                // edge fade comes or goes
+                if (map_mode_gui::scroll_by_px(dy_px / scale)) {
+                        states::draw();
+                }
+
+                io::update_screen();
+
+                return;
+        }
+
         if (s_map_pan_active) {
                 // Map panning - the content follows the finger with pixel
                 // precision, like dragging the map surface itself. Whole
@@ -1152,6 +1214,17 @@ static void handle_single_finger_motion()
                                 // came down on it belongs to it (holding it
                                 // lifts it for arranging, see
                                 // step_touch_dpad_hold)
+                                return;
+                        }
+
+                        if (io::panel_logical_px_rect(
+                                    Panel::map_gui_stats_border)
+                                    .is_pos_inside(start_logical_px)) {
+                                try_begin_side_panel_scroll(
+                                        x,
+                                        y,
+                                        window_px_dims);
+
                                 return;
                         }
 
@@ -1271,7 +1344,8 @@ static void handle_finger_motion_event()
              s_touch_drag_active ||
              s_map_pan_active ||
              s_bar_drag_active ||
-             s_dpad_drag_active)) {
+             s_dpad_drag_active ||
+             s_side_panel_scroll_active)) {
                 handle_single_finger_motion();
         }
 }
@@ -1349,6 +1423,16 @@ static void handle_finger_up_event()
                 // The movement pad keeps its new place and size, and stays
                 // lifted - a tap outside it is what puts it down (see the
                 // tap handling below)
+                reset_touch_gesture();
+
+                states::draw();
+
+                io::update_screen();
+
+                return;
+        }
+
+        if (s_side_panel_scroll_active) {
                 reset_touch_gesture();
 
                 states::draw();
@@ -1487,6 +1571,16 @@ static void handle_finger_up_event()
                         return;
                 }
 
+                // A "more" prompt takes the tap, not the screen under it
+                // (e.g. the inventory, drawing the prompt over itself)
+                if (msg_log::is_waiting_more_prompt()) {
+                        s_input.key = SDLK_RETURN;
+
+                        s_is_done_reading_input = true;
+
+                        return;
+                }
+
                 State* const state = states::current_state();
 
                 // The standard [ x ] close control of fullscreen screens
@@ -1515,18 +1609,9 @@ static void handle_finger_up_event()
                 }
 
                 // A cell of the movement pad - the same movement keys a
-                // swipe would have produced (see dpad).
-                //
-                // NOTE: Not while a "more" prompt is up. That prompt is
-                // answered by tapping, and a tap that landed on the pad
-                // must answer it rather than send a movement key it may
-                // not accept - the same rule the swipe branch below
-                // follows. A QUERY is different: the direction query is
-                // answered BY the movement keys.
-                const int dpad_key =
-                        msg_log::is_waiting_more_prompt()
-                        ? 0
-                        : dpad::key_at(end_logical_px);
+                // swipe would have produced (see dpad). A direction query
+                // is answered by these.
+                const int dpad_key = dpad::key_at(end_logical_px);
 
                 if (dpad_key != 0) {
                         s_input.key = dpad_key;

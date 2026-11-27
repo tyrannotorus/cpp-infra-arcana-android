@@ -305,11 +305,7 @@ void ActionListState::close_if_action_spent_time()
 
 bool ActionListState::pop_if_action_spent_turn()
 {
-        // An action started here was carried out in a screen of its own (a
-        // throw that was aimed out on the map), and that screen is gone -
-        // this is where the question left open by close_if_action_spent_time
-        // gets its answer. See the header for why it is asked here rather
-        // than in on_resume, and why it must be before the input read.
+        // Answers what close_if_action_spent_time left open (see the header)
         if (did_action_spend_turn()) {
                 states::pop();
 
@@ -322,12 +318,8 @@ bool ActionListState::pop_if_action_spent_turn()
                 // The action was called off (a throw cancelled at its
                 // marker) and this screen is in charge again.
                 //
-                // NOTE: Drawing stays paused all the way until HERE,
-                // rather than resuming when the marker pops: the throw is
-                // performed after that pop, so resuming any earlier paints
-                // this screen over the map while the item is still in the
-                // air - and in the case above the screen is closing
-                // anyway, having never been seen again.
+                // NOTE: Drawing stays paused until HERE rather than
+                // resuming when the marker pops - see the header.
                 enable_drawing();
 
                 // Redrawn at once: the input read that follows BLOCKS, so

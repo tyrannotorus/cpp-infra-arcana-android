@@ -26,6 +26,8 @@ int g_wait_turns_left {-1};
 Dir g_auto_move_dir {Dir::END};
 bool g_has_taken_auto_move_step {false};
 
+bool g_is_run_mode {false};
+
 bool g_is_aim_marker_pending {false};
 P g_aim_marker_pending_pos {0, 0};
 
@@ -65,6 +67,8 @@ void init()
 
         g_auto_move_dir = Dir::END;
         g_has_taken_auto_move_step = false;
+
+        g_is_run_mode = false;
 
         g_is_aim_marker_pending = false;
         g_aim_marker_pending_pos = {0, 0};

@@ -73,6 +73,7 @@
 #include "random.hpp"
 #include "rect.hpp"
 #include "reload.hpp"
+#include "run_mode.hpp"
 #include "saving.hpp"
 #include "sound.hpp"
 #include "state.hpp"
@@ -448,36 +449,9 @@ static void handle_swap_weapon_command()
 
 static void handle_auto_move_command(const Dir dir)
 {
-        bool is_allowed = true;
+        const std::string prevent_msg = run_mode::refusal_reason();
 
-        std::string prevent_msg;
-
-        if (actor::is_player_seeing_burning_terrain()) {
-                is_allowed = false;
-                prevent_msg = common_text::g_fire_prevent_cmd;
-        }
-        else if (!actor::seen_foes(*map::g_player).empty()) {
-                is_allowed = false;
-                prevent_msg = common_text::g_mon_prevent_cmd;
-        }
-        else if (!map::g_player->m_properties.allow_see()) {
-                is_allowed = false;
-                prevent_msg = "Not while blind.";
-        }
-        else if (map::g_player->m_properties.has(prop::Id::poisoned)) {
-                is_allowed = false;
-                prevent_msg = "Not while poisoned.";
-        }
-        else if (map::g_player->m_properties.has(prop::Id::confused)) {
-                is_allowed = false;
-                prevent_msg = "Not while confused.";
-        }
-        else if (map::g_player->m_properties.has(prop::Id::infected)) {
-                is_allowed = false;
-                prevent_msg = "Not while infected.";
-        }
-
-        if (!is_allowed) {
+        if (!prevent_msg.empty()) {
                 msg_log::add(
                         prevent_msg,
                         colors::text(),
@@ -489,6 +463,16 @@ static void handle_auto_move_command(const Dir dir)
         }
 
         map::g_player->set_auto_move(dir);
+}
+
+// Runs while the run / walk toggle is on, steps otherwise
+static void handle_move_command(const Dir dir)
+{
+        if (run_mode::try_run(dir)) {
+                return;
+        }
+
+        actor::do_move_action(*map::g_player, dir);
 }
 
 static GameCmd to_cmd_default(const io::InputData& input)
@@ -633,6 +617,10 @@ static GameCmd to_cmd_default(const io::InputData& input)
         case SDLK_F15:
                 // Sent only by the action bar's throw button
                 return GameCmd::toggle_throw;
+
+        case SDLK_F16:
+                // Sent only by the action bar's run / walk button
+                return GameCmd::toggle_run;
 
         case 'g':
         case ',':
@@ -794,35 +782,35 @@ void handle(const GameCmd cmd)
                 break;
 
         case GameCmd::right: {
-                actor::do_move_action(*map::g_player, Dir::right);
+                handle_move_command(Dir::right);
         } break;
 
         case GameCmd::down: {
-                actor::do_move_action(*map::g_player, Dir::down);
+                handle_move_command(Dir::down);
         } break;
 
         case GameCmd::left: {
-                actor::do_move_action(*map::g_player, Dir::left);
+                handle_move_command(Dir::left);
         } break;
 
         case GameCmd::up: {
-                actor::do_move_action(*map::g_player, Dir::up);
+                handle_move_command(Dir::up);
         } break;
 
         case GameCmd::up_right: {
-                actor::do_move_action(*map::g_player, Dir::up_right);
+                handle_move_command(Dir::up_right);
         } break;
 
         case GameCmd::down_right: {
-                actor::do_move_action(*map::g_player, Dir::down_right);
+                handle_move_command(Dir::down_right);
         } break;
 
         case GameCmd::down_left: {
-                actor::do_move_action(*map::g_player, Dir::down_left);
+                handle_move_command(Dir::down_left);
         } break;
 
         case GameCmd::up_left: {
-                actor::do_move_action(*map::g_player, Dir::up_left);
+                handle_move_command(Dir::up_left);
         } break;
 
         case GameCmd::wait: {
@@ -983,6 +971,10 @@ void handle(const GameCmd cmd)
 
         case GameCmd::use_medical_bag: {
                 handle_activate_item_shortcut_command(item::Id::medical_bag);
+        } break;
+
+        case GameCmd::toggle_run: {
+                run_mode::toggle();
         } break;
 
         case GameCmd::toggle_lantern: {

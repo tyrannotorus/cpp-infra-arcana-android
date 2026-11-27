@@ -357,6 +357,11 @@ static R s_display_used_px_rect[(size_t)io::Display::END] = {};
 // first clear must cover all of them regardless of the used flags
 static bool s_must_clear_all_displays = true;
 
+// Logical pixels (see io::reserve_side_content_px_h)
+static int s_side_content_px_h = 0;
+
+static int s_side_content_scroll_px = 0;
+
 // The screen area a display can cover. Everything drawn to it must land
 // inside this - the texture is exactly this big, so anything outside is
 // clipped away rather than merely composited somewhere odd.
@@ -371,6 +376,18 @@ static R display_logical_px_rect(const io::Display display)
 
         case io::Display::log:
                 return io::panel_logical_px_rect(Panel::log);
+
+        case io::Display::side_content: {
+                // The panel's inner area, extended down to fit the content
+                auto rect = io::panel_logical_px_rect(Panel::map_gui_stats);
+
+                rect.p1.y =
+                        rect.p0.y +
+                        std::max(rect.h(), s_side_content_px_h) -
+                        1;
+
+                return rect;
+        }
 
         case io::Display::side:
                 return io::panel_logical_px_rect(
@@ -423,6 +440,8 @@ Display display_for_panel(const Panel panel)
                 return Display::log;
 
         case Panel::map_gui_stats:
+                return Display::side_content;
+
         case Panel::map_gui_stats_border:
                 return Display::side;
 
@@ -484,6 +503,66 @@ void set_display_for_panel(const Panel panel)
         set_display(display_for_panel(panel));
 }
 
+// (Re)creates one display's texture, sized to the area it covers
+static void create_display_texture(const Display display)
+{
+        const auto i = (size_t)display;
+
+        if (s_display_textures[i]) {
+                SDL_DestroyTexture(s_display_textures[i]);
+
+                s_display_textures[i] = nullptr;
+        }
+
+        const auto rect = display_logical_px_rect(display);
+
+        s_display_px_rects[i] = rect;
+
+        // The map display carries one cell of overscan on every side
+        auto tex_px_dims = rect.dims();
+
+        if (display == Display::map) {
+                tex_px_dims += map_overscan_px().scaled_up(2);
+        }
+
+        // A panel can be degenerate on a very small window - a zero sized
+        // texture is a creation failure, and drawing into it would simply
+        // be invisible anyway
+        tex_px_dims.set(
+                std::max(1, tex_px_dims.x),
+                std::max(1, tex_px_dims.y));
+
+        auto* const texture =
+                SDL_CreateTexture(
+                        g_sdl_renderer,
+                        SDL_PIXELFORMAT_RGBA8888,
+                        SDL_TEXTUREACCESS_TARGET,
+                        tex_px_dims.x,
+                        tex_px_dims.y);
+
+        if (!texture) {
+                TRACE_ERROR_RELEASE
+                        << "Failed to create display texture: "
+                        << SDL_GetError()
+                        << std::endl;
+
+                PANIC;
+        }
+
+        // The map is the bottom layer, over a window that was just cleared
+        // to black - so it can be copied straight down instead of blended,
+        // saving a full screen read every frame. Where the map texture is
+        // transparent it writes black, which is what the cleared window
+        // shows anyway.
+        SDL_SetTextureBlendMode(
+                texture,
+                (display == Display::map)
+                        ? SDL_BLENDMODE_NONE
+                        : SDL_BLENDMODE_BLEND);
+
+        s_display_textures[i] = texture;
+}
+
 void init_displays()
 {
         TRACE_FUNC_BEGIN;
@@ -491,53 +570,7 @@ void init_displays()
         cleanup_displays();
 
         for (size_t i = 0; i < (size_t)Display::END; ++i) {
-                const auto rect = display_logical_px_rect((Display)i);
-
-                s_display_px_rects[i] = rect;
-
-                // The map display carries one cell of overscan on every side
-                auto tex_px_dims = rect.dims();
-
-                if ((Display)i == Display::map) {
-                        tex_px_dims += map_overscan_px().scaled_up(2);
-                }
-
-                // A panel can be degenerate on a very small window - a
-                // zero sized texture is a creation failure, and drawing
-                // into it would simply be invisible anyway
-                tex_px_dims.set(
-                        std::max(1, tex_px_dims.x),
-                        std::max(1, tex_px_dims.y));
-
-                auto* const texture =
-                        SDL_CreateTexture(
-                                g_sdl_renderer,
-                                SDL_PIXELFORMAT_RGBA8888,
-                                SDL_TEXTUREACCESS_TARGET,
-                                tex_px_dims.x,
-                                tex_px_dims.y);
-
-                if (!texture) {
-                        TRACE_ERROR_RELEASE
-                                << "Failed to create display texture: "
-                                << SDL_GetError()
-                                << std::endl;
-
-                        PANIC;
-                }
-
-                // The map is the bottom layer, over a window that was just
-                // cleared to black - so it can be copied straight down
-                // instead of blended, saving a full screen read every frame.
-                // Where the map texture is transparent it writes black,
-                // which is what the cleared window shows anyway.
-                SDL_SetTextureBlendMode(
-                        texture,
-                        ((Display)i == Display::map)
-                                ? SDL_BLENDMODE_NONE
-                                : SDL_BLENDMODE_BLEND);
-
-                s_display_textures[i] = texture;
+                create_display_texture((Display)i);
         }
 
         s_current_display = Display::END;
@@ -547,6 +580,33 @@ void init_displays()
         clear_display_textures();
 
         TRACE_FUNC_END;
+}
+
+void reserve_side_content_px_h(const int px_h)
+{
+        const auto i = (size_t)Display::side_content;
+
+        if (px_h <= s_display_px_rects[i].h()) {
+                return;
+        }
+
+        // Headroom, so a few more statuses do not recreate it
+        s_side_content_px_h = px_h + (config::gui_cell_px_h() * 8);
+
+        if (!s_display_textures[i]) {
+                // Not created yet - init_displays uses this height
+                return;
+        }
+
+        create_display_texture(Display::side_content);
+
+        // A new texture holds garbage
+        clear_display_texture(Display::side_content);
+}
+
+void set_side_content_scroll_px(const int px)
+{
+        s_side_content_scroll_px = px;
 }
 
 void cleanup_displays()
@@ -764,6 +824,47 @@ void composite_display_textures()
                         continue;
                 }
 
+                if ((Display)i == Display::side_content) {
+                        // The panel's inner area, from the scroll position
+                        // down, moved by the side display's offset
+                        const R window = panel_logical_px_rect(Panel::map_gui_stats);
+
+                        const auto side_offset =
+                                s_display_px_offsets[(size_t)Display::side]
+                                        .scaled_up(scale)
+                                        .with_offsets(g_rendering_px_offset);
+
+                        P content_px_dims;
+
+                        SDL_QueryTexture(
+                                texture,
+                                nullptr,
+                                nullptr,
+                                &content_px_dims.x,
+                                &content_px_dims.y);
+
+                        const int window_w = std::min(window.w(), content_px_dims.x);
+                        const int window_h = std::min(window.h(), content_px_dims.y);
+
+                        const int scroll =
+                                std::clamp(
+                                        s_side_content_scroll_px,
+                                        0,
+                                        content_px_dims.y - window_h);
+
+                        const SDL_Rect src_rect {0, scroll, window_w, window_h};
+
+                        const SDL_Rect dst_rect {
+                                side_offset.x + (window.p0.x * scale),
+                                side_offset.y + (window.p0.y * scale),
+                                window_w * scale,
+                                window_h * scale};
+
+                        SDL_RenderCopy(g_sdl_renderer, texture, &src_rect, &dst_rect);
+
+                        continue;
+                }
+
                 P px_dims;
 
                 SDL_QueryTexture(
@@ -805,7 +906,6 @@ void composite_display_textures()
 
                 SDL_RenderCopy(g_sdl_renderer, texture, &src_rect, &dst_rect);
         }
-
 }
 
 void set_map_zoom(const float zoom, const P& center_px)

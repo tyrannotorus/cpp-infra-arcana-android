@@ -7,6 +7,7 @@
 #ifndef SCROLLBAR_HPP
 #define SCROLLBAR_HPP
 
+#include "colors.hpp"
 #include "rect.hpp"
 
 enum class Panel;
@@ -40,12 +41,14 @@ void draw(const R& track_px, int scroll_px, int max_scroll_px);
 // shown at the edges where the content continues out of view. The bottom
 // fade can be made taller, for content areas that keep something else in
 // their bottom rows (e.g. the inventory's item action pins) - the text
-// under it then reads as faded out rather than as cut off.
+// under it then reads as faded out rather than as cut off. The fades blend
+// to bg_color.
 void draw_content_fades(
         const R& content_px,
         int scroll_px,
         int max_scroll_px,
-        int extra_bottom_fade_px = 0);
+        int extra_bottom_fade_px = 0,
+        const Color& bg_color = colors::black());
 
 // The grip taken on the thumb when a drag begins, held for the whole
 // gesture so that the thumb never jumps out from under the finger. A grab

@@ -39,6 +39,7 @@
 #include "property_data.hpp"
 #include "property_handler.hpp"
 #include "rect.hpp"
+#include "run_mode.hpp"
 #include "smell.hpp"
 #include "terrain.hpp"
 #include "terrain_data.hpp"
@@ -606,6 +607,9 @@ static void player_start_turn()
         actor::player_state::g_allow_print_mon_warning = true;
 
         msg_log::on_player_turn_start();
+
+        // Last: after the vision and monster updates, before the turn is drawn
+        run_mode::on_player_turn();
 }
 
 static void mon_start_turn(actor::Actor& mon)

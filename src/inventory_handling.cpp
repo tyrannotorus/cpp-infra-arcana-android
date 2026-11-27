@@ -150,8 +150,7 @@ static void on_equipable_backpack_item_selected(const size_t backpack_idx)
                         s_nr_turns_to_handle_armor;
         } break;
 
-        default:
-        {
+        default: {
                 ASSERT(false);
         } break;
         }
@@ -194,11 +193,18 @@ static void unequip_slot_item(InvSlot& slot)
         game_time::tick();
 }
 
-// Drops the item (ONE of a stack), or refuses to
+enum class DropAmount
+{
+        one,
+        whole_stack
+};
+
+// Drops one of the stack or all of it (one turn), or refuses to
 static void try_drop_item(
         item::Item& item,
         const InvType inv_type,
-        const size_t idx)
+        const size_t idx,
+        const DropAmount amount)
 {
         // HACK: The Flagellant Torture Collar is not allowed to be removed.
         if (item.id() == item::Id::torture_collar) {
@@ -232,9 +238,17 @@ static void try_drop_item(
                 return;
         }
 
-        // One item per tap - no "drop how many?" count query (poor mobile
-        // UX)
-        item_drop::drop_item_from_inv(*map::g_player, inv_type, idx, 1);
+        // No count query (poor mobile UX) - "drop" and "drop all" pins instead
+        const int nr_to_drop =
+                (amount == DropAmount::whole_stack)
+                ? item.m_nr_items
+                : 1;
+
+        item_drop::drop_item_from_inv(
+                *map::g_player,
+                inv_type,
+                idx,
+                nr_to_drop);
 
         game_time::tick();
 }
@@ -722,7 +736,7 @@ void BrowseInv::on_resume()
         // A screen opened from here has closed
         //
         // NOTE: Drawing is deliberately NOT resumed here - see
-        // InvState::pop_if_action_spent_turn
+        // ActionListState::pop_if_action_spent_turn
         sync_browser_to_inventory();
 }
 
@@ -1023,12 +1037,10 @@ std::vector<ActionPin> BrowseInv::marked_item_actions() const
         if (marked.inv_type == InvType::slots) {
                 pins.push_back({(int)ItemActionId::unequip, "remove", {}});
         }
-        else if ((d.type == ItemType::melee_wpn) ||
-                 (d.type == ItemType::ranged_wpn)) {
+        else if ((d.type == ItemType::melee_wpn) || (d.type == ItemType::ranged_wpn)) {
                 pins.push_back({(int)ItemActionId::equip, "wield", {}});
         }
-        else if ((d.type == ItemType::armor) ||
-                 (d.type == ItemType::head_wear)) {
+        else if ((d.type == ItemType::armor) || (d.type == ItemType::head_wear)) {
                 pins.push_back({(int)ItemActionId::equip, "wear", {}});
         }
         else if (d.has_std_activate) {
@@ -1049,8 +1061,12 @@ std::vector<ActionPin> BrowseInv::marked_item_actions() const
                 pins.push_back({(int)ItemActionId::throw_item, "throw", {}});
         }
 
-        // Last - the one action that is not wanted by accident
+        // Last - the actions that are not wanted by accident
         pins.push_back({(int)ItemActionId::drop, "drop", {}});
+
+        if (d.is_stackable && (marked.item->m_nr_items > 1)) {
+                pins.push_back({(int)ItemActionId::drop_all, "drop all", {}});
+        }
 
         return pins;
 }
@@ -1130,11 +1146,10 @@ void InvState::run_item_action(const ItemActionId action_id)
                 }
                 else if (marked.item) {
                         // The throw is aimed on the MAP - this screen is
-                        // not drawn under the marker (see states::draw),
-                        // and any confirmation is asked over the map too.
-                        // Drawing is resumed by the next update (see
-                        // pop_if_action_spent_turn), or right here if the
-                        // throw is refused.
+                        // not drawn under the marker (see states::draw).
+                        // A committed throw closes it (see Throwing); it
+                        // draws again on a cancel (see
+                        // pop_if_action_spent_turn) or a refusal.
                         disable_drawing();
 
                         if (!try_throw_item(*marked.item)) {
@@ -1166,7 +1181,18 @@ void InvState::run_item_action(const ItemActionId action_id)
                         try_drop_item(
                                 *marked.item,
                                 marked.inv_type,
-                                marked.idx);
+                                marked.idx,
+                                DropAmount::one);
+                }
+                break;
+
+        case ItemActionId::drop_all:
+                if (marked.item) {
+                        try_drop_item(
+                                *marked.item,
+                                marked.inv_type,
+                                marked.idx,
+                                DropAmount::whole_stack);
                 }
                 break;
         }

@@ -124,7 +124,8 @@ protected:
         // "has the turn been spent since this action started" - asked at
         // two different moments, because an action may finish either
         // within its own call (equipping, dropping) or much later, in a
-        // screen of its own (a throw, aimed out on the map).
+        // screen of its own (a throw, aimed out on the map). A screen that
+        // commits the action closes this one first (see Throwing, Equip).
         //
         // So: bracket every action with note_action_started() and
         // close_if_action_spent_time(). When the answer cannot be known
@@ -140,20 +141,15 @@ protected:
         // NOTE: May delete this object.
         void close_if_action_spent_time();
 
-        // Call at the VERY TOP of update(), before reading input. Settles
-        // what became of an action this screen started out on the map (a
-        // throw that was aimed): the screen closes if the turn was spent,
-        // and otherwise takes back over, drawing again. Returns true if
-        // this object was deleted - just return from update() then.
+        // Call at the VERY TOP of update(), before reading input. Settles an
+        // action started in a screen of its own: closes this screen if the
+        // turn was spent, otherwise (e.g. a cancelled throw) draws it again.
+        // Returns true if this object was deleted.
         //
-        // NOTE: Both of those orderings are load bearing. This cannot be
-        // settled in on_resume, because the throw is performed AFTER its
-        // marker pops - nothing has happened yet at that point, and this
-        // screen drawing again there would paint over the map while the
-        // item is still in the air. And it cannot wait until after the
-        // input read, because that read BLOCKS: the screen would come
-        // back up and sit there waiting for a tap, having already spent
-        // the player's turn.
+        // NOTE: Not in on_resume - a marker performs its action AFTER it
+        // pops, so drawing there paints over the map mid-action. Not after
+        // the input read - it BLOCKS, leaving this screen up after the turn
+        // was spent.
         bool pop_if_action_spent_turn();
 
         bool try_tap(const P& logical_px) final;

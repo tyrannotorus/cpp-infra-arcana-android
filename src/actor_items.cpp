@@ -561,8 +561,7 @@ static void make_item_set_firearm(actor::Actor& actor)
                 inv.put_in_slot(SlotId::wpn, item, Verbose::no);
         } break;
 
-        default:
-        {
+        default: {
                 ASSERT(false);
         } break;
         }

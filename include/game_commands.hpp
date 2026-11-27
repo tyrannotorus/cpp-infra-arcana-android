@@ -55,6 +55,7 @@ enum class GameCmd
         swap_weapon,
         throw_item,
         toggle_throw,
+        toggle_run,
         toggle_lantern,
         use_medical_bag,
         look,

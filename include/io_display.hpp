@@ -43,6 +43,12 @@ enum class Display
 {
         map,
         log,
+
+        // The side stats panel's full content, under the panel's frame
+        // (`side`). Composited as a scrolled window the panel's size,
+        // moved by the side display's offset.
+        side_content,
+
         side,
         screen,
 
@@ -118,6 +124,12 @@ void set_display_px_offset(Display display, const P& px_offset);
 void set_display_px_origin(Display display, const P& px_pos);
 
 void reset_display_px_offsets();
+
+// Grows the side content display to hold content this tall (logical pixels)
+void reserve_side_content_px_h(int px_h);
+
+// How far down the side content the panel's window starts (logical pixels)
+void set_side_content_scroll_px(int px);
 
 P display_px_offset(Display display);
 
